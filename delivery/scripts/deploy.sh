@@ -145,14 +145,21 @@ rsync -az --delete \
   "$PROJECT_DIR/plugins/riders-tools/" \
   "$VPS_HOST:$VPS_PLUGIN_DIR/"
 
-echo "==> Deploying octopus-channel plugin..."
-scp "$PROJECT_DIR/plugins/octopus-channel/index.ts" \
-    "$PROJECT_DIR/plugins/octopus-channel/openclaw.plugin.json" \
-    "$VPS_HOST:$VPS_OCTOPUS_PLUGIN_DIR/"
-
-if [ -f "$PROJECT_DIR/plugins/octopus-channel/node-shims.d.ts" ]; then
-  scp "$PROJECT_DIR/plugins/octopus-channel/node-shims.d.ts" "$VPS_HOST:$VPS_OCTOPUS_PLUGIN_DIR/"
-fi
+echo "==> Deploying octopus-channel plugin (rsync of full directory)..."
+# After Waves 2-5 the plugin ships as a tree (index.ts + lib/*.ts helpers +
+# openclaw.plugin.json + optional node-shims.d.ts). Use rsync with --delete
+# so any removed source file on the box is cleared too; excludes keep local
+# build artifacts, node modules and OpenClaw runtime state out of the upload.
+rsync -az --delete \
+  --exclude='node_modules/' \
+  --exclude='.openclaw/' \
+  --exclude='.tmp/' \
+  --exclude='*.log' \
+  --exclude='*.tmp' \
+  --exclude='package-lock.json' \
+  --exclude='tsconfig.json' \
+  "$PROJECT_DIR/plugins/octopus-channel/" \
+  "$VPS_HOST:$VPS_OCTOPUS_PLUGIN_DIR/"
 
 echo "==> Deploying shared plugin helpers..."
 scp "$PROJECT_DIR/plugins/shared/conversation-policy.ts" \
