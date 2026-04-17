@@ -52,7 +52,20 @@ async function main() {
   const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
   const sourcePath = path.join(root, "plugins/octopus-channel/index.ts");
   const ridersToolsPath = path.join(root, "plugins/riders-tools/index.ts");
-  const source = fs.readFileSync(sourcePath, "utf-8");
+  // After Waves 2–5 the octopus-channel plugin was surgically split into
+  // plugins/octopus-channel/lib/*.ts. Collect source from the entry + every
+  // extracted module so legacy string-contract assertions still find their
+  // needles wherever they currently live.
+  const octopusLibDir = path.join(root, "plugins/octopus-channel/lib");
+  const source = [
+    fs.readFileSync(sourcePath, "utf-8"),
+    ...(fs.existsSync(octopusLibDir)
+      ? fs
+          .readdirSync(octopusLibDir)
+          .filter((f) => f.endsWith(".ts"))
+          .map((f) => fs.readFileSync(path.join(octopusLibDir, f), "utf-8"))
+      : []),
+  ].join("\n");
   // After the Wave 1a surgical split, riders-tools/index.ts is a composition
   // root and the individual tool bodies live in plugins/riders-tools/tools/*.ts.
   // Collect source from the entry + each extracted tool module so legacy
