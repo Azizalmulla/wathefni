@@ -1,0 +1,17 @@
+{
+  "name": "riders-tools",
+  "version": "1.0.0",
+  "description": "Riders delivery pricing, booking, tracking, and admin tooling.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ../../scripts/run-pricing-rc-suite.mjs",
+    "test:pricing-rc": "node ../../scripts/run-pricing-rc-suite.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "jiti": "^2.6.1"
+  }
+}

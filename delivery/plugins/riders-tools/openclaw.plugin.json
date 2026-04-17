@@ -1,0 +1,68 @@
+{
+  "id": "riders-tools",
+  "name": "Riders Tools",
+  "description": "Custom agent tools for Riders delivery support: pricing lookup, order tracking, complaints, and escalation.",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "pricing": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sourceMode": {
+            "type": "string",
+            "enum": [
+              "google_sheet_live",
+              "published_preferred",
+              "static_only"
+            ]
+          },
+          "publishedPath": {
+            "type": "string"
+          },
+          "resolverOverlayPath": {
+            "type": "string"
+          },
+          "adminAllowlist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "googleSheet": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "spreadsheetId": {
+                "type": "string"
+              },
+              "sheetName": {
+                "type": "string"
+              },
+              "headerRow": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "behavior": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "publishedPath": {
+            "type": "string"
+          },
+          "adminAllowlist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

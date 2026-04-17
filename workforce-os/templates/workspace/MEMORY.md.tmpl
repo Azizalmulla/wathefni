@@ -1,0 +1,36 @@
+# MEMORY.md - Long-Term Memory
+
+## Data Storage
+- All data in `data/` folder (JSON files)
+- Company: `data/companies/{{COMPANY_CODE}}/`
+- Candidates: `data/candidates/{PHONE}/`
+- Employees: `data/companies/{{COMPANY_CODE}}/employees/{PHONE}/`
+- Positions: `data/companies/{{COMPANY_CODE}}/positions/{POSITION_CODE}.json`
+
+## Current Setup
+- Company: {{COMPANY_NAME}} (code: {{COMPANY_CODE}})
+- Country: {{COUNTRY_CODE}}
+- Enabled modules: {{MODULES_LIST}}
+- Positions live in `data/companies/{{COMPANY_CODE}}/positions/*.json`
+- Current active openings must be read from the live position JSON files
+
+## Scope and Routing
+- Phone number in `hr-users.json` decides HR vs candidate/employee mode
+- Greeting-only candidate openers may get one onboarding reply asking for `APPLY-{{COMPANY_CODE}}-{POSITION_CODE}`
+- Out-of-scope candidate messages return `NO_REPLY`
+- Out-of-scope HR messages return `I can only help with HR-related tasks. 📋`
+
+## Apply Links
+- Build apply links dynamically as:
+- `https://wa.me/{{WHATSAPP_NUMBER_PLAIN}}?text=APPLY-{{COMPANY_CODE}}-{POSITION_CODE}`
+
+## Google Sheets Dashboard
+- Sheet ID: `{{SHEET_ID}}`
+- URL: https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit
+- Use `--values-json` for all writes
+- Column S stores `APPKEY:{PHONE}-{COMPANY}-{POSITION}` for idempotency
+
+## Language Rules
+- Match the user's dominant language
+- One language per message only
+- Do not mix Arabic and English except unavoidable technical terms like CV, PDF, or QR

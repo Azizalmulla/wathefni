@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.12",
+    "lastTouchedAt": "2026-03-15T19:39:00.000Z"
+  },
+  "update": {
+    "channel": "beta"
+  },
+  "models": {
+    "providers": {
+      "openai": {
+        "baseUrl": "https://api.openai.com/v1",
+        "models": [
+          {
+            "id": "gpt-5.4-mini",
+            "name": "GPT-5.4 mini",
+            "api": "openai-responses",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 128000,
+            "maxTokens": 16384
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "thinkingDefault": "low",
+      "model": {
+        "primary": "openai/gpt-5.4-mini"
+      },
+      "models": {
+        "openai/gpt-5.4-mini": {
+          "params": {
+            "reasoning": {
+              "effort": "low"
+            },
+            "text": {
+              "verbosity": "low"
+            },
+            "transport": "auto",
+            "openaiWsWarmup": true,
+            "responsesServerCompaction": true
+          }
+        }
+      },
+      "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
+      "bootstrapMaxChars": 50000,
+      "bootstrapTotalMaxChars": 180000,
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    },
+    "list": [
+      {
+        "id": "riders",
+        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
+        "thinkingDefault": "low",
+        "model": {
+          "primary": "openai/gpt-5.4-mini"
+        },
+        "tools": {
+          "deny": ["message"]
+        }
+      },
+      {
+        "id": "riders-admin",
+        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders-admin",
+        "thinkingDefault": "low",
+        "model": {
+          "primary": "openai/gpt-5.4-mini"
+        },
+        "tools": {
+          "deny": ["exec"]
+        }
+      },
+      {
+        "id": "riders-mini",
+        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
+        "thinkingDefault": "low",
+        "model": {
+          "primary": "openai/gpt-5.4-mini"
+        },
+        "tools": {
+          "deny": ["message"]
+        }
+      }
+    ]
+  },
+  "bindings": [],
+  "messages": {
+    "responsePrefix": "",
+    "ackReactionScope": "group-mentions",
+    "queue": {
+      "mode": "collect"
+    },
+    "inbound": {
+      "debounceMs": 5000
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "media": {
+      "audio": {
+        "enabled": true,
+        "maxBytes": 20971520,
+        "models": [
+          {
+            "provider": "openai",
+            "model": "gpt-4o-transcribe"
+          }
+        ]
+      }
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": false,
+      "dmPolicy": "pairing",
+      "allowFrom": [],
+      "debounceMs": 0,
+      "accounts": {
+        "default": {
+          "enabled": false,
+          "dmPolicy": "pairing",
+          "allowFrom": [],
+          "debounceMs": 0
+        }
+      },
+      "mediaMaxMb": 50
+    },
+    "telegram": {
+      "enabled": false,
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "streaming": "partial",
+      "linkPreview": false
+    },
+    "octopus": {
+      "enabled": true,
+      "agentId": "riders",
+      "dmPolicy": "open",
+      "allowFrom": [],
+      "typingEnabled": true,
+      "typingRefreshMs": 9000,
+      "webhookPath": "/webhook",
+      "accounts": {
+        "default": {
+          "enabled": true
+        }
+      },
+      "behaviorPolicyPublishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/behavior-policy.published.json"
+    }
+  },
+  "gateway": {
+    "port": 18790,
+    "mode": "local",
+    "bind": "loopback",
+    "trustedProxies": [
+      "127.0.0.1/8",
+      "::1/128"
+    ],
+    "auth": {
+      "mode": "token",
+      "token": "CHANGE_ME_DELIVERY_TOKEN"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    }
+  },
+  "plugins": {
+    "allow": [
+      "openai",
+      "riders-tools",
+      "octopus-channel"
+    ],
+    "load": {
+      "paths": [
+        "/Users/azizalmulla/Desktop/claw/delivery/plugins/riders-tools",
+        "/Users/azizalmulla/Desktop/claw/delivery/plugins/octopus-channel"
+      ]
+    },
+    "entries": {
+      "openai": {
+        "enabled": true,
+        "config": {
+          "personality": "off"
+        }
+      },
+      "riders-tools": {
+        "enabled": true,
+        "config": {
+          "pricing": {
+            "sourceMode": "published_preferred",
+            "publishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/pricing.published.json",
+            "resolverOverlayPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/pricing.resolver.overlay.json",
+            "adminAllowlist": [],
+            "googleSheet": {
+              "spreadsheetId": "",
+              "sheetName": "",
+              "headerRow": 1
+            }
+          },
+          "behavior": {
+            "publishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/behavior-policy.published.json",
+            "adminAllowlist": []
+          }
+        }
+      },
+      "octopus-channel": {
+        "enabled": true
+      }
+    }
+  }
+}

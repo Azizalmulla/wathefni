@@ -1,0 +1,50 @@
+# TOOLS.md - Local Notes
+
+Skills define _how_ tools work. This file is for workspace specifics — the local environment details that support the workflows.
+
+## Workspace Notes
+
+### Identity and Channel
+
+- Primary WhatsApp number: `{{WHATSAPP_NUMBER}}`
+- Timezone: `Asia/Kuwait` (`UTC+3`)
+- Company code: `{{COMPANY_CODE}}`
+- Country: `{{COUNTRY_CODE}}`
+
+### HR Admin
+
+{{HR_USERS_BLOCK}}
+
+### Google Accounts and Targets
+
+- Google account: `{{GOOGLE_ACCOUNT}}`
+- Google Sheet ID: `{{SHEET_ID}}`
+- Drive parent folder for uploads: `{{DRIVE_FOLDER_ID}}`
+
+### Paths
+
+- Workspace root: `{{WORKSPACE_PATH}}`
+- Outbound media folder: `~/.openclaw/media/outbound`
+- Candidate data root: `data/candidates/`
+- Employee data root: `data/companies/{{COMPANY_CODE}}/employees/`
+- Company data root: `data/companies/`
+- Sync queue root: `data/companies/{{COMPANY_CODE}}/sync-queue/`
+
+### Enabled Modules
+
+{{MODULES_BLOCK}}
+
+### Operational Reminders
+
+- Use `--values-json` for Google Sheets writes
+- Preserve `APPKEY:{APP_KEY}` markers in sheet notes
+- Candidate/employee-facing errors must stay plain and never expose tool or auth details
+- Generated QR codes and exported PDFs may be written only to the outbound media folder
+
+## Why Separate?
+
+`SKILL.md` defines behavior. `TOOLS.md` keeps local values, targets, and paths in one place so the workflow can stay consistent without bloating the shared skill.
+
+---
+
+Add or update local environment details here when the setup changes.

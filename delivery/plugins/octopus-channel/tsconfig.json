@@ -1,0 +1,15 @@
+{
+  "//": "Loose during wave 2a surgical split. Will be upgraded to strict after index.ts is decomposed and residual typing is addressed.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["*.ts", "lib/**/*.ts"]
+}

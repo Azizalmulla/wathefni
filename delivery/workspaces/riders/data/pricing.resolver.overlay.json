@@ -1,0 +1,281 @@
+{
+  "resolver": {
+    "aliases": [
+      {
+        "alias": "علي صباح",
+        "area_id": 180
+      },
+      {
+        "alias": "علي صباح السالم",
+        "area_id": 180
+      },
+      {
+        "alias": "الخيران البحرية",
+        "area_id": 142
+      },
+      {
+        "alias": "الخيران الشاليهات",
+        "area_id": 142
+      },
+      {
+        "alias": "الوفرة الزراعية",
+        "area_id": 195
+      },
+      {
+        "alias": "ضاحية صباح الأحمد البحرية",
+        "area_id": 164
+      },
+      {
+        "alias": "المطلاع السكنية",
+        "area_id": 76
+      },
+      {
+        "alias": "مطلاع السكنية",
+        "area_id": 76
+      },
+      {
+        "alias": "Al Mutlaa Residential",
+        "area_id": 76
+      },
+      {
+        "alias": "frwnya",
+        "area_id": 204
+      },
+      {
+        "alias": "frwaniya",
+        "area_id": 204
+      },
+      {
+        "alias": "mshrf",
+        "area_id": 57
+      },
+      {
+        "alias": "mngf",
+        "area_id": 190
+      },
+      {
+        "alias": "mhboula",
+        "area_id": 139
+      },
+      {
+        "alias": "fhaheel",
+        "area_id": 160
+      },
+      {
+        "alias": "fntas",
+        "area_id": 196
+      }
+    ],
+    "pricing_groups": [
+      {
+        "id": "south_saad_abdullah_blocks",
+        "name_ar": "جنوب سعد العبدالله",
+        "name_en": "South Saad Al-Abdulla",
+        "area_ids": [75, 82, 83, 84, 85, 86],
+        "aliases": [
+          "جنوب سعد العبدالله",
+          "جنوب سعد عبدالله",
+          "South Saad Al-Abdulla"
+        ],
+        "geo": {
+          "governorate": "Jahra Governorate",
+          "area_name_ar": "جنوب سعد العبدالله"
+        }
+      },
+      {
+        "id": "south_sabah_al_ahmad_blocks",
+        "name_ar": "جنوب صباح الأحمد",
+        "name_en": "South Sabah Al-Ahmad",
+        "area_ids": [145, 146, 147, 148, 149, 150, 151, 152, 168, 169, 170, 171, 192],
+        "aliases": [
+          "جنوب صباح الأحمد",
+          "جنوب صباح الاحمد",
+          "جنوب صباح احمد",
+          "جنوب صباح أحمد",
+          "South Sabah Al-Ahmad"
+        ],
+        "geo": {
+          "governorate": "Ahmadi Governorate",
+          "area_name_ar": "جنوب صباح الأحمد"
+        }
+      },
+      {
+        "id": "sabah_al_ahmad_core",
+        "name_ar": "مدينة صباح الأحمد",
+        "name_en": "Sabah Al-Ahmad City",
+        "area_ids": [135, 143, 158, 159, 161, 162, 167, 189, 191],
+        "aliases": [
+          "مدينة صباح الأحمد",
+          "صباح الأحمد السكنية",
+          "مدينة صباح احمد",
+          "مدينة صباح أحمد",
+          "Sabah Al-Ahmad City"
+        ],
+        "geo": {
+          "governorate": "Ahmadi Governorate",
+          "area_name_ar": "صباح الأحمد"
+        }
+      }
+    ],
+    "ambiguity_groups": [
+      {
+        "id": "khairan",
+        "prompt_ar": "الخيران السكنية أم شاليهات الخيران؟",
+        "prompt_en": "Do you mean Khiran City (residential) or Shalehat Al-Khiran (chalets)?",
+        "aliases": ["الخيران", "خيران", "Khairan"]
+      },
+      {
+        "id": "wafra",
+        "prompt_ar": "الوفرة السكنية أم مزارع الوفرة؟",
+        "prompt_en": "Do you mean Wafra Residential or Wafra Farms?",
+        "aliases": ["الوفرة", "Wafra"]
+      },
+      {
+        "id": "saad_abdullah",
+        "prompt_ar": "سعد العبدالله أم جنوب سعد العبدالله؟",
+        "prompt_en": "Do you mean Saad Al-Abdulla or South Saad Al-Abdulla?",
+        "aliases": ["سعد العبدالله", "سعد عبدالله", "Saad Al-Abdulla"]
+      },
+      {
+        "id": "sabah_al_ahmad",
+        "prompt_ar": "مدينة صباح الأحمد أم جنوب صباح الأحمد أم صباح الأحمد البحرية؟",
+        "prompt_en": "Do you mean Sabah Al-Ahmad City, South Sabah Al-Ahmad, or Sabah Al-Ahmad Marine?",
+        "aliases": [
+          "صباح الأحمد",
+          "صباح الاحمد",
+          "صباح احمد",
+          "صباح أحمد",
+          "سابح الاحمد",
+          "سابح الأحمد",
+          "Sabah Al-Ahmad",
+          "Sabah Al Ahmad",
+          "Sabah Ahmad",
+          "Sabah Ahmed",
+          "Saba7 Ahmad",
+          "Saba7 Ahmed"
+        ]
+      },
+      {
+        "id": "shuwaikh",
+        "prompt_ar": "الشويخ السكنية أم الشويخ الصناعية أم الشويخ التعليمية أم الشويخ الصحية؟",
+        "prompt_en": "Do you mean Shuwaikh (residential), Shuwaikh Industrial, Shuwaikh Educational, or Shuwaikh Sanitary?",
+        "aliases": ["الشويخ", "شويخ", "Shuwaikh"]
+      },
+      {
+        "id": "ardhiya",
+        "prompt_ar": "العارضية السكنية أم العارضية الحرفية أم العارضية حكومي أم العارضية مخازن؟",
+        "prompt_en": "Do you mean Ardhiya (residential), Ardhiya Herafiya (craft), Ardhiya Government, or Ardhiya Stores?",
+        "aliases": ["العارضية", "عارضية", "Ardhiya", "Ardiya"]
+      },
+      {
+        "id": "ahmadi",
+        "prompt_ar": "أي منطقة بالأحمدي؟ شمال أم جنوب أم شرق أم غرب أم وسط الأحمدي؟",
+        "prompt_en": "Which Ahmadi area? North, South, East, West, or Middle of Ahmadi?",
+        "aliases": ["الأحمدي", "الاحمدي", "احمدي", "Ahmadi"]
+      },
+      {
+        "id": "sulaibiya",
+        "prompt_ar": "الصليبية السكنية أم الصليبية الزراعية أم الصليبية الصناعية؟",
+        "prompt_en": "Do you mean Sulaibiya Residential, Sulaibiya Agricultural, or Sulaibiya Industrial?",
+        "aliases": ["الصليبية", "صليبية", "Sulaibiya", "Sulaibyia"]
+      },
+      {
+        "id": "doha",
+        "prompt_ar": "الدوحة السكنية أم شاليهات الدوحة أم ميناء الدوحة؟",
+        "prompt_en": "Do you mean Doha Residential, Shalehat Doha, or Mina Doha?",
+        "aliases": ["الدوحة", "دوحة", "Doha"]
+      },
+      {
+        "id": "sulaibikhat",
+        "prompt_ar": "الصليبيخات أم شمال غرب الصليبيخات أم مقبرة الصليبيخات؟",
+        "prompt_en": "Do you mean Sulaibikhat, Northwest Sulaibikhat, or Sulaibikhat Cemetery?",
+        "aliases": ["الصليبيخات", "صليبيخات", "Sulaibikhat"]
+      },
+      {
+        "id": "sabah_al_salem",
+        "prompt_ar": "صباح السالم أم صباح السالم الجامعية؟",
+        "prompt_en": "Do you mean Sabah Al-Salem or Sabah Al Salem University?",
+        "aliases": ["صباح السالم", "Sabah Al-Salem", "Sabah Al Salem"]
+      },
+      {
+        "id": "kabd",
+        "prompt_ar": "كبد أم كبد الزراعية؟",
+        "prompt_en": "Do you mean Kabd or Kabd Agricultural?",
+        "aliases": ["كبد", "Kabd"]
+      },
+      {
+        "id": "jahra_area",
+        "prompt_ar": "الجهراء السكنية أم الجهراء الصناعية أم معسكرات الجهراء؟",
+        "prompt_en": "Do you mean Jahra (residential), Jahra Industrial, or Jahra Camps?",
+        "aliases": ["الجهراء", "جهراء", "Jahra"]
+      },
+      {
+        "id": "shuaiba",
+        "prompt_ar": "الشعيبة الصناعية الغربية أم الشعيبة الصناعية الشرقية؟",
+        "prompt_en": "Do you mean Shuaiba Industrial Western or Shuaiba Industrial Eastern?",
+        "aliases": ["الشعيبة", "شعيبة", "Shuaiba"]
+      },
+      {
+        "id": "mina",
+        "prompt_ar": "ميناء الدوحة أم ميناء عبدالله أم مصفاة ميناء عبدالله أم مصفاة ميناء الأحمدي؟",
+        "prompt_en": "Do you mean Mina Doha, Mina Abdulla, Mina Abdullah Refinery, or Mina Al-Ahmadi Refinery?",
+        "aliases": ["ميناء", "Mina"],
+        "options": [
+          { "area_id": 45, "name_en": "Mina Doha", "name_ar": "ميناء الدوحة" },
+          { "area_id": 183, "name_en": "Mina Abdulla", "name_ar": "ميناء عبدالله" },
+          { "area_id": 181, "name_en": "Mina Abdullah Refinery", "name_ar": "مصفاة ميناء عبدالله" },
+          { "area_id": 185, "name_en": "Mina Al-Ahmadi Refinery", "name_ar": "مصفاة ميناء الأحمدي" }
+        ]
+      },
+      {
+        "id": "mina_abdullah",
+        "prompt_ar": "تقصد ميناء عبدالله أم مصفاة ميناء عبدالله أم شاليهات ميناء عبدالله؟",
+        "prompt_en": "Do you mean Mina Abdulla, Mina Abdullah Refinery, or Shalehat Mina Abdullah?",
+        "aliases": [
+          "ميناء عبدالله",
+          "ميناء عبد الله",
+          "مينا عبدالله",
+          "مينا عبد الله",
+          "Mina Abdulla",
+          "Mina Abdullah"
+        ],
+        "options": [
+          { "area_id": 183, "name_en": "Mina Abdulla", "name_ar": "ميناء عبدالله" },
+          { "area_id": 181, "name_en": "Mina Abdullah Refinery", "name_ar": "مصفاة ميناء عبدالله" },
+          { "area_id": 187, "name_en": "Shalehat Mina Abdullah", "name_ar": "شاليهات ميناء عبدالله" }
+        ]
+      },
+      {
+        "id": "kuwait_city_downtown",
+        "prompt_ar": "وين في مدينة الكويت بالضبط؟ مثلاً: الشرق، المرقاب، القبلة، بنيد القار، أو دسمان.",
+        "prompt_en": "Where in Kuwait City exactly? For example: Sharq, Mirqab, Qibla, Bnaid Al-Qar, or Dasman.",
+        "aliases": [
+          "مدينة الكويت",
+          "الكويت العاصمة",
+          "Kuwait City",
+          "Downtown Kuwait"
+        ]
+      },
+      {
+        "id": "shadadiya",
+        "prompt_ar": "تقصد الشدادية أم الشدادية الصناعية؟",
+        "prompt_en": "Do you mean Shadadiya or Shadadiya Industrial?",
+        "aliases": ["الشدادية", "شدادية", "Shadadiya", "Shadadiyah"],
+        "options": [
+          { "area_id": 209, "name_en": "Shadadiya", "name_ar": "الشدادية" },
+          { "area_id": 136, "name_en": "Shadadiya Industrial", "name_ar": "الشدادية الصناعية" }
+        ]
+      },
+      {
+        "id": "sea_front",
+        "prompt_ar": "تقصد الواجهة البحرية أم الواجهة البحرية حولي؟",
+        "prompt_en": "Do you mean The Sea Front or The Sea Front Hawalli?",
+        "aliases": ["الواجهة البحرية", "واجهة بحرية", "The Sea Front", "Sea Front"],
+        "options": [
+          { "area_id": 25, "name_en": "The Sea Front", "name_ar": "الواجهة البحرية" },
+          { "area_id": 225, "name_en": "The Sea Front Hawalli", "name_ar": "الواجهة البحرية حولي" }
+        ]
+      }
+    ]
+  }
+}

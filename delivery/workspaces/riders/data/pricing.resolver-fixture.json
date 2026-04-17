@@ -1,0 +1,210 @@
+{
+  "currency": "KWD",
+  "last_updated": "2026-04-08T00:00:00.000Z",
+  "columns": {
+    "id": "id",
+    "governorate": "governorate",
+    "name_en": "name_en",
+    "name_ar": "name_ar",
+    "sedan_normal": "sedan_normal",
+    "sedan_fast": "sedan_fast",
+    "cooled_van_normal": "cooled_van_normal",
+    "cooled_van_fast": "cooled_van_fast",
+    "van_normal": "van_normal",
+    "van_fast": "van_fast",
+    "helper_standard": "helper_standard"
+  },
+  "resolver": {
+    "aliases": [
+      {
+        "alias": "علي صباح",
+        "area_id": 4
+      }
+    ],
+    "pricing_groups": [
+      {
+        "id": "south_saad",
+        "name_ar": "جنوب سعد العبدالله",
+        "name_en": "South Saad Al-Abdulla",
+        "area_ids": [2, 3],
+        "aliases": ["جنوب سعد العبدالله", "South Saad Al-Abdulla"],
+        "geo": {
+          "governorate": "Jahra Governorate",
+          "area_name_ar": "جنوب سعد العبدالله",
+          "objectid": "geo-south-saad"
+        }
+      }
+    ],
+    "ambiguity_groups": [
+      {
+        "id": "khairan",
+        "prompt_ar": "الخيران السكنية أم شاليهات الخيران؟",
+        "prompt_en": "Do you mean Khairan Residential or Khairan Chalets?",
+        "aliases": ["الخيران", "Khairan"]
+      }
+    ]
+  },
+  "areas": [
+    {
+      "id": 1,
+      "governorate": "Jahra Governorate",
+      "name_en": "Al Mutlaa",
+      "name_ar": "المطلاع",
+      "sedan_normal": 2.5,
+      "sedan_fast": 3.5,
+      "cooled_van_normal": 3.5,
+      "cooled_van_fast": 4.5,
+      "van_normal": 3.5,
+      "van_fast": 4.5,
+      "helper_standard": 6.5
+    },
+    {
+      "id": 2,
+      "governorate": "Jahra Governorate",
+      "name_en": "South Saad Al-Abdulla 1",
+      "name_ar": "جنوب سعد العبدالله 1",
+      "sedan_normal": 5.0,
+      "sedan_fast": 7.0,
+      "cooled_van_normal": 7.0,
+      "cooled_van_fast": 9.0,
+      "van_normal": 7.0,
+      "van_fast": 9.0,
+      "helper_standard": 12.0
+    },
+    {
+      "id": 3,
+      "governorate": "Jahra Governorate",
+      "name_en": "South Saad Al-Abdulla 2",
+      "name_ar": "جنوب سعد العبدالله 2",
+      "sedan_normal": 5.0,
+      "sedan_fast": 7.0,
+      "cooled_van_normal": 7.0,
+      "cooled_van_fast": 9.0,
+      "van_normal": 7.0,
+      "van_fast": 9.0,
+      "helper_standard": 12.0
+    },
+    {
+      "id": 4,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "Ali Sabah Al-Salem",
+      "name_ar": "ضاحية علي صباح السالم",
+      "sedan_normal": 2.75,
+      "sedan_fast": 3.75,
+      "cooled_van_normal": 3.75,
+      "cooled_van_fast": 5.0,
+      "van_normal": 3.75,
+      "van_fast": 5.0,
+      "helper_standard": 7.5,
+      "geo": {
+        "governorate": "Ahmadi Governorate",
+        "area_name_ar": "علي صباح السالم",
+        "objectid": "geo-ali-sabah"
+      }
+    },
+    {
+      "id": 5,
+      "governorate": "Hawalli Governorate",
+      "name_en": "Hawalli",
+      "name_ar": "حولي",
+      "sedan_normal": 1.5,
+      "sedan_fast": 2.0,
+      "cooled_van_normal": 2.0,
+      "cooled_van_fast": 2.75,
+      "van_normal": 2.0,
+      "van_fast": 2.75,
+      "helper_standard": 4.0
+    },
+    {
+      "id": 6,
+      "governorate": "Capital Governorate",
+      "name_en": "Dasman",
+      "name_ar": "دسمان",
+      "sedan_normal": 1.25,
+      "sedan_fast": 1.75,
+      "cooled_van_normal": 1.75,
+      "cooled_van_fast": 2.25,
+      "van_normal": 1.75,
+      "van_fast": 2.25,
+      "helper_standard": 3.25
+    },
+    {
+      "id": 7,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "Khairan Residential",
+      "name_ar": "الخيران السكنية",
+      "sedan_normal": 6.0,
+      "sedan_fast": 8.0,
+      "cooled_van_normal": 8.0,
+      "cooled_van_fast": 10.0,
+      "van_normal": 8.0,
+      "van_fast": 10.0,
+      "helper_standard": 13.0
+    },
+    {
+      "id": 8,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "Khairan Chalets",
+      "name_ar": "شاليهات الخيران",
+      "sedan_normal": 7.5,
+      "sedan_fast": 9.5,
+      "cooled_van_normal": 9.5,
+      "cooled_van_fast": 12.0,
+      "van_normal": 9.5,
+      "van_fast": 12.0,
+      "helper_standard": 15.0
+    },
+    {
+      "id": 9,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "South Subah AlAhamd",
+      "name_ar": "جنوب صباح الأحمد",
+      "sedan_normal": 6.0,
+      "sedan_fast": 8.0,
+      "cooled_van_normal": 8.0,
+      "cooled_van_fast": 10.0,
+      "van_normal": 8.0,
+      "van_fast": 10.0,
+      "helper_standard": 13.0
+    },
+    {
+      "id": 10,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "South Ahmadi",
+      "name_ar": "جنوب الأحمدي",
+      "sedan_normal": 2.75,
+      "sedan_fast": 3.75,
+      "cooled_van_normal": 3.75,
+      "cooled_van_fast": 5.0,
+      "van_normal": 3.75,
+      "van_fast": 5.0,
+      "helper_standard": 7.5
+    },
+    {
+      "id": 11,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "East Ahmadi",
+      "name_ar": "شرق الأحمدي",
+      "sedan_normal": 2.5,
+      "sedan_fast": 3.5,
+      "cooled_van_normal": 3.5,
+      "cooled_van_fast": 4.5,
+      "van_normal": 3.5,
+      "van_fast": 4.5,
+      "helper_standard": 6.5
+    },
+    {
+      "id": 12,
+      "governorate": "Ahmadi Governorate",
+      "name_en": "Mina Al-Ahmadi Refinery",
+      "name_ar": "مصفاة ميناء الأحمدي",
+      "sedan_normal": 2.75,
+      "sedan_fast": 3.75,
+      "cooled_van_normal": 3.75,
+      "cooled_van_fast": 5.0,
+      "van_normal": 3.75,
+      "van_fast": 5.0,
+      "helper_standard": 7.5
+    }
+  ]
+}

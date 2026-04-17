@@ -1,0 +1,108 @@
+{
+  "country": "KW",
+  "country_name": "Kuwait",
+  "country_name_ar": "الكويت",
+  "reminder_windows_days": [90, 60, 30, 15, 7],
+  "document_types": {
+    "civil_id": {
+      "label": "Civil ID",
+      "label_ar": "البطاقة المدنية",
+      "typical_validity_years": 5,
+      "renewal_lead_days": 30,
+      "authority": "PACI",
+      "authority_ar": "الهيئة العامة للمعلومات المدنية",
+      "required": true,
+      "fine_per_day_kd": 0,
+      "notes": "Issued by PACI. Required for all residents. Renewal at PACI branches or online."
+    },
+    "residency": {
+      "label": "Residency Permit",
+      "label_ar": "الإقامة",
+      "typical_validity_years": 1,
+      "renewal_lead_days": 60,
+      "authority": "MOI",
+      "authority_ar": "وزارة الداخلية",
+      "required": true,
+      "fine_per_day_kd": 2,
+      "notes": "Article 18 (private sector) or Article 20 (dependent). Late renewal incurs 2 KD/day fine. Renewal requires valid passport, medical, and employer sponsorship."
+    },
+    "work_permit": {
+      "label": "Work Permit",
+      "label_ar": "إذن العمل",
+      "typical_validity_years": 1,
+      "renewal_lead_days": 30,
+      "authority": "PAM",
+      "authority_ar": "الهيئة العامة للقوى العاملة",
+      "required": true,
+      "fine_per_day_kd": 0,
+      "notes": "Issued by Public Authority for Manpower. Tied to residency and employer sponsorship."
+    },
+    "passport": {
+      "label": "Passport",
+      "label_ar": "جواز السفر",
+      "typical_validity_years": 5,
+      "renewal_lead_days": 90,
+      "authority": "Embassy / Home Country",
+      "authority_ar": "السفارة / بلد الأصل",
+      "required": true,
+      "fine_per_day_kd": 0,
+      "notes": "Employee responsibility. Must have 6+ months validity for residency renewal. Employer tracks for visa purposes."
+    },
+    "medical": {
+      "label": "Medical Fitness Certificate",
+      "label_ar": "شهادة اللياقة الطبية",
+      "typical_validity_years": 2,
+      "renewal_lead_days": 30,
+      "authority": "MOH",
+      "authority_ar": "وزارة الصحة",
+      "required": true,
+      "notes": "Required for initial residency and some renewals. Done at designated MOH clinics."
+    }
+  },
+  "escalation_rules": {
+    "90": {
+      "action": "log_only",
+      "description": "Log internally. No notifications yet."
+    },
+    "60": {
+      "action": "notify_hr",
+      "description": "Notify HR via WhatsApp about upcoming expiry."
+    },
+    "30": {
+      "action": "notify_hr_and_employee",
+      "description": "Notify HR with urgency. Request updated documents from employee via WhatsApp."
+    },
+    "15": {
+      "action": "urgent_hr",
+      "description": "Urgent alert to HR. Follow up with employee if no response."
+    },
+    "7": {
+      "action": "critical_hr",
+      "description": "CRITICAL alert to HR. Daily follow-up with employee."
+    },
+    "0": {
+      "action": "overdue_daily",
+      "description": "OVERDUE. Daily alert to HR until resolved. Include fine calculation if applicable."
+    }
+  },
+  "visa_types": {
+    "article_18": {
+      "label": "Article 18 - Private Sector",
+      "label_ar": "مادة 18 - قطاع خاص",
+      "typical_renewal": "annual",
+      "transferable": true
+    },
+    "article_20": {
+      "label": "Article 20 - Dependent",
+      "label_ar": "مادة 20 - عائلية",
+      "typical_renewal": "annual",
+      "transferable": false
+    },
+    "article_22": {
+      "label": "Article 22 - Government",
+      "label_ar": "مادة 22 - حكومي",
+      "typical_renewal": "per contract",
+      "transferable": false
+    }
+  }
+}

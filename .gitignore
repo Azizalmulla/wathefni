@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Runtime state (plugins persist small JSON files for dedupe/ledgers/profiles)
+*.state.json
+**/tmp/
+**/.cache/
+**/storage/
+**/state/
+
+# Logs
+*.log
+logs/
+tmp_*.log
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+
+# Python (ai-recruiter / workforce-os)
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/

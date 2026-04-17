@@ -1,0 +1,8 @@
+{
+  "name": "octopus-channel",
+  "version": "1.0.0",
+  "private": true,
+  "openclaw": {
+    "extensions": ["./octopus-channel.ts"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "octopus-channel",
+  "name": "AI Octopus Channel",
+  "description": "Generic AI Octopus channel transport for OpenClaw.",
+  "channels": ["octopus"],
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "octopus-channel",
+  "version": "1.0.0",
+  "description": "Native AI Octopus channel integration for OpenClaw.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "jiti": "^2.6.1"
+  }
+}

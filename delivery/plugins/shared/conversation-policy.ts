@@ -1,0 +1,474 @@
+export type ConversationFlowStage =
+  | "idle"
+  | "quoted"
+  | "collecting_booking_details"
+  | "summary_shown"
+  | "awaiting_confirmation"
+  | "order_submitted";
+
+export type BookingCollectionStep =
+  | "none"
+  | "sender"
+  | "recipient"
+  | "pickup_address"
+  | "delivery_address"
+  | "summary_pending"
+  | "awaiting_summary_confirmation";
+
+export type PersistedBookingLocation = {
+  source: "location_pin" | "map_link";
+  latitude: number;
+  longitude: number;
+  name: string | null;
+  address: string | null;
+  resolvedAreaName: string | null;
+};
+
+export type PersistedBookingDraft = {
+  senderName: string | null;
+  senderPhone: string | null;
+  senderPhoneRejected?: boolean;
+  recipientName: string | null;
+  recipientPhone: string | null;
+  pickupBlock: string | null;
+  pickupStreet: string | null;
+  pickupHouse: string | null;
+  // Kuwait address extensions. `pickupAvenue` is a first-class field because
+  // many Kuwait areas use "جادة / jadda / jedda / avenue" as a distinct road
+  // designation (NOT a street). `pickupExtra` is a free-form human-readable
+  // string for floor, apartment, office, landmark, or any useful address note
+  // the customer volunteers ("Floor 3, Apt 12, next to the mosque").
+  pickupAvenue: string | null;
+  pickupExtra: string | null;
+  pickupLocation: PersistedBookingLocation | null;
+  deliveryBlock: string | null;
+  deliveryStreet: string | null;
+  deliveryHouse: string | null;
+  deliveryAvenue: string | null;
+  deliveryExtra: string | null;
+  deliveryLocation: PersistedBookingLocation | null;
+  pendingLocation: PersistedBookingLocation | null;
+};
+
+export type CustomerIntent =
+  | "greeting"
+  | "service_inquiry"
+  | "route_service_inquiry"
+  | "passenger_transport_request"
+  | "pricing_request"
+  | "booking_followup"
+  | "language_switch"
+  | "tracking"
+  | "general_support";
+
+export type PersistedConversationControllerEntry = {
+  lastActivityTs: number;
+  language: "ar" | "en";
+  explicitLanguage: "ar" | "en" | null;
+  stage: ConversationFlowStage;
+  bookingStep: BookingCollectionStep;
+  conversationId: string;
+  replyTarget: string;
+  accountId: string;
+  quoteRouteKey: string | null;
+  quoteTs: number | null;
+  quotePickupAreaNameEn: string | null;
+  quotePickupAreaNameAr: string | null;
+  quoteDropoffAreaNameEn: string | null;
+  quoteDropoffAreaNameAr: string | null;
+  selectedQuoteOptionType: string | null;
+  selectedQuoteOptionLabelAr: string | null;
+  selectedQuoteOptionLabelEn: string | null;
+  selectedQuoteOptionPrice: number | null;
+  selectedQuoteOptionDirectChatBookingStatus: string | null;
+  selectedDeliveryType: string | null;
+  quotedPrice: number | null;
+  bookingDraft: PersistedBookingDraft;
+  pendingReplyText?: string | null;
+  quotePresentedToCustomer?: boolean;
+  // Set when stage transitions to "order_submitted" so the post-order
+  // correction flow can reference the order the customer just placed.
+  // Cleared whenever stage moves away from "order_submitted".
+  submittedOrderUid?: string | null;
+};
+
+export function createEmptyBookingDraft(): PersistedBookingDraft {
+  return {
+    senderName: null,
+    senderPhone: null,
+    recipientName: null,
+    recipientPhone: null,
+    pickupBlock: null,
+    pickupStreet: null,
+    pickupHouse: null,
+    pickupAvenue: null,
+    pickupExtra: null,
+    pickupLocation: null,
+    deliveryBlock: null,
+    deliveryStreet: null,
+    deliveryHouse: null,
+    deliveryAvenue: null,
+    deliveryExtra: null,
+    deliveryLocation: null,
+    pendingLocation: null,
+  };
+}
+
+const ARABIC_CHAR_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+export const CONVERSATION_CONTROLLER_QUOTE_WINDOW_MS = 30 * 60_000;
+
+export function normalizeIntentText(text: string | null): string {
+  return (text || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s']/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function detectConversationLanguage(text: string | null): "ar" | "en" {
+  if (!text) return "en";
+  const chars = text.replace(/\s/g, "");
+  if (!chars) return "en";
+  let arabicCount = 0;
+  for (const ch of chars) {
+    if (ARABIC_CHAR_RE.test(ch)) arabicCount++;
+  }
+  return arabicCount / chars.length > 0.3 ? "ar" : "en";
+}
+
+export function detectExplicitLanguageRequest(text: string | null): "ar" | "en" | null {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return null;
+  }
+  const englishMarkers = [
+    "english",
+    "english pl",
+    "english please",
+    "speak english",
+    "in english",
+    "reply in english",
+  ];
+  if (englishMarkers.includes(normalized)) {
+    return "en";
+  }
+  const arabicMarkers = [
+    "arabic",
+    "arabic pl",
+    "arabic please",
+    "speak arabic",
+    "in arabic",
+    "reply in arabic",
+    "عربي",
+    "بالعربي",
+    "بالعربية",
+    "تكلم عربي",
+    "رد بالعربي",
+    "رد بالعربية",
+  ];
+  if (arabicMarkers.includes(normalized)) {
+    return "ar";
+  }
+  return null;
+}
+
+export function hasVisibleArabic(text: string | null): boolean {
+  return ARABIC_CHAR_RE.test(text || "");
+}
+
+export function hasVisibleLatin(text: string | null): boolean {
+  return /[A-Za-z]/.test(text || "");
+}
+
+export function resolveCustomerReplyLanguage(params: {
+  visibleText: string | null;
+  explicitLanguage: "ar" | "en" | null;
+  fallbackLanguage: "ar" | "en";
+  preferFallbackForAudioTranscript?: boolean;
+  preferFallbackForLowSignalText?: boolean;
+}): "ar" | "en" {
+  if (params.explicitLanguage) {
+    return params.explicitLanguage;
+  }
+  const text = params.visibleText || "";
+  const hasArabic = hasVisibleArabic(text);
+  const hasLatin = hasVisibleLatin(text);
+  if (hasArabic && !hasLatin) {
+    return "ar";
+  }
+  if (hasLatin && !hasArabic) {
+    return "en";
+  }
+  if (text.trim()) {
+    if (params.preferFallbackForLowSignalText && !hasArabic && !hasLatin) {
+      return params.fallbackLanguage;
+    }
+    return detectConversationLanguage(text);
+  }
+  return params.fallbackLanguage;
+}
+
+export function isSimpleGreeting(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  return [
+    "hi",
+    "hello",
+    "hey",
+    "yo",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "السلام عليكم",
+    "سلام",
+    "مرحبا",
+    "هلا",
+    "هلا والله",
+    "اهلا",
+    "أهلا",
+  ].includes(normalized);
+}
+
+// Minimal safety-net for when the turn-interpreter LLM fails (network error,
+// timeout, refusal). Kept intentionally tiny — the interpreter is the source
+// of truth for acceptance classification. Do NOT grow this list to handle
+// natural-language variations; fix the interpreter prompt instead.
+export function isBookingStartIntent(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  return [
+    "ok",
+    "okay",
+    "yes",
+    "yep",
+    "sure",
+    "book",
+    "proceed",
+    "continue",
+    "go ahead",
+    "احجز",
+    "اكمل",
+    "كمل",
+    "نعم",
+    "تمام",
+    "اوكي",
+  ].includes(normalized);
+}
+
+export function hasRouteEvidence(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  const routePatterns = [
+    /\bfrom\b.+\bto\b/i,
+    /\b(?:price|how much|quote|cost)\b.+\bto\b/i,
+    /\b[a-z][a-z\s]{2,}\b\s+to\s+\b[a-z][a-z\s]{2,}\b/i,
+    /\bمن\b.+\b(?:الى|إلى|ل)\b/u,
+    /\b(?:سعر|كم|تكلفة)\b.+\b(?:الى|إلى)\b/u,
+    /nearest riders area:/i,
+  ];
+  return routePatterns.some((pattern) => pattern.test(normalized));
+}
+
+export function isGeneralServiceInquiry(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  const phrases = [
+    "what services",
+    "what service",
+    "what do you offer",
+    "what can you do",
+    "services",
+    "service list",
+    "service menu",
+    "شنو الخدمات",
+    "ما هي الخدمات",
+    "شنو عندكم",
+    "الخدمات",
+    "شنو تقدمون",
+  ];
+  return phrases.some((phrase) => normalized.includes(phrase));
+}
+
+export function isPassengerTransportRequest(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  const passengerMarkers = [
+    "drop me",
+    "take me",
+    "pick me up",
+    "ride to airport",
+    "airport ride",
+    "drive me",
+    "taxi",
+    "transport me",
+    "وصلني",
+    "ودني",
+    "خذني",
+    "وصلني المطار",
+    "ودني المطار",
+    "ابي سيارة للمطار",
+    "أبي سيارة للمطار",
+    "ابي توصلني",
+    "أبي توصلني",
+  ];
+  const packageMarkers = [
+    "package",
+    "parcel",
+    "shipment",
+    "deliver package",
+    "send package",
+    "item",
+    "items",
+    "order",
+    "طلب",
+    "شحنة",
+    "طرود",
+    "غرض",
+    "اغراض",
+  ];
+  const looksPassenger = passengerMarkers.some((phrase) => normalized.includes(phrase));
+  if (!looksPassenger) {
+    return false;
+  }
+  const looksPackage = packageMarkers.some((phrase) => normalized.includes(phrase));
+  return !looksPackage;
+}
+
+export function extractTrackingOrderId(text: string): string | null {
+  const match = text.match(/\bORDER-[A-Za-z0-9-]+\b/i);
+  return match ? match[0].toUpperCase() : null;
+}
+
+export function isTrackingIntent(text: string): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  const trackingMarkers = [
+    "track",
+    "tracking",
+    "order status",
+    "status update",
+    "تتبع",
+    "تابع",
+    "متابعة الطلب",
+    "حالة الطلب",
+    "حالة طلبي",
+    "وين طلبي",
+    "تحديث الطلب",
+  ];
+  return trackingMarkers.some((marker) => normalized.includes(marker));
+}
+
+export function hasFreshQuotedState(entry: PersistedConversationControllerEntry | null): boolean {
+  return !!entry?.quoteTs && (Date.now() - entry.quoteTs) <= CONVERSATION_CONTROLLER_QUOTE_WINDOW_MS;
+}
+
+export function hasQuotedBookingAuthority(entry: PersistedConversationControllerEntry | null): boolean {
+  return Boolean(
+    entry &&
+    entry.stage === "quoted" &&
+    entry.quoteRouteKey &&
+    entry.selectedDeliveryType &&
+    entry.quotedPrice != null,
+  );
+}
+
+export function hasActiveQuotedBookingAuthority(entry: PersistedConversationControllerEntry | null): boolean {
+  return hasFreshQuotedState(entry) && hasQuotedBookingAuthority(entry);
+}
+
+export function isExplicitOrderConfirmation(text: string | null): boolean {
+  const normalized = normalizeIntentText(text);
+  if (!normalized) {
+    return false;
+  }
+  return [
+    "yes",
+    "yes please",
+    "yes confirm",
+    "confirm",
+    "confirmed",
+    "i confirm",
+    "confirm it",
+    "go ahead",
+    "proceed",
+    "continue",
+    "confirmed proceed",
+    "confirmed go ahead",
+    "ok confirm",
+    "okay confirm",
+    "نعم",
+    "اي",
+    "ايي",
+    "اي نعم",
+    "مؤكد",
+    "أكد",
+    "اكده",
+    "أكيد",
+  ].includes(normalized);
+}
+
+export function classifyCustomerIntent(params: {
+  visibleText: string | null;
+  explicitLanguage: "ar" | "en" | null;
+  controllerEntry: PersistedConversationControllerEntry | null;
+}): CustomerIntent | null {
+  const text = params.visibleText || "";
+  if (params.explicitLanguage) {
+    return "language_switch";
+  }
+  if (
+    params.controllerEntry &&
+    (
+      params.controllerEntry.stage === "awaiting_confirmation" ||
+      params.controllerEntry.bookingStep === "awaiting_summary_confirmation"
+    ) &&
+    isExplicitOrderConfirmation(text)
+  ) {
+    return "booking_followup";
+  }
+  if (isPassengerTransportRequest(text)) {
+    return "passenger_transport_request";
+  }
+  if (extractTrackingOrderId(text)) {
+    return "tracking";
+  }
+  if (isTrackingIntent(text)) {
+    return "tracking";
+  }
+  if (hasActiveQuotedBookingAuthority(params.controllerEntry) && isBookingStartIntent(text)) {
+    return "booking_followup";
+  }
+  if (isSimpleGreeting(text)) {
+    return "greeting";
+  }
+  if (isGeneralServiceInquiry(text)) {
+    return "service_inquiry";
+  }
+  return null;
+}
+
+export function buildConversationControllerKey(accountId: string, conversationId: string): string {
+  return `${String(accountId || "").trim()}::${String(conversationId || "").trim()}`;
+}
+
+export function resolveSessionIdentityKey(ctx: any): string {
+  return (
+    ctx?.ControllerStateKey ||
+    ctx?.controllerStateKey ||
+    ctx?.SessionKey ||
+    ctx?.sessionKey ||
+    ctx?.ConversationId ||
+    ctx?.conversationId ||
+    ctx?.sessionId ||
+    "__global__"
+  );
+}

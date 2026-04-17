@@ -1,0 +1,12 @@
+{
+  "//": "Root tsconfig is intentionally loose. Strict type-checking is enforced per-plugin via plugins/*/tsconfig.json. Do not enable strict here until the large index.ts files are split and fully typed.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["plugins/**/*.ts", "plugins/**/*.d.ts"]
+}

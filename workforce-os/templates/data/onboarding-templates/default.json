@@ -1,0 +1,84 @@
+{
+  "template_id": "default",
+  "name": "Default Onboarding",
+  "name_ar": "التهيئة الافتراضية",
+  "items": [
+    {
+      "id": "civil_id",
+      "label": "Civil ID (front + back)",
+      "label_ar": "البطاقة المدنية (أمام وخلف)",
+      "type": "document",
+      "accept": ["image", "pdf"],
+      "required": true,
+      "extracts_expiry": true,
+      "document_type": "civil_id",
+      "instructions": "Please send a clear photo of your Civil ID — front and back.",
+      "instructions_ar": "أرسل صورة واضحة للبطاقة المدنية — الأمام والخلف."
+    },
+    {
+      "id": "passport",
+      "label": "Passport (photo page)",
+      "label_ar": "جواز السفر (صفحة الصورة)",
+      "type": "document",
+      "accept": ["image", "pdf"],
+      "required": true,
+      "extracts_expiry": true,
+      "document_type": "passport",
+      "instructions": "Please send a clear photo of your passport's photo page.",
+      "instructions_ar": "أرسل صورة واضحة لصفحة الصورة في جواز سفرك."
+    },
+    {
+      "id": "personal_photo",
+      "label": "Personal photo",
+      "label_ar": "صورة شخصية",
+      "type": "photo",
+      "accept": ["image"],
+      "required": true,
+      "extracts_expiry": false,
+      "document_type": null,
+      "instructions": "Please send a recent personal photo (passport-style or professional).",
+      "instructions_ar": "أرسل صورة شخصية حديثة (نمط جواز السفر أو رسمية)."
+    },
+    {
+      "id": "bank_details",
+      "label": "Bank account (IBAN)",
+      "label_ar": "حساب البنك (IBAN)",
+      "type": "text",
+      "accept": ["text", "image"],
+      "required": true,
+      "extracts_expiry": false,
+      "document_type": null,
+      "instructions": "Please send your bank name and IBAN number.",
+      "instructions_ar": "أرسل اسم البنك ورقم IBAN."
+    },
+    {
+      "id": "medical",
+      "label": "Medical fitness certificate",
+      "label_ar": "شهادة اللياقة الطبية",
+      "type": "document",
+      "accept": ["image", "pdf"],
+      "required": false,
+      "extracts_expiry": true,
+      "document_type": "medical",
+      "instructions": "Please send your medical fitness certificate (if you have one).",
+      "instructions_ar": "أرسل شهادة اللياقة الطبية (إذا متوفرة)."
+    },
+    {
+      "id": "education_cert",
+      "label": "Educational certificates",
+      "label_ar": "الشهادات الدراسية",
+      "type": "document",
+      "accept": ["image", "pdf"],
+      "required": false,
+      "extracts_expiry": false,
+      "document_type": null,
+      "instructions": "Please send your highest educational certificate or degree.",
+      "instructions_ar": "أرسل أعلى شهادة دراسية حصلت عليها."
+    }
+  ],
+  "reminder_schedule": {
+    "first_reminder_hours": 24,
+    "second_reminder_hours": 48,
+    "escalate_to_hr_hours": 72
+  }
+}
