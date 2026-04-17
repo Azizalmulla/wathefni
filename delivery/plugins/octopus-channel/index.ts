@@ -208,7 +208,16 @@ import {
   resolveSameRouteQuoteFollowupAction,
   buildDeterministicSelectedQuotedOptionReply,
   buildDeterministicOtherQuotedOptionsReply,
+  buildQuotedRouteContextLines,
 } from "./lib/quoted-options";
+import {
+  shouldIncludeQuotedRouteContext,
+  formatOneBrainValue,
+  computeOneBrainMissingFields,
+  computeOneBrainNextRequiredAction,
+  formatOneBrainLiveChannelContext,
+} from "./lib/one-brain-context";
+import type { OneBrainNextRequiredAction } from "./lib/one-brain-context";
 
 const nodeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
 const env = nodeProcess?.env ?? {};
@@ -1084,288 +1093,12 @@ const customerProfileStore = createCustomerProfileStore({
 const getCustomerProfilePath = customerProfileStore.getPath;
 const loadCustomerProfile = customerProfileStore.load;
 
-function shouldIncludeQuotedRouteContext(options?: {
-  currentIntent?: CustomerIntent | null;
-  interpretedTurn?: InterpretedCustomerTurn | null;
-  conversationStage?: ConversationFlowStage | null;
-}): boolean {
-  const stage = options?.conversationStage || null;
-  const action = options?.interpretedTurn?.action || "";
-  const isQuoteFollowupClarification =
-    action === "clarify" && options?.interpretedTurn?.should_use_active_quote;
-  const shouldKeepQuoteContextDuringBooking =
-    [
-      "collecting_booking_details",
-      "summary_shown",
-      "awaiting_confirmation",
-    ].includes(String(stage || "")) &&
-    (
-      action === "same_route_quote_option" ||
-      action === "same_route_show_other_options" ||
-      isQuoteFollowupClarification
-    );
-  if (stage !== "quoted" && !shouldKeepQuoteContextDuringBooking) {
-    return false;
-  }
-  if (
-    [
-      "greeting",
-      "language_switch",
-      "service_overview",
-      "tracking_request",
-      "tracking_missing_id",
-      "passenger_transport_request",
-      "handoff",
-      "general_support",
-    ].includes(action) &&
-    !isQuoteFollowupClarification
-  ) {
-    return false;
-  }
-  if (
-    options?.interpretedTurn &&
-    !options.interpretedTurn.should_use_active_quote &&
-    stage !== "quoted"
-  ) {
-    return false;
-  }
-  const currentIntent = options?.currentIntent || null;
-  if (
-    currentIntent === "greeting" ||
-    currentIntent === "service_inquiry" ||
-    currentIntent === "tracking" ||
-    currentIntent === "language_switch" ||
-    currentIntent === "passenger_transport_request" ||
-    currentIntent === "general_support"
-  ) {
-    return false;
-  }
-  return true;
-}
+// shouldIncludeQuotedRouteContext moved to ./lib/one-brain-context.ts (wave 5).
 
-// ONE-BRAIN: produces a short, descriptive state snapshot for the agent.
-// Intentionally minimal — no step hints, no "ask ONLY for X" imperatives, no
-// intent enum, no transition hints. The agent reads the facts and decides what
-// to do. Hard rules are a tight, boundary-aligned 4-item list — nothing else.
-function formatOneBrainLiveChannelContext(params: {
-  normalizedReplyTarget: string | null;
-  preferredReplyLanguage?: "ar" | "en" | null;
-  controllerEntry?: PersistedConversationControllerEntry | null;
-  quotedRoute?: StoredQuotedRoute | null;
-}): string {
-  const entry = params.controllerEntry || null;
-  const draft = entry?.bookingDraft || null;
-  const lines: string[] = [
-    "[SYSTEM CONTEXT - LIVE CHANNEL]",
-    "Hidden runtime facts. Do not quote, mention, or explain this block to the customer.",
-    "current_sender_role: customer",
-    `current_customer_whatsapp: ${formatCustomerMemoryValue(params.normalizedReplyTarget)}`,
-  ];
-  if (params.preferredReplyLanguage) {
-    lines.push(`preferred_reply_language: ${params.preferredReplyLanguage}`);
-  }
-
-  // Active quoted route snapshot — always included when one exists so the
-  // agent can reason over service options without re-calling get_price.
-  if (params.quotedRoute) {
-    lines.push(...buildQuotedRouteContextLines(params.quotedRoute, entry));
-  }
-
-  // Surface the current controller stage so the agent knows where we are
-  // in the conversation lifecycle (idle → quoted → collecting → summary →
-  // awaiting_confirmation → order_submitted). Crucial for post-order flows:
-  // the agent must read stage=order_submitted and follow the post-order
-  // correction rules instead of pretending the booking draft is still live.
-  if (entry?.stage) {
-    lines.push(`current_conversation_stage: ${entry.stage}`);
-  }
-  if (entry?.stage === "order_submitted" && entry.submittedOrderUid) {
-    lines.push(`submitted_order_uid: ${formatOneBrainValue(entry.submittedOrderUid)}`);
-  }
-
-  // Compact booking-draft snapshot. Single JSON-like block the agent can read
-  // at a glance; pairs with an explicit missing_fields array.
-  if (draft) {
-    const sender = `sender: { name: ${formatOneBrainValue(draft.senderName)}, phone: ${formatOneBrainValue(draft.senderPhone)} }`;
-    const recipient = `recipient: { name: ${formatOneBrainValue(draft.recipientName)}, phone: ${formatOneBrainValue(draft.recipientPhone)} }`;
-    const pickupPin = formatPersistedBookingLocationLabel(draft.pickupLocation);
-    const deliveryPin = formatPersistedBookingLocationLabel(draft.deliveryLocation);
-    const pickup = `pickup: { area: ${formatOneBrainValue(entry?.quotePickupAreaNameEn || null)}, block: ${formatOneBrainValue(draft.pickupBlock)}, street: ${formatOneBrainValue(draft.pickupStreet)}, avenue: ${formatOneBrainValue(draft.pickupAvenue)}, house: ${formatOneBrainValue(draft.pickupHouse)}, extra: ${formatOneBrainValue(draft.pickupExtra)}, pin: ${formatOneBrainValue(pickupPin)} }`;
-    const delivery = `delivery: { area: ${formatOneBrainValue(entry?.quoteDropoffAreaNameEn || null)}, block: ${formatOneBrainValue(draft.deliveryBlock)}, street: ${formatOneBrainValue(draft.deliveryStreet)}, avenue: ${formatOneBrainValue(draft.deliveryAvenue)}, house: ${formatOneBrainValue(draft.deliveryHouse)}, extra: ${formatOneBrainValue(draft.deliveryExtra)}, pin: ${formatOneBrainValue(deliveryPin)} }`;
-    lines.push("booking_draft:");
-    lines.push(`  ${sender}`);
-    lines.push(`  ${recipient}`);
-    lines.push(`  ${pickup}`);
-    lines.push(`  ${delivery}`);
-    const pendingPin = formatPersistedBookingLocationLabel(draft.pendingLocation);
-    if (pendingPin) {
-      lines.push(`pending_shared_location: ${pendingPin}`);
-    }
-    const selectedType = entry?.selectedDeliveryType || null;
-    const selectedPrice = entry?.quotedPrice != null ? `${entry.quotedPrice.toFixed(3)} KWD` : null;
-    if (selectedType || selectedPrice) {
-      lines.push(`selected_service: ${formatOneBrainValue(selectedType)}`);
-      lines.push(`selected_price: ${formatOneBrainValue(selectedPrice)}`);
-    }
-    const missing = computeOneBrainMissingFields(draft, entry);
-    lines.push(`missing_fields: [${missing.join(", ")}]`);
-
-    // State-derived imperative directive. LLMs follow a single explicit
-    // "next action" much more reliably than prose rules in the skill file.
-    // This is the deterministic backstop for the "lazy summary" / "mid-booking
-    // route recap" class of bug.
-    const directive = computeOneBrainNextRequiredAction({ draft, entry, missing });
-    if (directive) {
-      lines.push(`next_required_action: ${directive.action}`);
-      if (directive.field) lines.push(`next_field: ${directive.field}`);
-      if (directive.forbiddenShapes.length > 0) {
-        lines.push(`forbidden_reply_shapes: [${directive.forbiddenShapes.join(", ")}]`);
-      }
-    }
-  }
-
-  // The only four hard rules. Everything else lives in SKILL.md / IDENTITY.md.
-  lines.push("hard_rules:");
-  lines.push("  1. Every price you state must come from a get_price result for the active route this turn or an already-active quoted route above. Never invent, cache, or reuse prices from earlier in the conversation if the route changed.");
-  lines.push("  2. The only way to place an order is calling create_simple_order. The server validates the draft, route, service, and price; if it rejects, fix what it asks and try again. Never claim an order was placed without a successful tool result.");
-  lines.push("  3. Reply in the customer's current language. If they switch, you switch.");
-  lines.push("  4. Every reply must move the conversation forward. Never emit a standalone acknowledgement like 'Sure', 'Noted', 'Understood', or 'We'll proceed' without also taking the next concrete action in the same message (ask for the next missing field, show the summary, confirm, etc.).");
-
-  lines.push("[/SYSTEM CONTEXT - LIVE CHANNEL]");
-  return lines.join("\n");
-}
-
-function formatOneBrainValue(value: string | null | undefined): string {
-  if (value == null || value === "") return "null";
-  return JSON.stringify(value);
-}
-
-function computeOneBrainMissingFields(
-  draft: PersistedBookingDraft,
-  entry: PersistedConversationControllerEntry | null,
-): string[] {
-  const missing: string[] = [];
-  if (!draft.senderName) missing.push("sender.name");
-  if (!draft.senderPhone) missing.push("sender.phone");
-  if (!draft.recipientName) missing.push("recipient.name");
-  if (!draft.recipientPhone) missing.push("recipient.phone");
-  if (!hasSatisfiedBookingAddress(draft, "pickup")) missing.push("pickup.address");
-  if (!hasSatisfiedBookingAddress(draft, "delivery")) missing.push("delivery.address");
-  if (!entry?.quotePickupAreaNameEn) missing.push("pickup.area");
-  if (!entry?.quoteDropoffAreaNameEn) missing.push("delivery.area");
-  if (!entry?.selectedDeliveryType) missing.push("service_type");
-  if (entry?.quotedPrice == null) missing.push("quoted_price");
-  return missing;
-}
-
-type OneBrainNextRequiredAction = {
-  action: string;
-  field: string | null;
-  forbiddenShapes: string[];
-};
-
-/**
- * Turn the current booking-draft state into a single imperative directive the
- * LLM receives every turn. This is a deterministic backstop for prompt drift:
- * LLMs follow a short state-derived directive (`next_required_action: X`) much
- * more reliably than prose rules buried in SKILL.md, especially under
- * ambiguity or after clarification detours.
- *
- * Returns null when no booking has started (pre-quote / chit-chat); SKILL.md
- * governs those turns.
- */
-function computeOneBrainNextRequiredAction(params: {
-  draft: PersistedBookingDraft;
-  entry: PersistedConversationControllerEntry | null;
-  missing: string[];
-}): OneBrainNextRequiredAction | null {
-  const { draft, entry, missing } = params;
-
-  // Post-order stage. The booking draft is intentionally empty here (cleared
-  // at the order_submitted transition). The LLM must NOT write to the draft
-  // via apply_booking_field — that tool is gated separately. If the customer
-  // wants to change order details, the correct flow is:
-  //   1. Call track_order with the submitted_order_uid to get payment_status.
-  //   2. If the order is UNPAID → call cancel_order, then create_simple_order
-  //      with the corrected details (no new payment link is generated for the
-  //      cancelled one, so we avoid the double-pay race).
-  //   3. If the order is PAID → call request_handoff so a human can update it.
-  // Emitting this directive on EVERY order_submitted turn (not just when the
-  // message looks like a correction) is intentional: it prevents the LLM from
-  // ever silently applying a field update to a dead draft or hallucinating a
-  // handoff it didn't actually perform.
-  if (entry?.stage === "order_submitted") {
-    return {
-      action: "POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF",
-      field: null,
-      forbiddenShapes: [
-        "standalone_ack",
-        "route_price_recap",
-        "fake_handoff_claim",
-        "field_update_without_recreate",
-      ],
-    };
-  }
-
-  // Pre-quote / no active route — let the agent reason freely.
-  if (!entry || entry.quotedPrice == null || !entry.selectedDeliveryType) {
-    return null;
-  }
-
-  // Booking has started (we have a selected service + price) but fields are
-  // still missing. Point at the first one; forbid standalone acks.
-  const collectionMissing = missing.filter(
-    (f) =>
-      f === "sender.name" ||
-      f === "sender.phone" ||
-      f === "recipient.name" ||
-      f === "recipient.phone" ||
-      f === "pickup.address" ||
-      f === "delivery.address",
-  );
-
-  if (collectionMissing.length > 0) {
-    let field: string = collectionMissing[0];
-    let action = "COLLECT_NEXT_MISSING_FIELD";
-
-    // Sender is collected in a single combined ask (name + phone decision).
-    if (field === "sender.name" || field === "sender.phone") {
-      // If the sender's name is missing, we haven't started sender collection
-      // yet — ask for name + whether to use WhatsApp as sender phone.
-      if (!draft.senderName) {
-        field = "sender";
-        action = "ASK_SENDER_NAME_AND_PHONE_DECISION";
-      } else {
-        field = "sender.phone";
-        action = "ASK_SENDER_PHONE";
-      }
-    } else if (field === "recipient.name" || field === "recipient.phone") {
-      field = "recipient";
-      action = "ASK_RECIPIENT_NAME_AND_PHONE";
-    } else if (field === "pickup.address") {
-      action = "ASK_PICKUP_ADDRESS";
-    } else if (field === "delivery.address") {
-      action = "ASK_DELIVERY_ADDRESS";
-    }
-
-    return {
-      action,
-      field,
-      forbiddenShapes: ["standalone_ack", "route_price_recap"],
-    };
-  }
-
-  // All required collection fields are present.  The ONLY legitimate next
-  // action is either (a) writing the full order summary so the customer can
-  // confirm, or (b) — if they already confirmed the last-turn summary —
-  // calling create_simple_order. The LLM picks between those; we just
-  // prohibit stub replies and acknowledgements here.
-  return {
-    action: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
-    field: null,
-    forbiddenShapes: ["standalone_ack", "route_price_recap", "one_line_confirmation_without_summary"],
-  };
-}
+// formatOneBrainLiveChannelContext, formatOneBrainValue,
+// computeOneBrainMissingFields, OneBrainNextRequiredAction, and
+// computeOneBrainNextRequiredAction moved to ./lib/one-brain-context.ts
+// (wave 5).
 
 function formatLiveChannelContext(
   senderRole: "customer" | "admin",
@@ -2756,53 +2489,7 @@ function resolveSameRouteQuoteActionFromInterpreter(params: {
   return { kind: "switch_option", option };
 }
 
-function buildQuotedRouteContextLines(
-  route: StoredQuotedRoute | null | undefined,
-  controllerEntry: PersistedConversationControllerEntry | null | undefined,
-): string[] {
-  if (!route) return [];
-  const options = route.optionCatalog.filter((entry) => entry.quoted_price != null);
-  const defaultOption = getQuotedRouteDefaultOption(route);
-  const selectedOption = getActiveSelectedQuotedOption(route, controllerEntry);
-  const lines = [
-    `active_quoted_route_pickup_en: ${route.pickupAreaNameEn}`,
-    `active_quoted_route_dropoff_en: ${route.dropoffAreaNameEn}`,
-  ];
-  if (defaultOption) {
-    lines.push(
-      `active_quoted_default_option: ${defaultOption.delivery_type} | ${defaultOption.label_en} | label_ar=${defaultOption.label_ar} | ${defaultOption.formatted_price ?? `${defaultOption.quoted_price?.toFixed(3)} KWD`} | bookable=${defaultOption.direct_chat_booking_status || "-"}`,
-    );
-  }
-  if (selectedOption) {
-    lines.push(
-      `active_selected_quoted_option: ${selectedOption.delivery_type} | ${selectedOption.label_en} | label_ar=${selectedOption.label_ar} | ${formatQuotedOptionPrice(selectedOption)} | bookable=${selectedOption.direct_chat_booking_status || "-"}`,
-    );
-    lines.push(
-      `active_selected_quoted_option_direct_chat_booking_status: ${selectedOption.direct_chat_booking_status || "-"}`,
-    );
-  }
-  if (options.length > 0) {
-    lines.push("active_quoted_options:");
-    for (const option of options) {
-      lines.push(
-        `- ${option.delivery_type} | ${option.label_en} | label_ar=${option.label_ar} | ${option.formatted_price ?? `${option.quoted_price?.toFixed(3)} KWD`} | bookable=${option.direct_chat_booking_status || "-"}`,
-      );
-    }
-  }
-  lines.push(
-    "Quote-state rule: If the customer is still asking about this same active quoted route and did not change pickup/dropoff, answer from these quoted options instead of calling get_price again.",
-  );
-  lines.push(
-    "Quote-state rule: Treat active_selected_quoted_option as the current selected option for this turn unless the customer clearly asks for a different quoted option.",
-  );
-  lines.push(
-    "Quote-state rule: If active_selected_quoted_option_direct_chat_booking_status is manual_confirmation_required or not_available, do not start direct chat booking for that option. Explain that manual confirmation or human follow-up is required instead.",
-  );
-  lines.push(
-    "Quote-state rule: Only call get_price again if the customer changed the route or there is no active quoted route context.",
-  );
-  return lines;
-}
+// buildQuotedRouteContextLines moved to ./lib/quoted-options.ts (wave 5).
 
 function buildDeterministicLocationClarificationReply(params: {
   language: "ar" | "en";

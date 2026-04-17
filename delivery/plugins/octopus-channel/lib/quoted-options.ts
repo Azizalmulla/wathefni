@@ -348,6 +348,54 @@ export function buildDeterministicSelectedQuotedOptionReply(params: {
   return lines.join("\n");
 }
 
+export function buildQuotedRouteContextLines(
+  route: StoredQuotedRoute | null | undefined,
+  controllerEntry: PersistedConversationControllerEntry | null | undefined,
+): string[] {
+  if (!route) return [];
+  const options = route.optionCatalog.filter((entry) => entry.quoted_price != null);
+  const defaultOption = getQuotedRouteDefaultOption(route);
+  const selectedOption = getActiveSelectedQuotedOption(route, controllerEntry);
+  const lines = [
+    `active_quoted_route_pickup_en: ${route.pickupAreaNameEn}`,
+    `active_quoted_route_dropoff_en: ${route.dropoffAreaNameEn}`,
+  ];
+  if (defaultOption) {
+    lines.push(
+      `active_quoted_default_option: ${defaultOption.delivery_type} | ${defaultOption.label_en} | label_ar=${defaultOption.label_ar} | ${defaultOption.formatted_price ?? `${defaultOption.quoted_price?.toFixed(3)} KWD`} | bookable=${defaultOption.direct_chat_booking_status || "-"}`,
+    );
+  }
+  if (selectedOption) {
+    lines.push(
+      `active_selected_quoted_option: ${selectedOption.delivery_type} | ${selectedOption.label_en} | label_ar=${selectedOption.label_ar} | ${formatQuotedOptionPrice(selectedOption)} | bookable=${selectedOption.direct_chat_booking_status || "-"}`,
+    );
+    lines.push(
+      `active_selected_quoted_option_direct_chat_booking_status: ${selectedOption.direct_chat_booking_status || "-"}`,
+    );
+  }
+  if (options.length > 0) {
+    lines.push("active_quoted_options:");
+    for (const option of options) {
+      lines.push(
+        `- ${option.delivery_type} | ${option.label_en} | label_ar=${option.label_ar} | ${option.formatted_price ?? `${option.quoted_price?.toFixed(3)} KWD`} | bookable=${option.direct_chat_booking_status || "-"}`,
+      );
+    }
+  }
+  lines.push(
+    "Quote-state rule: If the customer is still asking about this same active quoted route and did not change pickup/dropoff, answer from these quoted options instead of calling get_price again.",
+  );
+  lines.push(
+    "Quote-state rule: Treat active_selected_quoted_option as the current selected option for this turn unless the customer clearly asks for a different quoted option.",
+  );
+  lines.push(
+    "Quote-state rule: If active_selected_quoted_option_direct_chat_booking_status is manual_confirmation_required or not_available, do not start direct chat booking for that option. Explain that manual confirmation or human follow-up is required instead.",
+  );
+  lines.push(
+    "Quote-state rule: Only call get_price again if the customer changed the route or there is no active quoted route context.",
+  );
+  return lines;
+}
+
 export function buildDeterministicOtherQuotedOptionsReply(params: {
   language: "ar" | "en";
   route: StoredQuotedRoute;
