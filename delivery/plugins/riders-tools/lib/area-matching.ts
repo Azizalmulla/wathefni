@@ -77,6 +77,13 @@ export const NON_DISTINGUISHING_EN_TOKENS = new Set([
   "suburb",
   "neighbourhood",
   "neighborhood",
+  // Geographic suffixes customers almost never type when referring to the
+  // area by name. "Umm Al-Namel Island" in data, "om il namel" from
+  // customer — the "island" tail otherwise balloons edit distance and
+  // kills the fuzzy match. Same rationale as stripping "منطقة" / "ضاحية"
+  // from Arabic labels.
+  "island",
+  "islands",
 ]);
 
 /**
@@ -279,6 +286,79 @@ export function damerauLevenshteinDistance(a: string, b: string): number {
 
 export function normalizeGovernorateName(text: string): string {
   return normalizeEn(text.replace(/governorate/gi, ""));
+}
+
+/**
+ * Matcher-friendly Latin normalization that also drops non-distinguishing
+ * tokens (e.g. "island", "al", "area"). Use this — not `normalizeLatinAreaKey`
+ * — whenever you are comparing a customer's casual query ("om il namel") to a
+ * canonical label ("Umm Al-Namel Island"). The base key function keeps every
+ * token so it can be used for exact lookups; this variant is purpose-built
+ * for edit-distance / similarity work where those tokens would otherwise
+ * inflate the distance.
+ */
+export function normalizeLatinAreaKeyForMatching(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/5/g, "kh")
+    .replace(/7/g, "ha")
+    .replace(/8/g, "gh")
+    .replace(/6/g, "t")
+    .replace(/9/g, "s")
+    .replace(/[23]/g, "a")
+    .replace(/[^a-z\s]/g, " ")
+    .split(/\s+/)
+    .map((token) => normalizeLatinAreaToken(token))
+    .filter(Boolean)
+    .filter((token) => !NON_DISTINGUISHING_EN_TOKENS.has(token))
+    .join(" ")
+    .trim();
+}
+
+/**
+ * Matcher-friendly Arabic canonicalization. Strips non-distinguishing tokens
+ * AND the trailing geographic suffixes like "جزيرة" that would otherwise
+ * bloat the compacted string used for edit distance. Keeps directional
+ * prefixes (جنوب/شمال/شرق/غرب) because those genuinely distinguish areas.
+ */
+export function canonicalizeAreaNameForMatching(text: string): string {
+  const stripped = text
+    .split(/\s+/)
+    .map((token) => token.replace(/^ال/, ""))
+    .filter((token) => token.length > 0 && !NON_DISTINGUISHING_AREA_TOKENS.has(token))
+    .join(" ")
+    .trim();
+  return normalizeForFuzzyMatch(stripped.replace(AREA_PREFIX_RE, ""));
+}
+
+/**
+ * Cheap 0..1 similarity score used to rank candidates for the graduated
+ * response path. Tries Latin and Arabic normalization, picks whichever
+ * matches the query's script, and falls back to a length-weighted
+ * Damerau-Levenshtein. Returns 0 for trivially-short inputs to avoid
+ * matching noise.
+ */
+export function scoreAreaMatchSimilarity(query: string, label: string): number {
+  const q = query.trim();
+  const l = label.trim();
+  if (!q || !l) return 0;
+  const useArabic = /[\u0600-\u06FF]/.test(q);
+  const qNorm = useArabic
+    ? canonicalizeAreaNameForMatching(q)
+    : normalizeLatinAreaKeyForMatching(q);
+  const lNorm = useArabic
+    ? canonicalizeAreaNameForMatching(l)
+    : normalizeLatinAreaKeyForMatching(l);
+  const qCompact = qNorm.replace(/\s+/g, "");
+  const lCompact = lNorm.replace(/\s+/g, "");
+  if (qCompact.length < 2 || lCompact.length < 2) return 0;
+  if (qCompact === lCompact) return 1;
+  const distance = damerauLevenshteinDistance(qCompact, lCompact);
+  const maxLen = Math.max(qCompact.length, lCompact.length);
+  if (maxLen === 0) return 0;
+  const similarity = 1 - distance / maxLen;
+  return similarity < 0 ? 0 : similarity;
 }
 
 export function buildSheetHeaderFingerprints(value: string) {

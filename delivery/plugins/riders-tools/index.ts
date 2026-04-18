@@ -63,6 +63,9 @@ import {
   normalizeEn,
   normalizeLatinAreaToken,
   normalizeLatinAreaKey,
+  normalizeLatinAreaKeyForMatching,
+  canonicalizeAreaNameForMatching,
+  scoreAreaMatchSimilarity,
   containsArabicScript,
   compactLookupKey,
   damerauLevenshteinDistance,
@@ -3130,6 +3133,63 @@ function findAreaNearTypoMatch(
 }
 
 /**
+ * Candidate collector for the graduated-response path.
+ *
+ * Unlike `findAreaNearTypoMatch` this never returns null and has no hard
+ * distance cap — it always returns the top-K most-similar areas ranked by
+ * `scoreAreaMatchSimilarity`. Used to:
+ *  - show the LLM a shortlist when deterministic resolution fails
+ *  - confirm plausibility when `verifyAreaEvidence` would otherwise reject
+ *
+ * Candidates with similarity below `minSimilarity` are dropped so the LLM
+ * never sees pure noise. Default 0.25 is generous enough to surface
+ * dropped-suffix Arabizi matches (e.g. "om il namel" → 0.667) while
+ * excluding unrelated areas.
+ */
+export type AreaCandidate = {
+  area: PricingArea;
+  similarity: number;
+};
+
+function collectAreaCandidates(
+  query: string,
+  areas: PricingArea[],
+  options: { topK?: number; minSimilarity?: number } = {},
+): AreaCandidate[] {
+  const topK = options.topK ?? 5;
+  const minSimilarity = options.minSimilarity ?? 0.25;
+  const raw = (query || "").trim();
+  if (!raw || areas.length === 0) return [];
+
+  const useArabic = containsArabicScript(raw);
+  const scored: AreaCandidate[] = [];
+  for (const area of areas) {
+    const label = useArabic ? area.name_ar : area.name_en;
+    if (!label) continue;
+    const similarity = scoreAreaMatchSimilarity(raw, label);
+    if (similarity < minSimilarity) continue;
+    scored.push({ area, similarity });
+  }
+
+  scored.sort((a, b) => b.similarity - a.similarity);
+  return scored.slice(0, topK);
+}
+
+/**
+ * Confidence classifier for the graduated-response path. Used to tag
+ * resolver outputs so the LLM knows whether to trust a match silently
+ * ("high"), confirm with the customer ("medium"), or treat it as a
+ * suggestion the customer must pick from ("low").
+ */
+type AreaMatchConfidence = "high" | "medium" | "low";
+
+function confidenceFromSimilarity(similarity: number): AreaMatchConfidence {
+  if (similarity >= 0.85) return "high";
+  if (similarity >= 0.55) return "medium";
+  return "low";
+}
+
+/**
  * Primary area lookup: deterministic-first pipeline with safe typo recovery.
  * Layer 1: Exact match
  * Layer 2: Canonical match (prefix-stripped)
@@ -4093,11 +4153,27 @@ function createAreaSuggestionResult(params: {
 function createAreaNotFoundResult(params: {
   field: "pickup_area" | "dropoff_area" | "delivery_area";
   query: string;
+  /** Optional top-K similar areas computed by `collectAreaCandidates`. When
+   * present, the LLM can use them on the next turn to either re-call
+   * get_price with an area_id (if confident) or ask the customer a
+   * candidate-based clarification ("did you mean one of these?"). */
+  closestCandidates?: AreaCandidate[];
 }) {
-  const { field, query } = params;
+  const { field, query, closestCandidates } = params;
   const labels = getAreaFieldLabels(field);
   const prompt_ar = `لم أتعرف على اسم ${labels.ar} "${query}". يرجى إعادة اسم المنطقة أو إرسال منطقة قريبة معروفة.`;
   const prompt_en = `I couldn't recognize the ${labels.en} "${query}". Please send the area name again or share a nearby known area.`;
+  const candidatePayload =
+    closestCandidates && closestCandidates.length > 0
+      ? {
+          closest_candidates: closestCandidates.map((c) => ({
+            area_id: c.area.id,
+            name_en: c.area.name_en,
+            name_ar: c.area.name_ar,
+            similarity: Number(c.similarity.toFixed(3)),
+          })),
+        }
+      : {};
   return createTextResult({
     status: "area_not_found",
     field,
@@ -4105,11 +4181,68 @@ function createAreaNotFoundResult(params: {
     message: prompt_en,
     prompt_ar,
     prompt_en,
+    ...candidatePayload,
+    _customer_message: prompt_en,
+    _customer_message_ar: prompt_ar,
+    _customer_message_en: prompt_en,
+    _instruction: closestCandidates && closestCandidates.length > 0
+      ? "The area name could not be recognized with confidence. Review `closest_candidates` — if one is clearly what the customer meant (dialect, Arabizi, typo), re-call get_price with that area_id in pickup_area_id or dropoff_area_id. Otherwise ask the customer to confirm the top candidate by name, or pick from the list. Do not silently pick a candidate without confirmation when the top similarity is below 0.6."
+      : "Tell the customer the area name could not be recognized yet. Ask them to restate the area or provide a nearby known area. Do not claim the service is unavailable unless a later tool result confirms that explicitly.",
+  });
+}
+
+/**
+ * Graduated-response result for `verifyAreaEvidence` `needs_clarification`.
+ * The customer's raw token didn't resolve deterministically but has a
+ * plausible link to the model's claimed area. We return the candidates and
+ * let the LLM decide: re-call with an area_id (if it's confident) or
+ * confirm with the customer using the top candidate's name (if unsure).
+ * Never silently accept the model's claim — always require a verifiable
+ * next step.
+ */
+function createAreaNeedsClarificationResult(params: {
+  field: "pickup_area" | "dropoff_area" | "delivery_area";
+  query: string;
+  modelArea: PricingArea;
+  modelSimilarity: number;
+  matchConfidence: AreaMatchConfidence;
+  closestCandidates: AreaCandidate[];
+}) {
+  const { field, query, modelArea, modelSimilarity, matchConfidence, closestCandidates } =
+    params;
+  const labels = getAreaFieldLabels(field);
+  const topCandidate = closestCandidates[0]?.area ?? modelArea;
+  const prompt_ar = `هل تقصد "${topCandidate.name_ar}" في ${labels.ar}؟`;
+  const prompt_en = `Did you mean "${topCandidate.name_en}" for ${labels.en}?`;
+  return createTextResult({
+    status: "area_needs_clarification",
+    field,
+    query,
+    message: prompt_en,
+    prompt_ar,
+    prompt_en,
+    model_proposed: {
+      area_id: modelArea.id,
+      name_en: modelArea.name_en,
+      name_ar: modelArea.name_ar,
+      similarity: Number(modelSimilarity.toFixed(3)),
+      match_confidence: matchConfidence,
+    },
+    closest_candidates: closestCandidates.map((c) => ({
+      area_id: c.area.id,
+      name_en: c.area.name_en,
+      name_ar: c.area.name_ar,
+      similarity: Number(c.similarity.toFixed(3)),
+    })),
     _customer_message: prompt_en,
     _customer_message_ar: prompt_ar,
     _customer_message_en: prompt_en,
     _instruction:
-      "Tell the customer the area name could not be recognized yet. Ask them to restate the area or provide a nearby known area. Do not claim the service is unavailable unless a later tool result confirms that explicitly.",
+      "The customer's raw word did not match an area exactly, but the top candidate looks close. " +
+      "If `model_proposed.match_confidence` is 'high' you may re-call get_price with that area_id directly. " +
+      "If 'medium' confirm with the customer using the top candidate's name before quoting. " +
+      "If 'low' ask the customer to pick from `closest_candidates` or restate the area. " +
+      "Use only one language in the customer-facing reply.",
   });
 }
 
@@ -4923,7 +5056,39 @@ type AreaEvidenceDecision =
       suggestedAlternatives: PricingArea[];
       suggestedPromptAr: string | null;
       suggestedPromptEn: string | null;
+    }
+  | {
+      // Graduated-response path. Raw token doesn't resolve deterministically,
+      // but the model's claim and the raw token DO have a plausible similarity
+      // link via `scoreAreaMatchSimilarity` (at least one of the top
+      // candidates for the raw token matches what the model claimed, with
+      // similarity above the graduated threshold). Preserves the smuggle
+      // defense (we don't silently accept the model's claim) while giving the
+      // LLM a path to self-correct on retry (read `closest_candidates`, decide
+      // whether to re-call with `pickup_area_id` or confirm with the
+      // customer).
+      action: "needs_clarification";
+      rawToken: string;
+      modelCanonical: string;
+      modelArea: PricingArea;
+      modelSimilarity: number;
+      closestCandidates: AreaCandidate[];
+      matchConfidence: AreaMatchConfidence;
     };
+
+// Graduated-response feature flag. Default ON: the new path only activates
+// when the current code would reject as `smuggle_not_found`, and only when
+// there's a plausible similarity link between the raw token and the model's
+// claim. Set RIDERS_AREA_GRADUATED_RESPONSE=0 to revert to the strict
+// binary reject/pass if any regression shows up in live traffic.
+const AREA_GRADUATED_RESPONSE_ENABLED =
+  String(process.env.RIDERS_AREA_GRADUATED_RESPONSE ?? "1").trim() !== "0";
+
+// Minimum similarity for a candidate to count as a "plausible link" between
+// the customer's raw token and the model's claimed area. Calibrated against
+// representative Kuwaiti Arabizi misses (e.g. "om il namel" → 0.667,
+// "7wly" → 0.833) while excluding spurious matches ("xxxxx" → 0).
+const AREA_GRADUATED_MIN_LINK_SIMILARITY = 0.4;
 
 function verifyAreaEvidence(params: {
   rawToken: string | null;
@@ -4933,8 +5098,6 @@ function verifyAreaEvidence(params: {
 }): AreaEvidenceDecision {
   const { rawToken, modelValue, idOverride, data } = params;
 
-  // Explicit area_id means the customer already picked from a disambiguation
-  // list. Skip evidence-binding — the customer IS the evidence.
   if (typeof idOverride === "number") return { action: "keep" };
   if (!rawToken) return { action: "keep" };
 
@@ -4943,12 +5106,10 @@ function verifyAreaEvidence(params: {
   const modelResolved = modelRes?.status === "resolved" ? modelRes : null;
   const rawResolved = rawRes?.status === "resolved" ? rawRes : null;
 
-  // Both resolve, agree → pass (covers Arabic↔English transliteration).
   if (rawResolved && modelResolved && rawResolved.area.id === modelResolved.area.id) {
     return { action: "keep" };
   }
 
-  // Both resolve, disagree → customer's actual word wins.
   if (rawResolved && modelResolved && rawResolved.area.id !== modelResolved.area.id) {
     return {
       action: "override",
@@ -4958,7 +5119,6 @@ function verifyAreaEvidence(params: {
     };
   }
 
-  // Raw resolves, model doesn't → trust raw.
   if (rawResolved && !modelResolved) {
     return {
       action: "override",
@@ -4968,13 +5128,51 @@ function verifyAreaEvidence(params: {
     };
   }
 
-  // Raw does NOT resolve but model does → potential smuggle.
   if (!rawResolved && modelResolved) {
     const typoMatch = findAreaNearTypoMatch(rawToken, data.areas);
     if (typoMatch && typoMatch.area.id === modelResolved.area.id) {
-      // Raw is a known typo of what model claimed → legitimate close-transliteration.
       return { action: "keep" };
     }
+
+    if (AREA_GRADUATED_RESPONSE_ENABLED) {
+      // Graduated response: before rejecting as smuggle, check whether the
+      // customer's raw token has a plausible similarity link to the model's
+      // claimed area. If yes, the model is probably right about an area the
+      // deterministic matcher missed (classic obscure-area + Arabizi case).
+      // Emit needs_clarification with the top candidates so the LLM can
+      // self-correct on the next turn (re-call with pickup_area_id or ask
+      // the customer to confirm the top candidate).
+      const candidates = collectAreaCandidates(rawToken, data.areas, { topK: 5 });
+      const modelSimilarity = scoreAreaMatchSimilarity(rawToken, modelResolved.area.name_en);
+      const arSimilarity = scoreAreaMatchSimilarity(rawToken, modelResolved.area.name_ar);
+      const bestModelSimilarity = Math.max(modelSimilarity, arSimilarity);
+      const topCandidateIsModel =
+        candidates.length > 0 && candidates[0].area.id === modelResolved.area.id;
+      const modelInCandidates = candidates.some(
+        (c) => c.area.id === modelResolved.area.id,
+      );
+
+      const plausibleLink =
+        bestModelSimilarity >= AREA_GRADUATED_MIN_LINK_SIMILARITY ||
+        (topCandidateIsModel && candidates[0].similarity >= AREA_GRADUATED_MIN_LINK_SIMILARITY);
+
+      if (plausibleLink) {
+        console.log(
+          `[area-evidence] needs_clarification raw="${rawToken}" model="${modelValue}" modelArea="${modelResolved.area.name_en}" modelSim=${bestModelSimilarity.toFixed(3)} topCandidate="${candidates[0]?.area.name_en ?? "-"}" topSim=${candidates[0]?.similarity.toFixed(3) ?? "0"} modelInCandidates=${modelInCandidates}`,
+        );
+        return {
+          action: "needs_clarification",
+          rawToken,
+          modelCanonical: modelValue,
+          modelArea: modelResolved.area,
+          modelSimilarity: bestModelSimilarity,
+          closestCandidates: candidates,
+          matchConfidence: confidenceFromSimilarity(bestModelSimilarity),
+        };
+      }
+      // No plausible link → fall through to strict reject (smuggle defense).
+    }
+
     return {
       action: "reject",
       reason: typoMatch ? "smuggle_suspected" : "smuggle_not_found",
@@ -4988,7 +5186,6 @@ function verifyAreaEvidence(params: {
     };
   }
 
-  // Neither resolves → let downstream pipeline handle it (not_found).
   return { action: "keep" };
 }
 
@@ -5001,6 +5198,9 @@ export const __resolverTestHooks = {
   resolveAreaDeterministicSync,
   isAreaMismatch,
   verifyAreaEvidence,
+  collectAreaCandidates,
+  confidenceFromSimilarity,
+  scoreAreaMatchSimilarity,
 };
 
 export default function register(api: any) {
@@ -5069,7 +5269,9 @@ export default function register(api: any) {
       verifyAreaEvidence,
       createAreaSuggestionResult,
       createAreaNotFoundResult,
+      createAreaNeedsClarificationResult,
       createAreaClarificationResult,
+      collectAreaCandidates,
       resolvePricingAreaQuery,
       getBidirectionalRoutePrices,
       getSpecialDeliveryCapabilities,

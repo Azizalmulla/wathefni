@@ -35,7 +35,9 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     verifyAreaEvidence,
     createAreaSuggestionResult,
     createAreaNotFoundResult,
+    createAreaNeedsClarificationResult,
     createAreaClarificationResult,
+    collectAreaCandidates,
     resolvePricingAreaQuery,
     getBidirectionalRoutePrices,
     getSpecialDeliveryCapabilities,
@@ -221,8 +223,30 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
                       `Did you mean "${decision.suggestedArea.name_en}"?`,
                     alternativeAreas: decision.suggestedAlternatives,
                   })
-                : createAreaNotFoundResult({ field, query: decision.rawToken });
+                : createAreaNotFoundResult({
+                    field,
+                    query: decision.rawToken,
+                    closestCandidates: collectAreaCandidates(decision.rawToken, data.areas, {
+                      topK: 5,
+                    }),
+                  });
               return { override: null as any, reject: rejectResult };
+            }
+            if (decision.action === "needs_clarification") {
+              console.log(
+                `[area-evidence] ${field} NEEDS_CLARIFICATION raw="${rawToken}" model="${modelValue}"→${decision.modelArea.name_en}, modelSim=${decision.modelSimilarity.toFixed(3)}, candidates=${decision.closestCandidates.map((c: any) => `${c.area.name_en}(${c.similarity.toFixed(2)})`).join("|") || "none"}`,
+              );
+              return {
+                override: null as any,
+                reject: createAreaNeedsClarificationResult({
+                  field,
+                  query: decision.rawToken,
+                  modelArea: decision.modelArea,
+                  modelSimilarity: decision.modelSimilarity,
+                  matchConfidence: decision.matchConfidence,
+                  closestCandidates: decision.closestCandidates,
+                }),
+              };
             }
             return { override: null as any, reject: null as any };
           };
@@ -326,6 +350,9 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           return createAreaNotFoundResult({
             field: "pickup_area",
             query: params.pickup_area,
+            closestCandidates: collectAreaCandidates(params.pickup_area, data.areas, {
+              topK: 5,
+            }),
           });
         }
 
@@ -333,6 +360,9 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           return createAreaNotFoundResult({
             field: "dropoff_area",
             query: params.dropoff_area,
+            closestCandidates: collectAreaCandidates(params.dropoff_area, data.areas, {
+              topK: 5,
+            }),
           });
         }
 

@@ -37,6 +37,10 @@ const steps = [
     script: "smoke-test-area-preresolution.mjs",
   },
   {
+    label: "Area graduated-response smoke",
+    script: "smoke-test-area-graduated-response.mjs",
+  },
+  {
     label: "Published pricing summary smoke",
     script: "smoke-test-published-pricing-summary.mjs",
   },

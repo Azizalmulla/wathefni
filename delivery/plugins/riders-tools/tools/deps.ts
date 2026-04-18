@@ -128,7 +128,13 @@ export interface ToolDeps {
     verifyAreaEvidence: (params: any) => any;
     createAreaSuggestionResult: (params: any) => any;
     createAreaNotFoundResult: (params: any) => any;
+    createAreaNeedsClarificationResult: (params: any) => any;
     createAreaClarificationResult: (params: any) => any;
+    collectAreaCandidates: (
+      query: string,
+      areas: any[],
+      options?: { topK?: number; minSimilarity?: number },
+    ) => Array<{ area: any; similarity: number }>;
     resolvePricingAreaQuery: (query: string, data: any) => Promise<any>;
     getBidirectionalRoutePrices: (pickup: any, dropoff: any) => any;
     getSpecialDeliveryCapabilities: () => Promise<any>;
