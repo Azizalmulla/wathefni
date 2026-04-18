@@ -41,6 +41,10 @@ const steps = [
     script: "smoke-test-area-graduated-response.mjs",
   },
   {
+    label: "Address completeness (Kuwaiti shapes) smoke",
+    script: "smoke-test-address-completeness.mjs",
+  },
+  {
     label: "Published pricing summary smoke",
     script: "smoke-test-published-pricing-summary.mjs",
   },

@@ -25,12 +25,105 @@ export function hasStructuredBookingLocation(
   );
 }
 
-export function hasCompleteTextAddress(params: {
+// Kuwait address reality: many valid addresses don't have a separate "house /
+// villa / tower" number on the façade. Apartment buildings, compounds, and
+// commercial towers are identified by the unit/apartment/floor in the
+// `address_extra` field, and the driver uses the recipient's phone as the
+// final navigation fallback. So our completeness rule is:
+//
+//   block
+//   + (street OR avenue)
+//   + (house OR substantive extra)
+//
+// A "substantive" extra is one that actually helps a driver locate the unit:
+// it contains at least one digit OR a known locator keyword. This prevents a
+// stray "thanks" accidentally getting routed into address_extra and being
+// misread as a complete address.
+const LOCATOR_KEYWORDS_EN = [
+  "building",
+  "tower",
+  "villa",
+  "compound",
+  "apt",
+  "apartment",
+  "flat",
+  "floor",
+  "unit",
+  "office",
+  "shop",
+  "chalet",
+  "farm",
+  "gate",
+  "suite",
+  "block",
+  "house",
+];
+
+const LOCATOR_KEYWORDS_AR = [
+  "شقة",
+  "شقه",
+  "دور",
+  "طابق",
+  "عمارة",
+  "عماره",
+  "برج",
+  "فيلا",
+  "مجمع",
+  "وحدة",
+  "وحده",
+  "مكتب",
+  "محل",
+  "بوابة",
+  "بوابه",
+  "شاليه",
+  "مزرعة",
+  "مزرعه",
+  "بيت",
+  "منزل",
+];
+
+export function hasSubstantiveAddressExtra(extra: string | null | undefined): boolean {
+  if (!extra) return false;
+  const trimmed = extra.trim();
+  if (trimmed.length < 3) return false;
+  if (/\d/.test(trimmed) || /[\u0660-\u0669]/.test(trimmed)) return true; // digits (Latin or Arabic-Indic)
+  const lower = trimmed.toLowerCase();
+  for (const kw of LOCATOR_KEYWORDS_EN) {
+    if (lower.includes(kw)) return true;
+  }
+  for (const kw of LOCATOR_KEYWORDS_AR) {
+    if (trimmed.includes(kw)) return true;
+  }
+  return false;
+}
+
+export type AddressCompletenessParams = {
   block: string | null | undefined;
   street: string | null | undefined;
   house: string | null | undefined;
-}): boolean {
-  return Boolean(params.block && params.street && params.house);
+  avenue?: string | null | undefined;
+  extra?: string | null | undefined;
+};
+
+export type AddressMissingField = "block" | "street_or_avenue" | "house_or_unit";
+
+export function diagnoseTextAddress(params: AddressCompletenessParams): {
+  complete: boolean;
+  missing: AddressMissingField[];
+} {
+  const missing: AddressMissingField[] = [];
+  if (!params.block) missing.push("block");
+  const hasStreet = Boolean(params.street);
+  const hasAvenue = Boolean(params.avenue);
+  if (!hasStreet && !hasAvenue) missing.push("street_or_avenue");
+  const hasHouse = Boolean(params.house);
+  const hasSubstantiveExtra = hasSubstantiveAddressExtra(params.extra);
+  if (!hasHouse && !hasSubstantiveExtra) missing.push("house_or_unit");
+  return { complete: missing.length === 0, missing };
+}
+
+export function hasCompleteTextAddress(params: AddressCompletenessParams): boolean {
+  return diagnoseTextAddress(params).complete;
 }
 
 export function hasSatisfiedBookingAddress(
@@ -45,7 +138,32 @@ export function hasSatisfiedBookingAddress(
     block: kind === "pickup" ? draft.pickupBlock : draft.deliveryBlock,
     street: kind === "pickup" ? draft.pickupStreet : draft.deliveryStreet,
     house: kind === "pickup" ? draft.pickupHouse : draft.deliveryHouse,
+    avenue: kind === "pickup" ? draft.pickupAvenue : draft.deliveryAvenue,
+    extra: kind === "pickup" ? draft.pickupExtra : draft.deliveryExtra,
   });
+}
+
+/**
+ * For diagnostics and `missing_fields` refinement: returns the specific
+ * sub-field(s) that are preventing this side's address from being considered
+ * complete. Returns empty list when the address is already locatable (text or
+ * structured).
+ */
+export function diagnoseBookingAddressMissing(
+  draft: PersistedBookingDraft,
+  kind: "pickup" | "delivery",
+): AddressMissingField[] {
+  const location = kind === "pickup" ? draft.pickupLocation : draft.deliveryLocation;
+  if (hasStructuredBookingLocation(location)) {
+    return [];
+  }
+  return diagnoseTextAddress({
+    block: kind === "pickup" ? draft.pickupBlock : draft.deliveryBlock,
+    street: kind === "pickup" ? draft.pickupStreet : draft.deliveryStreet,
+    house: kind === "pickup" ? draft.pickupHouse : draft.deliveryHouse,
+    avenue: kind === "pickup" ? draft.pickupAvenue : draft.deliveryAvenue,
+    extra: kind === "pickup" ? draft.pickupExtra : draft.deliveryExtra,
+  }).missing;
 }
 
 export function resolveNextBookingStepFromDraft(draft: PersistedBookingDraft): BookingCollectionStep {

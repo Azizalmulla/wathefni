@@ -23,6 +23,7 @@ import { buildQuotedRouteContextLines } from "./quoted-options";
 import {
   hasSatisfiedBookingAddress,
   formatPersistedBookingLocationLabel,
+  diagnoseBookingAddressMissing,
 } from "./booking-flow";
 
 type InterpretedCustomerTurnLike = {
@@ -101,8 +102,25 @@ export function computeOneBrainMissingFields(
   if (!draft.senderPhone) missing.push("sender.phone");
   if (!draft.recipientName) missing.push("recipient.name");
   if (!draft.recipientPhone) missing.push("recipient.phone");
-  if (!hasSatisfiedBookingAddress(draft, "pickup")) missing.push("pickup.address");
-  if (!hasSatisfiedBookingAddress(draft, "delivery")) missing.push("delivery.address");
+  // For each side, emit the aggregate marker (`pickup.address` /
+  // `delivery.address`) that downstream next-required-action logic already
+  // keys on, PLUS granular sub-field markers so the LLM can ask a targeted
+  // question ("block?", "building number or apartment?", etc.) instead of
+  // the previously vague "I still need the delivery address." Hallucination
+  // incident 2026-04-17 was driven in large part by the LLM being unable to
+  // tell *which* sub-field the server considered missing.
+  if (!hasSatisfiedBookingAddress(draft, "pickup")) {
+    missing.push("pickup.address");
+    for (const sub of diagnoseBookingAddressMissing(draft, "pickup")) {
+      missing.push(`pickup.${sub}`);
+    }
+  }
+  if (!hasSatisfiedBookingAddress(draft, "delivery")) {
+    missing.push("delivery.address");
+    for (const sub of diagnoseBookingAddressMissing(draft, "delivery")) {
+      missing.push(`delivery.${sub}`);
+    }
+  }
   if (!entry?.quotePickupAreaNameEn) missing.push("pickup.area");
   if (!entry?.quoteDropoffAreaNameEn) missing.push("delivery.area");
   if (!entry?.selectedDeliveryType) missing.push("service_type");
