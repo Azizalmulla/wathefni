@@ -4982,7 +4982,20 @@ function collectAreaEvidenceFromText(
   const words = cleaned.split(/\s+/).filter((w) => w.length >= 2);
   if (!words.length) return evidence;
 
-  const MAX_NGRAM = 3;
+  // Widest n-gram = widest area name in the catalog, in words, capped at a
+  // safety ceiling. Derived from data so we auto-scale if the catalog ever
+  // grows longer names (e.g. "Bar Al-Jahra Governorate Extension") — no
+  // manual constant to drift out of sync.
+  const MAX_NGRAM_CEILING = 6;
+  let maxNgram = 1;
+  for (const area of data.areas) {
+    const enWords = (area.name_en || "").trim().split(/\s+/).filter(Boolean).length;
+    const arWords = (area.name_ar || "").trim().split(/\s+/).filter(Boolean).length;
+    const widest = Math.max(enWords, arWords);
+    if (widest > maxNgram) maxNgram = widest;
+  }
+  maxNgram = Math.min(maxNgram, MAX_NGRAM_CEILING);
+
   const tried = new Set<string>();
 
   const tryResolve = (candidate: string): void => {
@@ -4996,7 +5009,7 @@ function collectAreaEvidenceFromText(
   };
 
   for (let i = 0; i < words.length; i++) {
-    for (let n = 1; n <= MAX_NGRAM && i + n <= words.length; n++) {
+    for (let n = 1; n <= maxNgram && i + n <= words.length; n++) {
       const gram = words.slice(i, i + n).join(" ");
       if (gram.length < 3) continue;
       tryResolve(gram);
