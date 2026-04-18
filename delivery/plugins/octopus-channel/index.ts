@@ -367,6 +367,11 @@ let inactivityApiRef: OpenClawPluginApi | null = null;
 const inactivityAccountCache = new Map<string, ResolvedOctopusAccount>();
 let inactivitySweepTimer: ReturnType<typeof setInterval> | null = null;
 let inactivitySweepRunning = false;
+// In-flight set: keys currently being nudged/closed in this process. Prevents
+// double-sends within the same process when sweeps overlap. Not persisted, so
+// after a restart it's empty — which is fine because the state file is the
+// source of truth for nudgeSentTs.
+const inactivityInFlight = new Set<string>();
 
 const CONVERSATION_CONTROLLER_EXPIRY_MS = 6 * 60 * 60_000;
 const CONVERSATION_CONTROLLER_STATE_PATH = path.join(
@@ -485,21 +490,44 @@ async function sweepInactivity(): Promise<void> {
       }
 
       const elapsed = now - entry.lastActivityTs;
+      const elapsedMin = Math.round(elapsed / 60_000);
 
       // Garbage-collect very stale entries
       if (elapsed > INACTIVITY_EXPIRY_MS) {
+        api.logger.info(
+          `[octopus] inactivity sweep gc conversation=${entry.conversationId} elapsedMin=${elapsedMin} nudgeSent=${entry.nudgeSentTs !== null}`,
+        );
         delete state[key];
         dirty = true;
         continue;
       }
 
-      // Close threshold (only after nudge was already sent). Keep the entry
-      // until delivery succeeds so transient send failures can retry safely.
-      if (entry.nudgeSentTs !== null && elapsed >= INACTIVITY_CLOSE_MS) {
+      // Skip if another sweep in this process is already handling this key.
+      if (inactivityInFlight.has(key)) {
+        api.logger.info(
+          `[octopus] inactivity sweep skip conversation=${entry.conversationId} reason=in_flight elapsedMin=${elapsedMin}`,
+        );
+        continue;
+      }
+
+      const pastClose = elapsed >= INACTIVITY_CLOSE_MS;
+      const pastNudge = elapsed >= INACTIVITY_NUDGE_MS;
+      const nudgeAlreadySent = entry.nudgeSentTs !== null;
+
+      // Close threshold — fires if (a) nudge already succeeded, or (b) we're
+      // past the close threshold with no nudge ever sent (covers the case
+      // where a prior nudge attempt silently never recorded). In both cases
+      // we try to close so entries don't get stranded until gc.
+      if (pastClose && (nudgeAlreadySent || pastNudge)) {
         const closeLang = entry.language;
         const closeConvId = entry.conversationId;
         const closeReplyTarget = entry.replyTarget;
         const closeAccountId = entry.accountId;
+        const closeReason = nudgeAlreadySent ? "after_nudge" : "nudge_missed";
+        inactivityInFlight.add(key);
+        api.logger.info(
+          `[octopus] inactivity sweep action=close conversation=${closeConvId} elapsedMin=${elapsedMin} reason=${closeReason}`,
+        );
         try {
           const text =
             closeLang === "ar"
@@ -514,7 +542,7 @@ async function sweepInactivity(): Promise<void> {
             source: "inactivity_close",
           });
           api.logger.info(
-            `[octopus] inactivity close sent conversation=${closeConvId} lang=${closeLang}`,
+            `[octopus] inactivity close sent conversation=${closeConvId} lang=${closeLang} reason=${closeReason}`,
           );
           delete state[key];
           dirty = true;
@@ -532,7 +560,7 @@ async function sweepInactivity(): Promise<void> {
           }
         } catch (error) {
           api.logger.error(
-            `[octopus] inactivity close failed conversation=${closeConvId} error=${error instanceof Error ? error.message : String(error)}`,
+            `[octopus] inactivity close failed conversation=${closeConvId} reason=${closeReason} error=${error instanceof Error ? error.message : String(error)}`,
           );
           if (isAiOctopusConversationClosedError(error)) {
             delete state[key];
@@ -543,17 +571,20 @@ async function sweepInactivity(): Promise<void> {
               `[octopus] dropped inactivity close for closed conversation=${closeConvId}`,
             );
           }
+        } finally {
+          inactivityInFlight.delete(key);
         }
         continue;
       }
 
-      // Nudge threshold — persist nudgeSentTs before sending so restarts
-      // mid-flight cannot re-trigger the same nudge from stale state.
-      if (entry.nudgeSentTs === null && elapsed >= INACTIVITY_NUDGE_MS) {
-        entry.nudgeSentTs = now;
-        dirty = true;
-        await saveInactivityState(state);
-        dirty = false;
+      // Nudge threshold — only persist nudgeSentTs AFTER a successful send,
+      // so a transient send failure can retry on the next sweep instead of
+      // silently blackholing the nudge forever.
+      if (!nudgeAlreadySent && pastNudge) {
+        inactivityInFlight.add(key);
+        api.logger.info(
+          `[octopus] inactivity sweep action=nudge conversation=${entry.conversationId} elapsedMin=${elapsedMin}`,
+        );
         try {
           const text =
             entry.language === "ar"
@@ -567,6 +598,15 @@ async function sweepInactivity(): Promise<void> {
             text,
             source: "inactivity_nudge",
           });
+          // Send succeeded — now persist nudgeSentTs. Re-read state to avoid
+          // clobbering a concurrent customer activity write.
+          const freshState = await loadInactivityState();
+          const freshEntry = freshState[key];
+          if (freshEntry && freshEntry.lastActivityTs === entry.lastActivityTs) {
+            freshEntry.nudgeSentTs = Date.now();
+            await saveInactivityState(freshState);
+            entry.nudgeSentTs = freshEntry.nudgeSentTs;
+          }
           api.logger.info(
             `[octopus] inactivity nudge sent conversation=${entry.conversationId} lang=${entry.language}`,
           );
@@ -581,7 +621,16 @@ async function sweepInactivity(): Promise<void> {
               `[octopus] dropped inactivity nudge for closed conversation=${entry.conversationId}`,
             );
           }
+          // For any other error: leave nudgeSentTs === null so the next
+          // sweep retries. The close fallback (above) also covers the case
+          // where retries keep failing past CLOSE_MS.
+        } finally {
+          inactivityInFlight.delete(key);
         }
+      } else {
+        api.logger.debug?.(
+          `[octopus] inactivity sweep skip conversation=${entry.conversationId} elapsedMin=${elapsedMin} nudgeSent=${nudgeAlreadySent} pastNudge=${pastNudge} pastClose=${pastClose}`,
+        );
       }
     }
 
