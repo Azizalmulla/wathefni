@@ -49,6 +49,10 @@ const steps = [
     script: "smoke-test-hallucination-guard.mjs",
   },
   {
+    label: "Summary fact verifier smoke",
+    script: "smoke-test-summary-fact-verifier.mjs",
+  },
+  {
     label: "Published pricing summary smoke",
     script: "smoke-test-published-pricing-summary.mjs",
   },

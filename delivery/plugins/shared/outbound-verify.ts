@@ -31,6 +31,7 @@ export type OutboundReplyShape =
   | "stub_summary"
   | "route_price_recap"
   | "standalone_ack"
+  | "summary_fact_drift"
   | "empty";
 
 export type VerifyOutboundParams = {
@@ -167,6 +168,176 @@ function replyLooksLikeFullSummary(reply: string, entry: PersistedConversationCo
   return canonicalRows >= 3;
 }
 
+/**
+ * Fact-verification for summary-shape replies. Catches the subtle
+ * failure mode where the LLM emits a structurally-correct summary (labeled
+ * rows, ≥ 3 field signals) but with at least one factual drift — wrong
+ * price, wrong phone-tail, wrong area name. Yesterday's incident had a
+ * contributing factor of this class: the LLM's summary presented the
+ * delivery address as complete when the server had it as incomplete.
+ *
+ * Tolerances:
+ *   - Price: exact numeric match within 0.05 KWD (rounds "1.25" vs "1.250").
+ *   - Phones: any 7+ digit sequence in the reply must match the tail of one
+ *     of the two stored phones (sender or recipient). Shorter numeric tokens
+ *     are treated as block/street/apt numbers and ignored.
+ *   - Areas: pickup and dropoff canonical names (EN or AR) must each appear
+ *     at least once when the summary mentions an area-labeled row. If a
+ *     labeled row contains an area token that doesn't match the server's
+ *     pickup OR dropoff area, that's a drift.
+ *   - Names: stored sender / recipient names (trimmed, case-insensitive)
+ *     must each appear somewhere in the reply when the stored value is
+ *     present. Missing names in an otherwise-full summary = drift.
+ *
+ * Returns a list of mismatches; empty list = consistent. Callers treat a
+ * non-empty list as a reason to substitute the canonical summary.
+ */
+export type SummaryFactMismatch = {
+  field: "price" | "phone" | "area" | "name";
+  mentioned: string;
+  expected: string;
+};
+
+export type SummaryFactCheckResult = {
+  consistent: boolean;
+  mismatches: SummaryFactMismatch[];
+};
+
+const KWD_PRICE_RE = /(\d+(?:[.,]\d{1,3})?)\s*(?:kwd|kd|د\.?ك|دينار|dinars?)\b/gi;
+
+const LONG_DIGIT_SEQ_RE = /(\d[\d\s-]{6,})/g;
+
+function extractKwdPrices(reply: string): number[] {
+  const out: number[] = [];
+  let m: RegExpExecArray | null;
+  const re = new RegExp(KWD_PRICE_RE.source, KWD_PRICE_RE.flags);
+  while ((m = re.exec(reply)) !== null) {
+    const n = Number(m[1].replace(",", "."));
+    if (Number.isFinite(n) && n > 0) out.push(n);
+  }
+  return out;
+}
+
+function extractPhoneCandidates(reply: string): string[] {
+  const out: string[] = [];
+  let m: RegExpExecArray | null;
+  const re = new RegExp(LONG_DIGIT_SEQ_RE.source, LONG_DIGIT_SEQ_RE.flags);
+  while ((m = re.exec(reply)) !== null) {
+    const digits = m[1].replace(/\D/g, "");
+    if (digits.length >= 7) out.push(digits);
+  }
+  return out;
+}
+
+/**
+ * Does one phone candidate look like the tail of a stored phone?
+ * Matches by comparing the last N digits (min 7) of both. Handles the
+ * variety of ways a phone can appear ("96597485757", "97485757",
+ * "+965 97485757").
+ */
+function phoneCandidateMatchesStored(candidate: string, stored: string[]): boolean {
+  const cand = candidate.replace(/\D/g, "");
+  if (cand.length < 7) return false;
+  const candTail = cand.slice(-7);
+  for (const s of stored) {
+    const sd = s.replace(/\D/g, "");
+    if (sd.length < 7) continue;
+    if (sd.slice(-7) === candTail) return true;
+    // Also accept full-candidate == full-stored even when stored is longer.
+    if (sd === cand || sd.endsWith(cand) || cand.endsWith(sd)) return true;
+  }
+  return false;
+}
+
+export function verifySummaryFacts(
+  reply: string,
+  entry: PersistedConversationControllerEntry,
+): SummaryFactCheckResult {
+  const mismatches: SummaryFactMismatch[] = [];
+  const draft = entry.bookingDraft;
+
+  // 1. Price verification (only when a price is actually mentioned).
+  const mentionedPrices = extractKwdPrices(reply);
+  if (entry.quotedPrice != null && mentionedPrices.length > 0) {
+    const quoted = entry.quotedPrice;
+    const anyMatch = mentionedPrices.some((p) => Math.abs(p - quoted) <= 0.05);
+    if (!anyMatch) {
+      mismatches.push({
+        field: "price",
+        mentioned: mentionedPrices.join(","),
+        expected: quoted.toFixed(3),
+      });
+    }
+  }
+
+  // 2. Phone verification.
+  const storedPhones: string[] = [];
+  if (draft.senderPhone) storedPhones.push(draft.senderPhone);
+  if (draft.recipientPhone) storedPhones.push(draft.recipientPhone);
+  if (storedPhones.length > 0) {
+    const phoneCandidates = extractPhoneCandidates(reply);
+    for (const cand of phoneCandidates) {
+      if (!phoneCandidateMatchesStored(cand, storedPhones)) {
+        mismatches.push({
+          field: "phone",
+          mentioned: cand,
+          expected: storedPhones.join("|"),
+        });
+        break; // one phone drift is enough to substitute
+      }
+    }
+  }
+
+  // 3. Name verification — when both stored names are present, expect both
+  // to appear in a full summary. If a name is missing AND we're in a
+  // summary-shape reply (checked by caller), that's drift.
+  const lowerReply = reply.toLowerCase();
+  for (const [label, name] of [
+    ["sender_name", draft.senderName],
+    ["recipient_name", draft.recipientName],
+  ] as const) {
+    if (!name) continue;
+    const t = name.trim().toLowerCase();
+    if (t.length < 2) continue;
+    // Split on spaces — presence of any token of the name (≥ 3 chars)
+    // counts as a match. Handles "Muhammad" vs "Mohammed", "Ahmad" vs
+    // "Ahmed" by requiring the first token to be present for people who
+    // use one name in daily life. Tolerant but catches outright missing.
+    const first = t.split(/\s+/)[0];
+    if (first.length >= 3 && !lowerReply.includes(first)) {
+      mismatches.push({
+        field: "name",
+        mentioned: "<missing>",
+        expected: name,
+      });
+    }
+  }
+
+  // 4. Area verification — both areas must appear (EN or AR form) when
+  // the reply contains an area-like labeled row. We detect "area-like"
+  // broadly: the reply contains a canonical pickup/delivery label line.
+  const hasAreaRow =
+    /(^|\n)[\*\-•\s>]*(?:pickup|delivery|from|to|الاستلام|التسليم|من|الى|إلى)\b/i.test(reply);
+  if (hasAreaRow) {
+    for (const [label, en, ar] of [
+      ["pickup_area", entry.quotePickupAreaNameEn, entry.quotePickupAreaNameAr],
+      ["delivery_area", entry.quoteDropoffAreaNameEn, entry.quoteDropoffAreaNameAr],
+    ] as const) {
+      const enOk = en ? lowerReply.includes(en.toLowerCase()) : false;
+      const arOk = ar ? reply.includes(ar) : false;
+      if ((en || ar) && !enOk && !arOk) {
+        mismatches.push({
+          field: "area",
+          mentioned: "<missing>",
+          expected: [en, ar].filter(Boolean).join(" / "),
+        });
+      }
+    }
+  }
+
+  return { consistent: mismatches.length === 0, mismatches };
+}
+
 export function classifyOutboundReplyShape(params: VerifyOutboundParams): OutboundReplyShape {
   const reply = (params.replyText || "").trim();
   if (!reply) return "empty";
@@ -189,6 +360,14 @@ export function classifyOutboundReplyShape(params: VerifyOutboundParams): Outbou
       if (looksLikeRoutePriceRecap(reply, entry.bookingDraft)) return "route_price_recap";
       return "stub_summary";
     }
+    // Full summary shape — now verify the facts inside it against server
+    // state. Catches the subtle class where the LLM writes a structurally
+    // correct summary with wrong price / wrong phone / wrong area / missing
+    // stored name. Yesterday's incident had this pattern as a contributing
+    // factor: LLM's earlier summary presented the apartment address as
+    // complete when the server (pre-fix) had it as incomplete.
+    const factCheck = verifySummaryFacts(reply, entry);
+    if (!factCheck.consistent) return "summary_fact_drift";
     return "ok";
   }
 
@@ -364,13 +543,20 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
   const draftComplete = params.missingFields.length === 0;
 
   // (1) Full summary substitute when draft is complete and the reply is a
-  // stub / route-recap.
+  // stub / route-recap / fact-drift. Fact-drift is the new case: the reply
+  // is structurally a summary but contains at least one factual claim
+  // (price, phone, area, name) that disagrees with the authoritative
+  // server state. Substituting with the data-driven canonical summary
+  // removes the contradiction on the record so the customer sees one
+  // consistent truth.
   if (
     entry &&
     draftComplete &&
     entry.quotedPrice != null &&
     entry.selectedDeliveryType &&
-    (shape === "stub_summary" || shape === "route_price_recap")
+    (shape === "stub_summary" ||
+      shape === "route_price_recap" ||
+      shape === "summary_fact_drift")
   ) {
     const substitute = buildDeterministicOrderSummary({ entry, language: params.language });
     return {
