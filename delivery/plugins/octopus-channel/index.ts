@@ -4132,20 +4132,14 @@ async function handleInboundMessage(params: {
   const activeQuotedRoute = isStoredQuotedRouteFresh(preDispatchGuardEntry.session?.lastQuotedRoute)
     ? preDispatchGuardEntry.session?.lastQuotedRoute ?? null
     : null;
-  const interpretedCustomerTurn =
-    senderRole === "customer" && !RESPONDER_FIRST_FLAG && !isOneBrainConversation(replyTarget)
-      ? await interpretCustomerTurnWithOpenAi({
-          logger: api.logger,
-          visibleText: turnSignals.workflowInputText,
-          rawBody,
-          preferredReplyLanguage,
-          explicitLanguageRequest: explicitLanguageRequestRaw,
-          controllerEntry: conversationControllerEntry,
-          route: activeQuotedRoute,
-          nearestAreaName,
-          hasLocationMessage: Boolean(resolvedLocation),
-        })
-      : null;
+  // Interpreter LLM call is permanently disabled. ONE-BRAIN owns every
+  // customer turn in production (RIDERS_ONE_BRAIN=1 with empty allowlist
+  // has applied globally for months and the interpreter path has not fired
+  // in prod). Statically nulling the branch here makes downstream
+  // `interpretedCustomerTurn?.action === X` checks evaluate to `false`
+  // just like they did at runtime, but now it's provable at compile time.
+  // Dead function, flags, and types will be removed in a follow-up commit.
+  const interpretedCustomerTurn: InterpretedCustomerTurn | null = null;
   if (RESPONDER_FIRST_FLAG && senderRole === "customer") {
     try {
       clearResponderStateOps(conversationId);
