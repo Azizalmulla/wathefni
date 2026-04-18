@@ -1,7 +1,7 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.3.12",
-    "lastTouchedAt": "2026-03-15T19:39:00.000Z"
+    "lastTouchedVersion": "2026.4.14",
+    "lastTouchedAt": "2026-04-17T00:00:00.000Z"
   },
   "update": {
     "channel": "beta"
@@ -10,15 +10,14 @@
     "providers": {
       "openai": {
         "baseUrl": "https://api.openai.com/v1",
+        "apiKey": "${OPENAI_API_KEY}",
         "models": [
           {
             "id": "gpt-5.4-mini",
             "name": "GPT-5.4 mini",
             "api": "openai-responses",
             "reasoning": true,
-            "input": [
-              "text"
-            ],
+            "input": ["image", "text"],
             "contextWindow": 128000,
             "maxTokens": 16384
           }
@@ -28,66 +27,49 @@
   },
   "agents": {
     "defaults": {
-      "thinkingDefault": "low",
       "model": {
         "primary": "openai/gpt-5.4-mini"
       },
       "models": {
         "openai/gpt-5.4-mini": {
           "params": {
-            "reasoning": {
-              "effort": "low"
-            },
-            "text": {
-              "verbosity": "low"
-            },
             "transport": "auto",
             "openaiWsWarmup": true,
-            "responsesServerCompaction": true
+            "responsesServerCompaction": true,
+            "reasoning": { "effort": "medium" },
+            "text": { "verbosity": "low" }
           }
         }
       },
-      "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
+      "workspace": "/opt/riders-delivery/workspaces/riders",
       "bootstrapMaxChars": 50000,
       "bootstrapTotalMaxChars": 180000,
+      "compaction": { "mode": "safeguard" },
       "maxConcurrent": 4,
-      "subagents": {
-        "maxConcurrent": 8
-      }
+      "subagents": { "maxConcurrent": 8 },
+      "thinkingDefault": "medium"
     },
     "list": [
       {
         "id": "riders",
-        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
-        "thinkingDefault": "low",
-        "model": {
-          "primary": "openai/gpt-5.4-mini"
-        },
-        "tools": {
-          "deny": ["message"]
-        }
-      },
-      {
-        "id": "riders-admin",
-        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders-admin",
-        "thinkingDefault": "low",
-        "model": {
-          "primary": "openai/gpt-5.4-mini"
-        },
-        "tools": {
-          "deny": ["exec"]
-        }
+        "workspace": "/opt/riders-delivery/workspaces/riders",
+        "model": { "primary": "openai/gpt-5.4-mini" },
+        "tools": { "deny": ["message"] },
+        "thinkingDefault": "medium"
       },
       {
         "id": "riders-mini",
-        "workspace": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders",
-        "thinkingDefault": "low",
-        "model": {
-          "primary": "openai/gpt-5.4-mini"
-        },
-        "tools": {
-          "deny": ["message"]
-        }
+        "workspace": "/opt/riders-delivery/workspaces/riders",
+        "model": { "primary": "openai/gpt-5.4-mini" },
+        "tools": { "deny": ["message"] },
+        "thinkingDefault": "medium"
+      },
+      {
+        "id": "riders-admin",
+        "workspace": "/opt/riders-delivery/workspaces/riders-admin",
+        "model": { "primary": "openai/gpt-5.4-mini" },
+        "tools": { "deny": ["exec"] },
+        "thinkingDefault": "medium"
       }
     ]
   },
@@ -95,12 +77,7 @@
   "messages": {
     "responsePrefix": "",
     "ackReactionScope": "group-mentions",
-    "queue": {
-      "mode": "collect"
-    },
-    "inbound": {
-      "debounceMs": 5000
-    }
+    "inbound": { "debounceMs": 5000 }
   },
   "commands": {
     "native": "auto",
@@ -109,33 +86,22 @@
     "ownerDisplay": "raw"
   },
   "session": {
-    "dmScope": "per-channel-peer"
-  },
-  "tools": {
-    "media": {
-      "audio": {
-        "enabled": true,
-        "maxBytes": 20971520,
-        "models": [
-          {
-            "provider": "openai",
-            "model": "gpt-4o-transcribe"
-          }
-        ]
-      }
-    }
+    "dmScope": "per-channel-peer",
+    "reset": { "mode": "idle", "idleMinutes": 1440 }
   },
   "channels": {
     "whatsapp": {
       "enabled": false,
       "dmPolicy": "pairing",
       "allowFrom": [],
+      "groupPolicy": "allowlist",
       "debounceMs": 0,
       "accounts": {
         "default": {
           "enabled": false,
           "dmPolicy": "pairing",
           "allowFrom": [],
+          "groupPolicy": "allowlist",
           "debounceMs": 0
         }
       },
@@ -145,7 +111,7 @@
       "enabled": false,
       "dmPolicy": "pairing",
       "groupPolicy": "allowlist",
-      "streaming": "partial",
+      "streaming": { "mode": "partial" },
       "linkPreview": false
     },
     "octopus": {
@@ -157,76 +123,81 @@
       "typingRefreshMs": 9000,
       "webhookPath": "/webhook",
       "accounts": {
-        "default": {
-          "enabled": true
-        }
+        "default": { "enabled": true }
       },
-      "behaviorPolicyPublishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/behavior-policy.published.json"
+      "behaviorPolicyPublishedPath": "/opt/riders-delivery/workspaces/riders/data/behavior-policy.published.json"
     }
   },
   "gateway": {
     "port": 18790,
     "mode": "local",
     "bind": "loopback",
-    "trustedProxies": [
-      "127.0.0.1/8",
-      "::1/128"
-    ],
     "auth": {
       "mode": "token",
-      "token": "CHANGE_ME_DELIVERY_TOKEN"
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
     },
     "tailscale": {
       "mode": "off",
       "resetOnExit": false
-    }
+    },
+    "trustedProxies": ["127.0.0.1/8", "::1/128"]
   },
   "skills": {
-    "install": {
-      "nodeManager": "npm"
-    }
+    "install": { "nodeManager": "npm" }
   },
   "plugins": {
-    "allow": [
-      "openai",
-      "riders-tools",
-      "octopus-channel"
-    ],
     "load": {
       "paths": [
-        "/Users/azizalmulla/Desktop/claw/delivery/plugins/riders-tools",
-        "/Users/azizalmulla/Desktop/claw/delivery/plugins/octopus-channel"
+        "/opt/riders-delivery/plugins/riders-tools",
+        "/opt/riders-delivery/plugins/octopus-channel"
       ]
     },
     "entries": {
       "openai": {
         "enabled": true,
-        "config": {
-          "personality": "off"
-        }
+        "config": { "personality": "off" }
       },
       "riders-tools": {
         "enabled": true,
         "config": {
           "pricing": {
             "sourceMode": "published_preferred",
-            "publishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/pricing.published.json",
-            "resolverOverlayPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/pricing.resolver.overlay.json",
+            "publishedPath": "/opt/riders-delivery/workspaces/riders/data/pricing.published.json",
+            "resolverOverlayPath": "/opt/riders-delivery/workspaces/riders/data/pricing.resolver.overlay.json",
             "adminAllowlist": [],
             "googleSheet": {
-              "spreadsheetId": "",
-              "sheetName": "",
+              "spreadsheetId": "${RIDERS_PRICING_SHEET_ID}",
+              "sheetName": "export-38-areas",
               "headerRow": 1
             }
           },
           "behavior": {
-            "publishedPath": "/Users/azizalmulla/Desktop/claw/delivery/workspaces/riders/data/behavior-policy.published.json",
+            "publishedPath": "/opt/riders-delivery/workspaces/riders/data/behavior-policy.published.json",
             "adminAllowlist": []
           }
         }
       },
       "octopus-channel": {
         "enabled": true
+      },
+      "telegram": {
+        "enabled": true
+      }
+    }
+  },
+  "env": {
+    "RIDERS_TRACKING_PROVIDER": "fleetrunnr",
+    "FLEETRUNNR_API_BASE_URL": "https://api.fleetrunnr.net/rest/v1",
+    "FLEETRUNNR_BEARER_TOKEN": "${FLEETRUNNR_BEARER_TOKEN}"
+  },
+  "tools": {
+    "media": {
+      "audio": {
+        "enabled": true,
+        "maxBytes": 20971520,
+        "models": [
+          { "provider": "openai", "model": "gpt-4o-transcribe" }
+        ]
       }
     }
   }
