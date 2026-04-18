@@ -53,6 +53,10 @@ const steps = [
     script: "smoke-test-summary-fact-verifier.mjs",
   },
   {
+    label: "FSM state gate smoke",
+    script: "smoke-test-fsm-state-gate.mjs",
+  },
+  {
     label: "Published pricing summary smoke",
     script: "smoke-test-published-pricing-summary.mjs",
   },

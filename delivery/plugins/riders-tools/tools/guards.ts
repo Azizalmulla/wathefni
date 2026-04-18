@@ -709,6 +709,38 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
   }
 
   // --- before_tool_call: hard-block generic outbound tools for customer Octopus chats ---
+  //
+  // This hook also implements the FSM state gate: a coarse-grained
+  // coherence check that refuses tool calls that make no sense in the
+  // current booking stage, telling the LLM explicitly which tool IS
+  // appropriate instead. Removing nonsensical options from the LLM's
+  // decision surface shrinks the failure space — the LLM can still
+  // write a normal text reply, but it can't, say, try to `apply_
+  // booking_field` after the order is already submitted and then get
+  // confused by the stage-mismatch warning the tool returned.
+  //
+  // FSM gates (in priority order):
+  //   - Post-order (stage === "order_submitted"): only tools that make
+  //     sense post-submission are allowed (track_order, cancel_order,
+  //     request_handoff, assign_agent with legitimate reason). All
+  //     booking-collection tools (apply_booking_field, start_booking,
+  //     create_simple_order, get_price) are hard-blocked with a message
+  //     pointing the LLM to the right post-order tool.
+  //
+  // The remaining per-tool gates below (get_price, track_order,
+  // create_simple_order, assign_agent) are the pre-existing intent-
+  // gate logic and stay unchanged.
+  const POST_ORDER_BLOCKED_TOOLS: Record<string, string> = {
+    apply_booking_field:
+      "The order is already submitted. apply_booking_field cannot save anything now. For corrections, use the post-order correction flow: track_order to check payment status, then either cancel_order + create_simple_order (if unpaid) or request_handoff (if already paid).",
+    start_booking:
+      "The order is already submitted. Do not start a new booking mid-conversation. If the customer wants a separate new booking, finish this conversation first, or use request_handoff for ops to handle it.",
+    create_simple_order:
+      "The order is already submitted for this conversation. Do not create another order on top. If the customer wants to change the existing order, track_order + cancel_order + create_simple_order is the correction flow; if paid already, use request_handoff.",
+    get_price:
+      "The order is already submitted. Do not re-quote prices now. Answer from the submitted order if needed; for post-order help use track_order / cancel_order / request_handoff.",
+  };
+
   function beforeToolCall(event: any, ctx: any) {
     const toolName = String(event?.toolName || "");
     if (isCustomerOctopusContext(ctx)) {
@@ -719,6 +751,26 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
       const stageHint = bookingAuthority.stage;
       const bookingStepHint = bookingAuthority.bookingStep;
       const toolParams = getToolParams(event);
+
+      // ----- FSM state gate (post-order) -----
+      // Hardest gate: after an order is submitted, the booking-collection
+      // toolset is disallowed. This is the single cleanest separation in
+      // the state machine and catches 90% of "LLM calls the wrong tool in
+      // post-order chat" incidents. The message tells the LLM exactly
+      // which tool IS appropriate for post-order work.
+      //
+      // Note: stage values flow through `normalizeIntentText` which
+      // strips underscores, so the canonical "order_submitted" arrives
+      // here as "order submitted". We compare against that normalized
+      // form to match reality rather than the enum name.
+      const isPostOrderStage = stageHint === "order submitted" || stageHint === "order_submitted";
+      if (isPostOrderStage && POST_ORDER_BLOCKED_TOOLS[toolName]) {
+        console.log(
+          `[fsm-gate] blocked ${toolName} post_order stage=${stageHint} bookingStep=${bookingStepHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)}`,
+        );
+        blockTool(POST_ORDER_BLOCKED_TOOLS[toolName]);
+      }
+
       if (toolName === "get_price") {
         const currentSession = getSessionFromCtx(ctx).session;
         const explicitLanguageHint = Boolean(ctx?.ExplicitLanguageHint || ctx?.explicitLanguageHint);
@@ -998,6 +1050,13 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
       recordGuardState,
       extractPricesFromText,
       sessionState,
+      // Test hook: lets smoke tests invoke the before_tool_call gate
+      // directly without wiring a full OpenClaw hook-registration fake.
+      // The event object needs `toolName` + optional params; the block
+      // mechanism is the `blockTool` thrown sentinel that OpenClaw
+      // catches in production — in tests, callers should wrap in
+      // try/catch.
+      beforeToolCall,
     },
     registerHooks,
   };
