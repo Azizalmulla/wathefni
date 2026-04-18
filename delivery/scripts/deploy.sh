@@ -175,6 +175,7 @@ echo "==> Deploying Riders workspace files..."
 scp "$PROJECT_DIR/workspaces/riders/AGENTS.md" \
     "$PROJECT_DIR/workspaces/riders/IDENTITY.md" \
     "$PROJECT_DIR/workspaces/riders/MEMORY.md" \
+    "$PROJECT_DIR/workspaces/riders/REFERENCE.md" \
     "$PROJECT_DIR/workspaces/riders/SKILL.md" \
     "$PROJECT_DIR/workspaces/riders/SOUL.md" \
     "$PROJECT_DIR/workspaces/riders/TOOLS.md" \
