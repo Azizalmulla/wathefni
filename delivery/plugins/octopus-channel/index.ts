@@ -1665,121 +1665,13 @@ function isOneBrainConversation(replyTarget: string | null | undefined): boolean
   const normalized = String(replyTarget || "").replace(/\s+/g, "");
   return Boolean(normalized) && ONE_BRAIN_ALLOWLIST.has(normalized);
 }
-const TURN_INTERPRETER_MODEL = String(env.RIDERS_TURN_INTERPRETER_MODEL || "gpt-5.4").trim();
-const TURN_INTERPRETER_TIMEOUT_MS = Number.parseInt(env.RIDERS_TURN_INTERPRETER_TIMEOUT_MS || "12000", 10);
-const TURN_INTERPRETER_DELIVERY_TYPES = [
-  "sedan_normal",
-  "sedan_fast",
-  "van_normal",
-  "van_fast",
-  "cooled_van_normal",
-  "cooled_van_fast",
-  "helper_standard",
-] as const;
-const TURN_INTERPRETER_ACTIONS = [
-  "greeting",
-  "language_switch",
-  "service_overview",
-  "pricing_request",
-  "same_route_quote_option",
-  "same_route_show_other_options",
-  "start_booking",
-  "booking_step_input",
-  "correct_booking_field",
-  "confirm_summary",
-  "cancel_booking",
-  "tracking_request",
-  "tracking_missing_id",
-  "passenger_transport_request",
-  "handoff",
-  "clarify",
-  "general_support",
-] as const;
-
-const TURN_INTERPRETER_RESPONSE_FORMAT = {
-  type: "json_schema",
-  json_schema: {
-    name: "riders_turn_interpretation",
-    strict: true,
-    schema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        action: { type: "string", enum: [...TURN_INTERPRETER_ACTIONS] },
-        selected_delivery_type: {
-          anyOf: [
-            { type: "string", enum: [...TURN_INTERPRETER_DELIVERY_TYPES] },
-            { type: "null" },
-          ],
-        },
-        should_use_active_quote: { type: "boolean" },
-        route_changed: { type: "boolean" },
-        order_id: {
-          anyOf: [
-            { type: "string" },
-            { type: "null" },
-          ],
-        },
-        requested_language: {
-          anyOf: [
-            { type: "string", enum: ["ar", "en"] },
-            { type: "null" },
-          ],
-        },
-        confidence: { type: "string", enum: ["low", "medium", "high"] },
-        reason: { type: "string" },
-        booking_fields: {
-          anyOf: [
-            {
-              type: "object",
-              additionalProperties: false,
-              properties: {
-                sender_name: { anyOf: [{ type: "string" }, { type: "null" }] },
-                sender_phone: { anyOf: [{ type: "string" }, { type: "null" }] },
-                phone_decision: { anyOf: [{ type: "string", enum: ["use_whatsapp", "different", "none"] }, { type: "null" }] },
-                recipient_name: { anyOf: [{ type: "string" }, { type: "null" }] },
-                recipient_phone: { anyOf: [{ type: "string" }, { type: "null" }] },
-                address_block: { anyOf: [{ type: "string" }, { type: "null" }] },
-                address_street: { anyOf: [{ type: "string" }, { type: "null" }] },
-                address_house: { anyOf: [{ type: "string" }, { type: "null" }] },
-              },
-              required: [
-                "sender_name",
-                "sender_phone",
-                "phone_decision",
-                "recipient_name",
-                "recipient_phone",
-                "address_block",
-                "address_street",
-                "address_house",
-              ],
-            },
-            { type: "null" },
-          ],
-        },
-        location_role_hint: {
-          anyOf: [
-            { type: "string", enum: ["pickup", "delivery"] },
-            { type: "null" },
-          ],
-        },
-      },
-      required: [
-        "action",
-        "selected_delivery_type",
-        "should_use_active_quote",
-        "route_changed",
-        "order_id",
-        "requested_language",
-        "confidence",
-        "reason",
-        "booking_fields",
-        "location_role_hint",
-      ],
-    },
-  },
-} as const;
-
+// Legacy turn-interpreter LLM (TURN_INTERPRETER_*, buildTurnInterpreterStateSummary,
+// normalizeInterpretedCustomerTurn, normalizeBookingFields,
+// interpretCustomerTurnWithOpenAi, mapInterpretedActionToCustomerIntent,
+// resolveSameRouteQuoteActionFromInterpreter) was deleted in the
+// interpreter-collapse refactor. One-brain owns every customer turn;
+// deterministic tool-side guards enforce correctness. See earlier commit
+// (24fbcc9) for the call-site neutralization that preceded this delete.
 // BOOKABLE_QUOTED_OPTION_TYPES, DELIVERY_TYPE_ALIASES, SAME_ROUTE_* markers, and
 // all quoted-option helpers (isBookableQuotedOptionType, getQuotedRouteDefaultOption,
 // getQuotedRouteOption, getActiveSelectedQuotedOption, formatQuotedOptionLabel,
@@ -1788,270 +1680,6 @@ const TURN_INTERPRETER_RESPONSE_FORMAT = {
 // scoreQuotedOptionMatch, resolveSameRouteQuoteFollowupAction,
 // buildDeterministicSelectedQuotedOptionReply, buildDeterministicOtherQuotedOptionsReply)
 // moved to ./lib/quoted-options.ts (wave 4).
-
-function buildTurnInterpreterStateSummary(params: {
-  controllerEntry: PersistedConversationControllerEntry | null;
-  preferredReplyLanguage: "ar" | "en";
-  explicitLanguageRequest: "ar" | "en" | null;
-  route: StoredQuotedRoute | null | undefined;
-  nearestAreaName: string | null;
-  hasLocationMessage: boolean;
-}): string {
-  const lines = [
-    "[TRUSTED STATE]",
-    `preferred_reply_language: ${params.preferredReplyLanguage}`,
-    `explicit_language_request: ${params.explicitLanguageRequest || "-"}`,
-    `conversation_stage: ${params.controllerEntry?.stage || "idle"}`,
-    `booking_step: ${params.controllerEntry?.bookingStep || "none"}`,
-    `active_quote_route_key: ${params.controllerEntry?.quoteRouteKey || "-"}`,
-    `active_quote_pickup_en: ${params.controllerEntry?.quotePickupAreaNameEn || "-"}`,
-    `active_quote_dropoff_en: ${params.controllerEntry?.quoteDropoffAreaNameEn || "-"}`,
-    `selected_quote_option_type: ${params.controllerEntry?.selectedQuoteOptionType || "-"}`,
-    `selected_quote_option_label_en: ${params.controllerEntry?.selectedQuoteOptionLabelEn || "-"}`,
-    `selected_quote_option_price: ${params.controllerEntry?.selectedQuoteOptionPrice ?? "-"}`,
-    `selected_delivery_type: ${params.controllerEntry?.selectedDeliveryType || "-"}`,
-    `selected_delivery_price: ${params.controllerEntry?.quotedPrice ?? "-"}`,
-    `quote_presented_to_customer: ${params.controllerEntry?.quotePresentedToCustomer === false ? "no" : params.controllerEntry?.stage === "quoted" ? "yes" : "-"}`,
-    `nearest_area_name: ${params.nearestAreaName || "-"}`,
-    `has_location_message: ${params.hasLocationMessage ? "yes" : "no"}`,
-    `pending_shared_location: ${formatPersistedBookingLocationLabel(params.controllerEntry?.bookingDraft.pendingLocation) || "-"}`,
-    `confirmed_pickup_location: ${formatPersistedBookingLocationLabel(params.controllerEntry?.bookingDraft.pickupLocation) || "-"}`,
-    `confirmed_delivery_location: ${formatPersistedBookingLocationLabel(params.controllerEntry?.bookingDraft.deliveryLocation) || "-"}`,
-  ];
-  if (params.route) {
-    lines.push(`quoted_route_pickup_en: ${params.route.pickupAreaNameEn}`);
-    lines.push(`quoted_route_dropoff_en: ${params.route.dropoffAreaNameEn}`);
-    lines.push("quoted_options:");
-    for (const option of params.route.optionCatalog.filter((entry) => entry.quoted_price != null)) {
-      lines.push(
-        `- ${option.delivery_type} | ${option.label_en} | ${formatQuotedOptionPrice(option)} | direct_chat=${option.direct_chat_booking_status || "-"}`,
-      );
-    }
-  }
-  lines.push("[/TRUSTED STATE]");
-  return lines.join("\n");
-}
-
-function normalizeInterpretedCustomerTurn(value: unknown): InterpretedCustomerTurn | null {
-  const parsed = parseObjectValue(value);
-  const action = asTrimmedString(parsed?.action);
-  const confidence = asTrimmedString(parsed?.confidence);
-  if (
-    !action ||
-    !TURN_INTERPRETER_ACTIONS.includes(action as typeof TURN_INTERPRETER_ACTIONS[number]) ||
-    !confidence ||
-    !["low", "medium", "high"].includes(confidence)
-  ) {
-    return null;
-  }
-  const selectedDeliveryType = asTrimmedString(parsed?.selected_delivery_type);
-  const requestedLanguage = asTrimmedString(parsed?.requested_language);
-  return {
-    action: action as InterpretedCustomerTurnAction,
-    selected_delivery_type:
-      selectedDeliveryType && TURN_INTERPRETER_DELIVERY_TYPES.includes(selectedDeliveryType as typeof TURN_INTERPRETER_DELIVERY_TYPES[number])
-        ? selectedDeliveryType
-        : null,
-    should_use_active_quote: Boolean(parsed?.should_use_active_quote),
-    route_changed: Boolean(parsed?.route_changed),
-    order_id: asTrimmedString(parsed?.order_id) || null,
-    requested_language: requestedLanguage === "ar" || requestedLanguage === "en" ? requestedLanguage : null,
-    confidence: confidence as InterpretedCustomerTurn["confidence"],
-    reason: asTrimmedString(parsed?.reason) || "",
-    booking_fields: normalizeBookingFields(parsed?.booking_fields),
-    location_role_hint: (() => {
-      const hint = asTrimmedString(parsed?.location_role_hint);
-      return hint === "pickup" || hint === "delivery" ? hint : null;
-    })(),
-  };
-}
-
-function normalizeBookingFields(value: unknown): InterpretedBookingFields | null {
-  if (!value || typeof value !== "object") return null;
-  const v = value as Record<string, unknown>;
-  const senderName = typeof v.sender_name === "string" ? v.sender_name.trim() || null : null;
-  const senderPhone = typeof v.sender_phone === "string" ? v.sender_phone.replace(/\D/g, "").trim() || null : null;
-  const rawPd = typeof v.phone_decision === "string" ? v.phone_decision.trim() : null;
-  const phoneDecision = rawPd === "use_whatsapp" || rawPd === "different" || rawPd === "none" ? rawPd : null;
-  const recipientName = typeof v.recipient_name === "string" ? v.recipient_name.trim() || null : null;
-  const recipientPhone = typeof v.recipient_phone === "string" ? v.recipient_phone.replace(/\D/g, "").trim() || null : null;
-  const addressBlock = typeof v.address_block === "string" ? v.address_block.trim() || null : null;
-  const addressStreet = typeof v.address_street === "string" ? v.address_street.trim() || null : null;
-  const addressHouse = typeof v.address_house === "string" ? v.address_house.trim() || null : null;
-  if (!senderName && !senderPhone && !phoneDecision && !recipientName && !recipientPhone && !addressBlock && !addressStreet && !addressHouse) {
-    return null;
-  }
-  return { sender_name: senderName, sender_phone: senderPhone, phone_decision: phoneDecision, recipient_name: recipientName, recipient_phone: recipientPhone, address_block: addressBlock, address_street: addressStreet, address_house: addressHouse };
-}
-
-async function interpretCustomerTurnWithOpenAi(params: {
-  logger: Pick<Console, "info" | "warn" | "error"> | OpenClawPluginApi["logger"];
-  visibleText: string;
-  rawBody: string;
-  preferredReplyLanguage: "ar" | "en";
-  explicitLanguageRequest: "ar" | "en" | null;
-  controllerEntry: PersistedConversationControllerEntry | null;
-  route: StoredQuotedRoute | null | undefined;
-  nearestAreaName: string | null;
-  hasLocationMessage: boolean;
-}): Promise<InterpretedCustomerTurn | null> {
-  const apiKey = env.OPENAI_API_KEY?.trim();
-  if (!apiKey || !params.rawBody.trim()) {
-    return null;
-  }
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TURN_INTERPRETER_TIMEOUT_MS);
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: TURN_INTERPRETER_MODEL,
-        temperature: 0,
-        response_format: TURN_INTERPRETER_RESPONSE_FORMAT,
-        messages: [
-          {
-            role: "system",
-            content: [
-              "You are a strict customer-turn interpreter for Riders delivery support.",
-              buildTurnInterpreterStateSummary({
-                controllerEntry: params.controllerEntry,
-                preferredReplyLanguage: params.preferredReplyLanguage,
-                explicitLanguageRequest: params.explicitLanguageRequest,
-                route: params.route,
-                nearestAreaName: params.nearestAreaName,
-                hasLocationMessage: params.hasLocationMessage,
-              }),
-              "Use the trusted state as the source of truth. Do not answer the user. Do not roleplay.",
-              "If conversation_stage=quoted and quote_presented_to_customer=yes and the route did not change, classify precisely: (a) ANY message that indicates the customer accepts/chooses and wants to proceed — whether bare ('ok', 'yes', 'yep', 'sure', 'yalla', 'proceed', 'go ahead', 'احجز', 'كمل', 'تمام'), acceptance + option name ('ok lets go with the express sedan', 'proceed with the box van', 'نعم خذ الفان', 'go with helper'), or any other phrasing that commits to booking — use action=start_booking with should_use_active_quote=true, and if they named an option, populate selected_delivery_type. The presence of 'ok/yes/lets/go with/proceed/احجز/تمام/كمل' combined with a route/option in context is acceptance, NOT inquiry. (b) A pure inquiry about a different option with NO acceptance verb ('what about express sedan?', 'how much for the box van?', 'is refrigerated available?', 'كم الفان؟') means action=same_route_quote_option with should_use_active_quote=true and selected_delivery_type populated. (c) A request to see all options ('what options are available?', 'show me all cars', 'شنو الخيارات') means action=same_route_show_other_options. Do NOT use confirm_summary when conversation_stage=quoted. If conversation_stage=quoted but quote_presented_to_customer=no, the customer has not yet seen the price — short confirmations likely answer a pending clarification (e.g. area disambiguation). In that case use action=pricing_request with route_changed=false so the price is shown.",
-              "If conversation_stage=awaiting_confirmation or booking_step=awaiting_summary_confirmation, confirmation messages mean action=confirm_summary.",
-              "If conversation_stage=collecting_booking_details, sender/recipient/phone/address details mean action=booking_step_input unless the customer clearly changes topic. When action=booking_step_input, populate booking_fields: extract sender_name (just the person's name, no extra text), sender_phone (digits only if given), phone_decision (use_whatsapp if confirming the WhatsApp number, different if rejecting it or asking to use another number, none otherwise), recipient_name, recipient_phone, address_block, address_street, address_house. Use booking_step from the trusted state to map short unlabeled replies to the next missing field: if sender name is already known and the customer sends digits, that is sender_phone; if recipient name is already known and the customer sends digits, that is recipient_phone; if booking_step is pickup_address or delivery_address and the customer sends one unlabeled value like '2', map it to the first missing address field in order block, street, house. If has_location_message=yes during pickup_address or delivery_address, still use action=booking_step_input even if booking_fields stay null because the location pin/map link itself may be the address evidence. Only fill fields the customer explicitly provided; leave the rest null. For all other actions set booking_fields to null.",
-              "If the customer explicitly corrects a previously submitted booking field (e.g. 'actually my name is Ahmed', 'wrong number, use 99887766', 'change the recipient name to X'), use action=correct_booking_field and populate the corrected value(s) in booking_fields regardless of the current booking_step. This allows overwriting past fields without restarting.",
-              "If conversation_stage is collecting_booking_details, summary_shown, or awaiting_confirmation and the customer clearly wants to cancel, abandon, or start over (e.g. 'cancel', 'never mind', 'nvm', 'forget it', 'start over', 'لا خلاص', 'الغي', 'ما ابي'), use action=cancel_booking.",
-              "If pending_shared_location is set (not '-') and the customer indicates which role the location should serve (pickup or delivery), set location_role_hint to 'pickup' or 'delivery'. This covers natural phrasing like 'this is where they pick it up from', 'for the sender', 'delivery side', 'هذا مكان الاستلام', 'مكان المرسل', etc. If pending_shared_location is '-' or the customer is not answering a location-role question, set location_role_hint to null.",
-              "Broad service questions without a specific route mean action=service_overview. If the customer wants to move a person rather than a package (e.g. ودني المطار ,وصلني ,خذني, take me, drop me, taxi), use action=passenger_transport_request even if they only mention a destination. Do not use pricing_request or clarify for person-transport. Human-help, complaint, or refund requests mean action=handoff.",
-              "If the customer clearly asks for a new route price or changes pickup/dropoff for a package or delivery, use action=pricing_request and set route_changed=true.",
-              "Tracking with a valid ORDER- number means action=tracking_request and set order_id. Tracking without a valid ORDER- number means action=tracking_missing_id.",
-              "Pure greetings mean action=greeting. Explicit language changes mean action=language_switch.",
-              "Set should_use_active_quote=true only when the customer is still on the same active quoted route; otherwise false.",
-              "If the latest message is still ambiguous after using the trusted state, use action=clarify. Return only the schema.",
-            ].join("\n"),
-          },
-          {
-            role: "user",
-            content: params.rawBody,
-          },
-        ],
-      }),
-    });
-    if (!response.ok) {
-      const raw = await response.text();
-      params.logger.warn(`[turn-interpreter] openai request failed status=${response.status} body=${raw.slice(0, 300)}`);
-      return null;
-    }
-    const payload = (await response.json()) as any;
-    const rawContent = payload?.choices?.[0]?.message?.content;
-    const refusal = asTrimmedString(payload?.choices?.[0]?.message?.refusal);
-    if (refusal) {
-      params.logger.warn(`[turn-interpreter] model refusal: ${refusal}`);
-      return null;
-    }
-    const contentText = Array.isArray(rawContent)
-      ? rawContent
-        .map((item: any) => asTrimmedString(item?.text) || asTrimmedString(item?.content) || "")
-        .filter(Boolean)
-        .join("\n")
-      : asTrimmedString(rawContent);
-    const interpreted = normalizeInterpretedCustomerTurn(contentText ? safeJsonParse(contentText) : null);
-    if (!interpreted) {
-      params.logger.warn(`[turn-interpreter] invalid structured output: ${String(contentText || "").slice(0, 300)}`);
-      return null;
-    }
-    return interpreted;
-  } catch (error) {
-    params.logger.warn(
-      `[turn-interpreter] structured interpretation failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-function mapInterpretedActionToCustomerIntent(action: InterpretedCustomerTurn | null): CustomerIntent | null {
-  if (!action) return null;
-  switch (action.action) {
-    case "greeting":
-      return "greeting";
-    case "service_overview":
-      return "service_inquiry";
-    case "pricing_request":
-    case "same_route_quote_option":
-    case "same_route_show_other_options":
-      return "pricing_request";
-    case "start_booking":
-    case "booking_step_input":
-    case "correct_booking_field":
-    case "confirm_summary":
-    case "cancel_booking":
-      return "booking_followup";
-    case "tracking_request":
-    case "tracking_missing_id":
-      return "tracking";
-    case "language_switch":
-      return "language_switch";
-    case "passenger_transport_request":
-      return "passenger_transport_request";
-    case "handoff":
-    case "clarify":
-    case "general_support":
-    default:
-      return "general_support";
-  }
-}
-
-function resolveSameRouteQuoteActionFromInterpreter(params: {
-  interpretedTurn: InterpretedCustomerTurn | null;
-  route: StoredQuotedRoute | null | undefined;
-  controllerEntry: PersistedConversationControllerEntry | null;
-}): SameRouteQuoteFollowupAction {
-  if (
-    !params.interpretedTurn ||
-    !params.route ||
-    !params.controllerEntry ||
-    !hasActiveQuotedBookingAuthority(params.controllerEntry)
-  ) {
-    return null;
-  }
-  if (params.interpretedTurn.action === "same_route_show_other_options") {
-    return { kind: "show_other_options" };
-  }
-  const wantsQuotedOption =
-    (
-      params.interpretedTurn.action === "same_route_quote_option" ||
-      (
-        params.interpretedTurn.action === "start_booking" &&
-        params.interpretedTurn.should_use_active_quote
-      )
-    ) &&
-    !!params.interpretedTurn.selected_delivery_type;
-  if (!wantsQuotedOption || !params.interpretedTurn.selected_delivery_type) {
-    return null;
-  }
-  const option = getQuotedRouteOption(params.route, params.interpretedTurn.selected_delivery_type);
-  if (!option) {
-    return null;
-  }
-  const selectedOption = getActiveSelectedQuotedOption(params.route, params.controllerEntry);
-  if (selectedOption?.delivery_type === option.delivery_type) {
-    return { kind: "confirm_selected_option", option };
-  }
-  return { kind: "switch_option", option };
-}
 
 // buildQuotedRouteContextLines moved to ./lib/quoted-options.ts (wave 5).
 
@@ -3654,6 +3282,7 @@ async function directOpenAiAudioTranscription(params: {
 }
 
 const TRANSCRIPT_REFINE_TIMEOUT_MS = 2500;
+const TRANSCRIPT_REFINE_MODEL = String(env.RIDERS_TRANSCRIPT_REFINE_MODEL || "gpt-5.4").trim();
 
 async function refineTranscriptWithLlm(params: {
   rawText: string;
@@ -3686,7 +3315,7 @@ async function refineTranscriptWithLlm(params: {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: TURN_INTERPRETER_MODEL,
+        model: TRANSCRIPT_REFINE_MODEL,
         temperature: 0,
         response_format: { type: "json_object" },
         messages: [
@@ -4252,14 +3881,11 @@ async function handleInboundMessage(params: {
   }
   const currentCustomerIntent =
     senderRole === "customer"
-      ? (
-        mapInterpretedActionToCustomerIntent(interpretedCustomerTurn) ||
-        classifyCustomerIntent({
+      ? classifyCustomerIntent({
           visibleText: turnSignals.workflowInputText || null,
           explicitLanguage: explicitLanguageRequest,
           controllerEntry: conversationControllerEntry,
         })
-      )
       : null;
   let controllerTransitionHint: string | null = null;
   const llmSaysBookingData =
@@ -4989,17 +4615,11 @@ async function handleInboundMessage(params: {
     activeQuotedRoute &&
     turnSignals.workflowInputText
   ) {
-    sameRouteQuoteAction =
-      resolveSameRouteQuoteActionFromInterpreter({
-        interpretedTurn: interpretedCustomerTurn,
-        controllerEntry: conversationControllerEntry,
-        route: activeQuotedRoute,
-      }) ||
-      resolveSameRouteQuoteFollowupAction({
-        visibleText: turnSignals.workflowInputText,
-        controllerEntry: conversationControllerEntry,
-        route: activeQuotedRoute,
-      });
+    sameRouteQuoteAction = resolveSameRouteQuoteFollowupAction({
+      visibleText: turnSignals.workflowInputText,
+      controllerEntry: conversationControllerEntry,
+      route: activeQuotedRoute,
+    });
     if (
       sameRouteQuoteAction &&
       (sameRouteQuoteAction.kind === "switch_option" || sameRouteQuoteAction.kind === "confirm_selected_option")
@@ -6564,7 +6184,6 @@ export const __testables = {
   clearAutomatedConversationContext,
   applyBookingFieldCorrection,
   applyResponderStateOps,
-  normalizeInterpretedCustomerTurn,
   shouldResetControllerForNewRouteMessage,
   shouldMoveToHumanAgent,
   shouldPreserveGreetingDuringActiveFlow,

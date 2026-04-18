@@ -89,29 +89,9 @@ async function main() {
 
   assert(t, "__testables export should exist");
 
-  const interpreted = t.normalizeInterpretedCustomerTurn({
-    action: "correct_booking_field",
-    selected_delivery_type: null,
-    should_use_active_quote: false,
-    route_changed: false,
-    order_id: null,
-    requested_language: "en",
-    confidence: "high",
-    reason: "customer corrected a previous sender field",
-    booking_fields: {
-      sender_name: "Ahmed",
-      sender_phone: null,
-      phone_decision: "none",
-      recipient_name: null,
-      recipient_phone: null,
-      address_block: null,
-      address_street: null,
-      address_house: null,
-    },
-    location_role_hint: "pickup",
-  });
-  assert(interpreted?.action === "correct_booking_field", "turn interpreter should normalize correct_booking_field");
-  assert(interpreted?.location_role_hint === "pickup", "turn interpreter should normalize location_role_hint");
+  // normalizeInterpretedCustomerTurn was removed along with the legacy
+  // interpreter LLM path (one-brain owns every customer turn now).
+  // The deterministic helpers below remain the interpretation layer.
 
   assert(t.getLocationRoleSelection("Pic up") === "pickup", "Pic up should resolve as pickup");
   assert(t.getLocationRoleSelection("for the sender") === "pickup", "sender-side phrasing should resolve as pickup");
@@ -497,8 +477,7 @@ async function main() {
     "source should clear stale quote context and route saved-location acknowledgments through the agent",
   );
   assert(
-    source.includes('params.interpretedTurn.action === "start_booking"') &&
-      source.includes("pre-dispatch quoted conversation transitioned to booking-details stage") &&
+    source.includes("pre-dispatch quoted conversation transitioned to booking-details stage") &&
       source.includes("blocked booking transition for non-direct-bookable option"),
     "source should start booking before agent reply while still blocking non-direct-bookable options",
   );
