@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Eval harness for the responder-first orchestration path.
+ * Eval harness for the responder-first (one-brain) orchestration path.
  *
  * Exercises the `applyResponderStateOps` pipeline with representative
- * fixtures so we can verify that tool-emitted state ops produce the
- * expected controller state and deterministic-summary trigger before
- * flipping RIDERS_RESPONDER_FIRST=1 in production.
+ * fixtures to verify tool-emitted state ops produce the expected
+ * controller state and deterministic-summary trigger. Responder-first
+ * is now the only production path (the legacy interpreter was deleted
+ * in commit 2615020 and the feature flag was hardcoded in Stage 3).
+ * This harness remains as a regression guard for the state-op pipeline.
  *
  * Run: node delivery/scripts/eval-responder-first.mjs
  */

@@ -1636,34 +1636,22 @@ async function findSessionGuardEntryWithPersistence(
 // InterpretedCustomerTurnAction, InterpretedBookingFields, and
 // InterpretedCustomerTurn moved to ./lib/interpreter-types.ts (wave 5).
 
-const RESPONDER_FIRST_FLAG = (() => {
-  const raw = String(env.RIDERS_RESPONDER_FIRST || "").trim().toLowerCase();
-  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
-})();
-// ONE-BRAIN flag: when ON, the channel skips the turn-interpreter LLM,
-// skips the deterministic greeting shortcut, skips the deterministic
-// order-summary builder, and drains responder state ops through a minimal
-// patch-apply path (no stage/step/hint threading). The agent (single LLM)
-// owns every customer-facing message; deterministic guards only check prices
-// at outbound and order preconditions at create time.
-const ONE_BRAIN_FLAG = (() => {
-  const raw = String(env.RIDERS_ONE_BRAIN || "").trim().toLowerCase();
-  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
-})();
-// Optional per-number allowlist for ONE-BRAIN. When set, ONE-BRAIN only
-// applies to the listed WhatsApp numbers. Leave empty to apply globally
-// once the flag is on.
-const ONE_BRAIN_ALLOWLIST: Set<string> = new Set(
-  String(env.RIDERS_ONE_BRAIN_ALLOWLIST || "")
-    .split(",")
-    .map((value) => value.replace(/\s+/g, ""))
-    .filter(Boolean),
-);
-function isOneBrainConversation(replyTarget: string | null | undefined): boolean {
-  if (!ONE_BRAIN_FLAG) return false;
-  if (ONE_BRAIN_ALLOWLIST.size === 0) return true;
-  const normalized = String(replyTarget || "").replace(/\s+/g, "");
-  return Boolean(normalized) && ONE_BRAIN_ALLOWLIST.has(normalized);
+// ONE-BRAIN and responder-first are now permanent. The channel skips the
+// legacy turn-interpreter LLM (deleted in commit 2615020), drains responder
+// state ops through the minimal patch-apply path, and the single agent LLM
+// owns every customer-facing message. Deterministic guards only check
+// prices at outbound and order preconditions at create time.
+//
+// These constants (formerly env-flag-driven via RIDERS_RESPONDER_FIRST,
+// RIDERS_ONE_BRAIN, RIDERS_ONE_BRAIN_ALLOWLIST) are hardcoded to `true`
+// so prod behavior cannot be silently changed via environment drift.
+// isOneBrainConversation() is kept as a predicate (not just `true`)
+// because ~10 downstream call sites pass it a replyTarget argument; the
+// signature is preserved so TS doesn't complain.
+const RESPONDER_FIRST_FLAG = true;
+const ONE_BRAIN_FLAG = true;
+function isOneBrainConversation(_replyTarget: string | null | undefined): boolean {
+  return true;
 }
 // Legacy turn-interpreter LLM (TURN_INTERPRETER_*, buildTurnInterpreterStateSummary,
 // normalizeInterpretedCustomerTurn, normalizeBookingFields,
