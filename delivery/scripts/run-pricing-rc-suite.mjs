@@ -45,6 +45,10 @@ const steps = [
     script: "smoke-test-address-completeness.mjs",
   },
   {
+    label: "Reply hallucination guard smoke",
+    script: "smoke-test-hallucination-guard.mjs",
+  },
+  {
     label: "Published pricing summary smoke",
     script: "smoke-test-published-pricing-summary.mjs",
   },

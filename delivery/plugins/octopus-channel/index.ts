@@ -47,6 +47,10 @@ import {
 } from "../shared/booking-draft";
 import { verifyAndRepairOutbound } from "../shared/outbound-verify";
 import {
+  runHallucinationGuard,
+  isHallucinationGuardEnabled,
+} from "../shared/reply-hallucination-guard";
+import {
   extractForNextAction,
   type FastPathAction,
 } from "../shared/fast-path-extractor";
@@ -4679,6 +4683,17 @@ async function handleInboundMessage(params: {
             return;
           }
           let controllerReplyLogKind: "booking_details" | "location_clarification" | null = null;
+          // Captured BEFORE the drain so the hallucination guard can tell whether
+          // an "order placed" claim in the outbound reply is grounded in a real
+          // stage transition this turn. If stageAtTurnStart was already
+          // `order_submitted`, the customer is in post-order chat and any
+          // recap-style "order placed" mention is legitimate.
+          const stageAtTurnStart = conversationControllerEntry?.stage ?? null;
+          // Lifted from the drain block so the post-reply hallucination guard
+          // can consult this turn's field-rejection evidence. Any rejection
+          // pushed here makes a "field is invalid, please resend" LLM reply
+          // grounded rather than hallucinated.
+          const hallucinationGuardRejections: Array<{ field: string; reason: string; received: string }> = [];
           // ONE-BRAIN mode: simplified drain. One LLM per turn owns all reply
           // copy; we only merge booking patches into the draft, reset on cancel,
           // and flag handoff. No stage/step/hint threading, no deterministic
@@ -4690,7 +4705,7 @@ async function handleInboundMessage(params: {
                 let nextDraft = conversationControllerEntry?.bookingDraft || createEmptyBookingDraft();
                 let cancelled = false;
                 let handoffRequested = false;
-                const rejections: Array<{ field: string; reason: string; received: string }> = [];
+                const rejections = hallucinationGuardRejections;
                 const appliedOps: string[] = [];
                 for (const op of drained) {
                   if (op.op === "apply_booking_field") {
@@ -5268,6 +5283,41 @@ async function handleInboundMessage(params: {
                 stage: "summary_shown" as ConversationFlowStage,
                 bookingStep: "summary_pending" as BookingCollectionStep,
               };
+            }
+
+            // Phase-2 Hallucination Guard (ONE-BRAIN only).
+            // Separate factual-claim axis from the shape verification above.
+            // Scans the (possibly already-substituted) reply for claims that
+            // aren't backed by server-side evidence:
+            //   - field-rejection claims without a real rejection this turn
+            //   - price mentions that disagree with the authoritative quote
+            //   - "order placed" assertions without a submitted-stage transition
+            // On a block, substitutes a deterministic next-step ask derived
+            // from the current next-required-action + granular missing
+            // sub-fields. Never throws; logs every interception for triage.
+            if (isHallucinationGuardEnabled()) {
+              const nra = computeOneBrainNextRequiredAction({
+                draft: conversationControllerEntry.bookingDraft,
+                entry: conversationControllerEntry,
+                missing: missingForVerify,
+              });
+              const guardDecision = runHallucinationGuard({
+                replyText,
+                entry: conversationControllerEntry,
+                missingFields: missingForVerify,
+                rejectionsThisTurn: hallucinationGuardRejections,
+                stageAtTurnStart,
+                language: preferredReplyLanguage,
+                nextRequiredAction: nra?.action ?? null,
+              });
+              if (guardDecision.claims.length > 0) {
+                api.logger.warn(
+                  `[one-brain/hallucination-guard] blocked=${guardDecision.blocked} claims=${guardDecision.claims.join(",")} reason=${guardDecision.reason} substituted_from=${guardDecision.substitutedFrom} conversation=${conversationId} original=${JSON.stringify(replyText).slice(0, 240)}`,
+                );
+              }
+              if (guardDecision.blocked) {
+                replyText = guardDecision.replyText;
+              }
             }
           }
           const pendingPrefix = conversationControllerEntry?.pendingReplyText?.trim();
