@@ -161,15 +161,22 @@ rsync -az --delete \
   "$PROJECT_DIR/plugins/octopus-channel/" \
   "$VPS_HOST:$VPS_OCTOPUS_PLUGIN_DIR/"
 
-echo "==> Deploying shared plugin helpers..."
-scp "$PROJECT_DIR/plugins/shared/conversation-policy.ts" \
-    "$PROJECT_DIR/plugins/shared/guard-state.ts" \
-    "$PROJECT_DIR/plugins/shared/responder-state-ops.ts" \
-    "$PROJECT_DIR/plugins/shared/booking-draft.ts" \
-    "$PROJECT_DIR/plugins/shared/order-guard.ts" \
-    "$PROJECT_DIR/plugins/shared/outbound-verify.ts" \
-    "$PROJECT_DIR/plugins/shared/fast-path-extractor.ts" \
-    "$VPS_HOST:$VPS_SHARED_PLUGIN_DIR/"
+echo "==> Deploying shared plugin helpers (rsync of full directory)..."
+# rsync (not scp) so newly-added shared modules don't silently fail to ship.
+# Previous bug: new file `reply-hallucination-guard.ts` wasn't in the explicit
+# scp list → VPS plugin crashed on boot with "Cannot find module". Using
+# --delete so any removed source file on the box is cleared too; excludes
+# keep local build artifacts and tests out.
+rsync -az --delete \
+  --exclude='node_modules/' \
+  --exclude='.openclaw/' \
+  --exclude='.tmp/' \
+  --exclude='*.log' \
+  --exclude='*.tmp' \
+  --exclude='*.test.ts' \
+  --exclude='*.spec.ts' \
+  "$PROJECT_DIR/plugins/shared/" \
+  "$VPS_HOST:$VPS_SHARED_PLUGIN_DIR/"
 
 echo "==> Deploying Riders workspace files..."
 scp "$PROJECT_DIR/workspaces/riders/AGENTS.md" \
