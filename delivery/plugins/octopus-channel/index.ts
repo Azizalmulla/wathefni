@@ -286,8 +286,22 @@ const ADMIN_ALLOWLIST = Array.from(
   ),
 );
 
-const INBOUND_DEBOUNCE_MS = 5000;
-const INBOUND_MEDIA_DEBOUNCE_MS = INBOUND_DEBOUNCE_MS;
+// Debounce window waits for possible follow-up messages before processing a
+// turn. 3s is the sweet spot: long enough to coalesce a burst of short
+// messages ("hi", "I need a driver", "from Salmiya"), short enough that
+// single-message turns don't feel sluggish. Override via
+// RIDERS_INBOUND_DEBOUNCE_MS (text) / RIDERS_INBOUND_MEDIA_DEBOUNCE_MS (media).
+function readPositiveIntEnv(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const n = Number.parseInt(String(raw).trim(), 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+const INBOUND_DEBOUNCE_MS = readPositiveIntEnv("RIDERS_INBOUND_DEBOUNCE_MS", 3000);
+const INBOUND_MEDIA_DEBOUNCE_MS = readPositiveIntEnv(
+  "RIDERS_INBOUND_MEDIA_DEBOUNCE_MS",
+  INBOUND_DEBOUNCE_MS,
+);
 
 // DebouncedMessage + DebounceBucket types moved to ./lib/types.ts (wave 2a).
 

@@ -504,10 +504,11 @@ async function main() {
     "source should expose richer quote/controller context and remove the canned greeting/service interceptions",
   );
   assert(
-    source.includes("const INBOUND_MEDIA_DEBOUNCE_MS = INBOUND_DEBOUNCE_MS;") &&
+    source.includes('"RIDERS_INBOUND_DEBOUNCE_MS"') &&
+      source.includes('"RIDERS_INBOUND_MEDIA_DEBOUNCE_MS"') &&
       source.includes("resolveInboundDebounceMs") &&
       source.includes("windowMs="),
-    "source should debounce media turns so they can merge with nearby follow-up text",
+    "source should debounce media turns so they can merge with nearby follow-up text (env-overridable)",
   );
   assert(
     source.includes("isSummaryEditRequest") &&
