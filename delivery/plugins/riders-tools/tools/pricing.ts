@@ -32,6 +32,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
   } = intentGates;
   const {
     extractAreaTokensFromText,
+    collectAreaEvidenceFromText,
     verifyAreaEvidence,
     createAreaSuggestionResult,
     createAreaNotFoundResult,
@@ -193,6 +194,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
 
         if (visibleText) {
           const rawTokens = extractAreaTokensFromText(visibleText);
+          // Full-text n-gram evidence set: every area the customer could
+          // plausibly be referring to, regardless of phrasing or prefixes.
+          // Used to suppress false-positive smuggle rejections when the
+          // narrow separator-split raw token misses filler-wrapped names
+          // like "Ok lets book slwa to slmya".
+          const evidenceIds = collectAreaEvidenceFromText(visibleText, data);
 
           const applyDecision = (
             field: "pickup_area" | "dropoff_area",
@@ -200,6 +207,10 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             rawToken: string | null,
             modelValue: string,
           ) => {
+            const modelAreaId: number | null = decision.modelArea?.id ?? null;
+            const evidenceCovers =
+              modelAreaId !== null && evidenceIds.has(modelAreaId);
+
             if (decision.action === "override") {
               console.log(
                 `[area-evidence] ${field} raw="${rawToken}" model="${modelValue}" decision=override value="${decision.value}"`,
@@ -207,6 +218,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
               return { override: decision.value as string, reject: null as any };
             }
             if (decision.action === "reject") {
+              if (evidenceCovers) {
+                console.log(
+                  `[area-evidence] ${field} evidence_verified raw="${rawToken}" model="${modelValue}"→${decision.modelArea?.name_en ?? "?"} evidenceIds=[${Array.from(evidenceIds).join(",")}] (demoted from reject)`,
+                );
+                return { override: null as any, reject: null as any };
+              }
               console.log(
                 `[area-evidence] ${field} SMUGGLE raw="${rawToken}" unresolved, model="${modelValue}"→${decision.modelArea?.name_en ?? "?"}, reason=${decision.reason}, suggested=${decision.suggestedArea?.name_en ?? "none"}`,
               );
@@ -233,6 +250,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
               return { override: null as any, reject: rejectResult };
             }
             if (decision.action === "needs_clarification") {
+              if (evidenceCovers) {
+                console.log(
+                  `[area-evidence] ${field} evidence_verified raw="${rawToken}" model="${modelValue}"→${decision.modelArea.name_en} evidenceIds=[${Array.from(evidenceIds).join(",")}] (demoted from needs_clarification)`,
+                );
+                return { override: null as any, reject: null as any };
+              }
               console.log(
                 `[area-evidence] ${field} NEEDS_CLARIFICATION raw="${rawToken}" model="${modelValue}"→${decision.modelArea.name_en}, modelSim=${decision.modelSimilarity.toFixed(3)}, candidates=${decision.closestCandidates.map((c: any) => `${c.area.name_en}(${c.similarity.toFixed(2)})`).join("|") || "none"}`,
               );

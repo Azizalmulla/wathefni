@@ -125,6 +125,7 @@ export interface ToolDeps {
       pickup: string | null;
       dropoff: string | null;
     };
+    collectAreaEvidenceFromText: (text: string, data: any) => Set<number>;
     verifyAreaEvidence: (params: any) => any;
     createAreaSuggestionResult: (params: any) => any;
     createAreaNotFoundResult: (params: any) => any;

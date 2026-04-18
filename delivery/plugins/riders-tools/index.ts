@@ -4954,6 +4954,58 @@ function extractAreaTokensFromText(text: string): { pickup: string | null; dropo
   return { pickup: null, dropoff: null };
 }
 
+// Scan the full customer text for evidence of any area mention by resolving
+// every 1–3 word n-gram through the same resolver the LLM uses. Returns the
+// set of area IDs that appear anywhere in the message, regardless of
+// surrounding filler words, conversational prefixes, or sentence structure.
+//
+// This is the grounding for the evidence-binding guard: if the LLM claims a
+// pickup/dropoff area, and that area ID is in this set, it's verified — no
+// regex gymnastics required. Handles typos (slwa → Salwa), Arabic/English
+// mixing, and arbitrary prefixes ("Ok lets book ...", "please quote ...",
+// "أبي أحجز ...") without needing to enumerate them.
+function collectAreaEvidenceFromText(
+  text: string,
+  data: PricingData,
+): Set<number> {
+  const evidence = new Set<number>();
+  if (!text || typeof text !== "string") return evidence;
+  if (text.length > 300) return evidence;
+  if (!data?.areas?.length) return evidence;
+
+  const cleaned = text
+    .replace(/[?؟!.,:;()"'`“”‘’]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleaned) return evidence;
+
+  const words = cleaned.split(/\s+/).filter((w) => w.length >= 2);
+  if (!words.length) return evidence;
+
+  const MAX_NGRAM = 3;
+  const tried = new Set<string>();
+
+  const tryResolve = (candidate: string): void => {
+    const key = candidate.toLowerCase();
+    if (tried.has(key)) return;
+    tried.add(key);
+    const res = resolveAreaDeterministicSync(candidate, data);
+    if (res && res.status === "resolved" && res.area) {
+      evidence.add(res.area.id);
+    }
+  };
+
+  for (let i = 0; i < words.length; i++) {
+    for (let n = 1; n <= MAX_NGRAM && i + n <= words.length; n++) {
+      const gram = words.slice(i, i + n).join(" ");
+      if (gram.length < 3) continue;
+      tryResolve(gram);
+    }
+  }
+
+  return evidence;
+}
+
 function resolveAreaDeterministicSync(
   query: string,
   data: PricingData,
@@ -5195,6 +5247,7 @@ export const __resolverTestHooks = {
   resolvePricingAreaQuery,
   resolveGeoAreaMatch,
   extractAreaTokensFromText,
+  collectAreaEvidenceFromText,
   resolveAreaDeterministicSync,
   isAreaMismatch,
   verifyAreaEvidence,
@@ -5266,6 +5319,7 @@ export default function register(api: any) {
     },
     quoting: {
       extractAreaTokensFromText,
+      collectAreaEvidenceFromText,
       verifyAreaEvidence,
       createAreaSuggestionResult,
       createAreaNotFoundResult,
