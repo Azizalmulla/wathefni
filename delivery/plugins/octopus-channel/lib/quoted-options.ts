@@ -393,6 +393,19 @@ export function buildQuotedRouteContextLines(
   lines.push(
     "Quote-state rule: Only call get_price again if the customer changed the route or there is no active quoted route context.",
   );
+  // Answering rule (added 2026-04-18 after incident where the LLM, in
+  // quoted state, replied with only the stored route+price and failed to
+  // address the customer's actual question — e.g. customer asked \"is this
+  // the cheapest?\" and got back only \"Delivery from X to Y, Price: 2.500
+  // KWD\"). The preceding rules tell the LLM what NOT to do (don't
+  // re-call get_price, don't switch options unprompted, etc.) but were
+  // silent on how to construct the reply, which the model interpreted as
+  // \"just restate the quote\". This rule closes that gap: answer the
+  // customer's question directly, then reference the quoted option if
+  // helpful — never the other way around.
+  lines.push(
+    "Quote-state rule: \"Answer from these quoted options\" means use them as GROUNDING for a natural reply to the customer's actual question — it does NOT mean re-emit the route+price as the entire reply. Always address what the customer asked (e.g. \"is this the cheapest?\", \"what else do you have?\", \"how long does it take?\") in a direct, conversational sentence first, and only then reference the relevant option or price from the stored quote if it helps. Never reply with only the route and price when the customer asked a question.",
+  );
   return lines;
 }
 
