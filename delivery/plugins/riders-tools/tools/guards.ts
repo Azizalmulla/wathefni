@@ -29,6 +29,7 @@ import {
 } from "../../shared/conversation-policy";
 import {
   persistGuardSessionAliases,
+  hydrateAllPersistedGuardSessions,
   PersistedGuardSessionState,
 } from "../../shared/guard-state";
 
@@ -942,6 +943,34 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
     api.on("after_tool_call", (event: any, ctx: any) => {
       void recordGuardState(event.toolName as string, event.result, ctx);
     });
+    // Cold-start hydration: load every non-stale persisted guard session into
+    // the in-memory map so the first inbound turn after a gateway restart has
+    // full context (last quoted route, pending order fingerprint, valid
+    // prices) inside before_tool_call without paying async disk I/O per hook.
+    // The octopus-channel already reads this state async before dispatch, but
+    // other plugins (and future inbound paths) benefit from having it ready.
+    void (async () => {
+      try {
+        const entries = await hydrateAllPersistedGuardSessions();
+        if (entries.length === 0) return;
+        for (const { alias, session } of entries) {
+          if (!sessionState.has(alias)) {
+            sessionState.set(alias, session as SessionGuardState);
+          }
+        }
+        if (api?.logger?.info) {
+          api.logger.info(
+            `[guard] hydrated ${entries.length} persisted guard session(s) at boot`,
+          );
+        }
+      } catch (error) {
+        if (api?.logger?.warn) {
+          api.logger.warn(
+            `[guard] failed to hydrate persisted guard sessions at boot: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
+    })();
     setInterval(() => {
       const cutoff = Date.now() - 3_600_000;
       for (const [key, s] of sessionState) {

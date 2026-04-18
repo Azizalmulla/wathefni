@@ -180,6 +180,114 @@ export function hasVisibleLatin(text: string | null): boolean {
   return /[A-Za-z]/.test(text || "");
 }
 
+/**
+ * Customer's script/register mode for this turn. Orthogonal to the binary
+ * `ar | en` language used by the deterministic canonicals — the LLM reads
+ * this mode to decide whether to reply in Arabic script, Arabizi (Latin
+ * letters with digit-for-letter substitutions), or English. Used as a
+ * hidden signal in the one-brain system context; never exposed to the
+ * customer directly.
+ */
+export type CustomerScriptMode = "english" | "arabic" | "arabizi";
+
+// Kuwaiti Arabizi signal words. When a latin-only input contains any of
+// these tokens (whole-word match) we tag the turn as Arabizi mode so the
+// LLM mirrors script and register back to the customer. Keep this list
+// narrow and highly specific to avoid false positives on English:
+// – Digit-for-letter words (`3laikm`, `7awalli`, `9bya`, `5aldya`, …).
+// – Common Kuwaiti Arabic words that are frequently romanised without
+//   digits (`shlon`, `shlonk`, `shlonkm`, `abshr`, `hala`, `hala wallah`,
+//   `yallah`, `inshallah`, `mashallah`, `akeed`, `zain`, `7adi`, …).
+const ARABIZI_DIGIT_TOKEN_RE = /(?:^|\s|[.,!?;:()"'\u2014\u2013-])[A-Za-z]*[23567][A-Za-z0-9]*(?=$|[\s.,!?;:()"'\u2014\u2013-])/;
+const ARABIZI_WORD_TOKENS = [
+  "shlon", "shlonk", "shlonkm", "shlonich", "shlonich",
+  "hala", "halla", "halla walla", "hala wallah", "shakhbark", "shakhbarkm",
+  "slam", "slamm", "salam",
+  "abshr", "abshur", "abshir",
+  "yallah", "yalla",
+  "inshallah", "inshalla", "isa", "insha allah",
+  "mashallah", "masha allah",
+  "akeed", "akid",
+  "zain", "zein",
+  "walla", "wallah", "walah",
+  "mskeen", "meskeen",
+  "5osh", "khosh",
+  "shino", "shnoo", "shnu", "shino hay",
+  "laish", "laysh", "lesh",
+  "wain", "ween", "feen",
+  "kaifik", "kaifak", "keefak", "keefik",
+  "habibi", "habibti",
+  "3ad",
+  "agool", "agul",
+  "abi", "abghi", "abgha",
+  "6ayeb", "tayeb",
+  "ma3a", "m3a", "ma3ak", "ma3ach",
+  "mub", "mo",
+  "bas", "bass",
+  "3leik", "3leich", "3laikm", "3alaikum",
+  "wa3laikm", "w3laikm",
+  "bkm", "bkm il", "kam",
+  "tws6eel", "tws3eel", "toseel", "tawseel",
+  "msklah", "mashkla", "mushkila",
+  "wayed", "wajed", "wayd",
+  "trawani", "treed", "tabi",
+];
+
+function isProbablyArabizi(text: string): boolean {
+  if (!text) return false;
+  const hasArabic = hasVisibleArabic(text);
+  const hasLatin = hasVisibleLatin(text);
+  // Arabizi only applies when the customer is typing in Latin script.
+  if (!hasLatin) return false;
+  // A mixed-script message with real Arabic takes the Arabic-script path;
+  // any Latin in that message is probably a brand/area name, not Arabizi.
+  if (hasArabic) return false;
+  // Digit-for-letter tokens are the strongest signal. `3laikm`, `7awalli`,
+  // `9bya`, `5aldya`, `6aima`, `2shbilya` all match. We require a digit
+  // embedded in an otherwise-alphabetic token, not a standalone number or
+  // a phone fragment (those are usually separated by punctuation/spaces).
+  if (ARABIZI_DIGIT_TOKEN_RE.test(` ${text} `)) return true;
+  // Fallback to a narrow wordlist for digit-less Arabizi.
+  const lower = text.toLowerCase();
+  for (const token of ARABIZI_WORD_TOKENS) {
+    const re = new RegExp(`(?:^|[^a-z])${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z])`, "i");
+    if (re.test(lower)) return true;
+  }
+  return false;
+}
+
+/**
+ * Classify the customer's turn into one of three mirroring modes.
+ * Orthogonal to the binary `ar | en` language (still returned separately
+ * by `resolveCustomerReplyLanguage`); callers pass BOTH to downstream code:
+ *   – binary `language` drives deterministic canonical selection.
+ *   – `scriptMode` is injected into the one-brain context so the LLM
+ *     mirrors the customer's script and register.
+ */
+export function resolveCustomerScriptMode(params: {
+  visibleText: string | null;
+  explicitLanguage: "ar" | "en" | null;
+  fallbackLanguage: "ar" | "en";
+}): CustomerScriptMode {
+  const text = (params.visibleText || "").trim();
+  if (!text) {
+    return params.fallbackLanguage === "ar" ? "arabic" : "english";
+  }
+  if (hasVisibleArabic(text) && !hasVisibleLatin(text)) {
+    return "arabic";
+  }
+  if (isProbablyArabizi(text)) {
+    return "arabizi";
+  }
+  if (hasVisibleLatin(text) && !hasVisibleArabic(text)) {
+    return "english";
+  }
+  // Mixed-script (rare): prefer Arabic-script to preserve the primary
+  // language unless we have an explicit English signal.
+  if (params.explicitLanguage === "en") return "english";
+  return "arabic";
+}
+
 export function resolveCustomerReplyLanguage(params: {
   visibleText: string | null;
   explicitLanguage: "ar" | "en" | null;

@@ -20,7 +20,7 @@
 
 ## Riders Business Rules
 
-See IDENTITY.md for the full reference. Key facts for quick recall:
+See REFERENCE.md for full policy/FAQ content and TOOLS.md for tool behavior. Key facts for quick recall:
 - Default quote: standard sedan + standard delivery only.
 - Pickup working hours: internal areas `6:00 AM - 12:00 AM`; external areas `6:00 AM - 9:00 PM`.
 - Price inquiries always go through `get_price`. Interpret the customer's area text into a proper name before calling the tool — it verifies and corrects if needed.

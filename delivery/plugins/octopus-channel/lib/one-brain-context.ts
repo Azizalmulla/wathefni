@@ -13,6 +13,7 @@
 import type {
   ConversationFlowStage,
   CustomerIntent,
+  CustomerScriptMode,
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
@@ -201,6 +202,7 @@ export function computeOneBrainNextRequiredAction(params: {
 export function formatOneBrainLiveChannelContext(params: {
   normalizedReplyTarget: string | null;
   preferredReplyLanguage?: "ar" | "en" | null;
+  customerScriptMode?: CustomerScriptMode | null;
   controllerEntry?: PersistedConversationControllerEntry | null;
   quotedRoute?: StoredQuotedRoute | null;
 }): string {
@@ -214,6 +216,9 @@ export function formatOneBrainLiveChannelContext(params: {
   ];
   if (params.preferredReplyLanguage) {
     lines.push(`preferred_reply_language: ${params.preferredReplyLanguage}`);
+  }
+  if (params.customerScriptMode) {
+    lines.push(`customer_script_mode: ${params.customerScriptMode}`);
   }
 
   if (params.quotedRoute) {
@@ -265,7 +270,7 @@ export function formatOneBrainLiveChannelContext(params: {
   lines.push("hard_rules:");
   lines.push("  1. Every price you state must come from a get_price result for the active route this turn or an already-active quoted route above. Never invent, cache, or reuse prices from earlier in the conversation if the route changed.");
   lines.push("  2. The only way to place an order is calling create_simple_order. The server validates the draft, route, service, and price; if it rejects, fix what it asks and try again. Never claim an order was placed without a successful tool result.");
-  lines.push("  3. Reply in the customer's current language. If they switch, you switch.");
+  lines.push("  3. Reply in the customer's current language AND script. If `customer_script_mode` is `arabizi`, reply in Kuwaiti Arabizi (Latin letters + digit-for-letter substitutions like 7/9/5/6/3/2) — NOT Arabic script. If `arabic`, reply in Arabic script (Kuwaiti White Dialect). If `english`, reply in English. If the customer switches mode between turns, switch with them immediately.");
   lines.push("  4. Every reply must move the conversation forward. Never emit a standalone acknowledgement like 'Sure', 'Noted', 'Understood', or 'We'll proceed' without also taking the next concrete action in the same message (ask for the next missing field, show the summary, confirm, etc.).");
 
   lines.push("[/SYSTEM CONTEXT - LIVE CHANNEL]");

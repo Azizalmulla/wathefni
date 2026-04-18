@@ -155,6 +155,30 @@ function pruneStaleEntries(
   return state;
 }
 
+/**
+ * Eagerly load every persisted guard session into memory. Called once at
+ * plugin `register()` to hydrate the in-memory `sessionState` map from disk
+ * so the very first inbound turn after a gateway restart doesn't have to
+ * wait on async disk I/O inside the `before_tool_call` hot path.
+ *
+ * Stale entries (older than `GUARD_STATE_TTL_MS`) are pruned during load.
+ * Entries that cannot be deserialized are silently skipped. Returns a list
+ * of `{ alias, session }` pairs the caller can splat into the live map.
+ */
+export async function hydrateAllPersistedGuardSessions(): Promise<
+  Array<{ alias: string; session: PersistedGuardSessionState }>
+> {
+  const state = pruneStaleEntries(await loadPersistedGuardState());
+  const out: Array<{ alias: string; session: PersistedGuardSessionState }> = [];
+  for (const [alias, serialized] of Object.entries(state)) {
+    const session = deserializeGuardSession(serialized);
+    if (session) {
+      out.push({ alias, session });
+    }
+  }
+  return out;
+}
+
 export async function persistGuardSessionAliases(
   aliases: string[],
   session: PersistedGuardSessionState,

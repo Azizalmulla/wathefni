@@ -24,9 +24,11 @@ import {
   isGeneralServiceInquiry,
   isSimpleGreeting,
   isTrackingIntent,
+  CustomerScriptMode,
   normalizeIntentText,
   PersistedConversationControllerEntry,
   resolveCustomerReplyLanguage,
+  resolveCustomerScriptMode,
   resolveSessionIdentityKey,
 } from "../shared/conversation-policy";
 import { findPersistedGuardSession } from "../shared/guard-state";
@@ -2789,6 +2791,7 @@ function shouldPreferCanonicalToolReply(params: {
   replyText: string;
   canonicalText: string | null;
   preferredLanguage: "ar" | "en";
+  scriptMode?: CustomerScriptMode | null;
   lastToolAgeMs: number;
   extractPricesFromText: (text: string) => string[];
 }): boolean {
@@ -2797,12 +2800,21 @@ function shouldPreferCanonicalToolReply(params: {
   if (!params.toolName || !canonical || !reply || reply === canonical) {
     return false;
   }
-  const wrongLanguageForConversation =
-    params.preferredLanguage === "en"
-      ? containsArabic(reply)
-      : containsLatin(reply);
-  if (wrongLanguageForConversation) {
-    return true;
+  // In Arabizi mode the customer is writing Arabic words in Latin letters; a
+  // Latin-only LLM reply is CORRECT, not a language mismatch. Skip the
+  // script-mismatch swap entirely so we don't clobber a well-formed Arabizi
+  // reply with the Arabic-script canonical. Lossy-content checks below
+  // still apply (e.g. canonical has order id / price / URL that reply is
+  // missing).
+  const scriptMode = params.scriptMode || null;
+  if (scriptMode !== "arabizi") {
+    const wrongLanguageForConversation =
+      params.preferredLanguage === "en"
+        ? containsArabic(reply)
+        : containsLatin(reply);
+    if (wrongLanguageForConversation) {
+      return true;
+    }
   }
   if (params.toolName === "create_simple_order" || params.toolName === "track_order") {
     if (params.lastToolAgeMs > 15_000) {
@@ -3267,6 +3279,12 @@ async function directOpenAiAudioTranscription(params: {
 
 const TRANSCRIPT_REFINE_TIMEOUT_MS = 2500;
 const TRANSCRIPT_REFINE_MODEL = String(env.RIDERS_TRANSCRIPT_REFINE_MODEL || "gpt-5.4").trim();
+// Gate the post-STT refinement LLM call. Default OFF: Whisper with a domain vocab
+// prompt is accurate enough for Kuwaiti Arabic / English code-switching, and the
+// extra LLM hop was adding ~2-3s latency per voice message for marginal gain.
+// Set RIDERS_TRANSCRIPT_REFINE_ENABLED=1 to opt back in if we ever see regressions.
+const TRANSCRIPT_REFINE_ENABLED =
+  String(env.RIDERS_TRANSCRIPT_REFINE_ENABLED || "").trim() === "1";
 
 async function refineTranscriptWithLlm(params: {
   rawText: string;
@@ -3426,7 +3444,7 @@ async function transcribeAudioMessage(params: {
   }
   let finalText = rawText;
   let refined = false;
-  if (rawText.length > 0 && rawText.length < 400) {
+  if (TRANSCRIPT_REFINE_ENABLED && rawText.length > 0 && rawText.length < 400) {
     const refinedText = await refineTranscriptWithLlm({
       rawText,
       language: languageHint,
@@ -3717,6 +3735,17 @@ async function handleInboundMessage(params: {
     preferFallbackForAudioTranscript: Boolean(audioMessage),
     preferFallbackForLowSignalText: true,
   });
+  // Script/register mirror signal for the one-brain LLM. Orthogonal to the
+  // binary ar/en language: the latter drives deterministic canonical choice,
+  // this one tells the LLM whether to render the reply in Arabic script,
+  // Kuwaiti Arabizi (Latin letters + digit-for-letter substitutions), or
+  // plain English. Lets the bot mirror "Slam 3laikm" with "w 3laikm il slam"
+  // instead of formal Arabic script.
+  let customerScriptMode: CustomerScriptMode = resolveCustomerScriptMode({
+    visibleText: turnSignals.languageSignalText || null,
+    explicitLanguage: explicitLanguageRequestRaw,
+    fallbackLanguage: resolveControllerFallbackLanguage(conversationControllerEntry),
+  });
   const promptSessionRevision =
     senderRole === "customer"
       ? await resolveAgentWorkspacePromptRevision(api.config, resolvedAgentId)
@@ -3786,6 +3815,7 @@ async function handleInboundMessage(params: {
       in_type: inboundType,
       in: inboundSnippet,
       lang: preferredReplyLanguage || null,
+      script: customerScriptMode,
       mode: "one_brain",
       state: {
         stage: conversationControllerEntry?.stage || null,
@@ -4530,6 +4560,7 @@ async function handleInboundMessage(params: {
     isOneBrain: isOneBrainConversation(replyTarget),
     currentIntent: currentCustomerIntent,
     preferredReplyLanguage,
+    customerScriptMode,
     conversationStage: conversationControllerEntry?.stage ?? null,
     bookingStep: conversationControllerEntry?.bookingStep ?? null,
     controllerEntry: conversationControllerEntry,
@@ -4899,6 +4930,7 @@ async function handleInboundMessage(params: {
               replyText,
               canonicalText: preferredCanonicalText,
               preferredLanguage: preferredReplyLanguage,
+              scriptMode: customerScriptMode,
               lastToolAgeMs: Math.max(0, Date.now() - sessionGuard.lastToolTs),
               extractPricesFromText: guardState.extractPricesFromText,
             })) {
@@ -5410,6 +5442,33 @@ const octopusPlugin: ChannelPlugin<ResolvedOctopusAccount> = {
       approveHint: "Add the conversation id or phone number to channels.octopus.allowFrom.",
       normalizeEntry: (raw: string) => normalizeAllowEntry(raw),
     }),
+  },
+  // OpenClaw's channel-health-monitor polls `plugin.gateway.startAccount` as
+  // the channel's lifecycle handle. Without it, `snapshot.running` never
+  // flips to true and the monitor restarts the channel every ~5-10 minutes
+  // with `reason: stopped`. Octopus is a pure webhook receiver (inbound HTTP
+  // is registered via `api.registerHttpRoute` at plugin load), so there is no
+  // long-lived socket to connect. We keep the task alive by awaiting the
+  // abort signal, which flips `running: true` while the gateway is up.
+  //
+  // `stopAccount` is a no-op because there is nothing to tear down beyond
+  // the abort signal the gateway already fires for us.
+  status: {
+    skipStaleSocketHealthCheck: true,
+  },
+  gateway: {
+    startAccount: async (params: { abortSignal: AbortSignal }) => {
+      const { abortSignal } = params;
+      if (abortSignal.aborted) return;
+      await new Promise<void>((resolve) => {
+        const onAbort = () => {
+          abortSignal.removeEventListener("abort", onAbort);
+          resolve();
+        };
+        abortSignal.addEventListener("abort", onAbort, { once: true });
+      });
+    },
+    stopAccount: async () => {},
   },
 };
 

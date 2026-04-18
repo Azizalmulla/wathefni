@@ -14,6 +14,7 @@ import type {
   BookingCollectionStep,
   ConversationFlowStage,
   CustomerIntent,
+  CustomerScriptMode,
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
 import type { InterpretedCustomerTurn } from "./interpreter-types";
@@ -35,6 +36,7 @@ export function formatLiveChannelContext(
     currentIntent?: CustomerIntent | null;
     interpretedTurn?: InterpretedCustomerTurn | null;
     preferredReplyLanguage?: "ar" | "en" | null;
+    customerScriptMode?: CustomerScriptMode | null;
     conversationStage?: ConversationFlowStage | null;
     bookingStep?: BookingCollectionStep | null;
     controllerEntry?: PersistedConversationControllerEntry | null;
@@ -53,6 +55,7 @@ export function formatLiveChannelContext(
     return formatOneBrainLiveChannelContext({
       normalizedReplyTarget,
       preferredReplyLanguage: options?.preferredReplyLanguage,
+      customerScriptMode: options?.customerScriptMode,
       controllerEntry: options?.controllerEntry,
       quotedRoute: options?.quotedRoute,
     });

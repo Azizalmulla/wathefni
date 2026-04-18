@@ -329,7 +329,27 @@ export function buildDeterministicOrderSummary(params: {
 /**
  * Main entry point. Classifies the outbound reply and, when a bad shape is
  * detected in a state where we can produce a deterministic substitute,
- * replaces the reply with the canonical summary.
+ * replaces the reply with a canonical one.
+ *
+ * Substitution policy, in priority order:
+ *
+ *   1. `stub_summary` or `route_price_recap` with a complete draft →
+ *      replace with the structured full order summary. This is a pure
+ *      data-driven template (block/street/house/phone/price fields) — no
+ *      hand-written wording lives here, so there's no drift risk against
+ *      SKILL.md.
+ *   2. `standalone_ack` when draft is complete and we have a quote +
+ *      service type → also substitute the full summary. A bare "Sure"
+ *      after the draft is complete is exactly the stub we want to replace,
+ *      and the summary is still data-driven.
+ *
+ * For every other bad shape (notably bare `standalone_ack` mid-booking, or
+ * any `stub_summary` when the draft is still incomplete) we DO NOT
+ * substitute. We log the interception and let the reply through — the next
+ * inbound turn self-corrects because `next_required_action` in the
+ * one-brain context forces the LLM to advance. Writing deterministic
+ * per-field question strings here would duplicate the SKILL.md wording and
+ * silently drift against it whenever the booking flow is tuned.
  *
  * Never throws. Returns the (possibly substituted) reply text along with a
  * `replaced` flag and reason so the caller can log the interception.
@@ -343,9 +363,8 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
   const entry = params.entry;
   const draftComplete = params.missingFields.length === 0;
 
-  // Only attempt deterministic substitution when we have everything needed to
-  // build a full summary. For stub_summary or route_price_recap in a complete
-  // state, we synthesize the canonical summary.
+  // (1) Full summary substitute when draft is complete and the reply is a
+  // stub / route-recap.
   if (
     entry &&
     draftComplete &&
@@ -362,9 +381,28 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
     };
   }
 
-  // Otherwise: don't interfere. Log-only. Keeps us safe from false positives
-  // during collection turns and avoids customer confusion from reply swaps we
-  // aren't confident about.
+  // (2) Full summary substitute when draft is complete and the reply is a
+  // bare standalone ack. ("Sure", "تمام" with no content after the draft
+  // is already full — the customer is waiting for the summary, not an ack.)
+  if (
+    entry &&
+    draftComplete &&
+    entry.quotedPrice != null &&
+    entry.selectedDeliveryType &&
+    shape === "standalone_ack"
+  ) {
+    const substitute = buildDeterministicOrderSummary({ entry, language: params.language });
+    return {
+      replyText: substitute,
+      replaced: true,
+      shape,
+      reason: `substituted_full_summary:standalone_ack_when_draft_complete`,
+    };
+  }
+
+  // Otherwise: log-only. A bare ack mid-booking or an incomplete-draft
+  // stub is annoying but not dangerous — the next turn's
+  // `next_required_action` directive pulls the LLM back on track.
   return {
     replyText: params.replyText,
     replaced: false,

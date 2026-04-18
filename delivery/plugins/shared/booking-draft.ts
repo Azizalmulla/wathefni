@@ -154,10 +154,30 @@ export function looksLikeInteriorDetail(value: string | null | undefined): boole
   if (value == null) return false;
   const s = String(value).toLowerCase().trim();
   if (!s) return false;
-  // English / Arabizi keywords
-  if (/\b(apt|apartment|apartement|flat|floor|fl|office|door|gate|suite|unit)\b/.test(s)) return true;
+  // English / Arabizi keywords — common and common-variant spellings.
+  if (/\b(apt|appt|apartment|apartement|flat|floor|fl|office|door|gate|suite|unit|room|lobby|basement|mezzanine|penthouse|ground\s*floor|first\s*floor|second\s*floor|upper\s*floor|lower\s*floor)\b/.test(s)) return true;
   // Arabic keywords (no word-boundary support for Arabic script in JS regex)
-  if (/(شقه|شقة|فلات|دور|طابق|باب|مكتب|بوابة)/.test(s)) return true;
+  if (/(شقه|شقة|فلات|دور|طابق|باب|مكتب|بوابة|ارضي|أرضي|علوي|سفلي|قبو)/.test(s)) return true;
+  return false;
+}
+
+// A valid `address_house` value is a short street-level identifier a driver
+// reads off a façade — "17", "23b", "villa 4", "tower A", "bldg 12". It is
+// NEVER a sentence or a multi-piece description. This length cap catches the
+// case where the LLM dumps an entire address sentence into house without the
+// interior keywords triggering. 32 chars is generous for "Villa 123, Tower B".
+const ADDRESS_HOUSE_MAX_LEN = 32;
+
+export function looksLikeSuspiciousHouseValue(value: string | null | undefined): boolean {
+  if (value == null) return false;
+  const s = String(value).trim();
+  if (!s) return false;
+  if (s.length > ADDRESS_HOUSE_MAX_LEN) return true;
+  // No digits anywhere AND more than 2 words → almost certainly not a house
+  // number (real pure-text house identifiers are short: "villa", "tower A").
+  const hasDigit = /\d/.test(s);
+  const wordCount = s.split(/\s+/).filter(Boolean).length;
+  if (!hasDigit && wordCount > 2) return true;
   return false;
 }
 
@@ -331,6 +351,18 @@ export function applyBookingFieldPatch(params: {
     rejected.push({
       field: "address_house",
       reason: "address_house_is_interior_detail",
+      received: String(p.address_house),
+    });
+  } else if (p.address_house != null && looksLikeSuspiciousHouseValue(p.address_house)) {
+    // Catches sentence-shaped or overlong values that slipped past the
+    // interior-keyword detector (e.g. "Villa 4 near the mosque next to the
+    // gas station", "ground", "the big white building on the corner").
+    // Preserve the information in `address_extra` and force the LLM to ask
+    // the customer for the actual building number.
+    rerouteHouseToExtra = String(p.address_house).trim();
+    rejected.push({
+      field: "address_house",
+      reason: "address_house_suspicious_value",
       received: String(p.address_house),
     });
   } else if (p.address_house != null) {
