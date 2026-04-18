@@ -223,11 +223,7 @@ import {
   formatCustomerProfileContext,
   formatBehaviorPolicyContext,
 } from "./lib/context-blocks";
-import type {
-  InterpretedCustomerTurn,
-  InterpretedCustomerTurnAction,
-  InterpretedBookingFields,
-} from "./lib/interpreter-types";
+import type { InterpretedBookingFields } from "./lib/interpreter-types";
 
 const nodeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
 const env = nodeProcess?.env ?? {};
@@ -1642,14 +1638,15 @@ async function findSessionGuardEntryWithPersistence(
 // owns every customer-facing message. Deterministic guards only check
 // prices at outbound and order preconditions at create time.
 //
-// These constants (formerly env-flag-driven via RIDERS_RESPONDER_FIRST,
-// RIDERS_ONE_BRAIN, RIDERS_ONE_BRAIN_ALLOWLIST) are hardcoded to `true`
-// so prod behavior cannot be silently changed via environment drift.
-// isOneBrainConversation() is kept as a predicate (not just `true`)
+// `RESPONDER_FIRST_FLAG` is hardcoded to `true` (formerly env-flag-driven via
+// RIDERS_RESPONDER_FIRST). It remains a named constant because the one
+// surviving legacy `else if` branch in the deliver() drain pipeline still
+// references it; TS cannot prove the branch is unreachable without it, and
+// keeping it keeps that documented rollback point visible.
+// `isOneBrainConversation()` is kept as a predicate (not just `true`)
 // because ~10 downstream call sites pass it a replyTarget argument; the
 // signature is preserved so TS doesn't complain.
 const RESPONDER_FIRST_FLAG = true;
-const ONE_BRAIN_FLAG = true;
 function isOneBrainConversation(_replyTarget: string | null | undefined): boolean {
   return true;
 }
@@ -1763,9 +1760,8 @@ function applyStandaloneLocationAssignment(params: {
 
 function getDeclaredLocationRole(params: {
   visibleText: string;
-  interpretedTurn: InterpretedCustomerTurn | null;
 }): "pickup" | "delivery" | null {
-  return getLocationRoleSelection(params.visibleText) || params.interpretedTurn?.location_role_hint || null;
+  return getLocationRoleSelection(params.visibleText) || null;
 }
 
 function applyVolunteeredFutureBookingFields(params: {
@@ -3749,35 +3745,18 @@ async function handleInboundMessage(params: {
   const activeQuotedRoute = isStoredQuotedRouteFresh(preDispatchGuardEntry.session?.lastQuotedRoute)
     ? preDispatchGuardEntry.session?.lastQuotedRoute ?? null
     : null;
-  // Interpreter LLM call is permanently disabled. ONE-BRAIN owns every
-  // customer turn in production (RIDERS_ONE_BRAIN=1 with empty allowlist
-  // has applied globally for months and the interpreter path has not fired
-  // in prod). Statically nulling the branch here makes downstream
-  // `interpretedCustomerTurn?.action === X` checks evaluate to `false`
-  // just like they did at runtime, but now it's provable at compile time.
-  // Dead function, flags, and types will be removed in a follow-up commit.
-  const interpretedCustomerTurn: InterpretedCustomerTurn | null = null;
-  if (RESPONDER_FIRST_FLAG && senderRole === "customer") {
+  // Clear any stale responder-state ops from the previous turn so this
+  // turn's tool calls start with an empty queue.
+  if (senderRole === "customer") {
     try {
       clearResponderStateOps(conversationId);
     } catch {}
   }
-  const explicitLanguageRequest =
-    explicitLanguageRequestRaw ||
-    (
-      interpretedCustomerTurn?.action === "language_switch"
-        ? (interpretedCustomerTurn.requested_language || null)
-        : null
-    );
-  if (explicitLanguageRequest && explicitLanguageRequest !== explicitLanguageRequestRaw) {
-    preferredReplyLanguage = resolveCustomerReplyLanguage({
-      visibleText: turnSignals.languageSignalText || null,
-      explicitLanguage: explicitLanguageRequest,
-      fallbackLanguage: resolveControllerFallbackLanguage(conversationControllerEntry),
-      preferFallbackForAudioTranscript: Boolean(audioMessage),
-      preferFallbackForLowSignalText: true,
-    });
-  }
+  // `explicitLanguageRequest` used to merge a raw channel-level signal with the
+  // interpreter LLM's `language_switch` hint. With the interpreter removed,
+  // the raw value IS the explicit request, so the `!== raw` reconciliation
+  // block below was unreachable and has been deleted.
+  const explicitLanguageRequest = explicitLanguageRequestRaw;
   if (
     !explicitLanguageRequest &&
     conversationControllerEntry &&
@@ -3790,35 +3769,6 @@ async function handleInboundMessage(params: {
     )
   ) {
     preferredReplyLanguage = resolveControllerFallbackLanguage(conversationControllerEntry);
-  }
-  if (senderRole === "customer" && interpretedCustomerTurn) {
-    const bf = interpretedCustomerTurn.booking_fields;
-    const bookingLog =
-      bf &&
-      (bf.sender_name ||
-        bf.sender_phone ||
-        bf.phone_decision ||
-        bf.recipient_name ||
-        bf.recipient_phone ||
-        bf.address_block ||
-        bf.address_street ||
-        bf.address_house)
-        ? ` booking=${[
-            bf.sender_name ? `sn=${JSON.stringify(bf.sender_name)}` : null,
-            bf.sender_phone ? `sp=${bf.sender_phone}` : null,
-            bf.phone_decision ? `pd=${bf.phone_decision}` : null,
-            bf.recipient_name ? `rn=${JSON.stringify(bf.recipient_name)}` : null,
-            bf.recipient_phone ? `rp=${bf.recipient_phone}` : null,
-            bf.address_block ? `ab=${JSON.stringify(bf.address_block)}` : null,
-            bf.address_street ? `as=${JSON.stringify(bf.address_street)}` : null,
-            bf.address_house ? `ah=${JSON.stringify(bf.address_house)}` : null,
-          ]
-            .filter(Boolean)
-            .join(" ")}`
-        : "";
-    api.logger.info(
-      `[turn-interpreter] conversation=${conversationId} action=${interpretedCustomerTurn.action} selected=${interpretedCustomerTurn.selected_delivery_type || "na"} useActiveQuote=${interpretedCustomerTurn.should_use_active_quote ? "yes" : "no"} routeChanged=${interpretedCustomerTurn.route_changed ? "yes" : "no"} confidence=${interpretedCustomerTurn.confidence}${bookingLog}`,
-    );
   }
   try {
     const inboundType = locationMessage
@@ -3836,18 +3786,7 @@ async function handleInboundMessage(params: {
       in_type: inboundType,
       in: inboundSnippet,
       lang: preferredReplyLanguage || null,
-      mode: RESPONDER_FIRST_FLAG ? "responder_first" : "interpreter_first",
-      interp: interpretedCustomerTurn
-        ? {
-            action: interpretedCustomerTurn.action,
-            conf: interpretedCustomerTurn.confidence,
-            selected: interpretedCustomerTurn.selected_delivery_type || null,
-            route_changed: Boolean(interpretedCustomerTurn.route_changed),
-            use_active_quote: Boolean(interpretedCustomerTurn.should_use_active_quote),
-            fields: interpretedCustomerTurn.booking_fields || null,
-            location_role_hint: interpretedCustomerTurn.location_role_hint || null,
-          }
-        : null,
+      mode: "one_brain",
       state: {
         stage: conversationControllerEntry?.stage || null,
         booking_step: conversationControllerEntry?.bookingStep || null,
@@ -3876,13 +3815,9 @@ async function handleInboundMessage(params: {
         })
       : null;
   let controllerTransitionHint: string | null = null;
-  const llmSaysBookingData =
-    interpretedCustomerTurn?.action === "booking_step_input" ||
-    interpretedCustomerTurn?.action === "correct_booking_field";
   if (
     senderRole === "customer" &&
     turnSignals.workflowInputText &&
-    !llmSaysBookingData &&
     shouldResetControllerForNewRouteMessage({
       controllerEntry: conversationControllerEntry,
       visibleText: turnSignals.workflowInputText,
@@ -3916,9 +3851,7 @@ async function handleInboundMessage(params: {
       );
     }
   }
-  const isGreetingTurn =
-    interpretedCustomerTurn?.action === "greeting" ||
-    (!interpretedCustomerTurn && currentCustomerIntent === "greeting");
+  const isGreetingTurn = currentCustomerIntent === "greeting";
   const shouldContinueGreetingInActiveFlow =
     senderRole === "customer" &&
     conversationControllerEntry &&
@@ -3988,44 +3921,17 @@ async function handleInboundMessage(params: {
     conversationControllerEntry?.bookingDraft.pendingLocation &&
     replyTarget;
   if (hasPendingLocationToAssign) {
-    // Layer 1: deterministic fast-path
-    let pendingLocationRoleResult =
+    // Deterministic fast-path: keyword match on visible text to bind the
+    // pending location to pickup or delivery. One-brain handles the nuanced
+    // cases via the `apply_booking_field` tool with an explicit `address_role`.
+    // The legacy Layer-2 interpreter `location_role_hint` path has been removed.
+    const pendingLocationRoleResult =
       turnSignals.workflowInputText
         ? applyPendingLocationRoleSelection({
             controllerEntry: conversationControllerEntry,
             visibleText: turnSignals.workflowInputText,
           })
         : null;
-    // Layer 2: LLM intelligence — trust GPT-5.4's location_role_hint
-    if (!pendingLocationRoleResult && interpretedCustomerTurn?.location_role_hint) {
-      const llmRole = interpretedCustomerTurn.location_role_hint;
-      const pendingLocation = conversationControllerEntry.bookingDraft.pendingLocation;
-      let nextEntry: PersistedConversationControllerEntry = {
-        ...conversationControllerEntry,
-        bookingDraft: {
-          ...conversationControllerEntry.bookingDraft,
-          pendingLocation: null,
-        },
-      };
-      if (llmRole === "pickup") {
-        nextEntry.bookingDraft.pickupLocation = pendingLocation;
-        nextEntry.bookingDraft.pickupBlock = null;
-        nextEntry.bookingDraft.pickupStreet = null;
-        nextEntry.bookingDraft.pickupHouse = null;
-      } else {
-        nextEntry.bookingDraft.deliveryLocation = pendingLocation;
-        nextEntry.bookingDraft.deliveryBlock = null;
-        nextEntry.bookingDraft.deliveryStreet = null;
-        nextEntry.bookingDraft.deliveryHouse = null;
-      }
-      if (conversationControllerEntry.stage === "collecting_booking_details") {
-        nextEntry = applyBookingDraftProgress(nextEntry);
-      }
-      pendingLocationRoleResult = { entry: nextEntry, role: llmRole };
-      api.logger.info(
-        `[controller] pending location resolved via LLM location_role_hint=${llmRole} conversation=${conversationId}`,
-      );
-    }
     if (pendingLocationRoleResult) {
       const shouldInvalidateQuoteContext =
         pendingLocationRoleResult.entry.stage !== "collecting_booking_details" &&
@@ -4090,105 +3996,12 @@ async function handleInboundMessage(params: {
       );
     }
   }
-  const shouldAdvanceBookingControllerFromText =
-    // Responder-first / one-brain modes: draft mutations come exclusively from
-    // LLM tool calls (apply_booking_field). Do not let the legacy heuristic
-    // parser run — it pollutes bookingDraft by capturing arbitrary text
-    // ("thenumber is", "Ok") as field values.
-    !RESPONDER_FIRST_FLAG &&
-    !isOneBrainConversation(replyTarget) &&
-    senderRole === "customer" &&
-    (Boolean(turnSignals.workflowInputText) || hasStructuredBookingLocation(persistedResolvedLocation)) &&
-    Boolean(conversationControllerEntry) &&
-    (
-      interpretedCustomerTurn?.action === "booking_step_input" ||
-      interpretedCustomerTurn?.action === "correct_booking_field" ||
-      (
-        conversationControllerEntry?.stage === "collecting_booking_details" &&
-        hasBookingSignalForCurrentStep({
-          controllerEntry: conversationControllerEntry,
-          visibleText: turnSignals.workflowInputText,
-          replyTarget,
-          location: persistedResolvedLocation,
-        }) &&
-        ![
-          "greeting",
-          "language_switch",
-          "service_overview",
-          "pricing_request",
-          "same_route_quote_option",
-          "same_route_show_other_options",
-          "passenger_transport_request",
-          "handoff",
-        ].includes(interpretedCustomerTurn?.action || "") &&
-        !extractTrackingOrderId(turnSignals.workflowInputText) &&
-        !isTrackingIntent(turnSignals.workflowInputText)
-      )
-    );
-  // Handle mid-booking field corrections: apply corrected fields regardless of current step,
-  // then re-derive the booking step from the updated draft.
-  if (
-    shouldAdvanceBookingControllerFromText &&
-    interpretedCustomerTurn?.action === "correct_booking_field" &&
-    interpretedCustomerTurn.booking_fields &&
-    conversationControllerEntry &&
-    (
-      conversationControllerEntry.stage === "collecting_booking_details" ||
-      conversationControllerEntry.stage === "summary_shown" ||
-      conversationControllerEntry.stage === "awaiting_confirmation" ||
-      conversationControllerEntry.bookingStep === "summary_pending" ||
-      conversationControllerEntry.bookingStep === "awaiting_summary_confirmation"
-    )
-  ) {
-    const fields = interpretedCustomerTurn.booking_fields;
-    const correctionResult = applyBookingFieldCorrection({
-      controllerEntry: conversationControllerEntry,
-      visibleText: turnSignals.workflowInputText,
-      replyTarget,
-      bookingFields: fields,
-    });
-    conversationControllerEntry = correctionResult.entry;
-    if (correctionResult.status === "ambiguous_address_role") {
-      controllerTransitionHint = "correction_ambiguous_address";
-    } else if (correctionResult.status === "no_op") {
-      controllerTransitionHint = "correction_unparsed";
-    } else if (
-      conversationControllerEntry.stage === "awaiting_confirmation" ||
-      conversationControllerEntry.bookingStep === "awaiting_summary_confirmation" ||
-      conversationControllerEntry.bookingStep === "summary_pending"
-    ) {
-      controllerTransitionHint = "summary_ready";
-    } else {
-      controllerTransitionHint = `booking_step_advanced:${conversationControllerEntry.bookingStep}`;
-    }
-    api.logger.info(
-      `[controller] booking field correction status=${correctionResult.status} conversation=${conversationId} corrected_fields=${JSON.stringify(fields)} step=${conversationControllerEntry.bookingStep} hint=${controllerTransitionHint}`,
-    );
-  } else if (shouldAdvanceBookingControllerFromText) {
-    conversationControllerEntry = advanceBookingControllerFromCustomerText({
-      controllerEntry: conversationControllerEntry,
-      visibleText: turnSignals.workflowInputText,
-      replyTarget,
-      bookingFields:
-        interpretedCustomerTurn?.action === "booking_step_input"
-          ? interpretedCustomerTurn.booking_fields ?? null
-          : null,
-      location: persistedResolvedLocation,
-    });
-  }
-  if (
-    shouldAdvanceBookingControllerFromText &&
-    !controllerTransitionHint?.startsWith("location_saved:") &&
-    conversationControllerEntry?.stage === "collecting_booking_details" &&
-    (
-      conversationControllerEntry.bookingStep === "sender" ||
-      conversationControllerEntry.bookingStep === "recipient" ||
-      conversationControllerEntry.bookingStep === "pickup_address" ||
-      conversationControllerEntry.bookingStep === "delivery_address"
-    )
-  ) {
-    controllerTransitionHint = `booking_step_advanced:${conversationControllerEntry.bookingStep}`;
-  }
+  // Legacy heuristic booking-text advancer removed: one-brain owns all draft
+  // mutations via `apply_booking_field` tool calls drained below. The old
+  // `shouldAdvanceBookingControllerFromText` / `advanceBookingControllerFromCustomerText` /
+  // `applyBookingFieldCorrection` pipeline was guarded behind `!RESPONDER_FIRST_FLAG &&
+  // !isOneBrainConversation(...)` — both constants now `true`, so the branch was
+  // provably unreachable. See Stage 4 of the interpreter collapse.
   if (
     senderRole === "customer" &&
     replyTarget &&
@@ -4243,9 +4056,7 @@ async function handleInboundMessage(params: {
     // Greeting during active booking now routed through agent via controllerTransitionHint
   }
   // Tracking without order ID: LLM already knows from IDENTITY.md to ask for ORDER-XXXXX format
-  const effectiveLanguageSwitch: "ar" | "en" | null =
-    explicitLanguageRequest ||
-    (interpretedCustomerTurn?.action === "language_switch" ? interpretedCustomerTurn.requested_language : null);
+  const effectiveLanguageSwitch: "ar" | "en" | null = explicitLanguageRequest;
   if (senderRole === "customer" && replyTarget && effectiveLanguageSwitch) {
     if (conversationControllerEntry) {
       conversationControllerEntry = {
@@ -4306,7 +4117,6 @@ async function handleInboundMessage(params: {
   ) {
     const declaredStandaloneRole = getDeclaredLocationRole({
       visibleText: turnSignals.workflowInputText,
-      interpretedTurn: interpretedCustomerTurn,
     });
     if (
       declaredStandaloneRole &&
@@ -4413,7 +4223,6 @@ async function handleInboundMessage(params: {
   ) {
     const declaredLocationRole = getDeclaredLocationRole({
       visibleText: turnSignals.workflowInputText,
-      interpretedTurn: interpretedCustomerTurn,
     });
     conversationControllerEntry = {
       ...(declaredLocationRole
@@ -4466,10 +4275,7 @@ async function handleInboundMessage(params: {
   if (
     senderRole === "customer" &&
     replyTarget &&
-    (
-      interpretedCustomerTurn?.action === "passenger_transport_request" ||
-      currentCustomerIntent === "passenger_transport_request"
-    )
+    currentCustomerIntent === "passenger_transport_request"
   ) {
     if (conversationControllerEntry) {
       const hasActiveQuote = !!conversationControllerEntry.quoteRouteKey && conversationControllerEntry.stage === "quoted";
@@ -4504,45 +4310,9 @@ async function handleInboundMessage(params: {
       `[controller] passenger transport request routed through agent conversation=${conversationId} lang=${preferredReplyLanguage}`,
     );
   }
-  if (
-    senderRole === "customer" &&
-    replyTarget &&
-    conversationControllerEntry &&
-    interpretedCustomerTurn?.action === "cancel_booking" &&
-    (
-      conversationControllerEntry.stage === "collecting_booking_details" ||
-      conversationControllerEntry.stage === "summary_shown" ||
-      conversationControllerEntry.stage === "awaiting_confirmation"
-    )
-  ) {
-    const prevStage = conversationControllerEntry.stage;
-    conversationControllerEntry = {
-      ...conversationControllerEntry,
-      stage: "idle",
-      bookingStep: "none",
-      bookingDraft: createEmptyBookingDraft(),
-      pendingReplyText: null,
-      quoteRouteKey: null,
-      quoteTs: null,
-      quotePickupAreaNameEn: null,
-      quotePickupAreaNameAr: null,
-      quoteDropoffAreaNameEn: null,
-      quoteDropoffAreaNameAr: null,
-      selectedQuoteOptionType: null,
-      selectedQuoteOptionLabelAr: null,
-      selectedQuoteOptionLabelEn: null,
-      selectedQuoteOptionPrice: null,
-      selectedQuoteOptionDirectChatBookingStatus: null,
-      selectedDeliveryType: null,
-      quotedPrice: null,
-    };
-    await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-    mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-    controllerTransitionHint = "booking_cancelled";
-    api.logger.info(
-      `[controller] booking cancelled by customer routed through agent conversation=${conversationId} prevStage=${prevStage}`,
-    );
-  }
+  // Legacy interpreter-driven `cancel_booking` fast-path removed. One-brain
+  // emits a `cancel_booking` responder op from the LLM tool; the drain below
+  // clears booking state. See Stage 4 of the interpreter collapse.
   if (
     senderRole === "customer" &&
     replyTarget &&
@@ -4554,10 +4324,7 @@ async function handleInboundMessage(params: {
       conversationControllerEntry.bookingStep === "awaiting_summary_confirmation"
     ) &&
     turnSignals.workflowInputText &&
-    isSummaryEditRequest(turnSignals.workflowInputText) &&
-    interpretedCustomerTurn?.action !== "correct_booking_field" &&
-    interpretedCustomerTurn?.action !== "pricing_request" &&
-    interpretedCustomerTurn?.action !== "cancel_booking"
+    isSummaryEditRequest(turnSignals.workflowInputText)
   ) {
     conversationControllerEntry = {
       ...conversationControllerEntry,
@@ -4637,22 +4404,16 @@ async function handleInboundMessage(params: {
     conversationControllerEntry.quotePresentedToCustomer !== false &&
     hasActiveQuotedBookingAuthority(conversationControllerEntry) &&
     activeQuotedRoute;
-  const interpreterSaidStartBooking = interpretedCustomerTurn?.action === "start_booking";
   const safetyNetMatched = Boolean(
     turnSignals.workflowInputText && isBookingStartIntent(turnSignals.workflowInputText),
   );
   if (quotedStagePreDispatch) {
     api.logger.info(
-      `[controller] quoted-stage turn conversation=${conversationId} interpreter_action=${interpretedCustomerTurn?.action || "na"} interpreter_start_booking=${interpreterSaidStartBooking ? "yes" : "no"} safety_net_matched=${safetyNetMatched ? "yes" : "no"} selected_delivery_type=${interpretedCustomerTurn?.selected_delivery_type || "na"}`,
+      `[controller] quoted-stage turn conversation=${conversationId} safety_net_matched=${safetyNetMatched ? "yes" : "no"}`,
     );
   }
-  if (quotedStagePreDispatch && (interpreterSaidStartBooking || safetyNetMatched)) {
-    const requestedStartBookingOption =
-      interpretedCustomerTurn?.action === "start_booking" && interpretedCustomerTurn.selected_delivery_type
-        ? getQuotedRouteOption(activeQuotedRoute, interpretedCustomerTurn.selected_delivery_type)
-        : null;
+  if (quotedStagePreDispatch && safetyNetMatched) {
     const selectedQuotedOption =
-      requestedStartBookingOption ||
       getQuotedRouteOption(activeQuotedRoute, conversationControllerEntry.selectedQuoteOptionType) ||
       getQuotedRouteOption(activeQuotedRoute, conversationControllerEntry.selectedDeliveryType) ||
       getActiveSelectedQuotedOption(activeQuotedRoute, conversationControllerEntry);
@@ -4768,7 +4529,6 @@ async function handleInboundMessage(params: {
   const channelContext = formatLiveChannelContext(senderRole, replyTarget, {
     isOneBrain: isOneBrainConversation(replyTarget),
     currentIntent: currentCustomerIntent,
-    interpretedTurn: interpretedCustomerTurn,
     preferredReplyLanguage,
     conversationStage: conversationControllerEntry?.stage ?? null,
     bookingStep: conversationControllerEntry?.bookingStep ?? null,
@@ -4835,8 +4595,6 @@ async function handleInboundMessage(params: {
     OriginatingTo: `octopus:${conversationId}`,
     ControllerStateKey: controllerStateKey,
     CustomerIntentHint: currentCustomerIntent || undefined,
-    CustomerTurnActionHint: interpretedCustomerTurn?.action || undefined,
-    CustomerTurnActionConfidenceHint: interpretedCustomerTurn?.confidence || undefined,
     ConversationStageHint: conversationControllerEntry?.stage || undefined,
     BookingStepHint: conversationControllerEntry?.bookingStep || undefined,
     PreferredReplyLanguage: preferredReplyLanguage,
@@ -4862,30 +4620,9 @@ async function handleInboundMessage(params: {
   api.logger.info(
     `[octopus] inbound routed account=${account.accountId} conversation=${conversationId} agent=${resolvedAgentId} senderRole=${senderRole} replyTarget=${replyTarget || ""} intent=${currentCustomerIntent || "na"} stage=${conversationControllerEntry?.stage || "na"} promptSessionRevision=${promptSessionRevision || "na"}`,
   );
-  if (
-    isGreetingTurn &&
-    senderRole === "customer" &&
-    replyTarget &&
-    !controllerTransitionHint &&
-    !isOneBrainConversation(replyTarget) &&
-    (!conversationControllerEntry || conversationControllerEntry.stage === "idle" || conversationControllerEntry.stage === "quoted")
-  ) {
-    typingLoop.stop();
-    const greetingText = buildDeterministicGreetingReply(preferredReplyLanguage);
-    await sendOctopusTextReply({
-      api,
-      account,
-      conversationId,
-      replyTarget,
-      text: greetingText,
-      source: "deterministic_greeting",
-      ingressIds,
-    });
-    api.logger.info(
-      `[octopus] deterministic greeting sent conversation=${conversationId} lang=${preferredReplyLanguage}`,
-    );
-    return;
-  }
+  // Legacy deterministic-greeting early-return removed: one-brain owns
+  // greetings and replies via the agent LLM. The old branch was gated behind
+  // `!isOneBrainConversation(replyTarget)` which is now provably `false`.
   try {
     await api.runtime.channel.reply.dispatchReplyWithBufferedBlockDispatcher({
       ctx: ctxPayload,
@@ -5314,25 +5051,15 @@ async function handleInboundMessage(params: {
             conversationControllerEntry.stage === "quoted" &&
             conversationControllerEntry.quotePresentedToCustomer !== false &&
             hasActiveQuotedBookingAuthority(conversationControllerEntry) &&
-            (
-              interpretedCustomerTurn?.action === "start_booking" ||
-              (
-                turnSignals.workflowInputText &&
-                isBookingStartIntent(turnSignals.workflowInputText)
-              )
-            )
+            turnSignals.workflowInputText &&
+            isBookingStartIntent(turnSignals.workflowInputText)
           ) {
             const latestQuotedRoute =
               sessionGuard?.lastToolName === "get_price" && sessionGuard.lastQuotedRoute
                 ? sessionGuard.lastQuotedRoute
                 : null;
             const effectiveQuotedRoute = latestQuotedRoute || activeQuotedRoute;
-            const requestedStartBookingOption =
-              interpretedCustomerTurn?.action === "start_booking" && interpretedCustomerTurn.selected_delivery_type
-                ? getQuotedRouteOption(effectiveQuotedRoute, interpretedCustomerTurn.selected_delivery_type)
-                : null;
             const selectedQuotedOption =
-              requestedStartBookingOption ||
               getQuotedRouteOption(effectiveQuotedRoute, conversationControllerEntry.selectedQuoteOptionType) ||
               getQuotedRouteOption(effectiveQuotedRoute, conversationControllerEntry.selectedDeliveryType) ||
               getActiveSelectedQuotedOption(effectiveQuotedRoute, conversationControllerEntry);
@@ -5410,39 +5137,15 @@ async function handleInboundMessage(params: {
           if (controllerTransitionHint === "grace_window_offer" && !replyText) {
             replyText = buildDeterministicGraceWindowReply(preferredReplyLanguage);
           }
-          // location_saved hint: LLM receives the hint and responds naturally
-          // Language switch reissue: LLM receives the new language + booking step context and rephrases naturally
-          if (
-            (
-              controllerTransitionHint === "summary_ready" ||
-              controllerTransitionHint === "language_switch_reissue_summary"
-            ) &&
-            conversationControllerEntry &&
-            !isOneBrainConversation(replyTarget)
-          ) {
-            replyText = buildDeterministicOrderSummaryReply(preferredReplyLanguage, conversationControllerEntry);
-          }
+          // Legacy deterministic summary override (gated behind
+          // `!isOneBrainConversation(...)`) removed. One-brain's Phase-2
+          // output verification below is the canonical backstop that repairs
+          // stub/route-recap replies into a real summary.
           if (!replyText) {
             replyText = buildProviderIssueFallbackReply(preferredReplyLanguage);
             api.logger.warn(
               `[octopus] LLM produced empty reply, using fallback conversation=${conversationId}`,
             );
-          }
-          if (
-            conversationControllerEntry &&
-            !isOneBrainConversation(replyTarget) &&
-            (
-              conversationControllerEntry.stage === "summary_shown" ||
-              conversationControllerEntry.stage === "awaiting_confirmation" ||
-              conversationControllerEntry.bookingStep === "summary_pending" ||
-              conversationControllerEntry.bookingStep === "awaiting_summary_confirmation"
-            ) &&
-            (
-              controllerTransitionHint === "summary_ready" ||
-              controllerTransitionHint === "language_switch_reissue_summary"
-            )
-          ) {
-            replyText = buildDeterministicOrderSummaryReply(preferredReplyLanguage, conversationControllerEntry);
           }
           if (conversationControllerEntry) {
             const persistedEntry =
@@ -5547,32 +5250,13 @@ async function handleInboundMessage(params: {
                 `[controller] pending reply flushed with current reply conversation=${conversationId}`,
               );
             }
-            // LLM-driven handoff: if GPT-5.4 classified intent as handoff, trigger the
-            // handoff API regardless of whether the outbound reply matched escalation strings.
-            // sendOctopusTextReply already handles string-match handoff; this covers the LLM path.
-            if (
-              interpretedCustomerTurn?.action === "handoff" &&
-              !shouldMoveToHumanAgent(outboundText)
-            ) {
-              try {
-                await aiOctopusRequest(account, "/client/conversation/toagent", {
-                  conversation_id: conversationId,
-                });
-                api.logger.info(
-                  `[controller] LLM-driven handoff triggered conversation=${conversationId}`,
-                );
-              } catch (handoffError) {
-                api.logger.error(
-                  `[controller] LLM-driven handoff failed conversation=${conversationId} error=${handoffError instanceof Error ? handoffError.message : String(handoffError)}`,
-                );
-              }
-            }
+            // Legacy interpreter-driven handoff removed; one-brain emits a
+            // `request_handoff` responder op when escalation is needed, and the
+            // string-match `shouldMoveToHumanAgent(outboundText)` check below
+            // covers the canned-reply case handled by `sendOctopusTextReply`.
             if (
               conversationControllerEntry &&
-              (
-                interpretedCustomerTurn?.action === "handoff" ||
-                shouldMoveToHumanAgent(outboundText)
-              )
+              shouldMoveToHumanAgent(outboundText)
             ) {
               conversationControllerEntry = clearAutomatedConversationContext({
                 ...conversationControllerEntry,

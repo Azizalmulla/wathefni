@@ -438,21 +438,27 @@ async function main() {
     "Arabic audio transcript text should stay Arabic instead of being forced back to English",
   );
 
+  // Stage 4 interpreter collapse: the `llmSaysBookingData` predicate and the
+  // LLM-driven handoff trigger were deleted along with the dormant turn
+  // interpreter. The route-reset logic now runs unconditionally on inbound
+  // customer text (no `!llmSaysBookingData` guard), and handoff escalation is
+  // driven by (a) a `request_handoff` responder op from the one-brain tool and
+  // (b) the `shouldMoveToHumanAgent(outboundText)` string match applied by
+  // `sendOctopusTextReply`.
   assert(
-    source.includes("const llmSaysBookingData =") &&
-      source.includes("!llmSaysBookingData &&") &&
-      source.includes("shouldResetControllerForNewRouteMessage"),
-    "source should guard route reset behind llmSaysBookingData",
+    source.includes("shouldResetControllerForNewRouteMessage") &&
+      !source.includes("llmSaysBookingData"),
+    "route reset should run unconditionally (llmSaysBookingData predicate removed)",
   );
   assert(
-    source.includes('interpretedCustomerTurn?.action === "handoff"') &&
-      source.includes("[controller] LLM-driven handoff triggered"),
-    "source should include LLM-driven handoff trigger",
+    source.includes("shouldMoveToHumanAgent(outboundText)") &&
+      !source.includes("LLM-driven handoff triggered"),
+    "source should rely on shouldMoveToHumanAgent for handoff (LLM-driven handoff trigger removed)",
   );
   assert(
-    source.includes("const effectiveLanguageSwitch:") &&
-      source.includes("interpretedCustomerTurn?.action === \"language_switch\""),
-    "source should include LLM-based language switch fallback",
+    source.includes("const effectiveLanguageSwitch: \"ar\" | \"en\" | null = explicitLanguageRequest") &&
+      !source.includes('interpretedCustomerTurn?.action === "language_switch"'),
+    "effectiveLanguageSwitch should collapse to explicitLanguageRequest (interpreter fallback removed)",
   );
   assert(
     source.includes("Location pin saved during") &&
