@@ -1711,6 +1711,79 @@ async function main() {
     }
   }
 
+  // ---------------------------------------------------------------------
+  // DST: applyBookingFieldPatch funnels through updateSlot
+  //
+  // Regression cover for the dialog-state-tracking layer wiring. When a
+  // DialogState is passed, every successfully-validated field should show
+  // up in the returned `dialogState.slots` as `filled`; a later write of
+  // a *different* value to an already-filled slot should surface as a
+  // conflict (draft preserves the old value, DST exposes the contested
+  // one).
+  // ---------------------------------------------------------------------
+  {
+    const ds = loadTs("plugins/shared/dialog-state.ts");
+    const { createEmptyDialogState } = ds;
+
+    const emptyDraft = createEmptyBookingDraft();
+    const dialogState0 = createEmptyDialogState();
+
+    const first = applyBookingFieldPatch({
+      draft: emptyDraft,
+      patch: { sender_name: "Aziz", sender_phone: "96597485757" },
+      dialogState: dialogState0,
+      dstSource: "llm_apply",
+    });
+    assertTrue(
+      "dst.applyBookingFieldPatch.returns_dialogState",
+      first.dialogState != null,
+      "dialogState should be echoed back",
+    );
+    assertEqual(
+      "dst.applyBookingFieldPatch.sender_name.filled",
+      first.dialogState?.slots?.sender_name?.status,
+      "filled",
+    );
+    assertEqual(
+      "dst.applyBookingFieldPatch.sender_name.value",
+      first.dialogState?.slots?.sender_name?.value,
+      "Aziz",
+    );
+    assertEqual(
+      "dst.applyBookingFieldPatch.sender_phone.filled",
+      first.dialogState?.slots?.sender_phone?.status,
+      "filled",
+    );
+
+    // Different sender_phone → conflict; draft should keep the old value.
+    const contest = applyBookingFieldPatch({
+      draft: first.draft,
+      patch: { sender_phone: "96560000000" },
+      dialogState: first.dialogState,
+      dstSource: "llm_apply",
+    });
+    assertEqual(
+      "dst.applyBookingFieldPatch.conflict.status",
+      contest.dialogState?.slots?.sender_phone?.status,
+      "conflict",
+    );
+    assertEqual(
+      "dst.applyBookingFieldPatch.conflict.keeps_old_value",
+      contest.draft.senderPhone,
+      "96597485757",
+    );
+    assertEqual(
+      "dst.applyBookingFieldPatch.conflict.candidate",
+      contest.dialogState?.slots?.sender_phone?.conflictCandidate,
+      "96560000000",
+    );
+    assertTrue(
+      "dst.applyBookingFieldPatch.conflict.surfaces",
+      Array.isArray(contest.conflicts) && contest.conflicts.length >= 1,
+      "conflicts[] should be populated",
+    );
+  }
+
   console.log("");
   if (process.exitCode) {
     console.error("Some ONE-BRAIN checks failed.");

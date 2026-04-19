@@ -267,6 +267,61 @@ export function scoreQuotedOptionMatch(normalizedText: string, option: RouteQuot
   return score;
 }
 
+/**
+ * Detect the "cancel + option in same utterance" misclassification.
+ *
+ * Background (Bug 2, 2026-04-20 incident):
+ *   Customer: "nvm pls standard sedan"
+ *   LLM:      emits `cancel_booking` with source_quote="nvm pls standard sedan"
+ *   Server:   applies the cancel, replies "we've cancelled the booking"
+ *   Customer: lost the quote because they actually wanted to switch
+ *             from an earlier selection back to `sedan_normal`.
+ *
+ * The tell is local and deterministic: the customer's own source quote
+ * names one of the currently quoted options, which contradicts a
+ * cancellation. Cancel reads like "nvm", "cancel", "never mind", etc.,
+ * but when the same utterance also contains a known option alias
+ * ("standard sedan", "express box", "سريع", "مساعد", …) it is an
+ * option switch, not a cancellation.
+ *
+ * Returns `{ contradicted: true, optionLabel }` when an option mention
+ * is detected. `optionLabel` is the customer-facing English label of
+ * the matched option (falls back to the delivery_type id), used by the
+ * reply guard to render a disambiguating substitute.
+ *
+ * Runs deterministically — no LLM, no scoring heuristic beyond the
+ * existing alias map used everywhere else for option matching. The
+ * threshold is "any positive match score" because these aliases are
+ * already tuned for exact / substring hits.
+ */
+export function detectCancelContradictsOptionMention(params: {
+  sourceQuote: string | null | undefined;
+  route: StoredQuotedRoute | null | undefined;
+}): { contradicted: boolean; optionLabel: string | null; optionType: string | null } {
+  const quote = (params.sourceQuote || "").trim();
+  const route = params.route || null;
+  if (!quote || !route || !Array.isArray(route.optionCatalog) || route.optionCatalog.length === 0) {
+    return { contradicted: false, optionLabel: null, optionType: null };
+  }
+  const normalized = normalizeIntentText(quote);
+  if (!normalized) {
+    return { contradicted: false, optionLabel: null, optionType: null };
+  }
+  let best: { score: number; option: RouteQuoteOption | null } = { score: 0, option: null };
+  for (const opt of route.optionCatalog) {
+    if (opt.quoted_price == null) continue;
+    const score = scoreQuotedOptionMatch(normalized, opt);
+    if (score > best.score) {
+      best = { score, option: opt };
+    }
+  }
+  if (best.score <= 0 || !best.option) {
+    return { contradicted: false, optionLabel: null, optionType: null };
+  }
+  const label = best.option.label_en || best.option.label_ar || best.option.delivery_type;
+  return { contradicted: true, optionLabel: label, optionType: best.option.delivery_type };
+}
+
 export function resolveSameRouteQuoteFollowupAction(params: {
   visibleText: string;
   controllerEntry: PersistedConversationControllerEntry | null;

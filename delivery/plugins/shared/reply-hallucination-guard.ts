@@ -38,6 +38,7 @@ import type {
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
 } from "./conversation-policy";
+import type { DialogState, SlotName } from "./dialog-state";
 import { buildDeterministicOrderSummary } from "./outbound-verify";
 
 export type HallucinationGuardLanguage = "ar" | "en";
@@ -63,12 +64,54 @@ export type HallucinationGuardInputs = {
   /** Optional hook for callers that already compute next-required-action.
    *  If absent, the guard falls back to a safe generic nudge. */
   nextRequiredAction?: string | null;
+  /**
+   * All valid quoted prices for the active route, including the currently
+   * selected option AND every other bookable/manual-confirmation option the
+   * customer has the right to hear about. Passed in by the caller (the
+   * octopus channel already has `activeQuotedRoute.pricesByType` in scope
+   * at the point it invokes the guard).
+   *
+   * The guard uses this to decide whether a `price_mismatch` is real:
+   * a mentioned price is only flagged when it falls OUTSIDE this whole set,
+   * not just when it differs from the scalar `entry.quotedPrice` (which
+   * tracks only the currently-selected option).
+   *
+   * Background — 2026-04-19 20:49:49 live incident:
+   *   Customer: "is there other options"
+   *   LLM:      "Yes, we also have Express sedan at 1.750 KWD, Standard
+   *              box van at 1.750 KWD, and Express box van at 2.250 KWD…"
+   *   Guard:    blocked=true reason=price_mismatch mentioned=1.75,1.75,2.25
+   *              quoted=1.25 → substituted ASK_SENDER_NAME_AND_PHONE_DECISION.
+   *
+   * All three "mismatched" prices were real, persisted, active quoted
+   * options. The guard should not have fired. With this field populated
+   * from `activeQuotedRoute.pricesByType`, it no longer does.
+   *
+   * Optional; when absent the guard falls back to the legacy
+   * `entry.quotedPrice`-only comparison for backwards compatibility with
+   * callers that don't yet plumb this through. New callers MUST pass it.
+   */
+  activeQuotedPrices?: number[];
+  /**
+   * When set, the server-side cancel guard has determined that the LLM's
+   * `cancel_booking` op was contradicted by the same utterance naming one
+   * of the currently quoted options (the canonical "nvm pls standard
+   * sedan" class — `nvm` read as cancel, `pls standard sedan` ignored).
+   * The cancel op is NOT applied in that case, and the reply guard uses
+   * this signal to suppress any "we've cancelled" text and substitute a
+   * disambiguating re-ask.
+   *
+   * `optionLabel` is the customer-facing label of the option the customer
+   * seems to be switching to, used to personalize the clarification.
+   */
+  cancelContradicted?: { optionLabel: string } | null;
 };
 
 export type HallucinationKind =
   | "field_rejection_hallucination"
   | "price_mismatch"
-  | "order_placed_hallucination";
+  | "order_placed_hallucination"
+  | "cancel_misclassification";
 
 export type HallucinationGuardDecision = {
   replyText: string;
@@ -77,8 +120,21 @@ export type HallucinationGuardDecision = {
    *  the same reply; only the highest-priority one dictates the substitute. */
   claims: HallucinationKind[];
   reason: string | null;
-  /** Source of the substitute reply, for log triage. */
-  substitutedFrom: "none" | "next_required_action" | "order_summary" | "generic_nudge";
+  /** Source of the substitute reply, for log triage.
+   *
+   *  `price_repair` is the neutral clarification used when `price_mismatch`
+   *  fires — see §"Guards must not advance the flow" comment near
+   *  `PRICE_REPAIR_TEMPLATE`. This source is distinct from
+   *  `next_required_action` because a price-mismatch repair MUST NOT
+   *  silently advance the conversation to the next slot ask; it repairs
+   *  in place. */
+  substitutedFrom:
+    | "none"
+    | "next_required_action"
+    | "order_summary"
+    | "generic_nudge"
+    | "price_repair"
+    | "cancel_repair";
 };
 
 // ---------------------------------------------------------------------------
@@ -143,10 +199,47 @@ function fieldRejectionHasEvidence(params: {
   rejections: FieldRejection[];
   draft: PersistedBookingDraft | null;
   missingFields: string[];
+  dialogState?: DialogState | null;
 }): boolean {
   if (params.rejections.length > 0) return true;
   const draft = params.draft;
   if (!draft) return true; // no draft → we don't know; give benefit of the doubt
+
+  // DST defense: if every core slot the LLM might be complaining about is
+  // marked `filled` in the dialog state and we recorded no rejection for
+  // this turn, the "please re-send X" claim is definitionally ungrounded.
+  // DST status is stricter than legacy `isValidPhone/isValidName` checks
+  // because it tracks explicit accept/reject history — a value that was
+  // filled by the customer and never invalidated is trustworthy evidence.
+  const dst = params.dialogState ?? null;
+  if (dst) {
+    const coreSlots: SlotName[] = [
+      "sender_name",
+      "sender_phone",
+      "recipient_name",
+      "recipient_phone",
+    ];
+    let anyConflict = false;
+    let anyUnfilled = false;
+    for (const name of coreSlots) {
+      const slot = dst.slots[name];
+      if (!slot) { anyUnfilled = true; continue; }
+      if (slot.status === "conflict") anyConflict = true;
+      else if (slot.status !== "filled") anyUnfilled = true;
+    }
+    // Conflict on a core slot → the LLM is legitimately asking the customer
+    // to disambiguate. Don't flag the claim regardless of what the draft
+    // mirror shows (mirror keeps the last-known-good value on conflict, so
+    // the legacy validator would wrongly say "all valid").
+    if (anyConflict) {
+      return true;
+    }
+    // All filled + no conflict → claim is ungrounded.
+    if (!anyUnfilled) {
+      return false;
+    }
+    // anyUnfilled → fall through to the legacy draft-level check below.
+  }
 
   // Phone sanity — 8+ digits after stripping non-digits. Matches upstream
   // validator. If the LLM says "phone is invalid" and the stored phone
@@ -205,6 +298,32 @@ export function looksLikeOrderPlacedClaim(reply: string): boolean {
   return false;
 }
 
+// Assertions that the booking/order has been cancelled. Paired with the
+// server-side `cancelContradicted` signal so the guard fires only when
+// the cancel op itself was rejected as a misclassification ("nvm pls
+// standard sedan" class — see Bug 2 2026-04-20). Questions and offers
+// about cancelling are intentionally NOT flagged.
+const CANCEL_CLAIM_PATTERNS: RegExp[] = [
+  /\b(?:we(?:'ve)?|i(?:'ve)?)\s+cancell?ed\b/i,
+  /\byour\s+(?:booking|order|request)\s+(?:is|has\s+been)\s+cancell?ed\b/i,
+  /\b(?:booking|order|request)\s+cancell?ed\b/i,
+  /\bcancellation\s+(?:is\s+)?(?:done|complete|confirmed)\b/i,
+  /(?:تم|تمت)\s+(?:الإلغاء|إلغاء)\s*(?:الطلب|الحجز)?/,
+  /(?:الطلب|الحجز)\s+(?:تم\s+إلغاؤه|ملغى|ملغاة)/,
+  /\bألغي(?:نا|ت|ناها)\b/,
+  /\bبطل(?:ت|نا|نه)\b/,
+];
+
+export function looksLikeCancellationClaim(reply: string): boolean {
+  if (/\b(?:do\s+you\s+want(?:\s+to)?|would\s+you\s+like\s+(?:me\s+)?to|shall\s+i|should\s+i)\s+cancel\b/i.test(reply)) {
+    return false;
+  }
+  for (const re of CANCEL_CLAIM_PATTERNS) {
+    if (re.test(reply)) return true;
+  }
+  return false;
+}
+
 /**
  * Extract mentioned KWD-like prices from the reply. Returns numbers,
  * normalized. Very tolerant of KWD / KD / د.ك / دينار suffixes.
@@ -222,11 +341,55 @@ export function extractMentionedPrices(reply: string): number[] {
   return out;
 }
 
-function priceDisagrees(mentioned: number[], quoted: number | null): boolean {
-  if (quoted == null || !Number.isFinite(quoted)) return false;
+// A 0.05 KWD tolerance covers rounding variants ("1.25" vs "1.250")
+// and bidi-digit normalization slop we see in Arabic-script replies.
+const PRICE_MATCH_TOLERANCE_KWD = 0.05;
+
+function pricesApproximatelyEqual(a: number, b: number): boolean {
+  return Math.abs(a - b) <= PRICE_MATCH_TOLERANCE_KWD;
+}
+
+/**
+ * Decide whether any mentioned price is NOT accounted for by the active
+ * route's valid price set.
+ *
+ * Pre-2026-04-19: this function compared every mentioned price against a
+ * single scalar `entry.quotedPrice` — the currently-selected option's
+ * price. That meant a legitimate "here are your other options" reply
+ * (which mentions the non-selected options' prices) registered as a
+ * price_mismatch on all of them. See the inline note on
+ * `activeQuotedPrices` in `HallucinationGuardInputs` for the live
+ * incident reference.
+ *
+ * New behavior:
+ *   - Build the full set of valid prices from (a) every non-null value in
+ *     `activeQuotedPrices` plus (b) the scalar `entry.quotedPrice` if
+ *     present (belt-and-braces — selected price is almost always already
+ *     in the full set, but we tolerate a caller that only passes one).
+ *   - A mismatch fires only when at least one mentioned price is NOT in
+ *     that full set (within tolerance). If every mentioned price is
+ *     accounted for, the reply is grounded.
+ *   - When the caller passed no set at all AND no scalar, we have no
+ *     ground truth and cannot make the call — return `false` (no
+ *     mismatch), erring on the side of letting the reply through. The
+ *     outbound verify pass and the order-guard both fire separately on
+ *     the create_simple_order boundary, so this is a safe no-op.
+ */
+function priceDisagrees(
+  mentioned: number[],
+  validSet: number[],
+): boolean {
   if (mentioned.length === 0) return false;
-  // A 0.05 KWD tolerance covers rounding variants ("1.25" vs "1.250").
-  return mentioned.every((p) => Math.abs(p - quoted) > 0.05);
+  const cleanedValid = validSet.filter(
+    (v) => typeof v === "number" && Number.isFinite(v) && v > 0,
+  );
+  if (cleanedValid.length === 0) return false;
+  for (const m of mentioned) {
+    if (!cleanedValid.some((v) => pricesApproximatelyEqual(m, v))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -269,6 +432,62 @@ const GENERIC_NUDGE: NextStepTemplate = {
   en: "Let me double-check your request. Could you confirm the pickup and delivery areas again?",
   ar: "تكرماً، هل يمكنك تأكيد منطقة الاستلام ومنطقة التسليم مرة أخرى؟",
 };
+
+// -----------------------------------------------------------------------
+// Guards must not advance the flow.
+//
+// When a hallucination check fires, the safety net should REPAIR IN PLACE
+// — it should not silently push the conversation to the next slot. The
+// pre-2026-04-19 behavior routed every blocked reply through
+// `deterministicSubstitute(next_required_action)`, which meant a
+// false-positive price-mismatch on a legitimate "here are the other
+// options" answer produced the sender-phone ask as the customer-visible
+// repair. That is the wrong blast radius: the customer's question was
+// never answered, and the booking state jumped forward.
+//
+// The price-mismatch repair is deliberately a neutral re-ask that keeps
+// the conversation parked on the price question. If the guard misfires,
+// the customer sees "let me re-check — which option are you asking
+// about?", not the next slot ask.
+//
+// `field_rejection_hallucination` stays on the ASK_* path on purpose:
+// when the LLM falsely claims a customer-provided field is invalid,
+// the correct repair IS to re-ask the real next required slot — the
+// LLM's claim was about the wrong field, so the server's ground truth
+// of what's actually missing is the right thing to render.
+// -----------------------------------------------------------------------
+const PRICE_REPAIR_TEMPLATE: NextStepTemplate = {
+  en: "Sorry, let me re-check that — which option are you asking about?",
+  ar: "عذراً، دعني أتأكد من ذلك — عن أي خيار تسأل تحديداً؟",
+};
+
+// -----------------------------------------------------------------------
+// Cancel-vs-switch repair.
+//
+// Fires when the server-side cancel guard flagged this turn's
+// `cancel_booking` op as contradicted by an option mention in the same
+// utterance (Bug 2, 2026-04-20 — "nvm pls standard sedan" was
+// classified as cancel). The LLM's reply typically contains cancel
+// language ("we've cancelled the booking"), which is now ungrounded
+// because the server refused to apply the cancel. The substitute is a
+// disambiguating re-ask that names the option the customer seems to be
+// switching to, so the customer can confirm or correct without losing
+// their current quoted route.
+//
+// Why parameterised: the option label comes from the route's
+// `label_en`/`label_ar` so the customer sees the same wording the
+// server uses everywhere else.
+// -----------------------------------------------------------------------
+function cancelRepairText(
+  optionLabel: string,
+  language: HallucinationGuardLanguage,
+): string {
+  const safeLabel = (optionLabel || "").trim() || (language === "ar" ? "هذا الخيار" : "that option");
+  if (language === "ar") {
+    return `تكرماً، للتوضيح — تبي تبدل إلى "${safeLabel}" لنفس المسار، أو إلغاء الطلب كلياً؟`;
+  }
+  return `Just to confirm — would you like to switch to "${safeLabel}" for this route, or cancel the booking entirely?`;
+}
 
 /**
  * Pick a deterministic substitute based on next-required-action + the
@@ -331,11 +550,25 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
       rejections: inputs.rejectionsThisTurn,
       draft: inputs.entry?.bookingDraft || null,
       missingFields: inputs.missingFields,
+      dialogState: inputs.entry?.dialogState ?? null,
     });
     if (!hasEvidence) {
       claims.push("field_rejection_hallucination");
       reasons.push("field_rejection_claim_without_evidence");
     }
+  }
+
+  // ----- Claim 2b: cancel-misclassification -----
+  //
+  // Only fires when BOTH (a) the reply asserts a cancellation (not asks
+  // / offers one) AND (b) the caller has signalled that the server-side
+  // cancel guard rejected this turn's cancel op as contradicted by an
+  // option mention in the same utterance. Without the (b) signal the
+  // guard stays silent — legitimate post-cancel acknowledgements are
+  // still passed through.
+  if (inputs.cancelContradicted && looksLikeCancellationClaim(reply)) {
+    claims.push("cancel_misclassification");
+    reasons.push("cancel_claim_with_server_contradicted_intent");
   }
 
   // ----- Claim 2: order-placed hallucination -----
@@ -358,12 +591,36 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
   }
 
   // ----- Claim 3: price mismatch -----
+  //
+  // The valid set is the union of:
+  //   - every non-null price from the active route's quoted options
+  //     (`activeQuotedPrices` — passed in by the caller from
+  //     `activeQuotedRoute.pricesByType`), and
+  //   - the scalar `entry.quotedPrice` (the currently-selected option's
+  //     price — almost always already in the set above, but we tolerate
+  //     the legacy path where only the scalar is available).
+  //
+  // A mismatch fires only when a mentioned price falls OUTSIDE the
+  // whole set, not just when it differs from the selected scalar.
   const mentioned = extractMentionedPrices(reply);
   if (mentioned.length > 0) {
-    const quoted = inputs.entry?.quotedPrice ?? null;
-    if (quoted != null && priceDisagrees(mentioned, quoted)) {
+    const validSet: number[] = [];
+    if (Array.isArray(inputs.activeQuotedPrices)) {
+      for (const p of inputs.activeQuotedPrices) {
+        if (typeof p === "number" && Number.isFinite(p) && p > 0) {
+          validSet.push(p);
+        }
+      }
+    }
+    const selectedScalar = inputs.entry?.quotedPrice ?? null;
+    if (selectedScalar != null && Number.isFinite(selectedScalar)) {
+      validSet.push(selectedScalar);
+    }
+    if (validSet.length > 0 && priceDisagrees(mentioned, validSet)) {
       claims.push("price_mismatch");
-      reasons.push(`price_mismatch mentioned=${mentioned.join(",")} quoted=${quoted}`);
+      reasons.push(
+        `price_mismatch mentioned=${mentioned.join(",")} valid=${validSet.join(",")}`,
+      );
     }
   }
 
@@ -372,11 +629,38 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
   }
 
   // Blocking policy. Priority order matches claims[] ordering above.
-  //   - field_rejection_hallucination → substitute deterministic next step
-  //   - order_placed_hallucination → substitute safe "still reviewing" ask
-  //   - price_mismatch → substitute with order-summary if possible (fresh
-  //     price from the authoritative entry), else generic nudge
+  //
+  //   - field_rejection_hallucination → deterministic next-required-step.
+  //     The LLM's false claim was "your field is invalid"; the correct
+  //     server-grounded repair is to re-ask the slot the server actually
+  //     needs. This is the one case where the substitute legitimately
+  //     advances to the next ask.
+  //
+  //   - order_placed_hallucination → summary (if ready) or generic nudge.
+  //     Safe because neither advances the flow past the confirmation
+  //     step — the LLM falsely claimed "placed", so we re-present the
+  //     summary (still pre-submit) or nudge.
+  //
+  //   - price_mismatch → neutral in-place repair. MUST NOT substitute
+  //     with `next_required_action`. See the block comment on
+  //     `PRICE_REPAIR_TEMPLATE` above for the full rationale.
   const primary = claims[0];
+
+  // Cancel-misclassification dispatch. Highest priority when present:
+  // the customer's intent was misread by the LLM, the server has
+  // refused to apply the cancel, and the reply must not go out
+  // asserting a cancellation that did not happen. Substitute with a
+  // neutral re-ask that names the option the customer appears to be
+  // switching to. See `cancelRepairText`.
+  if (claims.includes("cancel_misclassification") && inputs.cancelContradicted) {
+    return {
+      replyText: cancelRepairText(inputs.cancelContradicted.optionLabel, inputs.language),
+      blocked: true,
+      claims,
+      reason: reasons.join("|"),
+      substitutedFrom: "cancel_repair",
+    };
+  }
 
   if (primary === "order_placed_hallucination") {
     // We never pretend an order was placed. Fallback is a generic nudge
@@ -402,7 +686,23 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
     };
   }
 
-  // field_rejection or price_mismatch → deterministic next-step substitute
+  if (primary === "price_mismatch") {
+    // Neutral in-place repair — do NOT advance to the next slot ask.
+    // See `PRICE_REPAIR_TEMPLATE` block comment for the "guards are not
+    // advancement engines" principle.
+    return {
+      replyText: PRICE_REPAIR_TEMPLATE[inputs.language],
+      blocked: true,
+      claims,
+      reason: reasons.join("|"),
+      substitutedFrom: "price_repair",
+    };
+  }
+
+  // field_rejection_hallucination → deterministic next-required-step
+  // substitute. Legitimately advances, because the LLM's false claim was
+  // about a field being invalid, and re-asking the actual next slot is
+  // the correct server-grounded repair.
   const sub = deterministicSubstitute({
     nextRequiredAction: inputs.nextRequiredAction ?? null,
     missingFields: inputs.missingFields,

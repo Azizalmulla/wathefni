@@ -5,7 +5,6 @@
 // deterministic Arabic/English replies. No I/O, no module-scope state.
 // ---------------------------------------------------------------------------
 
-import { hasVisibleArabic, hasVisibleLatin } from "../../shared/conversation-policy";
 import { asTrimmedString } from "./normalize";
 
 export function isProviderErrorText(value: unknown): boolean {
@@ -49,21 +48,57 @@ export function normalizeReplyTextForComparison(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
-export function looksLikePriceOnlyReply(text: string): boolean {
-  const normalized = normalizeReplyTextForComparison(text);
-  if (!normalized) {
-    return false;
+/**
+ * Decide whether the canonical-overwrite guard is allowed to fire on this
+ * turn. The guard exists for ONE specific failure mode: the LLM called
+ * get_price on THIS turn and produced a degenerate reply that lost the
+ * route+price grounding (e.g. just "6.000 KWD"). In that case we resurrect
+ * the canonical tool message.
+ *
+ * It must NOT fire when:
+ *   1. The tool ran on a prior turn (stale lastToolTs). The original
+ *      sessionIsRecent window of 5 minutes is far too generous for this
+ *      guard; it must be turn-local (~30s).
+ *   2. The conversation has moved past the fresh-quote phase. In `quoted`
+ *      (follow-up Q&A on an existing quote), `collecting_booking_details`,
+ *      `summary_shown`, `awaiting_confirmation`, or `order_submitted`, the
+ *      LLM is answering a question or driving a booking forward — its
+ *      natural-language reply is correct even when it mentions the price.
+ *      Overwriting it produces the "AI re-emits the quote instead of
+ *      answering" regression observed on 2026-04-19 13:42 (live).
+ *
+ * Stage at the call site is the PRE-promotion stage (the
+ * `quoted`/`order_submitted` promotions happen AFTER the guard runs).
+ * So the only stage where a fresh get_price legitimately deserves a
+ * canonical overwrite is `idle` (a brand-new quote turn, before the
+ * controller flips to `quoted`).
+ */
+export function isCanonicalOverwriteAllowed(params: {
+  lastToolAgeMs: number;
+  controllerStage: string | null | undefined;
+  /** Maximum age in ms for the tool call to count as "this turn". */
+  turnLocalWindowMs?: number;
+}): { allowed: boolean; reason: string } {
+  const turnWindow = params.turnLocalWindowMs ?? 30_000;
+  if (!Number.isFinite(params.lastToolAgeMs)) {
+    return { allowed: false, reason: "no_tool_session" };
   }
-  return /^(?:it'?s\s+|price:?\s+)?\d+(?:\.\d{1,3})?\s*(?:KWD|KD|د\.ك)\.?$/i.test(normalized);
+  if (params.lastToolAgeMs >= turnWindow) {
+    return { allowed: false, reason: "tool_stale" };
+  }
+  const stage = params.controllerStage || "idle";
+  if (stage !== "idle") {
+    return { allowed: false, reason: `post_quote_stage:${stage}` };
+  }
+  return { allowed: true, reason: "fresh_quote_turn" };
 }
 
-export function containsArabic(text: string): boolean {
-  return hasVisibleArabic(text);
-}
-
-export function containsLatin(text: string): boolean {
-  return hasVisibleLatin(text);
-}
+// `looksLikePriceOnlyReply`, `containsArabic`, and `containsLatin` were
+// deleted in the Step-3 guard-narrowing sweep. They only served the two
+// stylistic branches of `shouldPreferCanonicalToolReply` (the script-swap
+// and `get_price` "lossy" rewriters) which were both retired. Factual
+// price correctness is enforced by the outbound price whitelist in
+// `index.ts`, not by a phrasing-based substitute.
 
 export function buildDeterministicGreetingReply(language: "ar" | "en"): string {
   return language === "ar"

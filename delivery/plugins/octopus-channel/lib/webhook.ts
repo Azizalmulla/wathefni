@@ -137,10 +137,48 @@ export function isTerminalIngressStatus(status: IngressLedgerStatus): boolean {
 }
 
 export function extractConversationId(payload: any): string | number | null {
-  const candidate =
-    payload?.conversation_id ?? payload?.conversationId ?? payload?.conversation?.id;
-  if (candidate === undefined || candidate === null || candidate === "") return null;
-  return candidate;
+  // Preferred: AI Octopus legacy payloads include an explicit conversation_id
+  // (numeric, stable per customer). Keep these as the primary source.
+  const legacyCandidates = [
+    payload?.conversation_id,
+    payload?.conversationId,
+    payload?.conversation?.id,
+    payload?.data?.conversation_id,
+    payload?.data?.conversationId,
+  ];
+  for (const candidate of legacyCandidates) {
+    if (candidate !== undefined && candidate !== null && candidate !== "") {
+      return candidate;
+    }
+  }
+
+  // Fallback: raw Meta WhatsApp Cloud API format (AI Octopus started
+  // forwarding this shape in April 2026). The customer's wa_id is the
+  // stable per-customer identifier — it is what AI Octopus's own legacy
+  // `conversation_id` used to be derived from. Using `wa_id` keeps
+  // conversation state keyed consistently across old and new payloads.
+  const entries = Array.isArray(payload?.entry) ? payload.entry : [];
+  for (const entry of entries) {
+    const changes = Array.isArray(entry?.changes) ? entry.changes : [];
+    for (const change of changes) {
+      const value = change?.value;
+      const contactWaId = Array.isArray(value?.contacts) && value.contacts[0]?.wa_id;
+      if (contactWaId) return String(contactWaId);
+      const messageFrom =
+        Array.isArray(value?.messages) && value.messages[0]?.from;
+      if (messageFrom) return String(messageFrom);
+    }
+  }
+
+  // Last resort: top-level `from` or `wa_id` in flattened payloads.
+  const flatCandidates = [payload?.wa_id, payload?.from, payload?.sender];
+  for (const candidate of flatCandidates) {
+    if (candidate !== undefined && candidate !== null && candidate !== "") {
+      return String(candidate);
+    }
+  }
+
+  return null;
 }
 
 export function extractWhatsAppMessages(payload: any): any[] {

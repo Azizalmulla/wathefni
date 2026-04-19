@@ -32,6 +32,7 @@ export type OutboundReplyShape =
   | "route_price_recap"
   | "standalone_ack"
   | "summary_fact_drift"
+  | "clarifying_question"
   | "empty";
 
 export type VerifyOutboundParams = {
@@ -249,6 +250,206 @@ function phoneCandidateMatchesStored(candidate: string, stored: string[]): boole
   return false;
 }
 
+/**
+ * Compact factual drift — Step-5 observational detector.
+ *
+ * Targets the remaining leak after Step-3 freed stylistic shapes: a SHORT
+ * reply (stub / ack) that happens to make a FACTUAL CLAIM about a tracked
+ * field and gets the value wrong. These don't pass
+ * `replyLooksLikeFullSummary`'s structural bar, so `verifySummaryFacts` never
+ * sees them — but the customer still reads them as authoritative.
+ *
+ * Example drift captured:
+ *   stored recipient_phone = "+96562844738"
+ *   LLM reply             = "Got it, sending to +96599991111. All set?"
+ *
+ * Policy (intentionally tight):
+ *
+ *  - Only two field kinds are checked: PHONE and NAME. Prices are already
+ *    handled by the Region-A KWD whitelist. Areas and addresses require
+ *    structural context we don't have in a compact reply, so they stay with
+ *    the full-summary path.
+ *
+ *  - A NAME claim requires an attribution preposition directly preceding a
+ *    capitalised / Arabic name-token ("to Ahmad", "for Sara", "sender Ali",
+ *    "للمرسل فلان"). Bare capitalised tokens ("Sending your order now.") do
+ *    NOT count — no attribution, no claim.
+ *
+ *  - A PHONE claim is any ≥ 7-digit run in the reply. Re-uses the same rule
+ *    as `verifySummaryFacts` for consistency.
+ *
+ *  - A claim only counts as DRIFT if the value doesn't match ANY stored
+ *    value for that field kind. This deliberately allows "sending to
+ *    $sender" when the sender was the actual originator of the message —
+ *    the name matches.
+ *
+ * This function is pure. It never substitutes; it just reports. Step-5
+ * ships it as a log-only signal; a later step may promote to substitution
+ * once prod frequency + false-positive rate are known.
+ */
+export type CompactFactKind = "phone" | "name";
+
+export type CompactFactMismatch = {
+  kind: CompactFactKind;
+  /** The wrong value the reply claimed. */
+  mentioned: string;
+  /** Pipe-joined stored values for triage. */
+  expected: string;
+};
+
+export type CompactFactCheckResult = {
+  consistent: boolean;
+  mismatches: CompactFactMismatch[];
+};
+
+const NAME_ATTRIBUTION_EN =
+  "(?:to|for|from|sender|recipient|send(?:ing)?\\s+to|recv|receiver|To|For|From|Sender|Recipient|Send(?:ing)?\\s+To|Recv|Receiver)";
+const NAME_ATTRIBUTION_AR =
+  "(?:الى|إلى|لـ|من|المرسل|المستلم|إلي|الي)";
+
+// Latin capitalised token (≥ 3 chars) OR Arabic word (≥ 3 Arabic letters).
+// Deliberately ignores single-letter initials, lowercase tokens, and
+// numeric tokens. Anchored to the attribution preposition so we don't
+// pick up sentence-initial capitalisations. Flags are intentionally
+// non-case-insensitive for the NAME token part so that "to confirm"
+// never looks like "to [Name]" — only a real capitalised token counts.
+const NAME_CLAIM_EN_RE = new RegExp(
+  `\\b${NAME_ATTRIBUTION_EN}\\s+([A-Z][A-Za-z'\\-]{2,})\\b`,
+  "gu",
+);
+const NAME_CLAIM_AR_RE = new RegExp(
+  `${NAME_ATTRIBUTION_AR}\\s+([\\u0600-\\u06FF]{3,}(?:\\s+[\\u0600-\\u06FF]{3,})?)`,
+  "gu",
+);
+
+/**
+ * A small set of English stopwords that happen to start capitalised but
+ * never refer to a person. Used to filter out matches like "to Confirm"
+ * (sentence-start or bolded verb) so they don't get compared against a
+ * stored name.
+ */
+const NAME_STOPWORDS = new Set([
+  "confirm",
+  "confirmed",
+  "pickup",
+  "delivery",
+  "please",
+  "order",
+  "service",
+  "sender",
+  "recipient",
+  "phone",
+  "number",
+  "name",
+  "today",
+  "tomorrow",
+  "yes",
+  "now",
+  "the",
+  "this",
+  "that",
+  "here",
+  "there",
+  "your",
+  "our",
+]);
+
+function storedNameTokens(entry: PersistedConversationControllerEntry): string[] {
+  const tokens: string[] = [];
+  const draft = entry.bookingDraft;
+  for (const name of [draft.senderName, draft.recipientName]) {
+    if (!name) continue;
+    const parts = name.trim().split(/\s+/);
+    for (const p of parts) {
+      const t = p.toLowerCase();
+      if (t.length >= 3) tokens.push(t);
+    }
+  }
+  return tokens;
+}
+
+function nameClaimMatchesStored(claim: string, storedTokens: string[]): boolean {
+  const c = claim.trim().toLowerCase();
+  if (c.length < 3) return true; // too short to be a reliable claim
+  // Stopwords (verbs / prepositions / generic nouns that happen to
+  // appear capitalised in a name-attribution context) are NEVER treated
+  // as name claims — they match by default so the caller doesn't flag.
+  if (NAME_STOPWORDS.has(c)) return true;
+  for (const t of storedTokens) {
+    if (t === c) return true;
+    // Tolerate "Ahmad" vs "Ahmed" by comparing first 3 chars when both
+    // are ≥ 4 long. Narrow enough to catch variant spellings without
+    // false-matching unrelated short names.
+    if (c.length >= 4 && t.length >= 4 && c.slice(0, 3) === t.slice(0, 3)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Scan a compact reply for factual claims about tracked fields. Returns the
+ * list of mismatches; empty list = no drift observed.
+ *
+ * Intended ONLY for replies that already failed `replyLooksLikeFullSummary`
+ * — i.e. the caller has a `stub_summary` / `standalone_ack` / `ok` shape
+ * and wants the narrow backstop. Calling on a full summary is safe (it
+ * will just re-confirm what `verifySummaryFacts` already decided) but
+ * wastes a pass.
+ */
+export function verifyCompactFactualClaims(
+  reply: string,
+  entry: PersistedConversationControllerEntry,
+): CompactFactCheckResult {
+  const mismatches: CompactFactMismatch[] = [];
+  const draft = entry.bookingDraft;
+
+  // --- PHONE claims --------------------------------------------------------
+  const storedPhones: string[] = [];
+  if (draft.senderPhone) storedPhones.push(draft.senderPhone);
+  if (draft.recipientPhone) storedPhones.push(draft.recipientPhone);
+  if (storedPhones.length > 0) {
+    const phoneCandidates = extractPhoneCandidates(reply);
+    for (const cand of phoneCandidates) {
+      if (!phoneCandidateMatchesStored(cand, storedPhones)) {
+        mismatches.push({
+          kind: "phone",
+          mentioned: cand,
+          expected: storedPhones.join("|"),
+        });
+        break; // one drift is enough
+      }
+    }
+  }
+
+  // --- NAME claims ---------------------------------------------------------
+  const storedTokens = storedNameTokens(entry);
+  if (storedTokens.length > 0) {
+    const claims: string[] = [];
+    let m: RegExpExecArray | null;
+    const reEn = new RegExp(NAME_CLAIM_EN_RE.source, NAME_CLAIM_EN_RE.flags);
+    while ((m = reEn.exec(reply)) !== null) {
+      if (m[1]) claims.push(m[1]);
+    }
+    const reAr = new RegExp(NAME_CLAIM_AR_RE.source, NAME_CLAIM_AR_RE.flags);
+    while ((m = reAr.exec(reply)) !== null) {
+      if (m[1]) claims.push(m[1]);
+    }
+    for (const claim of claims) {
+      if (!nameClaimMatchesStored(claim, storedTokens)) {
+        mismatches.push({
+          kind: "name",
+          mentioned: claim,
+          expected: [draft.senderName, draft.recipientName].filter(Boolean).join(" / "),
+        });
+        break;
+      }
+    }
+  }
+
+  return { consistent: mismatches.length === 0, mismatches };
+}
+
 export function verifySummaryFacts(
   reply: string,
   entry: PersistedConversationControllerEntry,
@@ -338,9 +539,90 @@ export function verifySummaryFacts(
   return { consistent: mismatches.length === 0, mismatches };
 }
 
+/**
+ * Does the reply look like the LLM is asking the customer to CLARIFY or
+ * CONFIRM a specific field value, rather than emit a summary or a stub?
+ *
+ * This shape exists because the canonical-summary substitution path was
+ * over-eagerly replacing LLM clarifications with the full summary. On
+ * 2026-04-19 15:28, a historical poisoned `sender_name = "Is this the
+ * cheapest option"` was carried into a complete draft; the customer
+ * sent "hello"; the LLM correctly replied:
+ *
+ *   Hi, please confirm the sender name for the order. Is it "hello" or
+ *   "Is this the cheapest option"?
+ *
+ * Structurally that isn't a `full_summary` shape (it lacks the
+ * Pickup/Delivery/Service/Price lines), so without this detector it
+ * was tagged `stub_summary` and substituted with the full summary —
+ * re-surfacing the poisoned value the LLM was trying to repair.
+ *
+ * Detection rule: reply contains a question mark AND at least one of
+ * the following repair phrases (EN / AR / Arabizi mix). The phrase
+ * list is intentionally tight — we'd rather miss a clarification (it
+ * gets substituted, mild annoyance) than mis-flag a real stub as a
+ * clarification (it survives substitution, bad customer experience).
+ */
+// Clarifying questions have two distinguishing features vs a generic
+// stub ("All set, ready to confirm?"):
+//
+//  (a) they reference a SPECIFIC FIELD being disputed
+//      ("confirm the sender name", "clarify the pickup block"), or
+//  (b) they present a BINARY CHOICE between two candidate values
+//      ("Is it X or Y?", "did you mean A or B?"), or
+//  (c) they explicitly ask the customer to resend / re-share / provide
+//      a specific field ("could you resend the phone number?").
+//
+// The generic stub "ready to confirm?" matches none of these. The
+// generic summary prompt "Shall I confirm this order?" is filtered
+// explicitly in `looksLikeClarifyingQuestion`.
+const FIELD_REFERENCE = "sender\\s+name|recipient\\s+name|sender\\s+phone|recipient\\s+phone|pickup|delivery|address|block|street|house|avenue|area|phone|number|name";
+
+const CLARIFYING_QUESTION_PHRASES: RegExp[] = [
+  // (a) Clarify / confirm + specific field reference.
+  new RegExp(`\\b(?:please\\s+)?(?:confirm|clarify|correct|verify|double[-\\s]?check)\\b(?:\\s+\\w+){0,3}\\s+(?:${FIELD_REFERENCE})`, "iu"),
+  // (b) Binary-choice forms.
+  /\b(?:is\s+it|was\s+it|do\s+you\s+mean|did\s+you\s+mean|which\s+(?:one|name|number|is|value))\b/iu,
+  // (c) Resend / provide a specific field.
+  new RegExp(`\\b(?:could|can)\\s+you\\s+(?:confirm|resend|re[-\\s]?send|repeat|provide|share)\\b(?:\\s+\\w+){0,3}\\s+(?:${FIELD_REFERENCE})`, "iu"),
+  // Arabic script equivalents — these are already specific enough to be
+  // clarifications rather than bare stubs.
+  /(?:من\s+فضلك\s+أكد|من\s+فضلك\s+اكد|ممكن\s+تأكد|ممكن\s+تاكد|أيهما\s+الصحيح|ايهما\s+الصحيح|هل\s+تقصد|تقصد)/u,
+  // Arabizi equivalents (lightweight).
+  /\b(?:akkid|akid|t2akkid|etha|yaa?3ni|ta3ni)\b/iu,
+];
+
+function looksLikeClarifyingQuestion(reply: string): boolean {
+  if (!/[?؟]/.test(reply)) return false;
+  // Guard against "Shall I confirm this order?" which appears in every
+  // canonical summary — those aren't clarifications, they're the
+  // normal confirmation prompt. Require a clarify phrase that's NOT
+  // the standard "shall I confirm this order" line.
+  const normalized = reply.replace(/\s+/g, " ").trim().toLowerCase();
+  if (/shall\s+i\s+confirm\s+this\s+order\??$/i.test(normalized)) return false;
+  // Multi-line summaries (Pickup: / Delivery: / Price: …) that happen
+  // to include a trailing "Shall I confirm this order?" also have
+  // their own handling and shouldn't be classified here.
+  const looksLikeSummaryLines =
+    /\bpickup\s*:/i.test(reply) &&
+    /\bdelivery\s*:/i.test(reply) &&
+    /\bprice\s*:/i.test(reply);
+  if (looksLikeSummaryLines) return false;
+  return CLARIFYING_QUESTION_PHRASES.some((rx) => rx.test(reply));
+}
+
 export function classifyOutboundReplyShape(params: VerifyOutboundParams): OutboundReplyShape {
   const reply = (params.replyText || "").trim();
   if (!reply) return "empty";
+
+  // Clarifying questions are evaluated FIRST, before the stub /
+  // standalone-ack heuristics, so they never get substituted away —
+  // even when the draft is complete (which is exactly when the LLM
+  // is most likely to repair a persisted field with a clarifying
+  // question).
+  if (looksLikeClarifyingQuestion(reply)) {
+    return "clarifying_question";
+  }
 
   const normalized = normalizeForCompare(reply);
   if (STANDALONE_ACK_RE.test(normalized)) return "standalone_ack";
@@ -510,25 +792,24 @@ export function buildDeterministicOrderSummary(params: {
  * detected in a state where we can produce a deterministic substitute,
  * replaces the reply with a canonical one.
  *
- * Substitution policy, in priority order:
+ * Substitution policy (Step-3 narrowing):
  *
- *   1. `stub_summary` or `route_price_recap` with a complete draft →
- *      replace with the structured full order summary. This is a pure
- *      data-driven template (block/street/house/phone/price fields) — no
- *      hand-written wording lives here, so there's no drift risk against
- *      SKILL.md.
- *   2. `standalone_ack` when draft is complete and we have a quote +
- *      service type → also substitute the full summary. A bare "Sure"
- *      after the draft is complete is exactly the stub we want to replace,
- *      and the summary is still data-driven.
+ *   Only `summary_fact_drift` triggers a substitute. Fact drift means the
+ *   reply claims a price / phone tail / stored name / area name that
+ *   disagrees with authoritative server state — a transactional mismatch
+ *   the customer could act on.
  *
- * For every other bad shape (notably bare `standalone_ack` mid-booking, or
- * any `stub_summary` when the draft is still incomplete) we DO NOT
- * substitute. We log the interception and let the reply through — the next
- * inbound turn self-corrects because `next_required_action` in the
- * one-brain context forces the LLM to advance. Writing deterministic
- * per-field question strings here would duplicate the SKILL.md wording and
- * silently drift against it whenever the booking flow is tuned.
+ *   All other detected shapes (`stub_summary`, `route_price_recap`,
+ *   `standalone_ack`) are **log-only**. Under the "free natural phrasing /
+ *   strict on facts" policy, a short or differently-structured summary is
+ *   acceptable UX; the LLM's natural wording often reads better than the
+ *   rigid labeled-row canonical template. The `next_required_action`
+ *   directive on the next turn keeps the flow on track if the reply was
+ *   genuinely sub-par.
+ *
+ *   Clarifying questions are NEVER substituted — see
+ *   `looksLikeClarifyingQuestion` for the detection rule. That branch
+ *   survives the narrowing as a belt-and-braces safety net.
  *
  * Never throws. Returns the (possibly substituted) reply text along with a
  * `replaced` flag and reason so the caller can log the interception.
@@ -538,25 +819,39 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
   if (shape === "ok" || shape === "empty") {
     return { replyText: params.replyText, replaced: false, shape, reason: null };
   }
+  // Clarifying questions are the LLM doing repair work on the persisted
+  // state (e.g. "Is the sender name X or Y?"). Never substitute these
+  // with the canonical summary — that's exactly what suppresses the
+  // repair and re-surfaces the poisoned value. See
+  // `looksLikeClarifyingQuestion` for the detection rule.
+  if (shape === "clarifying_question") {
+    return {
+      replyText: params.replyText,
+      replaced: false,
+      shape,
+      reason: "preserved_clarifying_question",
+    };
+  }
 
   const entry = params.entry;
   const draftComplete = params.missingFields.length === 0;
 
-  // (1) Full summary substitute when draft is complete and the reply is a
-  // stub / route-recap / fact-drift. Fact-drift is the new case: the reply
-  // is structurally a summary but contains at least one factual claim
-  // (price, phone, area, name) that disagrees with the authoritative
-  // server state. Substituting with the data-driven canonical summary
-  // removes the contradiction on the record so the customer sees one
-  // consistent truth.
+  // Only factual drift triggers substitution. A reply is classified as
+  // `summary_fact_drift` ONLY after passing the "full summary" structural
+  // bar AND then failing `verifySummaryFacts` (wrong price / wrong phone
+  // tail / missing stored name / wrong area). That is a transactional
+  // mismatch where the customer could act on wrong information, so we
+  // replace it with the authoritative data-driven summary.
+  //
+  // All other shapes — `stub_summary`, `route_price_recap`,
+  // `standalone_ack` — are treated as log-only stylistic observations
+  // under the Step-3 "free phrasing, strict facts" policy.
   if (
     entry &&
     draftComplete &&
     entry.quotedPrice != null &&
     entry.selectedDeliveryType &&
-    (shape === "stub_summary" ||
-      shape === "route_price_recap" ||
-      shape === "summary_fact_drift")
+    shape === "summary_fact_drift"
   ) {
     const substitute = buildDeterministicOrderSummary({ entry, language: params.language });
     return {
@@ -567,32 +862,16 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
     };
   }
 
-  // (2) Full summary substitute when draft is complete and the reply is a
-  // bare standalone ack. ("Sure", "تمام" with no content after the draft
-  // is already full — the customer is waiting for the summary, not an ack.)
-  if (
-    entry &&
-    draftComplete &&
-    entry.quotedPrice != null &&
-    entry.selectedDeliveryType &&
-    shape === "standalone_ack"
-  ) {
-    const substitute = buildDeterministicOrderSummary({ entry, language: params.language });
-    return {
-      replyText: substitute,
-      replaced: true,
-      shape,
-      reason: `substituted_full_summary:standalone_ack_when_draft_complete`,
-    };
-  }
-
-  // Otherwise: log-only. A bare ack mid-booking or an incomplete-draft
-  // stub is annoying but not dangerous — the next turn's
-  // `next_required_action` directive pulls the LLM back on track.
+  // Log-only for every other detected shape. The stylistic shapes
+  // (stub_summary / route_price_recap / standalone_ack) used to be
+  // substituted with the canonical labeled-row summary; that made the
+  // system feel robotic and overwrote perfectly-valid natural phrasings.
+  // We keep the detection so production logs still surface shape drift
+  // for observability, but we trust the LLM's wording.
   return {
     replyText: params.replyText,
     replaced: false,
     shape,
-    reason: `detected_${shape}_no_safe_substitute`,
+    reason: `detected_${shape}_log_only`,
   };
 }

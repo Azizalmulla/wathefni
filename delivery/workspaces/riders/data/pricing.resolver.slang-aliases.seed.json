@@ -1,0 +1,172 @@
+{
+  "_comment": "Hand-curated colloquial / slang / Arabizi forms that rule-based generation cannot produce deterministically. Each entry is a (area_id or ambiguity_group_id or pricing_group_id) + a list of alias strings. REVIEW CAREFULLY — these encode assumptions about how real Kuwaitis type area names on WhatsApp. Add or remove freely; changes here are data-only and take effect at the next pricing publish. Mark entries with _source so we can trace where an alias came from (e.g. 'observed', 'heuristic', 'known-pattern').",
+  "entries": [
+    {
+      "area_id": 194,
+      "name_en": "Shalehat Jlea'a",
+      "aliases": ["Jlai3a", "Jliaa", "Jlea", "jla3a", "jl3a", "shalehat jlai3a", "shalehat jliaa"],
+      "_source": "observed-2026-04-18"
+    },
+    {
+      "area_id": 182,
+      "name_en": "Shalehat Dba'ayeh",
+      "aliases": ["Dba3ya", "Dba3ayeh", "Dbaya", "Dbayeh", "dba3iya", "shalehat dba3ya"],
+      "_source": "known-pattern (ع→3)"
+    },
+    {
+      "area_id": 118,
+      "name_en": "Shalehat Subiya",
+      "aliases": ["Sbiya", "Subya", "Shalehat Sbiya", "Shalehat Subya"],
+      "_source": "known-pattern (vowel-drop)"
+    },
+    {
+      "area_id": 119,
+      "name_en": "Shalehat Kazima",
+      "aliases": ["Kathma", "Ka6ma", "Kadhma", "Shalehat Kathma", "Shalehat Ka6ma"],
+      "_source": "known-pattern (ظ/ذ→th/6)"
+    },
+    {
+      "area_id": 165,
+      "name_en": "Shalehat Zoor",
+      "aliases": ["Zour", "Al Zour", "Shalehat Zour", "az zour"],
+      "_source": "known-pattern (oo/ou)"
+    },
+    {
+      "area_id": 163,
+      "name_en": "Shalehat Al-Nuwaiseeb",
+      "aliases": ["Nuwaiseeb", "Nwaisib", "Nwaisib", "Nwaseeb", "Nwayseb", "Shalehat Nwaisib"],
+      "_source": "known-pattern (ai/ei/ay)"
+    },
+    {
+      "area_id": 197,
+      "name_en": "Shalehat Bneder",
+      "aliases": ["Bneder", "Bnider", "Shalehat Bnider"],
+      "_source": "known-pattern (e/i)"
+    },
+
+    {
+      "area_id": 37,
+      "name_en": "Daiya",
+      "aliases": ["Di3iya", "Da3iya", "Al Di3iya", "Al Da3iya", "dei3ya", "dei3ia"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 49,
+      "name_en": "Shaab",
+      "aliases": ["Sha3ab", "Al Sha3ab", "Sh3ab", "il sha3b"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 65,
+      "name_en": "Oyoun",
+      "aliases": ["3youn", "Al 3youn", "3ywn", "al 3ywn"],
+      "_source": "known-pattern (initial ع→3)"
+    },
+    {
+      "area_id": 110,
+      "name_en": "Naeem",
+      "aliases": ["Na3eem", "Al Na3eem", "Na3im", "il na3eem"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 103,
+      "name_en": "Naayem Industrial",
+      "aliases": ["Na3yem Industrial", "Na3ayem Industrial", "Al Na3ayem", "Nayem Sina3iya"],
+      "_source": "known-pattern (ع + ص→s)"
+    },
+    {
+      "area_id": 126,
+      "name_en": "Al-Adan",
+      "aliases": ["3adan", "Al 3adan", "il 3adan"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 134,
+      "name_en": "Egaila",
+      "aliases": ["3igaila", "3gaila", "3gila", "Al 3igaila", "il 3gaila"],
+      "_source": "known-pattern (ع + ق→g)"
+    },
+    {
+      "area_id": 39,
+      "name_en": "Adailiya",
+      "aliases": ["3adailiya", "Al 3adailiya", "3adiliya", "il 3adailiya"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 106,
+      "name_en": "Abdally",
+      "aliases": ["3abdali", "Al 3abdali", "3abdaly", "il 3abdali"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 60,
+      "name_en": "Mubarak Al-Abdullah",
+      "aliases": ["Mubarak 3abdullah", "Mubarak Al-3abdullah", "Mbarak Al Abdullah", "West Mishref", "Gharb Mishref"],
+      "_source": "known-pattern + colloquial"
+    },
+    {
+      "area_id": 92,
+      "name_en": "Saad Al-Abdulla",
+      "aliases": ["Sa3ad", "Sa3ad Al Abdullah", "Saad Abdulla", "Saad Abdullah"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "area_id": 127,
+      "name_en": "Subhan Industrial",
+      "aliases": ["Sub7an Industrial", "Sob7an Industrial", "Sub7an Sina3iya", "Subhan"],
+      "_source": "known-pattern (ح→7)"
+    },
+    {
+      "area_id": 99,
+      "name_en": "Amghara Industrial",
+      "aliases": ["Amghra", "Amghara", "Amghra Industrial", "Amghra Sina3iya"],
+      "_source": "known-pattern"
+    },
+
+    {
+      "ambiguity_group_id": "sabah_al_ahmad",
+      "aliases": ["Saba7 Ahmad", "Saba7 Ahmed", "Saba7 El Ahmad", "Sabah Ahmad", "Sabah Ahmed", "Sabah El Ahmad"],
+      "_source": "known-pattern (ح→7)"
+    },
+    {
+      "ambiguity_group_id": "sabah_al_salem",
+      "aliases": ["Saba7 Al Salem", "Saba7 AlSalem", "Saba7 Salem", "Sabah Salem", "Sabah AlSalem"],
+      "_source": "known-pattern (ح→7)"
+    },
+    {
+      "ambiguity_group_id": "shuwaikh",
+      "aliases": ["Shuw3i5", "Shwe5", "Shwaikh", "Shwi5"],
+      "_source": "known-pattern (خ→5)"
+    },
+    {
+      "ambiguity_group_id": "sulaibikhat",
+      "aliases": ["Sulaibi5at", "Slibi5at", "Slaibi5at", "Slibikhat"],
+      "_source": "known-pattern (خ→5)"
+    },
+    {
+      "ambiguity_group_id": "ardhiya",
+      "aliases": ["3ardhiya", "Al 3ardhiya", "3ardiya", "Al 3ardiya"],
+      "_source": "known-pattern (ع)"
+    },
+    {
+      "ambiguity_group_id": "jahra_area",
+      "aliases": ["Jahra2", "Jahraa", "Jahr2", "il jahra"],
+      "_source": "known-pattern (ء→2)"
+    },
+    {
+      "ambiguity_group_id": "wafra",
+      "aliases": ["Al Wafra", "il wafra", "wfra"],
+      "_source": "known-pattern"
+    },
+    {
+      "ambiguity_group_id": "khairan",
+      "aliases": ["5airan", "5iran", "Al 5airan", "khayran"],
+      "_source": "known-pattern (خ→5)"
+    },
+    {
+      "ambiguity_group_id": "shuaiba",
+      "aliases": ["Sh3aiba", "Sh3iba", "Al Sh3aiba", "Shu3aiba", "il sh3aiba"],
+      "_source": "known-pattern (ع)"
+    }
+  ]
+}

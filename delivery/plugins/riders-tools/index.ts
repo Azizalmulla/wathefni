@@ -2566,7 +2566,7 @@ async function collectAreaResolutionCandidates(
     });
   }
 
-  const nearMatch = findAreaNearTypoMatch(query, data.areas);
+  const nearMatch = findAreaNearTypoMatch(query, data.areas, data.resolver);
   if (nearMatch) {
     push({
       area: nearMatch.area,
@@ -3045,6 +3045,7 @@ function findAreaByConsonantSkeleton(
 function findAreaNearTypoMatch(
   query: string,
   areas: PricingArea[],
+  resolver?: PricingResolverConfig | null,
 ): { area: PricingArea; prompt_ar: string; prompt_en: string; alternative_areas?: PricingArea[] } | null {
   const raw = query.trim();
   if (!raw) return null;
@@ -3061,20 +3062,21 @@ function findAreaNearTypoMatch(
     { area: PricingArea; label: string; distance: number; similarity: number }
   >();
 
-  for (const area of areas) {
-    const label = useArabic ? area.name_ar : area.name_en;
-    if (!label) continue;
-
+  const considerLabel = (
+    area: PricingArea,
+    label: string | null | undefined,
+  ): void => {
+    if (!label) return;
     const normalizedLabel = compactLookupKey(
       useArabic ? canonicalizeAreaName(label) : normalizeLatinAreaKey(label),
     );
-    if (!normalizedLabel || normalizedLabel === normalizedQuery) continue;
-    if (Math.abs(normalizedLabel.length - normalizedQuery.length) > maxDistance) continue;
-
+    if (!normalizedLabel || normalizedLabel === normalizedQuery) return;
+    if (Math.abs(normalizedLabel.length - normalizedQuery.length) > maxDistance)
+      return;
     const distance = damerauLevenshteinDistance(normalizedQuery, normalizedLabel);
-    if (distance > maxDistance) continue;
-
-    const similarity = 1 - distance / Math.max(normalizedQuery.length, normalizedLabel.length);
+    if (distance > maxDistance) return;
+    const similarity =
+      1 - distance / Math.max(normalizedQuery.length, normalizedLabel.length);
     const current = candidates.get(area.id);
     if (
       !current ||
@@ -3082,6 +3084,32 @@ function findAreaNearTypoMatch(
       (distance === current.distance && similarity > current.similarity)
     ) {
       candidates.set(area.id, { area, label, distance, similarity });
+    }
+  };
+
+  for (const area of areas) {
+    const label = useArabic ? area.name_ar : area.name_en;
+    considerLabel(area, label);
+  }
+
+  // Bug B fix: also fuzzy-match against alias strings, not just canonical
+  // area names. Without this, `Julai3a` (edit distance 1 from the alias
+  // `Jlai3a`, which maps to `Jlea'a`) is rejected because the canonical
+  // `Jlea'a` is too dissimilar. Aliases are first-class user-facing
+  // spellings, so they deserve the same typo tolerance as canonical names.
+  if (resolver?.aliases?.length) {
+    const areaById = new Map<number, PricingArea>();
+    for (const area of areas) areaById.set(area.id, area);
+    for (const entry of resolver.aliases) {
+      if (!entry?.alias || typeof entry.area_id !== "number") continue;
+      const area = areaById.get(entry.area_id);
+      if (!area) continue;
+      // Only consider script-matching aliases. An Arabic query shouldn't
+      // typo-match a Latin alias and vice versa — that's a semantic-resolver
+      // concern, not a typo-matcher one.
+      const aliasIsArabic = containsArabicScript(entry.alias);
+      if (aliasIsArabic !== useArabic) continue;
+      considerLabel(area, entry.alias);
     }
   }
 
@@ -3240,6 +3268,8 @@ async function findAreaAsync(
   }
 
   // Layer 3.5 — deterministic typo/transliteration recovery
+  // (resolver omitted here; this code path is currently dead — kept as a
+  // structural reference for the layered pipeline)
   const nearMatch = findAreaNearTypoMatch(query, areas);
   if (nearMatch) {
     if (!nearMatch.alternative_areas?.length) {
@@ -3848,29 +3878,66 @@ function normalizeSheetRowsToPublishedAreas(
 
 async function applyPricingResolverOverlayIfConfigured(data: PricingData): Promise<PricingData> {
   const inspection = await inspectPricingResolverOverlay(data);
-  if (!inspection.status.configured) {
-    return data;
+  let mergedData = data;
+
+  if (inspection.status.configured) {
+    if (inspection.status.state === "missing") {
+      console.warn(
+        `[pricing] RIDERS_PRICING_RESOLVER_OVERLAY_PATH / resolverOverlayPath not found: ${describePath(pricingResolverOverlayPathOverride)}`,
+      );
+    } else if (inspection.status.state === "invalid") {
+      throw new Error(
+        inspection.status.error ||
+          `Resolver overlay is invalid: ${describePath(pricingResolverOverlayPathOverride)}`,
+      );
+    } else if (inspection.mergedResolver) {
+      mergedData = { ...mergedData, resolver: inspection.mergedResolver };
+    }
   }
 
-  if (inspection.status.state === "missing") {
+  // Option B: merge the runtime-learned aliases file on top of the overlay.
+  // Written to by llm-area-resolver / learned-aliases-io when the LLM
+  // fallback accepts a high-confidence area match. Kept in a separate
+  // file so deploys don't clobber production-learned data.
+  try {
+    const learned = await loadLearnedResolverForMerge();
+    if (learned) {
+      const merged = mergePricingResolverConfigs(mergedData.resolver, learned);
+      if (merged) {
+        validatePricingResolverConfig(merged, mergedData.areas);
+        mergedData = { ...mergedData, resolver: merged };
+        console.log(
+          `[pricing] merged learned-aliases overlay aliases=${learned.aliases?.length || 0}`,
+        );
+      }
+    }
+  } catch (err) {
     console.warn(
-      `[pricing] RIDERS_PRICING_RESOLVER_OVERLAY_PATH / resolverOverlayPath not found: ${describePath(pricingResolverOverlayPathOverride)}`,
-    );
-    return data;
-  }
-
-  if (inspection.status.state === "invalid") {
-    throw new Error(
-      inspection.status.error ||
-        `Resolver overlay is invalid: ${describePath(pricingResolverOverlayPathOverride)}`,
+      `[pricing] failed to merge learned-aliases overlay: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 
-  if (!inspection.mergedResolver) {
-    return data;
-  }
+  return mergedData;
+}
 
-  return { ...data, resolver: inspection.mergedResolver };
+async function loadLearnedResolverForMerge(): Promise<PricingResolverConfig | null> {
+  const { resolveLearnedAliasesPath, loadLearnedAliasesFile } = await import(
+    "./lib/learned-aliases-io"
+  );
+  const filePath = resolveLearnedAliasesPath();
+  if (!filePath) return null;
+  if (!(await pathExists(filePath))) return null;
+
+  const file = await loadLearnedAliasesFile(filePath);
+  if (!file.aliases || file.aliases.length === 0) return null;
+
+  const resolverInput: Record<string, unknown> = {
+    aliases: file.aliases.map((entry) => ({
+      alias: entry.alias,
+      area_id: entry.area_id,
+    })),
+  };
+  return normalizePricingResolverConfig(resolverInput) || null;
 }
 
 // buildPublishedPricingData, pricesMatch, maxPrice, getRouteSheetPrice,
@@ -5060,7 +5127,7 @@ function resolveAreaDeterministicSync(
     };
   }
 
-  const nearMatch = findAreaNearTypoMatch(query, data.areas);
+  const nearMatch = findAreaNearTypoMatch(query, data.areas, data.resolver);
   if (nearMatch && !nearMatch.alternative_areas?.length) {
     return { status: "resolved", area: nearMatch.area };
   }
@@ -5160,8 +5227,26 @@ function verifyAreaEvidence(params: {
   modelValue: string;
   idOverride: number | null | undefined;
   data: PricingData;
+  // Names of an already-resolved area on this leg from a PRIOR turn (e.g. the
+  // pickup resolved when the customer first sent "Jlai3a to wafra" but the
+  // dropoff was ambiguous; on the next turn they reply "wafra res", which
+  // doesn't echo "Jlai3a"). When provided AND the model's claim resolves to
+  // the same canonical area, we KEEP the model value without requiring raw
+  // evidence in this turn — the customer already established the area, and
+  // the LLM is correctly carrying it forward, not smuggling a new one.
+  // English and Arabic forms are both checked because the LLM may pass
+  // through whichever name appeared in the prior tool-result snapshot.
+  pendingAreaNameEn?: string | null;
+  pendingAreaNameAr?: string | null;
 }): AreaEvidenceDecision {
-  const { rawToken, modelValue, idOverride, data } = params;
+  const {
+    rawToken,
+    modelValue,
+    idOverride,
+    data,
+    pendingAreaNameEn,
+    pendingAreaNameAr,
+  } = params;
 
   if (typeof idOverride === "number") return { action: "keep" };
   if (!rawToken) return { action: "keep" };
@@ -5170,6 +5255,25 @@ function verifyAreaEvidence(params: {
   const rawRes = resolveAreaDeterministicSync(rawToken, data);
   const modelResolved = modelRes?.status === "resolved" ? modelRes : null;
   const rawResolved = rawRes?.status === "resolved" ? rawRes : null;
+
+  // Pending-area shortcut: if the model's claim matches a previously-resolved
+  // area for this leg, accept it. This is the carry-forward path that fixes
+  // the multi-turn smuggle false-positive (Bug A in the Jlai3a → Wafra
+  // transcript). Checked BEFORE raw-token reconciliation because the raw
+  // token in this turn legitimately refers to the OTHER leg.
+  if (modelResolved && (pendingAreaNameEn || pendingAreaNameAr)) {
+    const pendingCandidates = [pendingAreaNameEn, pendingAreaNameAr]
+      .filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+    for (const candidate of pendingCandidates) {
+      const pendingRes = resolveAreaDeterministicSync(candidate, data);
+      if (
+        pendingRes?.status === "resolved" &&
+        pendingRes.area.id === modelResolved.area.id
+      ) {
+        return { action: "keep" };
+      }
+    }
+  }
 
   if (rawResolved && modelResolved && rawResolved.area.id === modelResolved.area.id) {
     return { action: "keep" };
@@ -5194,7 +5298,7 @@ function verifyAreaEvidence(params: {
   }
 
   if (!rawResolved && modelResolved) {
-    const typoMatch = findAreaNearTypoMatch(rawToken, data.areas);
+    const typoMatch = findAreaNearTypoMatch(rawToken, data.areas, data.resolver);
     if (typoMatch && typoMatch.area.id === modelResolved.area.id) {
       return { action: "keep" };
     }

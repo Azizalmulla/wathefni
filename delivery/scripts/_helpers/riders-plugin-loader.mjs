@@ -45,6 +45,16 @@ export async function loadRidersToolsModule(importMetaUrl) {
   return await jiti(ridersPluginPath);
 }
 
+/**
+ * Load any TypeScript module under `delivery/` via jiti. Pass an absolute
+ * path to the .ts file you want to import. Useful for unit-style smoke
+ * tests against pure helpers.
+ */
+export async function loadDeliveryTsModule(importMetaUrl, absoluteTsPath) {
+  const jiti = createJiti(importMetaUrl);
+  return await jiti(absoluteTsPath);
+}
+
 export async function loadPluginRegistrations(importMetaUrl, pluginConfig) {
   const registrations = [];
   const api = {

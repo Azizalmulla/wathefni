@@ -1,3 +1,5 @@
+import type { DialogState } from "./dialog-state.js";
+
 export type ConversationFlowStage =
   | "idle"
   | "quoted"
@@ -76,6 +78,21 @@ export type PersistedConversationControllerEntry = {
   quotePickupAreaNameAr: string | null;
   quoteDropoffAreaNameEn: string | null;
   quoteDropoffAreaNameAr: string | null;
+  // Pending (in-progress) area resolutions. Populated by get_price as soon as
+  // an area resolves deterministically, BEFORE a full quote is produced.
+  // Used to preserve mid-conversation progress when one leg resolved but the
+  // other is still ambiguous — so a follow-up turn answering the ambiguity
+  // doesn't accidentally trigger a smuggle-guard false-positive on the leg
+  // that was already settled. Cleared when the quote is produced (promoted
+  // to `quote*`), when the area is replaced with a different value, or when
+  // the order is submitted / cancelled.
+  //
+  // Optional for backwards compat with pre-existing persisted entries; code
+  // that reads these MUST treat undefined and null identically.
+  pendingPickupAreaNameEn?: string | null;
+  pendingPickupAreaNameAr?: string | null;
+  pendingDropoffAreaNameEn?: string | null;
+  pendingDropoffAreaNameAr?: string | null;
   selectedQuoteOptionType: string | null;
   selectedQuoteOptionLabelAr: string | null;
   selectedQuoteOptionLabelEn: string | null;
@@ -90,6 +107,10 @@ export type PersistedConversationControllerEntry = {
   // correction flow can reference the order the customer just placed.
   // Cleared whenever stage moves away from "order_submitted".
   submittedOrderUid?: string | null;
+  // Dialog State Tracking layer — typed slot register with requested_slot and
+  // conflict detection. Optional for backwards compat with pre-DST persisted
+  // entries; the controller seeds an empty state on first read.
+  dialogState?: DialogState;
 };
 
 export function createEmptyBookingDraft(): PersistedBookingDraft {
@@ -112,6 +133,75 @@ export function createEmptyBookingDraft(): PersistedBookingDraft {
     deliveryLocation: null,
     pendingLocation: null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Effective pickup / delivery area resolution.
+//
+// A single area slot can be populated by three different upstream
+// signals, in descending order of authority:
+//
+//   (1) `entry.quote*AreaNameEn` — the area inside an active `get_price`
+//       quote. Highest authority; invariant with the current price.
+//
+//   (2) `entry.pending*AreaNameEn` — an area that resolved
+//       deterministically (typed area name, area-alias match, or pin
+//       assignment) but has not yet been priced via `get_price`.
+//
+//   (3) `draft.pickupLocation.resolvedAreaName` /
+//       `draft.deliveryLocation.resolvedAreaName` — the nearest-area
+//       name that the pin resolver produced when the customer shared
+//       a WhatsApp location pin and explicitly bound it to pickup or
+//       delivery.
+//
+// Historically only (1) satisfied the "pickup.area" / "delivery.area"
+// slot, so the 2026-04-19 pin flow produced the bug where the customer
+// pinned a location (resolver said "Mirqab"), the agent asked role
+// ("pickup"), the controller moved the pin into `pickupLocation` with
+// `resolvedAreaName = "Mirqab"` — but the LLM still saw
+// `missing_fields: [pickup.area ...]` because `quotePickupAreaNameEn`
+// was null. The LLM honestly asked "Which pickup area is it from?",
+// even though Mirqab was sitting right there in the pin.
+//
+// Centralizing the fallback here means three call sites agree:
+//   - `applyPendingLocationRoleSelection` lifts (3) → (2) on assignment.
+//   - `computeOneBrainMissingFields` reads the effective area to decide
+//     whether "pickup.area" / "delivery.area" belongs in the missing
+//     list.
+//   - The LLM context-block surface formats the effective area (not
+//     just the quote field) so the draft line reads
+//     `pickup: { area: "Mirqab", ..., pin: "Mirqab" }`.
+//
+// The quote → pending → pin priority is preserved in both getters so
+// a later `get_price` promoting pending → quote still wins, and a
+// subsequent customer correction (typing a different area) flows
+// through the normal apply-boundary path.
+// ---------------------------------------------------------------------------
+
+export function getEffectivePickupAreaName(
+  draft: PersistedBookingDraft | null | undefined,
+  entry: PersistedConversationControllerEntry | null | undefined,
+): string | null {
+  const quoted = entry?.quotePickupAreaNameEn;
+  if (typeof quoted === "string" && quoted.trim()) return quoted.trim();
+  const pending = entry?.pendingPickupAreaNameEn;
+  if (typeof pending === "string" && pending.trim()) return pending.trim();
+  const pin = draft?.pickupLocation?.resolvedAreaName;
+  if (typeof pin === "string" && pin.trim()) return pin.trim();
+  return null;
+}
+
+export function getEffectiveDeliveryAreaName(
+  draft: PersistedBookingDraft | null | undefined,
+  entry: PersistedConversationControllerEntry | null | undefined,
+): string | null {
+  const quoted = entry?.quoteDropoffAreaNameEn;
+  if (typeof quoted === "string" && quoted.trim()) return quoted.trim();
+  const pending = entry?.pendingDropoffAreaNameEn;
+  if (typeof pending === "string" && pending.trim()) return pending.trim();
+  const pin = draft?.deliveryLocation?.resolvedAreaName;
+  if (typeof pin === "string" && pin.trim()) return pin.trim();
+  return null;
 }
 
 const ARABIC_CHAR_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
@@ -257,12 +347,17 @@ function isProbablyArabizi(text: string): boolean {
 }
 
 /**
- * Classify the customer's turn into one of three mirroring modes.
- * Orthogonal to the binary `ar | en` language (still returned separately
- * by `resolveCustomerReplyLanguage`); callers pass BOTH to downstream code:
- *   – binary `language` drives deterministic canonical selection.
- *   – `scriptMode` is injected into the one-brain context so the LLM
- *     mirrors the customer's script and register.
+ * Classify the customer's turn into one of the mirroring modes we actually
+ * reply in. Orthogonal to the binary `ar | en` language returned by
+ * `resolveCustomerReplyLanguage`.
+ *
+ * NOTE: We intentionally do NOT return `"arabizi"` here, even though
+ * `isProbablyArabizi` can detect it. Kuwaiti customers who type Arabizi
+ * prefer English replies over back-transliterated Arabizi (which reads
+ * as artificial / machine-generated to a native speaker). So Arabizi
+ * input routes to the `"english"` reply mode. The `"arabizi"` variant is
+ * kept in the union type for backward compatibility only — nothing
+ * downstream should ever receive it.
  */
 export function resolveCustomerScriptMode(params: {
   visibleText: string | null;
@@ -273,14 +368,32 @@ export function resolveCustomerScriptMode(params: {
   if (!text) {
     return params.fallbackLanguage === "ar" ? "arabic" : "english";
   }
-  if (hasVisibleArabic(text) && !hasVisibleLatin(text)) {
+  const hasArabic = hasVisibleArabic(text);
+  const hasLatin = hasVisibleLatin(text);
+  if (hasArabic && !hasLatin) {
     return "arabic";
   }
+  // Arabizi input → English reply (see note above). Return before the
+  // generic Latin check so we don't need a separate Arabizi branch.
   if (isProbablyArabizi(text)) {
-    return "arabizi";
-  }
-  if (hasVisibleLatin(text) && !hasVisibleArabic(text)) {
     return "english";
+  }
+  if (hasLatin && !hasArabic) {
+    return "english";
+  }
+  // Letterless turns (digits, whitespace, punctuation, emoji only) carry
+  // zero script signal. They must NOT flip the conversation's script
+  // mode — inheriting the controller's fallback is the only correct
+  // behavior. Without this branch, the function used to fall through
+  // to the "mixed-script default Arabic" line below, which is what
+  // produced the 2026-04-19 transcript where an English conversation
+  // suddenly got an Arabic reply ("أرسل اسم المستلم ورقمه.") after the
+  // customer typed the bare number "99338566". The sibling function
+  // `resolveCustomerReplyLanguage` already handles this for the binary
+  // ar/en signal; mirroring the rule here keeps the two resolvers from
+  // drifting apart. See `smoke-test-letterless-language-stability.mjs`.
+  if (!hasArabic && !hasLatin) {
+    return params.fallbackLanguage === "ar" ? "arabic" : "english";
   }
   // Mixed-script (rare): prefer Arabic-script to preserve the primary
   // language unless we have an explicit English signal.
@@ -307,10 +420,19 @@ export function resolveCustomerReplyLanguage(params: {
   if (hasLatin && !hasArabic) {
     return "en";
   }
+  // Letterless turns (digits, whitespace, punctuation, emoji only) carry
+  // zero language signal. Inheriting the conversation's previous language
+  // is the only correct behavior — the alternative is letting a single
+  // bare number like "929" flip the reply language, which is what caused
+  // the 2026-04-19 transcript where an English conversation suddenly
+  // got an Arabic error message after the customer typed "929". The
+  // `preferFallbackForLowSignalText` flag used to be the opt-in lever for
+  // this, but we now apply it unconditionally: there is no caller for
+  // which "guess language from a numbers-only string" is the right call.
+  if (text.trim() && !hasArabic && !hasLatin) {
+    return params.fallbackLanguage;
+  }
   if (text.trim()) {
-    if (params.preferFallbackForLowSignalText && !hasArabic && !hasLatin) {
-      return params.fallbackLanguage;
-    }
     return detectConversationLanguage(text);
   }
   return params.fallbackLanguage;

@@ -266,99 +266,13 @@ async function main() {
     "active-quote clarifications during booking should keep quoted route context",
   );
 
-  const summaryEntry = buildControllerEntry(shared, {
-    stage: "awaiting_confirmation",
-    bookingStep: "awaiting_summary_confirmation",
-    bookingDraft: {
-      ...shared.createEmptyBookingDraft(),
-      senderName: "Ahmed",
-      senderPhone: "50000000",
-      recipientName: "Sara",
-      recipientPhone: "51111111",
-      pickupBlock: "1",
-      pickupStreet: "2",
-      pickupHouse: "3",
-      deliveryBlock: "4",
-      deliveryStreet: "5",
-      deliveryHouse: "6",
-    },
-  });
-  const correctedSummaryResult = t.applyBookingFieldCorrection({
-    controllerEntry: summaryEntry,
-    visibleText: "change the recipient phone to 60000000",
-    replyTarget: "96550000000",
-    bookingFields: {
-      sender_name: null,
-      sender_phone: null,
-      phone_decision: "none",
-      recipient_name: null,
-      recipient_phone: "60000000",
-      address_block: null,
-      address_street: null,
-      address_house: null,
-    },
-  });
-  assert(
-    correctedSummaryResult.status === "applied",
-    "summary-stage corrections should report applied status",
-  );
-  const correctedSummary = correctedSummaryResult.entry;
-  assert(
-    correctedSummary.bookingDraft.recipientPhone === "60000000",
-    "summary-stage corrections should update the draft",
-  );
-  assert(
-    correctedSummary.bookingStep === "awaiting_summary_confirmation",
-    "summary-stage corrections should stay in summary confirmation when draft is still complete",
-  );
-
-  const ambiguousAddressResult = t.applyBookingFieldCorrection({
-    controllerEntry: summaryEntry,
-    visibleText: "change block to 9",
-    replyTarget: "96550000000",
-    bookingFields: {
-      sender_name: null,
-      sender_phone: null,
-      phone_decision: "none",
-      recipient_name: null,
-      recipient_phone: null,
-      address_block: "9",
-      address_street: null,
-      address_house: null,
-    },
-  });
-  assert(
-    ambiguousAddressResult.status === "ambiguous_address_role",
-    "ambiguous address edits should report ambiguous_address_role status",
-  );
-  assert(
-    ambiguousAddressResult.entry === summaryEntry,
-    "ambiguous address edits should not mutate the controller entry",
-  );
-
-  const noOpCorrectionResult = t.applyBookingFieldCorrection({
-    controllerEntry: summaryEntry,
-    visibleText: "change something",
-    replyTarget: "96550000000",
-    bookingFields: {
-      sender_name: null,
-      sender_phone: null,
-      phone_decision: "none",
-      recipient_name: null,
-      recipient_phone: null,
-      address_block: null,
-      address_street: null,
-      address_house: null,
-    },
-  });
-  assert(
-    noOpCorrectionResult.status === "no_op",
-    "correction with no usable fields should report no_op status",
-  );
-  assert(
-    noOpCorrectionResult.entry === summaryEntry,
-    "no-op corrections should not mutate the controller entry",
-  );
+  // Note: `applyBookingFieldCorrection` was deleted in the step-2 dead-code
+  // sweep (it was only reachable via the unreachable legacy `applyResponderStateOps`
+  // branch). The summary-stage correction behavior that used to be validated
+  // here is now covered by the live-drain path: the LLM's `apply_booking_field`
+  // tool call is applied by `applyBookingFieldPatch` + `applyBookingDraftProgress`,
+  // exercised end-to-end by `smoke-test-carry-over-live-drain.mjs` and the
+  // main octopus-channel integration.
 
   const senderEntry = buildControllerEntry(shared, {
     stage: "collecting_booking_details",

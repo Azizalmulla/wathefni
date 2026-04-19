@@ -16,6 +16,17 @@ import {
   isPassengerTransportRequest,
   isSimpleGreeting,
 } from "../../shared/conversation-policy";
+import {
+  pushResponderStateOp,
+  type ResponderSetRequestedSlotOp,
+  type ResponderSetPendingAreaOp,
+} from "../../shared/responder-state-ops";
+import {
+  isLlmAreaResolverEnabled,
+  resolveAreaWithLlm,
+  type LlmAreaResolverResult,
+} from "../lib/llm-area-resolver";
+import { appendLearnedAlias } from "../lib/learned-aliases-io";
 
 import type { ToolDeps } from "./deps";
 
@@ -51,6 +62,135 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     buildServiceCatalogEntry,
     getQuotedPriceForDeliveryType,
   } = quoting;
+  const { resolveToolConversationId, resolveToolTurnId } = deps.booking;
+
+  // Dialog-state-tracking helper. When the pricing tool returns a clarifying
+  // result (ambiguous match, low-confidence suggestion, smuggle reject), it
+  // pushes a `set_requested_slot` op so the orchestrator records the
+  // `requestedSlot` register on the controller entry. The next customer turn
+  // uses that register to route their disambiguation answer to the correct
+  // slot even when the LLM misroutes it.
+  function markRequestedAreaSlot(
+    ctx: any,
+    field: "pickup_area" | "dropoff_area",
+    options?: string[] | null,
+  ): void {
+    try {
+      const conversationId = resolveToolConversationId(ctx);
+      if (!conversationId) return;
+      const turnId = resolveToolTurnId(ctx);
+      const op: ResponderSetRequestedSlotOp = {
+        op: "set_requested_slot",
+        slot: field,
+        options: options && options.length > 0 ? options : null,
+        turn_id: turnId || "",
+      };
+      pushResponderStateOp(conversationId, op);
+    } catch {
+      // best-effort — DST is an enhancement, never block the tool on it
+    }
+  }
+
+  // Persist a mid-conversation, successfully-resolved area onto the
+  // controller entry via a set_pending_area op. Called as soon as ONE leg
+  // resolves, regardless of whether the OTHER leg also resolved or the
+  // overall get_price call produced a full quote. See the op declaration
+  // in responder-state-ops.ts for rationale (smuggle-guard preservation).
+  function markPendingArea(
+    ctx: any,
+    field: "pickup_area" | "dropoff_area",
+    nameEn: string | null,
+    nameAr: string | null,
+  ): void {
+    try {
+      const conversationId = resolveToolConversationId(ctx);
+      if (!conversationId) return;
+      const turnId = resolveToolTurnId(ctx);
+      const op: ResponderSetPendingAreaOp = {
+        op: "set_pending_area",
+        field,
+        area_name_en: nameEn && nameEn.trim() ? nameEn.trim() : null,
+        area_name_ar: nameAr && nameAr.trim() ? nameAr.trim() : null,
+        turn_id: turnId || "",
+      };
+      pushResponderStateOp(conversationId, op);
+    } catch {
+      // best-effort — enhancement only, never block the tool on it
+    }
+  }
+
+  // LLM area-resolver fallback: invoked ONLY when the deterministic pipeline
+  // returned no match. Uses a narrow, schema-constrained OpenAI call with
+  // a pre-filtered shortlist of candidates to pick the customer's intent.
+  // On high confidence, result is learned back into
+  // `pricing.resolver.learned-aliases.json` so the next customer with the
+  // same spelling hits a free deterministic alias.
+  async function tryLlmAreaFallback(
+    ctx: any,
+    field: "pickup_area" | "dropoff_area",
+    query: string,
+    candidates: Array<{ area: any; similarity: number }>,
+    otherLegArea: any | null,
+  ): Promise<LlmAreaResolverResult | null> {
+    if (!isLlmAreaResolverEnabled()) return null;
+    const apiKey = process.env.OPENAI_API_KEY?.trim() || null;
+    if (!apiKey) return null;
+    if (!candidates || candidates.length === 0) return null;
+
+    let conversationId: string | null = null;
+    try {
+      conversationId = resolveToolConversationId(ctx) || null;
+    } catch {
+      conversationId = null;
+    }
+
+    const result = await resolveAreaWithLlm(
+      {
+        query,
+        candidates,
+        governorateHint: otherLegArea?.governorate || null,
+        trigger: "not_found",
+        conversationId,
+      },
+      {
+        openaiApiKey: apiKey,
+        model: process.env.RIDERS_LLM_AREA_RESOLVER_MODEL || "gpt-4o-mini",
+      },
+    );
+
+    try {
+      console.log(
+        `[pricing/llm-resolver] field=${field} query=${JSON.stringify(query)} conversation=${conversationId || "-"} status=${result.status} area_id=${result.area_id} confidence=${result.confidence} latency_ms=${result.diagnostics.latency_ms} prompt_tokens=${result.diagnostics.prompt_tokens} completion_tokens=${result.diagnostics.completion_tokens} cost_usd=${result.diagnostics.estimated_cost_usd} fallback=${result.diagnostics.fallback_used} reasoning=${JSON.stringify(result.reasoning).slice(0, 200)}`,
+      );
+    } catch {
+      // logging best-effort
+    }
+
+    if (result.status === "resolved" && result.should_learn && result.area_id !== null) {
+      try {
+        const learned = await appendLearnedAlias({
+          alias: query,
+          area_id: result.area_id,
+          model: result.diagnostics.model,
+          confidence: result.confidence,
+          conversation_id: conversationId,
+          reasoning: result.reasoning,
+        });
+        result.learned = learned.written;
+        if (!learned.written && learned.reason) {
+          console.log(
+            `[pricing/llm-resolver] learn-back skipped alias=${JSON.stringify(query)} reason=${learned.reason}`,
+          );
+        }
+      } catch (err) {
+        console.warn(
+          `[pricing/llm-resolver] learn-back failed alias=${JSON.stringify(query)} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+
+    return result;
+  }
 
   // loadPricing is module-scope in index.ts; it is not passed through deps
   // because it would add another indirection. Instead we rely on the
@@ -201,6 +341,70 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           // like "Ok lets book slwa to slmya".
           const evidenceIds = collectAreaEvidenceFromText(visibleText, data);
 
+          // DST-driven misroute correction: if we asked the customer for a
+          // specific area slot last turn (requestedSlot.name === pickup_area
+          // or dropoff_area) and the LLM now calls get_price with that area
+          // on the OPPOSITE side, swap the params before verification. This
+          // catches the "salmiya → sabah alsalem / disambig / Sabal al salem"
+          // class of bug where the LLM misroutes a disambiguation answer.
+          //
+          // The swap only fires when all three conditions hold:
+          //   (1) requestedSlot is a pickup_area / dropoff_area with options.
+          //   (2) EXACTLY ONE of the two params matches a requestedSlot
+          //       option (by area name_en, case-insensitive).
+          //   (3) That match is on the opposite side from the requestedSlot
+          //       (i.e. the LLM put the answer in the wrong slot).
+          try {
+            const controllerEntry = ctx && isCustomerOctopusContext(ctx)
+              ? (getNormalizedBookingAuthority(ctx) as any).controller
+              : null;
+            const requestedSlot = controllerEntry?.dialogState?.requestedSlot ?? null;
+            if (
+              requestedSlot &&
+              (requestedSlot.name === "pickup_area" ||
+                requestedSlot.name === "dropoff_area") &&
+              Array.isArray(requestedSlot.options) &&
+              requestedSlot.options.length > 0
+            ) {
+              const optSet = new Set(
+                requestedSlot.options
+                  .map((o: string) => o?.trim().toLowerCase())
+                  .filter(Boolean),
+              );
+              const pickupMatches = optSet.has(
+                String(params.pickup_area || "").trim().toLowerCase(),
+              );
+              const dropoffMatches = optSet.has(
+                String(params.dropoff_area || "").trim().toLowerCase(),
+              );
+              const exactlyOneMatch =
+                (pickupMatches && !dropoffMatches) ||
+                (!pickupMatches && dropoffMatches);
+              const misrouted =
+                exactlyOneMatch &&
+                ((pickupMatches && requestedSlot.name === "dropoff_area") ||
+                  (dropoffMatches && requestedSlot.name === "pickup_area"));
+              if (misrouted) {
+                console.log(
+                  `[dst/misroute] swapping params pickup="${params.pickup_area}" dropoff="${params.dropoff_area}" requestedSlot=${requestedSlot.name} options=[${requestedSlot.options.join("|")}]`,
+                );
+                const swappedPickup = params.dropoff_area;
+                const swappedDropoff = params.pickup_area;
+                const swappedPickupId = params.dropoff_area_id;
+                const swappedDropoffId = params.pickup_area_id;
+                params = {
+                  ...params,
+                  pickup_area: swappedPickup,
+                  dropoff_area: swappedDropoff,
+                  pickup_area_id: swappedPickupId,
+                  dropoff_area_id: swappedDropoffId,
+                };
+              }
+            }
+          } catch {
+            // DST reads are best-effort — never block the tool on a read error
+          }
+
           const applyDecision = (
             field: "pickup_area" | "dropoff_area",
             decision: any,
@@ -247,6 +451,18 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
                       topK: 5,
                     }),
                   });
+              // Record that the next customer turn is answering a specific
+              // area slot. Options surface when we suggested a single area or
+              // alternatives; empty options means "free-form answer expected".
+              const suggestionOptions: string[] = decision.suggestedArea
+                ? [
+                    decision.suggestedArea.name_en,
+                    ...(Array.isArray(decision.suggestedAlternatives)
+                      ? decision.suggestedAlternatives.map((a: any) => a?.name_en).filter(Boolean)
+                      : []),
+                  ]
+                : [];
+              markRequestedAreaSlot(ctx, field, suggestionOptions);
               return { override: null as any, reject: rejectResult };
             }
             if (decision.action === "needs_clarification") {
@@ -259,6 +475,13 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
               console.log(
                 `[area-evidence] ${field} NEEDS_CLARIFICATION raw="${rawToken}" model="${modelValue}"→${decision.modelArea.name_en}, modelSim=${decision.modelSimilarity.toFixed(3)}, candidates=${decision.closestCandidates.map((c: any) => `${c.area.name_en}(${c.similarity.toFixed(2)})`).join("|") || "none"}`,
               );
+              const clarifyOptions = [
+                decision.modelArea?.name_en,
+                ...(Array.isArray(decision.closestCandidates)
+                  ? decision.closestCandidates.map((c: any) => c?.area?.name_en).filter(Boolean)
+                  : []),
+              ].filter(Boolean) as string[];
+              markRequestedAreaSlot(ctx, field, clarifyOptions);
               return {
                 override: null as any,
                 reject: createAreaNeedsClarificationResult({
@@ -274,11 +497,35 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             return { override: null as any, reject: null as any };
           };
 
+          // Read prior-turn resolved area names (if any) so verifyAreaEvidence
+          // can recognize a legitimate carry-forward instead of mis-flagging
+          // it as a smuggle. See verifyAreaEvidence for full rationale.
+          const evidenceController =
+            (getNormalizedBookingAuthority(ctx) as any)?.controller || null;
+          const pendingPickupNameEn =
+            evidenceController?.pendingPickupAreaNameEn ||
+            evidenceController?.quotePickupAreaNameEn ||
+            null;
+          const pendingPickupNameAr =
+            evidenceController?.pendingPickupAreaNameAr ||
+            evidenceController?.quotePickupAreaNameAr ||
+            null;
+          const pendingDropoffNameEn =
+            evidenceController?.pendingDropoffAreaNameEn ||
+            evidenceController?.quoteDropoffAreaNameEn ||
+            null;
+          const pendingDropoffNameAr =
+            evidenceController?.pendingDropoffAreaNameAr ||
+            evidenceController?.quoteDropoffAreaNameAr ||
+            null;
+
           const pickupDecision = verifyAreaEvidence({
             rawToken: rawTokens.pickup,
             modelValue: params.pickup_area,
             idOverride: params.pickup_area_id,
             data,
+            pendingAreaNameEn: pendingPickupNameEn,
+            pendingAreaNameAr: pendingPickupNameAr,
           });
           const pickupApplied = applyDecision(
             "pickup_area",
@@ -295,6 +542,8 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             modelValue: params.dropoff_area,
             idOverride: params.dropoff_area_id,
             data,
+            pendingAreaNameEn: pendingDropoffNameEn,
+            pendingAreaNameAr: pendingDropoffNameAr,
           });
           const dropoffApplied = applyDecision(
             "dropoff_area",
@@ -322,7 +571,38 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             ? findAreaById(params.dropoff_area_id)
             : await resolvePricingAreaQuery(params.dropoff_area, data);
 
+        // Persist any leg that resolved, BEFORE the early-return guards for
+        // ambiguous/suggested/not_found on the other leg. This preserves
+        // mid-conversation progress: if the customer's pickup resolved but
+        // the dropoff is ambiguous, a follow-up turn answering only the
+        // dropoff disambiguation must still see the pickup as "settled" —
+        // otherwise the smuggle guard will wrongly reject the LLM's
+        // pass-through of the already-resolved pickup.
+        if (pickupResolution.status === "resolved" && pickupResolution.area) {
+          markPendingArea(
+            ctx,
+            "pickup_area",
+            pickupResolution.area.name_en,
+            pickupResolution.area.name_ar,
+          );
+        }
+        if (dropoffResolution.status === "resolved" && dropoffResolution.area) {
+          markPendingArea(
+            ctx,
+            "dropoff_area",
+            dropoffResolution.area.name_en,
+            dropoffResolution.area.name_ar,
+          );
+        }
+
         if (pickupResolution.status === "ambiguous") {
+          markRequestedAreaSlot(
+            ctx,
+            "pickup_area",
+            Array.isArray(pickupResolution.options)
+              ? pickupResolution.options.map((o: any) => o?.name_en).filter(Boolean)
+              : [],
+          );
           return createAreaClarificationResult({
             field: "pickup_area",
             query: params.pickup_area,
@@ -333,6 +613,16 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         }
 
         if (pickupResolution.status === "suggested") {
+          markRequestedAreaSlot(
+            ctx,
+            "pickup_area",
+            [
+              pickupResolution.area?.name_en,
+              ...(Array.isArray(pickupResolution.alternative_areas)
+                ? pickupResolution.alternative_areas.map((a: any) => a?.name_en).filter(Boolean)
+                : []),
+            ].filter(Boolean) as string[],
+          );
           return createAreaSuggestionResult({
             field: "pickup_area",
             query: params.pickup_area,
@@ -344,6 +634,13 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         }
 
         if (dropoffResolution.status === "ambiguous") {
+          markRequestedAreaSlot(
+            ctx,
+            "dropoff_area",
+            Array.isArray(dropoffResolution.options)
+              ? dropoffResolution.options.map((o: any) => o?.name_en).filter(Boolean)
+              : [],
+          );
           return createAreaClarificationResult({
             field: "dropoff_area",
             query: params.dropoff_area,
@@ -354,6 +651,16 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         }
 
         if (dropoffResolution.status === "suggested") {
+          markRequestedAreaSlot(
+            ctx,
+            "dropoff_area",
+            [
+              dropoffResolution.area?.name_en,
+              ...(Array.isArray(dropoffResolution.alternative_areas)
+                ? dropoffResolution.alternative_areas.map((a: any) => a?.name_en).filter(Boolean)
+                : []),
+            ].filter(Boolean) as string[],
+          );
           return createAreaSuggestionResult({
             field: "dropoff_area",
             query: params.dropoff_area,
@@ -364,29 +671,105 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           });
         }
 
-        const pickup =
+        let pickup: any =
           pickupResolution.status === "resolved" ? pickupResolution.area : null;
-        const dropoff =
+        let dropoff: any =
           dropoffResolution.status === "resolved" ? dropoffResolution.area : null;
 
         if (!pickup) {
-          return createAreaNotFoundResult({
-            field: "pickup_area",
-            query: params.pickup_area,
-            closestCandidates: collectAreaCandidates(params.pickup_area, data.areas, {
-              topK: 5,
-            }),
-          });
+          const pickupCandidates = collectAreaCandidates(
+            params.pickup_area,
+            data.areas,
+            { topK: 10 },
+          );
+          // Option B: LLM fallback resolver. Only fires when the deterministic
+          // pipeline produced no match. Gated by env flag + budget caps.
+          const llm = await tryLlmAreaFallback(
+            ctx,
+            "pickup_area",
+            params.pickup_area,
+            pickupCandidates,
+            dropoff,
+          );
+          if (llm && llm.status === "resolved" && llm.area_id !== null) {
+            const resolvedArea = data.areas.find((a: any) => a.id === llm.area_id);
+            if (resolvedArea) {
+              pickup = resolvedArea;
+              markPendingArea(
+                ctx,
+                "pickup_area",
+                resolvedArea.name_en,
+                resolvedArea.name_ar,
+              );
+            }
+          } else if (llm && llm.status === "suggested" && llm.area_id !== null) {
+            const suggested = data.areas.find((a: any) => a.id === llm.area_id);
+            if (suggested) {
+              markRequestedAreaSlot(ctx, "pickup_area", [suggested.name_en]);
+              return createAreaSuggestionResult({
+                field: "pickup_area",
+                query: params.pickup_area,
+                suggestedArea: suggested,
+                prompt_ar: `هل تقصد ${suggested.name_ar}؟`,
+                prompt_en: `Do you mean ${suggested.name_en}?`,
+                alternativeAreas: [],
+              });
+            }
+          }
+          if (!pickup) {
+            return createAreaNotFoundResult({
+              field: "pickup_area",
+              query: params.pickup_area,
+              closestCandidates: pickupCandidates.slice(0, 5),
+            });
+          }
         }
 
         if (!dropoff) {
-          return createAreaNotFoundResult({
-            field: "dropoff_area",
-            query: params.dropoff_area,
-            closestCandidates: collectAreaCandidates(params.dropoff_area, data.areas, {
-              topK: 5,
-            }),
-          });
+          const dropoffCandidates = collectAreaCandidates(
+            params.dropoff_area,
+            data.areas,
+            { topK: 10 },
+          );
+          const llm = await tryLlmAreaFallback(
+            ctx,
+            "dropoff_area",
+            params.dropoff_area,
+            dropoffCandidates,
+            pickup,
+          );
+          if (llm && llm.status === "resolved" && llm.area_id !== null) {
+            const resolvedArea = data.areas.find((a: any) => a.id === llm.area_id);
+            if (resolvedArea) {
+              dropoff = resolvedArea;
+              markPendingArea(
+                ctx,
+                "dropoff_area",
+                resolvedArea.name_en,
+                resolvedArea.name_ar,
+              );
+            }
+          } else if (llm && llm.status === "suggested" && llm.area_id !== null) {
+            const suggested = data.areas.find((a: any) => a.id === llm.area_id);
+            if (suggested) {
+              markRequestedAreaSlot(ctx, "dropoff_area", [suggested.name_en]);
+              return createAreaSuggestionResult({
+                field: "dropoff_area",
+                query: params.dropoff_area,
+                suggestedArea: suggested,
+                prompt_ar: `هل تقصد ${suggested.name_ar}؟`,
+                prompt_en: `Do you mean ${suggested.name_en}?`,
+                alternativeAreas: [],
+              });
+            }
+          }
+          if (!dropoff) {
+            return createAreaNotFoundResult({
+              field: "dropoff_area",
+              query: params.dropoff_area,
+              closestCandidates: dropoffCandidates.slice(0, 5),
+            });
+          }
         }
 
         const c = data.currency;

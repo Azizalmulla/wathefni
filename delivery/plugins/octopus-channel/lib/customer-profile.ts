@@ -15,6 +15,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { asTrimmedString, normalizePhone } from "./normalize";
 import { safeJsonParse } from "./session-helpers";
+import {
+  formatSanitizerDrops,
+  sanitizeSavedOrder,
+  type SanitizationDrop,
+} from "../../shared/persisted-state-sanitizer.js";
 import type {
   CustomerProfile,
   SavedAddress,
@@ -115,12 +120,37 @@ export function createCustomerProfileStore(
         return null;
       }
       const profile = parsed as CustomerProfile;
-      const sanitized = sanitizeCustomerProfile(profile);
-      if (
-        sanitized &&
+      // (1) Coarse legacy sanitizer — wipes the WHOLE saved order when it's
+      // structurally junk (both names look like phones, etc.). Kept for
+      // backwards compatibility.
+      const coarse = sanitizeCustomerProfile(profile);
+      const coarseDroppedOrder =
+        coarse &&
         profile.last_successful_order &&
-        !sanitized.last_successful_order
-      ) {
+        !coarse.last_successful_order;
+      // (2) Per-field sanitizer — catches the common case where the
+      // saved order is MOSTLY valid but one field (e.g.
+      // `sender.name = "Is this the cheapest option"`) was written by
+      // pre-fix code. These corrupt-in-place fields don't trip the
+      // coarse check. Runs the same validators as the write path.
+      const fieldResult = sanitizeSavedOrder(coarse?.last_successful_order ?? null);
+      const fieldDrops: SanitizationDrop[] = fieldResult.drops;
+      const sanitized: CustomerProfile | null = coarse
+        ? { ...coarse, last_successful_order: fieldResult.value ?? null }
+        : coarse;
+      if (fieldDrops.length > 0) {
+        // One structured line per load so ops can grep for it and
+        // measure historical corruption in the wild.
+        try {
+          console.warn(
+            `[sanitizer] customer_profile path=${profilePath} drops=${fieldDrops.length} ${formatSanitizerDrops(fieldDrops)}`,
+          );
+        } catch {}
+      }
+      // Persist the cleaned profile back if EITHER sanitizer path changed
+      // anything — so the next read is clean even without the fix in place,
+      // and so telemetry doesn't spam the same drops turn after turn.
+      if (coarseDroppedOrder || fieldDrops.length > 0) {
         await fs.writeFile(profilePath, `${JSON.stringify(sanitized, null, 2)}\n`, "utf-8");
       }
       return sanitized;

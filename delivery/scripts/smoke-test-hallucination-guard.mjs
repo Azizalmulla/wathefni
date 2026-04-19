@@ -222,7 +222,7 @@ function buildEntry(draft, overrides = {}) {
 }
 
 // -----------------------------------------------------------------------
-// Case 7: price mismatch
+// Case 7: price mismatch — mentioned price is OUTSIDE the full quoted set
 // -----------------------------------------------------------------------
 {
   const entry = buildEntry(buildCompleteDraft()); // quoted 1.250
@@ -234,9 +234,26 @@ function buildEntry(draft, overrides = {}) {
     stageAtTurnStart: "collecting_booking_details",
     language: "en",
     nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    // Even when the full valid set is passed, 5.000 is still out of it.
+    activeQuotedPrices: [1.25, 1.75, 2.25],
   });
   assert(decision.blocked, "case7: price mismatch must be blocked");
   assert(decision.claims.includes("price_mismatch"), "case7: must detect price_mismatch");
+  // B: price_mismatch must substitute with the neutral price_repair, NOT
+  // the next_required_action. That's the whole point of "guards don't
+  // advance the flow".
+  assert(
+    decision.substitutedFrom === "price_repair",
+    `case7: substitute must be price_repair, got: ${decision.substitutedFrom}`,
+  );
+  assert(
+    !/sender|phone|name/i.test(decision.replyText),
+    `case7: repair must not ask for sender/phone/name, got: ${decision.replyText}`,
+  );
+  assert(
+    /re-check|option/i.test(decision.replyText),
+    `case7: repair must be a neutral re-ask about which option, got: ${decision.replyText}`,
+  );
 }
 
 // -----------------------------------------------------------------------
@@ -364,4 +381,259 @@ function buildEntry(draft, overrides = {}) {
   );
 }
 
-console.log("ok: all 14 hallucination-guard smoke cases passed");
+// -----------------------------------------------------------------------
+// Case 15: 2026-04-19 "is there other options" incident.
+//
+// After a price quote, the LLM answered a legitimate option inquiry by
+// listing the OTHER quoted options and their real quoted prices. The
+// pre-fix guard compared each mentioned price against the single scalar
+// `entry.quotedPrice` (the currently-selected option) and flagged them
+// all as price_mismatch, then substituted ASK_SENDER_NAME_AND_PHONE.
+//
+// With the full active-quote price set plumbed through, the mention of
+// every quoted option's real price must pass the guard untouched.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: 1.25 });
+  const decision = runHallucinationGuard({
+    replyText:
+      "Yes, we have other options too. Express sedan is 1.750 KWD, Standard box van is 1.750 KWD, and Express box van is 2.250 KWD. Would you like to switch?",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices: [1.25, 1.75, 2.25],
+  });
+  assert(
+    !decision.blocked,
+    `case15: legit other-options reply must pass — got blocked=${decision.blocked} claims=${decision.claims.join(",")} reason=${decision.reason}`,
+  );
+  assert(
+    decision.claims.length === 0,
+    `case15: no claims expected; got ${decision.claims.join(",")}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 16: mentioned price outside the full set still blocks.
+//
+// Valid set is {1.25, 1.75, 2.25}. Reply quotes 9.000 KWD — not in set.
+// Guard must fire AND substitute the price_repair (not an ASK_*).
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: 1.25 });
+  const decision = runHallucinationGuard({
+    replyText: "Sedan is 1.750 KWD, and box van is 9.000 KWD.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices: [1.25, 1.75, 2.25],
+  });
+  assert(decision.blocked, "case16: out-of-set price must block");
+  assert(
+    decision.claims.includes("price_mismatch"),
+    "case16: must detect price_mismatch",
+  );
+  assert(
+    decision.substitutedFrom === "price_repair",
+    `case16: substitute must be price_repair, got ${decision.substitutedFrom}`,
+  );
+  assert(
+    !/sender|name|phone/i.test(decision.replyText),
+    `case16: repair must not advance to slot ask, got: ${decision.replyText}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 17: rounding tolerance — "1.75" and "1.750" are the same price.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: 1.25 });
+  const decision = runHallucinationGuard({
+    replyText: "Express sedan is 1.75 KWD.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices: [1.25, 1.75, 2.25],
+  });
+  assert(
+    !decision.blocked,
+    `case17: 1.75 must match 1.750 via tolerance — got ${JSON.stringify(decision)}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 18: field_rejection_hallucination still advances to next ASK_*.
+//
+// The "guards don't advance the flow" principle is scoped to
+// price_mismatch (where the LLM's false claim isn't about a specific
+// slot). When the LLM falsely claims a customer-provided field is
+// invalid, the correct repair IS to re-ask the server's real next slot.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft());
+  const decision = runHallucinationGuard({
+    replyText:
+      "The phone numbers need to be resent in a valid format. Send the sender and recipient phone numbers again, digits only.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    activeQuotedPrices: [1.25],
+  });
+  assert(decision.blocked, "case18: field rejection hallucination must still block");
+  assert(
+    decision.substitutedFrom === "next_required_action" ||
+      decision.substitutedFrom === "order_summary" ||
+      decision.substitutedFrom === "generic_nudge",
+    `case18: field-rejection substitute must stay on the legitimate-advance path, got ${decision.substitutedFrom}`,
+  );
+  assert(
+    decision.substitutedFrom !== "price_repair",
+    "case18: field-rejection must NOT be squashed into price_repair",
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 19: backwards compatibility — when no activeQuotedPrices is
+// passed, legacy scalar-only behavior still works (uses entry.quotedPrice).
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft()); // quotedPrice 1.25
+  const decision = runHallucinationGuard({
+    replyText: "The price is 1.250 KWD. Shall I confirm?",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    // No activeQuotedPrices — legacy caller.
+  });
+  assert(!decision.blocked, "case19: scalar-only match must pass (legacy path)");
+}
+{
+  const entry = buildEntry(buildCompleteDraft()); // quotedPrice 1.25
+  const decision = runHallucinationGuard({
+    replyText: "The price is 9.000 KWD.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    // No activeQuotedPrices — legacy caller.
+  });
+  assert(
+    decision.blocked && decision.claims.includes("price_mismatch"),
+    "case19b: scalar-only out-of-set price still blocks (legacy path)",
+  );
+  assert(
+    decision.substitutedFrom === "price_repair",
+    "case19b: legacy blocked price_mismatch must still route to price_repair",
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 20: empty activeQuotedPrices + null entry.quotedPrice = no signal,
+// do not fire price_mismatch. Err on the side of letting the reply
+// through; create_simple_order and outbound-verify will catch real bugs.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: null });
+  const decision = runHallucinationGuard({
+    replyText: "The price is 9.000 KWD.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    activeQuotedPrices: [],
+  });
+  assert(
+    !decision.claims.includes("price_mismatch"),
+    "case20: no ground truth = no price_mismatch claim",
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 21: manual-confirmation option price ("Helper service" etc.).
+//
+// 2026-04-19 second incident regression: the caller unions
+// `activeQuotedRoute.pricesByType` (bookable options) with
+// `activeQuotedRoute.optionCatalog[*].quoted_price` (options the
+// customer is allowed to hear a price for — including manual-confirm).
+// Helper service is the canonical manual-confirm option: not in
+// `pricesByType`, but in `optionCatalog` at 3.250 KWD.
+//
+// A reply that mentions "Helper service at 3.250 KWD" alongside the
+// bookable options must pass — the price IS grounded in the quote,
+// just in the option catalog rather than the bookable bucket.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: 1.25 });
+  const activeQuotedPrices = [1.25, 1.75, 2.25, 3.25];
+  const decision = runHallucinationGuard({
+    replyText:
+      "Yes, we also have Helper service at 3.250 KWD (manual confirmation required), or Express sedan at 1.750 KWD and Express box van at 2.250 KWD.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices,
+  });
+  assert(
+    !decision.blocked,
+    `case21: manual-confirm Helper price must pass — got blocked=${decision.blocked} claims=${decision.claims.join(",")}`,
+  );
+  assert(
+    decision.claims.length === 0,
+    `case21: no claims expected, got ${decision.claims.join(",")}`,
+  );
+}
+
+// Companion: same union set, but the reply drifts to a price that is
+// NOT in the catalog → still blocks, and still uses price_repair (not
+// an ASK_* advancement).
+{
+  const entry = buildEntry(buildCompleteDraft(), { quotedPrice: 1.25 });
+  const decision = runHallucinationGuard({
+    replyText:
+      "Helper service is 5.000 KWD (manual confirmation).",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices: [1.25, 1.75, 2.25, 3.25],
+  });
+  assert(decision.blocked, "case21b: Helper-price drift must still block");
+  assert(
+    decision.claims.includes("price_mismatch"),
+    "case21b: price_mismatch expected",
+  );
+  assert(
+    decision.substitutedFrom === "price_repair",
+    `case21b: substitute must be price_repair, got ${decision.substitutedFrom}`,
+  );
+  assert(
+    !/sender|name|phone/i.test(decision.replyText),
+    `case21b: repair must not advance to slot ask, got: ${decision.replyText}`,
+  );
+}
+
+console.log("ok: all 21 hallucination-guard smoke cases passed");

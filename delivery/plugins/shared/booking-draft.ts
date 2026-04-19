@@ -14,6 +14,15 @@ import type {
   PersistedBookingDraft,
   PersistedBookingLocation,
 } from "./conversation-policy.js";
+import {
+  type DialogState,
+  type SlotName,
+  type SlotSource,
+  isDialogStateEnabled,
+  mirrorDialogStateToDraft,
+  slotNameForBookingField,
+  updateSlot,
+} from "./dialog-state.js";
 
 export type BookingDraft = PersistedBookingDraft;
 export type BookingLocation = PersistedBookingLocation;
@@ -223,11 +232,77 @@ export function createEmptyBookingDraft(): BookingDraft {
   };
 }
 
+/**
+ * Field names on `BookingDraft` that are tied to a specific pickup-and-delivery
+ * route. When the customer starts a new route mid-conversation ("salwa to
+ * massayel" after finishing an unrelated order), these must be wiped so the
+ * new quote + address-collection flow starts clean.
+ *
+ * The identity fields (sender/recipient name + phone) are deliberately NOT in
+ * this list — those travel with the customer across orders. Preserving them
+ * is the whole point of the carry-over architecture: if they were already
+ * filled (either by the customer this turn, by a fast-path, or by
+ * `carry_over_from_last_order`), the new route must not nuke them.
+ */
+export const ROUTE_SCOPED_DRAFT_FIELDS: ReadonlyArray<keyof BookingDraft> = [
+  "pickupBlock",
+  "pickupStreet",
+  "pickupHouse",
+  "pickupAvenue",
+  "pickupExtra",
+  "pickupLocation",
+  "deliveryBlock",
+  "deliveryStreet",
+  "deliveryHouse",
+  "deliveryAvenue",
+  "deliveryExtra",
+  "deliveryLocation",
+  "pendingLocation",
+];
+
+/**
+ * Return a new draft with route-scoped fields cleared and identity fields
+ * (sender/recipient name + phone) preserved from `previous`. Used by the
+ * orchestrator when it detects a brand-new route mid-conversation and needs
+ * to start a fresh quote without losing the customer's identity details —
+ * especially the ones they just asked to carry over from a previous order.
+ *
+ * This is the fix for the transcript bug where `reset active booking flow
+ * after new route message` wiped `same names and number as last order` the
+ * instant the customer said "salwa to massayel".
+ */
+export function createRouteResetDraft(previous: BookingDraft | null | undefined): BookingDraft {
+  const empty = createEmptyBookingDraft();
+  if (!previous) return empty;
+  return {
+    ...empty,
+    senderName: previous.senderName ?? null,
+    senderPhone: previous.senderPhone ?? null,
+    recipientName: previous.recipientName ?? null,
+    recipientPhone: previous.recipientPhone ?? null,
+  };
+}
+
+export type SlotConflict = {
+  slot: SlotName;
+  filledValue: string;
+  incomingValue: string;
+};
+
 export type ApplyPatchResult = {
   draft: BookingDraft;
   applied: Array<keyof BookingFieldPatch>;
   rejected: BookingFieldValidationError[];
   senderPhoneDecision?: PhoneDecision;
+  /** When a `dialogState` was passed in, the updated state reflecting every
+   *  successfully-applied field in the patch. When no `dialogState` was
+   *  passed, this is null (legacy callers unchanged). */
+  dialogState?: DialogState | null;
+  /** Slots that would have been overwritten with a different value — they
+   *  were NOT applied (the legacy draft keeps the previously-filled value)
+   *  and the caller is expected to ask the customer which to keep. Always
+   *  an empty array when `dialogState` wasn't passed. */
+  conflicts?: SlotConflict[];
 };
 
 /**
@@ -242,11 +317,41 @@ export function applyBookingFieldPatch(params: {
   draft: BookingDraft;
   patch: BookingFieldPatch;
   whatsappNumber?: string | null;
+  /** Optional DST state. When provided, every successfully-validated field
+   *  write is funneled through `updateSlot` for conflict detection. When
+   *  omitted, the function behaves exactly like before (legacy callers). */
+  dialogState?: DialogState | null;
+  /** Defaults to `"llm_apply"`. Callers that know they're applying a
+   *  customer-fast-path patch or a tool override should pass the matching
+   *  source so the slot record's `lastSource` is accurate. */
+  dstSource?: SlotSource;
+  /** When true and a DST `requestedSlot` is active, an incoming value for a
+   *  different slot name is redirected to the requested slot. Only the guard
+   *  (which has evidence that the incoming value is a valid answer to the
+   *  requested slot) should pass this. */
+  routeToRequested?: boolean;
+  /** Explicit edit-intent flag. Set by the apply boundary when the incoming
+   *  proposal's `source_quote` contains an edit signal (English/Arabic
+   *  edit verbs, negations like "not X", `label N to M` patterns) AND the
+   *  conversation stage is one where edits are expected (summary_shown,
+   *  awaiting_confirmation, collecting_booking_details). When true, every
+   *  `updateSlot` call in this patch passes `forceOverwrite: true`, so a
+   *  different-value write on a filled/conflict slot REPLACES the incumbent
+   *  silently instead of raising a conflict. Logged as `[edit-override]`
+   *  so we can audit firing rates. See
+   *  `apply-boundary.ts` → `sourceQuoteLooksLikeEdit`. */
+  editIntent?: boolean;
 }): ApplyPatchResult {
   const next: BookingDraft = { ...params.draft };
   const applied: Array<keyof BookingFieldPatch> = [];
   const rejected: BookingFieldValidationError[] = [];
   let senderPhoneDecision: PhoneDecision | undefined;
+
+  // Collect every successful (field, value) write so we can walk them through
+  // DST at the end. We can't just snapshot `next` because DST needs the patch
+  // *field key* (to map to a slot name), which isn't recoverable from the
+  // draft shape alone. Entries are added only when validation succeeded.
+  const dstWrites: Array<{ patchField: string; role: "pickup" | "delivery" | null; value: string | null }> = [];
 
   const p = params.patch || {};
 
@@ -255,6 +360,7 @@ export function applyBookingFieldPatch(params: {
     if (r.value) {
       next.senderName = r.value;
       applied.push("sender_name");
+      dstWrites.push({ patchField: "sender_name", role: null, value: r.value });
     } else if (r.reason) {
       rejected.push({ field: "sender_name", reason: r.reason, received: String(p.sender_name) });
     }
@@ -266,6 +372,7 @@ export function applyBookingFieldPatch(params: {
     if (wa.value) {
       next.senderPhone = wa.value;
       applied.push("phone_decision");
+      dstWrites.push({ patchField: "sender_phone", role: null, value: wa.value });
     } else {
       // No WA number available — leave senderPhone as-is, record decision only.
       applied.push("phone_decision");
@@ -280,6 +387,7 @@ export function applyBookingFieldPatch(params: {
     if (r.value) {
       next.senderPhone = r.value;
       applied.push("sender_phone");
+      dstWrites.push({ patchField: "sender_phone", role: null, value: r.value });
     } else if (r.reason) {
       rejected.push({ field: "sender_phone", reason: r.reason, received: String(p.sender_phone) });
     }
@@ -290,6 +398,7 @@ export function applyBookingFieldPatch(params: {
     if (r.value) {
       next.recipientName = r.value;
       applied.push("recipient_name");
+      dstWrites.push({ patchField: "recipient_name", role: null, value: r.value });
     } else if (r.reason) {
       rejected.push({ field: "recipient_name", reason: r.reason, received: String(p.recipient_name) });
     }
@@ -300,6 +409,7 @@ export function applyBookingFieldPatch(params: {
     if (r.value) {
       next.recipientPhone = r.value;
       applied.push("recipient_phone");
+      dstWrites.push({ patchField: "recipient_phone", role: null, value: r.value });
     } else if (r.reason) {
       rejected.push({ field: "recipient_phone", reason: r.reason, received: String(p.recipient_phone) });
     }
@@ -313,9 +423,11 @@ export function applyBookingFieldPatch(params: {
       if (role === "pickup") {
         next.pickupBlock = r.value;
         applied.push("address_block");
+        dstWrites.push({ patchField: "address_block", role: "pickup", value: r.value });
       } else if (role === "delivery") {
         next.deliveryBlock = r.value;
         applied.push("address_block");
+        dstWrites.push({ patchField: "address_block", role: "delivery", value: r.value });
       }
       // If role is null we leave it alone — the LLM should ask
     } else if (r.reason) {
@@ -329,9 +441,11 @@ export function applyBookingFieldPatch(params: {
       if (role === "pickup") {
         next.pickupStreet = r.value;
         applied.push("address_street");
+        dstWrites.push({ patchField: "address_street", role: "pickup", value: r.value });
       } else if (role === "delivery") {
         next.deliveryStreet = r.value;
         applied.push("address_street");
+        dstWrites.push({ patchField: "address_street", role: "delivery", value: r.value });
       }
     } else if (r.reason) {
       rejected.push({ field: "address_street", reason: r.reason, received: String(p.address_street) });
@@ -371,9 +485,11 @@ export function applyBookingFieldPatch(params: {
       if (role === "pickup") {
         next.pickupHouse = r.value;
         applied.push("address_house");
+        dstWrites.push({ patchField: "address_house", role: "pickup", value: r.value });
       } else if (role === "delivery") {
         next.deliveryHouse = r.value;
         applied.push("address_house");
+        dstWrites.push({ patchField: "address_house", role: "delivery", value: r.value });
       }
     } else if (r.reason) {
       rejected.push({ field: "address_house", reason: r.reason, received: String(p.address_house) });
@@ -386,9 +502,11 @@ export function applyBookingFieldPatch(params: {
       if (role === "pickup") {
         next.pickupAvenue = r.value;
         applied.push("address_avenue");
+        dstWrites.push({ patchField: "address_avenue", role: "pickup", value: r.value });
       } else if (role === "delivery") {
         next.deliveryAvenue = r.value;
         applied.push("address_avenue");
+        dstWrites.push({ patchField: "address_avenue", role: "delivery", value: r.value });
       }
     } else if (r.reason) {
       rejected.push({ field: "address_avenue", reason: r.reason, received: String(p.address_avenue) });
@@ -409,9 +527,11 @@ export function applyBookingFieldPatch(params: {
       if (role === "pickup") {
         next.pickupExtra = r.value;
         applied.push("address_extra");
+        dstWrites.push({ patchField: "address_extra", role: "pickup", value: r.value });
       } else if (role === "delivery") {
         next.deliveryExtra = r.value;
         applied.push("address_extra");
+        dstWrites.push({ patchField: "address_extra", role: "delivery", value: r.value });
       }
     } else if (r.reason) {
       rejected.push({
@@ -422,7 +542,170 @@ export function applyBookingFieldPatch(params: {
     }
   }
 
-  return { draft: next, applied, rejected, senderPhoneDecision };
+  // DST projection: if the caller handed us a dialogState, run every
+  // successful write through `updateSlot`. Conflicts surface as rejections
+  // (so the existing hallucination-guard/rejections plumbing sees them) AND
+  // as a separate `conflicts` array so callers can render a disambiguation
+  // prompt. The draft is updated only when the slot actually accepts the
+  // write — conflicts revert the legacy draft field so readers keep seeing
+  // the last-known-good value.
+  const conflicts: SlotConflict[] = [];
+  let nextDialogState: DialogState | null = params.dialogState ?? null;
+  // Respect the env kill-switch: if DST is disabled at runtime, ignore the
+  // passed-in state entirely and fall through to the legacy-only path. The
+  // returned `dialogState` is set to null so callers don't try to persist a
+  // half-updated copy.
+  if (nextDialogState && !isDialogStateEnabled()) {
+    nextDialogState = null;
+  }
+  if (nextDialogState) {
+    const source: SlotSource = params.dstSource ?? "llm_apply";
+
+    // Tuple-atomic source-precedence override.
+    //
+    // Product rule (2026-04-19): a fresh customer-turn identity tuple
+    // (BOTH `*_name` AND `*_phone` in the same patch) silently supersedes
+    // a carried-over identity for this order. Single-field corrections
+    // still flow through the normal conflict path — that's a real
+    // "you said X, now you're saying Y" moment.
+    //
+    // This sits at the patch level because tuple-atomicity is only
+    // visible here: `updateSlot` sees one slot at a time and can't know
+    // whether the other half of the identity is being updated in the
+    // same turn. We decide once per patch, then pass
+    // `overrideIfSourceWas: "carryover"` into the two relevant
+    // `updateSlot` calls.
+    //
+    // Only customer-authored writes can trigger the override
+    // (`customer_fast_path` or `llm_apply`). The `llm_apply` source is
+    // included because the LLM is the one that usually extracts and
+    // applies the customer's new tuple; the fast-path is a faster
+    // alternate route but expresses the same intent. `carryover` is
+    // explicitly excluded so a second carry-over op can't overwrite an
+    // earlier carry-over (which would be a nonsense).
+    const isCustomerAuthoredWrite =
+      source === "customer_fast_path" || source === "llm_apply";
+    const senderTuplePresent =
+      dstWrites.some((w) => w.patchField === "sender_name") &&
+      dstWrites.some((w) => w.patchField === "sender_phone");
+    const recipientTuplePresent =
+      dstWrites.some((w) => w.patchField === "recipient_name") &&
+      dstWrites.some((w) => w.patchField === "recipient_phone");
+    const senderOverride = isCustomerAuthoredWrite && senderTuplePresent;
+    const recipientOverride = isCustomerAuthoredWrite && recipientTuplePresent;
+
+    for (const w of dstWrites) {
+      const slotName = slotNameForBookingField(w.patchField, w.role);
+      if (!slotName) continue;
+      // Per-write decision whether this specific slot carries the tuple
+      // override. Only the two identity-tuple fields whose other half is
+      // also in the patch are eligible.
+      const eligibleForOverride =
+        (senderOverride &&
+          (slotName === "sender_name" || slotName === "sender_phone")) ||
+        (recipientOverride &&
+          (slotName === "recipient_name" || slotName === "recipient_phone"));
+      const res = updateSlot(nextDialogState, slotName, w.value, source, {
+        routeToRequested: params.routeToRequested === true,
+        overrideIfSourceWas: eligibleForOverride ? "carryover" : undefined,
+        forceOverwrite: params.editIntent === true,
+      });
+      nextDialogState = res.state;
+      if (res.decision.action === "conflict") {
+        conflicts.push({
+          slot: slotName,
+          filledValue: res.decision.filledValue,
+          incomingValue: res.decision.incomingValue,
+        });
+        // Revert the legacy draft field for this slot so the draft mirrors
+        // the DST state: the previously-filled value stays canonical until
+        // the customer disambiguates. We can't simply re-read from
+        // `params.draft` per-slot since the applied-list might have been
+        // affected earlier in the same patch; use the DST mirror as the
+        // single source of truth.
+        // (applied.push was already called for this field; keep it as-is
+        // since the patch was validated — but surface the rejection.)
+        rejected.push({
+          field: patchFieldToRejectionField(w.patchField),
+          reason: "slot_conflict_with_filled_value",
+          received: String(w.value),
+        });
+      } else if (res.decision.action === "overridden_by_source_precedence") {
+        // Structured log so we can see the override firing at the right
+        // rate in production. Grep key: `[carryover-override]`.
+        try {
+          console.warn(
+            `[carryover-override] slot=${slotName} previousSource=${res.decision.previousSource ?? "null"} newSource=${res.decision.newSource} previousValue=${JSON.stringify(res.decision.previousValue ?? "")} incomingValue=${JSON.stringify(w.value ?? "")}`,
+          );
+        } catch {}
+      } else if (res.decision.action === "overridden_by_edit_intent") {
+        // Structured log for the explicit-edit override. Grep key:
+        // `[edit-override]`. Firing rate should correlate with
+        // post-summary corrections like "block 3 to block 4", "change
+        // the street to 10", "actually recipient phone is …", etc.
+        try {
+          console.warn(
+            `[edit-override] slot=${slotName} previousSource=${res.decision.previousSource ?? "null"} newSource=${res.decision.newSource} previousValue=${JSON.stringify(res.decision.previousValue ?? "")} incomingValue=${JSON.stringify(w.value ?? "")}`,
+          );
+        } catch {}
+      } else if (res.decision.action === "upgraded_by_superset") {
+        // Structured log for the address-extra strict-superset upgrade.
+        // Grep key: `[slot-upgrade]`. This fires when two grounded
+        // writes land in the same turn and the second one strictly
+        // adds info — the canonical case is fast-path seeing "floor 11,
+        // door 14" and the LLM seeing the full "apartment 11, floor 11,
+        // door 14" from the same customer utterance. Should be
+        // frequent enough to be benign but rare in absolute numbers.
+        try {
+          console.warn(
+            `[slot-upgrade] slot=${slotName} previousSource=${res.decision.previousSource ?? "null"} newSource=${res.decision.newSource} previousValue=${JSON.stringify(res.decision.previousValue ?? "")} incomingValue=${JSON.stringify(w.value ?? "")}`,
+          );
+        } catch {}
+      }
+    }
+    // Mirror DST onto the legacy draft so the `draft` shape returned to
+    // callers reflects conflict-reverts (filled value kept, candidate held
+    // in DST). Only mirror the fields that DST actually owns; locations and
+    // senderPhoneRejected on the incoming draft are preserved.
+    const mirrored = mirrorDialogStateToDraft(nextDialogState, next);
+    Object.assign(next, mirrored);
+  }
+
+  return {
+    draft: next,
+    applied,
+    rejected,
+    senderPhoneDecision,
+    dialogState: nextDialogState,
+    conflicts,
+  };
+}
+
+function patchFieldToRejectionField(
+  patchField: string,
+): BookingFieldValidationError["field"] {
+  switch (patchField) {
+    case "sender_name":
+      return "sender_name";
+    case "sender_phone":
+      return "sender_phone";
+    case "recipient_name":
+      return "recipient_name";
+    case "recipient_phone":
+      return "recipient_phone";
+    case "address_block":
+      return "address_block";
+    case "address_street":
+      return "address_street";
+    case "address_house":
+      return "address_house";
+    case "address_avenue":
+      return "address_avenue";
+    case "address_extra":
+      return "address_extra";
+    default:
+      return "sender_name"; // unreachable given the slotName filter above
+  }
 }
 
 function pickupAddressComplete(draft: BookingDraft): boolean {

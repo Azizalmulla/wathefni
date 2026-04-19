@@ -29,6 +29,7 @@ import {
   ResponderBookingFieldOp,
   validateApplyBookingFieldOp,
   sanityCheckBookingDraft,
+  type CarryOverBucket,
 } from "../../shared/responder-state-ops";
 import {
   guardCreateSimpleOrder,
@@ -1353,6 +1354,107 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
         console.log(`[responder-op] confirm_summary conversation=${conversationId} ${JSON.stringify(op)}`);
       } catch {}
       return createTextResult({ acknowledged: true });
+    },
+  }));
+
+  api.registerTool((ctx: any) => ({
+    name: "carry_over_from_last_order",
+    label: "Carry Over From Last Order",
+    description:
+      "BOOKING STATE TOOL — call this when the customer says to reuse any part of their previous order (e.g. 'same names and number as last order', 'same sender and recipient', 'same pickup as last time', 'same delivery address', 'use my last details', 'نفس الأسماء والرقم'). You MUST call this IN ADDITION to your customer reply, in the same turn. Pick ONLY the buckets the customer actually asked for. Bucket meanings: 'sender_identity' = sender name + sender phone; 'recipient_identity' = recipient name + recipient phone; 'pickup_location' = pickup area + full address (block, street, house, avenue, extra); 'delivery_location' = delivery area + full address; 'payer' = order-level payer attribute. Rules: (1) Pass the narrowest explicit set — if the customer says 'same sender, new recipient', buckets=['sender_identity']; if 'same everything', buckets=['sender_identity','recipient_identity','pickup_location','delivery_location']. (2) Every value still goes through per-field validation; stale values are skipped, and your next reply should ask for just the skipped fields. (3) Never invent buckets; only reuse what the customer actually asked for. (4) If the tool result lists buckets under 'buckets_not_yet_supported' (currently pickup_location and delivery_location), those are NOT auto-reusable today — in your reply ask the customer to re-send those details fresh, even though they asked to reuse them. Never tell the customer an address was reused unless the tool result confirms it. Never mention this tool to the customer.",
+    strict: true,
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        buckets: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: [
+              "sender_identity",
+              "recipient_identity",
+              "pickup_location",
+              "delivery_location",
+              "payer",
+            ],
+          },
+          minItems: 1,
+          maxItems: 5,
+          description:
+            "Which buckets to copy from the last successful order. 'sender_identity' = sender name + phone. 'recipient_identity' = recipient name + phone. 'pickup_location' = pickup area + address fields. 'delivery_location' = delivery area + address fields. 'payer' = order-level payer attribute. Pass only what the customer actually asked for.",
+        },
+        source_quote: {
+          type: ["string", "null"],
+          description: "Verbatim snippet from the customer's message that triggered this reuse (e.g. 'same names and number as last order').",
+        },
+      },
+      required: ["buckets", "source_quote"],
+    },
+    async execute(_toolCallId: string, params: any) {
+      const conversationId = resolveToolConversationId(ctx);
+      const turnId = resolveToolTurnId(ctx);
+      if (!conversationId) {
+        try {
+          console.warn(`[responder-op] carry_over_from_last_order dropped_no_conversation ctxKeys=${Object.keys(ctx || {}).join(",")}`);
+        } catch {}
+        return createTextResult({ applied: false, reason: "no_conversation_context" });
+      }
+      const rawBuckets = Array.isArray(params?.buckets) ? params.buckets : [];
+      const allowed = new Set([
+        "sender_identity",
+        "recipient_identity",
+        "pickup_location",
+        "delivery_location",
+        "payer",
+      ]);
+      const buckets: CarryOverBucket[] = [];
+      for (const b of rawBuckets) {
+        if (typeof b === "string" && allowed.has(b) && !buckets.includes(b as CarryOverBucket)) {
+          buckets.push(b as CarryOverBucket);
+        }
+      }
+      if (buckets.length === 0) {
+        return createTextResult({
+          applied: false,
+          reason: "no_valid_buckets",
+          note:
+            "No valid buckets provided. Pass an explicit list like ['sender_identity', 'recipient_identity']. Do not guess — ask the customer which details they want reused.",
+        });
+      }
+      const op: ResponderStateOp = {
+        op: "carry_over_from_last_order",
+        buckets,
+        source_quote:
+          typeof params?.source_quote === "string" && params.source_quote.trim()
+            ? params.source_quote.trim()
+            : null,
+        turn_id: turnId,
+      };
+      pushResponderStateOp(conversationId, op);
+      try {
+        console.log(
+          `[responder-op] carry_over_from_last_order conversation=${conversationId} buckets=${buckets.join(",")} ${op.source_quote ? `quote=${JSON.stringify(op.source_quote)}` : ""}`,
+        );
+      } catch {}
+      // Surface location buckets up-front so the LLM can route to "please
+      // confirm this fresh" without waiting for a drain round-trip. V2 will
+      // replace this with real location carry-over: full-tuple atomic copy
+      // of area + block + street + house + avenue + extra. Skip the entire
+      // bucket if any sub-field fails revalidation, to avoid the
+      // close-but-wrong failure mode.
+      const notYetSupported = buckets.filter(
+        (b) => b === "pickup_location" || b === "delivery_location",
+      );
+      return createTextResult({
+        acknowledged: true,
+        buckets,
+        buckets_not_yet_supported: notYetSupported.length > 0 ? notYetSupported : undefined,
+        note:
+          notYetSupported.length > 0
+            ? `Intent recorded. Identity buckets (sender_identity / recipient_identity / payer) will be filled at drain time after revalidation. Location buckets (${notYetSupported.join(", ")}) are NOT yet auto-reusable — in your reply, tell the customer you'll keep the same identity details but ask them to re-send the pickup / delivery address fresh for this new order. Never claim a location was reused.`
+            : "Intent recorded — the orchestrator will read the saved last order and fill the requested buckets after revalidating every field. In your reply, acknowledge the reused details briefly and ask ONLY for the new pickup / delivery area (and any address sub-fields that were skipped because the saved values were stale). Never claim details were saved before you see this tool's drain result.",
+      });
     },
   }));
 

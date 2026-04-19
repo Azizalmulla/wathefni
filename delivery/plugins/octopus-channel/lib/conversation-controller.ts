@@ -11,6 +11,15 @@
 // ---------------------------------------------------------------------------
 
 import type { PersistedConversationControllerEntry } from "../../shared/conversation-policy";
+import {
+  createEmptyDialogState,
+  isDialogStateEnabled,
+  seedDialogStateFromDraft,
+} from "../../shared/dialog-state.js";
+import {
+  formatSanitizerDrops,
+  sanitizeBookingDraft,
+} from "../../shared/persisted-state-sanitizer.js";
 import type { ConversationControllerState } from "./types";
 
 export type ConversationControllerOptions = {
@@ -59,6 +68,43 @@ export function createConversationController(
     const state = await load();
     const existing = state[params.key];
     if (existing && !isExpired(existing)) {
+      const mergedDraft = {
+        ...createEmptyBookingDraft(),
+        ...(existing.bookingDraft || {}),
+      };
+      // Read-time sanitization. Treats persisted state as untrusted
+      // input: runs every typed field through the SAME validators the
+      // write path uses (validateName, cleanPhone, cleanAddressPart).
+      // Any field that fails is set to null and recorded for
+      // telemetry. This neutralizes historical poisoning from pre-fix
+      // code versions — the 2026-04-19 15:28 incident being the
+      // canonical case: `senderName="Is this the cheapest option"`
+      // was persisted before today's coherence fix landed and kept
+      // resurfacing every turn because the read path trusted it.
+      const sanitizerResult = sanitizeBookingDraft(mergedDraft, "controller_entry");
+      const sanitizedDraft = sanitizerResult.value ?? mergedDraft;
+      if (sanitizerResult.drops.length > 0) {
+        try {
+          console.warn(
+            `[sanitizer] controller_entry key=${params.key} drops=${sanitizerResult.drops.length} ${formatSanitizerDrops(sanitizerResult.drops)}`,
+          );
+        } catch {}
+      }
+      // Backfill DST from legacy draft on first load; once present, trust the
+      // persisted slot register as the source of truth for conflict status
+      // and the requested_slot register.
+      //
+      // When sanitization dropped fields, we must seed DST from the
+      // SANITIZED draft even if the persisted `dialogState` existed,
+      // because the old DST still thinks the dropped field was set.
+      // Otherwise the LLM's context surface would disagree with the
+      // draft the summary renderer reads.
+      const dstOn = isDialogStateEnabled();
+      const dialogState = dstOn
+        ? sanitizerResult.drops.length > 0
+          ? seedDialogStateFromDraft(sanitizedDraft)
+          : (existing.dialogState ?? seedDialogStateFromDraft(sanitizedDraft))
+        : (existing.dialogState ?? null);
       return {
         bookingStep: "none",
         quotePickupAreaNameEn: null,
@@ -73,10 +119,8 @@ export function createConversationController(
         selectedDeliveryType: null,
         quotedPrice: null,
         ...existing,
-        bookingDraft: {
-          ...createEmptyBookingDraft(),
-          ...(existing.bookingDraft || {}),
-        },
+        bookingDraft: sanitizedDraft,
+        dialogState,
       };
     }
     if (existing) {
@@ -106,6 +150,7 @@ export function createConversationController(
       selectedDeliveryType: null,
       quotedPrice: null,
       bookingDraft: createEmptyBookingDraft(),
+      dialogState: isDialogStateEnabled() ? createEmptyDialogState() : null,
     };
   }
 

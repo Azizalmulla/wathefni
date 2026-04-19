@@ -26,6 +26,8 @@
  */
 
 import type { BookingFieldPatch } from "./booking-draft";
+import { validateName } from "./responder-state-ops";
+import { isAcceptableSlotResponse } from "./slot-response-coherence";
 
 export type FastPathAction =
   | "ASK_SENDER_NAME_AND_PHONE_DECISION"
@@ -75,6 +77,32 @@ const ADDRESS_PART_AR = {
 
 const INTERIOR_RE_EN = /\b(apt|apartment|flat|floor|fl|office|door|gate|suite|unit)\s*[:#]?\s*([a-z0-9]{1,10})\b/gi;
 const INTERIOR_RE_AR = /(?:شقة|شقه|فلات|دور|طابق|باب|مكتب|بوابة)\s*[:#]?\s*([a-z0-9]{1,10})/gi;
+
+// Mirror of `hasSubstantiveAddressExtra` in
+// `plugins/octopus-channel/lib/booking-flow.ts`. Kept inline to preserve
+// the shared → octopus-channel layering (shared never imports plugin-
+// local code). The smoke test in
+// `scripts/smoke-test-fast-path-address-extra.mjs` asserts the two
+// predicates agree on a curated fixture so drift is caught.
+const EXTRA_LOCATOR_EN = [
+  "apartment", "apt", "flat", "floor", "fl", "door", "gate",
+  "suite", "unit", "office", "villa", "tower", "building",
+  "bldg", "bld", "bd",
+];
+const EXTRA_LOCATOR_AR = [
+  "شقة", "شقه", "دور", "طابق", "بوابة", "بوابه",
+  "مكتب", "فيلا", "برج", "عمارة", "عماره", "وحدة", "وحده",
+];
+function isSubstantiveExtra(extra: string | null | undefined): boolean {
+  if (!extra) return false;
+  const t = extra.trim();
+  if (t.length < 3) return false;
+  if (/\d/.test(t) || /[\u0660-\u0669]/.test(t)) return true;
+  const lower = t.toLowerCase();
+  for (const kw of EXTRA_LOCATOR_EN) if (lower.includes(kw)) return true;
+  for (const kw of EXTRA_LOCATOR_AR) if (t.includes(kw)) return true;
+  return false;
+}
 
 function tryAddressLabeled(text: string): {
   block: string | null;
@@ -143,13 +171,36 @@ export function extractAddressForRole(params: {
   const reasons: string[] = [];
   const labeled = tryAddressLabeled(params.text);
   if (labeled) {
-    // Require at least block+street+house for high confidence.
-    const needed = [labeled.block, labeled.street, labeled.house].filter(Boolean).length;
-    if (needed < 3) {
+    // Completeness rule — must match the downstream predicate in
+    // `hasCompleteTextAddress` (plugins/octopus-channel/lib/booking-flow.ts)
+    // so the fast-path doesn't bail on addresses the completeness gate
+    // would accept. Any divergence becomes a silent UX regression: the
+    // LLM re-asks for a field the customer already provided.
+    //
+    //   block        - always required
+    //   street OR avenue - at least one required
+    //   house OR substantive-extra (apartment / floor / door / etc.)
+    //                - at least one required
+    const hasBlock = Boolean(labeled.block);
+    const hasStreetOrAvenue = Boolean(labeled.street || labeled.avenue);
+    const hasHouseOrExtra =
+      Boolean(labeled.house) || isSubstantiveExtra(labeled.extra);
+    if (!hasBlock || !hasStreetOrAvenue || !hasHouseOrExtra) {
+      // Granular bail reasons (log-only — decision stays the same).
+      // These drive the address-shape coverage dashboard: recurring
+      // miss patterns here tell us which shape-classes to add support
+      // for next (interior-locator words, alternative labels, etc.).
+      if (!hasBlock) reasons.push("labeled_missing_block");
+      if (!hasStreetOrAvenue) reasons.push("labeled_missing_street_or_avenue");
+      if (!hasHouseOrExtra) reasons.push("labeled_missing_house_or_extra");
       reasons.push("labeled_address_partial_ignored");
       return { patch: null, confidence: "none", reasons };
     }
-    reasons.push("labeled_address_complete");
+    reasons.push(
+      labeled.house
+        ? "labeled_address_complete"
+        : "labeled_address_complete_via_extra",
+    );
     return {
       patch: {
         address_role: params.role,
@@ -181,6 +232,10 @@ export function extractAddressForRole(params: {
     };
   }
 
+  // Neither labeled nor bare-triplet/quad shape matched. The LLM will
+  // have to parse this free-form. Tag for coverage triage so we can see
+  // which shape-classes are eluding both extractors.
+  reasons.push("no_labeled_or_bare_shape");
   return { patch: null, confidence: "none", reasons };
 }
 
@@ -257,15 +312,12 @@ function stripTrailingPunct(s: string): string {
 function looksLikeValidName(candidate: string): boolean {
   const trimmed = stripTrailingPunct(candidate);
   if (!trimmed) return false;
-  if (trimmed.length < 2 || trimmed.length > 60) return false;
-  // No digits allowed in a name.
-  if (/\d/.test(trimmed)) return false;
-  // Must have at least one letter (Latin or Arabic).
-  if (!/[a-z\u0600-\u06ff]/i.test(trimmed)) return false;
-  // Reject things that are really just booking-domain words ("yes", "no",
-  // "ok", "نعم", "لا"), which should be handled by different fast-paths.
-  if (/^(yes|no|ok|okay|sure|nope|yep|نعم|لا|تمام|اوك|اوكي)$/i.test(trimmed)) return false;
-  return true;
+  // Defer to the apply-boundary `validateName` so the pre-LLM fast-path
+  // and the post-LLM tool-op validator share a single shape policy. This
+  // closes the gap that let "Is this the cheapest option" be written to
+  // sender_name on 2026-04-19 13:42 — the fast-path's old standalone
+  // predicate accepted any letters+spaces string of length 2–60.
+  return validateName(trimmed) === null;
 }
 
 /**
@@ -348,11 +400,32 @@ export function extractSenderNameAndDecision(params: {
   }
 
   // 4) Whatever's left after stripping markers and digits is the name.
+  //
+  // Two-layer gate: the residual must (a) pass the same shape rules
+  // the apply-boundary uses (`validateName` via `looksLikeValidName`)
+  // AND (b) be coherent with `sender_name` per the slot-response
+  // coherence policy. The coherence layer catches conversational
+  // fragments that are letter-only but not actually a name (e.g.
+  // questions, topic changes). Without it, the fast-path's own shape
+  // predicate accepts any letters+spaces string of length 2–60 — which
+  // is how "Is this the cheapest option" reached `sender_name` in
+  // production on 2026-04-19 13:42 (live).
   const nameCandidate = stripTrailingPunct(
     residual.replace(/[,،;:]+/g, " ").replace(/\s+/g, " "),
   );
-  const senderName = looksLikeValidName(nameCandidate) ? nameCandidate : null;
-  if (senderName) reasons.push("name_residual");
+  let senderName: string | null = null;
+  if (looksLikeValidName(nameCandidate)) {
+    const coherence = isAcceptableSlotResponse({
+      text: nameCandidate,
+      slot: "sender_name",
+    });
+    if (coherence.acceptable) {
+      senderName = nameCandidate;
+      reasons.push("name_residual");
+    } else {
+      reasons.push(`name_rejected_by_coherence:${coherence.decision.kind}:${coherence.decision.reason}`);
+    }
+  }
 
   // Require at least ONE deterministically-extracted signal. If we got
   // nothing (no decision, no phone, no name), bail.
@@ -422,6 +495,21 @@ export function extractRecipientNameAndPhone(params: {
   // Name must be reasonable length (2-60 chars) and not start/end with dangling
   // single letters that are artifacts of partial extraction.
   if (namePart.length < 2 || namePart.length > 60) {
+    return { patch: null, confidence: "none", reasons };
+  }
+  // Coherence gate against `recipient_name`. Same rationale as the
+  // sender-combined extractor above: shape alone cannot tell a person
+  // name from a conversational fragment. Without this gate, a message
+  // like "Is this cheapest 99118375" would have written the question to
+  // `recipient_name`. With it, the name drops and we bail on the whole
+  // extraction (since phone-only recipient writes aren't supported by
+  // this path — the LLM will re-ask coherently).
+  const nameCoherence = isAcceptableSlotResponse({
+    text: namePart,
+    slot: "recipient_name",
+  });
+  if (!nameCoherence.acceptable) {
+    reasons.push(`name_rejected_by_coherence:${nameCoherence.decision.kind}:${nameCoherence.decision.reason}`);
     return { patch: null, confidence: "none", reasons };
   }
   reasons.push("name_plus_phone");

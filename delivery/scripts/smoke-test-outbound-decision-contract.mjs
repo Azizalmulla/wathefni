@@ -1,0 +1,482 @@
+#!/usr/bin/env node
+// ---------------------------------------------------------------------------
+// Smoke test: Step-4 outbound-decision contract.
+//
+// Locks in the Step-4 consolidation: every outbound-reply decision now
+// flows through `decidePreStateOutbound` + `decidePostStateOutbound` in
+// `plugins/octopus-channel/lib/outbound-decision.ts`, and every outcome
+// lands on ONE of the tight fixed reason codes in the module's
+// `OutboundDecisionReason` union.
+//
+// We verify:
+//   1. The 5-decision vocabulary (`allow`, `allow_sanitized`,
+//      `replace_authoritative`, `replace_fallback`, `block_retry`) is the
+//      complete set of top-level outcomes.
+//   2. The 10 reason codes are the complete set of reason codes exported.
+//   3. Representative callsites for each customer-outcome produce the
+//      expected (decision, reason) pair:
+//        - price whitelist → replace_fallback / replace_price_mismatch
+//        - empty LLM reply → replace_fallback / fallback_empty_reply
+//        - summary_fact_drift → replace_authoritative / replace_summary_fact_drift
+//        - canonical tx-artifact loss → replace_authoritative /
+//          replace_transaction_artifact_missing
+//        - clarifying question → allow / preserve_clarification
+//        - healthy natural reply → allow / allow
+//   4. Source-shape anchors for the Step-4 refactor:
+//        - `decidePreStateOutbound` and `decidePostStateOutbound` exist,
+//        - `index.ts` no longer imports `verifyAndRepairOutbound` /
+//          `runHallucinationGuard` directly,
+//        - `shouldPreferCanonicalToolReply` is gone from `index.ts`.
+//
+// Any change that adds a new decision kind or reason code MUST update
+// this smoke — that's the point: one fixed enum, one fixed contract.
+// ---------------------------------------------------------------------------
+
+import assert from "node:assert/strict";
+import path from "node:path";
+import fs from "node:fs";
+import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+
+async function loadTsModule(relativePath) {
+  const jitiFactory = require(
+    path.join(root, "plugins/riders-tools/node_modules/jiti/lib/jiti.cjs"),
+  );
+  const jiti = jitiFactory(pathToFileURL(import.meta.url).href, { interopDefault: true });
+  return await jiti(path.join(root, relativePath));
+}
+
+const { decidePreStateOutbound, decidePostStateOutbound } = await loadTsModule(
+  "plugins/octopus-channel/lib/outbound-decision.ts",
+);
+const { createEmptyBookingDraft } = await loadTsModule(
+  "plugins/shared/conversation-policy.ts",
+);
+
+// ---------------------------------------------------------------------------
+// Fixtures
+// ---------------------------------------------------------------------------
+
+function priceExtractor(text) {
+  const out = [];
+  const re = /\b(\d+\.\d{3})\b/g;
+  let m;
+  while ((m = re.exec(text)) !== null) out.push(m[1]);
+  return out;
+}
+
+function fakeSessionGuard(overrides = {}) {
+  return {
+    allValidPrices: new Set(["1.250"]),
+    lastToolTs: Date.now(),
+    lastToolName: "get_price",
+    ...overrides,
+  };
+}
+
+function buildCompleteDraft() {
+  const d = createEmptyBookingDraft();
+  d.senderName = "Aziz";
+  d.senderPhone = "96597485757";
+  d.recipientName = "Ahmed";
+  d.recipientPhone = "96562844738";
+  d.pickupBlock = "6";
+  d.pickupStreet = "9";
+  d.pickupHouse = "17";
+  d.deliveryBlock = "2";
+  d.deliveryStreet = "9";
+  d.deliveryExtra = "Apartment 19";
+  return d;
+}
+
+function buildCompleteEntry() {
+  return {
+    stage: "summary_shown",
+    bookingStep: "summary_pending",
+    bookingDraft: buildCompleteDraft(),
+    quotePickupAreaNameEn: "Hawalli",
+    quotePickupAreaNameAr: "حولي",
+    quoteDropoffAreaNameEn: "Salmiya",
+    quoteDropoffAreaNameAr: "السالمية",
+    selectedDeliveryType: "sedan_normal",
+    quotedPrice: 1.25,
+  };
+}
+
+const noopBuilders = {
+  buildDeterministicSelectedQuotedOptionReply: ({ language }) =>
+    language === "ar" ? "خيار موثق" : "Verified option reply",
+  buildDeterministicGraceWindowReply: (l) => (l === "ar" ? "نافذة سماح" : "Grace window reply"),
+  buildProviderIssueFallbackReply: (l) =>
+    l === "ar" ? "يوجد خلل فني، جربوا بعد شوي." : "There's a technical issue, please try again in a moment.",
+};
+
+// ---------------------------------------------------------------------------
+// (1) Decision + reason code vocabulary anchors
+// ---------------------------------------------------------------------------
+// We can't introspect a TS union at runtime, but we can anchor the module
+// source. If someone adds a new kind or reason without updating this smoke,
+// the assertion fails.
+
+const moduleSrc = fs.readFileSync(
+  path.join(root, "plugins/octopus-channel/lib/outbound-decision.ts"),
+  "utf8",
+);
+
+{
+  const kindMatch = moduleSrc.match(
+    /export type OutboundDecisionKind =\s*([\s\S]*?);/,
+  );
+  assert.ok(kindMatch, "Decision kind union must exist");
+  const kinds = [...kindMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort();
+  assert.deepEqual(
+    kinds,
+    ["allow", "allow_sanitized", "block_retry", "replace_authoritative", "replace_fallback"],
+    "Decision kinds must be exactly the 5-way contract",
+  );
+}
+
+{
+  const reasonMatch = moduleSrc.match(
+    /export type OutboundDecisionReason =\s*([\s\S]*?);/,
+  );
+  assert.ok(reasonMatch, "Reason code union must exist");
+  const reasons = [...reasonMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort();
+  assert.deepEqual(
+    reasons,
+    [
+      "allow",
+      "allow_sanitized",
+      "block_provider_error",
+      "fallback_empty_reply",
+      "preserve_clarification",
+      "replace_field_rejection_hallucination",
+      "replace_order_placed_hallucination",
+      "replace_price_mismatch",
+      "replace_summary_fact_drift",
+      "replace_transaction_artifact_missing",
+    ],
+    "Reason codes must be exactly the 10-entry fixed enum (tight surface)",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// (2) Behavioral anchors — pre-state (Region A)
+// ---------------------------------------------------------------------------
+
+// A-clean: healthy LLM reply with a valid price → allow / allow
+{
+  const res = decidePreStateOutbound({
+    replyText: "Sure, 1.250 KWD for this trip.",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard(),
+    sessionIsRecent: true,
+    preferredCanonicalText: "Canonical price message",
+    guardToolAgeMs: 1000,
+    canonicalOverwriteAllowed: false, // stage=quoted post-price → no overwrite
+    canonicalOverwriteSkipReason: "post_quote_stage:quoted",
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "quoted",
+  });
+  assert.equal(res.decision, "allow", "A-clean: healthy reply allowed");
+  assert.equal(res.reason, "allow", "A-clean: reason=allow");
+  assert.equal(res.replyText, "Sure, 1.250 KWD for this trip.");
+}
+
+// A-price: hallucinated KWD token → replace_fallback / replace_price_mismatch
+{
+  const res = decidePreStateOutbound({
+    replyText: "Great news — only 0.750 KWD.",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard(),
+    sessionIsRecent: true,
+    preferredCanonicalText: null,
+    guardToolAgeMs: 1000,
+    canonicalOverwriteAllowed: false,
+    canonicalOverwriteSkipReason: null,
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "quoted",
+  });
+  assert.equal(res.decision, "replace_fallback", "A-price: price whitelist blocks without canonical");
+  assert.equal(res.reason, "replace_price_mismatch");
+  assert.ok(/pricing error/i.test(res.replyText), "A-price: pricing-error fallback used");
+  assert.ok(
+    res.logEntries.some((e) => e.level === "warn" && /BLOCKED hallucinated prices/.test(e.message)),
+    "A-price: must emit whitelist warn log",
+  );
+}
+
+// A-price-canonical: hallucinated KWD token + canonical available →
+// replace_authoritative / replace_price_mismatch
+{
+  const res = decidePreStateOutbound({
+    replyText: "Great news — only 0.750 KWD.",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard(),
+    sessionIsRecent: true,
+    preferredCanonicalText: "The correct price is 1.250 KWD.",
+    guardToolAgeMs: 1000,
+    canonicalOverwriteAllowed: false,
+    canonicalOverwriteSkipReason: null,
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "quoted",
+  });
+  assert.equal(res.decision, "replace_authoritative", "A-price-canonical: canonical substituted");
+  assert.equal(res.reason, "replace_price_mismatch");
+  assert.equal(res.replyText, "The correct price is 1.250 KWD.");
+}
+
+// A-txartifact: create_simple_order reply lost the tracking URL within 15s
+// → replace_authoritative / replace_transaction_artifact_missing
+{
+  const res = decidePreStateOutbound({
+    replyText: "Order created. We'll deliver it soon.",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard({ lastToolName: "create_simple_order", allValidPrices: new Set() }),
+    sessionIsRecent: true,
+    preferredCanonicalText:
+      "Order ORDER-abc-123 created. Track: https://riders.example/track/abc",
+    guardToolAgeMs: 2000,
+    canonicalOverwriteAllowed: true,
+    canonicalOverwriteSkipReason: null,
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "idle",
+  });
+  assert.equal(res.decision, "replace_authoritative");
+  assert.equal(res.reason, "replace_transaction_artifact_missing");
+  assert.ok(/https:\/\//.test(res.replyText), "canonical with URL restored");
+}
+
+// A-empty-fill: empty LLM reply + recent canonical → replace_authoritative
+// / replace_transaction_artifact_missing
+{
+  const res = decidePreStateOutbound({
+    replyText: "",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard({ lastToolName: "get_price" }),
+    sessionIsRecent: true,
+    preferredCanonicalText: "Price: 1.250 KWD.",
+    guardToolAgeMs: 1000,
+    canonicalOverwriteAllowed: true,
+    canonicalOverwriteSkipReason: null,
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "idle",
+  });
+  assert.equal(res.decision, "replace_authoritative", "A-empty-fill: empty reply filled from canonical");
+  assert.equal(res.reason, "replace_transaction_artifact_missing");
+  assert.equal(res.replyText, "Price: 1.250 KWD.");
+}
+
+// ---------------------------------------------------------------------------
+// (3) Behavioral anchors — post-state (Regions B + C)
+// ---------------------------------------------------------------------------
+
+// B-empty: no controller entry, empty reply → replace_fallback /
+// fallback_empty_reply (generic provider-issue fallback)
+{
+  const res = decidePostStateOutbound({
+    replyText: "",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: null,
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_fallback");
+  assert.equal(res.reason, "fallback_empty_reply");
+  assert.ok(/technical issue/.test(res.replyText), "provider-issue fallback used");
+  assert.ok(
+    res.logEntries.some((e) => e.level === "warn" && /LLM produced empty reply/.test(e.message)),
+    "empty-reply warn log emitted",
+  );
+}
+
+// B-transition-edit: summary_edit_request hint + empty reply → fallback
+{
+  const res = decidePostStateOutbound({
+    replyText: "",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: null,
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: "summary_edit_request",
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_fallback");
+  assert.equal(res.reason, "fallback_empty_reply");
+  assert.ok(/change/.test(res.replyText), "summary-edit-request template used");
+}
+
+// C-drift: summary_fact_drift on complete draft → replace_authoritative /
+// replace_summary_fact_drift + markedSummaryShown
+{
+  const entry = buildCompleteEntry();
+  entry.quotedPrice = 1.25;
+  const driftyFullSummary = [
+    "Sender: Aziz (7485)",
+    "Recipient: Ahmed (4738)",
+    "Pickup: Hawalli block 6, street 9, house 17",
+    "Delivery: Salmiya block 2, street 9, apartment 19",
+    "Service: sedan",
+    "Total: 3.500 KWD",
+    "Confirm?",
+  ].join("\n");
+  const res = decidePostStateOutbound({
+    replyText: driftyFullSummary,
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "summary_shown",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_authoritative", "C-drift: fact drift triggers substitute");
+  assert.equal(res.reason, "replace_summary_fact_drift");
+  assert.equal(res.markedSummaryShown, true, "C-drift: marks summary shown for persistence");
+  assert.ok(/1\.250|1\.25/.test(res.replyText), "C-drift: authoritative price used");
+}
+
+// C-clarify: clarifying question → allow / preserve_clarification
+{
+  const entry = buildCompleteEntry();
+  const clarifyReply = "Could you confirm the recipient phone number?";
+  const res = decidePostStateOutbound({
+    replyText: clarifyReply,
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: null,
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "allow", "C-clarify: clarifying question passes through");
+  assert.equal(res.reason, "preserve_clarification", "C-clarify: tagged preserve_clarification");
+  assert.equal(res.markedSummaryShown, false);
+  assert.equal(res.replyText, clarifyReply, "C-clarify: replyText unchanged");
+  assert.equal(res.detectedShape, "clarifying_question");
+}
+
+// C-stub-log-only: stub_summary on complete draft → allow / allow (log-only)
+// This is the Step-3 relaxation — anchored here to prove Step-4 did NOT
+// accidentally re-introduce the substitute.
+{
+  const entry = buildCompleteEntry();
+  const res = decidePostStateOutbound({
+    replyText: "All set, ready to confirm?",
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: null,
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "allow", "C-stub-log-only: stub_summary still log-only post-Step-4");
+  assert.equal(res.markedSummaryShown, false);
+  assert.equal(res.replyText, "All set, ready to confirm?");
+  assert.equal(res.detectedShape, "stub_summary");
+}
+
+// ---------------------------------------------------------------------------
+// (4) Callsite source-shape anchors
+// ---------------------------------------------------------------------------
+
+const indexSrc = fs.readFileSync(
+  path.join(root, "plugins/octopus-channel/index.ts"),
+  "utf8",
+);
+
+// `index.ts` must use the new decision entry points.
+assert.ok(
+  /decidePreStateOutbound\(/.test(indexSrc),
+  "index.ts must call decidePreStateOutbound",
+);
+assert.ok(
+  /decidePostStateOutbound\(/.test(indexSrc),
+  "index.ts must call decidePostStateOutbound",
+);
+
+// `index.ts` must NOT import the lower-level guards directly anymore —
+// they're encapsulated in the decision module.
+assert.ok(
+  !/from "\.\.\/shared\/outbound-verify"/.test(indexSrc),
+  "index.ts must not import verifyAndRepairOutbound directly",
+);
+assert.ok(
+  !/^\s*runHallucinationGuard,?\s*$/m.test(indexSrc),
+  "index.ts must not import runHallucinationGuard directly",
+);
+
+// The Step-3 inlined `shouldPreferCanonicalToolReply` must be gone from
+// `index.ts` — the factual-only policy now lives as
+// `needsCanonicalOverwriteForTxArtifacts` inside the decision module.
+assert.ok(
+  !/function shouldPreferCanonicalToolReply\s*\(/.test(indexSrc),
+  "shouldPreferCanonicalToolReply must be gone from index.ts",
+);
+assert.ok(
+  /function needsCanonicalOverwriteForTxArtifacts\s*\(/.test(moduleSrc),
+  "needsCanonicalOverwriteForTxArtifacts must live in outbound-decision.ts",
+);
+
+// The central emitter helper must exist so logs still surface.
+assert.ok(
+  /function emitOutboundDecisionLogs\s*\(/.test(indexSrc),
+  "emitOutboundDecisionLogs helper must exist in index.ts",
+);
+
+console.log("ALL PASS smoke-test-outbound-decision-contract.mjs");
