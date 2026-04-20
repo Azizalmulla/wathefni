@@ -117,6 +117,9 @@ export type OutboundDecisionReason =
   | "replace_price_mismatch"
   | "replace_field_rejection_hallucination"
   | "replace_order_placed_hallucination"
+  | "replace_clarify_option_before_proceed"
+  | "replace_manual_confirm_address_ask"
+  | "replace_manual_confirm_handoff"
   | "block_provider_error"
   | "fallback_empty_reply"
   | "preserve_clarification";
@@ -175,9 +178,65 @@ export type PreStateOutboundInput = {
   activeQuotedRoute: StoredQuotedRoute | null;
   sameRouteQuoteAction: SameRouteQuoteFollowupAction;
 
+  /**
+   * Clarify-before-proceed signal (Bug 1, 2026-04-20). Set by the caller
+   * when `next_required_action === "CLARIFY_OPTION_BEFORE_PROCEED"` was
+   * emitted for this turn (i.e. the customer sent a vague proceed signal
+   * on a route that has a manual-confirm option and did NOT name a
+   * specific option). When set, Region A substitutes any LLM reply with
+   * the deterministic clarify reply so the customer is never advanced
+   * into sender collection on an ambiguous "go ahead". Left null when
+   * the gate did not fire (the common case). */
+  clarifyOptionBeforeProceed?: boolean;
+
   /** Plugin-local deterministic builder, injected to keep this module free
    *  of circular plugin imports. */
   buildDeterministicSelectedQuotedOptionReply: (args: {
+    language: "ar" | "en";
+    route: StoredQuotedRoute;
+    option: RouteQuoteOption;
+  }) => string;
+
+  /** Plugin-local deterministic clarify-before-proceed reply builder. */
+  buildDeterministicClarifyOptionBeforeProceedReply?: (args: {
+    language: "ar" | "en";
+    route: StoredQuotedRoute;
+  }) => string;
+
+  /**
+   * Manual-confirm address-ask substitution (Bug 4, 2026-04-20).
+   *
+   * Set by the caller when `next_required_action` is one of
+   * `ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM` / `ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM`
+   * AND the selected option has `direct_chat_booking_status === "manual_confirmation_required"`.
+   * When set, Region A substitutes the LLM reply with
+   * `buildDeterministicManualConfirmAddressAskReply(...)` so the
+   * "needs manual confirmation" signal can never be dropped.
+   */
+  manualConfirmAddressAsk?: {
+    side: "pickup" | "delivery";
+    option: RouteQuoteOption;
+  } | null;
+
+  /**
+   * Manual-confirm handoff substitution (Bug 4 companion).
+   *
+   * Set when `next_required_action === "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM"`.
+   * Causes Region A to substitute
+   * `buildDeterministicManualConfirmHandoffReply(...)`.
+   */
+  manualConfirmHandoff?: {
+    option: RouteQuoteOption;
+  } | null;
+
+  /** Deterministic manual-confirm reply builders (see `quoted-options.ts`). */
+  buildDeterministicManualConfirmAddressAskReply?: (args: {
+    language: "ar" | "en";
+    route: StoredQuotedRoute;
+    option: RouteQuoteOption;
+    side: "pickup" | "delivery";
+  }) => string;
+  buildDeterministicManualConfirmHandoffReply?: (args: {
     language: "ar" | "en";
     route: StoredQuotedRoute;
     option: RouteQuoteOption;
@@ -338,6 +397,132 @@ export function decidePreStateOutbound(
   let reply = input.replyText;
   let decision: OutboundDecisionKind = "allow";
   let reason: OutboundDecisionReason = "allow";
+
+  // ------------------------------------------------------------------
+  // (A0) Clarify-before-proceed substitution (Bug 1, 2026-04-20).
+  //
+  // When the upstream directive gate fired `CLARIFY_OPTION_BEFORE_PROCEED`
+  // (vague proceed on a route with a manual-confirm option, no option
+  // named by the customer), the LLM's draft reply is unreliable — it
+  // may ask for sender name, emit `start_booking`, or silently default
+  // to the verified option. The server's answer is deterministic: list
+  // the priced options (flagging manual-confirm ones) and ask the
+  // customer to pick. This branch runs FIRST so it outranks canonical
+  // overwrite, empty-fill, price whitelist, and same-route quote
+  // correction, all of which would substitute the wrong text here.
+  // ------------------------------------------------------------------
+  if (
+    input.clarifyOptionBeforeProceed &&
+    input.activeQuotedRoute &&
+    input.buildDeterministicClarifyOptionBeforeProceedReply
+  ) {
+    const substitute = input.buildDeterministicClarifyOptionBeforeProceedReply({
+      language: input.preferredLanguage,
+      route: input.activeQuotedRoute,
+    });
+    logEntries.push({
+      level: "warn",
+      message: `[guard] Substituted clarify-before-proceed reply conversation=${input.conversationId} sessionKey=${input.sessionKeyForLogs} routeKey=${input.activeQuotedRoute.routeKey}`,
+      detail: {
+        routeKey: input.activeQuotedRoute.routeKey,
+        sessionKey: input.sessionKeyForLogs,
+        originalLen: reply ? reply.length : 0,
+      },
+    });
+    return {
+      decision: "replace_authoritative",
+      reason: "replace_clarify_option_before_proceed",
+      replyText: substitute,
+      detectedShape: null,
+      markedSummaryShown: false,
+      logEntries,
+    };
+  }
+
+  // ------------------------------------------------------------------
+  // (A0a) Manual-confirm address-ask substitution (Bug 4, 2026-04-20).
+  //
+  // When the controller's directive for this turn is
+  // `ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM` or
+  // `ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM`, the LLM's draft reply
+  // historically dropped the "needs manual confirmation" signal and
+  // blended with direct-booking address asks ("Express refrigerated
+  // van is 2.250 KWD. Send the pickup address first."). We replace
+  // the reply with a deterministic, server-composed text that always
+  // names the option, its price, AND the manual-confirmation caveat
+  // before the address ask. Runs BEFORE canonical overwrite, empty-
+  // fill, price whitelist, and same-route quote correction so the
+  // manual-confirm path is the dominant Region-A substitution.
+  // ------------------------------------------------------------------
+  if (
+    input.manualConfirmAddressAsk &&
+    input.activeQuotedRoute &&
+    input.buildDeterministicManualConfirmAddressAskReply
+  ) {
+    const substitute = input.buildDeterministicManualConfirmAddressAskReply({
+      language: input.preferredLanguage,
+      route: input.activeQuotedRoute,
+      option: input.manualConfirmAddressAsk.option,
+      side: input.manualConfirmAddressAsk.side,
+    });
+    logEntries.push({
+      level: "warn",
+      message: `[guard] Substituted manual-confirm ${input.manualConfirmAddressAsk.side}-address ask conversation=${input.conversationId} sessionKey=${input.sessionKeyForLogs} routeKey=${input.activeQuotedRoute.routeKey} option=${input.manualConfirmAddressAsk.option.delivery_type}`,
+      detail: {
+        routeKey: input.activeQuotedRoute.routeKey,
+        optionType: input.manualConfirmAddressAsk.option.delivery_type,
+        side: input.manualConfirmAddressAsk.side,
+        originalLen: reply ? reply.length : 0,
+      },
+    });
+    return {
+      decision: "replace_authoritative",
+      reason: "replace_manual_confirm_address_ask",
+      replyText: substitute,
+      detectedShape: null,
+      markedSummaryShown: false,
+      logEntries,
+    };
+  }
+
+  // ------------------------------------------------------------------
+  // (A0b) Manual-confirm handoff substitution (Bug 4 companion).
+  //
+  // When both pickup + delivery addresses are present on a manual-
+  // confirm selection, the controller emits
+  // `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM`. Substitute with a
+  // deterministic handoff message so the customer-facing text is
+  // consistent regardless of whether the LLM emits the
+  // `request_handoff` op this turn.
+  // ------------------------------------------------------------------
+  if (
+    input.manualConfirmHandoff &&
+    input.activeQuotedRoute &&
+    input.buildDeterministicManualConfirmHandoffReply
+  ) {
+    const substitute = input.buildDeterministicManualConfirmHandoffReply({
+      language: input.preferredLanguage,
+      route: input.activeQuotedRoute,
+      option: input.manualConfirmHandoff.option,
+    });
+    logEntries.push({
+      level: "warn",
+      message: `[guard] Substituted manual-confirm handoff reply conversation=${input.conversationId} sessionKey=${input.sessionKeyForLogs} routeKey=${input.activeQuotedRoute.routeKey} option=${input.manualConfirmHandoff.option.delivery_type}`,
+      detail: {
+        routeKey: input.activeQuotedRoute.routeKey,
+        optionType: input.manualConfirmHandoff.option.delivery_type,
+        originalLen: reply ? reply.length : 0,
+      },
+    });
+    return {
+      decision: "replace_authoritative",
+      reason: "replace_manual_confirm_handoff",
+      replyText: substitute,
+      detectedShape: null,
+      markedSummaryShown: false,
+      logEntries,
+    };
+  }
 
   const canonical = input.preferredCanonicalText;
   const sg = input.sessionGuard;

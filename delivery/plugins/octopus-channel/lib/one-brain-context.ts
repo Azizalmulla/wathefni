@@ -23,7 +23,12 @@ import {
 } from "../../shared/conversation-policy";
 import { formatCustomerMemoryValue } from "./customer-profile";
 import type { StoredQuotedRoute } from "./quoted-options";
-import { buildQuotedRouteContextLines } from "./quoted-options";
+import {
+  buildQuotedRouteContextLines,
+  detectExplicitOptionMention,
+  detectVagueProceedSignal,
+  routeHasManualConfirmOption,
+} from "./quoted-options";
 import {
   hasSatisfiedBookingAddress,
   formatPersistedBookingLocationLabel,
@@ -159,8 +164,23 @@ export function computeOneBrainNextRequiredAction(params: {
   draft: PersistedBookingDraft;
   entry: PersistedConversationControllerEntry | null;
   missing: string[];
+  /**
+   * Current customer utterance for this turn. Used by the
+   * clarify-before-proceed gate (Bug 1, 2026-04-20): a vague "proceed"
+   * signal on a route that has a manual-confirm option is ambiguous and
+   * must not silently advance into sender collection. Optional — callers
+   * that don't have the text available (e.g. post-drain recomputation)
+   * skip the gate.
+   */
+  currentCustomerText?: string | null;
+  /**
+   * Active quoted route for this turn. Needed by the clarify-before-
+   * proceed gate to inspect the option catalog. Optional for the same
+   * reason as `currentCustomerText`.
+   */
+  activeQuotedRoute?: StoredQuotedRoute | null;
 }): OneBrainNextRequiredAction | null {
-  const { draft, entry, missing } = params;
+  const { draft, entry, missing, currentCustomerText, activeQuotedRoute } = params;
 
   if (entry?.stage === "order_submitted") {
     return {
@@ -171,6 +191,58 @@ export function computeOneBrainNextRequiredAction(params: {
         "route_price_recap",
         "fake_handoff_claim",
         "field_update_without_recreate",
+      ],
+    };
+  }
+
+  // Clarify-before-proceed gate (Bug 1, 2026-04-20 manual-confirm incident).
+  //
+  // Background: on `stage=quoted` with a mixed-bookability catalog (at
+  // least one `manual_confirmation_required` option alongside others),
+  // a vague proceed signal ("can we go ahead with it or?", "let's do
+  // it", "اكمل", "نعم") is AMBIGUOUS. The customer could mean the
+  // currently-selected option, the option the bot last mentioned, or
+  // any other priced option in the catalog — and at least one of them
+  // can't be booked via `create_simple_order`. Advancing silently into
+  // sender collection here is the category failure we're fixing: the
+  // LLM implicitly commits to the default `sedan_normal` (verified +
+  // bookable) and kicks off sender collection, even though the bot was
+  // just quoting Helper service (manual-confirm).
+  //
+  // Gate invariants:
+  //  * stage === "quoted" (pre-collection, post-pricing)
+  //  * route has at least one manual-confirm option AND >= 2 priced options
+  //  * the customer's text this turn contains a vague proceed signal
+  //  * the customer did NOT name any specific option in this same turn
+  //  * `currentCustomerText` and `activeQuotedRoute` were both supplied
+  //
+  // When the gate fires, the directive is `CLARIFY_OPTION_BEFORE_PROCEED`
+  // and `forbidden_reply_shapes` hard-blocks the LLM from the known drift
+  // patterns: starting sender collection, calling `start_booking`, or
+  // silently defaulting to the verified option. The reply itself is
+  // server-composed by `buildDeterministicClarifyOptionBeforeProceedReply`
+  // at the outbound-decision Region-A substitution point; the directive
+  // here is the upstream steer that also keeps the LLM's tool calls
+  // constrained.
+  const inQuotedPreCollection = entry?.stage === "quoted";
+  if (
+    inQuotedPreCollection &&
+    activeQuotedRoute &&
+    currentCustomerText &&
+    routeHasManualConfirmOption(activeQuotedRoute) &&
+    detectVagueProceedSignal(currentCustomerText) &&
+    !detectExplicitOptionMention({ text: currentCustomerText, route: activeQuotedRoute })
+  ) {
+    return {
+      action: "CLARIFY_OPTION_BEFORE_PROCEED",
+      field: "selected_option",
+      forbiddenShapes: [
+        "standalone_ack",
+        "route_price_recap",
+        "ask_sender_before_option_confirmed",
+        "ask_recipient_before_option_confirmed",
+        "start_booking_with_default_option",
+        "call_create_simple_order_before_option_confirmed",
       ],
     };
   }
@@ -249,16 +321,29 @@ export function computeOneBrainNextRequiredAction(params: {
   if (isManualConfirmSelection) {
     const pickupMissing = missing.includes("pickup.address");
     const deliveryMissing = missing.includes("delivery.address");
+    // Bug 4 (2026-04-20 manual-confirm signal drop incident): the LLM
+    // previously produced address-ask replies that looked identical to
+    // the direct-booking flow (e.g. "Express refrigerated van is 2.250
+    // KWD. Send the pickup address first."). The outbound decision now
+    // substitutes a deterministic, server-composed reply via
+    // `buildDeterministicManualConfirmAddressAskReply`, but we keep the
+    // forbidden-shape signal here so the LLM upstream is also steered
+    // and the guard is defensible in both layers. Key new shapes:
+    //   - `ask_pickup_address_without_manual_confirm_signal`
+    //   - `ask_delivery_address_without_manual_confirm_signal`
+    //   - `request_handoff_without_manual_confirm_signal`
+    // These are enforced by the outbound substitution; listing them
+    // makes the intent visible in logs and smoke tests.
     if (pickupMissing) {
       return {
         action: "ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM",
         field: "pickup.address",
         forbiddenShapes: [
           "standalone_ack",
-          "route_price_recap",
           "ask_sender_for_manual_confirm",
           "ask_recipient_for_manual_confirm",
           "call_create_simple_order_for_manual_confirm",
+          "ask_pickup_address_without_manual_confirm_signal",
         ],
       };
     }
@@ -268,10 +353,10 @@ export function computeOneBrainNextRequiredAction(params: {
         field: "delivery.address",
         forbiddenShapes: [
           "standalone_ack",
-          "route_price_recap",
           "ask_sender_for_manual_confirm",
           "ask_recipient_for_manual_confirm",
           "call_create_simple_order_for_manual_confirm",
+          "ask_delivery_address_without_manual_confirm_signal",
         ],
       };
     }
@@ -285,6 +370,7 @@ export function computeOneBrainNextRequiredAction(params: {
         "ask_recipient_for_manual_confirm",
         "call_create_simple_order_for_manual_confirm",
         "write_full_order_summary_for_manual_confirm",
+        "request_handoff_without_manual_confirm_signal",
       ],
     };
   }
@@ -378,6 +464,17 @@ export function computeOneBrainNextRequiredAction(params: {
       forbiddenShapes.push("ask_recipient_with_sender");
     }
 
+    // Bug 2 (address-drift, 2026-04-20): when a side's address is already
+    // satisfied under `hasSatisfiedBookingAddress` (block + street|avenue +
+    // either house OR a substantive extra), the LLM must not ask for any
+    // more sub-fields of that side. Without this hard shape, SKILL.md's
+    // documentation of the house/extra fields consistently steered the
+    // LLM to append "send the building number" even after the customer
+    // provided apartment/floor/door. Rendering the forbidden shapes per-
+    // side tells the LLM which side is frozen this turn, keeping the
+    // forbidden-list self-explanatory in logs.
+    addAddressSatisfiedForbiddenShapes(forbiddenShapes, draft);
+
     return {
       action,
       field,
@@ -385,11 +482,58 @@ export function computeOneBrainNextRequiredAction(params: {
     };
   }
 
+  const summaryForbiddenShapes = [
+    "standalone_ack",
+    "route_price_recap",
+    "one_line_confirmation_without_summary",
+  ];
+  addAddressSatisfiedForbiddenShapes(summaryForbiddenShapes, draft);
   return {
     action: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
     field: null,
-    forbiddenShapes: ["standalone_ack", "route_price_recap", "one_line_confirmation_without_summary"],
+    forbiddenShapes: summaryForbiddenShapes,
   };
+}
+
+/**
+ * Bug 2 helper (2026-04-20 address-drift incident).
+ *
+ * Pushes the per-side "don't ask for address sub-fields that are already
+ * satisfied" shape names onto the forbidden list for whichever sides
+ * (pickup / delivery) have an address that passes
+ * `hasSatisfiedBookingAddress`. The pair of shape names is intentional:
+ *
+ *   * `ask_for_satisfied_<side>_address_field` — the generic guard for
+ *     any sub-field ask (block / street / avenue / house / extra) when
+ *     the side is already locatable.
+ *   * `ask_for_<side>_house_when_extra_satisfies_completeness` — the
+ *     specific sub-shape we saw drift into: `address_extra` holds
+ *     apartment/floor/door, which the server accepts as satisfying
+ *     completeness (per `hasSubstantiveAddressExtra`), but the LLM
+ *     still asks for the house / building number because SKILL.md told
+ *     it to do that whenever `address_house` is null. Listing the
+ *     specific shape too makes the drift visible in logs and keeps the
+ *     prompt-side rewrite in SKILL.md anchored to a named server shape.
+ */
+function addAddressSatisfiedForbiddenShapes(
+  forbiddenShapes: string[],
+  draft: PersistedBookingDraft,
+): void {
+  const pushIfAbsent = (value: string) => {
+    if (!forbiddenShapes.includes(value)) forbiddenShapes.push(value);
+  };
+  if (hasSatisfiedBookingAddress(draft, "pickup")) {
+    pushIfAbsent("ask_for_satisfied_pickup_address_field");
+    if (!draft.pickupHouse && draft.pickupExtra) {
+      pushIfAbsent("ask_for_pickup_house_when_extra_satisfies_completeness");
+    }
+  }
+  if (hasSatisfiedBookingAddress(draft, "delivery")) {
+    pushIfAbsent("ask_for_satisfied_delivery_address_field");
+    if (!draft.deliveryHouse && draft.deliveryExtra) {
+      pushIfAbsent("ask_for_delivery_house_when_extra_satisfies_completeness");
+    }
+  }
 }
 
 // ONE-BRAIN: produces a short, descriptive state snapshot for the agent.
@@ -402,6 +546,12 @@ export function formatOneBrainLiveChannelContext(params: {
   customerScriptMode?: CustomerScriptMode | null;
   controllerEntry?: PersistedConversationControllerEntry | null;
   quotedRoute?: StoredQuotedRoute | null;
+  /**
+   * Current customer utterance for this turn. Forwarded to
+   * `computeOneBrainNextRequiredAction` so the clarify-before-proceed
+   * gate (Bug 1) can fire on vague proceed signals.
+   */
+  currentCustomerText?: string | null;
 }): string {
   const entry = params.controllerEntry || null;
   const draft = entry?.bookingDraft || null;
@@ -462,7 +612,13 @@ export function formatOneBrainLiveChannelContext(params: {
     const missing = computeOneBrainMissingFields(draft, entry);
     lines.push(`missing_fields: [${missing.join(", ")}]`);
 
-    const directive = computeOneBrainNextRequiredAction({ draft, entry, missing });
+    const directive = computeOneBrainNextRequiredAction({
+      draft,
+      entry,
+      missing,
+      currentCustomerText: params.currentCustomerText ?? null,
+      activeQuotedRoute: params.quotedRoute ?? null,
+    });
     if (directive) {
       lines.push(`next_required_action: ${directive.action}`);
       if (directive.field) lines.push(`next_field: ${directive.field}`);
@@ -520,7 +676,7 @@ export function formatOneBrainLiveChannelContext(params: {
   lines.push("  5. Informational option/price questions (e.g. 'what is the cheapest?', 'most expensive option?', 'do you have a van?', 'is there a faster one?', 'how much for express?', 'شنو أرخص خيار؟', 'عندكم باص؟') are ANSWER-ONLY turns. Reply with the direct answer (option name + price, or a short factual yes/no) and stop. Do NOT append the next slot ask (sender name, phone, recipient, address, etc.), do NOT invite the customer to proceed, do NOT attach a 'if you want to book it, send me…' suffix — even when `next_required_action` is a slot ask. The customer is evaluating options, not proceeding. Only advance to the next slot ask when the customer's NEXT message contains an explicit proceed signal: 'yes', 'go', 'let's do it', 'book it', 'proceed', 'continue', 'confirm', 'اطلب', 'اكمل', 'نعم', 'تمام خلّيها', 'خذ', 'سكّر', etc.");
   lines.push("  6. Edit turns — when the customer explicitly edits already-filled fields (e.g. 'block 3 to block 4', 'change the street to 10', 'no, make it sedan_fast', 'بدّل الشقة إلى 25') after the summary or during confirmation, treat the new values as the sole source of truth. Acknowledge the update briefly and either re-show the updated summary or ask only for the specific field that is still genuinely ambiguous. Do NOT re-offer the old value as an alternative. Do NOT say 'is it A or B?' listing the pre-edit and post-edit values. The server applies the edit; your job is to confirm it, not to re-litigate it.");
   lines.push("  7. Cancel vs option-switch — NEVER call `cancel_booking` when the same customer utterance also names one of the currently quoted options (e.g. 'nvm pls standard sedan', 'cancel, actually fast box van', 'skip the helper, do sedan instead', 'لا بس مبرد', 'مو مساعد، عادي'). 'nvm', 'never mind', 'forget it', 'skip', 'cancel', 'actually', 'no' paired with a vehicle/option name is an OPTION SWITCH, not a cancellation. In that case, emit an `apply_booking_field` or option-selection update for the named option if applicable, answer the customer by naming the switched-to option + its quoted price, and continue the flow. Only call `cancel_booking` when the customer clearly wants to abandon the booking entirely, with no option-switch wording in the same message ('cancel the booking', 'never mind the whole thing', 'ألغي الطلب').");
-  lines.push("  8. Manual-confirmation options — some options in the active route's option catalog require manual confirmation by our team and CANNOT be placed via `create_simple_order` directly (typically flagged in `optionCatalog` with a direct-chat-booking status like 'manual_confirmation_required'; the Helper service is the canonical case). When the customer wants to proceed with a manual-confirm option ('go ahead with helper', 'helper service please', 'خذ المساعد'), do NOT call `create_simple_order`, do NOT collect sender/recipient identity. Instead, briefly explain that this option needs manual confirmation, then collect ONLY pickup and delivery addresses, and finally call `request_handoff` with a short reason like 'manual_confirm_<option_type>' so the team takes over. The customer is not booking an instant order; they are handing off to a human for manual scheduling.");
+  lines.push("  8. Manual-confirmation options — some options in the active route's option catalog require manual confirmation by our team and CANNOT be placed via `create_simple_order` directly (typically flagged in `optionCatalog` with a direct-chat-booking status like 'manual_confirmation_required'; Helper service and refrigerated-van variants are canonical cases). The SERVER composes the customer-facing reply on these turns — it always names the option, its price, the 'needs manual confirmation by our team' signal, and the next address ask (or the handoff message once both addresses are collected). Your reply text will be substituted; what matters on your side is the OP layer: do NOT call `create_simple_order`, do NOT collect sender/recipient identity, apply address ops normally for pickup + delivery, and when both addresses are present call `request_handoff` with a short reason tag like 'manual_confirm_<option_type>' so the team picks up. The customer is not booking an instant order; they are handing off to a human for manual scheduling.");
   lines.push("[/SYSTEM CONTEXT - LIVE CHANNEL]");
   return lines.join("\n");
 }

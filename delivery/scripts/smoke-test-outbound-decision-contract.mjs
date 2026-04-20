@@ -12,7 +12,10 @@
 //   1. The 5-decision vocabulary (`allow`, `allow_sanitized`,
 //      `replace_authoritative`, `replace_fallback`, `block_retry`) is the
 //      complete set of top-level outcomes.
-//   2. The 10 reason codes are the complete set of reason codes exported.
+//   2. The 13 reason codes are the complete set of reason codes exported.
+//      (10 before Bug 1; + `replace_clarify_option_before_proceed` (Bug 1);
+//       + `replace_manual_confirm_address_ask` +
+//       `replace_manual_confirm_handoff` (Bug 4).)
 //   3. Representative callsites for each customer-outcome produce the
 //      expected (decision, reason) pair:
 //        - price whitelist → replace_fallback / replace_price_mismatch
@@ -154,13 +157,16 @@ const moduleSrc = fs.readFileSync(
       "block_provider_error",
       "fallback_empty_reply",
       "preserve_clarification",
+      "replace_clarify_option_before_proceed",
       "replace_field_rejection_hallucination",
+      "replace_manual_confirm_address_ask",
+      "replace_manual_confirm_handoff",
       "replace_order_placed_hallucination",
       "replace_price_mismatch",
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
     ],
-    "Reason codes must be exactly the 10-entry fixed enum (tight surface)",
+    "Reason codes must be exactly the fixed enum (13 entries after Bug 4 manual-confirm substitution)",
   );
 }
 

@@ -43,6 +43,13 @@ export function formatLiveChannelContext(
     quotedRoute?: StoredQuotedRoute | null;
     quoteFollowupHint?: string | null;
     controllerTransitionHint?: string | null;
+    /**
+     * Current customer utterance for this turn. Forwarded to
+     * `formatOneBrainLiveChannelContext` so the clarify-before-proceed
+     * gate (Bug 1) can fire on vague proceed signals. Legacy (non-
+     * one-brain) path ignores it.
+     */
+    currentCustomerText?: string | null;
   },
 ): string {
   const normalizedReplyTarget = normalizePhone(replyTarget);
@@ -58,6 +65,7 @@ export function formatLiveChannelContext(
       customerScriptMode: options?.customerScriptMode,
       controllerEntry: options?.controllerEntry,
       quotedRoute: options?.quotedRoute,
+      currentCustomerText: options?.currentCustomerText ?? null,
     });
   }
 

@@ -222,8 +222,14 @@ import {
   buildQuotedOptionAliases,
   scoreQuotedOptionMatch,
   detectCancelContradictsOptionMention,
+  detectExplicitOptionMention,
+  detectVagueProceedSignal,
+  routeHasManualConfirmOption,
   resolveSameRouteQuoteFollowupAction,
   buildDeterministicSelectedQuotedOptionReply,
+  buildDeterministicClarifyOptionBeforeProceedReply,
+  buildDeterministicManualConfirmAddressAskReply,
+  buildDeterministicManualConfirmHandoffReply,
   buildDeterministicOtherQuotedOptionsReply,
   buildQuotedRouteContextLines,
 } from "./lib/quoted-options";
@@ -4229,6 +4235,8 @@ async function handleInboundMessage(params: {
         draft,
         entry: conversationControllerEntry,
         missing,
+        currentCustomerText: rawBody,
+        activeQuotedRoute,
       });
       if (directive) {
         const fastResult = extractForNextAction({
@@ -4368,6 +4376,7 @@ async function handleInboundMessage(params: {
     quotedRoute: activeQuotedRoute,
     quoteFollowupHint,
     controllerTransitionHint,
+    currentCustomerText: rawBody,
   });
   const customerProfileContext = senderRole === "customer" ? formatCustomerProfileContext(customerProfile) : null;
   const behaviorContext = senderRole === "customer"
@@ -4898,6 +4907,78 @@ async function handleInboundMessage(params: {
           // substitution is visible to the `quotePresentedToCustomer`
           // computation — preserving pre-Step-4 behavior.
           {
+            // Clarify-before-proceed gate (Bug 1, 2026-04-20 manual-
+            // confirm incident). Evaluated at Region-A time so the
+            // controller entry reflects any drain-loop updates from this
+            // turn. Fires only on `stage=quoted` with a mixed-bookability
+            // catalog and a vague proceed signal that does not name an
+            // option — see `computeOneBrainNextRequiredAction` for the
+            // authoritative invariants, kept in sync with the outbound
+            // substitute below.
+            const clarifyOptionBeforeProceed = Boolean(
+              conversationControllerEntry?.stage === "quoted" &&
+                activeQuotedRoute &&
+                rawBody &&
+                routeHasManualConfirmOption(activeQuotedRoute) &&
+                detectVagueProceedSignal(rawBody) &&
+                !detectExplicitOptionMention({ text: rawBody, route: activeQuotedRoute }),
+            );
+            if (clarifyOptionBeforeProceed) {
+              api.logger.info(
+                `[one-brain/clarify-option] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
+              );
+            }
+
+            // Manual-confirm server-composed address-ask / handoff
+            // substitution (Bug 4, 2026-04-20 manual-confirm signal drop
+            // incident). When the controller has a fresh quote AND the
+            // selected option is flagged `manual_confirmation_required`,
+            // we compute whether the next server-directed action is an
+            // address ask (pickup or delivery) or the handoff itself,
+            // and pass that to Region-A so the reply text is rendered
+            // deterministically. This is the single-source-of-truth
+            // sibling of `computeOneBrainNextRequiredAction` — we
+            // replicate just the manual-confirm sub-branch here because
+            // Region A runs BEFORE the controller-state mutation block
+            // and must not depend on the LLM's emitted directive text.
+            let manualConfirmAddressAsk:
+              | {
+                  side: "pickup" | "delivery";
+                  option: RouteQuoteOption;
+                }
+              | null = null;
+            let manualConfirmHandoff: { option: RouteQuoteOption } | null = null;
+            if (
+              conversationControllerEntry?.stage === "quoted" &&
+              activeQuotedRoute &&
+              conversationControllerEntry.selectedDeliveryType &&
+              String(
+                conversationControllerEntry.selectedQuoteOptionDirectChatBookingStatus || "",
+              )
+                .trim()
+                .toLowerCase() === "manual_confirmation_required"
+            ) {
+              const selectedOption = getActiveSelectedQuotedOption(
+                activeQuotedRoute,
+                conversationControllerEntry,
+              );
+              if (selectedOption) {
+                const draft = conversationControllerEntry.bookingDraft;
+                const pickupSatisfied = hasSatisfiedBookingAddress(draft, "pickup");
+                const deliverySatisfied = hasSatisfiedBookingAddress(draft, "delivery");
+                if (!pickupSatisfied) {
+                  manualConfirmAddressAsk = { side: "pickup", option: selectedOption };
+                } else if (!deliverySatisfied) {
+                  manualConfirmAddressAsk = { side: "delivery", option: selectedOption };
+                } else {
+                  manualConfirmHandoff = { option: selectedOption };
+                }
+                api.logger.info(
+                  `[one-brain/manual-confirm] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} pickupSatisfied=${pickupSatisfied} deliverySatisfied=${deliverySatisfied}`,
+                );
+              }
+            }
+
             const preDecision = decidePreStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -4910,7 +4991,13 @@ async function handleInboundMessage(params: {
               extractPricesFromText: guardState?.extractPricesFromText || ((_: string) => []),
               activeQuotedRoute,
               sameRouteQuoteAction,
+              clarifyOptionBeforeProceed,
+              manualConfirmAddressAsk,
+              manualConfirmHandoff,
               buildDeterministicSelectedQuotedOptionReply,
+              buildDeterministicClarifyOptionBeforeProceedReply,
+              buildDeterministicManualConfirmAddressAskReply,
+              buildDeterministicManualConfirmHandoffReply,
               conversationId,
               sessionKeyForLogs: guardSessionKey,
               controllerStage: conversationControllerEntry?.stage || null,

@@ -70,6 +70,306 @@ export const DELIVERY_TYPE_ALIASES: Record<string, string[]> = {
   helper_standard: ["helper", "assistant", "مساعد", "مع مساعد"],
 };
 
+// ---------------------------------------------------------------------------
+// Class + tier classification (Bug 3, 2026-04-20 option-match drift incident).
+//
+// Problem being modelled: loose substring scoring on `DELIVERY_TYPE_ALIASES`
+// accepts a tier-only hit ("express") as a full option match even when a
+// class discriminator in the same utterance ("ref" for refrigerated) is
+// unknown to the alias table. Example incident: `"express ref van"` scored
+// `sedan_fast = 7` and `cooled_van_fast = 0`, so the matcher picked Express
+// sedan instead of Express refrigerated van.
+//
+// The fix decomposes each option's identity into:
+//   - class: sedan / van / cooled_van / helper
+//   - tier : normal / fast (single-tier classes get "standard" as the tier)
+//
+// The new `matchQuotedOptionDiscriminated` helper is the architectural
+// replacement for raw `scoreQuotedOptionMatch` at the controller commit
+// point. It requires a class token in the text before committing a match,
+// so tier-only utterances ("express", "fast") fall through to the
+// clarify-before-proceed gate instead of silently defaulting.
+// ---------------------------------------------------------------------------
+
+export type QuotedOptionClass = "sedan" | "van" | "cooled_van" | "helper";
+export type QuotedOptionTier = "normal" | "fast" | "standard";
+
+export type QuotedOptionClassification = {
+  class: QuotedOptionClass;
+  tier: QuotedOptionTier;
+};
+
+const DELIVERY_TYPE_CLASSIFICATION: Record<string, QuotedOptionClassification> = {
+  sedan_normal: { class: "sedan", tier: "normal" },
+  sedan_fast: { class: "sedan", tier: "fast" },
+  van_normal: { class: "van", tier: "normal" },
+  van_fast: { class: "van", tier: "fast" },
+  cooled_van_normal: { class: "cooled_van", tier: "normal" },
+  cooled_van_fast: { class: "cooled_van", tier: "fast" },
+  helper_standard: { class: "helper", tier: "standard" },
+};
+
+/**
+ * Tier tokens — markers that identify the "normal vs fast" dimension of
+ * an option. Normalized to lowercase for English entries; Arabic entries
+ * are matched against the raw text (Arabic normalization is identity).
+ *
+ * These tokens are ORTHOGONAL to class tokens below. A reply like "express"
+ * alone identifies a tier but not a class, so the matcher must refuse to
+ * auto-select and fall through to the clarify gate.
+ */
+export const OPTION_TIER_TOKENS: Record<QuotedOptionTier, string[]> = {
+  normal: [
+    "standard",
+    "normal",
+    "regular",
+    "std",
+    "reg",
+    "عادي",
+    "عادية",
+    "العادي",
+    "ستاندرد",
+  ],
+  fast: [
+    "express",
+    "fast",
+    "urgent",
+    "quick",
+    "rapid",
+    "rush",
+    "asap",
+    "سريع",
+    "السريع",
+    "مستعجل",
+    "اكسبرس",
+    "اكسبريس",
+  ],
+  standard: [],
+};
+
+/**
+ * Class tokens — markers that identify the vehicle/service class dimension.
+ *
+ * `cooled_van` intentionally includes the common abbreviations `ref` and
+ * `refrig` so that `"express ref van"` resolves class=cooled_van + tier=fast.
+ * Without these abbreviations the matcher cannot distinguish a refrigerated
+ * van from a plain van in the canonical customer phrasing the 2026-04-20
+ * incident surfaced.
+ *
+ * `van` is intentionally excluded from `cooled_van` tokens — a bare "van"
+ * is ambiguous between `van_*` and `cooled_van_*`, and the matcher
+ * (see `matchQuotedOptionDiscriminated`) uses `"van"` only as a neutral
+ * class hint which requires additional disambiguating evidence.
+ */
+export const OPTION_CLASS_TOKENS: Record<QuotedOptionClass, string[]> = {
+  sedan: ["sedan", "car", "سيدان", "سيارة", "سياره"],
+  van: ["box", "box van", "بوكس", "البوكس"],
+  cooled_van: [
+    "refrigerated",
+    "refrig",
+    "ref van",
+    "ref",
+    "cooled",
+    "cold",
+    "chilled",
+    "مبرد",
+    "المبرد",
+    "مبرده",
+    "مبردة",
+  ],
+  helper: ["helper", "assistant", "مساعد", "مع مساعد"],
+};
+
+/**
+ * Public accessor: returns the `{ class, tier }` classification for a
+ * known delivery type, or `null` for an unknown id. Lets other modules
+ * (tests, future guards) reuse the same mapping without reaching into
+ * the constant table directly.
+ */
+export function getOptionClassification(
+  deliveryType: string | null | undefined,
+): QuotedOptionClassification | null {
+  const normalized = String(deliveryType || "").trim().toLowerCase();
+  if (!normalized) return null;
+  return DELIVERY_TYPE_CLASSIFICATION[normalized] || null;
+}
+
+function hasTokenHit(normalizedText: string, token: string): boolean {
+  if (!token) return false;
+  if (normalizedText === token) return true;
+  // Prefer whole-word matches for short Latin tokens so that "box"
+  // doesn't leak into unrelated substrings (e.g. "boxing"). Arabic
+  // tokens are matched via substring because `normalizeIntentText`
+  // leaves Arabic characters untouched and Arabic word boundaries are
+  // well-preserved by our surrounding whitespace check.
+  const isLatin = /^[a-z]+( [a-z]+)*$/i.test(token);
+  if (isLatin) {
+    const re = new RegExp(`(^|[^a-z0-9])${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`, "i");
+    return re.test(normalizedText);
+  }
+  return normalizedText.includes(token);
+}
+
+/**
+ * Collect the set of classes and tiers that appear in the normalized
+ * input text. Order of token iteration is longest-first per dimension so
+ * that, e.g., "ref van" wins over the shorter "ref" inside the
+ * `cooled_van` class list (irrelevant for correctness but keeps the
+ * matched-token telemetry intuitive when we log it).
+ */
+function detectOptionDimensionsInText(normalizedText: string): {
+  classes: Set<QuotedOptionClass>;
+  tiers: Set<QuotedOptionTier>;
+} {
+  const classes = new Set<QuotedOptionClass>();
+  const tiers = new Set<QuotedOptionTier>();
+  if (!normalizedText) return { classes, tiers };
+  for (const [cls, tokens] of Object.entries(OPTION_CLASS_TOKENS) as [
+    QuotedOptionClass,
+    string[],
+  ][]) {
+    const sorted = [...tokens].sort((a, b) => b.length - a.length);
+    for (const tok of sorted) {
+      if (hasTokenHit(normalizedText, tok)) {
+        classes.add(cls);
+        break;
+      }
+    }
+  }
+  for (const [tier, tokens] of Object.entries(OPTION_TIER_TOKENS) as [
+    QuotedOptionTier,
+    string[],
+  ][]) {
+    if (tier === "standard") continue;
+    const sorted = [...tokens].sort((a, b) => b.length - a.length);
+    for (const tok of sorted) {
+      if (hasTokenHit(normalizedText, tok)) {
+        tiers.add(tier);
+        break;
+      }
+    }
+  }
+  return { classes, tiers };
+}
+
+/**
+ * Outcome of the class+tier discriminated matcher.
+ *
+ *   - `match`       : unique option identified, safe to commit
+ *   - `ambiguous`   : multiple options consistent with the input (e.g.
+ *                     "express van" without "cooled"/"ref") — caller must
+ *                     fall through to the clarify-before-proceed gate
+ *   - `underspecified`: tier alone, or empty signal — caller falls through
+ *   - `none`        : no class/tier token detected at all
+ */
+export type QuotedOptionMatchResult =
+  | { kind: "match"; option: RouteQuoteOption; reason: "full_label" | "class_and_tier" | "class_only_unique" }
+  | { kind: "ambiguous"; candidates: RouteQuoteOption[] }
+  | { kind: "underspecified"; hasTier: boolean; hasClass: boolean }
+  | { kind: "none" };
+
+/**
+ * Discriminated class+tier matcher. Replaces raw `scoreQuotedOptionMatch`
+ * at the controller commit point (`resolveSameRouteQuoteFollowupAction`)
+ * and the LLM-side clarify-gate explicit-mention check
+ * (`detectExplicitOptionMention`).
+ *
+ * Decision ladder (first match wins):
+ *   1. Full-label substring hit — the customer typed one of the option's
+ *      English or Arabic labels verbatim. This is always unambiguous
+ *      because labels are unique per option catalog.
+ *   2. Exactly one priced option satisfies both `class` and `tier`
+ *      detected in the text → commit.
+ *   3. No tier token in the text, but exactly one priced option matches
+ *      the detected class (e.g. bare "helper") → commit. Single-tier
+ *      classes like `helper_standard` win here even though the catalog
+ *      may include a manual-confirm flavor.
+ *   4. Multiple options consistent with the detected dimensions →
+ *      ambiguous; caller falls through to the clarify gate.
+ *   5. Tier-only or empty signal → underspecified.
+ */
+export function matchQuotedOptionDiscriminated(params: {
+  normalizedText: string;
+  options: RouteQuoteOption[];
+}): QuotedOptionMatchResult {
+  const { normalizedText, options } = params;
+  if (!normalizedText || options.length === 0) {
+    return { kind: "none" };
+  }
+  const priced = options.filter((o) => o.quoted_price != null);
+  if (priced.length === 0) {
+    return { kind: "none" };
+  }
+
+  // Tier 1: full-label substring hit. Iterate by longest label first so
+  // "Express refrigerated van" beats "Express sedan" when the customer
+  // types the long label in a longer utterance.
+  const labelMatches: { option: RouteQuoteOption; length: number }[] = [];
+  for (const option of priced) {
+    const labels = [
+      normalizeIntentText(option.label_en || ""),
+      normalizeIntentText(option.label_ar || ""),
+    ].filter(Boolean);
+    let longest = 0;
+    for (const lbl of labels) {
+      if (lbl && normalizedText.includes(lbl) && lbl.length > longest) {
+        longest = lbl.length;
+      }
+    }
+    if (longest > 0) {
+      labelMatches.push({ option, length: longest });
+    }
+  }
+  if (labelMatches.length > 0) {
+    labelMatches.sort((a, b) => b.length - a.length);
+    // A label hit is authoritative even against other label hits: the
+    // longest label wins (e.g. "Express refrigerated van" contains
+    // "Express sedan"? no — guaranteed disjoint; but the sort is defensive).
+    return { kind: "match", option: labelMatches[0].option, reason: "full_label" };
+  }
+
+  const { classes, tiers } = detectOptionDimensionsInText(normalizedText);
+
+  if (classes.size === 0 && tiers.size === 0) {
+    return { kind: "none" };
+  }
+
+  // Tier 2/3/4: class-driven disambiguation.
+  if (classes.size > 0) {
+    const candidatesByClass = priced.filter((opt) => {
+      const cls = getOptionClassification(opt.delivery_type);
+      return cls != null && classes.has(cls.class);
+    });
+    if (candidatesByClass.length === 0) {
+      return { kind: "underspecified", hasTier: tiers.size > 0, hasClass: false };
+    }
+
+    if (tiers.size > 0) {
+      const narrowed = candidatesByClass.filter((opt) => {
+        const cls = getOptionClassification(opt.delivery_type);
+        return cls != null && tiers.has(cls.tier);
+      });
+      if (narrowed.length === 1) {
+        return { kind: "match", option: narrowed[0], reason: "class_and_tier" };
+      }
+      if (narrowed.length > 1) {
+        return { kind: "ambiguous", candidates: narrowed };
+      }
+      // narrowed.length === 0 — tier is asserted but no candidate in the
+      // class list has that tier (e.g. "express helper" when only
+      // helper_standard exists). Fall back to class-only narrowing.
+    }
+
+    if (candidatesByClass.length === 1) {
+      return { kind: "match", option: candidatesByClass[0], reason: "class_only_unique" };
+    }
+    return { kind: "ambiguous", candidates: candidatesByClass };
+  }
+
+  // Tier 5: tier-only signal with no class — always underspecified.
+  return { kind: "underspecified", hasTier: tiers.size > 0, hasClass: false };
+}
+
 export const SAME_ROUTE_OTHER_OPTIONS_MARKERS = [
   "other options",
   "other option",
@@ -322,6 +622,196 @@ export function detectCancelContradictsOptionMention(params: {
   return { contradicted: true, optionLabel: label, optionType: best.option.delivery_type };
 }
 
+/**
+ * Vague "proceed" signal detector (Bug 1, 2026-04-20 manual-confirm incident).
+ *
+ * Matches generic go-ahead markers ("proceed", "go ahead", "let's do it",
+ * "book it", "yes please", "اكمل", "نعم", "تمام", …) that DO NOT name a
+ * specific option. When the active route has a mix of bookable and
+ * manual-confirm options, a vague proceed is ambiguous — the customer could
+ * mean the currently-selected option OR the one the bot just mentioned
+ * (e.g. "Helper service, 3.250 KWD"). The caller is expected to pair this
+ * with `detectExplicitOptionMention` to decide whether clarification is
+ * needed.
+ *
+ * Returns false as soon as an option alias is found inside the text so this
+ * helper alone can answer "vague AND no explicit option named". Kept
+ * deterministic (no LLM, no scoring tricks) and aligned with the marker
+ * lists used elsewhere in the quoted-options module.
+ */
+const VAGUE_PROCEED_MARKERS_EN = [
+  "go ahead",
+  "go ahead with it",
+  "go ahead with that",
+  "go ahead with this",
+  "let us do it",
+  "let's do it",
+  "lets do it",
+  "let us go",
+  "let's go",
+  "lets go",
+  "book it",
+  "book this",
+  "book that",
+  "proceed",
+  "proceed with it",
+  "proceed with that",
+  "proceed with this",
+  "continue",
+  "yes please",
+  "yes",
+  "yep",
+  "yeah",
+  "ok",
+  "okay",
+  "sure",
+  "fine",
+  "confirm",
+  "can we go ahead",
+  "can we proceed",
+  "can we go",
+  "shall we proceed",
+  "shall we go ahead",
+  "do it",
+  "let us book",
+  "let's book",
+  "lets book",
+];
+
+const VAGUE_PROCEED_MARKERS_AR = [
+  "اكمل",
+  "أكمل",
+  "اطلب",
+  "اطلبه",
+  "اطلبها",
+  "نعم",
+  "ايوه",
+  "ايوا",
+  "أيوه",
+  "ايه",
+  "تمام",
+  "اوكي",
+  "اوك",
+  "ماشي",
+  "موافق",
+  "موافقه",
+  "موافقة",
+  "زين",
+  "طيب",
+  "يلا",
+  "يلا نكمل",
+  "خلاص",
+  "تفضل",
+  "كمل",
+  "خذ",
+  "خذها",
+  "خذه",
+];
+
+export function detectVagueProceedSignal(text: string | null | undefined): boolean {
+  const raw = (text || "").trim();
+  if (!raw) return false;
+  if (raw.length > 120) return false;
+  const normalized = normalizeIntentText(raw);
+  if (!normalized) return false;
+  for (const marker of VAGUE_PROCEED_MARKERS_EN) {
+    if (normalized === marker) return true;
+    if (normalized.includes(marker)) return true;
+  }
+  for (const marker of VAGUE_PROCEED_MARKERS_AR) {
+    if (raw === marker) return true;
+    if (raw.includes(marker)) return true;
+  }
+  return false;
+}
+
+/**
+ * Positive option-mention detector. Pure positive half of
+ * `detectCancelContradictsOptionMention`: returns the matched option when
+ * the customer's text names a known option by any of its aliases or
+ * labels, otherwise null. Used by the clarify-before-proceed gate to
+ * decide whether a "proceed" signal is unambiguous.
+ */
+export function detectExplicitOptionMention(params: {
+  text: string | null | undefined;
+  route: StoredQuotedRoute | null | undefined;
+}): RouteQuoteOption | null {
+  const text = (params.text || "").trim();
+  const route = params.route || null;
+  if (!text || !route || !Array.isArray(route.optionCatalog) || route.optionCatalog.length === 0) {
+    return null;
+  }
+  const normalized = normalizeIntentText(text);
+  if (!normalized) return null;
+  // Bug 3 (2026-04-20 option-match drift): use the class+tier discriminated
+  // matcher so tier-only signals ("express", "fast") and abbreviated inputs
+  // ("express ref van") return null/ambiguous, which keeps the clarify-
+  // before-proceed gate in charge. The legacy `scoreQuotedOptionMatch` ladder
+  // above is preserved for callers that still need a purely permissive hit.
+  const outcome = matchQuotedOptionDiscriminated({
+    normalizedText: normalized,
+    options: route.optionCatalog,
+  });
+  if (outcome.kind === "match") {
+    return outcome.option;
+  }
+  return null;
+}
+
+/**
+ * True when the active route has at least one option flagged as
+ * `manual_confirmation_required` in its option catalog AND at least one
+ * OTHER option (manual-confirm or otherwise) with a quoted price. Single-
+ * option catalogs are by definition unambiguous on a vague "proceed".
+ */
+export function routeHasManualConfirmOption(route: StoredQuotedRoute | null | undefined): boolean {
+  if (!route || !Array.isArray(route.optionCatalog)) return false;
+  const priced = route.optionCatalog.filter((o) => o.quoted_price != null);
+  if (priced.length < 2) return false;
+  return priced.some(
+    (o) => String(o.direct_chat_booking_status || "").trim().toLowerCase() === "manual_confirmation_required",
+  );
+}
+
+/**
+ * Deterministic clarify-before-proceed reply builder. Used as the
+ * server-composed substitute when the customer sends a vague proceed
+ * signal on a route that contains a manual-confirm option. Lists the
+ * priced options with their labels + prices and asks the customer to
+ * name one explicitly. Flags manual-confirm options in-line so the
+ * customer knows which require a human handoff.
+ *
+ * Kept short (one question, bullet list) so it composes cleanly with the
+ * same-route-quote-options reply and doesn't re-state the route header
+ * the customer already saw.
+ */
+export function buildDeterministicClarifyOptionBeforeProceedReply(params: {
+  language: "ar" | "en";
+  route: StoredQuotedRoute;
+}): string {
+  const priced = params.route.optionCatalog.filter((o) => o.quoted_price != null);
+  if (params.language === "ar") {
+    const header = "أي خيار تفضل نكمل فيه؟";
+    const bullets = priced.map((option) => {
+      const label = formatQuotedOptionLabel(option, "ar");
+      const price = formatQuotedOptionPrice(option);
+      const status = String(option.direct_chat_booking_status || "").toLowerCase();
+      const suffix = status === "manual_confirmation_required" ? " (يحتاج تأكيد يدوي)" : "";
+      return `- ${label}: ${price}${suffix}`;
+    });
+    return [header, ...bullets].join("\n");
+  }
+  const header = "Which option would you like to go ahead with?";
+  const bullets = priced.map((option) => {
+    const label = formatQuotedOptionLabel(option, "en");
+    const price = formatQuotedOptionPrice(option);
+    const status = String(option.direct_chat_booking_status || "").toLowerCase();
+    const suffix = status === "manual_confirmation_required" ? " (needs manual confirmation)" : "";
+    return `- ${label}: ${price}${suffix}`;
+  });
+  return [header, ...bullets].join("\n");
+}
+
 export function resolveSameRouteQuoteFollowupAction(params: {
   visibleText: string;
   controllerEntry: PersistedConversationControllerEntry | null;
@@ -349,14 +839,23 @@ export function resolveSameRouteQuoteFollowupAction(params: {
     return { kind: "show_other_options" };
   }
   const options = params.route.optionCatalog.filter((entry) => entry.quoted_price != null);
-  const matches = options
-    .map((option) => ({ option, score: scoreQuotedOptionMatch(normalizedText, option) }))
-    .filter((entry) => entry.score > 0)
-    .sort((left, right) => right.score - left.score);
-  if (matches.length > 0) {
+  // Bug 3 (2026-04-20 option-match drift): commit a `switch_option` only
+  // when the class+tier discriminated matcher returns a unique match.
+  // Underspecified / ambiguous inputs are handed off to the clarify gate
+  // so the controller never auto-commits to the wrong option (historic
+  // failure mode: "express ref van" → sedan_fast via tier-only hit). The
+  // legacy scoring ladder is intentionally NOT consulted as a fallback;
+  // if the discriminated matcher cannot resolve uniqueness, we want the
+  // clarify-before-proceed directive to engage instead of a second-best
+  // guess.
+  const outcome = matchQuotedOptionDiscriminated({
+    normalizedText,
+    options,
+  });
+  if (outcome.kind === "match") {
     return {
       kind: "switch_option",
-      option: matches[0].option,
+      option: outcome.option,
     };
   }
   const currentOption = getActiveSelectedQuotedOption(params.route, params.controllerEntry);
@@ -401,6 +900,79 @@ export function buildDeterministicSelectedQuotedOptionReply(params: {
     lines.push("This option is not currently available for direct chat booking.");
   }
   return lines.join("\n");
+}
+
+/**
+ * Manual-confirm address-ask reply (Bug 4, 2026-04-20 manual-confirm
+ * signal drop incident).
+ *
+ * When the customer has explicitly selected a `manual_confirmation_required`
+ * option on a quoted route, the server must compose the address-collection
+ * prompt directly so the "needs manual confirmation by our team" signal is
+ * never dropped from the outbound text. Previously the LLM generated this
+ * reply free-hand — the hard prompt rule held in some turns but drifted in
+ * others, making the flow indistinguishable from a direct-booking address
+ * ask. This builder makes the signal deterministic.
+ *
+ * The `side` parameter controls which address the reply requests next:
+ *   - `"pickup"`   → used when only `delivery.address` is present
+ *   - `"delivery"` → used when only `pickup.address` is present
+ *
+ * When BOTH addresses are missing we ask for pickup first (matches the
+ * existing controller ordering). When BOTH addresses are already present
+ * the caller switches to the handoff builder instead.
+ */
+export function buildDeterministicManualConfirmAddressAskReply(params: {
+  language: "ar" | "en";
+  route: StoredQuotedRoute;
+  option: RouteQuoteOption;
+  side: "pickup" | "delivery";
+}): string {
+  const label = formatQuotedOptionLabel(params.option, params.language);
+  const price = formatQuotedOptionPrice(params.option);
+  if (params.language === "ar") {
+    const recap = `${label} ${price}. هذا الخيار يحتاج تأكيد يدوي من فريقنا قبل تثبيت الحجز.`;
+    const ask =
+      params.side === "pickup"
+        ? "ممكن ترسل لنا عنوان الاستلام (المنطقة، القطعة، الشارع، والمبنى/الشقة)؟"
+        : "ممكن ترسل لنا عنوان التوصيل (المنطقة، القطعة، الشارع، والمبنى/الشقة)؟";
+    return `${recap}\n${ask}`;
+  }
+  const recap = `${label} is ${price}. This option needs manual confirmation by our team before we can confirm the booking.`;
+  const ask =
+    params.side === "pickup"
+      ? "Could you share the pickup address (area, block, street, and building/apartment)?"
+      : "Could you share the delivery address (area, block, street, and building/apartment)?";
+  return `${recap}\n${ask}`;
+}
+
+/**
+ * Manual-confirm handoff reply (Bug 4 companion builder).
+ *
+ * When the customer has selected a `manual_confirmation_required` option
+ * AND both pickup + delivery addresses are already collected, the server
+ * emits this deterministic handoff message. The accompanying
+ * `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM` directive tells the LLM to also
+ * emit a `request_handoff` op; this builder guarantees the customer-
+ * facing text is consistent regardless of the op pipeline.
+ */
+export function buildDeterministicManualConfirmHandoffReply(params: {
+  language: "ar" | "en";
+  route: StoredQuotedRoute;
+  option: RouteQuoteOption;
+}): string {
+  const label = formatQuotedOptionLabel(params.option, params.language);
+  const price = formatQuotedOptionPrice(params.option);
+  if (params.language === "ar") {
+    return [
+      `${label} ${price}.`,
+      "هذا الخيار يحتاج تأكيد يدوي من فريقنا. استلمنا العناوين، وراح يتواصل معك أحد الموظفين لتأكيد الحجز.",
+    ].join("\n");
+  }
+  return [
+    `${label} is ${price}.`,
+    "This option needs manual confirmation by our team. We have your addresses — one of our agents will reach out shortly to confirm the booking.",
+  ].join("\n");
 }
 
 export function buildQuotedRouteContextLines(
