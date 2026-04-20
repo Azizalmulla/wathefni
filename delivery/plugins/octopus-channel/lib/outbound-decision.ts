@@ -105,6 +105,65 @@ export type OutboundDecisionKind =
   | "block_retry";
 
 /**
+ * Reply attribution (Phase 5, 2026-04-20 "observability tripwire").
+ *
+ * Every outbound reply gets tagged with a 3-way author so we can
+ * measure, per turn, whether the customer ultimately saw
+ * server-composed / LLM-composed / deterministic-fallback text. This is
+ * the observability half of the directive-registry architecture:
+ *
+ *   - `server`   — the reply was substituted with server-rendered text
+ *                  (directive registry, canonical summary, same-route
+ *                  quote correction, clarify-before-proceed, manual-
+ *                  confirm flow, canonical price correction, etc.).
+ *                  Maps from `replace_authoritative`.
+ *   - `llm`      — the LLM's draft text was passed through unchanged,
+ *                  optionally after a sanitation pass. Maps from
+ *                  `allow` / `allow_sanitized`.
+ *   - `fallback` — a safe generic fallback fired because the primary
+ *                  path could not produce a reply (empty LLM output,
+ *                  provider issue, pricing error without a canonical
+ *                  source). Fallbacks are incidents, not steady-state
+ *                  UX — they are worth alerting on. Maps from
+ *                  `replace_fallback` and `block_retry`.
+ *
+ * Together with the tight `OutboundDecisionReason` enum, `replyAuthor`
+ * lets a triager grep production logs for two things:
+ *
+ *   - "what fraction of directive-active turns stayed server-composed?"
+ *     (ratio of `server` attributions on turns where a directive was
+ *     active — should be high after Phase 2/3.)
+ *   - "is `fallback` firing more than expected?" (regression signal
+ *     for provider issues or empty-reply bugs.)
+ */
+export type ReplyAuthor = "server" | "llm" | "fallback";
+
+/**
+ * Classify a decision kind into its customer-visible author. Pure, no
+ * I/O; the outbound-decision module attaches this automatically to every
+ * result in `finalizeOutboundDecision` below.
+ */
+export function classifyReplyAuthor(
+  decision: OutboundDecisionKind,
+): ReplyAuthor {
+  switch (decision) {
+    case "allow":
+    case "allow_sanitized":
+      return "llm";
+    case "replace_authoritative":
+      return "server";
+    case "replace_fallback":
+    case "block_retry":
+      return "fallback";
+    default: {
+      const _exhaustive: never = decision;
+      void _exhaustive;
+      return "llm";
+    }
+  }
+}
+
+/**
  * Stable, customer-outcome-oriented reason codes.
  *
  * Keep this enum tight (~10 entries). Finer-grained detail (the original
@@ -150,8 +209,29 @@ export type OutboundDecisionResult = {
    * module pure; state transitions stay at the callsite).
    */
   markedSummaryShown: boolean;
+  /**
+   * Phase 5 attribution. Derived from `decision` via
+   * `classifyReplyAuthor`, never computed independently. Present on
+   * every returned result so the caller can emit a single
+   * `[one-brain/reply-attribution]` log line without re-deriving.
+   */
+  replyAuthor: ReplyAuthor;
   logEntries: OutboundDecisionLogEntry[];
 };
+
+/**
+ * Attach the `replyAuthor` derived field. All exported entry points
+ * run every return through this so every `OutboundDecisionResult`
+ * across the codebase carries a consistent attribution tag.
+ */
+function finalizeOutboundDecision(
+  partial: Omit<OutboundDecisionResult, "replyAuthor">,
+): OutboundDecisionResult {
+  return {
+    ...partial,
+    replyAuthor: classifyReplyAuthor(partial.decision),
+  };
+}
 
 /**
  * Minimal structural subset of the in-process session-guard shape. The
@@ -421,6 +501,12 @@ function reasonForHallucinationClaim(
 export function decidePreStateOutbound(
   input: PreStateOutboundInput,
 ): OutboundDecisionResult {
+  return finalizeOutboundDecision(decidePreStateOutboundImpl(input));
+}
+
+function decidePreStateOutboundImpl(
+  input: PreStateOutboundInput,
+): Omit<OutboundDecisionResult, "replyAuthor"> {
   const logEntries: OutboundDecisionLogEntry[] = [];
   let reply = input.replyText;
   let decision: OutboundDecisionKind = "allow";
@@ -796,6 +882,12 @@ export function decidePreStateOutbound(
 export function decidePostStateOutbound(
   input: PostStateOutboundInput,
 ): OutboundDecisionResult {
+  return finalizeOutboundDecision(decidePostStateOutboundImpl(input));
+}
+
+function decidePostStateOutboundImpl(
+  input: PostStateOutboundInput,
+): Omit<OutboundDecisionResult, "replyAuthor"> {
   const logEntries: OutboundDecisionLogEntry[] = [];
   let reply = input.replyText;
   let decision: OutboundDecisionKind = "allow";

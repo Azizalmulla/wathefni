@@ -4700,6 +4700,24 @@ async function handleInboundMessage(params: {
                     // One-brain ignores these — `apply_booking_field` and
                     // `create_simple_order` are the only signals we care about.
                     appliedOps.push(`${op.op}:ignored`);
+                  } else {
+                    // Phase 5 (2026-04-20): unknown responder op kinds.
+                    // The discriminated-union `ResponderStateOp` covers
+                    // every known op at build time, so reaching this
+                    // branch implies either (a) a tool pushed an op
+                    // with a new kind that the drain loop hasn't been
+                    // updated to handle, or (b) a malformed op escaped
+                    // the push-time validator. Log it as a warn so
+                    // drift in the responder-op contract is surfaced
+                    // rather than silently dropped. Behavior unchanged:
+                    // the op is not applied.
+                    const unknownKind = String(
+                      (op as { op?: unknown }).op || "",
+                    ).slice(0, 40);
+                    appliedOps.push(`unknown_op:${unknownKind}`);
+                    api.logger.warn(
+                      `[one-brain/drain] unknown_op conversation=${conversationId} op=${JSON.stringify(op).slice(0, 200)}`,
+                    );
                   }
                 }
                 // Phase 1 reconciliation: combine the pre-dispatch
@@ -5083,6 +5101,16 @@ async function handleInboundMessage(params: {
               controllerStage: conversationControllerEntry?.stage,
             });
           }
+          // Phase 5 (2026-04-20): per-turn reply-author attribution.
+          // Populated by the pre-state block and updated (if the post-
+          // state path overrides) after Regions B+C run. Emitted once
+          // at the end of the turn as `[one-brain/reply-attribution]`
+          // so a triager can grep per-conversation / per-account and
+          // measure the server-composed vs LLM-composed vs fallback
+          // ratio without re-deriving.
+          let turnReplyAuthor: "server" | "llm" | "fallback" = "llm";
+          let turnReplyReason: string = "allow";
+          let turnReplyDirective: string | null = null;
           // Step-4 consolidation: Region A of the former inline decision
           // pipeline (canonical overwrite, empty-fill, price whitelist,
           // same-route quote correction) is now a single pure call. It runs
@@ -5270,6 +5298,9 @@ async function handleInboundMessage(params: {
             });
             replyText = preDecision.replyText;
             emitOutboundDecisionLogs(api, preDecision.logEntries);
+            turnReplyAuthor = preDecision.replyAuthor;
+            turnReplyReason = preDecision.reason;
+            turnReplyDirective = directiveActionForRender;
             // Phase 3 (2026-04-20): when Region A substituted the server-
             // composed summary, promote the controller to
             // `summary_shown / summary_pending` in the same turn. Mirrors
@@ -5600,6 +5631,15 @@ async function handleInboundMessage(params: {
             });
             replyText = postDecision.replyText;
             emitOutboundDecisionLogs(api, postDecision.logEntries);
+            // Phase 5 attribution: post-state wins when it substituted;
+            // preserves pre-state attribution otherwise. "Post wins on
+            // substitution" gives us the strongest outcome — if
+            // post-state's C-drift / hallucination guard replaced the
+            // reply, that's the customer-visible truth.
+            if (postDecision.decision !== "allow") {
+              turnReplyAuthor = postDecision.replyAuthor;
+              turnReplyReason = postDecision.reason;
+            }
             if (postDecision.markedSummaryShown) {
               // Mark the summary as having been shown so downstream
               // confirmation detection and order-guard "summary_shown" gate
@@ -5632,7 +5672,22 @@ async function handleInboundMessage(params: {
             });
             replyText = postDecision.replyText;
             emitOutboundDecisionLogs(api, postDecision.logEntries);
+            if (postDecision.decision !== "allow") {
+              turnReplyAuthor = postDecision.replyAuthor;
+              turnReplyReason = postDecision.reason;
+            }
           }
+          // Phase 5 attribution — emit ONE canonical line per turn so
+          // per-conversation / per-directive aggregation is a grep away.
+          // Dashboards / alerts can slice on:
+          //   reply_author=server   — directive substitution fired
+          //   reply_author=llm      — LLM draft passed through
+          //   reply_author=fallback — provider / empty-reply fallback
+          try {
+            api.logger.info(
+              `[one-brain/reply-attribution] conversation=${conversationId} reply_author=${turnReplyAuthor} reason=${turnReplyReason} directive=${turnReplyDirective || "-"} stage=${conversationControllerEntry?.stage || "-"} lang=${preferredReplyLanguage}`,
+            );
+          } catch {}
           const pendingPrefix = conversationControllerEntry?.pendingReplyText?.trim();
           const outboundText = pendingPrefix ? `${pendingPrefix}\n\n${replyText}` : replyText;
           try {
