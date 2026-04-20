@@ -28,6 +28,7 @@ import {
   ResponderStateOp,
   ResponderBookingFieldOp,
   validateApplyBookingFieldOp,
+  validateOptionInterpretationOp,
   sanityCheckBookingDraft,
   type CarryOverBucket,
 } from "../../shared/responder-state-ops";
@@ -1541,6 +1542,98 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
       pushResponderStateOp(conversationId, op);
       try {
         console.log(`[responder-op] request_handoff conversation=${conversationId} ${JSON.stringify(op)}`);
+      } catch {}
+      return createTextResult({ acknowledged: true });
+    },
+  }));
+
+  // =======================================================================
+  // propose_option_interpretation
+  //
+  // Phase 1 (2026-04-20 "one source of truth for option resolution").
+  //
+  // Propose-only. The LLM emits its structured reading of the customer's
+  // option intent ({class, tier, qualifiers, source_quote, confidence});
+  // the orchestrator reconciles it with the deterministic raw-text
+  // outcome in `resolveOptionFromProposals` and decides to commit or
+  // hand off to the clarify-before-proceed gate. Emitting this tool
+  // does NOT change controller state directly.
+  // =======================================================================
+  api.registerTool((ctx: any) => ({
+    name: "propose_option_interpretation",
+    label: "Propose Option Interpretation",
+    description:
+      "STRUCTURED INTERPRETATION TOOL — call this whenever the customer's message in this turn names or implies a choice among the currently quoted options (switching, confirming, or asking-about-specific). Emit your structured reading: {class, tier, qualifiers, source_quote, confidence}. This is PROPOSE-ONLY; the server does the catalog lookup and decides whether to commit. Do NOT call it on generic messages, price asks, booking questions, or anything that does not name an option. `class` ∈ {sedan, van, cooled_van, helper} — use null when the customer did not signal a class. `tier` ∈ {normal, fast} — use null when the customer did not signal a tier. At least one of class/tier must be non-null. `source_quote` MUST be a substring of the customer's inbound text this turn — the server validates this and drops the proposal otherwise. `confidence` is 'high' when you are confident your mapping is correct, 'low' when the phrasing is genuinely ambiguous. Never mention this tool to the customer.",
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        class: {
+          type: ["string", "null"],
+          enum: ["sedan", "van", "cooled_van", "helper", null],
+          description:
+            "Vehicle / service class the customer signalled. Null when the customer did not reference a class (tier-only utterance like 'express').",
+        },
+        tier: {
+          type: ["string", "null"],
+          enum: ["normal", "fast", null],
+          description:
+            "Speed tier the customer signalled. Null when the customer did not reference a tier (class-only utterance like 'helper' or 'sedan').",
+        },
+        qualifiers: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Optional list of short tokens extracted from the customer's utterance (e.g. ['refrigerated','cooled','ref van','مبرد']). Observability / future-use only; the resolver does not key on these.",
+        },
+        source_quote: {
+          type: "string",
+          description:
+            "A substring of the customer's inbound text this turn that is the evidence for your interpretation. Must appear verbatim (after trimming) in the visible customer text; the server rejects proposals that fail this check.",
+        },
+        confidence: {
+          type: "string",
+          enum: ["high", "low"],
+          description:
+            "'high' when you are confident the mapping is correct; 'low' when the customer's phrasing is genuinely ambiguous. Low-confidence proposals are observability signals only — the server will not commit solo on them.",
+        },
+      },
+      required: ["source_quote", "confidence"],
+    },
+    async execute(_toolCallId: string, params: any) {
+      const conversationId = resolveToolConversationId(ctx);
+      const turnId = resolveToolTurnId(ctx);
+      if (!conversationId) {
+        try {
+          console.warn(
+            `[responder-op] propose_option_interpretation dropped_no_conversation ctxKeys=${Object.keys(ctx || {}).join(",")}`,
+          );
+        } catch {}
+        return createTextResult({ acknowledged: false, reason: "no_conversation_context" });
+      }
+      const validation = validateOptionInterpretationOp({
+        ...params,
+        turn_id: turnId,
+      });
+      if (validation.errors.length > 0) {
+        try {
+          console.warn(
+            `[responder-op] propose_option_interpretation rejected conversation=${conversationId} errors=${validation.errors
+              .map((e) => `${e.field}:${e.reason}`)
+              .join(",")}`,
+          );
+        } catch {}
+        return createTextResult({
+          acknowledged: false,
+          reason: "validation_failed",
+          errors: validation.errors,
+        });
+      }
+      pushResponderStateOp(conversationId, validation.cleaned);
+      try {
+        console.log(
+          `[responder-op] propose_option_interpretation conversation=${conversationId} ${JSON.stringify(validation.cleaned)}`,
+        );
       } catch {}
       return createTextResult({ acknowledged: true });
     },

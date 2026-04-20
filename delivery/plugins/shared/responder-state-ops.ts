@@ -144,6 +144,72 @@ export type ResponderCarryOverFromLastOrderOp = {
   turn_id: string;
 };
 
+/**
+ * LLM-side structured interpretation of the customer's option intent
+ * (Phase 1, 2026-04-20 "one source of truth for option resolution").
+ *
+ * ## Why this op exists
+ *
+ * Before this op, option resolution was double-sourced: the server ran
+ * regex/token matching over the raw customer text
+ * (`matchQuotedOptionDiscriminated`) AND the LLM independently understood
+ * the utterance but had no typed channel to share that understanding. On
+ * phrases the matcher didn't cover — dialect variants, typos, rare
+ * synonyms, inverted word order — the LLM knew the right answer but the
+ * server ignored it. And when the two implicitly disagreed, we had no
+ * way to detect that disagreement.
+ *
+ * This op is the LLM's *proposal* for the `{class, tier}` the customer
+ * meant, in structured form. It is PROPOSE-ONLY — emitting the op does
+ * not mutate state. The orchestrator's
+ * `resolveOptionFromProposals` (in `quoted-options.ts`) reconciles this
+ * proposal with the deterministic raw-text outcome and commits via the
+ * same `applySelectedQuotedOptionToController` path as today's
+ * deterministic matcher.
+ *
+ * ## Fields
+ *
+ * `class`   — vehicle/service class. Null when the customer didn't
+ *             signal a class (tier-only utterance like "express").
+ * `tier`    — speed tier. Null when the customer didn't signal a tier
+ *             (class-only utterance like "helper" or "sedan").
+ * `qualifiers` — free-form short tokens the LLM extracted as evidence
+ *             ("cooled", "refrigerated", "ref van", "مبرد"). Used for
+ *             observability + future disambiguation work; the resolver
+ *             does not key on these today.
+ * `source_quote` — the substring of the customer's actual inbound text
+ *             the LLM based this interpretation on. The orchestrator
+ *             validates this appears in the turn's visible text and
+ *             drops the proposal if it doesn't — same contract as the
+ *             `apply_booking_field` evidence check. Prevents the LLM
+ *             from synthesizing an interpretation out of earlier
+ *             conversation or its own prior reply.
+ * `confidence` — `"high"` when the LLM is confident the mapping is
+ *             correct, `"low"` when it is guessing. The resolver only
+ *             commits on high-confidence LLM proposals; low-confidence
+ *             ones are observability signals only.
+ *
+ * ## What the LLM should emit
+ *
+ * Only when the customer utterance in THIS turn is a selection or a
+ * switch between already-quoted options. Not for generic booking
+ * questions, price asks, or any message that does not name an option.
+ * If the customer's phrasing is genuinely ambiguous, the LLM should
+ * still emit the op with the fields it is confident about (e.g.
+ * `{class:"cooled_van", tier:null, confidence:"low"}`) — that signal is
+ * enough for the resolver to steer to clarify on ambiguity rather than
+ * auto-pick.
+ */
+export type ResponderOptionInterpretationOp = {
+  op: "propose_option_interpretation";
+  class: "sedan" | "van" | "cooled_van" | "helper" | null;
+  tier: "normal" | "fast" | null;
+  qualifiers?: string[] | null;
+  source_quote: string;
+  confidence: "high" | "low";
+  turn_id: string;
+};
+
 export type ResponderStateOp =
   | ResponderBookingFieldOp
   | ResponderStartBookingOp
@@ -152,7 +218,8 @@ export type ResponderStateOp =
   | ResponderHandoffOp
   | ResponderSetRequestedSlotOp
   | ResponderSetPendingAreaOp
-  | ResponderCarryOverFromLastOrderOp;
+  | ResponderCarryOverFromLastOrderOp
+  | ResponderOptionInterpretationOp;
 
 const buffer = new Map<string, ResponderStateOp[]>();
 const TURN_OP_LIMIT = 32;
@@ -469,4 +536,141 @@ export function sanityCheckBookingDraft(draft: {
   }
 
   return problems;
+}
+
+// ---------------------------------------------------------------------------
+// Option-interpretation validator (Phase 1, 2026-04-20).
+//
+// Shape-only check — semantic reconciliation against the catalog lives in
+// `resolveOptionFromProposals` (`quoted-options.ts`). This function rejects
+// ops that are structurally malformed before they reach the resolver.
+// ---------------------------------------------------------------------------
+
+const OPTION_INTERPRETATION_VALID_CLASSES = new Set([
+  "sedan",
+  "van",
+  "cooled_van",
+  "helper",
+]);
+const OPTION_INTERPRETATION_VALID_TIERS = new Set(["normal", "fast"]);
+const OPTION_INTERPRETATION_VALID_CONFIDENCES = new Set(["high", "low"]);
+const OPTION_INTERPRETATION_SOURCE_QUOTE_MAX_LEN = 200;
+const OPTION_INTERPRETATION_QUALIFIER_MAX_COUNT = 8;
+const OPTION_INTERPRETATION_QUALIFIER_MAX_LEN = 40;
+
+export type OptionInterpretationValidationError = {
+  field: "class" | "tier" | "source_quote" | "confidence" | "qualifiers";
+  reason: string;
+  received?: string;
+};
+
+/**
+ * Shape-validate an incoming `propose_option_interpretation` op. Returns
+ * a cleaned op (field types narrowed) plus the list of validation errors.
+ * Called by the tool registration synchronously before pushing AND by the
+ * orchestrator when draining — defense-in-depth mirroring
+ * `validateApplyBookingFieldOp`.
+ *
+ * NOTE: `class` and `tier` are independently nullable. A proposal with
+ * `{class: "cooled_van", tier: null}` is valid — it tells the resolver
+ * "customer clearly signalled the refrigerated-van class but didn't pick
+ * normal vs fast". The resolver then falls through to the class-only
+ * unique-match rule, or clarify if the catalog has >1 option in that
+ * class. At least one of `class` / `tier` must be non-null; otherwise the
+ * op carries no useful signal.
+ */
+export function validateOptionInterpretationOp(input: any): {
+  cleaned: ResponderOptionInterpretationOp;
+  errors: OptionInterpretationValidationError[];
+} {
+  const errors: OptionInterpretationValidationError[] = [];
+  const rawClass =
+    typeof input?.class === "string" ? input.class.trim().toLowerCase() : null;
+  const rawTier =
+    typeof input?.tier === "string" ? input.tier.trim().toLowerCase() : null;
+  const rawConfidence =
+    typeof input?.confidence === "string"
+      ? input.confidence.trim().toLowerCase()
+      : "";
+  const rawSourceQuote =
+    typeof input?.source_quote === "string" ? input.source_quote.trim() : "";
+  const rawTurnId = typeof input?.turn_id === "string" ? input.turn_id : "";
+
+  let cleanedClass: ResponderOptionInterpretationOp["class"] = null;
+  if (rawClass && !OPTION_INTERPRETATION_VALID_CLASSES.has(rawClass)) {
+    errors.push({
+      field: "class",
+      reason: "class_unknown",
+      received: String(input?.class ?? ""),
+    });
+  } else if (rawClass) {
+    cleanedClass = rawClass as ResponderOptionInterpretationOp["class"];
+  }
+
+  let cleanedTier: ResponderOptionInterpretationOp["tier"] = null;
+  if (rawTier && !OPTION_INTERPRETATION_VALID_TIERS.has(rawTier)) {
+    errors.push({
+      field: "tier",
+      reason: "tier_unknown",
+      received: String(input?.tier ?? ""),
+    });
+  } else if (rawTier) {
+    cleanedTier = rawTier as ResponderOptionInterpretationOp["tier"];
+  }
+
+  if (cleanedClass === null && cleanedTier === null) {
+    errors.push({
+      field: "class",
+      reason: "class_and_tier_both_null",
+    });
+  }
+
+  if (!rawSourceQuote) {
+    errors.push({ field: "source_quote", reason: "source_quote_empty" });
+  } else if (rawSourceQuote.length > OPTION_INTERPRETATION_SOURCE_QUOTE_MAX_LEN) {
+    errors.push({
+      field: "source_quote",
+      reason: "source_quote_too_long",
+      received: String(rawSourceQuote.length),
+    });
+  }
+
+  if (!OPTION_INTERPRETATION_VALID_CONFIDENCES.has(rawConfidence)) {
+    errors.push({
+      field: "confidence",
+      reason: "confidence_unknown",
+      received: String(input?.confidence ?? ""),
+    });
+  }
+
+  let cleanedQualifiers: string[] | null = null;
+  if (input?.qualifiers !== undefined && input?.qualifiers !== null) {
+    if (!Array.isArray(input.qualifiers)) {
+      errors.push({ field: "qualifiers", reason: "qualifiers_not_array" });
+    } else {
+      const out: string[] = [];
+      for (const q of input.qualifiers) {
+        if (typeof q !== "string") continue;
+        const trimmed = q.trim();
+        if (!trimmed) continue;
+        if (trimmed.length > OPTION_INTERPRETATION_QUALIFIER_MAX_LEN) continue;
+        out.push(trimmed);
+        if (out.length >= OPTION_INTERPRETATION_QUALIFIER_MAX_COUNT) break;
+      }
+      cleanedQualifiers = out.length > 0 ? out : null;
+    }
+  }
+
+  const cleaned: ResponderOptionInterpretationOp = {
+    op: "propose_option_interpretation",
+    class: cleanedClass,
+    tier: cleanedTier,
+    qualifiers: cleanedQualifiers,
+    source_quote: rawSourceQuote.slice(0, OPTION_INTERPRETATION_SOURCE_QUOTE_MAX_LEN),
+    confidence:
+      (rawConfidence as ResponderOptionInterpretationOp["confidence"]) || "low",
+    turn_id: rawTurnId,
+  };
+
+  return { cleaned, errors };
 }

@@ -232,6 +232,9 @@ import {
   buildDeterministicManualConfirmHandoffReply,
   buildDeterministicOtherQuotedOptionsReply,
   buildQuotedRouteContextLines,
+  matchQuotedOptionDiscriminated,
+  matchLlmOptionInterpretation,
+  resolveOptionFromProposals,
 } from "./lib/quoted-options";
 import {
   shouldIncludeQuotedRouteContext,
@@ -4679,10 +4682,119 @@ async function handleInboundMessage(params: {
                         );
                       } catch {}
                     }
+                  } else if (op.op === "propose_option_interpretation") {
+                    // Phase 1 (2026-04-20) — LLM's structured option
+                    // interpretation. Stored for the post-drain
+                    // reconciliation block below. Emitting the op does
+                    // NOT mutate controller state by itself.
+                    appliedOps.push(
+                      `propose_option_interpretation(${op.class ?? "-"}/${op.tier ?? "-"}/${op.confidence})`,
+                    );
                   } else if (op.op === "start_booking" || op.op === "confirm_summary") {
                     // One-brain ignores these — `apply_booking_field` and
                     // `create_simple_order` are the only signals we care about.
                     appliedOps.push(`${op.op}:ignored`);
+                  }
+                }
+                // Phase 1 reconciliation: combine the pre-dispatch
+                // deterministic raw-text outcome (captured earlier as
+                // `sameRouteQuoteAction`) with the LLM's structured
+                // interpretation op, and commit if the resolver returns a
+                // unique option that is NOT already selected. Pre-dispatch
+                // already committed its own unique match; this block only
+                // adds coverage for cases where raw-text was
+                // underspecified/ambiguous/none AND the LLM's
+                // interpretation uniquely resolves with high confidence.
+                // Disagreements are logged so we can see drift between
+                // the two proposer layers — Phase 5 will surface those as
+                // a metric.
+                {
+                  const interpretOp = drained.find(
+                    (op) => op.op === "propose_option_interpretation",
+                  ) as
+                    | {
+                        op: "propose_option_interpretation";
+                        class: "sedan" | "van" | "cooled_van" | "helper" | null;
+                        tier: "normal" | "fast" | null;
+                        qualifiers?: string[] | null;
+                        source_quote: string;
+                        confidence: "high" | "low";
+                        turn_id: string;
+                      }
+                    | undefined;
+                  if (
+                    interpretOp &&
+                    conversationControllerEntry &&
+                    activeQuotedRoute &&
+                    hasActiveQuotedBookingAuthority(conversationControllerEntry)
+                  ) {
+                    // Source-quote evidence gate — mirrors the
+                    // `apply_booking_field` contract. The LLM must quote a
+                    // substring of the customer's inbound text to ground its
+                    // interpretation; otherwise the proposal is dropped.
+                    const visible = (turnSignals.workflowInputText || "").trim();
+                    const quote = (interpretOp.source_quote || "").trim();
+                    const quoteGrounded =
+                      quote.length > 0 &&
+                      visible.toLowerCase().includes(quote.toLowerCase());
+                    if (!quoteGrounded) {
+                      api.logger.warn(
+                        `[option-resolve] llm_interpretation dropped reason=source_quote_not_in_visible conversation=${conversationId} quote=${JSON.stringify(quote.slice(0, 80))} visible=${JSON.stringify(visible.slice(0, 80))}`,
+                      );
+                    } else {
+                      const pricedOptions =
+                        activeQuotedRoute.optionCatalog.filter((o) => o.quoted_price != null);
+                      const normalizedVisibleText = normalizeIntentText(visible);
+                      const rawTextOutcome = matchQuotedOptionDiscriminated({
+                        normalizedText: normalizedVisibleText,
+                        options: pricedOptions,
+                      });
+                      const llmOutcome = matchLlmOptionInterpretation({
+                        interpretation: {
+                          class: interpretOp.class,
+                          tier: interpretOp.tier,
+                          source_quote: interpretOp.source_quote,
+                          confidence: interpretOp.confidence,
+                        },
+                        options: pricedOptions,
+                      });
+                      const reconciled = resolveOptionFromProposals({
+                        rawTextOutcome,
+                        llmOutcome,
+                      });
+                      const currentSelectedType =
+                        conversationControllerEntry.selectedQuoteOptionType ||
+                        conversationControllerEntry.selectedDeliveryType ||
+                        null;
+                      if (reconciled.kind === "commit") {
+                        const target = reconciled.option;
+                        if (target.delivery_type !== currentSelectedType) {
+                          conversationControllerEntry = applySelectedQuotedOptionToController(
+                            conversationControllerEntry,
+                            target,
+                          );
+                          mirrorConversationControllerEntry(
+                            controllerStateKey,
+                            conversationControllerEntry,
+                          );
+                          api.logger.info(
+                            `[option-resolve] committed conversation=${conversationId} source=${reconciled.source} option=${target.delivery_type} price=${formatQuotedOptionPrice(target)} prior=${currentSelectedType || "-"}`,
+                          );
+                        } else {
+                          api.logger.info(
+                            `[option-resolve] reaffirmed conversation=${conversationId} source=${reconciled.source} option=${target.delivery_type}`,
+                          );
+                        }
+                      } else if (reconciled.kind === "clarify") {
+                        api.logger.warn(
+                          `[option-resolve] clarify conversation=${conversationId} source=${reconciled.source} fastPath=${reconciled.fastPathCandidate?.delivery_type || "-"} llm=${reconciled.llmCandidate?.delivery_type || "-"} candidates=${(reconciled.candidates || []).map((c) => c.delivery_type).join(",") || "-"}`,
+                        );
+                      } else {
+                        api.logger.info(
+                          `[option-resolve] no_signal conversation=${conversationId} raw=${rawTextOutcome.kind} llm=${llmOutcome.kind}`,
+                        );
+                      }
+                    }
                   }
                 }
                 if (conversationControllerEntry) {

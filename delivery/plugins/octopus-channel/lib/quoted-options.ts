@@ -370,6 +370,197 @@ export function matchQuotedOptionDiscriminated(params: {
   return { kind: "underspecified", hasTier: tiers.size > 0, hasClass: false };
 }
 
+// ---------------------------------------------------------------------------
+// LLM-side structured option interpretation (Phase 1, 2026-04-20).
+//
+// The LLM emits this via the `propose_option_interpretation` responder op
+// (see `plugins/shared/responder-state-ops.ts`). It is the Layer 2
+// proposal. The orchestrator feeds it into `resolveOptionFromProposals`
+// alongside the Layer 1 deterministic raw-text outcome and commits /
+// clarifies based on a reconciliation ladder.
+//
+// Only the shape we consume here is typed; the wire format may carry
+// additional fields (`qualifiers`, `turn_id`, `op`) that this resolver
+// ignores.
+// ---------------------------------------------------------------------------
+
+export type LlmOptionInterpretation = {
+  class: QuotedOptionClass | null;
+  tier: QuotedOptionTier | null;
+  source_quote: string;
+  confidence: "high" | "low";
+};
+
+/**
+ * Reconciled outcome of combining the deterministic raw-text match with
+ * the LLM's structured interpretation. The discriminated source field
+ * tells the caller *why* a particular option was chosen (or rejected),
+ * which is what makes per-turn attribution metrics possible in Phase 5.
+ *
+ *   - `commit_fast_path`        : only the deterministic matcher resolved;
+ *                                 LLM proposal absent / low-confidence / null.
+ *   - `commit_llm`              : only the LLM proposal resolved uniquely;
+ *                                 deterministic matcher was underspecified /
+ *                                 ambiguous. LLM "disambiguated" the text.
+ *   - `commit_both_agree`       : both resolved to the same option — safest
+ *                                 possible commit path.
+ *   - `clarify_disagreement`    : both resolved to DIFFERENT unique options;
+ *                                 the system deliberately commits nothing
+ *                                 this turn and hands off to the clarify
+ *                                 gate. This is the architectural tripwire
+ *                                 that catches drift between the two
+ *                                 proposer layers.
+ *   - `clarify_ambiguous`       : at least one side returned `ambiguous`
+ *                                 (multiple candidates) with no unique
+ *                                 winner; clarify gate takes over.
+ *   - `none`                    : no useful signal from either proposer.
+ */
+export type ReconciledOptionOutcome =
+  | { kind: "commit"; option: RouteQuoteOption; source: "commit_fast_path" | "commit_llm" | "commit_both_agree" }
+  | {
+      kind: "clarify";
+      source: "clarify_disagreement" | "clarify_ambiguous";
+      fastPathCandidate?: RouteQuoteOption | null;
+      llmCandidate?: RouteQuoteOption | null;
+      candidates?: RouteQuoteOption[];
+    }
+  | { kind: "none" };
+
+/**
+ * Resolve the LLM's structured interpretation against the catalog alone
+ * — no regex over raw text, no alias tables. This is the "single source
+ * of truth" property Phase 1 delivers: the LLM proposes class+tier, the
+ * server looks up the catalog, and that's it. Low-confidence proposals
+ * return `{ kind: "none" }` — they are never committed solo, only used
+ * as a tiebreaker / observability signal.
+ */
+export function matchLlmOptionInterpretation(params: {
+  interpretation: LlmOptionInterpretation | null;
+  options: RouteQuoteOption[];
+}): QuotedOptionMatchResult {
+  const { interpretation, options } = params;
+  if (!interpretation) return { kind: "none" };
+  if (interpretation.confidence !== "high") return { kind: "none" };
+  const priced = options.filter((o) => o.quoted_price != null);
+  if (priced.length === 0) return { kind: "none" };
+
+  const { class: llmClass, tier: llmTier } = interpretation;
+  if (llmClass === null && llmTier === null) return { kind: "none" };
+
+  if (llmClass === null) {
+    // Tier-only LLM proposal — mirrors raw-text underspecified outcome.
+    // Refuse to auto-commit; clarify takes over.
+    return { kind: "underspecified", hasTier: true, hasClass: false };
+  }
+
+  const candidatesByClass = priced.filter((opt) => {
+    const cls = getOptionClassification(opt.delivery_type);
+    return cls != null && cls.class === llmClass;
+  });
+  if (candidatesByClass.length === 0) {
+    return { kind: "underspecified", hasTier: llmTier != null, hasClass: false };
+  }
+
+  if (llmTier !== null) {
+    const narrowed = candidatesByClass.filter((opt) => {
+      const cls = getOptionClassification(opt.delivery_type);
+      return cls != null && cls.tier === llmTier;
+    });
+    if (narrowed.length === 1) {
+      return { kind: "match", option: narrowed[0], reason: "class_and_tier" };
+    }
+    if (narrowed.length > 1) {
+      return { kind: "ambiguous", candidates: narrowed };
+    }
+    // tier absent on every catalog entry for this class — defensive
+    // fallthrough to class-only.
+  }
+  if (candidatesByClass.length === 1) {
+    return { kind: "match", option: candidatesByClass[0], reason: "class_only_unique" };
+  }
+  return { kind: "ambiguous", candidates: candidatesByClass };
+}
+
+/**
+ * Phase 1 reconciliation. Combines the Layer 1 (deterministic raw-text)
+ * and Layer 2 (LLM structured) outcomes into a single commit-or-clarify
+ * decision. This is the single chokepoint the orchestrator calls from
+ * both the pre-dispatch commit path and the post-drain reconciliation
+ * path — so the rules are in one place and the attribution is uniform.
+ *
+ * Reconciliation ladder (first row wins):
+ *
+ *   fastPath | llm        | outcome
+ *   -------- | ---------- | ------------------------------------------
+ *   match A  | match A    | commit A, source=commit_both_agree
+ *   match A  | match B    | clarify, source=clarify_disagreement
+ *   match A  | none       | commit A, source=commit_fast_path
+ *   match A  | underspec. | commit A, source=commit_fast_path
+ *   match A  | ambiguous  | clarify, source=clarify_ambiguous (ambiguous LLM
+ *                           is a contradiction signal — do NOT commit A
+ *                           just because the regex landed)
+ *   ambig.   | match B    | commit B, source=commit_llm (LLM disambiguated)
+ *   underspec| match B    | commit B, source=commit_llm
+ *   none     | match B    | commit B, source=commit_llm
+ *   ambig.   | ambig.     | clarify, source=clarify_ambiguous
+ *   any else | any else   | { kind: "none" }
+ *
+ * The "match A + ambiguous LLM" row is intentionally conservative: if
+ * the LLM thinks the utterance could be more than one option, the
+ * deterministic matcher's commit is suspect — it probably landed on a
+ * tier-plus-class hit while the customer was genuinely ambiguous. Let
+ * clarify adjudicate.
+ */
+export function resolveOptionFromProposals(params: {
+  rawTextOutcome: QuotedOptionMatchResult;
+  llmOutcome: QuotedOptionMatchResult;
+}): ReconciledOptionOutcome {
+  const { rawTextOutcome, llmOutcome } = params;
+
+  const fastMatch =
+    rawTextOutcome.kind === "match" ? rawTextOutcome.option : null;
+  const llmMatch = llmOutcome.kind === "match" ? llmOutcome.option : null;
+
+  if (fastMatch && llmMatch) {
+    if (fastMatch.delivery_type === llmMatch.delivery_type) {
+      return { kind: "commit", option: fastMatch, source: "commit_both_agree" };
+    }
+    return {
+      kind: "clarify",
+      source: "clarify_disagreement",
+      fastPathCandidate: fastMatch,
+      llmCandidate: llmMatch,
+    };
+  }
+
+  if (fastMatch && llmOutcome.kind === "ambiguous") {
+    return {
+      kind: "clarify",
+      source: "clarify_ambiguous",
+      fastPathCandidate: fastMatch,
+      candidates: llmOutcome.candidates,
+    };
+  }
+
+  if (fastMatch) {
+    return { kind: "commit", option: fastMatch, source: "commit_fast_path" };
+  }
+
+  if (llmMatch) {
+    return { kind: "commit", option: llmMatch, source: "commit_llm" };
+  }
+
+  if (rawTextOutcome.kind === "ambiguous" || llmOutcome.kind === "ambiguous") {
+    const candidates = [
+      ...(rawTextOutcome.kind === "ambiguous" ? rawTextOutcome.candidates : []),
+      ...(llmOutcome.kind === "ambiguous" ? llmOutcome.candidates : []),
+    ];
+    return { kind: "clarify", source: "clarify_ambiguous", candidates };
+  }
+
+  return { kind: "none" };
+}
+
 export const SAME_ROUTE_OTHER_OPTIONS_MARKERS = [
   "other options",
   "other option",
