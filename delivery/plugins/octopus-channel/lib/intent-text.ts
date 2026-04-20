@@ -76,12 +76,32 @@ export function textContainsUrl(text: string): boolean {
 export function shouldMoveToHumanAgent(replyText: string): boolean {
   const normalized = replyText.replace(/\s+/g, " ").trim();
   if (!normalized) return false;
+  // String-matching escalation detector. The markers split into two
+  // families:
+  //
+  //   1. LLM / support-tool markers — Arabic customer-facing phrasing
+  //      the `assign_agent` / `complaint` support tools emit when they
+  //      stub the Octopus `toagent` call, plus generic "human agent"
+  //      phrasing the LLM sometimes emits directly.
+  //   2. Manual-confirm HANDOFF markers (Phase 4, 2026-04-20) —
+  //      distinctive substrings from the server-rendered
+  //      `buildDeterministicManualConfirmHandoffReply` only. We match
+  //      on "one of our agents will reach out" (EN) and
+  //      "راح يتواصل معك أحد الموظفين" (AR) because those substrings
+  //      are unique to the handoff reply; they do NOT appear in the
+  //      pickup-ask or delivery-ask replies (which also mention
+  //      "manual confirmation by our team" but don't promise agent
+  //      contact). This keeps `toagent` firing only on the actual
+  //      handoff turn, not on every manual-confirm collection turn.
   const escalationMarkers = [
     "تم تحويل محادثتكم لموظف الدعم المختص",
     "تم تحويل المحادثة لموظف الدعم المختص",
     "تم تسجيل الشكوى وتحويلها للإدارة للمراجعة",
     "human agent",
     "moved to a human agent",
+    // Manual-confirm handoff (Phase 4).
+    "one of our agents will reach out",
+    "راح يتواصل معك أحد الموظفين",
   ];
   return escalationMarkers.some((marker) => normalized.includes(marker));
 }

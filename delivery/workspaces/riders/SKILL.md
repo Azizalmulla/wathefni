@@ -408,8 +408,9 @@ You still need to drive the op layer correctly:
 
 - Do **NOT** call `create_simple_order`.
 - Do **NOT** collect sender/recipient identity (name + phone).
-- Apply address ops normally (`set_booking_field` for pickup/delivery area + text + sub-fields).
-- When both addresses are collected, call `request_handoff` with a short reason tag, e.g. `"manual_confirm_helper_standard"` / `"manual_confirm_cooled_van_fast"`, so our team picks it up.
+- Apply address ops normally (`apply_booking_field` for pickup/delivery area + text + sub-fields).
+
+`request_handoff` on manual-confirm handoff turns is **server-synthesized**. When both addresses are satisfied, the orchestrator emits `request_handoff` with a reason of `"manual_confirm_<option_type>"` regardless of whether you call the tool; the Octopus `toagent` escalation is independently triggered by the server-rendered handoff reply text. You CAN still call `request_handoff` — it's idempotent, and doing so makes the audit trail explicit — but you don't have to. What you must never do is forget to LET the handoff happen: keep `create_simple_order` away from manual-confirm options, don't collect sender/recipient fields, and trust the server to drive the escalation.
 
 What the customer ultimately sees in the turn is deterministic. What you emit as ops and intent text still matters for the state machine — just understand that the visible reply will be replaced with the server-rendered text.
 

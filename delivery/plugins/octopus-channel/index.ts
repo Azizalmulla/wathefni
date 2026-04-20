@@ -4927,6 +4927,71 @@ async function handleInboundMessage(params: {
                   await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
                   mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
                 }
+                // Phase 4 (2026-04-20): server-synthesized request_handoff
+                // on manual-confirm handoff turns.
+                //
+                // Before Phase 4, the `request_handoff` responder op was
+                // only emitted by the LLM (via the `request_handoff`
+                // tool). The manual-confirm handoff reply tells the
+                // customer "one of our agents will reach out", but if
+                // the LLM dropped the op the backend never learned
+                // about the handoff — silent failure mode.
+                //
+                // This block inspects the post-drain controller state:
+                // when the selected option is flagged
+                // `manual_confirmation_required` AND both pickup +
+                // delivery addresses are satisfied (the exact state
+                // that makes `computeOneBrainNextRequiredAction` return
+                // `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM` and Region A
+                // substitute the handoff reply), we guarantee the op
+                // is accounted for. The Octopus `toagent` trigger is
+                // independently wired via `shouldMoveToHumanAgent`
+                // matching the handoff reply text, so this branch is
+                // primarily about audit-trail consistency and the
+                // `handoff=yes` log signal.
+                //
+                // Idempotent: LLM-emitted `request_handoff` already set
+                // `handoffRequested = true`, so this block short-
+                // circuits. Running on every turn the condition is met
+                // is acceptable — the log line is the source of truth
+                // for per-conversation handoff counts (GROUP BY
+                // conversation).
+                if (
+                  !handoffRequested &&
+                  conversationControllerEntry &&
+                  activeQuotedRoute &&
+                  String(
+                    conversationControllerEntry.selectedQuoteOptionDirectChatBookingStatus || "",
+                  )
+                    .trim()
+                    .toLowerCase() === "manual_confirmation_required"
+                ) {
+                  const selectedOption = getActiveSelectedQuotedOption(
+                    activeQuotedRoute,
+                    conversationControllerEntry,
+                  );
+                  if (selectedOption) {
+                    const postDrainDraft = conversationControllerEntry.bookingDraft;
+                    const pickupSatisfied = hasSatisfiedBookingAddress(
+                      postDrainDraft,
+                      "pickup",
+                    );
+                    const deliverySatisfied = hasSatisfiedBookingAddress(
+                      postDrainDraft,
+                      "delivery",
+                    );
+                    if (pickupSatisfied && deliverySatisfied) {
+                      const synthesizedReason = `manual_confirm_${selectedOption.delivery_type}`;
+                      handoffRequested = true;
+                      appliedOps.push(
+                        `request_handoff:server_synthesized(${synthesizedReason})`,
+                      );
+                      api.logger.info(
+                        `[one-brain/server-handoff] synthesized conversation=${conversationId} reason=${synthesizedReason} route=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type}`,
+                      );
+                    }
+                  }
+                }
                 try {
                   api.logger.info(
                     `[one-brain] drained conversation=${conversationId} ops=${drained.length} applied=${appliedOps.join("|")} cancelled=${cancelled ? "yes" : "no"} handoff=${handoffRequested ? "yes" : "no"} rejections=${rejections.length}`,
