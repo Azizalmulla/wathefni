@@ -599,12 +599,22 @@ export function decidePreStateOutbound(
           originalLen: reply ? reply.length : 0,
         },
       });
+      // Phase 3 (2026-04-20): when the substituted reply is the server-
+      // composed full order summary, flip `markedSummaryShown` so the
+      // controller promotes to `summary_shown` / `summary_pending` in
+      // the same turn. Mirrors the post-state C-drift path which also
+      // promotes on substitution — keeps the two paths symmetric so
+      // downstream order-guard / confirmation detection fires off the
+      // real event regardless of which layer composed the summary.
+      const summaryWasSubstituted =
+        input.directiveAction ===
+        "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED";
       return {
         decision: "replace_authoritative",
         reason: "replace_directive_ask",
         replyText: outcome.text,
         detectedShape: null,
-        markedSummaryShown: false,
+        markedSummaryShown: summaryWasSubstituted,
         logEntries,
       };
     }

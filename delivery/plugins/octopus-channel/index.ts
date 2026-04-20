@@ -24,6 +24,7 @@ import {
   isGeneralServiceInquiry,
   isSimpleGreeting,
   isTrackingIntent,
+  isExplicitOrderConfirmation,
   CustomerScriptMode,
   normalizeIntentText,
   PersistedConversationControllerEntry,
@@ -5119,40 +5120,60 @@ async function handleInboundMessage(params: {
                 activeQuotedRoute: activeQuotedRoute || null,
               });
               if (directive && directiveHasServerRenderer(directive.action)) {
-                // Surface conflict details so the CONFIRM_SLOT_CONFLICT
-                // renderer can name the conflicting values concretely.
-                let conflictingSlot: string | null = null;
-                let conflictValues: { incoming: string; existing: string } | null = null;
-                if (directive.action === "CONFIRM_SLOT_CONFLICT" && directive.field) {
-                  conflictingSlot = directive.field;
-                  const slots = conversationControllerEntry.dialogState?.slots || {};
-                  const rec = (slots as any)[directive.field];
-                  if (
-                    rec &&
-                    rec.status === "conflict" &&
-                    typeof rec.value === "string" &&
-                    typeof rec.conflictValue === "string"
-                  ) {
-                    conflictValues = {
-                      existing: rec.value,
-                      incoming: rec.conflictValue,
-                    };
+                // Phase 3 confirm-turn gate: when the active directive
+                // is the summary composer AND the customer's inbound
+                // message this turn is an explicit order confirmation
+                // ("yes", "confirm", "اكمل", etc.), the LLM owns the
+                // reply because it needs to call `create_simple_order`
+                // and acknowledge the placed order. Re-rendering the
+                // summary here would tell the customer "shall I confirm
+                // this order?" a second time after they already said
+                // yes. Skip substitution in that case.
+                const isSummaryDirective =
+                  directive.action ===
+                  "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED";
+                const customerConfirmedOrder =
+                  isSummaryDirective && isExplicitOrderConfirmation(rawBody || null);
+                if (!customerConfirmedOrder) {
+                  // Surface conflict details so the CONFIRM_SLOT_CONFLICT
+                  // renderer can name the conflicting values concretely.
+                  let conflictingSlot: string | null = null;
+                  let conflictValues: { incoming: string; existing: string } | null = null;
+                  if (directive.action === "CONFIRM_SLOT_CONFLICT" && directive.field) {
+                    conflictingSlot = directive.field;
+                    const slots = conversationControllerEntry.dialogState?.slots || {};
+                    const rec = (slots as any)[directive.field];
+                    if (
+                      rec &&
+                      rec.status === "conflict" &&
+                      typeof rec.value === "string" &&
+                      typeof rec.conflictValue === "string"
+                    ) {
+                      conflictValues = {
+                        existing: rec.value,
+                        incoming: rec.conflictValue,
+                      };
+                    }
                   }
+                  directiveActionForRender = directive.action;
+                  directiveRenderContextForRender = {
+                    language: preferredReplyLanguage,
+                    draft: conversationControllerEntry.bookingDraft,
+                    entry: conversationControllerEntry,
+                    route: activeQuotedRoute || null,
+                    conflictingSlot,
+                    conflictValues,
+                    turnSeed: String(
+                      (conversationControllerEntry.lastActivityTs ?? Date.now()) +
+                        "::" +
+                        conversationId,
+                    ),
+                  };
+                } else {
+                  api.logger.info(
+                    `[one-brain/directive-dispatch] skipped_on_order_confirmation conversation=${conversationId} action=${directive.action} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
+                  );
                 }
-                directiveActionForRender = directive.action;
-                directiveRenderContextForRender = {
-                  language: preferredReplyLanguage,
-                  draft: conversationControllerEntry.bookingDraft,
-                  entry: conversationControllerEntry,
-                  route: activeQuotedRoute || null,
-                  conflictingSlot,
-                  conflictValues,
-                  turnSeed: String(
-                    (conversationControllerEntry.lastActivityTs ?? Date.now()) +
-                      "::" +
-                      conversationId,
-                  ),
-                };
               }
             }
 
@@ -5184,6 +5205,19 @@ async function handleInboundMessage(params: {
             });
             replyText = preDecision.replyText;
             emitOutboundDecisionLogs(api, preDecision.logEntries);
+            // Phase 3 (2026-04-20): when Region A substituted the server-
+            // composed summary, promote the controller to
+            // `summary_shown / summary_pending` in the same turn. Mirrors
+            // the post-state C-drift promotion so downstream confirmation
+            // detection and the order-guard summary gate fire off the
+            // real event, not a stale `collecting_booking_details` stage.
+            if (preDecision.markedSummaryShown && conversationControllerEntry) {
+              conversationControllerEntry = {
+                ...conversationControllerEntry,
+                stage: "summary_shown" as ConversationFlowStage,
+                bookingStep: "summary_pending" as BookingCollectionStep,
+              };
+            }
           }
           if (conversationControllerEntry && sessionGuard && sessionIsRecent) {
             if (

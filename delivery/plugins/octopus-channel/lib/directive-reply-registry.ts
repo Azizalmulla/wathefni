@@ -73,6 +73,7 @@ import {
   getEffectivePickupAreaName,
   getEffectiveDeliveryAreaName,
 } from "../../shared/conversation-policy";
+import { buildDeterministicOrderSummary } from "../../shared/outbound-verify";
 
 // ---------------------------------------------------------------------------
 // Directive action union (compile-time exhaustive).
@@ -353,6 +354,22 @@ function renderAskDeliveryAddress(ctx: DirectiveReplyRendererContext): string {
   ]);
 }
 
+function renderFullOrderSummary(ctx: DirectiveReplyRendererContext): string {
+  // Phase 3 (2026-04-20): the summary is now server-composed from
+  // controller state. Delegates to the same canonical builder that
+  // previously served as the C-drift substitute (see
+  // `buildDeterministicOrderSummary` in `shared/outbound-verify.ts`),
+  // so the format is identical and the post-state C-drift guard
+  // effectively becomes a regression alarm — if it ever fires after
+  // Phase 3, either Phase 3 didn't substitute or the LLM wrote its
+  // own summary before our substitution could apply, both of which
+  // are bugs worth surfacing.
+  return buildDeterministicOrderSummary({
+    entry: ctx.entry,
+    language: ctx.language,
+  });
+}
+
 function renderConfirmSlotConflict(ctx: DirectiveReplyRendererContext): string {
   const slot = ctx.conflictingSlot || "that field";
   const prettySlot = slot
@@ -437,10 +454,14 @@ export const DIRECTIVE_REPLY_RENDERERS = {
     rationale:
       "Post-order intent is context-dependent (track / cancel / re-order / handoff). A generic renderer would be a downgrade; the POST_ORDER_ONLY_* forbidden shapes enforce the boundary.",
   },
+  // Phase 3 (2026-04-20): server-composed summary. The caller must also
+  // gate on `!isExplicitOrderConfirmation(customerText)` so the
+  // confirmation turn (customer said "yes") still reaches the LLM, which
+  // owns the create_simple_order tool call and the order-confirmation
+  // reply. See index.ts Region-A wiring.
   WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED: {
-    kind: "llm_owned",
-    rationale:
-      "Summary rendering is the Phase 3 target. Today the C-drift fact verifier intercepts drift; Phase 3 will compose the summary deterministically from state.",
+    kind: "server",
+    render: renderFullOrderSummary,
   },
 } as const satisfies Record<DirectiveAction, DirectiveReplyRendererSpec>;
 

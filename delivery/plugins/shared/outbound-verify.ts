@@ -712,8 +712,26 @@ const SERVICE_LABELS_AR: Record<string, string> = {
 
 /**
  * Build a canonical, customer-facing full order summary from the booking
- * draft + live quote. Used as the deterministic substitute when the LLM
- * emits a stub summary despite a complete draft.
+ * draft + live quote. Used as both:
+ *
+ *   (a) the deterministic substitute when the LLM emits a stub summary
+ *       despite a complete draft (C-drift backstop — pre-Phase 3), and
+ *   (b) the primary Phase-3 server-rendered summary invoked by the
+ *       directive registry when `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED`
+ *       fires (current).
+ *
+ * After Phase 3 the same function produces the summary on every turn the
+ * directive is active, so the C-drift path reduces to a regression alarm
+ * — it should no longer fire under steady-state operation. Intentionally
+ * left in place so any future LLM-authored summary (edge cases, prompt
+ * regressions) still gets caught and substituted.
+ *
+ * Service label preference:
+ *   - Prefer the entry's live catalog label (`selectedQuoteOptionLabel*`)
+ *     when present — covers refrigerated-van / helper variants and any
+ *     future catalog expansion without a table update.
+ *   - Fall back to the static `SERVICE_LABELS_*` table for known types.
+ *   - Final fallback is the raw `selectedDeliveryType` key or an em-dash.
  */
 export function buildDeterministicOrderSummary(params: {
   entry: PersistedConversationControllerEntry;
@@ -722,10 +740,35 @@ export function buildDeterministicOrderSummary(params: {
   const { entry, language } = params;
   const draft = entry.bookingDraft;
 
-  const pickupArea = entry.quotePickupAreaNameEn || entry.quotePickupAreaNameAr || "—";
-  const deliveryArea = entry.quoteDropoffAreaNameEn || entry.quoteDropoffAreaNameAr || "—";
+  const pickupArea =
+    (language === "ar"
+      ? entry.quotePickupAreaNameAr || entry.quotePickupAreaNameEn
+      : entry.quotePickupAreaNameEn || entry.quotePickupAreaNameAr) || "—";
+  const deliveryArea =
+    (language === "ar"
+      ? entry.quoteDropoffAreaNameAr || entry.quoteDropoffAreaNameEn
+      : entry.quoteDropoffAreaNameEn || entry.quoteDropoffAreaNameAr) || "—";
   const serviceKey = entry.selectedDeliveryType || "";
   const priceStr = entry.quotedPrice != null ? entry.quotedPrice.toFixed(3) : "—";
+
+  const resolveServiceLabel = (lang: "ar" | "en"): string => {
+    if (lang === "ar") {
+      return (
+        entry.selectedQuoteOptionLabelAr ||
+        SERVICE_LABELS_AR[serviceKey] ||
+        entry.selectedQuoteOptionLabelEn ||
+        serviceKey ||
+        "—"
+      );
+    }
+    return (
+      entry.selectedQuoteOptionLabelEn ||
+      SERVICE_LABELS_EN[serviceKey] ||
+      entry.selectedQuoteOptionLabelAr ||
+      serviceKey ||
+      "—"
+    );
+  };
 
   if (language === "ar") {
     const pickupAddr = joinAddressPartsAr({
@@ -742,7 +785,7 @@ export function buildDeterministicOrderSummary(params: {
       house: draft.deliveryHouse,
       extra: draft.deliveryExtra,
     });
-    const service = SERVICE_LABELS_AR[serviceKey] || serviceKey || "—";
+    const service = resolveServiceLabel("ar");
     const lines = [
       `*ملخص الطلب*`,
       `الاستلام: ${pickupArea} — ${pickupAddr}`,
@@ -771,7 +814,7 @@ export function buildDeterministicOrderSummary(params: {
     house: draft.deliveryHouse,
     extra: draft.deliveryExtra,
   });
-  const service = SERVICE_LABELS_EN[serviceKey] || serviceKey || "—";
+  const service = resolveServiceLabel("en");
 
   const lines = [
     `*Order summary*`,

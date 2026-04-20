@@ -285,29 +285,17 @@ Required fields: sender name, sender phone, recipient name, recipient phone, pic
 - **When the customer sends a bare greeting mid-booking** (e.g. `hi`, `hala`, `هلا`), follow section 1d (warm-back + route reminder + next field) — do NOT just emit the next field ask in isolation. Customers reconnecting after a lull need orientation, not a brusque field prompt.
 - **When `missing_fields` is empty**, your next reply MUST be the full order summary. No exceptions, no route recaps, no one-line acknowledgements.
 
-### Order summary format
+### Order summary — server-composed
 
-The summary MUST be written as **labeled rows on separate lines**, not as a run-on paragraph. A prose sentence that mentions all the fields is NOT a summary — customers can't verify it at a glance, and the runtime will replace it with the canonical layout.
+When `missing_fields` is empty and the controller is still in collection, the directive `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED` fires and **the server composes the summary from state**. Your draft reply on that turn is substituted with the canonical labeled-row summary — you do not need to author it.
 
-Format: one row per field, each row starts with the label and a colon.
+What matters on your side:
 
-- English labels: `Pickup:`, `Delivery:`, `Sender:`, `Recipient:`, `Service:`, `Price:`
-- Arabic labels: `الاستلام:`, `التسليم:`, `المرسل:`, `المستلم:`, `الخدمة:`, `السعر:`
+- Do NOT call `create_simple_order` on the same turn you first hit `missing_fields: []` — the customer still has to confirm. The server's substituted reply ends with "Shall I confirm this order?" / "أأكد الطلب؟", and you wait.
+- Apply any field updates the customer sent in that turn (e.g. "my recipient is actually 65…") via `apply_booking_field` **before** the summary fires, so the server composes against the fresh state. The server will render the summary with the new values.
+- On the **confirm turn** — the customer replies with an explicit order confirmation ("yes" / "confirm" / "go ahead" / "proceed" / "نعم" / "مؤكد" / "أكيد", per the authoritative list in `isExplicitOrderConfirmation`) — the server deliberately does NOT re-render the summary. That is YOUR turn to call `create_simple_order` and acknowledge the placed order with the tracking link / order id. If you call `create_simple_order` too early (before the server has shown the summary), the order guard rejects it because the controller stage is not yet `summary_shown`.
 
-You may bold the first line with asterisks (`*Order summary*` / `*ملخص الطلب*`).
-
-Contents, in order:
-
-1. Pickup area + full address (block, street, avenue if any, house, any extras)
-2. Delivery area + full address (same shape)
-3. Sender name + phone
-4. Recipient name + phone
-5. Service type
-6. Quoted price
-
-Finish with a short explicit confirmation ask on its own line (`Shall I confirm this order?` / `أأكد الطلب؟`).
-
-Example (English):
+Reference format (for awareness — this is what the server emits):
 
     *Order summary*
     Pickup: Jabriya — Block 5, Street 7, House 19
@@ -319,9 +307,7 @@ Example (English):
 
     Shall I confirm this order?
 
-This rule fires every turn `missing_fields` is empty — including when the previous turn was a clarifying exchange (area mismatch, field correction, language switch). Don't skip the summary just because the customer's last message was a simple "ok" / "yes" / "no, I meant X" — check `missing_fields` and write the summary in the structured row format above.
-
-- **When the customer explicitly confirms** the summary you just wrote ("yes", "confirm", "go ahead", "تمام", "اكمل"), call `create_simple_order` with the exact values from your summary.
+If your reply ever tries to write a summary while the directive is active, the LLM draft is silently replaced. A post-state regression alarm (`replace_summary_fact_drift`) catches any drift if the LLM produced a summary that disagreed with state — after Phase 3 this alarm should essentially never fire. Don't rely on it to fix up your summary: the server writes the summary, full stop.
 
 ### Edit turns (post-summary or mid-confirmation)
 
