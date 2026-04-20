@@ -355,9 +355,9 @@ const moduleSrc = fs.readFileSync(
 // The reason code union must be the tight fixed enum. Step 4
 // consolidation shipped 10 entries; Step 5 did not widen it. The Bug 1
 // (2026-04-20) clarify-before-proceed substitution adds one entry; the
-// Bug 4 (2026-04-20) manual-confirm substitutions add two more — each
-// kept tight by carrying its own reason code rather than overloading an
-// existing one.
+// Bug 4 (2026-04-20) manual-confirm substitutions add two more; Phase 2
+// directive-to-reply registry adds one more — each kept tight by
+// carrying its own reason code rather than overloading an existing one.
 {
   const reasonMatch = moduleSrc.match(
     /export type OutboundDecisionReason =\s*([\s\S]*?);/,
@@ -373,6 +373,7 @@ const moduleSrc = fs.readFileSync(
       "fallback_empty_reply",
       "preserve_clarification",
       "replace_clarify_option_before_proceed",
+      "replace_directive_ask",
       "replace_field_rejection_hallucination",
       "replace_manual_confirm_address_ask",
       "replace_manual_confirm_handoff",
@@ -381,7 +382,7 @@ const moduleSrc = fs.readFileSync(
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
     ],
-    "Reason codes must be exactly the fixed enum (13 entries after Bug 4 manual-confirm substitutions)",
+    "Reason codes must be exactly the fixed enum (14 entries after Phase 2 directive registry)",
   );
 }
 

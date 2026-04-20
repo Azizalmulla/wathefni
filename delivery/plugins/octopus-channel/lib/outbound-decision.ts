@@ -71,6 +71,10 @@ import type {
   StoredQuotedRoute,
   SameRouteQuoteFollowupAction,
 } from "./quoted-options";
+import type {
+  DirectiveReplyRendererContext as DirectiveReplyRenderContext,
+  DirectiveReplyRenderResult,
+} from "./directive-reply-registry";
 
 /**
  * Top-level decision kinds — the 5-way contract from the Step-4 spec.
@@ -120,6 +124,7 @@ export type OutboundDecisionReason =
   | "replace_clarify_option_before_proceed"
   | "replace_manual_confirm_address_ask"
   | "replace_manual_confirm_handoff"
+  | "replace_directive_ask"
   | "block_provider_error"
   | "fallback_empty_reply"
   | "preserve_clarification";
@@ -241,6 +246,29 @@ export type PreStateOutboundInput = {
     route: StoredQuotedRoute;
     option: RouteQuoteOption;
   }) => string;
+
+  /**
+   * Phase 2 (2026-04-20): directive-to-reply registry inputs.
+   *
+   * When `directiveAction` names a directive whose registry spec is
+   * `{kind: "server"}`, Region A substitutes the LLM's draft with the
+   * server-rendered ask. Directives that live in dedicated branches
+   * (clarify-before-proceed, manual-confirm family) are still handled
+   * by their specific substitutions — the registry dispatcher
+   * short-circuits with `{kind: "existing"}` for those.
+   *
+   * Left null when the caller has no directive computed for this turn
+   * (e.g. idle stage) or the directive is LLM-owned (post-order intent,
+   * Phase-3 summary).
+   */
+  directiveAction?: string | null;
+  /** Pre-built renderer context (draft + entry + route + turnSeed). */
+  directiveRenderContext?: DirectiveReplyRenderContext | null;
+  /** Registry dispatcher; injected to avoid circular imports. */
+  renderDirectiveReply?: (
+    action: string,
+    ctx: DirectiveReplyRenderContext,
+  ) => DirectiveReplyRenderResult;
 
   /** Short identifiers for log-entry detail (no effect on the decision). */
   conversationId: string;
@@ -522,6 +550,66 @@ export function decidePreStateOutbound(
       markedSummaryShown: false,
       logEntries,
     };
+  }
+
+  // ------------------------------------------------------------------
+  // (A0c) Directive-to-reply registry dispatch (Phase 2, 2026-04-20).
+  //
+  // For directives whose registry spec is `{kind: "server"}` (field
+  // asks, recipient asks, address asks, slot-conflict confirmation),
+  // the server OWNS the reply text. The LLM's draft is discarded. This
+  // is the "directive → renderer" contract — every new ASK_* directive
+  // added to `DirectiveAction` must carry a renderer (or be explicitly
+  // flagged `llm_owned` / `server_existing`), enforced by the
+  // `satisfies Record<DirectiveAction, …>` check in the registry.
+  //
+  // Runs AFTER the dedicated branches (clarify-before-proceed + manual-
+  // confirm family) because those carry richer per-option state the
+  // generic registry doesn't need to replicate. For them the registry
+  // dispatcher returns `{kind: "existing"}` and this block is a no-op.
+  //
+  // Skipped when `sameRouteQuoteAction` is a switch/confirm-selected
+  // action this turn. In that case the customer just picked an option,
+  // and A4 below owns the recap/ask composition (or the LLM's reply
+  // passes through when it already contains the expected price). The
+  // directive dispatch would otherwise render just the bare next-slot
+  // ask and lose the price-recap context the customer expects
+  // immediately after a selection.
+  // ------------------------------------------------------------------
+  const skipDirectiveDispatchForSameRouteSwitch =
+    !!input.sameRouteQuoteAction &&
+    (input.sameRouteQuoteAction.kind === "switch_option" ||
+      input.sameRouteQuoteAction.kind === "confirm_selected_option");
+  if (
+    !skipDirectiveDispatchForSameRouteSwitch &&
+    input.directiveAction &&
+    input.directiveRenderContext &&
+    input.renderDirectiveReply
+  ) {
+    const outcome = input.renderDirectiveReply(
+      input.directiveAction,
+      input.directiveRenderContext,
+    );
+    if (outcome.kind === "render") {
+      logEntries.push({
+        level: "info",
+        message: `[guard] Substituted directive-driven reply conversation=${input.conversationId} sessionKey=${input.sessionKeyForLogs} action=${input.directiveAction}`,
+        detail: {
+          action: input.directiveAction,
+          originalLen: reply ? reply.length : 0,
+        },
+      });
+      return {
+        decision: "replace_authoritative",
+        reason: "replace_directive_ask",
+        replyText: outcome.text,
+        detectedShape: null,
+        markedSummaryShown: false,
+        logEntries,
+      };
+    }
+    // `existing` / `llm_owned` / `unknown_action` — fall through and let
+    // downstream substitutions or the LLM draft survive.
   }
 
   const canonical = input.preferredCanonicalText;

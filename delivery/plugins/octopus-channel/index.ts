@@ -244,6 +244,11 @@ import {
   formatOneBrainLiveChannelContext,
 } from "./lib/one-brain-context";
 import type { OneBrainNextRequiredAction } from "./lib/one-brain-context";
+import {
+  renderDirectiveReply,
+  directiveHasServerRenderer,
+} from "./lib/directive-reply-registry";
+import type { DirectiveReplyRendererContext } from "./lib/directive-reply-registry";
 import { formatLiveChannelContext } from "./lib/live-channel-context";
 import {
   formatCustomerProfileContext,
@@ -5091,6 +5096,66 @@ async function handleInboundMessage(params: {
               }
             }
 
+            // Phase 2 (2026-04-20): compute the directive for this turn
+            // and build the renderer context. The registry's
+            // compile-time exhaustiveness guarantees every directive has
+            // a spec — either a server renderer (we substitute), a
+            // server-existing branch (handled by clarify /
+            // manual-confirm substitutions above), or an llm_owned
+            // marker (pass through). The substitute fires at Region A
+            // block (A0c) below; see outbound-decision.ts.
+            let directiveActionForRender: string | null = null;
+            let directiveRenderContextForRender: DirectiveReplyRendererContext | null = null;
+            if (conversationControllerEntry) {
+              const missingForDirective = computeOneBrainMissingFields(
+                conversationControllerEntry.bookingDraft,
+                conversationControllerEntry,
+              );
+              const directive = computeOneBrainNextRequiredAction({
+                draft: conversationControllerEntry.bookingDraft,
+                entry: conversationControllerEntry,
+                missing: missingForDirective,
+                currentCustomerText: rawBody || null,
+                activeQuotedRoute: activeQuotedRoute || null,
+              });
+              if (directive && directiveHasServerRenderer(directive.action)) {
+                // Surface conflict details so the CONFIRM_SLOT_CONFLICT
+                // renderer can name the conflicting values concretely.
+                let conflictingSlot: string | null = null;
+                let conflictValues: { incoming: string; existing: string } | null = null;
+                if (directive.action === "CONFIRM_SLOT_CONFLICT" && directive.field) {
+                  conflictingSlot = directive.field;
+                  const slots = conversationControllerEntry.dialogState?.slots || {};
+                  const rec = (slots as any)[directive.field];
+                  if (
+                    rec &&
+                    rec.status === "conflict" &&
+                    typeof rec.value === "string" &&
+                    typeof rec.conflictValue === "string"
+                  ) {
+                    conflictValues = {
+                      existing: rec.value,
+                      incoming: rec.conflictValue,
+                    };
+                  }
+                }
+                directiveActionForRender = directive.action;
+                directiveRenderContextForRender = {
+                  language: preferredReplyLanguage,
+                  draft: conversationControllerEntry.bookingDraft,
+                  entry: conversationControllerEntry,
+                  route: activeQuotedRoute || null,
+                  conflictingSlot,
+                  conflictValues,
+                  turnSeed: String(
+                    (conversationControllerEntry.lastActivityTs ?? Date.now()) +
+                      "::" +
+                      conversationId,
+                  ),
+                };
+              }
+            }
+
             const preDecision = decidePreStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -5106,6 +5171,9 @@ async function handleInboundMessage(params: {
               clarifyOptionBeforeProceed,
               manualConfirmAddressAsk,
               manualConfirmHandoff,
+              directiveAction: directiveActionForRender,
+              directiveRenderContext: directiveRenderContextForRender,
+              renderDirectiveReply,
               buildDeterministicSelectedQuotedOptionReply,
               buildDeterministicClarifyOptionBeforeProceedReply,
               buildDeterministicManualConfirmAddressAskReply,
