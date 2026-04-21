@@ -288,6 +288,15 @@ export function computeOneBrainNextRequiredAction(params: {
       forbiddenShapes: [
         "standalone_ack",
         "route_price_recap",
+        // Zero-distance rebinds (2026-04-21 clarification regression).
+        // Forbid symmetric `get_price(pickup=X, dropoff=X)` shapes AND
+        // the "Delivery from X to X" recap. Typical trigger: a
+        // single-word clarification answer ("mirqab") for a dropoff
+        // ambiguity echoed on both legs. The server already has the
+        // pinned side in `pendingPickupAreaNameEn` /
+        // `pendingDropoffAreaNameEn`; the LLM must not overwrite it.
+        "route_price_recap_with_symmetric_areas",
+        "get_price_with_symmetric_areas",
         // Explicitly forbid sender/recipient asks at this step. The LLM
         // has a standing instruction to collect all missing fields, so
         // without this the model happily asks for names while the route
@@ -651,6 +660,24 @@ export function formatOneBrainLiveChannelContext(params: {
       }
       lines.push(
         `requested_slot_rule: The customer's next reply is answering "${requestedSlot.name}". Apply their value to that slot only. Do NOT route it to any other field, even if the value could plausibly belong elsewhere.`,
+      );
+    }
+
+    // Area-clarification pinning (2026-04-21 regression). When the
+    // pricing tool resolved one leg and asked for the other, the
+    // resolved leg is persisted as `pendingPickupAreaNameEn` /
+    // `pendingDropoffAreaNameEn`. Surface it explicitly so the LLM
+    // does NOT re-resolve it from the customer's next message or
+    // pass symmetric values to `get_price`. The server's
+    // symmetric-rebind guard will also enforce this, but telling the
+    // LLM up front keeps the tool calls clean.
+    const pinnedPickup = entry?.pendingPickupAreaNameEn || null;
+    const pinnedDropoff = entry?.pendingDropoffAreaNameEn || null;
+    if (pinnedPickup || pinnedDropoff) {
+      if (pinnedPickup) lines.push(`pending_pickup_area: ${pinnedPickup}`);
+      if (pinnedDropoff) lines.push(`pending_dropoff_area: ${pinnedDropoff}`);
+      lines.push(
+        `pending_area_rule: The indicated side(s) are already resolved by the server. The customer's next reply is answering the OTHER side's clarification. When you call \`get_price\`, pass the pinned value for the resolved side EXACTLY as shown above — do NOT echo the customer's new single-area mention on both legs. Symmetric \`get_price(pickup=X, dropoff=X)\` calls are always wrong at this stage.`,
       );
     }
 

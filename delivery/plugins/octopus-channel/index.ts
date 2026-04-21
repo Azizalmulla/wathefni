@@ -4865,9 +4865,32 @@ async function handleInboundMessage(params: {
                   // the next turn's smuggle guard sees the resolved area
                   // even if the LLM's tool call doesn't echo enough raw
                   // text. Last-write-wins per leg within a single turn.
+                  //
+                  // Also promote the controller stage from `idle` to
+                  // `collecting_booking_details` when any `set_pending_area`
+                  // op fires. This is the structural fix for the
+                  // 2026-04-21 area-clarification binding regression:
+                  // when the pricing tool resolves one leg and asks for
+                  // the other (ambiguous) leg, we need
+                  // `computeOneBrainNextRequiredAction` to dispatch the
+                  // `ASK_PICKUP_AREA` / `ASK_DELIVERY_AREA` directive, and
+                  // that dispatcher only fires when stage is
+                  // `collecting_booking_details` or `quoted`. Before this
+                  // promotion, stage stayed at `idle` because no
+                  // `apply_booking_field` patch fired on the clarification
+                  // turn, so `applyBookingDraftProgress` was never
+                  // invoked — leaving the LLM free to compose the
+                  // clarification itself, drop the pending-side recap,
+                  // and on the next turn rebind symmetrically (
+                  // `get_price(pickup=Mirqab, dropoff=Mirqab)`).
+                  //
+                  // See `smoke-test-area-clarification-binding.mjs` for
+                  // the exact regression coverage.
                   if (!cancelled) {
+                    let appliedPendingArea = false;
                     for (const op of drained) {
                       if (op.op !== "set_pending_area") continue;
+                      appliedPendingArea = true;
                       if (op.field === "pickup_area") {
                         nextEntry = {
                           ...nextEntry,
@@ -4881,6 +4904,18 @@ async function handleInboundMessage(params: {
                           pendingDropoffAreaNameAr: op.area_name_ar,
                         };
                       }
+                    }
+                    if (appliedPendingArea && nextEntry.stage === "idle") {
+                      nextEntry = {
+                        ...nextEntry,
+                        stage: "collecting_booking_details",
+                        bookingStep:
+                          nextEntry.bookingStep === "none"
+                            ? resolveNextBookingStepFromDraft(
+                                nextEntry.bookingDraft,
+                              )
+                            : nextEntry.bookingStep,
+                      };
                     }
                   }
                   // DST: derive `requestedSlot` from the fresh post-drain

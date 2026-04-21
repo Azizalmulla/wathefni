@@ -30,6 +30,7 @@ export type OutboundReplyShape =
   | "ok"
   | "stub_summary"
   | "route_price_recap"
+  | "route_zero_distance"
   | "standalone_ack"
   | "summary_fact_drift"
   | "clarifying_question"
@@ -635,6 +636,25 @@ export function classifyOutboundReplyShape(params: VerifyOutboundParams): Outbou
 
   if (!bookingStarted) return "ok";
 
+  // Zero-distance route detection (2026-04-21 area-clarification
+  // regression). When the quoted pickup area equals the quoted dropoff
+  // area, the route is physically nonsensical and always the result of
+  // a symmetric rebind upstream (e.g. `get_price(pickup=Mirqab,
+  // dropoff=Mirqab)` after a single-word clarification answer for
+  // dropoff was echoed on both legs). Surface this as a distinct shape
+  // so the repair loop can actively reject instead of log-only passing
+  // through a "Delivery from Mirqab to Mirqab" recap / summary. Fires
+  // regardless of whether the reply text is a recap or a full summary —
+  // the controller's state is already poisoned.
+  if (
+    entry.quotePickupAreaNameEn &&
+    entry.quoteDropoffAreaNameEn &&
+    entry.quotePickupAreaNameEn.trim().toLowerCase() ===
+      entry.quoteDropoffAreaNameEn.trim().toLowerCase()
+  ) {
+    return "route_zero_distance";
+  }
+
   const draftComplete = params.missingFields.length === 0;
 
   if (draftComplete) {
@@ -733,6 +753,27 @@ const SERVICE_LABELS_AR: Record<string, string> = {
  *   - Fall back to the static `SERVICE_LABELS_*` table for known types.
  *   - Final fallback is the raw `selectedDeliveryType` key or an em-dash.
  */
+/**
+ * Recovery reply for zero-distance routes. Fires when the controller
+ * has `quotePickupAreaNameEn == quoteDropoffAreaNameEn` — always a
+ * symmetric-rebind bug upstream. We drop the LLM's reply (which is
+ * typically "Delivery from X to X, <price>"), surface the ambiguity to
+ * the customer, and re-ask both areas. The deterministic reconciler
+ * upstream (pricing.ts symmetric-rebind guard + drain stage promotion
+ * + directive renderers) should prevent this from ever firing in a
+ * clean flow; if it does, this is the belt-and-braces safety net.
+ */
+export function buildZeroDistanceRouteRecovery(params: {
+  entry: PersistedConversationControllerEntry;
+  language: "ar" | "en";
+}): string {
+  const { language } = params;
+  if (language === "ar") {
+    return "صار التباس في المناطق. ممكن تعيد إرسال منطقة الاستلام ومنطقة التوصيل؟";
+  }
+  return "Looks like the pickup and delivery areas got mixed up. Could you resend the pickup area and the delivery area?";
+}
+
 export function buildDeterministicOrderSummary(params: {
   entry: PersistedConversationControllerEntry;
   language: "ar" | "en";
@@ -878,6 +919,26 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
 
   const entry = params.entry;
   const draftComplete = params.missingFields.length === 0;
+
+  // Active reject for zero-distance route (2026-04-21). The controller
+  // has `quotePickupAreaNameEn == quoteDropoffAreaNameEn`, which means
+  // the quote itself is poisoned upstream. Dropping the LLM's reply and
+  // substituting a recovery ask is the safe path — we can't trust the
+  // symmetric route as the source of truth, and we can't render a
+  // coherent summary from it either. The ask re-requests both areas
+  // and keeps the customer in control of the next turn.
+  if (entry && shape === "route_zero_distance") {
+    const substitute = buildZeroDistanceRouteRecovery({
+      entry,
+      language: params.language,
+    });
+    return {
+      replyText: substitute,
+      replaced: true,
+      shape,
+      reason: "substituted_zero_distance_route_recovery",
+    };
+  }
 
   // Only factual drift triggers substitution. A reply is classified as
   // `summary_fact_drift` ONLY after passing the "full summary" structural

@@ -206,13 +206,77 @@ function renderAskMissingAreas(ctx: DirectiveReplyRendererContext): string {
   ]);
 }
 
+// Area-clarification renderers (ASK_PICKUP_AREA / ASK_DELIVERY_AREA).
+//
+// The server fires these whenever `computeOneBrainNextRequiredAction` sees
+// the controller mid-booking with one route leg missing. In practice the
+// most common shape is the "one leg ambiguous" flow: the customer said
+// e.g. "salmiya to kuwait city", the pricing tool resolved Salmiya and
+// flagged "Kuwait City" as an ambiguity_group, and we now need to ask the
+// customer which sub-area they meant.
+//
+// Behavior:
+//   1. Always recap the preserved side when we know it
+//      (`pendingPickupAreaNameEn` / `pendingDropoffAreaNameEn` —
+//      pricing.ts pushes `set_pending_area` for the leg that resolved).
+//      This keeps the customer oriented and anchors the LLM-free
+//      reply to real state, so the generic fallback
+//      ("What's the delivery area?") never fires when the server has
+//      better context.
+//   2. Surface the ambiguity options when we have them
+//      (`dialogState.requestedSlot.options` — pricing.ts pushes
+//      `set_requested_slot` with the candidate list for
+//      ambiguity-group cases, e.g. Kuwait City →
+//      [Sharq, Mirqab, Qibla, Bnaid Al-Qar, Dasman]).
+//   3. Fall back to a generic ask only when neither is present.
+
+function extractRequestedOptions(
+  entry: PersistedConversationControllerEntry,
+  slotName: "pickup_area" | "dropoff_area",
+): string[] {
+  const slot = entry.dialogState?.requestedSlot;
+  if (!slot || slot.name !== slotName) return [];
+  const options = Array.isArray(slot.options) ? slot.options : [];
+  return options.map((o) => (typeof o === "string" ? o.trim() : "")).filter(Boolean);
+}
+
 function renderAskPickupArea(ctx: DirectiveReplyRendererContext): string {
+  const preservedDelivery =
+    ctx.entry.quoteDropoffAreaNameEn ||
+    ctx.entry.pendingDropoffAreaNameEn ||
+    null;
+  const preservedDeliveryAr =
+    ctx.entry.quoteDropoffAreaNameAr ||
+    ctx.entry.pendingDropoffAreaNameAr ||
+    null;
+  const options = extractRequestedOptions(ctx.entry, "pickup_area");
+
   if (ctx.language === "ar") {
+    const deliveryLabel = preservedDeliveryAr || preservedDelivery;
+    if (deliveryLabel && options.length > 0) {
+      return `توصيل إلى ${deliveryLabel}. شنو منطقة الاستلام بالضبط (${options.join("، ")})؟`;
+    }
+    if (deliveryLabel) {
+      return `توصيل إلى ${deliveryLabel}. شنو منطقة الاستلام بالضبط؟`;
+    }
+    if (options.length > 0) {
+      return `شنو منطقة الاستلام بالضبط (${options.join("، ")})؟`;
+    }
     return pick(ctx.turnSeed, [
       "شنو منطقة الاستلام بالضبط؟",
       "عطنا منطقة الاستلام (مثل: السالمية، الجابرية، حولي).",
       "من أي منطقة نستلم؟",
     ]);
+  }
+
+  if (preservedDelivery && options.length > 0) {
+    return `Delivery to ${preservedDelivery}. What's the pickup area (${options.join(", ")})?`;
+  }
+  if (preservedDelivery) {
+    return `Delivery to ${preservedDelivery}. What's the pickup area?`;
+  }
+  if (options.length > 0) {
+    return `What's the pickup area (${options.join(", ")})?`;
   }
   return pick(ctx.turnSeed, [
     "What's the pickup area?",
@@ -222,12 +286,42 @@ function renderAskPickupArea(ctx: DirectiveReplyRendererContext): string {
 }
 
 function renderAskDeliveryArea(ctx: DirectiveReplyRendererContext): string {
+  const preservedPickup =
+    ctx.entry.quotePickupAreaNameEn ||
+    ctx.entry.pendingPickupAreaNameEn ||
+    null;
+  const preservedPickupAr =
+    ctx.entry.quotePickupAreaNameAr ||
+    ctx.entry.pendingPickupAreaNameAr ||
+    null;
+  const options = extractRequestedOptions(ctx.entry, "dropoff_area");
+
   if (ctx.language === "ar") {
+    const pickupLabel = preservedPickupAr || preservedPickup;
+    if (pickupLabel && options.length > 0) {
+      return `استلام من ${pickupLabel}. شنو منطقة التوصيل بالضبط (${options.join("، ")})؟`;
+    }
+    if (pickupLabel) {
+      return `استلام من ${pickupLabel}. شنو منطقة التوصيل بالضبط؟`;
+    }
+    if (options.length > 0) {
+      return `شنو منطقة التوصيل بالضبط (${options.join("، ")})؟`;
+    }
     return pick(ctx.turnSeed, [
       "شنو منطقة التوصيل بالضبط؟",
       "عطنا منطقة التوصيل (مثل: السالمية، الجابرية، حولي).",
       "إلى أي منطقة نوصل؟",
     ]);
+  }
+
+  if (preservedPickup && options.length > 0) {
+    return `Pickup from ${preservedPickup}. What's the delivery area (${options.join(", ")})?`;
+  }
+  if (preservedPickup) {
+    return `Pickup from ${preservedPickup}. What's the delivery area?`;
+  }
+  if (options.length > 0) {
+    return `What's the delivery area (${options.join(", ")})?`;
   }
   return pick(ctx.turnSeed, [
     "What's the delivery area?",

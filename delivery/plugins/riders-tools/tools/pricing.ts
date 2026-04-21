@@ -359,6 +359,66 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
               ? (getNormalizedBookingAuthority(ctx) as any).controller
               : null;
             const requestedSlot = controllerEntry?.dialogState?.requestedSlot ?? null;
+
+            // Symmetric-rebind guard (2026-04-21 area-clarification
+            // regression). When a single-word clarification answer like
+            // "mirqab" arrives for a `dropoff_area` clarification, some
+            // models echo the same token on both legs
+            // (`get_price(pickup=Mirqab, dropoff=Mirqab)`). Without this
+            // guard the symmetric shape survives (both legs resolve to
+            // the same area, `route_price_recap` for "Mirqab → Mirqab"
+            // leaks to the customer). When the controller has a
+            // `pendingPickupAreaNameEn` or `pendingDropoffAreaNameEn`
+            // pinned on the OPPOSITE side, we override the non-requested
+            // leg to that pinned value — the authoritative source for
+            // "which side is already resolved". The subsequent DST
+            // misroute swap + smuggle guard then verify the result.
+            try {
+              const pendingPickup = controllerEntry?.pendingPickupAreaNameEn || null;
+              const pendingDropoff = controllerEntry?.pendingDropoffAreaNameEn || null;
+              const pickupStr = String(params.pickup_area || "").trim();
+              const dropoffStr = String(params.dropoff_area || "").trim();
+              const symmetric =
+                pickupStr.length > 0 &&
+                pickupStr.toLowerCase() === dropoffStr.toLowerCase();
+              if (
+                symmetric &&
+                requestedSlot &&
+                (requestedSlot.name === "pickup_area" ||
+                  requestedSlot.name === "dropoff_area")
+              ) {
+                if (
+                  requestedSlot.name === "dropoff_area" &&
+                  pendingPickup &&
+                  pendingPickup.toLowerCase() !== pickupStr.toLowerCase()
+                ) {
+                  console.log(
+                    `[area-symmetric-rebind] overriding pickup_area="${pickupStr}"→"${pendingPickup}" (pending pickup pinned; requestedSlot=dropoff_area)`,
+                  );
+                  params = {
+                    ...params,
+                    pickup_area: pendingPickup,
+                    pickup_area_id: undefined,
+                  };
+                } else if (
+                  requestedSlot.name === "pickup_area" &&
+                  pendingDropoff &&
+                  pendingDropoff.toLowerCase() !== dropoffStr.toLowerCase()
+                ) {
+                  console.log(
+                    `[area-symmetric-rebind] overriding dropoff_area="${dropoffStr}"→"${pendingDropoff}" (pending dropoff pinned; requestedSlot=pickup_area)`,
+                  );
+                  params = {
+                    ...params,
+                    dropoff_area: pendingDropoff,
+                    dropoff_area_id: undefined,
+                  };
+                }
+              }
+            } catch {
+              // Best-effort — never block the tool on this guard
+            }
+
             if (
               requestedSlot &&
               (requestedSlot.name === "pickup_area" ||
