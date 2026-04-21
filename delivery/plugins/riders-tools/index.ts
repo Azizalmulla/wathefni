@@ -110,17 +110,69 @@ const RIDERS_ONE_BRAIN_ENABLED = (() => {
 function resolveToolConversationId(ctx: any): string {
   const direct = String(ctx?.ConversationId || ctx?.conversationId || ctx?.ConversationID || "").trim();
   if (direct) return direct;
-  const to = String(ctx?.To || ctx?.to || "").trim();
-  if (to.startsWith("octopus:")) {
-    const extracted = to.slice("octopus:".length).trim();
-    if (extracted) return extracted;
-  }
   const sessionKey = String(ctx?.SessionKey || ctx?.sessionKey || "").trim();
   const match = sessionKey.match(/:octopus:direct:(.+?)(?:::prompt=|$)/);
   if (match?.[1]) {
     return match[1].trim();
   }
+  // Octopus tool contexts often set `To=octopus:<replyTarget>` where the
+  // suffix is the WhatsApp number, not the live conversation id. When both
+  // `SessionKey` and `To` are present, `SessionKey` is the authoritative
+  // source for responder-op routing because the octopus-channel drain keys by
+  // conversation id (e.g. `19055`), not reply target (`965...`).
+  const to = String(ctx?.To || ctx?.to || "").trim();
+  if (to.startsWith("octopus:")) {
+    const extracted = to.slice("octopus:".length).trim();
+    if (extracted) return extracted;
+  }
   return "";
+}
+
+/**
+ * Collect every plausible conversation identifier present on a tool `ctx`.
+ * The Octopus tool pipeline historically exposes up to three different ids
+ * that could each be "the" conversation key depending on code path:
+ *
+ *   - `ConversationId` / `conversationId` / `NativeChannelId` — the
+ *     authoritative numeric channel id (e.g. `19055`).
+ *   - `SessionKey` — contains the conversation id embedded as
+ *     `agent:riders:octopus:direct:<id>::prompt=...`.
+ *   - `To` / `OriginatingTo` — `octopus:<replyTarget>` when the runtime
+ *     has flipped the direction for reply rendering; the suffix is the
+ *     customer's WhatsApp number rather than the conversation id.
+ *
+ * When `pushResponderStateOp` runs under only ONE of these keys and the
+ * orchestrator drains under a different one, the clarification op is
+ * silently lost. Producers (tool push) and consumers (drain) both use
+ * this helper so every op lands under every candidate key, and
+ * `drainResponderStateOps` dedups at the end. See
+ * `smoke-test-area-clarification-binding.mjs` A1/A2.
+ */
+function resolveToolConversationAliases(ctx: any): string[] {
+  const aliases: string[] = [];
+  const seen = new Set<string>();
+  const add = (raw: unknown) => {
+    if (raw == null) return;
+    const value = String(raw).trim();
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+    aliases.push(value);
+  };
+  add(ctx?.ConversationId);
+  add(ctx?.conversationId);
+  add(ctx?.ConversationID);
+  add(ctx?.NativeChannelId);
+  add(ctx?.nativeChannelId);
+  const sessionKey = String(ctx?.SessionKey || ctx?.sessionKey || "").trim();
+  const sessionMatch = sessionKey.match(/:octopus:direct:(.+?)(?:::prompt=|$)/);
+  if (sessionMatch?.[1]) add(sessionMatch[1]);
+  const to = String(ctx?.To || ctx?.to || "").trim();
+  if (to.startsWith("octopus:")) add(to.slice("octopus:".length));
+  const originatingTo = String(ctx?.OriginatingTo || "").trim();
+  if (originatingTo.startsWith("octopus:")) {
+    add(originatingTo.slice("octopus:".length));
+  }
+  return aliases;
 }
 
 function resolveToolTurnId(ctx: any): string {
@@ -5371,6 +5423,8 @@ export const __resolverTestHooks = {
   collectAreaCandidates,
   confidenceFromSimilarity,
   scoreAreaMatchSimilarity,
+  resolveToolConversationId,
+  resolveToolConversationAliases,
 };
 
 export default function register(api: any) {
@@ -5458,6 +5512,7 @@ export default function register(api: any) {
     recordGuardState: guardHelpers.recordGuardState,
     booking: {
       resolveToolConversationId,
+      resolveToolConversationAliases,
       resolveToolTurnId,
       asOptionalTrimmedString,
       splitFullName,

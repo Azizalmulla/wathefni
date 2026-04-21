@@ -167,6 +167,7 @@ export interface ToolDeps {
   booking: {
     // module-scope helpers
     resolveToolConversationId: (ctx: any) => string;
+    resolveToolConversationAliases: (ctx: any) => string[];
     resolveToolTurnId: (ctx: any) => string;
     asOptionalTrimmedString: (value: unknown) => string | null;
     splitFullName: (fullName: string) => { first: string; last: string };

@@ -77,12 +77,21 @@ const outboundVerify = await loadTsModule(
 const oneBrain = await loadTsModule(
   "plugins/octopus-channel/lib/one-brain-context.ts",
 );
+const ridersTools = await loadTsModule("plugins/riders-tools/index.ts");
+const responderOps = await loadTsModule("plugins/shared/responder-state-ops.ts");
 
 const { createEmptyBookingDraft } = policy;
 const { renderDirectiveReply } = registry;
 const { classifyOutboundReplyShape, verifyAndRepairOutbound } = outboundVerify;
 const { computeOneBrainNextRequiredAction, formatOneBrainLiveChannelContext } =
   oneBrain;
+const { resolveToolConversationId } = ridersTools.__resolverTestHooks;
+const {
+  pushResponderStateOp,
+  drainResponderStateOps,
+  clearResponderStateOps,
+  peekResponderStateOps,
+} = responderOps;
 
 function makeEntry(overrides = {}) {
   return {
@@ -443,8 +452,15 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
 // ---------------------------------------------------------------------------
 // S1: source-level invariant — drain loop in octopus-channel/index.ts
 // promotes stage to `collecting_booking_details` when a
-// `set_pending_area` op fires at `idle`. Guards against a future refactor
-// silently removing this promotion and re-introducing the regression.
+// `set_pending_area` OR `set_requested_slot` op fires at `idle`. Guards
+// against a future refactor silently removing this promotion and re-
+// introducing the regression.
+//
+// Note: the promotion fires on `set_requested_slot` alone too — the
+// `Kuwait City` case produces ONLY a requested-slot op (no leg resolved
+// deterministically at the first `get_price`), so gating on
+// `set_pending_area` alone would leave `stage=idle` and the LLM would
+// free-compose the clarification again.
 // ---------------------------------------------------------------------------
 {
   const source = fs.readFileSync(
@@ -456,9 +472,42 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
     "utf8",
   );
   assert.ok(
-    /appliedPendingArea\s*&&\s*nextEntry\.stage\s*===\s*"idle"/.test(source) &&
-      /stage:\s*"collecting_booking_details"/.test(source),
-    "S1: drain loop must promote stage to collecting_booking_details when set_pending_area fires at idle",
+    /\(appliedPendingArea\s*\|\|\s*appliedRequestedSlot\)\s*&&\s*nextEntry\.stage\s*===\s*"idle"/.test(
+      source,
+    ) && /stage:\s*"collecting_booking_details"/.test(source),
+    "S1: drain loop must promote stage to collecting_booking_details when set_pending_area OR set_requested_slot fires at idle",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// S4: source-level invariant — the drain loop seeds an empty dialog state
+// before applying `set_requested_slot` so a fresh conversation (where
+// `conversationControllerEntry.dialogState` was null) still materializes
+// `requestedSlot` into the next turn. This is the other half of the
+// first-turn clarification-commit guarantee.
+// ---------------------------------------------------------------------------
+{
+  const source = fs.readFileSync(
+    path.resolve(
+      path.dirname(new URL(import.meta.url).pathname),
+      "..",
+      "plugins/octopus-channel/index.ts",
+    ),
+    "utf8",
+  );
+  assert.ok(
+    /if\s*\(!nextDialogState\)\s*\{\s*[\r\n\s]*nextDialogState\s*=\s*createEmptyDialogState\(\);/.test(
+      source,
+    ),
+    "S4: drain loop must seed nextDialogState with createEmptyDialogState() before applying set_requested_slot",
+  );
+  assert.ok(
+    /\[one-brain\/clarify-commit\]/.test(source),
+    "S4: drain loop must emit [one-brain/clarify-commit] log after materializing pending-area / requested-slot ops",
+  );
+  assert.ok(
+    /INVARIANT_VIOLATION stage still idle after clarify-commit/.test(source),
+    "S4: clarify-commit log must include an invariant-violation warn if stage is still idle",
   );
 }
 
@@ -484,6 +533,168 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
       source,
     ),
     "S2: symmetric-rebind guard must compare pending pickup against params",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// S3: runtime invariant — in Octopus tool contexts, responder-op routing
+// prefers the conversation id embedded in SessionKey over `To=octopus:<wa>`.
+// This is the production shape behind the `19055` / `965...` mismatch:
+// if ops key off the reply target, the drain on the live conversation id
+// never sees `set_pending_area` / `set_requested_slot`.
+// ---------------------------------------------------------------------------
+{
+  const conversationId = resolveToolConversationId({
+    To: "octopus:96599338566",
+    SessionKey: "agent:riders:octopus:direct:19055::prompt=f5e8a85dd957",
+  });
+  assert.equal(
+    conversationId,
+    "19055",
+    `S3: expected SessionKey conversation id to win over To reply-target, got ${JSON.stringify(conversationId)}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A1: responder-ops dual-key push + drain merge. When a tool pushes an
+// op under multiple candidate conversation ids (SessionKey-embedded id +
+// `To=octopus:<wa>` strip), the orchestrator's drain must find it under
+// EITHER key — and must only return one copy after dedup. This is the
+// invariant that protects the first-turn clarification from being lost
+// when the tool ctx and the drain caller disagree on which id is "the"
+// conversation id.
+// ---------------------------------------------------------------------------
+{
+  clearResponderStateOps("19055");
+  clearResponderStateOps("96599338566");
+  pushResponderStateOp(
+    "19055",
+    {
+      op: "set_pending_area",
+      field: "pickup_area",
+      area_name_en: "Salmiya",
+      area_name_ar: "السالمية",
+      turn_id: "t-a1",
+    },
+    ["96599338566"],
+  );
+  pushResponderStateOp(
+    "19055",
+    {
+      op: "set_requested_slot",
+      slot: "dropoff_area",
+      options: ["Sharq", "Mirqab", "Bnaid Al-Qar"],
+      turn_id: "t-a1",
+    },
+    ["96599338566"],
+  );
+  const peekedA = peekResponderStateOps("19055");
+  const peekedB = peekResponderStateOps("96599338566");
+  assert.equal(peekedA.length, 2, "A1: primary key must hold both ops");
+  assert.equal(peekedB.length, 2, "A1: alias key must mirror both ops");
+  // Drain under the alias — the merged result must still contain both ops
+  // exactly once AND must empty BOTH buffers so the next turn starts clean.
+  const drained = drainResponderStateOps("96599338566", ["19055"]);
+  assert.equal(
+    drained.length,
+    2,
+    `A1: drain must return dedup'd ops, got ${drained.length}`,
+  );
+  assert.ok(
+    drained.some((op) => op.op === "set_pending_area"),
+    "A1: drained ops must include set_pending_area",
+  );
+  assert.ok(
+    drained.some((op) => op.op === "set_requested_slot"),
+    "A1: drained ops must include set_requested_slot",
+  );
+  assert.equal(
+    peekResponderStateOps("19055").length,
+    0,
+    "A1: primary key must be empty after drain",
+  );
+  assert.equal(
+    peekResponderStateOps("96599338566").length,
+    0,
+    "A1: alias key must be empty after drain",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A2: drain merge + dedup when the same op lives under both keys is
+// idempotent — N-way push + N-way drain still yields ONE materialization.
+// ---------------------------------------------------------------------------
+{
+  clearResponderStateOps("19055");
+  clearResponderStateOps("96599338566");
+  const op = {
+    op: "set_pending_area",
+    field: "pickup_area",
+    area_name_en: "Salmiya",
+    area_name_ar: "السالمية",
+    turn_id: "t-a2",
+  };
+  pushResponderStateOp("19055", op, ["96599338566", "agent:extra"]);
+  pushResponderStateOp("19055", op, ["96599338566"]);
+  const drained = drainResponderStateOps("19055", [
+    "96599338566",
+    "agent:extra",
+  ]);
+  assert.equal(
+    drained.length,
+    1,
+    `A2: identical ops under multiple aliases must dedup to one drained op, got ${drained.length}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A3: source-level invariant — octopus-channel drain passes alias keys so
+// ops pushed under a replyTarget / controllerStateKey mismatch still land.
+// ---------------------------------------------------------------------------
+{
+  const source = fs.readFileSync(
+    path.resolve(
+      path.dirname(new URL(import.meta.url).pathname),
+      "..",
+      "plugins/octopus-channel/index.ts",
+    ),
+    "utf8",
+  );
+  assert.ok(
+    /drainResponderStateOps\(conversationId,\s*drainAliases\)/.test(source),
+    "A3: octopus-channel drain must invoke drainResponderStateOps with alias list",
+  );
+  assert.ok(
+    /addDrainAlias\(replyTarget\)/.test(source),
+    "A3: drainAliases must include replyTarget",
+  );
+  assert.ok(
+    /addDrainAlias\(controllerStateKey\)/.test(source),
+    "A3: drainAliases must include controllerStateKey",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A4: source-level invariant — pricing tool's markPendingArea /
+// markRequestedAreaSlot collect candidate aliases from ctx and push
+// under all of them. This is the producer side of the dual-key contract.
+// ---------------------------------------------------------------------------
+{
+  const source = fs.readFileSync(
+    path.resolve(
+      path.dirname(new URL(import.meta.url).pathname),
+      "..",
+      "plugins/riders-tools/tools/pricing.ts",
+    ),
+    "utf8",
+  );
+  assert.ok(
+    /function collectResponderOpAliases/.test(source),
+    "A4: pricing tool must define collectResponderOpAliases",
+  );
+  assert.ok(
+    /pushResponderStateOp\(primary,\s*op,\s*aliases\)/.test(source),
+    "A4: markPendingArea / markRequestedAreaSlot must push with alias list",
   );
 }
 

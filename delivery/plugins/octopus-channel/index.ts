@@ -3491,10 +3491,16 @@ async function handleInboundMessage(params: {
     ? preDispatchGuardEntry.session?.lastQuotedRoute ?? null
     : null;
   // Clear any stale responder-state ops from the previous turn so this
-  // turn's tool calls start with an empty queue.
+  // turn's tool calls start with an empty queue. Mirror the same alias
+  // set the drain loop uses so stale ops under secondary keys
+  // (replyTarget, controllerStateKey) can't survive across turns.
   if (senderRole === "customer") {
     try {
-      clearResponderStateOps(conversationId);
+      clearResponderStateOps(conversationId, [
+        replyTarget || "",
+        controllerStateKey,
+        `${account.accountId}::${conversationId}`,
+      ]);
     } catch {}
   }
   // `explicitLanguageRequest` used to merge a raw channel-level signal with the
@@ -4510,7 +4516,30 @@ async function handleInboundMessage(params: {
           // summary override — the LLM writes the summary itself when ready.
           if (senderRole === "customer") {
             try {
-              const drained = drainResponderStateOps(conversationId);
+              // Drain under every identifier the tool might have used to
+              // push responder ops. The Octopus tool-context occasionally
+              // carries an id that disagrees with the orchestrator's local
+              // `conversationId` (SessionKey vs `To=octopus:<wa>` vs
+              // NativeChannelId). Without the alias merge, an op pushed
+              // under `96599338566` would be lost when drain only looked
+              // up `19055`. See `pushResponderStateOp` / `drainResponderStateOps`
+              // and `smoke-test-area-clarification-binding.mjs` for the
+              // first-turn clarify invariant this protects.
+              const drainAliases: string[] = [];
+              const seenDrainAlias = new Set<string>();
+              const addDrainAlias = (raw: string | null | undefined) => {
+                const key = String(raw || "").trim();
+                if (!key || seenDrainAlias.has(key)) return;
+                seenDrainAlias.add(key);
+                drainAliases.push(key);
+              };
+              addDrainAlias(conversationId);
+              addDrainAlias(replyTarget);
+              addDrainAlias(controllerStateKey);
+              addDrainAlias(
+                `${account.accountId}::${conversationId}`,
+              );
+              const drained = drainResponderStateOps(conversationId, drainAliases);
               if (drained.length > 0) {
                 let nextDraft = conversationControllerEntry?.bookingDraft || createEmptyBookingDraft();
                 let nextDialogState = conversationControllerEntry?.dialogState ?? null;
@@ -4617,13 +4646,27 @@ async function handleInboundMessage(params: {
                     // asked the customer to disambiguate an area). Record it
                     // on DST so the next turn's guards and prompt know which
                     // slot the customer's reply should fill.
-                    if (nextDialogState) {
-                      nextDialogState = setRequestedSlot(nextDialogState, {
-                        name: op.slot as SlotName,
-                        options: op.options ?? null,
-                        askedTs: Date.now(),
-                      });
+                    //
+                    // First-turn clarify hydration (2026-04-21): on a fresh
+                    // conversation the controller's dialogState may be null
+                    // (DST disabled, or an older persisted row). We still
+                    // want server-owned clarification to survive into the
+                    // next turn, so seed an empty dialog state here before
+                    // applying the op instead of silently dropping it.
+                    // This is the category fix for the
+                    // `salmiya → kuwait city pls` scenario where
+                    // `markRequestedAreaSlot("dropoff_area", [...])` fired
+                    // but the controller entry still arrived at turn 2 with
+                    // `requestedSlot=null`, letting `bnaid al qar` be free-
+                    // bound by the LLM instead of routed deterministically.
+                    if (!nextDialogState) {
+                      nextDialogState = createEmptyDialogState();
                     }
+                    nextDialogState = setRequestedSlot(nextDialogState, {
+                      name: op.slot as SlotName,
+                      options: op.options ?? null,
+                      askedTs: Date.now(),
+                    });
                     appliedOps.push(`set_requested_slot(${op.slot})`);
                   } else if (op.op === "set_pending_area") {
                     // Handled below when the controller entry is materialized;
@@ -4886,8 +4929,12 @@ async function handleInboundMessage(params: {
                   //
                   // See `smoke-test-area-clarification-binding.mjs` for
                   // the exact regression coverage.
+                  let appliedPendingArea = false;
+                  let appliedRequestedSlot: {
+                    slot: SlotName;
+                    options: readonly string[] | null;
+                  } | null = null;
                   if (!cancelled) {
-                    let appliedPendingArea = false;
                     for (const op of drained) {
                       if (op.op !== "set_pending_area") continue;
                       appliedPendingArea = true;
@@ -4905,7 +4952,47 @@ async function handleInboundMessage(params: {
                         };
                       }
                     }
-                    if (appliedPendingArea && nextEntry.stage === "idle") {
+                    for (const op of drained) {
+                      if (op.op !== "set_requested_slot") continue;
+                      appliedRequestedSlot = {
+                        slot: op.slot as SlotName,
+                        options: op.options ?? null,
+                      };
+                    }
+                    // First-turn clarify hydration (category fix, 2026-04-21).
+                    //
+                    // Whenever the drain saw ANY of:
+                    //   - set_pending_area (one route leg just resolved)
+                    //   - set_requested_slot (pricing asked the customer to
+                    //     disambiguate an area slot)
+                    // we must guarantee that the controller entry carries
+                    // committed clarification state into the next turn. If
+                    // the pre-drain controller was still `idle` (fresh
+                    // conversation, no prior booking activity), stage must
+                    // be promoted to `collecting_booking_details` so:
+                    //   (a) `computeOneBrainNextRequiredAction` fires its
+                    //       area-clarification gate and returns ASK_PICKUP_AREA
+                    //       / ASK_DELIVERY_AREA
+                    //   (b) Region-A substitutes the server-composed
+                    //       clarification reply, so attribution is
+                    //       `reply_author=server` instead of LLM free-compose.
+                    //   (c) the next turn's guards (symmetric-rebind,
+                    //       clarification recovery) see the pinned opposite-
+                    //       side area and the requested_slot register and
+                    //       route the customer's short answer correctly.
+                    //
+                    // Pre-fix: this promotion was gated on `set_pending_area`
+                    // only. The `Kuwait City` dropoff case is ambiguous
+                    // (NO leg resolves deterministically at the first
+                    // `get_price` call — only the pickup resolves; dropoff
+                    // goes straight to `markRequestedAreaSlot` without a
+                    // prior `markPendingArea`), so when ONLY a
+                    // `set_requested_slot` op was drained, stage stayed at
+                    // `idle` and none of the above guarantees held.
+                    if (
+                      (appliedPendingArea || appliedRequestedSlot) &&
+                      nextEntry.stage === "idle"
+                    ) {
                       nextEntry = {
                         ...nextEntry,
                         stage: "collecting_booking_details",
@@ -4980,6 +5067,28 @@ async function handleInboundMessage(params: {
                   conversationControllerEntry = nextEntry;
                   await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
                   mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
+                  // First-turn clarification-commit invariant (2026-04-21).
+                  // Explicit log so the `reply_author=llm` + `stage=idle`
+                  // regression from the area-clarification canary can be
+                  // caught the moment it recurs. If this line is emitted
+                  // but the NEXT turn's prompt context reads
+                  // `stage=idle / requested_slot=null`, the bug is in the
+                  // persisted-read path (controller expiry, sanitizer,
+                  // seedDialogStateFromDraft), not in the drain.
+                  if (appliedPendingArea || appliedRequestedSlot) {
+                    try {
+                      const committedRequested =
+                        conversationControllerEntry.dialogState?.requestedSlot;
+                      api.logger.info(
+                        `[one-brain/clarify-commit] conversation=${conversationId} stage=${conversationControllerEntry.stage} step=${conversationControllerEntry.bookingStep} pending_pickup=${conversationControllerEntry.pendingPickupAreaNameEn || "-"} pending_dropoff=${conversationControllerEntry.pendingDropoffAreaNameEn || "-"} requested_slot=${committedRequested?.name || "-"} requested_options=${committedRequested?.options ? committedRequested.options.length : 0}`,
+                      );
+                      if (conversationControllerEntry.stage === "idle") {
+                        api.logger.warn(
+                          `[one-brain/clarify-commit] INVARIANT_VIOLATION stage still idle after clarify-commit conversation=${conversationId}`,
+                        );
+                      }
+                    } catch {}
+                  }
                 }
                 // Phase 4 (2026-04-20): server-synthesized request_handoff
                 // on manual-confirm handoff turns.

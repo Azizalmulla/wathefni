@@ -224,31 +224,115 @@ export type ResponderStateOp =
 const buffer = new Map<string, ResponderStateOp[]>();
 const TURN_OP_LIMIT = 32;
 
-export function pushResponderStateOp(conversationId: string, op: ResponderStateOp): void {
-  if (!conversationId) return;
-  const existing = buffer.get(conversationId) || [];
-  if (existing.length >= TURN_OP_LIMIT) return;
-  existing.push(op);
-  buffer.set(conversationId, existing);
+function normalizeKey(raw: string | null | undefined): string {
+  return String(raw || "").trim();
 }
 
-export function drainResponderStateOps(conversationId: string): ResponderStateOp[] {
-  if (!conversationId) return [];
-  const existing = buffer.get(conversationId) || [];
-  if (existing.length > 0) {
-    buffer.delete(conversationId);
+function collectKeys(
+  primary: string,
+  aliases?: readonly string[] | null,
+): string[] {
+  const keys: string[] = [];
+  const seen = new Set<string>();
+  const add = (raw: string | null | undefined) => {
+    const key = normalizeKey(raw);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    keys.push(key);
+  };
+  add(primary);
+  if (aliases) {
+    for (const alias of aliases) add(alias);
   }
-  return existing;
+  return keys;
 }
 
-export function clearResponderStateOps(conversationId: string): void {
-  if (!conversationId) return;
-  buffer.delete(conversationId);
+/**
+ * Push a responder state op into the per-turn buffer.
+ *
+ * `aliases` is an optional list of additional keys to mirror the op under.
+ * The Octopus tool-context sometimes disagrees with the orchestrator on
+ * which identifier is "the" conversation id (SessionKey-embedded id vs
+ * `To=octopus:<replyTarget>` vs NativeChannelId). When the tool doesn't
+ * know which one the drain will look up, it pushes under all candidates;
+ * `drainResponderStateOps` merges + dedups at drain time so the customer
+ * never loses a clarification op just because of a key-shape drift.
+ *
+ * Dedup key is `op.op|op.turn_id|<field-or-slot-discriminator>` — pushing
+ * the same op under multiple aliases yields ONE drained op, not N copies.
+ */
+export function pushResponderStateOp(
+  conversationId: string,
+  op: ResponderStateOp,
+  aliases?: readonly string[] | null,
+): void {
+  const keys = collectKeys(conversationId, aliases);
+  if (keys.length === 0) return;
+  for (const key of keys) {
+    const existing = buffer.get(key) || [];
+    if (existing.length >= TURN_OP_LIMIT) continue;
+    existing.push(op);
+    buffer.set(key, existing);
+  }
+}
+
+function opDedupKey(op: ResponderStateOp): string {
+  const base = `${op.op}|${(op as { turn_id?: string }).turn_id || ""}`;
+  switch (op.op) {
+    case "apply_booking_field":
+      return `${base}|af|${op.address_role || ""}|${op.sender_name || ""}|${op.sender_phone || ""}|${op.recipient_name || ""}|${op.recipient_phone || ""}|${op.address_block || ""}|${op.address_street || ""}|${op.address_house || ""}`;
+    case "set_pending_area":
+      return `${base}|${op.field}|${op.area_name_en || ""}`;
+    case "set_requested_slot":
+      return `${base}|${op.slot}|${(op.options || []).join(",")}`;
+    case "carry_over_from_last_order":
+      return `${base}|${(op.buckets || []).join(",")}`;
+    case "propose_option_interpretation":
+      return `${base}|${op.class || ""}|${op.tier || ""}|${op.confidence}`;
+    default:
+      return base;
+  }
+}
+
+/**
+ * Drain responder state ops. `conversationId` is the primary key; `aliases`
+ * are optional additional keys to drain + merge (dedup'd by turn_id + op
+ * shape). All matching buffers are cleared atomically.
+ */
+export function drainResponderStateOps(
+  conversationId: string,
+  aliases?: readonly string[] | null,
+): ResponderStateOp[] {
+  const keys = collectKeys(conversationId, aliases);
+  if (keys.length === 0) return [];
+  const merged: ResponderStateOp[] = [];
+  const seen = new Set<string>();
+  for (const key of keys) {
+    const existing = buffer.get(key) || [];
+    if (existing.length === 0) continue;
+    for (const op of existing) {
+      const dedup = opDedupKey(op);
+      if (seen.has(dedup)) continue;
+      seen.add(dedup);
+      merged.push(op);
+    }
+    buffer.delete(key);
+  }
+  return merged;
+}
+
+export function clearResponderStateOps(
+  conversationId: string,
+  aliases?: readonly string[] | null,
+): void {
+  const keys = collectKeys(conversationId, aliases);
+  for (const key of keys) buffer.delete(key);
 }
 
 export function peekResponderStateOps(conversationId: string): ResponderStateOp[] {
-  if (!conversationId) return [];
-  return [...(buffer.get(conversationId) || [])];
+  const key = normalizeKey(conversationId);
+  if (!key) return [];
+  return [...(buffer.get(key) || [])];
 }
 
 /**

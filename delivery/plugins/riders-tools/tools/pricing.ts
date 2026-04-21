@@ -62,7 +62,23 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     buildServiceCatalogEntry,
     getQuotedPriceForDeliveryType,
   } = quoting;
-  const { resolveToolConversationId, resolveToolTurnId } = deps.booking;
+  const { resolveToolConversationId, resolveToolConversationAliases, resolveToolTurnId } = deps.booking;
+
+  // Gather every plausible conversation-id alias from the tool ctx. See
+  // `resolveToolConversationAliases` in riders-tools/index.ts for the
+  // full rationale — TL;DR: the drain in octopus-channel may key off a
+  // different id shape (SessionKey vs `To=octopus:<wa>` vs NativeChannelId)
+  // than the tool does, and pushing under every candidate + dedup'ing at
+  // drain time eliminates that ambiguity. This is the producer side of
+  // the contract that `smoke-test-area-clarification-binding.mjs` A1/A2
+  // exercises.
+  function collectResponderOpAliases(ctx: any): string[] {
+    try {
+      return resolveToolConversationAliases(ctx);
+    } catch {
+      return [];
+    }
+  }
 
   // Dialog-state-tracking helper. When the pricing tool returns a clarifying
   // result (ambiguous match, low-confidence suggestion, smuggle reject), it
@@ -76,8 +92,9 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     options?: string[] | null,
   ): void {
     try {
-      const conversationId = resolveToolConversationId(ctx);
-      if (!conversationId) return;
+      const aliases = collectResponderOpAliases(ctx);
+      const primary = resolveToolConversationId(ctx) || aliases[0] || "";
+      if (!primary) return;
       const turnId = resolveToolTurnId(ctx);
       const op: ResponderSetRequestedSlotOp = {
         op: "set_requested_slot",
@@ -85,7 +102,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         options: options && options.length > 0 ? options : null,
         turn_id: turnId || "",
       };
-      pushResponderStateOp(conversationId, op);
+      pushResponderStateOp(primary, op, aliases);
+      try {
+        console.log(
+          `[responder-ops/push] op=set_requested_slot conversation=${primary} aliases=${JSON.stringify(aliases)} slot=${field} options=${JSON.stringify(options || [])}`,
+        );
+      } catch {}
     } catch {
       // best-effort — DST is an enhancement, never block the tool on it
     }
@@ -103,8 +125,9 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     nameAr: string | null,
   ): void {
     try {
-      const conversationId = resolveToolConversationId(ctx);
-      if (!conversationId) return;
+      const aliases = collectResponderOpAliases(ctx);
+      const primary = resolveToolConversationId(ctx) || aliases[0] || "";
+      if (!primary) return;
       const turnId = resolveToolTurnId(ctx);
       const op: ResponderSetPendingAreaOp = {
         op: "set_pending_area",
@@ -113,7 +136,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         area_name_ar: nameAr && nameAr.trim() ? nameAr.trim() : null,
         turn_id: turnId || "",
       };
-      pushResponderStateOp(conversationId, op);
+      pushResponderStateOp(primary, op, aliases);
+      try {
+        console.log(
+          `[responder-ops/push] op=set_pending_area conversation=${primary} aliases=${JSON.stringify(aliases)} field=${field} area_en=${JSON.stringify(op.area_name_en)}`,
+        );
+      } catch {}
     } catch {
       // best-effort — enhancement only, never block the tool on it
     }
