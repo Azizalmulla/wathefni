@@ -25,6 +25,7 @@ import {
   isSimpleGreeting,
   isTrackingIntent,
   isExplicitOrderConfirmation,
+  isInformationalOptionQuestion,
   CustomerScriptMode,
   normalizeIntentText,
   PersistedConversationControllerEntry,
@@ -5227,7 +5228,50 @@ async function handleInboundMessage(params: {
                   "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED";
                 const customerConfirmedOrder =
                   isSummaryDirective && isExplicitOrderConfirmation(rawBody || null);
-                if (!customerConfirmedOrder) {
+                // Phase 2 hotfix (2026-04-21): informational-question
+                // gate. Hard rule 5 says a price / option question on a
+                // quoted route is an ANSWER-ONLY turn — the LLM's
+                // reply must carry the answer, and no slot ask should
+                // advance the booking this turn. Pre-hotfix, the
+                // directive registry substituted the LLM's answer
+                // with the next server-rendered slot ask, silently
+                // advancing the flow. This gate restores rule 5
+                // semantics at the server layer: when the directive
+                // is one of the collection-flow or summary directives
+                // AND stage=quoted AND the customer is asking an
+                // informational option/price question, skip the
+                // substitution. The LLM's rule-5-compliant answer
+                // passes through.
+                //
+                // Scoped intentionally narrow:
+                //   - only on `stage=quoted` (pre-collection). Mid-
+                //     collection turns still fire the directive; the
+                //     user's design decision is that "answer-only" is
+                //     only safe before collection has begun.
+                //   - only on collection / summary directives. Never
+                //     skips CLARIFY_OPTION_BEFORE_PROCEED (the clarify
+                //     gate is the whole point when ambiguous options
+                //     are on offer) or CONFIRM_SLOT_CONFLICT (conflict
+                //     resolution must come before anything).
+                //   - manual-confirm address asks + handoff live in
+                //     dedicated Region-A branches, not in this
+                //     dispatch, so they are unaffected.
+                const directiveIsCollectionOrSummary =
+                  directive.action === "ASK_SENDER_NAME_AND_PHONE_DECISION" ||
+                  directive.action === "ASK_SENDER_PHONE" ||
+                  directive.action === "ASK_RECIPIENT_NAME_AND_PHONE" ||
+                  directive.action === "ASK_PICKUP_ADDRESS" ||
+                  directive.action === "ASK_DELIVERY_ADDRESS" ||
+                  directive.action === "ASK_MISSING_AREAS" ||
+                  directive.action === "ASK_PICKUP_AREA" ||
+                  directive.action === "ASK_DELIVERY_AREA" ||
+                  directive.action ===
+                    "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED";
+                const customerAskingInformational =
+                  directiveIsCollectionOrSummary &&
+                  conversationControllerEntry?.stage === "quoted" &&
+                  isInformationalOptionQuestion(rawBody || null);
+                if (!customerConfirmedOrder && !customerAskingInformational) {
                   // Surface conflict details so the CONFIRM_SLOT_CONFLICT
                   // renderer can name the conflicting values concretely.
                   let conflictingSlot: string | null = null;
@@ -5263,8 +5307,11 @@ async function handleInboundMessage(params: {
                     ),
                   };
                 } else {
+                  const skipReason = customerAskingInformational
+                    ? "skipped_on_informational_option_question"
+                    : "skipped_on_order_confirmation";
                   api.logger.info(
-                    `[one-brain/directive-dispatch] skipped_on_order_confirmation conversation=${conversationId} action=${directive.action} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
+                    `[one-brain/directive-dispatch] ${skipReason} conversation=${conversationId} action=${directive.action} stage=${conversationControllerEntry?.stage || "-"} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
                   );
                 }
               }

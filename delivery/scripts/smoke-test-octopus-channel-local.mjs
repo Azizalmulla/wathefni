@@ -427,7 +427,7 @@ async function main() {
   assert(
     source.includes("isSummaryEditRequest") &&
       source.includes("summary edit clarification routed through agent") &&
-      source.includes('controllerTransitionHint === "summary_edit_request" && !replyText'),
+      source.includes('controllerTransitionHint === "summary_edit_request" && !reply'),
     "source should route summary edits through the agent while avoiding unchanged-summary loops",
   );
   assert(
@@ -436,8 +436,8 @@ async function main() {
     "source should let GPT handle same-route option comparisons instead of replacing them with a canned list",
   );
   assert(
-    source.includes("const shouldSkipCanonicalPriceGuard = Boolean(") &&
-      source.includes("activeQuotedRoute && sameRouteQuoteAction"),
+    source.includes("const sameRouteQuoteSkip = Boolean(") &&
+      source.includes("input.activeQuotedRoute && input.sameRouteQuoteAction"),
     "source should skip the canonical price guard for all same-route quote interactions",
   );
   assert(

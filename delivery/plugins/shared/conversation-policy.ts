@@ -524,6 +524,115 @@ export function isGeneralServiceInquiry(text: string): boolean {
   return phrases.some((phrase) => normalized.includes(phrase));
 }
 
+/**
+ * Informational option / price question detector (2026-04-21).
+ *
+ * ## Why this exists
+ *
+ * Hard rule 5 in the live-channel context marks option / price
+ * questions as ANSWER-ONLY turns — the LLM must answer the question
+ * without advancing to the next slot ask, even when
+ * `next_required_action` is a slot ask. Pre-Phase-2 this was purely a
+ * prompt-side steer and the LLM followed it.
+ *
+ * Phase 2 introduced server-side directive-reply substitution: when a
+ * collection-flow directive fires, the LLM's draft is discarded and
+ * replaced with a deterministic server-rendered ask. That collision
+ * bypassed rule 5 — the LLM still correctly answered the question in
+ * its draft, but the substitution overwrote the answer with the next
+ * slot ask, advancing the booking flow on a turn where the customer
+ * was just evaluating options.
+ *
+ * The 2026-04-21 regression transcript
+ * (quote → "whats the most expensive option" → server substituted with
+ * "Great. Sender's full name please…") is the canonical case.
+ *
+ * ## What this detector returns
+ *
+ * `true` when the customer's message this turn is unambiguously an
+ * informational question about options / prices / vehicle classes —
+ * one that rule 5 says must be answered, not advanced past. Used by
+ * the Region-A directive-dispatch gate in `octopus-channel/index.ts`
+ * to skip substitution on `stage=quoted` for exactly the matching set
+ * of collection / summary directives. Does NOT skip
+ * `CLARIFY_OPTION_BEFORE_PROCEED` or `CONFIRM_SLOT_CONFLICT` —
+ * callers must keep the gate scope narrow.
+ *
+ * Detection rules, first match wins:
+ *
+ *   1. Negative short-circuit — explicit proceed / confirm / greeting
+ *      markers are NOT informational questions, even when they happen
+ *      to contain an interrogative-looking word.
+ *   2. Superlative / comparative words (`cheapest`, `most expensive`,
+ *      `fastest`, `أرخص`, `أغلى`, `أسرع`, Arabizi `arkhass`, etc.)
+ *      stand alone as informational — their presence implies a
+ *      price / option question without needing a second signal.
+ *   3. Explicit interrogative (`what`, `which`, `how much`, `do you
+ *      have`, `is there`, `any other`, `شنو`, `كم`, `هل`, `عندكم`,
+ *      Arabizi `shnu`, `bkm`, question mark, etc.) PAIRED WITH
+ *      price / option / vehicle vocabulary. Either half alone is not
+ *      enough — e.g. "do you deliver" (no vocab hit) or "sedan"
+ *      alone (no interrogative) do not qualify.
+ *
+ * Deliberately narrow. The cost of a missed detection is that Phase 2
+ * overrides rule 5 (reintroducing the regression); the cost of a false
+ * positive is that we skip a legitimate directive substitution and
+ * send the LLM's reply instead. Both are fixable; the narrower
+ * detector minimises the false-positive class.
+ */
+const INFORMATIONAL_SUPERLATIVE_EN =
+  /\b(cheap(?:er|est)?|expensive|most\s+expensive|priciest|fast(?:er|est)?|slow(?:er|est)?|bigg(?:er|est)?|small(?:er|est)?|larger|largest|quick(?:er|est)?)\b/i;
+const INFORMATIONAL_SUPERLATIVE_AR = /(أرخص|ارخص|أغلى|اغلى|أسرع|اسرع|أبطأ|ابطأ|أكبر|اكبر|أصغر|اصغر)/u;
+const INFORMATIONAL_SUPERLATIVE_ARABIZI =
+  /\b(akhass|akkhass|arkhas|arkhass|awfar|asra3|asraa|abta2|abta)\b/i;
+const INFORMATIONAL_INTERROGATIVE_EN =
+  /\b(what|whats|what's|what\s+is|which|how\s+much|how\s+many|do\s+you\s+(?:have|offer|do)|does\s+(?:it|this)|is\s+there|are\s+there|any\s+other|any\s+options?|alternatives?)\b/i;
+const INFORMATIONAL_INTERROGATIVE_AR =
+  /(شنو|وش|كم\s+سعر|كم\s+يكلف|كم\s+حق|هل\s+عندكم|عندكم|عندك|فيه\s+عندكم|يوجد)/u;
+const INFORMATIONAL_INTERROGATIVE_ARABIZI =
+  /\b(shnu|shno|shku|bkm|kam|wish|wesh)\b/i;
+const INFORMATIONAL_VOCAB_EN =
+  /\b(price|pricing|prices|cost|costs|fee|fees|kwd|kd|sedan|car|van|box|truck|express|fast|standard|cool(?:ed)?|refrig(?:erated)?|helper|option|options|alternative|alternatives|service|services)\b/i;
+const INFORMATIONAL_VOCAB_AR =
+  /(سعر|اسعار|الاسعار|تكلفة|تكلفه|خيار|خيارات|سيدان|سياره|سيارة|فان|بوكس|باص|مبرد|مساعد|عادي|عاديه|عادية|سريع|سريعه|سريعة|بديل|اخر|اخرى)/u;
+const INFORMATIONAL_VOCAB_ARABIZI = /\b(express|sedan|van|box|cool|helper)\b/i;
+
+export function isInformationalOptionQuestion(text: string | null): boolean {
+  const trimmed = (text || "").trim();
+  if (!trimmed) return false;
+  // Negative short-circuits — these look interrogative or vocab-rich
+  // but are clearly not open-ended informational questions.
+  if (isBookingStartIntent(trimmed)) return false;
+  if (isExplicitOrderConfirmation(trimmed)) return false;
+  if (isSimpleGreeting(trimmed)) return false;
+
+  const lower = trimmed.toLowerCase();
+
+  // Superlatives / comparatives stand alone — their semantic payload
+  // already names the dimension ("cheapest", "most expensive"), so
+  // pairing with a vocab token would be redundant.
+  if (
+    INFORMATIONAL_SUPERLATIVE_EN.test(lower) ||
+    INFORMATIONAL_SUPERLATIVE_AR.test(trimmed) ||
+    INFORMATIONAL_SUPERLATIVE_ARABIZI.test(lower)
+  ) {
+    return true;
+  }
+
+  const hasInterrogative =
+    INFORMATIONAL_INTERROGATIVE_EN.test(lower) ||
+    INFORMATIONAL_INTERROGATIVE_AR.test(trimmed) ||
+    INFORMATIONAL_INTERROGATIVE_ARABIZI.test(lower) ||
+    /[?؟]/.test(trimmed);
+  if (!hasInterrogative) return false;
+
+  return (
+    INFORMATIONAL_VOCAB_EN.test(lower) ||
+    INFORMATIONAL_VOCAB_AR.test(trimmed) ||
+    INFORMATIONAL_VOCAB_ARABIZI.test(lower)
+  );
+}
+
 export function isPassengerTransportRequest(text: string): boolean {
   const normalized = normalizeIntentText(text);
   if (!normalized) {
