@@ -4563,6 +4563,15 @@ async function handleInboundMessage(params: {
               addDrainAlias(
                 `${account.accountId}::${conversationId}`,
               );
+              // Class-10 observability: emit an unconditional line so we
+              // can correlate drain entry with same-turn pushes even when
+              // drained=[]. See `responder-state-ops.ts` for the paired
+              // buffer-level counters.
+              try {
+                api.logger.info(
+                  `[one-brain/drain-attempt] conversation=${conversationId} aliases=${JSON.stringify(drainAliases)}`,
+                );
+              } catch {}
               const drained = drainResponderStateOps(conversationId, drainAliases);
               if (drained.length > 0) {
                 let nextDraft = conversationControllerEntry?.bookingDraft || createEmptyBookingDraft();

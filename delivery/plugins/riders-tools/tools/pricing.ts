@@ -91,10 +91,27 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     field: "pickup_area" | "dropoff_area",
     options?: string[] | null,
   ): void {
+    // Class-10 observability: log UNCONDITIONAL entry so we can tell the
+    // difference between "function not called" and "function called but
+    // silently failed" (the outer try/catch below is intentionally narrow
+    // but swallows any error). See `responder-state-ops.ts` for the
+    // paired buffer-level counters this pairs with.
+    try {
+      console.log(
+        `[responder-ops/mark-slot-enter] field=${field} options_count=${(options || []).length}`,
+      );
+    } catch {}
     try {
       const aliases = collectResponderOpAliases(ctx);
       const primary = resolveToolConversationId(ctx) || aliases[0] || "";
-      if (!primary) return;
+      if (!primary) {
+        try {
+          console.log(
+            `[responder-ops/mark-slot-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)}`,
+          );
+        } catch {}
+        return;
+      }
       const turnId = resolveToolTurnId(ctx);
       const op: ResponderSetRequestedSlotOp = {
         op: "set_requested_slot",
@@ -108,8 +125,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           `[responder-ops/push] op=set_requested_slot conversation=${primary} aliases=${JSON.stringify(aliases)} slot=${field} options=${JSON.stringify(options || [])}`,
         );
       } catch {}
-    } catch {
-      // best-effort — DST is an enhancement, never block the tool on it
+    } catch (err) {
+      try {
+        console.log(
+          `[responder-ops/mark-slot-error] field=${field} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+      } catch {}
     }
   }
 
@@ -124,10 +145,23 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     nameEn: string | null,
     nameAr: string | null,
   ): void {
+    // Class-10 observability: see `markRequestedAreaSlot` above.
+    try {
+      console.log(
+        `[responder-ops/mark-pending-enter] field=${field} name_en=${JSON.stringify(nameEn)}`,
+      );
+    } catch {}
     try {
       const aliases = collectResponderOpAliases(ctx);
       const primary = resolveToolConversationId(ctx) || aliases[0] || "";
-      if (!primary) return;
+      if (!primary) {
+        try {
+          console.log(
+            `[responder-ops/mark-pending-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)}`,
+          );
+        } catch {}
+        return;
+      }
       const turnId = resolveToolTurnId(ctx);
       const op: ResponderSetPendingAreaOp = {
         op: "set_pending_area",
@@ -142,8 +176,12 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           `[responder-ops/push] op=set_pending_area conversation=${primary} aliases=${JSON.stringify(aliases)} field=${field} area_en=${JSON.stringify(op.area_name_en)}`,
         );
       } catch {}
-    } catch {
-      // best-effort — enhancement only, never block the tool on it
+    } catch (err) {
+      try {
+        console.log(
+          `[responder-ops/mark-pending-error] field=${field} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+      } catch {}
     }
   }
 

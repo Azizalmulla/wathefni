@@ -221,7 +221,31 @@ export type ResponderStateOp =
   | ResponderCarryOverFromLastOrderOp
   | ResponderOptionInterpretationOp;
 
-const buffer = new Map<string, ResponderStateOp[]>();
+// Class-10 fix (2026-04-21): `module_instance_isolation_drops_responder_ops`.
+//
+// Failure mode: the pricing tool (in the `riders-tools` plugin) pushes
+// `set_pending_area` / `set_requested_slot` ops into `buffer`, but the
+// `octopus-channel` drain reads an EMPTY buffer for the same key and never
+// emits the `[one-brain] drained` log. Two plugins importing the same
+// relative path (`../shared/responder-state-ops`) should share one module
+// instance under Node ESM's URL-keyed cache, but the OpenClaw plugin loader
+// has at times instantiated `plugins/shared/*` modules per-plugin (sandboxed
+// import contexts, separate bundle outputs, etc). The symptom is that push
+// and drain observe DIFFERENT `Map` instances in the same process, and
+// every cross-plugin responder op vanishes.
+//
+// Invariant: a `pushResponderStateOp` call must be visible to a subsequent
+// `drainResponderStateOps` call in the same process, regardless of which
+// plugin bundle owns each side.
+//
+// Fix: pin the backing Map on `globalThis` so it is process-singleton even
+// when the module source is duplicated. The type cast is intentional —
+// `globalThis` is untyped here on purpose so we don't leak the op shape to
+// unrelated code paths.
+const __RESPONDER_OPS_BUFFER_KEY = "__ridersResponderStateOpsBuffer__";
+const buffer: Map<string, ResponderStateOp[]> =
+  ((globalThis as any)[__RESPONDER_OPS_BUFFER_KEY] as Map<string, ResponderStateOp[]> | undefined) ??
+  ((globalThis as any)[__RESPONDER_OPS_BUFFER_KEY] = new Map<string, ResponderStateOp[]>());
 const TURN_OP_LIMIT = 32;
 
 function normalizeKey(raw: string | null | undefined): string {
@@ -274,6 +298,16 @@ export function pushResponderStateOp(
     existing.push(op);
     buffer.set(key, existing);
   }
+  // Class-10 observability: emit an unconditional line every push so we
+  // can correlate push -> drain across plugin boundaries without relying
+  // on the caller having an `api.logger`. Size-of-buffer is included so a
+  // divergent (per-plugin) instance is immediately visible in logs.
+  try {
+    // eslint-disable-next-line no-console
+    console.log(
+      `[responder-ops/buffer-push] primary=${conversationId} keys=${JSON.stringify(keys)} op=${op.op} turn_id=${String((op as { turn_id?: string }).turn_id || "")} buffer_size=${buffer.size}`,
+    );
+  } catch {}
 }
 
 function opDedupKey(op: ResponderStateOp): string {
@@ -307,8 +341,10 @@ export function drainResponderStateOps(
   if (keys.length === 0) return [];
   const merged: ResponderStateOp[] = [];
   const seen = new Set<string>();
+  const perKeyCounts: Record<string, number> = {};
   for (const key of keys) {
     const existing = buffer.get(key) || [];
+    perKeyCounts[key] = existing.length;
     if (existing.length === 0) continue;
     for (const op of existing) {
       const dedup = opDedupKey(op);
@@ -318,6 +354,15 @@ export function drainResponderStateOps(
     }
     buffer.delete(key);
   }
+  // Class-10 observability: emit an unconditional line every drain. If
+  // every `keys[k]` shows 0 despite a same-turn push, that proves the push
+  // and drain are reading different `buffer` instances.
+  try {
+    // eslint-disable-next-line no-console
+    console.log(
+      `[responder-ops/buffer-drain] primary=${conversationId} keys=${JSON.stringify(keys)} per_key=${JSON.stringify(perKeyCounts)} drained=${merged.length} buffer_size=${buffer.size}`,
+    );
+  } catch {}
   return merged;
 }
 
