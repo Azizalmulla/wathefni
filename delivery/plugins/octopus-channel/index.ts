@@ -4510,6 +4510,30 @@ async function handleInboundMessage(params: {
           // substitute a disambiguating re-ask in place of any
           // hallucinated "we've cancelled" text.
           let cancelContradicted: { optionLabel: string } | null = null;
+          // Class-level guard (2026-04-21): `stale_guard_state_clobbers_clarification_turn`.
+          //
+          // The quoted-state promotion block further down inherits
+          // `stage=quoted` + `quote*AreaNameEn` from `sessionGuard.lastQuotedRoute`
+          // whenever `lastToolName === "get_price"` and `lastToolTs !==
+          // controllerEntry.quoteTs`. This is the correct behaviour on a turn
+          // where `get_price` actually produced a fresh priced route, but the
+          // gate is SIGN-BLIND: a persisted `lastQuotedRoute` left over from
+          // a prior session (persisted to
+          // `~/.openclaw-<profile>/riders-guard-state.json`) survives service
+          // restart and still satisfies the test on the very next turn —
+          // even when that turn's `get_price` returned AREA_AMBIGUOUS and
+          // therefore set `set_requested_slot(pickup_area|dropoff_area)`.
+          // The false promotion then clears `pendingPickupAreaNameEn` /
+          // `pendingDropoffAreaNameEn` ("just promoted to quote*") and
+          // overwrites the fresh clarification with a stale route —
+          // breaking the invariant that the controller state must reflect
+          // THIS turn's tool results.
+          //
+          // `turnDrainedRouteSideClarification` is set inside the drain loop
+          // whenever a `set_requested_slot` for a route-side slot is applied.
+          // Its presence proves that the current turn is mid-clarification,
+          // and the quoted-state promotion block uses it as a hard veto.
+          let turnDrainedRouteSideClarification = false;
           // ONE-BRAIN mode: simplified drain. One LLM per turn owns all reply
           // copy; we only merge booking patches into the draft, reset on cancel,
           // and flag handoff. No stage/step/hint threading, no deterministic
@@ -4958,6 +4982,17 @@ async function handleInboundMessage(params: {
                         slot: op.slot as SlotName,
                         options: op.options ?? null,
                       };
+                      // Lift the class-level veto flag (see the declaration
+                      // of `turnDrainedRouteSideClarification` above). Only
+                      // route-side slot asks can be confused with a fresh
+                      // priced route; slot asks for name / phone / address
+                      // are orthogonal to the quoted-state promotion.
+                      if (
+                        op.slot === "pickup_area" ||
+                        op.slot === "dropoff_area"
+                      ) {
+                        turnDrainedRouteSideClarification = true;
+                      }
                     }
                     // First-turn clarify hydration (category fix, 2026-04-21).
                     //
@@ -5510,7 +5545,19 @@ async function handleInboundMessage(params: {
             if (
               sessionGuard.lastToolName === "get_price" &&
               sessionGuard.lastQuotedRoute &&
-              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs
+              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs &&
+              // Class-level veto (2026-04-21):
+              // `stale_guard_state_clobbers_clarification_turn`. A turn that
+              // drained a `set_requested_slot(pickup_area|dropoff_area)` is
+              // mid-clarification — the pricing tool returned AREA_AMBIGUOUS,
+              // did NOT produce a fresh priced route, and is asking the
+              // customer to disambiguate one leg. Inheriting
+              // `sessionGuard.lastQuotedRoute` on this turn can only come
+              // from a stale/persisted prior session, never from this
+              // turn's work. Skip the promotion and preserve the
+              // pending-area + requested-slot state the drain just committed.
+              // Regression: `smoke-test-clarification-turn-not-promoted.mjs`.
+              !turnDrainedRouteSideClarification
             ) {
               const replyContainsPrice = replyText
                 ? (guardState?.extractPricesFromText(replyText) || []).some((p) =>
@@ -5586,6 +5633,22 @@ async function handleInboundMessage(params: {
               conversationControllerEntry = clearAutomatedConversationContext({
                 ...conversationControllerEntry,
               });
+            } else if (
+              sessionGuard.lastToolName === "get_price" &&
+              sessionGuard.lastQuotedRoute &&
+              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs &&
+              turnDrainedRouteSideClarification
+            ) {
+              // Class-level veto fired. Emit an explicit observability log
+              // so the regression is easy to correlate in journalctl —
+              // mirror the shape of the clarify-commit log so dashboards
+              // can track both. See
+              // `smoke-test-clarification-turn-not-promoted.mjs`.
+              try {
+                api.logger.info(
+                  `[one-brain/clarify-preserved] skipped_quoted_promotion conversation=${conversationId} stale_route=${sessionGuard.lastQuotedRoute.pickupAreaNameEn || "-"}_to_${sessionGuard.lastQuotedRoute.dropoffAreaNameEn || "-"} requested_slot=${conversationControllerEntry.dialogState?.requestedSlot?.name || "-"} pending_pickup=${conversationControllerEntry.pendingPickupAreaNameEn || "-"} pending_dropoff=${conversationControllerEntry.pendingDropoffAreaNameEn || "-"}`,
+                );
+              } catch {}
             }
           }
           if (
