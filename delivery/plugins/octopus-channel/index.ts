@@ -283,6 +283,7 @@ import {
 } from "../shared/turn-decision";
 import type {
   TurnDecisionObservedContext,
+  A1SubstituteIntent,
 } from "../shared/turn-decision";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
@@ -4723,6 +4724,15 @@ async function handleInboundMessage(params: {
       dispatcherOptions: {
         deliver: async (payload: any) => {
           let replyText = asTrimmedString(payload?.text);
+          // Relocation 2 (A4 → layer) input: snapshot the LLM's raw
+          // reply text length BEFORE any pre-state / post-state
+          // substitution overwrites `replyText`. Consumed by the
+          // `turn-decision` derive-dispatch path as
+          // `a4_inputs.llm_reply_empty`. Safe to capture here because
+          // `replyText` at this point is strictly the LLM author's
+          // reply as surfaced by the buffered block dispatcher.
+          const originalLlmReplyChars =
+            typeof replyText === "string" ? replyText.length : 0;
           if (!replyTarget) {
             return;
           }
@@ -5770,6 +5780,13 @@ async function handleInboundMessage(params: {
           // pre-state decision branch (~line 5868) and goes out of scope
           // before the trace emit at the end of the turn.
           let turnReplyDirectiveRenderContextPresent = false;
+          // Relocation 2 (A4 → layer) input: A1 substitute intent —
+          // the pre-state decision's reason captured ONLY when the
+          // pre-state pipeline became the reply author (i.e., A1
+          // actually overrode the LLM). Null otherwise. The turn-
+          // decision layer consumes this to derive its own dispatch
+          // decision in parallel with A4.
+          let turnA1SubstituteIntent: A1SubstituteIntent | null = null;
           // Provenance tracking (2026-04-22). Separate from Phase 5
           // `replyAuthor` / `reason`: those feed the existing
           // `[one-brain/reply-attribution]` line and downstream
@@ -6218,6 +6235,16 @@ async function handleInboundMessage(params: {
             turnReplyDirective = directiveActionForRender;
             turnReplyDirectiveRenderContextPresent =
               directiveRenderContextForRender !== null;
+            // Capture A1 substitute intent only when A1 actually became
+            // the reply author (i.e. overrode the LLM). Casting the
+            // reason through `A1SubstituteIntent` is safe: the union
+            // enumerates every valid `OutboundDecisionReason`, and a
+            // future reason without a corresponding A1 member will
+            // fail compile inside `turn-decision.ts`.
+            if (preDecision.replyAuthor === "server") {
+              turnA1SubstituteIntent =
+                preDecision.reason as A1SubstituteIntent;
+            }
             // Seed the final decision from pre-state — post-state
             // overwrites below if it substitutes. This lets pre-state
             // substitutions (directive-registry, canonical overwrite,
@@ -7223,6 +7250,18 @@ async function handleInboundMessage(params: {
                   turnReplyDirectiveRenderContextPresent,
                 marked_summary_shown:
                   conversationControllerEntry?.stage === "summary_shown",
+              },
+              // Relocation 2 (A4 → layer): supply the fresh-decision
+              // inputs so `observeTurnDecision` can run `deriveDispatch`
+              // in parallel with the observed classifier.
+              a4_inputs: {
+                a1_substitute_intent: turnA1SubstituteIntent,
+                llm_reply_empty: originalLlmReplyChars === 0,
+                hallucination_guard_fired:
+                  (hallucinationGuardRejections || []).length > 0,
+                directive_has_server_renderer: turnReplyDirective
+                  ? directiveHasServerRenderer(turnReplyDirective as any)
+                  : false,
               },
               proposer: {
                 present: proposedTurnDecisionRaw !== null,

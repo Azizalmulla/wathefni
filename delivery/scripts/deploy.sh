@@ -134,6 +134,12 @@ DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_EMI
 # See delivery/ARCHITECTURE_TURN_DECISION.md.
 DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER='DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER'
 DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER'
+# Relocation 2 (A4 → layer): deriveDispatch export present in the
+# module, and a4_inputs block wired at the callsite. Absence means the
+# deployed build predates the dispatch derivation and the trace will
+# not emit layer_source / dispatch_agreement tokens.
+DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER'
+DEPLOY_CANARY_TURN_DECISION_A4_CALLSITE_MARKER='a4_inputs: {'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -457,6 +463,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER',
         'turn-decision [turn-decision/trace] callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER',
+        'turn-decision A4 deriveDispatch module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A4_CALLSITE_MARKER',
+        'turn-decision A4 a4_inputs callsite marker',
     ),
 ]
 

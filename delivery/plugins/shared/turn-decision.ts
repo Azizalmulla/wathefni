@@ -1,7 +1,8 @@
 // ---------------------------------------------------------------------------
-// Unified turn-decision layer — SCAFFOLD (relocation 1).
+// Unified turn-decision layer — SCAFFOLD + A4 DISPATCH (relocations 1–2).
 //
 // DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER: turn-decision scaffold observer
+// DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER: deriveDispatch
 //
 // ## What this file is, in one paragraph
 //
@@ -131,6 +132,31 @@ export const REPLY_SOURCES: readonly ReplySource[] = [
 // and force a deliberate archetype choice (the same tripwire discipline
 // the directive-reply-registry uses).
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// A1 substitute intents — the set of pre-state reasons that cause the legacy
+// pipeline to override the LLM's reply. The layer consumes this as an input
+// (observed from `preDecision.reason` when `replyAuthor === "server"`) rather
+// than re-deriving A1 triggers from state, because A1 relocation is its own
+// step (relocation 3).
+// ---------------------------------------------------------------------------
+
+export type A1SubstituteIntent =
+  | "replace_directive_ask"
+  | "replace_summary_fact_drift"
+  | "replace_clarify_option_before_proceed"
+  | "replace_manual_confirm_address_ask"
+  | "replace_manual_confirm_handoff"
+  | "replace_transaction_artifact_missing"
+  | "replace_price_mismatch"
+  | "replace_field_rejection_hallucination"
+  | "replace_order_placed_hallucination"
+  | "replace_get_price_bypass"
+  | "block_provider_error"
+  | "fallback_empty_reply"
+  | "preserve_clarification"
+  | "allow"
+  | "allow_sanitized";
 
 export function classifyReplySource(
   reason: OutboundDecisionReason,
@@ -308,6 +334,33 @@ export interface TurnDecisionObservedContext {
     marked_summary_shown: boolean;
   };
 
+  // A4 dispatch inputs (relocation 2). Optional because earlier smoke
+  // tests and older callsites may not supply them; when absent, the
+  // layer skips dispatch derivation and the trace omits layer_source /
+  // dispatch_agreement (behaves exactly like the scaffold).
+  a4_inputs?: {
+    // A1 substitute signal (pre-state decision). Null when the LLM
+    // reply was not overridden by A1. When non-null, this is the same
+    // value as `preDecision.reason` in the legacy pipeline, captured
+    // before A4 ran.
+    a1_substitute_intent: A1SubstituteIntent | null;
+
+    // Was the LLM's raw reply text empty at turn start? This is the
+    // unconditional empty-fill signal that would trigger a recovery
+    // template even without any A1 intent.
+    llm_reply_empty: boolean;
+
+    // Did the centralized hallucination guard reject any field this
+    // turn? The layer treats a non-empty rejection set as evidence
+    // the LLM's reply is not trustworthy for direct passthrough.
+    hallucination_guard_fired: boolean;
+
+    // Does the directive selector's candidate action have a
+    // server-side renderer? Required to decide whether rendering is
+    // even a physical option when the layer elects it.
+    directive_has_server_renderer: boolean;
+  };
+
   // Proposer-derived signals (already validated upstream).
   proposer: {
     present: boolean;
@@ -353,12 +406,29 @@ export interface TurnDecision {
   };
 
   reply: {
+    // Observed projection: mirrors what the legacy A4 actually did
+    // this turn. Derived from `outcome.reason` via `classifyReplySource`.
     source: ReplySource;
     directive?: DirectiveAction;
     render_context?: DirectiveReplyRendererContext;
     ack_prefix?: string;
     substitute_text_chars?: number;
     llm_authored_reason?: string;
+
+    // Layer decision (relocation 2): what the unified turn-decision
+    // layer would have dispatched, computed fresh from `a4_inputs` +
+    // proposer signals. Present only when `a4_inputs` was supplied.
+    // This is NOT executed; legacy A4 still drives the wire reply.
+    // The value exists so divergences between layer and legacy become
+    // first-class trace output and can be reviewed before any flip.
+    derived_source?: ReplySource;
+    derived_reason?: string;
+    derived_policy_rule?: string;
+    dispatch_agreement?:
+      | "agree"
+      | "disagree_layer_passthrough"
+      | "disagree_layer_substitute"
+      | "disagree_other";
   };
 
   transitions: {
@@ -384,6 +454,202 @@ export interface TurnDecision {
     observed_decision: OutboundDecisionKind;
     observed_reply_author: ReplyAuthor;
   };
+}
+
+// ---------------------------------------------------------------------------
+// A4 DISPATCH DERIVATION (relocation 2).
+//
+// Fresh decision from structured inputs — the layer's own answer to
+// "what reply source should this turn have?" computed independently
+// of `outcome.reason`. Intended to run in parallel with legacy A4 so
+// divergences surface explicitly in the trace.
+//
+// Policy rules are ordered; first match wins. Each rule emits a
+// stable `policy_rule` id for grep-level auditing. New rules must
+// claim a fresh id — never repurpose an existing one.
+//
+// Divergence handling:
+//   - The layer does NOT bias its decision toward legacy. If the
+//     layer's clean policy says `llm_authored` and legacy said
+//     `server_rendered_directive`, the trace records
+//     `dispatch_agreement=disagree_layer_passthrough` rather than
+//     muting the difference. We want honest divergence data before
+//     flipping execution.
+//   - Conversely, any rule that intentionally matches legacy should
+//     say so in its reason id (e.g. `a1_directive_ask_with_renderer`
+//     is legacy-aligned; `a1_directive_ask_ack_passthrough` is a
+//     deliberate divergence).
+// ---------------------------------------------------------------------------
+
+export interface A4DispatchInputs {
+  a1_substitute_intent: A1SubstituteIntent | null;
+  llm_reply_empty: boolean;
+  hallucination_guard_fired: boolean;
+  directive_has_server_renderer: boolean;
+  proposer_ti_kind: TurnIntentKind | null;
+  proposer_ti_confidence: "high" | "medium" | "low" | null;
+  proposer_ac_kind: AwaitingConfirmationKind | null;
+  proposer_po_kind: PostOrderIntentKind | null;
+}
+
+export interface A4DispatchDerivation {
+  source: ReplySource;
+  reason: string;
+  policy_rule: string;
+}
+
+const A1_RECOVERY_INTENTS: ReadonlySet<A1SubstituteIntent> = new Set<A1SubstituteIntent>([
+  "replace_transaction_artifact_missing",
+  "replace_price_mismatch",
+  "replace_field_rejection_hallucination",
+  "replace_order_placed_hallucination",
+  "replace_get_price_bypass",
+  "block_provider_error",
+  "fallback_empty_reply",
+]);
+
+const A1_SUBSTITUTE_TEXT_INTENTS: ReadonlySet<A1SubstituteIntent> = new Set<A1SubstituteIntent>([
+  "replace_clarify_option_before_proceed",
+  "replace_manual_confirm_address_ask",
+  "replace_manual_confirm_handoff",
+]);
+
+export function deriveDispatch(input: A4DispatchInputs): A4DispatchDerivation {
+  // Rule 1: A1 recovery-class intents — always recovery template.
+  if (
+    input.a1_substitute_intent &&
+    A1_RECOVERY_INTENTS.has(input.a1_substitute_intent)
+  ) {
+    return {
+      source: "server_recovery_template",
+      reason: input.a1_substitute_intent,
+      policy_rule: `layer.a1_recovery.${input.a1_substitute_intent}`,
+    };
+  }
+
+  // Rule 2: A1 substitute-text intents — targeted server reply.
+  if (
+    input.a1_substitute_intent &&
+    A1_SUBSTITUTE_TEXT_INTENTS.has(input.a1_substitute_intent)
+  ) {
+    return {
+      source: "server_substitute_text",
+      reason: input.a1_substitute_intent,
+      policy_rule: `layer.a1_substitute.${input.a1_substitute_intent}`,
+    };
+  }
+
+  // Rule 3: summary fact drift — canonical summary renderer.
+  if (input.a1_substitute_intent === "replace_summary_fact_drift") {
+    return {
+      source: "server_rendered_directive",
+      reason: "replace_summary_fact_drift",
+      policy_rule: "layer.a1_summary_fact_drift",
+    };
+  }
+
+  // Rule 4: A1 directive-ask — semantic gates apply here.
+  //
+  // This is where legacy behaviour and layer policy can legitimately
+  // differ. Legacy fires `replace_directive_ask` whenever the pre-state
+  // gate deems the LLM off-track, regardless of `turn_intent`. The
+  // layer's policy consults `ti_kind`:
+  //   - `acknowledgement` → passthrough (LLM's ack reply is fine)
+  //   - `clarifying_question` → passthrough (user asked, LLM answers)
+  //   - otherwise (and directive has renderer) → server_rendered_directive
+  //
+  // Low-confidence semantic signals fall through to the legacy-aligned
+  // render branch to avoid acting on a classifier the layer can't
+  // trust.
+  if (input.a1_substitute_intent === "replace_directive_ask") {
+    const tiIsHigh =
+      input.proposer_ti_confidence === "high" ||
+      input.proposer_ti_confidence === "medium";
+
+    if (tiIsHigh && input.proposer_ti_kind === "acknowledgement") {
+      return {
+        source: "llm_authored",
+        reason: "a1_directive_ask_ack_passthrough",
+        policy_rule: "layer.a1_directive_ask.ack_passthrough",
+      };
+    }
+    if (tiIsHigh && input.proposer_ti_kind === "clarifying_question") {
+      return {
+        source: "llm_authored",
+        reason: "a1_directive_ask_clarifying_passthrough",
+        policy_rule: "layer.a1_directive_ask.clarifying_passthrough",
+      };
+    }
+
+    if (input.directive_has_server_renderer) {
+      return {
+        source: "server_rendered_directive",
+        reason: "a1_directive_ask_with_renderer",
+        policy_rule: "layer.a1_directive_ask.render",
+      };
+    }
+
+    // No renderer — can't actually substitute; pass through with an
+    // explicit reason.
+    return {
+      source: "llm_authored",
+      reason: "a1_directive_ask_no_renderer",
+      policy_rule: "layer.a1_directive_ask.no_renderer_passthrough",
+    };
+  }
+
+  // Rule 5: A1 preserve_clarification — passthrough with stable reason.
+  if (input.a1_substitute_intent === "preserve_clarification") {
+    return {
+      source: "llm_authored",
+      reason: "preserve_clarification",
+      policy_rule: "layer.a1_preserve_clarification",
+    };
+  }
+
+  // Rule 6: Empty LLM reply + no A1 substitute → recovery (legacy has
+  // its own fallback_empty_reply path; layer agrees here).
+  if (input.llm_reply_empty) {
+    return {
+      source: "server_recovery_template",
+      reason: "fallback_empty_reply",
+      policy_rule: "layer.empty_llm_fallback",
+    };
+  }
+
+  // Rule 7: Hallucination guard fired without an A1 intent. Legacy's
+  // guard already runs inside `preDecision`, so in practice this rule
+  // fires only when the guard rejected a field but the pre-state
+  // pipeline decided to `allow` anyway (e.g. rejection promoted to a
+  // soft warning). The layer treats it as a divergence candidate.
+  if (input.hallucination_guard_fired) {
+    return {
+      source: "server_recovery_template",
+      reason: "hallucination_guard_rejected",
+      policy_rule: "layer.hallucination_guard",
+    };
+  }
+
+  // Default: authority allow — LLM's reply stands.
+  return {
+    source: "llm_authored",
+    reason: "authority_allow",
+    policy_rule: "layer.authority_allow",
+  };
+}
+
+export function classifyDispatchAgreement(
+  observed: ReplySource,
+  derived: ReplySource,
+): TurnDecision["reply"]["dispatch_agreement"] {
+  if (observed === derived) return "agree";
+  if (derived === "llm_authored" && observed !== "llm_authored") {
+    return "disagree_layer_passthrough";
+  }
+  if (observed === "llm_authored" && derived !== "llm_authored") {
+    return "disagree_layer_substitute";
+  }
+  return "disagree_other";
 }
 
 // ---------------------------------------------------------------------------
@@ -441,6 +707,27 @@ export function observeTurnDecision(
       undefined;
   }
 
+  // Relocation 2: layer-derived dispatch. Runs in parallel with the
+  // observed projection when `a4_inputs` is supplied. Emits an explicit
+  // agreement token so divergences are grep-able.
+  let derivedDispatch: A4DispatchDerivation | null = null;
+  let dispatchAgreement: TurnDecision["reply"]["dispatch_agreement"] | undefined;
+  if (ctx.a4_inputs) {
+    derivedDispatch = deriveDispatch({
+      a1_substitute_intent: ctx.a4_inputs.a1_substitute_intent,
+      llm_reply_empty: ctx.a4_inputs.llm_reply_empty,
+      hallucination_guard_fired: ctx.a4_inputs.hallucination_guard_fired,
+      directive_has_server_renderer: ctx.a4_inputs.directive_has_server_renderer,
+      proposer_ti_kind: ctx.proposer.ti_kind,
+      proposer_ti_confidence: ctx.proposer.ti_confidence,
+      proposer_ac_kind: ctx.proposer.ac_kind,
+      proposer_po_kind: ctx.proposer.po_kind,
+    });
+    dispatchAgreement = classifyDispatchAgreement(source, derivedDispatch.source);
+    policyHits.push(derivedDispatch.policy_rule);
+    policyHits.push(`dispatch:${dispatchAgreement}`);
+  }
+
   const decision: TurnDecision = {
     op_plan: { entries },
     reply: {
@@ -453,6 +740,14 @@ export function observeTurnDecision(
         ? { substitute_text_chars: ctx.outcome.reply_text_chars }
         : {}),
       ...(llm_authored_reason ? { llm_authored_reason } : {}),
+      ...(derivedDispatch
+        ? {
+            derived_source: derivedDispatch.source,
+            derived_reason: derivedDispatch.reason,
+            derived_policy_rule: derivedDispatch.policy_rule,
+            dispatch_agreement: dispatchAgreement,
+          }
+        : {}),
     },
     transitions,
     trace: {
@@ -505,6 +800,15 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
     llm_authored_reason: e.decision.reply.llm_authored_reason ?? null,
     ack_prefix_chars: e.decision.reply.ack_prefix?.length ?? 0,
     substitute_text_chars: e.decision.reply.substitute_text_chars ?? 0,
+    // Relocation 2: layer-derived dispatch and its divergence token.
+    // Always emitted (null when the callsite didn't supply `a4_inputs`)
+    // so downstream analyzers can rely on field presence.
+    layer: {
+      derived_source: e.decision.reply.derived_source ?? null,
+      derived_reason: e.decision.reply.derived_reason ?? null,
+      derived_policy_rule: e.decision.reply.derived_policy_rule ?? null,
+      dispatch_agreement: e.decision.reply.dispatch_agreement ?? null,
+    },
     op_plan: e.decision.op_plan.entries.map((x) => ({
       op: x.op_name,
       verdict: x.verdict,
@@ -527,6 +831,8 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
     `turn_id=${e.turn_id || "-"} ` +
     `lang=${e.language} ` +
     `reply_source=${e.decision.reply.source} ` +
+    `layer_source=${e.decision.reply.derived_source || "-"} ` +
+    `dispatch_agreement=${e.decision.reply.dispatch_agreement || "-"} ` +
     `observed_reason=${e.decision.trace.observed_reason} ` +
     `ti=${e.decision.trace.semantic_signals.ti_kind || "-"} ` +
     `ac=${e.decision.trace.semantic_signals.ac_kind || "-"} ` +
