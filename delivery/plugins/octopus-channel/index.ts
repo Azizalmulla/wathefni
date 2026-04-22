@@ -280,10 +280,12 @@ import {
 import {
   observeTurnDecision,
   formatTurnDecisionTrace,
+  deriveA1Substitute,
 } from "../shared/turn-decision";
 import type {
   TurnDecisionObservedContext,
   A1SubstituteIntent,
+  A1Derivation,
 } from "../shared/turn-decision";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
@@ -6237,6 +6239,131 @@ async function handleInboundMessage(params: {
               }
             }
 
+            // ----------------------------------------------------------
+            // Relocation 3 flip (2026-04-22). First concrete cut
+            // against the step-loop branch: compute the turn-decision
+            // layer's A1 derivation HERE, BEFORE Region A runs, and
+            // when all live-only safeguards pass, inject
+            // `layerA1Passthrough` so `decidePreStateOutbound` skips
+            // its A0c `replace_directive_ask` branch and lets the
+            // LLM's draft survive.
+            //
+            // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER.
+            //
+            // Live-only safeguards (ALL must pass for the flip to fire):
+            //   1. Env flag: `RIDERS_TURN_DECISION_A1_FLIP !== "off"`.
+            //      Default is on — explicit "off" is the one-line
+            //      rollback; a restart re-reads the env.
+            //   2. Derived policy rule must be one of the THREE
+            //      semantic gates. Legacy-aligned rules (render, no-
+            //      renderer passthrough, manual-confirm, clarify-
+            //      before-proceed, etc.) are NOT flipped.
+            //   3. Proposer ti_confidence ∈ {high, medium}. Low / null
+            //      classifications never trigger a passthrough — we
+            //      never act on a classifier we can't trust. The gate
+            //      inside `deriveA1Substitute` already enforces this,
+            //      but we re-check at the flip to make the safeguard
+            //      explicit and grep-able.
+            //   4. Hallucination guard did NOT reject this turn. If
+            //      the guard fired, we keep legacy behaviour — the
+            //      substitute is the expected fallback for an
+            //      unsupported LLM draft.
+            //   5. `sameRouteQuoteAction` is not a switch_option (the
+            //      derivation's own gate already covers this; checked
+            //      again at the flip for defence in depth).
+            // ----------------------------------------------------------
+            const a1FlipEnvOff =
+              (process.env.RIDERS_TURN_DECISION_A1_FLIP || "on")
+                .trim()
+                .toLowerCase() === "off";
+            const a1FlipProposerValidation = proposedTurnDecisionRaw
+              ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+              : null;
+            const a1FlipProposerValue =
+              a1FlipProposerValidation && a1FlipProposerValidation.ok
+                ? a1FlipProposerValidation.value
+                : null;
+            const a1FlipDirectiveHasServerRenderer = directiveActionForRender
+              ? directiveHasServerRenderer(directiveActionForRender as any)
+              : false;
+            const a1FlipSameRouteSwitch =
+              sameRouteQuoteAction?.kind === "switch_option";
+            const a1FlipRouteIntentFreshThisTurn = Boolean(
+              a1FlipProposerValue?.turn_kind === "initial_route" &&
+                !!activeQuotedRoute &&
+                sameRouteQuoteAction === null,
+            );
+            let a1FlipDerivation: A1Derivation | null = null;
+            try {
+              a1FlipDerivation = deriveA1Substitute({
+                clarify_option_before_proceed_flag: clarifyOptionBeforeProceed,
+                manual_confirm_address_ask: manualConfirmAddressAsk
+                  ? {
+                      side: manualConfirmAddressAsk.side,
+                      option_type:
+                        manualConfirmAddressAsk.option.delivery_type,
+                    }
+                  : null,
+                manual_confirm_handoff: manualConfirmHandoff
+                  ? {
+                      option_type: manualConfirmHandoff.option.delivery_type,
+                    }
+                  : null,
+                directive_action: directiveActionForRender,
+                directive_has_server_renderer:
+                  a1FlipDirectiveHasServerRenderer,
+                same_route_quote_switch_option: a1FlipSameRouteSwitch,
+                proposer_turn_kind: a1FlipProposerValue?.turn_kind ?? null,
+                proposer_ti_kind:
+                  a1FlipProposerValue?.turn_intent?.kind ?? null,
+                proposer_ti_confidence:
+                  a1FlipProposerValue?.turn_intent?.confidence ?? null,
+                stage_at_turn_start: stageAtTurnStart,
+                has_active_quoted_route_at_turn_start: !!activeQuotedRoute,
+                route_intent_fresh_this_turn: a1FlipRouteIntentFreshThisTurn,
+              });
+            } catch (a1FlipDeriveError) {
+              try {
+                api.logger.warn(
+                  `[turn-decision/flip] derive_failed conversation=${conversationId} error=${
+                    a1FlipDeriveError instanceof Error
+                      ? a1FlipDeriveError.message
+                      : String(a1FlipDeriveError)
+                  }`,
+                );
+              } catch {
+                // Never block the turn on flip-layer errors.
+              }
+              a1FlipDerivation = null;
+            }
+            const A1_FLIP_PASSTHROUGH_RULES = new Set<string>([
+              "layer.a1.directive_ask.pass_on_clarifying",
+              "layer.a1.directive_ask.pass_on_partial_answer",
+              "layer.a1.directive_ask.pass_on_route_change",
+            ]);
+            const a1FlipConfidenceOk =
+              a1FlipProposerValue?.turn_intent?.confidence === "high" ||
+              a1FlipProposerValue?.turn_intent?.confidence === "medium";
+            const a1FlipHallucinationGuardFired =
+              (hallucinationGuardRejections || []).length > 0;
+            const a1FlipAllowed = Boolean(
+              !a1FlipEnvOff &&
+                a1FlipDerivation &&
+                a1FlipDerivation.intent === "allow" &&
+                A1_FLIP_PASSTHROUGH_RULES.has(a1FlipDerivation.policy_rule) &&
+                a1FlipConfidenceOk &&
+                !a1FlipHallucinationGuardFired &&
+                !a1FlipSameRouteSwitch,
+            );
+            const a1FlipPayload =
+              a1FlipAllowed && a1FlipDerivation && directiveActionForRender
+                ? {
+                    allowed: true as const,
+                    policyRule: a1FlipDerivation.policy_rule,
+                    legacyWouldHave: directiveActionForRender,
+                  }
+                : null;
+
             const preDecision = decidePreStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -6262,6 +6389,7 @@ async function handleInboundMessage(params: {
               conversationId,
               sessionKeyForLogs: guardSessionKey,
               controllerStage: conversationControllerEntry?.stage || null,
+              layerA1Passthrough: a1FlipPayload,
             });
             replyText = preDecision.replyText;
             emitOutboundDecisionLogs(api, preDecision.logEntries);

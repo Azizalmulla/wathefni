@@ -281,6 +281,40 @@ export type PreStateOutboundInput = {
    * the gate did not fire (the common case). */
   clarifyOptionBeforeProceed?: boolean;
 
+  /**
+   * Relocation 3 (2026-04-22): turn-decision layer A1 passthrough flip.
+   *
+   * When the callsite's pre-Region-A evaluation of
+   * `deriveA1Substitute` returned one of the three semantic-gate
+   * passthroughs (`pass_on_clarifying`, `pass_on_partial_answer`,
+   * `pass_on_route_change`) AND the flip's live-only gates passed
+   * (confidence >= medium, hallucination guard did NOT fire, env flag
+   * `RIDERS_TURN_DECISION_A1_FLIP !== "off"`, sameRouteQuoteAction is
+   * not a switch_option), this field is populated with
+   * `{ allowed: true, policyRule, legacyWouldHave }`.
+   *
+   * Effect inside Region A: the A0c directive-registry dispatch branch
+   * is skipped — the LLM's draft survives through the rest of the
+   * pipeline (canonical overwrite, empty-reply fallback, etc.) exactly
+   * as if `directiveAction` had been null. All other A1 gates
+   * (clarify-before-proceed, manual-confirm address ask, manual-confirm
+   * handoff) run unchanged.
+   *
+   * Safeguards live at the CALLSITE — this struct is trusted. When
+   * flip safeguards fail or the env flag is "off", the callsite
+   * passes null and Region A behaves identically to the pre-Reloc-3
+   * build. `[turn-decision/flip]` log line is emitted via
+   * `logEntries` whenever the skip actually fires.
+   */
+  layerA1Passthrough?: {
+    allowed: boolean;
+    /** e.g. "layer.a1.directive_ask.pass_on_clarifying" */
+    policyRule: string;
+    /** Directive the legacy branch would have rendered — `directiveAction`
+     *  at call time — captured for the flip log. */
+    legacyWouldHave: string;
+  } | null;
+
   /** Plugin-local deterministic builder, injected to keep this module free
    *  of circular plugin imports. */
   buildDeterministicSelectedQuotedOptionReply: (args: {
@@ -708,8 +742,47 @@ function decidePreStateOutboundImpl(
   const skipDirectiveDispatchForSameRouteSwitch =
     !!input.sameRouteQuoteAction &&
     input.sameRouteQuoteAction.kind === "switch_option";
+
+  // Relocation 3 flip (2026-04-22). First concrete cut against the
+  // step-loop branch: when the turn-decision layer's
+  // `deriveA1Substitute` chose `allow` via a semantic gate
+  // (clarifying question, partial answer, or strict fresh route
+  // change) AND the callsite's live-only safeguards passed, skip
+  // the directive-registry dispatch so the LLM's draft survives.
+  //
+  // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER.
+  //
+  // The log line is emitted via logEntries so the callsite's
+  // `emitOutboundDecisionLogs` carries it into the journal alongside
+  // every other outbound-decision signal. Grepping
+  // `[turn-decision/flip]` in live logs is the authoritative source
+  // of truth for whether the flip actually took effect on a turn.
+  const skipDirectiveDispatchForLayerA1Passthrough =
+    !!input.layerA1Passthrough &&
+    input.layerA1Passthrough.allowed === true;
+  if (
+    skipDirectiveDispatchForLayerA1Passthrough &&
+    input.directiveAction &&
+    input.renderDirectiveReply
+  ) {
+    logEntries.push({
+      level: "info",
+      message:
+        `[turn-decision/flip] conversation=${input.conversationId} ` +
+        `sessionKey=${input.sessionKeyForLogs} ` +
+        `rule=${input.layerA1Passthrough!.policyRule} ` +
+        `legacy_would_have=${input.layerA1Passthrough!.legacyWouldHave} ` +
+        `action=${input.directiveAction}`,
+      detail: {
+        rule: input.layerA1Passthrough!.policyRule,
+        legacy_would_have: input.layerA1Passthrough!.legacyWouldHave,
+        action: input.directiveAction,
+      },
+    });
+  }
   if (
     !skipDirectiveDispatchForSameRouteSwitch &&
+    !skipDirectiveDispatchForLayerA1Passthrough &&
     input.directiveAction &&
     input.directiveRenderContext &&
     input.renderDirectiveReply

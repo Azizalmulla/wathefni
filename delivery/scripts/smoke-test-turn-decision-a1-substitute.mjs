@@ -28,9 +28,11 @@ const repoRoot = path.resolve(__dirname, "..");
 
 const MODULE_REL = "plugins/shared/turn-decision.ts";
 const CALLSITE_REL = "plugins/octopus-channel/index.ts";
+const OUTBOUND_REL = "plugins/octopus-channel/lib/outbound-decision.ts";
 
 const MODULE_PATH = path.join(repoRoot, MODULE_REL);
 const CALLSITE_PATH = path.join(repoRoot, CALLSITE_REL);
+const OUTBOUND_PATH = path.join(repoRoot, OUTBOUND_REL);
 
 function baseInputs(overrides = {}) {
   return {
@@ -355,9 +357,10 @@ const A1_AGREEMENT_CASES = [
 // ---------------------------------------------------------------------------
 
 async function runSourceLevelChecks(fails) {
-  const [moduleSrc, callsiteSrc] = await Promise.all([
+  const [moduleSrc, callsiteSrc, outboundSrc] = await Promise.all([
     fs.readFile(MODULE_PATH, "utf8"),
     fs.readFile(CALLSITE_PATH, "utf8"),
+    fs.readFile(OUTBOUND_PATH, "utf8"),
   ]);
 
   if (!moduleSrc.includes("DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER")) {
@@ -401,6 +404,55 @@ async function runSourceLevelChecks(fails) {
   if (!callsiteSrc.includes("route_intent_fresh_this_turn")) {
     fails.push(
       `callsite: route_intent_fresh_this_turn not computed in ${CALLSITE_REL}`,
+    );
+  }
+
+  // Relocation 3 FLIP (2026-04-22) — live-mode wiring checks.
+  if (!outboundSrc.includes("DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER")) {
+    fails.push(
+      `outbound: DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER missing from ${OUTBOUND_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER")) {
+    fails.push(
+      `callsite: DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!outboundSrc.includes("layerA1Passthrough")) {
+    fails.push(
+      `outbound: layerA1Passthrough input field missing from ${OUTBOUND_REL}`,
+    );
+  }
+  if (
+    !outboundSrc.includes("skipDirectiveDispatchForLayerA1Passthrough")
+  ) {
+    fails.push(
+      `outbound: skipDirectiveDispatchForLayerA1Passthrough guard missing from ${OUTBOUND_REL}`,
+    );
+  }
+  if (!outboundSrc.includes("[turn-decision/flip]")) {
+    fails.push(
+      `outbound: [turn-decision/flip] log line missing from ${OUTBOUND_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("RIDERS_TURN_DECISION_A1_FLIP")) {
+    fails.push(
+      `callsite: RIDERS_TURN_DECISION_A1_FLIP env flag missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("A1_FLIP_PASSTHROUGH_RULES")) {
+    fails.push(
+      `callsite: A1_FLIP_PASSTHROUGH_RULES set missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("a1FlipHallucinationGuardFired")) {
+    fails.push(
+      `callsite: a1FlipHallucinationGuardFired safeguard missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("layerA1Passthrough: a1FlipPayload")) {
+    fails.push(
+      `callsite: layerA1Passthrough injection missing from ${CALLSITE_REL}`,
     );
   }
 

@@ -146,6 +146,12 @@ DEPLOY_CANARY_TURN_DECISION_A4_CALLSITE_MARKER='a4_inputs: {'
 # emit layer_a1_intent / a1_agreement tokens.
 DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER'
 DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER'
+# Relocation 3 FLIP (2026-04-22): A0c passthrough wired live behind
+# env flag RIDERS_TURN_DECISION_A1_FLIP (default on, "off" to roll
+# back). Absence means the deployed build is shadow-only and the
+# three semantic-gate passthroughs will NOT take effect live.
+DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER'
+DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -489,6 +495,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER',
         'turn-decision A1 a1_inputs callsite marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/outbound-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER',
+        'turn-decision A1 flip (A0c skip) branch marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER',
+        'turn-decision A1 flip callsite marker',
     ),
 ]
 
