@@ -10,7 +10,7 @@ Returns exact delivery prices for a trip between two Kuwait areas.
 
 - Call for any concrete route pricing or route-specific service options.
 - Do NOT call for broad "what services" questions with no route — give a short service overview first, then ask for pickup and dropoff areas if they want exact pricing.
-- Do NOT call until BOTH `pickup_area` and `dropoff_area` are confirmed.
+- Do NOT wait for both areas to be perfectly confirmed when the customer already gave a concrete route intent. If the message names both route sides but one side may be broad, fuzzy, or ambiguous, still call `get_price` with your best interpretation for both sides and let the tool return `clarification_required`. Only ask for an area yourself when pickup or dropoff is truly absent from the customer's message.
 - Every **new route** gets a fresh live lookup. Never answer from conversation memory, earlier quoted prices, summaries, or inferred area matches — this rule applies even in long conversations, and even if a price was already mentioned earlier in the same chat for a different route.
 - If the customer is still on the **same quoted route**, answer follow-up service questions ("standard / express / box / helper / other options", "what's cheapest?") from the `active_quoted_route` snapshot instead of re-calling.
 
@@ -28,6 +28,7 @@ The tool has a deterministic resolver that verifies your interpretation and corr
 - `clarification_required` with a single `suggested_area` (no options) → ask a yes/no confirmation using the suggested area's name in the customer's language (`prompt_ar` / `prompt_en` give the exact phrasing). On `yes`, re-call with the suggested area's `area_id` in `pickup_area_id` / `dropoff_area_id`. On `no`, ask the customer to send the area name again.
 - `area_needs_clarification` → the customer's word is close to a known area but not a confident match. Read `model_proposed.match_confidence`: if `high`, you may re-call `get_price` immediately with `model_proposed.area_id` in `pickup_area_id` / `dropoff_area_id`; if `medium`, first confirm with the customer using the top candidate's name (`prompt_ar` / `prompt_en`); if `low`, ask them to pick from `closest_candidates` or restate. Never silently accept without a verifiable next step.
 - `area_not_found` → tell the customer you couldn't recognize the area name and ask them to restate it. If `closest_candidates` is present, you may offer the top entry by name (`"Did you mean X?"`) and re-call with that `area_id` on confirmation. Do NOT claim Riders doesn't serve the area unless a later tool result confirms that explicitly.
+- If the customer's route mentions a broad or parent area name like `Kuwait City`, the first clarification must still come from `get_price`'s `clarification_required` result. Do NOT bypass the tool by asking your own free-composed "which part?" question first — that loses server-owned clarification state.
 - Do NOT ask which part of `Hawalli` / `حولي` the customer means when they are clearly using it as the area name in a route pricing request. Only ask a clarification question if `get_price` itself returns `clarification_required`.
 
 ### Output rules

@@ -161,6 +161,7 @@ const moduleSrc = fs.readFileSync(
       "replace_clarify_option_before_proceed",
       "replace_directive_ask",
       "replace_field_rejection_hallucination",
+      "replace_get_price_bypass",
       "replace_manual_confirm_address_ask",
       "replace_manual_confirm_handoff",
       "replace_order_placed_hallucination",
@@ -168,7 +169,7 @@ const moduleSrc = fs.readFileSync(
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
     ],
-    "Reason codes must be exactly the fixed enum (14 entries after Phase 2 directive-to-reply registry)",
+    "Reason codes must be exactly the fixed enum (15 entries after Class-15 bypass repair)",
   );
 }
 
@@ -440,6 +441,181 @@ const moduleSrc = fs.readFileSync(
 }
 
 // ---------------------------------------------------------------------------
+// (3.5) Class-15 bypass repair (2026-04-21)
+//
+// Invariant under test: on a route-intent turn where no active quoted
+// route exists AND `get_price` was NOT called this turn, if the LLM
+// free-composed an area clarification the post-state decision MUST
+// substitute it with the deterministic repair reply and tag the
+// attribution as `server` via `replace_get_price_bypass`.
+// ---------------------------------------------------------------------------
+
+// C15-trigger-en: classic forward-path bypass. LLM replies "What's the
+// delivery area?" on a `stage=idle` turn with route evidence in the
+// inbound and no tool call → substitute + attribute as server.
+{
+  const res = decidePostStateOutbound({
+    replyText: "Pickup from Salmiya. What's the delivery area?",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    conversationId: "c1",
+  });
+  assert.equal(
+    res.decision,
+    "replace_authoritative",
+    "C15-trigger-en: free-composed area ask without get_price must be substituted",
+  );
+  assert.equal(res.reason, "replace_get_price_bypass");
+  assert.equal(res.replyAuthor, "server");
+  assert.ok(
+    /pickup area and the delivery area together/i.test(res.replyText),
+    `C15-trigger-en: repair reply should ask for both areas together, got ${JSON.stringify(res.replyText)}`,
+  );
+  assert.ok(
+    res.logEntries.some(
+      (e) =>
+        e.level === "warn" &&
+        /class-15\/bypass/.test(e.message) &&
+        /free_composed_area_clarification/.test(e.message),
+    ),
+    "C15-trigger-en: must emit class-15 warn log line",
+  );
+}
+
+// C15-trigger-ar: Arabic variant of the same bypass.
+{
+  const res = decidePostStateOutbound({
+    replyText: "استلام من السالمية. شنو منطقة التوصيل بالضبط؟",
+    preferredLanguage: "ar",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_authoritative", "C15-trigger-ar: Arabic area ask substituted");
+  assert.equal(res.reason, "replace_get_price_bypass");
+  assert.ok(
+    /منطقة التوصيل/.test(res.replyText),
+    "C15-trigger-ar: repair reply must be Arabic and reference both areas",
+  );
+}
+
+// C15-bypass-off: same LLM reply, but the caller says get_price fired
+// this turn (`classFifteenBypass: false`). Must pass through unchanged.
+{
+  const res = decidePostStateOutbound({
+    replyText: "Pickup from Salmiya. What's the delivery area?",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: false,
+    conversationId: "c1",
+  });
+  assert.equal(
+    res.decision,
+    "allow",
+    "C15-bypass-off: healthy tool-owned turn must not substitute",
+  );
+  assert.equal(res.replyText, "Pickup from Salmiya. What's the delivery area?");
+}
+
+// C15-nonmatching-shape: bypass asserted but reply isn't a free-composed
+// area question (e.g. a grounded price recap). Detector must stay
+// narrow — no substitution.
+{
+  const res = decidePostStateOutbound({
+    replyText: "Thanks for your message, I'll check that in a moment.",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    conversationId: "c1",
+  });
+  assert.equal(
+    res.decision,
+    "allow",
+    "C15-nonmatching-shape: non-area-question reply must pass through even under bypass flag",
+  );
+}
+
+// C15-whichpart: "Which part of Kuwait City?" shape also caught.
+{
+  const res = decidePostStateOutbound({
+    replyText: "Which part of Kuwait City?",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_authoritative");
+  assert.equal(res.reason, "replace_get_price_bypass");
+}
+
+// C15-price-reply-ignored: a price-bearing reply ("1.250 KWD ...") must
+// NEVER be treated as a free-composed area clarification, because the
+// `route_price_recap` / price-whitelist paths own that class.
+{
+  const res = decidePostStateOutbound({
+    replyText: "Salmiya → Kuwait City, 1.250 KWD. What's the delivery area?",
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    conversationId: "c1",
+  });
+  assert.equal(
+    res.decision,
+    "allow",
+    "C15-price-reply-ignored: price-bearing replies stay out of class-15 scope",
+  );
+}
+
+// ---------------------------------------------------------------------------
 // (4) Callsite source-shape anchors
 // ---------------------------------------------------------------------------
 
@@ -485,6 +661,24 @@ assert.ok(
 assert.ok(
   /function emitOutboundDecisionLogs\s*\(/.test(indexSrc),
   "emitOutboundDecisionLogs helper must exist in index.ts",
+);
+
+// Class-15 wiring anchors (2026-04-21): the callsite must snapshot the
+// dispatcher-entry wall-clock and pass `classFifteenBypass` through to
+// the post-state decision.
+assert.ok(
+  /const\s+turnStartMs\s*=\s*Date\.now\(\)\s*;/.test(indexSrc),
+  "index.ts must snapshot turnStartMs at dispatcher entry for class-15 detection",
+);
+assert.ok(
+  /classFifteenBypass\s*,/.test(indexSrc),
+  "index.ts must forward classFifteenBypass into decidePostStateOutbound",
+);
+assert.ok(
+  /getPriceFiredThisTurn\s*=\s*[\s\S]*?sessionGuard\.lastToolTs\s*>=\s*turnStartMs/.test(
+    indexSrc,
+  ),
+  "index.ts must compute getPriceFiredThisTurn using the turnStartMs snapshot",
 );
 
 console.log("ALL PASS smoke-test-outbound-decision-contract.mjs");

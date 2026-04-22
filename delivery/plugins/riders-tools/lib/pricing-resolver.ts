@@ -387,6 +387,51 @@ export function normalizePricingResolverAmbiguityGroup(
             `resolver.ambiguity_groups[${index}].id must be a non-empty string.`,
           );
         })();
+
+  // Class-12 invariant (2026-04-21): every ambiguity group MUST enumerate
+  // its member areas. A group that resolves at runtime with `options=[]`
+  // collapses the entire clarification flow (no choices surfaced in the
+  // reply, no options for the DST-swap misroute guard on the next turn),
+  // which is exactly the loop we saw on `kuwait_city_downtown`. We enforce
+  // this at load time so the failure mode is a loud startup error on any
+  // future group that ships incomplete, not a silent runtime degradation.
+  const rawOptions = input.options;
+  if (!Array.isArray(rawOptions) || rawOptions.length === 0) {
+    throw new Error(
+      `resolver.ambiguity_groups["${id}"].options must be a non-empty array of member areas. Every ambiguity group must enumerate the candidate areas it can disambiguate into.`,
+    );
+  }
+  const options = rawOptions.map((entry, optionIndex) => {
+    if (!isRecord(entry)) {
+      throw new Error(
+        `resolver.ambiguity_groups["${id}"].options[${optionIndex}] must be an object.`,
+      );
+    }
+    if (typeof entry.area_id !== "number" || !Number.isFinite(entry.area_id)) {
+      throw new Error(
+        `resolver.ambiguity_groups["${id}"].options[${optionIndex}].area_id must be a finite number.`,
+      );
+    }
+    const nameEn = normalizePricingText(
+      entry.name_en,
+      `resolver.ambiguity_groups["${id}"].options[${optionIndex}].name_en`,
+    );
+    const nameAr = normalizePricingText(
+      entry.name_ar,
+      `resolver.ambiguity_groups["${id}"].options[${optionIndex}].name_ar`,
+    );
+    return { area_id: entry.area_id, name_en: nameEn, name_ar: nameAr };
+  });
+  const seenOptionIds = new Set<number>();
+  for (const opt of options) {
+    if (seenOptionIds.has(opt.area_id)) {
+      throw new Error(
+        `resolver.ambiguity_groups["${id}"].options contains a duplicate area_id: ${opt.area_id}.`,
+      );
+    }
+    seenOptionIds.add(opt.area_id);
+  }
+
   return {
     id,
     prompt_ar: normalizePricingText(
@@ -397,6 +442,7 @@ export function normalizePricingResolverAmbiguityGroup(
       input.prompt_en,
       `resolver.ambiguity_groups[${index}].prompt_en`,
     ),
+    options,
     ...(normalizePricingResolverStringArray(
       input.aliases,
       `resolver.ambiguity_groups[${index}].aliases`,
@@ -481,6 +527,14 @@ export function validatePricingResolverConfig(
       );
     }
     ambiguityGroupIds.add(group.id);
+    // Class-12 invariant: options[*].area_id must point to a real area.
+    for (const opt of group.options) {
+      if (!areaIds.has(opt.area_id)) {
+        throw new Error(
+          `resolver.ambiguity_groups["${group.id}"].options references unknown area id ${opt.area_id}.`,
+        );
+      }
+    }
   }
 
   for (const aliasEntry of resolver.aliases || []) {

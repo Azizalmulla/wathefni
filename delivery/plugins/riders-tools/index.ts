@@ -32,6 +32,11 @@ import {
   describeRejection,
 } from "../shared/order-guard";
 import { looksLikeInteriorDetail } from "../shared/booking-draft";
+import {
+  resolveToolConversationId,
+  resolveToolConversationAliases,
+  resolveToolTurnId,
+} from "./lib/tool-conversation-ids";
 import type { ToolDeps } from "./tools/deps";
 import {
   parsePricingSourceMode,
@@ -100,6 +105,7 @@ import { registerAdminPricingTools } from "./tools/admin-pricing";
 import { registerCustomerSupportTools } from "./tools/support";
 import { registerPricingTools } from "./tools/pricing";
 import { registerBookingTools } from "./tools/booking";
+import { registerProposerTools } from "./tools/proposer";
 import { createGuardModule } from "./tools/guards";
 
 const RIDERS_ONE_BRAIN_ENABLED = (() => {
@@ -107,85 +113,11 @@ const RIDERS_ONE_BRAIN_ENABLED = (() => {
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 })();
 
-function resolveToolConversationId(ctx: any): string {
-  const direct = String(ctx?.ConversationId || ctx?.conversationId || ctx?.ConversationID || "").trim();
-  if (direct) return direct;
-  const sessionKey = String(ctx?.SessionKey || ctx?.sessionKey || "").trim();
-  const match = sessionKey.match(/:octopus:direct:(.+?)(?:::prompt=|$)/);
-  if (match?.[1]) {
-    return match[1].trim();
-  }
-  // Octopus tool contexts often set `To=octopus:<replyTarget>` where the
-  // suffix is the WhatsApp number, not the live conversation id. When both
-  // `SessionKey` and `To` are present, `SessionKey` is the authoritative
-  // source for responder-op routing because the octopus-channel drain keys by
-  // conversation id (e.g. `19055`), not reply target (`965...`).
-  const to = String(ctx?.To || ctx?.to || "").trim();
-  if (to.startsWith("octopus:")) {
-    const extracted = to.slice("octopus:".length).trim();
-    if (extracted) return extracted;
-  }
-  return "";
-}
-
-/**
- * Collect every plausible conversation identifier present on a tool `ctx`.
- * The Octopus tool pipeline historically exposes up to three different ids
- * that could each be "the" conversation key depending on code path:
- *
- *   - `ConversationId` / `conversationId` / `NativeChannelId` — the
- *     authoritative numeric channel id (e.g. `19055`).
- *   - `SessionKey` — contains the conversation id embedded as
- *     `agent:riders:octopus:direct:<id>::prompt=...`.
- *   - `To` / `OriginatingTo` — `octopus:<replyTarget>` when the runtime
- *     has flipped the direction for reply rendering; the suffix is the
- *     customer's WhatsApp number rather than the conversation id.
- *
- * When `pushResponderStateOp` runs under only ONE of these keys and the
- * orchestrator drains under a different one, the clarification op is
- * silently lost. Producers (tool push) and consumers (drain) both use
- * this helper so every op lands under every candidate key, and
- * `drainResponderStateOps` dedups at the end. See
- * `smoke-test-area-clarification-binding.mjs` A1/A2.
- */
-function resolveToolConversationAliases(ctx: any): string[] {
-  const aliases: string[] = [];
-  const seen = new Set<string>();
-  const add = (raw: unknown) => {
-    if (raw == null) return;
-    const value = String(raw).trim();
-    if (!value || seen.has(value)) return;
-    seen.add(value);
-    aliases.push(value);
-  };
-  add(ctx?.ConversationId);
-  add(ctx?.conversationId);
-  add(ctx?.ConversationID);
-  add(ctx?.NativeChannelId);
-  add(ctx?.nativeChannelId);
-  const sessionKey = String(ctx?.SessionKey || ctx?.sessionKey || "").trim();
-  const sessionMatch = sessionKey.match(/:octopus:direct:(.+?)(?:::prompt=|$)/);
-  if (sessionMatch?.[1]) add(sessionMatch[1]);
-  const to = String(ctx?.To || ctx?.to || "").trim();
-  if (to.startsWith("octopus:")) add(to.slice("octopus:".length));
-  const originatingTo = String(ctx?.OriginatingTo || "").trim();
-  if (originatingTo.startsWith("octopus:")) {
-    add(originatingTo.slice("octopus:".length));
-  }
-  return aliases;
-}
-
-function resolveToolTurnId(ctx: any): string {
-  const value =
-    ctx?.TurnId ||
-    ctx?.turnId ||
-    ctx?.MessageId ||
-    ctx?.messageId ||
-    ctx?.InboundMessageId ||
-    ctx?.inboundMessageId;
-  const trimmed = String(value || "").trim();
-  return trimmed || String(Date.now());
-}
+export {
+  resolveToolConversationId,
+  resolveToolConversationAliases,
+  resolveToolTurnId,
+} from "./lib/tool-conversation-ids";
 
 // ---------------------------------------------------------------------------
 // Types (moved to ./lib/types.ts in wave 1b; imported below)
@@ -2496,6 +2428,10 @@ function resolveAreaViaResolverMetadata(
           ambiguity_group_id: group.id,
           prompt_ar: group.prompt_ar,
           prompt_en: group.prompt_en,
+          // Class-12: alias-routed ambiguity also carries its member set,
+          // so downstream directive rendering + DST-swap guard see the
+          // same `options` as the direct alias path above.
+          options: group.options,
         };
       }
       continue;
@@ -5073,6 +5009,38 @@ function extractAreaTokensFromText(text: string): { pickup: string | null; dropo
   return { pickup: null, dropoff: null };
 }
 
+/**
+ * Slot-aware reinterpretation for single-area clarification answers.
+ *
+ * `extractAreaTokensFromText("mina doha")` intentionally defaults the lone
+ * token to `pickup`, because in the general case we don't know which side the
+ * customer meant. During an active area clarification turn, though, the server
+ * DOES know: `requestedSlot.name` is the authoritative side the customer is
+ * answering. Without this remap, a one-token answer to a `dropoff_area`
+ * clarification ("mina doha", "bnaid al qar") is mis-read as a new pickup
+ * token, which lets `verifyAreaEvidence` override the pinned pickup and
+ * collapse the route into a symmetric `X → X` quote.
+ *
+ * This helper is deliberately narrow: it only re-attributes when exactly ONE
+ * area token was extracted and the server has an active area slot. Full-route
+ * inputs ("salmiya to doha") keep the raw split unchanged.
+ */
+function alignAreaTokensToRequestedSlot(
+  tokens: { pickup: string | null; dropoff: string | null },
+  requestedSlotName: "pickup_area" | "dropoff_area" | null | undefined,
+): { pickup: string | null; dropoff: string | null } {
+  if (!tokens?.pickup || tokens.dropoff) {
+    return tokens;
+  }
+  if (requestedSlotName === "dropoff_area") {
+    return {
+      pickup: null,
+      dropoff: tokens.pickup,
+    };
+  }
+  return tokens;
+}
+
 // Scan the full customer text for evidence of any area mention by resolving
 // every 1–3 word n-gram through the same resolver the LLM uses. Returns the
 // set of area IDs that appear anywhere in the message, regardless of
@@ -5416,6 +5384,7 @@ export const __resolverTestHooks = {
   resolvePricingAreaQuery,
   resolveGeoAreaMatch,
   extractAreaTokensFromText,
+  alignAreaTokensToRequestedSlot,
   collectAreaEvidenceFromText,
   resolveAreaDeterministicSync,
   isAreaMismatch,
@@ -5490,6 +5459,7 @@ export default function register(api: any) {
     },
     quoting: {
       extractAreaTokensFromText,
+      alignAreaTokensToRequestedSlot,
       collectAreaEvidenceFromText,
       verifyAreaEvidence,
       createAreaSuggestionResult,
@@ -5575,6 +5545,17 @@ export default function register(api: any) {
   // Extracted to plugins/riders-tools/tools/booking.ts.
 
   registerBookingTools(api, deps);
+
+  // =========================================================================
+  // STRUCTURED PROPOSER TOOL (propose_turn_decision) — Phase A, 2026-04-21
+  // =========================================================================
+  // Shadow-mode typed proposer output. The LLM declares its per-turn
+  // decision via this tool; the octopus drain observes the
+  // `proposed_turn_decision` responder-op and emits a conformance log.
+  // No behavior gate, no substitution, no routing change in this PR —
+  // promotion to applyProposals happens later once the eval corpus shows
+  // >=95% well-formed proposals across the blocker transcripts.
+  registerProposerTools(api, deps);
 
   // =========================================================================
   // PRICING ADMIN TOOLS

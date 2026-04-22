@@ -67,6 +67,13 @@ async function main() {
               prompt_ar: "هل تقصد الدعية أو كيفان؟",
               prompt_en: "Do you mean Daiya or Kaifan?",
               aliases: ["الدعية"],
+              options: [
+                {
+                  area_id: 1,
+                  name_en: "Mutlaa",
+                  name_ar: "المطلاع",
+                },
+              ],
             },
           ],
         },
@@ -83,6 +90,15 @@ async function main() {
       {
         resolver: {
           aliases: [{ alias: "bad overlay alias", area_id: 999 }],
+          ambiguity_groups: [
+            {
+              id: "empty_ambiguity_group",
+              prompt_ar: "هل تقصد المطلاع؟",
+              prompt_en: "Do you mean Mutlaa?",
+              aliases: ["المطلاع الغامض"],
+              options: [],
+            },
+          ],
         },
       },
       null,
@@ -116,13 +132,62 @@ async function main() {
   const invalidStatus = await executeTool("admin_pricing_source_status", invalidOverlayPath);
   assert.equal(invalidStatus.payload.status, "ok");
   assert.equal(invalidStatus.payload.pricing_resolver_overlay.state, "invalid");
-  assert.match(invalidStatus.payload.pricing_resolver_overlay.error, /unknown area id 999/i);
+  assert.match(
+    invalidStatus.payload.pricing_resolver_overlay.error,
+    /unknown area id 999|must be a non-empty array of member areas/i,
+  );
   console.log("ok - pricing source status reports invalid overlay validation errors");
 
   const invalidValidation = await executeTool("admin_validate_pricing_resolver_overlay", invalidOverlayPath);
   assert.equal(invalidValidation.payload.status, "error");
-  assert.match(invalidValidation.payload.message, /unknown area id 999/i);
+  assert.match(
+    invalidValidation.payload.message,
+    /unknown area id 999|must be a non-empty array of member areas/i,
+  );
   console.log("ok - overlay validator rejects invalid overlay references");
+
+  const emptyOptionsOverlayPath = path.join(tempDir, "empty-options-overlay.json");
+  await fs.writeFile(
+    emptyOptionsOverlayPath,
+    `${JSON.stringify(
+      {
+        resolver: {
+          ambiguity_groups: [
+            {
+              id: "empty_options_only",
+              prompt_ar: "هل تقصد المطلاع؟",
+              prompt_en: "Do you mean Mutlaa?",
+              aliases: ["ambiguous mutlaa"],
+              options: [],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf-8",
+  );
+
+  const emptyOptionsStatus = await executeTool("admin_pricing_source_status", emptyOptionsOverlayPath);
+  assert.equal(emptyOptionsStatus.payload.status, "ok");
+  assert.equal(emptyOptionsStatus.payload.pricing_resolver_overlay.state, "invalid");
+  assert.match(
+    emptyOptionsStatus.payload.pricing_resolver_overlay.error,
+    /must be a non-empty array of member areas/i,
+  );
+  console.log("ok - pricing source status rejects ambiguity groups with empty options");
+
+  const emptyOptionsValidation = await executeTool(
+    "admin_validate_pricing_resolver_overlay",
+    emptyOptionsOverlayPath,
+  );
+  assert.equal(emptyOptionsValidation.payload.status, "error");
+  assert.match(
+    emptyOptionsValidation.payload.message,
+    /must be a non-empty array of member areas/i,
+  );
+  console.log("ok - overlay validator rejects empty ambiguity-group members at startup");
 
   await fs.rm(tempDir, { recursive: true, force: true });
   process.exit(0);

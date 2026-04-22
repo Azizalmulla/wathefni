@@ -40,7 +40,19 @@
         "id": "khairan",
         "prompt_ar": "الخيران السكنية أم شاليهات الخيران؟",
         "prompt_en": "Do you mean Khairan Residential or Khairan Chalets?",
-        "aliases": ["الخيران", "Khairan"]
+        "aliases": ["الخيران", "Khairan"],
+        "options": [
+          {
+            "area_id": 7,
+            "name_en": "Khairan Residential",
+            "name_ar": "الخيران السكنية"
+          },
+          {
+            "area_id": 8,
+            "name_en": "Khairan Chalets",
+            "name_ar": "شاليهات الخيران"
+          }
+        ]
       }
     ]
   },

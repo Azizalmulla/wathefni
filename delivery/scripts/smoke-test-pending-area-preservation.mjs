@@ -43,7 +43,14 @@ async function main() {
   const mod = await loadRidersToolsModule(import.meta.url);
   const hooks = mod.__resolverTestHooks;
   assert(hooks?.verifyAreaEvidence, "missing __resolverTestHooks");
-  const { verifyAreaEvidence, buildPublishedPricingData, normalizePricingResolverConfig, resolvePricingAreaQuery } =
+  const {
+    verifyAreaEvidence,
+    buildPublishedPricingData,
+    normalizePricingResolverConfig,
+    resolvePricingAreaQuery,
+    extractAreaTokensFromText,
+    alignAreaTokensToRequestedSlot,
+  } =
     hooks;
 
   const fs = await import("node:fs");
@@ -176,6 +183,51 @@ async function main() {
     `null hints must behave identically to no hints, got ${emptyDecision.action} vs ${noPendingDecision.action}`,
   );
   console.log("ok - null pending hints behave identically to no hints");
+
+  // Case 6: single-token clarification answers must bind to the requested
+  // slot, not default to pickup. This is the "Hawalli → Doha / 'mina doha'"
+  // blocker class from live QA.
+  const rawSingleToken = extractAreaTokensFromText("mina doha");
+  assert.deepEqual(
+    rawSingleToken,
+    { pickup: "mina doha", dropoff: null },
+    `expected legacy extractor to default one token to pickup, got ${JSON.stringify(rawSingleToken)}`,
+  );
+  const dropoffAligned = alignAreaTokensToRequestedSlot(rawSingleToken, "dropoff_area");
+  assert.deepEqual(
+    dropoffAligned,
+    { pickup: null, dropoff: "mina doha" },
+    `expected requestedSlot remap to move single token onto dropoff, got ${JSON.stringify(dropoffAligned)}`,
+  );
+  console.log("ok - single-token clarification remaps to requested dropoff slot");
+
+  // Case 7: after remap, the pinned opposite side survives verification
+  // instead of being overridden into a symmetric route.
+  const pinnedPickupDecision = verifyAreaEvidence({
+    rawToken: dropoffAligned.pickup,
+    modelValue: "Hawalli",
+    idOverride: null,
+    data,
+    pendingAreaNameEn: "Hawalli",
+    pendingAreaNameAr: null,
+  });
+  assert.equal(
+    pinnedPickupDecision.action,
+    "keep",
+    `expected pinned pickup to survive slot-aware remap, got ${pinnedPickupDecision.action}`,
+  );
+  const clarifiedDropoffDecision = verifyAreaEvidence({
+    rawToken: dropoffAligned.dropoff,
+    modelValue: "Mina Doha",
+    idOverride: null,
+    data,
+  });
+  assert.equal(
+    clarifiedDropoffDecision.action,
+    "keep",
+    `expected remapped dropoff token to verify as keep, got ${clarifiedDropoffDecision.action}`,
+  );
+  console.log("ok - slot-aware remap preserves pinned pickup and verifies clarified dropoff");
 
   // --- Bug B regression: alias typo tolerance (Julai3a) ------------------
 

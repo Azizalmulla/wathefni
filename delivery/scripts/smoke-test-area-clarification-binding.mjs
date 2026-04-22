@@ -69,7 +69,7 @@ async function loadTsModule(relativePath) {
 
 const policy = await loadTsModule("plugins/shared/conversation-policy.ts");
 const registry = await loadTsModule(
-  "plugins/octopus-channel/lib/directive-reply-registry.ts",
+  "plugins/shared/directive-reply-registry.ts",
 );
 const outboundVerify = await loadTsModule(
   "plugins/shared/outbound-verify.ts",

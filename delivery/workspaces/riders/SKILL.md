@@ -114,10 +114,13 @@ You need both pickup and dropoff areas.
 
 - If pickup is missing: `From which area should we pick up the order?` / `من أي منطقة نستلم الطلب؟`
 - If dropoff is missing: `To which area would you like to deliver?` / `إلى أي منطقة تبون نوصل؟`
+- If the customer already gave a concrete route with both sides mentioned, do NOT stop here just because one side may be broad, fuzzy, or ambiguous. Move to Step C and let `get_price` produce the clarification.
 
 #### Step C: interpret and call `get_price`
 
 Interpret the customer's area text (Arabizi, shorthand, typos) into a recognisable Kuwait area name and pass both areas to `get_price`. The deterministic resolver verifies and corrects.
+
+If the route is concrete but one side might be a parent area (for example `Kuwait City`) or an ambiguous spelling, you must still call `get_price` with your best interpretation for both sides. The tool owns the clarification. Do NOT ask a free-composed "which part?" question before the tool.
 
 See TOOLS.md → `get_price` for the full interpretation rules and disambiguation handling.
 
@@ -233,7 +236,7 @@ Triggers: `عندي مشروع` / `نبي نتعاون` / `هوم بزنس`.
 Triggers: `نقل حلويات بارده` / `بوكس مقفل` / `نقل مكينة ايس كريم` / `بوكس مبرد`.
 
 - Treat these as delivery-type discovery requests, not automatic escalation.
-- First confirm pickup and dropoff, then use `get_price`.
+- First confirm pickup and dropoff only when one side is actually missing from the customer's message. If both sides are present but one may be ambiguous, use `get_price` first and let the tool clarify.
 - Surface the relevant box / refrigerated / helper category from the quote's `other_options_if_customer_asks`.
 - If the selected category is verified for direct chat booking, continue the normal booking flow.
 - If the selected category is manual-confirmation-only or otherwise not verified for direct chat booking, explain that this option needs manual support confirmation before booking and use `assign_agent` / `request_handoff` if the customer wants to proceed.
@@ -258,7 +261,7 @@ When the customer shares a location (WhatsApp pin, Google Maps link, Apple Maps 
 
 - Use the resolved area name when "Nearest Riders area: X" is present. Confirm briefly: `تمام، المنطقة [X]، صح؟`
 - Use conversation context to determine if it is pickup or dropoff. If unclear, ask.
-- Once both areas are known, call `get_price`.
+- Once both areas are known, call `get_price`. If both sides are mentioned but one side is still ambiguous, that still counts as a `get_price` turn — the tool should generate the clarification.
 - If resolution failed (no "Nearest Riders area"), ask: `وصلنا الموقع. شنو اسم المنطقة عشان نحسب السعر؟`
 - If sent during booking (address collection phase), the pin IS the address. Ask if they want to add a house/building number, then move on.
 - Never send more than one message in response to a location.

@@ -35,6 +35,40 @@ VPS_CADDY_SITE_PATH="${RIDERS_CADDY_SITE_PATH:-/etc/caddy/Caddyfile}"
 VPS_PRICING_PUBLISHED_PATH="$VPS_RIDERS_DATA_DIR/pricing.published.json"
 VPS_PRICING_RESOLVER_OVERLAY_PATH="$VPS_RIDERS_DATA_DIR/pricing.resolver.overlay.json"
 VPS_BEHAVIOR_POLICY_PUBLISHED_PATH="$VPS_RIDERS_DATA_DIR/behavior-policy.published.json"
+DEPLOY_CANARY_CLASS12_MARKER='must be a non-empty array of member areas'
+DEPLOY_CANARY_GROUP_MARKER='"id": "kuwait_city_downtown"'
+DEPLOY_CANARY_OPTION_MARKER='"name_en": "Bnaid Al-Qar"'
+# Class-15 build canary markers (2026-04-21). Every file MUST carry the
+# string below after a deploy of the route-intent-bypass repair.
+DEPLOY_CANARY_CLASS15_VERIFY_MARKER='looksLikeFreeComposedAreaClarification'
+DEPLOY_CANARY_CLASS15_REASON_MARKER='replace_get_price_bypass'
+DEPLOY_CANARY_CLASS15_INDEX_MARKER='classFifteenBypass'
+# Class-17 build canary markers (2026-04-21). If any of these ever disappear
+# from a deployed bundle, the stripped-ctx booking-authority fallback is
+# silently degraded back to Class-11 identity-only and the paired
+# `hawalli → doha → mina doha` symmetric-rebind regression will reappear.
+DEPLOY_CANARY_CLASS17_STASH_MARKER='getStashedBookingAuthority'
+DEPLOY_CANARY_CLASS17_INGRESS_MARKER='bookingAuthority'
+DEPLOY_CANARY_CLASS17_REASON_MARKER='pricing_area_binding'
+# Phase D drift-counter build canary markers (2026-04-21). Baseline
+# `get_price`-bypass rate is meaningless if the counter silently falls
+# out of a future deploy, so we anchor both the emit tag and the
+# turn_kind partition literal. Observation-only — not a behavior guard.
+DEPLOY_CANARY_DRIFT_EMIT_MARKER='[drift/get-price-bypass]'
+DEPLOY_CANARY_DRIFT_PARTITION_MARKER='post_clarify_continuation'
+# Phase A structured-output build canary markers (2026-04-21). Shadow-
+# mode typed proposer output. If any of these go missing, the eval
+# corpus conformance measurement (>=95% well-formed across blocker
+# transcripts) will silently regress to undefined and we will have lost
+# the Phase A vs baseline comparison. Observation-only.
+DEPLOY_CANARY_PROPOSER_TOOL_MARKER='propose_turn_decision'
+DEPLOY_CANARY_PROPOSER_EMIT_MARKER='[structured-output/proposer]'
+DEPLOY_CANARY_PROPOSER_CONTRACT_MARKER='structured_output_v1'
+# Phase B measure-first build canary (2026-04-21). The
+# `[directive-render/trace]` emit must land in every future
+# octopus-channel bundle so we can keep reading verbs-vs-facts ratios.
+# Observation-only — not a behavior guard.
+DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER='[directive-render/trace]'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -198,6 +232,104 @@ scp "$PROJECT_DIR/workspaces/riders-admin/AGENTS.md" \
     "$PROJECT_DIR/workspaces/riders-admin/SKILL.md" \
     "$PROJECT_DIR/workspaces/riders-admin/TOOLS.md" \
     "$VPS_HOST:$VPS_RIDERS_ADMIN_WORKSPACE_DIR/"
+
+echo "==> Verifying deployed build canaries..."
+ssh "$VPS_HOST" "python3 - <<'PY'
+from pathlib import Path
+
+checks = [
+    (
+        Path('$VPS_PLUGIN_DIR/lib/pricing-resolver.ts'),
+        '$DEPLOY_CANARY_CLASS12_MARKER',
+        'class-12 startup invariant marker',
+    ),
+    (
+        Path('$VPS_PRICING_RESOLVER_OVERLAY_PATH'),
+        '$DEPLOY_CANARY_GROUP_MARKER',
+        'kuwait_city_downtown ambiguity group marker',
+    ),
+    (
+        Path('$VPS_PRICING_RESOLVER_OVERLAY_PATH'),
+        '$DEPLOY_CANARY_OPTION_MARKER',
+        'kuwait_city_downtown member option marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/outbound-verify.ts'),
+        '$DEPLOY_CANARY_CLASS15_VERIFY_MARKER',
+        'class-15 free-composed-area-clarification detector marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/outbound-decision.ts'),
+        '$DEPLOY_CANARY_CLASS15_REASON_MARKER',
+        'class-15 replace_get_price_bypass reason-code marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_CLASS15_INDEX_MARKER',
+        'class-15 classFifteenBypass callsite marker',
+    ),
+    (
+        Path('$VPS_PLUGIN_DIR/lib/tool-conversation-ids.ts'),
+        '$DEPLOY_CANARY_CLASS17_STASH_MARKER',
+        'class-17 getStashedBookingAuthority export marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_CLASS17_INGRESS_MARKER',
+        'class-17 ingress bookingAuthority publish marker',
+    ),
+    (
+        Path('$VPS_PLUGIN_DIR/tools/pricing.ts'),
+        '$DEPLOY_CANARY_CLASS17_REASON_MARKER',
+        'class-17 pricing authority-fallback reason marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_DRIFT_EMIT_MARKER',
+        'phase-d drift get_price-bypass emit marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_DRIFT_PARTITION_MARKER',
+        'phase-d drift post_clarify_continuation partition literal',
+    ),
+    (
+        Path('$VPS_PLUGIN_DIR/tools/proposer.ts'),
+        '$DEPLOY_CANARY_PROPOSER_TOOL_MARKER',
+        'phase-a propose_turn_decision tool registration marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_PROPOSER_EMIT_MARKER',
+        'phase-a structured-output conformance emit marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
+        '$DEPLOY_CANARY_PROPOSER_CONTRACT_MARKER',
+        'phase-a structured_output_v1 prompt contract marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/outbound-decision.ts'),
+        '$DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER',
+        'phase-b directive-render trace emit marker',
+    ),
+]
+
+missing = []
+for path, marker, label in checks:
+    try:
+        text = path.read_text()
+    except Exception as exc:
+        missing.append(f'{label}: unreadable {path} ({exc})')
+        continue
+    if marker not in text:
+        missing.append(f'{label}: missing marker {marker!r} in {path}')
+
+if missing:
+    raise SystemExit('deploy verifier failed:\\n' + '\\n'.join(missing))
+
+print('Build canary markers OK')
+PY"
 
 echo "==> Fixing ownership on delivery project files..."
 ssh "$VPS_HOST" "chown -R root:root /opt/riders-delivery"

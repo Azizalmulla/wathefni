@@ -4,6 +4,7 @@
  * Run from repo: node delivery/scripts/smoke-test-published-pricing-resolver.mjs
  */
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import {
   defaultPublishedPricingPath,
   defaultResolverOverlayPath,
@@ -13,6 +14,7 @@ import {
 
 const PUBLISHED_PATH = defaultPublishedPricingPath;
 const OVERLAY_PATH = defaultResolverOverlayPath;
+const OVERLAY = JSON.parse(fs.readFileSync(OVERLAY_PATH, "utf8"));
 
 async function loadGetPriceTool() {
   return await resolveRegisteredTool(
@@ -36,6 +38,37 @@ async function runCase(getPriceTool, testCase) {
   });
   const text = result?.content?.find?.((item) => item?.type === "text")?.text || "";
   return parseToolText(text);
+}
+
+function assertClarificationHasExpectedOptions(payload, group, query) {
+  assert(payload, `Expected JSON payload for ambiguity group ${group.id}`);
+  assert.equal(
+    payload.status,
+    "clarification_required",
+    `Expected ${group.id} to require clarification for query ${JSON.stringify(query)}`,
+  );
+  assert.equal(
+    payload.field,
+    "dropoff_area",
+    `Expected ${group.id} to clarify the dropoff side for query ${JSON.stringify(query)}`,
+  );
+  assert(Array.isArray(payload.options), `Expected ${group.id} to return options[]`);
+  assert(
+    payload.options.length > 0,
+    `Expected ${group.id} to return a non-empty options[] for query ${JSON.stringify(query)}`,
+  );
+
+  const expectedIds = new Set((group.options || []).map((entry) => entry.area_id));
+  const actualIds = new Set((payload.options || []).map((entry) => entry.area_id));
+  assert.deepEqual(
+    [...actualIds].sort((a, b) => a - b),
+    [...expectedIds].sort((a, b) => a - b),
+    `Expected ${group.id} option ids to match overlay members for query ${JSON.stringify(query)}`,
+  );
+  assert(
+    String(payload.prompt_en || payload.prompt_ar || "").trim().length > 0,
+    `Expected ${group.id} to still return a non-empty clarification prompt for query ${JSON.stringify(query)}`,
+  );
 }
 
 async function main() {
@@ -330,6 +363,44 @@ async function main() {
     /Sabah Al-Ahmad City|South Sabah Al-Ahmad|Sabah Al-Ahmad Marine/,
   );
   console.log("ok - Sabih Ahmad typo no longer misfires to Jaber Al-Ahmad");
+
+  const ambiguityQueries = {
+    khairan: "الخيران",
+    wafra: "الوفرة",
+    saad_abdullah: "سعد العبدالله",
+    sabah_al_ahmad: "صباح الأحمد",
+    shuwaikh: "الشويخ",
+    ardhiya: "العارضية",
+    ahmadi: "الأحمدي",
+    sulaibiya: "الصليبية",
+    doha: "الدوحة",
+    sulaibikhat: "الصليبيخات",
+    sabah_al_salem: "صباح السالم",
+    kabd: "كبد",
+    jahra_area: "الجهراء",
+    shuaiba: "الشعيبة",
+    mina: "ميناء",
+    mina_abdullah: "ميناء عبدالله",
+    kuwait_city_downtown: "Kuwait City",
+    shadadiya: "Shadadiya",
+    sea_front: "The Sea Front",
+  };
+
+  const allAmbiguityGroups = OVERLAY?.resolver?.ambiguity_groups || [];
+  assert.equal(allAmbiguityGroups.length, 19, "Expected 19 ambiguity groups in live resolver overlay");
+  for (const group of allAmbiguityGroups) {
+    const query = ambiguityQueries[group.id];
+    assert(query, `Missing smoke query seed for ambiguity group ${group.id}`);
+    const response = await runCase(getPriceTool, {
+      id: `ambiguity-members-${group.id}`,
+      pickup_area: "Hawalli",
+      dropoff_area: query,
+    });
+    assertClarificationHasExpectedOptions(response.json, group, query);
+    console.log(
+      `ok - ${group.id} returns ${group.options.length} concrete member options for ${JSON.stringify(query)}`,
+    );
+  }
 
   process.exit(0);
 }

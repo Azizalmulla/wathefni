@@ -40,6 +40,11 @@ import type {
 } from "./conversation-policy";
 import type { DialogState, SlotName } from "./dialog-state";
 import { buildDeterministicOrderSummary } from "./outbound-verify";
+import {
+  renderDirectiveReply,
+  isRegisteredDirectiveAction,
+  type DirectiveReplyRendererContext,
+} from "./directive-reply-registry";
 
 export type HallucinationGuardLanguage = "ar" | "en";
 
@@ -394,6 +399,34 @@ function priceDisagrees(
 
 // ---------------------------------------------------------------------------
 // Deterministic fallbacks
+//
+// Phase-B unification (2026-04-22): the guard-repair path and the normal
+// directive-render path MUST produce the same ask for the same state.
+// The guard delegates to `renderDirectiveReply` (moved to
+// `shared/directive-reply-registry.ts` so guards can legally depend on
+// it) for every ASK_* directive whose registry entry is server-rendered.
+//
+// Exceptions that stay guard-local:
+//
+//   - `GENERIC_NUDGE` — fires when we don't have a confident
+//     `nextRequiredAction`. The registry has no matching directive because
+//     the directive computer only emits a known action string (it never
+//     says "I don't know what to ask next").
+//
+//   - `PRICE_REPAIR_TEMPLATE` — neutral in-place repair for
+//     `price_mismatch`. Also has no registry equivalent: it's not a
+//     server-ask directive, it's a don't-advance safety net.
+//
+//   - `cancelRepairText` — parameterised by the option label the customer
+//     appears to be switching to (Bug 2, 2026-04-20). Not a registry
+//     directive; parameterised fallback only.
+//
+//   - `POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF` — the registry
+//     marks this directive `llm_owned` (post-order intent is context-
+//     dependent), so `renderDirectiveReply` returns `{ kind: "llm_owned" }`.
+//     The guard needs its own deterministic string for the "LLM
+//     hallucinated an order-placed state" repair path, so this one entry
+//     stays. All other ASK_* templates have been removed from the guard.
 // ---------------------------------------------------------------------------
 
 type NextStepTemplate = {
@@ -401,36 +434,14 @@ type NextStepTemplate = {
   ar: string;
 };
 
-const NEXT_STEP_TEMPLATES: Record<string, NextStepTemplate> = {
-  ASK_SENDER_NAME_AND_PHONE_DECISION: {
-    en: "Could you share the sender's full name, and let me know if I should use this WhatsApp number or a different one?",
-    ar: "تكرماً، ما هو الاسم الكامل للمرسل؟ وهل أستخدم رقم الواتساب هذا أم رقم آخر؟",
-  },
-  ASK_SENDER_PHONE: {
-    en: "What's the best phone number for the sender?",
-    ar: "ما هو أفضل رقم لتواصل مع المرسل؟",
-  },
-  ASK_RECIPIENT_NAME_AND_PHONE: {
-    en: "Could you share the recipient's full name and phone number?",
-    ar: "تكرماً، ما هو الاسم الكامل ورقم هاتف المستلم؟",
-  },
-  ASK_PICKUP_ADDRESS: {
-    en: "Could you share the pickup address — block, street (or avenue), and a building / apartment / tower identifier?",
-    ar: "تكرماً، ما هو عنوان الاستلام — القطعة والشارع (أو الجادة) ورقم المبنى أو الشقة أو البرج؟",
-  },
-  ASK_DELIVERY_ADDRESS: {
-    en: "Could you share the delivery address — block, street (or avenue), and a building / apartment / tower identifier?",
-    ar: "تكرماً، ما هو عنوان التسليم — القطعة والشارع (أو الجادة) ورقم المبنى أو الشقة أو البرج؟",
-  },
-  POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF: {
-    en: "Your order has already been placed. Would you like me to track it, cancel it, or connect you with our team?",
-    ar: "طلبك مسجل بالفعل. هل تود متابعته، إلغاؤه، أو التواصل مع فريقنا؟",
-  },
+const POST_ORDER_NUDGE: NextStepTemplate = {
+  en: "Your order is already placed. Track it, cancel it, or connect with our team?",
+  ar: "طلبك مسجل بالفعل. تتبّعه، إلغاؤه، أو التواصل مع فريقنا؟",
 };
 
 const GENERIC_NUDGE: NextStepTemplate = {
-  en: "Let me double-check your request. Could you confirm the pickup and delivery areas again?",
-  ar: "تكرماً، هل يمكنك تأكيد منطقة الاستلام ومنطقة التسليم مرة أخرى؟",
+  en: "Let me double-check — could you confirm the pickup and delivery areas?",
+  ar: "للتأكد — ممكن تأكد لنا منطقة الاستلام ومنطقة التوصيل؟",
 };
 
 // -----------------------------------------------------------------------
@@ -493,6 +504,19 @@ function cancelRepairText(
  * Pick a deterministic substitute based on next-required-action + the
  * granular missing sub-fields the address model now emits. Falls back to
  * a generic nudge when we don't have a confident ask.
+ *
+ * Phase-B unification (2026-04-22): for every ASK_* directive whose
+ * registry entry is `{ kind: "server" }`, this function delegates to
+ * `renderDirectiveReply` so the guard-repair path and the normal
+ * directive-render path produce IDENTICAL text for identical state.
+ *
+ * The address-subfield specialization (block / street_or_avenue /
+ * house_or_unit) is kept as a refinement IN FRONT of the registry call:
+ * when `missingFields` names specific sub-fields the customer hasn't
+ * filled, the guard surfaces just those instead of the generic
+ * "block, street, building/apartment?" ask. This is a strict superset of
+ * what the registry alone can express, and it uses evidence the registry
+ * doesn't receive (`missingFields`).
  */
 function deterministicSubstitute(params: {
   nextRequiredAction: string | null;
@@ -502,7 +526,9 @@ function deterministicSubstitute(params: {
 }): { text: string; source: HallucinationGuardDecision["substitutedFrom"] } {
   const { nextRequiredAction, missingFields, entry, language } = params;
 
-  // Refine address asks using the granular sub-field markers.
+  // Refine address asks using the granular sub-field markers. This
+  // lives IN FRONT of the registry delegation because the registry
+  // renderers don't see `missingFields`.
   if (nextRequiredAction === "ASK_PICKUP_ADDRESS" || nextRequiredAction === "ASK_DELIVERY_ADDRESS") {
     const side: "pickup" | "delivery" = nextRequiredAction === "ASK_PICKUP_ADDRESS" ? "pickup" : "delivery";
     const subs: string[] = [];
@@ -511,21 +537,55 @@ function deterministicSubstitute(params: {
     if (missingFields.includes(`${side}.house_or_unit`)) subs.push(language === "ar" ? "رقم المبنى أو الشقة" : "building number or apartment/tower");
     if (subs.length > 0) {
       const sideLabel = language === "ar"
-        ? (side === "pickup" ? "الاستلام" : "التسليم")
+        ? (side === "pickup" ? "الاستلام" : "التوصيل")
         : side;
       const text = language === "ar"
-        ? `تكرماً، ${subs.join("، ")} لعنوان ${sideLabel}؟`
-        : `Could you share the ${subs.join(" and ")} for the ${sideLabel} address?`;
+        ? `${subs.join("، ")} لعنوان ${sideLabel}؟`
+        : `${subs.join(" and ")} for the ${sideLabel} address?`;
       return { text, source: "next_required_action" };
     }
+    // Fall through to registry delegation when no sub-fields are named.
   }
 
+  // Registry delegation. Single source of truth: the same text the
+  // directive-render path would produce for this state.
+  if (nextRequiredAction && entry && isRegisteredDirectiveAction(nextRequiredAction)) {
+    const ctx: DirectiveReplyRendererContext = {
+      language,
+      draft: entry.bookingDraft,
+      entry,
+      conflictingSlot: null,
+      conflictValues: null,
+      // Seed is irrelevant post-Phase-B-trim for all ASK_* directives
+      // (single phrasing each), but the registry still accepts it.
+      // Stable per-entry so that any future reintroduction of a pool
+      // stays deterministic per conversation.
+      turnSeed: String(entry.lastActivityTs ?? 0),
+    };
+    const res = renderDirectiveReply(nextRequiredAction, ctx);
+    if (res.kind === "render") {
+      const sourceTag: HallucinationGuardDecision["substitutedFrom"] =
+        nextRequiredAction === "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED"
+          ? "order_summary"
+          : "next_required_action";
+      return { text: res.text, source: sourceTag };
+    }
+    // `llm_owned` / `existing` / `unknown_action` fall through to the
+    // guard-local fallbacks below.
+  }
+
+  // Legacy summary branch — covers the case where `entry` is present but
+  // the registry returned a non-render result (shouldn't normally
+  // happen, but preserves the prior behavior as a safety net).
   if (nextRequiredAction === "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED" && entry) {
     return { text: buildDeterministicOrderSummary({ entry, language }), source: "order_summary" };
   }
 
-  if (nextRequiredAction && NEXT_STEP_TEMPLATES[nextRequiredAction]) {
-    return { text: NEXT_STEP_TEMPLATES[nextRequiredAction][language], source: "next_required_action" };
+  // Post-order intent is `llm_owned` in the registry. Use the guard's
+  // own deterministic repair here because we CAN'T let a hallucinated
+  // order-placed claim go out with LLM-generated repair text.
+  if (nextRequiredAction === "POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF") {
+    return { text: POST_ORDER_NUDGE[language], source: "next_required_action" };
   }
 
   return { text: GENERIC_NUDGE[language], source: "generic_nudge" };

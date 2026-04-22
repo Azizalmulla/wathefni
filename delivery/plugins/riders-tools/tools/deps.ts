@@ -125,6 +125,13 @@ export interface ToolDeps {
       pickup: string | null;
       dropoff: string | null;
     };
+    alignAreaTokensToRequestedSlot: (
+      tokens: { pickup: string | null; dropoff: string | null },
+      requestedSlotName: "pickup_area" | "dropoff_area" | null | undefined,
+    ) => {
+      pickup: string | null;
+      dropoff: string | null;
+    };
     collectAreaEvidenceFromText: (text: string, data: any) => Set<number>;
     verifyAreaEvidence: (params: any) => any;
     createAreaSuggestionResult: (params: any) => any;

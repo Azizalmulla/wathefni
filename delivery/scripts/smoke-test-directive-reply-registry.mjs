@@ -47,7 +47,7 @@ function loadTs(relativePath) {
 }
 
 const policy = loadTs("plugins/shared/conversation-policy.ts");
-const registry = loadTs("plugins/octopus-channel/lib/directive-reply-registry.ts");
+const registry = loadTs("plugins/shared/directive-reply-registry.ts");
 const outboundDecision = loadTs("plugins/octopus-channel/lib/outbound-decision.ts");
 
 const {
@@ -231,10 +231,97 @@ function baseCtx({
   assert.ok(res.text.includes("apt 12 floor 3"), `C6 incoming: ${res.text}`);
 }
 
+// C7 (2026-04-22): AR CONFIRM_SLOT_CONFLICT must render the slot label
+// in Arabic — no leaking of raw DST slot keys like `sender_name`. This
+// locks in the Defect 2 fix (conv 19294, 2026-04-22).
+//
+// Covers both AR branches:
+//   (a) values-present  → `${label}: «existing» أو «incoming»؟`
+//   (b) values-missing  → `القيمة الصحيحة لـ ${label}؟`
+{
+  // (a) values present: must name the AR label, must contain both values,
+  // must NOT contain the raw English key.
+  const ctxA = baseCtx({
+    language: "ar",
+    conflictingSlot: "sender_name",
+    conflictValues: { existing: "عبدالعزيز الملا", incoming: "عبدالعزيز" },
+  });
+  const resA = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", ctxA);
+  assert.equal(resA.kind, "render", "C7a kind");
+  assert.ok(resA.text.includes("اسم المرسل"), `C7a AR label: ${resA.text}`);
+  assert.ok(
+    !/sender_name|sender name/i.test(resA.text),
+    `C7a must not leak raw EN key: ${resA.text}`,
+  );
+  assert.ok(resA.text.includes("عبدالعزيز الملا"), `C7a existing: ${resA.text}`);
+  assert.ok(resA.text.includes("عبدالعزيز"), `C7a incoming: ${resA.text}`);
+
+  // (b) values missing: must still name the AR label; prompts in the
+  // legacy `القيمة الصحيحة للـ sender name؟` form are a regression.
+  const ctxB = baseCtx({
+    language: "ar",
+    conflictingSlot: "sender_name",
+    conflictValues: null,
+  });
+  const resB = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", ctxB);
+  assert.equal(resB.kind, "render", "C7b kind");
+  assert.ok(resB.text.includes("اسم المرسل"), `C7b AR label: ${resB.text}`);
+  assert.ok(
+    !/sender_name|sender name/i.test(resB.text),
+    `C7b must not leak raw EN key: ${resB.text}`,
+  );
+  assert.ok(
+    resB.text.startsWith("القيمة الصحيحة لـ"),
+    `C7b AR template: ${resB.text}`,
+  );
+
+  // (c) exhaustiveness: every SlotName must produce a non-English label
+  // when rendered through the AR branch. A new slot added to the DST
+  // without an AR label would fall back to underscore-stripped form
+  // (Latin chars) and trip this check.
+  const slotNames = [
+    "sender_name",
+    "sender_phone",
+    "recipient_name",
+    "recipient_phone",
+    "pickup_area",
+    "dropoff_area",
+    "pickup_block",
+    "pickup_street",
+    "pickup_house",
+    "pickup_avenue",
+    "pickup_extra",
+    "delivery_block",
+    "delivery_street",
+    "delivery_house",
+    "delivery_avenue",
+    "delivery_extra",
+  ];
+  for (const slot of slotNames) {
+    const ctx = baseCtx({
+      language: "ar",
+      conflictingSlot: slot,
+      conflictValues: null,
+    });
+    const res = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", ctx);
+    assert.equal(res.kind, "render", `C7c[${slot}] kind`);
+    assert.ok(
+      !/[A-Za-z_]/.test(res.text.replace("KWD", "")),
+      `C7c[${slot}] AR render must not contain Latin slot-key chars: ${res.text}`,
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
-// V1: Variability — different seeds yield at least one pair that differs.
-// Over the 5 server-rendered directives with phrasing pools of size ≥ 2,
-// there must exist a pair of seeds that produces a different string.
+// V1 (Phase B trim, 2026-04-22): facts-only determinism.
+//
+// Pre-trim contract: each renderer owned a small pool and picked one
+// element via `pickPhrasingIndex(seed, pool.length)` — the test asserted
+// that varying the seed surfaced ≥2 distinct phrasings.
+//
+// Post-trim contract: each renderer collapses to a single facts-only
+// phrasing for a given (language, state shape). Varying the seed alone
+// must NOT change the output. Variability is intentionally zero.
 // ---------------------------------------------------------------------------
 {
   const actions = [
@@ -254,9 +341,10 @@ function baseCtx({
       const res = renderDirectiveReply(action, ctx);
       outputs.add(res.text);
     }
-    assert.ok(
-      outputs.size >= 2,
-      `V1: ${action} should vary across seeds; got ${outputs.size} unique outputs`,
+    assert.equal(
+      outputs.size,
+      1,
+      `V1: ${action} must be seed-invariant after Phase B trim; got ${outputs.size} unique outputs`,
     );
   }
 }
@@ -432,6 +520,68 @@ function preInput(overrides = {}) {
     `W5: directive dispatch must defer to A4 on switch_option; got ${res.reason}`,
   );
   assert.equal(res.reason, "replace_price_mismatch", `W5 A4 owns recap; got ${res.reason}`);
+}
+
+// W6 (2026-04-22): confirm_selected_option does NOT skip directive
+// dispatch. The price was already surfaced on the quote turn and is
+// unchanged by a confirm, so there's nothing for A4 to recap. The
+// next-slot ask (e.g. ASK_SENDER_NAME_AND_PHONE_DECISION) is the
+// correct outbound, and the registry owns its wording.
+//
+// Regression: pre-2026-04-22 the skip covered both `switch_option` and
+// `confirm_selected_option`, so the LLM's natural-language ask leaked
+// through on the post-confirm turn, producing the language-agnostic
+// registry miss observed on conv 19294.
+{
+  const ctx = baseCtx({ draftOverrides: { senderName: null } });
+  const sameRouteQuoteAction = {
+    kind: "confirm_selected_option",
+    option: {
+      delivery_type: "sedan_normal",
+      label_en: "Standard sedan",
+      label_ar: "سيارة عادية",
+      quoted_price: 1.25,
+      formatted_price: "1.250 KWD",
+      visibility: "visible",
+      direct_chat_booking_status: null,
+      direct_chat_booking_note: null,
+    },
+  };
+  const activeQuotedRoute = {
+    routeKey: "salmiya__hawalli",
+    pickupAreaNameEn: "Salmiya",
+    pickupAreaNameAr: "السالمية",
+    dropoffAreaNameEn: "Hawalli",
+    dropoffAreaNameAr: "حولي",
+    pricesByType: { sedan_normal: 1.25 },
+    optionCatalog: [sameRouteQuoteAction.option],
+    serviceDiscovery: null,
+  };
+  const res = decidePreStateOutbound(
+    preInput({
+      replyText: "What sender name should we put?",
+      directiveAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+      directiveRenderContext: ctx,
+      sameRouteQuoteAction,
+      activeQuotedRoute,
+      extractPricesFromText: () => [],
+    }),
+  );
+  assert.equal(
+    res.reason,
+    "replace_directive_ask",
+    `W6: confirm_selected_option must fall through to directive dispatch; got ${res.reason}`,
+  );
+  assert.equal(
+    res.decision,
+    "replace_authoritative",
+    `W6: directive dispatch must substitute; got ${res.decision}`,
+  );
+  assert.ok(
+    /Sender's full name\?/i.test(res.replyText) ||
+      /اسم المرسل/.test(res.replyText),
+    `W6: registry ask must replace LLM draft; got ${JSON.stringify(res.replyText)}`,
+  );
 }
 
 // ---------------------------------------------------------------------------

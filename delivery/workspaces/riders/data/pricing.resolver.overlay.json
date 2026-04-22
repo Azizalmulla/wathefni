@@ -3604,6 +3604,10 @@
           "5airan",
           "Al 5airan",
           "khayran"
+        ],
+        "options": [
+          { "area_id": 176, "name_en": "Khiran City", "name_ar": "الخيران السكنية" },
+          { "area_id": 142, "name_en": "Shalehat Al-Khiran", "name_ar": "شاليهات الخيران" }
         ]
       },
       {
@@ -3615,6 +3619,11 @@
           "Wafra",
           "il wafra",
           "wfra"
+        ],
+        "options": [
+          { "area_id": 144, "name_en": "Wafra Residential", "name_ar": "الوفرة السكنية" },
+          { "area_id": 195, "name_en": "Wafra Farms", "name_ar": "مزارع الوفرة" },
+          { "area_id": 157, "name_en": "Wafra", "name_ar": "الوفرة" }
         ]
       },
       {
@@ -3625,6 +3634,15 @@
           "سعد العبدالله",
           "سعد عبدالله",
           "Saad Al-Abdulla"
+        ],
+        "options": [
+          { "area_id": 92, "name_en": "Saad Al-Abdulla", "name_ar": "سعد العبدالله" },
+          { "area_id": 83, "name_en": "South Saad Al-Abdulla 1", "name_ar": "جنوب سعد العبدالله 1" },
+          { "area_id": 75, "name_en": "South Saad Al-Abdulla 2", "name_ar": "جنوب سعد العبدالله 2" },
+          { "area_id": 85, "name_en": "South Saad Al-Abdulla 3", "name_ar": "جنوب سعد العبدالله 3" },
+          { "area_id": 86, "name_en": "South Saad Al-Abdulla 4", "name_ar": "جنوب سعد العبدالله 4" },
+          { "area_id": 82, "name_en": "South Saad Al-Abdulla 5", "name_ar": "جنوب سعد العبدالله 5" },
+          { "area_id": 84, "name_en": "South Saad Al-Abdulla 6", "name_ar": "جنوب سعد العبدالله 6" }
         ]
       },
       {
@@ -3645,6 +3663,18 @@
           "Saba7 Ahmad",
           "Saba7 Ahmed",
           "Saba7 El Ahmad"
+        ],
+        "options": [
+          { "area_id": 161, "name_en": "Sabah Al-Ahmad 1", "name_ar": "صباح الأحمد 1" },
+          { "area_id": 162, "name_en": "Sabah Al-Ahmad 2", "name_ar": "صباح الأحمد 2" },
+          { "area_id": 143, "name_en": "Sabah Al-Ahmad 3", "name_ar": "صباح الأحمد 3" },
+          { "area_id": 158, "name_en": "Sabah Al-Ahmad 4", "name_ar": "صباح الأحمد 4" },
+          { "area_id": 135, "name_en": "Sabah Al-Ahmad 5", "name_ar": "صباح الأحمد 5" },
+          { "area_id": 189, "name_en": "Sabah Al-Ahmad 6", "name_ar": "صباح الأحمد 6" },
+          { "area_id": 159, "name_en": "Sabah Al-Ahmad Investment", "name_ar": "صباح الأحمد استثمارية" },
+          { "area_id": 164, "name_en": "Sabah Al-Ahmad Al-marine", "name_ar": "صباح الاحمد البحرية" },
+          { "area_id": 167, "name_en": "East Sabah Al-Ahmad", "name_ar": "شرق صباح الاحمد" },
+          { "area_id": 191, "name_en": "Sabah Al-Ahmad Services", "name_ar": "صباح الأحمد الخدمية" }
         ]
       },
       {
@@ -3658,6 +3688,14 @@
           "Shwe5",
           "Shwaikh",
           "Shwi5"
+        ],
+        "options": [
+          { "area_id": 42, "name_en": "Shuwaikh", "name_ar": "الشويخ" },
+          { "area_id": 34, "name_en": "Shuwaikh Industrial-1", "name_ar": "الشويخ الصناعية 1" },
+          { "area_id": 17, "name_en": "Shuwaikh Industrial-2", "name_ar": "الشويخ الصناعية 2" },
+          { "area_id": 14, "name_en": "Shuwaikh Industrial-3", "name_ar": "الشويخ الصناعية 3" },
+          { "area_id": 27, "name_en": "Shuwaikh Educational", "name_ar": "الشويخ التعليمية" },
+          { "area_id": 35, "name_en": "Shuwaikh Sanitary", "name_ar": "الشويخ الصحية" }
         ]
       },
       {
@@ -3671,6 +3709,12 @@
           "Ardiya",
           "3ardiya",
           "Al 3ardiya"
+        ],
+        "options": [
+          { "area_id": 222, "name_en": "Ardhiya", "name_ar": "العارضية" },
+          { "area_id": 219, "name_en": "Ardhiya Herafiya", "name_ar": "العارضية الحرفية" },
+          { "area_id": 221, "name_en": "Ardiya Government", "name_ar": "العارضية حكومي" },
+          { "area_id": 198, "name_en": "Ardhiya Stores", "name_ar": "العارضية مخازن" }
         ]
       },
       {
@@ -3682,6 +3726,13 @@
           "الاحمدي",
           "احمدي",
           "Ahmadi"
+        ],
+        "options": [
+          { "area_id": 153, "name_en": "North Ahmadi", "name_ar": "شمال الأحمدي" },
+          { "area_id": 156, "name_en": "South Ahmadi", "name_ar": "جنوب الأحمدي" },
+          { "area_id": 154, "name_en": "East Ahmadi", "name_ar": "شرق الأحمدي" },
+          { "area_id": 175, "name_en": "West Ahmadi", "name_ar": "غرب الأحمدي" },
+          { "area_id": 174, "name_en": "Middle of Ahmadi", "name_ar": "وسط الأحمدي" }
         ]
       },
       {
@@ -3693,6 +3744,12 @@
           "صليبية",
           "Sulaibiya",
           "Sulaibyia"
+        ],
+        "options": [
+          { "area_id": 71, "name_en": "Sulaibiya Residential", "name_ar": "الصليبية السكنية" },
+          { "area_id": 81, "name_en": "Sulaibiya Agricultural", "name_ar": "الصليبية الزراعية" },
+          { "area_id": 64, "name_en": "Sulaibiya Industrial 1", "name_ar": "الصليبية الصناعية 1" },
+          { "area_id": 104, "name_en": "Sulaibiya Industrial 2", "name_ar": "الصليبية الصناعية 2" }
         ]
       },
       {
@@ -3703,6 +3760,11 @@
           "الدوحة",
           "دوحة",
           "Doha"
+        ],
+        "options": [
+          { "area_id": 29, "name_en": "Doha Residential", "name_ar": "الدوحة السكنية" },
+          { "area_id": 43, "name_en": "Shalehat Doha", "name_ar": "شاليهات الدوحة" },
+          { "area_id": 45, "name_en": "Mina Doha", "name_ar": "ميناء الدوحة" }
         ]
       },
       {
@@ -3716,6 +3778,11 @@
           "Slibi5at",
           "Slaibi5at",
           "Slibikhat"
+        ],
+        "options": [
+          { "area_id": 23, "name_en": "Sulaibikhat", "name_ar": "الصليبيخات" },
+          { "area_id": 28, "name_en": "Northwest Sulaibikhat", "name_ar": "شمال غرب الصليبيخات" },
+          { "area_id": 79, "name_en": "Sulaibikhat Cemetery", "name_ar": "مقبرة الصليبيخات" }
         ]
       },
       {
@@ -3729,6 +3796,10 @@
           "Saba7 Al Salem",
           "Saba7 AlSalem",
           "Saba7 Salem"
+        ],
+        "options": [
+          { "area_id": 128, "name_en": "Sabah Al-Salem", "name_ar": "صباح السالم" },
+          { "area_id": 216, "name_en": "Sabah Al Salem University", "name_ar": "صباح السالم الجامعية" }
         ]
       },
       {
@@ -3738,6 +3809,10 @@
         "aliases": [
           "كبد",
           "Kabd"
+        ],
+        "options": [
+          { "area_id": 98, "name_en": "Kabd", "name_ar": "كبد" },
+          { "area_id": 186, "name_en": "kabd Agricultural", "name_ar": "كبد الزراعية" }
         ]
       },
       {
@@ -3749,6 +3824,11 @@
           "جهراء",
           "Jahra",
           "il jahra"
+        ],
+        "options": [
+          { "area_id": 112, "name_en": "Jahra", "name_ar": "الجهراء" },
+          { "area_id": 115, "name_en": "Jahra Industrial Herafiya 1", "name_ar": "الجهراء الصناعية الحرفية 1" },
+          { "area_id": 116, "name_en": "Jahra Camps", "name_ar": "معسكرات الجهراء" }
         ]
       },
       {
@@ -3764,6 +3844,10 @@
           "Al Sh3aiba",
           "Shu3aiba",
           "il sh3aiba"
+        ],
+        "options": [
+          { "area_id": 184, "name_en": "Shuaiba Industrial Western", "name_ar": "الشعيبه الصناعيه الغربيه" },
+          { "area_id": 188, "name_en": "Shuaiba Industrial esterly", "name_ar": "الشعيبة الصناعية الشرقية" }
         ]
       },
       {
@@ -3836,6 +3920,13 @@
           "الكويت العاصمة",
           "Kuwait City",
           "Downtown Kuwait"
+        ],
+        "options": [
+          { "area_id": 19, "name_en": "Sharq", "name_ar": "الشرق" },
+          { "area_id": 12, "name_en": "Mirqab", "name_ar": "المرقاب" },
+          { "area_id": 20, "name_en": "Qibla", "name_ar": "القبلة" },
+          { "area_id": 9, "name_en": "Bnaid Al-Qar", "name_ar": "بنيد القار" },
+          { "area_id": 6, "name_en": "Dasman", "name_ar": "دسمان" }
         ]
       },
       {

@@ -367,8 +367,9 @@ gateway_port = int(params.get("gatewayPort") or 18790)
 base = Path.home() / f".openclaw-{profile}"
 controller_path = base / "conversation-controller-state.json"
 inactivity_path = base / "inactivity-state.json"
+guard_path = base / "riders-guard-state.json"
 
-for path in [controller_path, inactivity_path]:
+for path in [controller_path, inactivity_path, guard_path]:
     if path.exists():
         try:
             state = json.loads(path.read_text())
@@ -377,13 +378,32 @@ for path in [controller_path, inactivity_path]:
         if isinstance(state, dict):
             next_state = {}
             for key, value in state.items():
-                if key == conversation_id or key == f"default::{conversation_id}":
-                    continue
-                if isinstance(value, dict):
-                    if str(value.get("conversationId") or value.get("conversation_id") or "") == conversation_id:
+                key_str = str(key or "")
+                if path == guard_path:
+                    if (
+                        key_str == "__global__" or
+                        key_str == conversation_id or
+                        key_str == reply_target or
+                        key_str == f"default::{conversation_id}" or
+                        (conversation_id and key_str.endswith(f"::{conversation_id}")) or
+                        (conversation_id and f":octopus:direct:{conversation_id}" in key_str)
+                    ):
                         continue
-                    if str(value.get("replyTarget") or value.get("reply_target") or "") == reply_target and conversation_id:
+                    if isinstance(value, dict):
+                        last_quote = value.get("lastQuotedRoute") or {}
+                        route_key = str(last_quote.get("routeKey") or "").strip()
+                        if route_key and reply_target and reply_target in route_key:
+                            continue
+                        if str(value.get("replyTarget") or value.get("reply_target") or "") == reply_target:
+                            continue
+                else:
+                    if key_str == conversation_id or key_str == f"default::{conversation_id}":
                         continue
+                    if isinstance(value, dict):
+                        if str(value.get("conversationId") or value.get("conversation_id") or "") == conversation_id:
+                            continue
+                        if str(value.get("replyTarget") or value.get("reply_target") or "") == reply_target and conversation_id:
+                            continue
                 next_state[key] = value
             path.write_text(json.dumps(next_state))
 

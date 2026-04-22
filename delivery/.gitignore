@@ -12,3 +12,5 @@ workspaces/**/.openclaw/
 workspaces/**/data/backups/
 workspaces/riders/data/pricing.resolver.overlay.aliases.generated.json
 workspaces/riders/data/pricing.resolver.learned-aliases.json
+reports/eval-corpus/*
+!reports/eval-corpus/README.md

@@ -53,7 +53,7 @@ function loadTs(relativePath) {
 
 const policy = loadTs("plugins/shared/conversation-policy.ts");
 const verify = loadTs("plugins/shared/outbound-verify.ts");
-const registry = loadTs("plugins/octopus-channel/lib/directive-reply-registry.ts");
+const registry = loadTs("plugins/shared/directive-reply-registry.ts");
 const outboundDecision = loadTs("plugins/octopus-channel/lib/outbound-decision.ts");
 
 const { createEmptyBookingDraft, isExplicitOrderConfirmation } = policy;

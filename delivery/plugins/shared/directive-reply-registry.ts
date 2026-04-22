@@ -67,13 +67,104 @@
 import type {
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
-} from "../../shared/conversation-policy";
-import type { StoredQuotedRoute } from "./quoted-options";
+} from "./conversation-policy";
 import {
   getEffectivePickupAreaName,
   getEffectiveDeliveryAreaName,
-} from "../../shared/conversation-policy";
-import { buildDeterministicOrderSummary } from "../../shared/outbound-verify";
+} from "./conversation-policy";
+import { buildDeterministicOrderSummary } from "./outbound-verify";
+import type { SlotName } from "./dialog-state";
+
+// ---------------------------------------------------------------------------
+// Localized slot-label maps.
+//
+// `CONFIRM_SLOT_CONFLICT` names the disputed field in its prompt. Before
+// 2026-04-22 the renderer derived the label purely by replacing `_` with
+// a space on the raw DST slot name (`sender_name` → "sender name"). That
+// was accidentally readable in English and a bug in Arabic, where the
+// English token got plugged into an Arabic sentence — e.g. the transcript
+// leak `القيمة الصحيحة للـ sender name؟` (conv 19294, 2026-04-22).
+//
+// These maps are `Record<SlotName, string>`, so adding a new slot name
+// to the `SlotName` union without adding a label here is a compile error
+// — the same exhaustiveness contract `DIRECTIVE_REPLY_RENDERERS` relies
+// on for directives. The runtime type of `conflictingSlot` in the
+// renderer context is `string | null` rather than `SlotName`, so a
+// malformed value is still possible at runtime; `slotLabel()` below logs
+// loudly via `console.warn` (deduped per-process) and falls back to the
+// underscore-stripped form rather than crashing or emitting a silent
+// bug.
+// ---------------------------------------------------------------------------
+
+const SLOT_LABELS_AR: Record<SlotName, string> = {
+  sender_name: "اسم المرسل",
+  sender_phone: "رقم المرسل",
+  recipient_name: "اسم المستلم",
+  recipient_phone: "رقم المستلم",
+  pickup_area: "منطقة الاستلام",
+  dropoff_area: "منطقة التسليم",
+  pickup_block: "قطعة الاستلام",
+  pickup_street: "شارع الاستلام",
+  pickup_house: "منزل/مبنى الاستلام",
+  pickup_avenue: "جادة الاستلام",
+  pickup_extra: "تفاصيل الاستلام",
+  delivery_block: "قطعة التسليم",
+  delivery_street: "شارع التسليم",
+  delivery_house: "منزل/مبنى التسليم",
+  delivery_avenue: "جادة التسليم",
+  delivery_extra: "تفاصيل التسليم",
+};
+
+// English labels intentionally mirror the legacy "underscore-stripped"
+// form (e.g. `pickup_extra` → "pickup extra") one-for-one. The accidental
+// readability of raw slot keys in English means pre-2026-04-22 customer
+// UX is preserved byte-for-byte on the EN path, so this patch is an
+// AR-only fix in customer-visible behaviour. Keeping the map here (and
+// making it `Record<SlotName, string>`) still gives us the compile-time
+// guarantee that a new slot name carries both an EN and AR label rather
+// than falling back silently.
+const SLOT_LABELS_EN: Record<SlotName, string> = {
+  sender_name: "sender name",
+  sender_phone: "sender phone",
+  recipient_name: "recipient name",
+  recipient_phone: "recipient phone",
+  pickup_area: "pickup area",
+  dropoff_area: "dropoff area",
+  pickup_block: "pickup block",
+  pickup_street: "pickup street",
+  pickup_house: "pickup house",
+  pickup_avenue: "pickup avenue",
+  pickup_extra: "pickup extra",
+  delivery_block: "delivery block",
+  delivery_street: "delivery street",
+  delivery_house: "delivery house",
+  delivery_avenue: "delivery avenue",
+  delivery_extra: "delivery extra",
+};
+
+// Dedupes the fallback warning to one `console.warn` per process per
+// unique (lang, slot) tuple. The renderer is called inside the turn hot
+// path; if a bug upstream starts flooding unknown slot names, one line
+// per tuple is enough to surface it without drowning the log stream.
+const SLOT_LABEL_WARN_ONCE = new Set<string>();
+
+function slotLabel(language: "ar" | "en", slot: string): string {
+  const map = language === "ar" ? SLOT_LABELS_AR : SLOT_LABELS_EN;
+  const hit = (map as Record<string, string>)[slot];
+  if (hit) return hit;
+  const warnKey = `${language}::${slot}`;
+  if (!SLOT_LABEL_WARN_ONCE.has(warnKey)) {
+    SLOT_LABEL_WARN_ONCE.add(warnKey);
+    try {
+      console.warn(
+        `[slot-label-fallback] language=${language} slot=${JSON.stringify(slot)} remediation=add_entry_to_SLOT_LABELS_${language.toUpperCase()}_in_directive_reply_registry`,
+      );
+    } catch {
+      // console.warn failure is not worth crashing the render.
+    }
+  }
+  return slot.replace(/_/g, " ");
+}
 
 // ---------------------------------------------------------------------------
 // Directive action union (compile-time exhaustive).
@@ -118,14 +209,18 @@ export type DirectiveReplyRendererContext = {
   language: "ar" | "en";
   draft: PersistedBookingDraft;
   entry: PersistedConversationControllerEntry;
-  route: StoredQuotedRoute | null;
   /** Slot name for CONFIRM_SLOT_CONFLICT. Null for other directives. */
   conflictingSlot?: string | null;
   /** For CONFIRM_SLOT_CONFLICT — the two conflicting values to surface. */
   conflictValues?: { incoming: string; existing: string } | null;
   /**
-   * Stable identifier for variability seed. Reuse the drain turn id;
-   * same turn → same phrasing, different turn → likely different.
+   * Stable identifier for variability seed. Phase B (2026-04-22) trim
+   * collapsed every non-area-clarification renderer to a single facts-
+   * only phrasing, so the seed no longer affects output for the trimmed
+   * directives — kept in the type signature because the area-
+   * clarification generic fallbacks (`renderAskPickupArea` /
+   * `renderAskDeliveryArea`) still use `pick()` when no preserved side
+   * and no option list are available.
    */
   turnSeed: string;
 };
@@ -192,18 +287,11 @@ function pick<T>(seed: string, options: T[]): T {
 // ---------------------------------------------------------------------------
 
 function renderAskMissingAreas(ctx: DirectiveReplyRendererContext): string {
+  // Phase B trim (2026-04-22): single facts-only phrasing, no pool.
   if (ctx.language === "ar") {
-    return pick(ctx.turnSeed, [
-      "قبل ما نقدر نسعر، عطنا منطقة الاستلام ومنطقة التوصيل.",
-      "شنو منطقة الاستلام وشنو منطقة التوصيل؟ من دونهم ما نقدر نطلع سعر.",
-      "عشان نسعر بدقّة، أرسل لنا منطقة الاستلام ومنطقة التوصيل.",
-    ]);
+    return "منطقة الاستلام ومنطقة التوصيل؟";
   }
-  return pick(ctx.turnSeed, [
-    "Before I can price this, what's the pickup area and what's the delivery area?",
-    "Could you share the pickup area and the delivery area? I need both to give you a price.",
-    "To price this properly, please send the pickup area and the delivery area.",
-  ]);
+  return "Pickup area and delivery area?";
 }
 
 // Area-clarification renderers (ASK_PICKUP_AREA / ASK_DELIVERY_AREA).
@@ -337,70 +425,53 @@ function renderCollectNextMissingField(
   // If this fires, the concrete directive logic has a gap and we should
   // fix it rather than rely on the generic phrasing.
   if (ctx.language === "ar") {
-    return "ممكن ترسل البيانات الناقصة عشان نكمل؟";
+    return "البيانات الناقصة؟";
   }
-  return "Could you send the remaining booking details so we can continue?";
+  return "Remaining booking details?";
 }
 
 function renderAskSenderNameAndPhoneDecision(
   ctx: DirectiveReplyRendererContext,
 ): string {
+  // Phase B trim (2026-04-22): worst offender pre-trim (mean=100, 55%
+  // verb overhead, pool=3). Collapsed to a single facts-only phrasing
+  // that decomposes the compound ask into two short clauses. The
+  // semantic of "is this WhatsApp number the sender's?" and "should we
+  // use this number for the sender?" is identical from the customer's
+  // POV, so we pick the shorter framing.
   if (ctx.language === "ar") {
-    return pick(ctx.turnSeed, [
-      "تمام. شنو الاسم الكامل للمرسل، وهل تبون نستخدم هالرقم (رقم واتساب الحالي) أو رقم ثاني؟",
-      "تمام. عطنا اسم المرسل الكامل، وهل نخلي الرقم هالرقم أو رقم ثاني؟",
-      "تمام. شنو اسم المرسل الكامل، ونستخدم رقمك الحالي لو عندك رقم غيره؟",
-    ]);
+    return "اسم المرسل الكامل؟ نستخدم رقم الواتساب هذا أو رقم ثاني؟";
   }
-  return pick(ctx.turnSeed, [
-    "Got it. What's the sender's full name, and should we use this number (your WhatsApp) or a different one?",
-    "Great. Sender's full name please, and is this WhatsApp number the sender's contact or a different one?",
-    "Noted. Could I get the sender's full name, and confirm whether to use this number or another?",
-  ]);
+  return "Sender's full name? Use this WhatsApp number, or a different one?";
 }
 
 function renderAskSenderPhone(ctx: DirectiveReplyRendererContext): string {
+  // Phase B trim: preserve the sender-name fact as a brief anchor; drop
+  // the pool entirely.
   const senderName = (ctx.draft.senderName || "").trim();
   if (ctx.language === "ar") {
-    const base = senderName
-      ? `تمام ${senderName}. شنو رقم المرسل؟`
-      : "شنو رقم المرسل؟";
-    return pick(ctx.turnSeed, [
-      base,
-      senderName
-        ? `سجّلنا الاسم ${senderName}. عطنا رقم تواصل المرسل من فضلك.`
-        : "عطنا رقم تواصل المرسل من فضلك.",
-    ]);
+    return senderName
+      ? `تمام ${senderName}. رقم المرسل؟`
+      : "رقم المرسل؟";
   }
-  const base = senderName
-    ? `Thanks ${senderName}. What's the sender's phone number?`
-    : "What's the sender's phone number?";
-  return pick(ctx.turnSeed, [
-    base,
-    senderName
-      ? `Got the name (${senderName}). Could you share the sender's phone number?`
-      : "Could you share the sender's phone number?",
-  ]);
+  return senderName
+    ? `Thanks ${senderName}. Sender's phone number?`
+    : "Sender's phone number?";
 }
 
 function renderAskRecipientNameAndPhone(
   ctx: DirectiveReplyRendererContext,
 ): string {
+  // Phase B trim: single facts-only phrasing, no pool.
   if (ctx.language === "ar") {
-    return pick(ctx.turnSeed, [
-      "ممتاز. الحين عطنا اسم المستلم الكامل ورقمه.",
-      "تمام. شنو اسم المستلم الكامل ورقم تواصله؟",
-      "زين. عطنا بيانات المستلم: الاسم الكامل والرقم.",
-    ]);
+    return "اسم المستلم الكامل ورقمه؟";
   }
-  return pick(ctx.turnSeed, [
-    "Thanks. Now could you share the recipient's full name and phone number?",
-    "Got it. What's the recipient's full name and phone number?",
-    "Noted. Please send the recipient's full name and contact number.",
-  ]);
+  return "Recipient's full name and phone number?";
 }
 
 function renderAskPickupAddress(ctx: DirectiveReplyRendererContext): string {
+  // Phase B trim: single facts-only phrasing, no pool. Area fact
+  // preserved when known (keeps customer oriented).
   const areaName =
     ctx.language === "ar"
       ? (ctx.entry.quotePickupAreaNameAr ||
@@ -410,21 +481,15 @@ function renderAskPickupAddress(ctx: DirectiveReplyRendererContext): string {
       : getEffectivePickupAreaName(ctx.draft, ctx.entry);
   if (ctx.language === "ar") {
     const suffix = areaName ? ` في ${areaName}` : "";
-    return pick(ctx.turnSeed, [
-      `ممكن ترسل عنوان الاستلام${suffix} (القطعة، الشارع، والمبنى/الشقة)؟`,
-      `عطنا عنوان الاستلام${suffix}: قطعة، شارع، ومبنى أو شقة.`,
-      `شنو عنوان الاستلام${suffix} بالتفصيل — قطعة، شارع، ومبنى/شقة؟`,
-    ]);
+    return `عنوان الاستلام${suffix} — قطعة، شارع، مبنى/شقة؟`;
   }
   const suffix = areaName ? ` in ${areaName}` : "";
-  return pick(ctx.turnSeed, [
-    `Could you share the pickup address${suffix} — block, street, and building/apartment?`,
-    `What's the pickup address${suffix}? Please include block, street, and building or apartment.`,
-    `Please send the pickup address${suffix}: block, street, and the building/apartment detail.`,
-  ]);
+  return `Pickup address${suffix} — block, street, building/apartment?`;
 }
 
 function renderAskDeliveryAddress(ctx: DirectiveReplyRendererContext): string {
+  // Phase B trim: single facts-only phrasing, no pool. Area fact
+  // preserved when known.
   const areaName =
     ctx.language === "ar"
       ? (ctx.entry.quoteDropoffAreaNameAr ||
@@ -434,18 +499,10 @@ function renderAskDeliveryAddress(ctx: DirectiveReplyRendererContext): string {
       : getEffectiveDeliveryAreaName(ctx.draft, ctx.entry);
   if (ctx.language === "ar") {
     const suffix = areaName ? ` في ${areaName}` : "";
-    return pick(ctx.turnSeed, [
-      `ممكن ترسل عنوان التوصيل${suffix} (القطعة، الشارع، والمبنى/الشقة)؟`,
-      `عطنا عنوان التوصيل${suffix}: قطعة، شارع، ومبنى أو شقة.`,
-      `شنو عنوان التوصيل${suffix} بالتفصيل — قطعة، شارع، ومبنى/شقة؟`,
-    ]);
+    return `عنوان التوصيل${suffix} — قطعة، شارع، مبنى/شقة؟`;
   }
   const suffix = areaName ? ` in ${areaName}` : "";
-  return pick(ctx.turnSeed, [
-    `Could you share the delivery address${suffix} — block, street, and building/apartment?`,
-    `What's the delivery address${suffix}? Please include block, street, and building or apartment.`,
-    `Please send the delivery address${suffix}: block, street, and the building/apartment detail.`,
-  ]);
+  return `Delivery address${suffix} — block, street, building/apartment?`;
 }
 
 function renderFullOrderSummary(ctx: DirectiveReplyRendererContext): string {
@@ -465,35 +522,43 @@ function renderFullOrderSummary(ctx: DirectiveReplyRendererContext): string {
 }
 
 function renderConfirmSlotConflict(ctx: DirectiveReplyRendererContext): string {
-  const slot = ctx.conflictingSlot || "that field";
-  const prettySlot = slot
-    .replace(/_/g, " ")
-    .replace(/\b(pickup|delivery)\b/gi, (m) => m.toLowerCase());
+  // Phase B trim: single facts-only phrasing, no pool. The slot label
+  // and the two conflicting values ARE the facts; everything else is
+  // removable framing.
+  //
+  // 2026-04-22: slot labels are now looked up via `slotLabel()` so the
+  // AR prompt stops leaking raw English DST keys (`sender_name` → no
+  // longer surfaces in Arabic output). Missing keys fall back to the
+  // legacy underscore-stripped form + `console.warn` so the bug is
+  // loud rather than silent. The compile-time
+  // `Record<SlotName, string>` shape on the label maps enforces that
+  // every new slot added to the DST gets both EN and AR labels.
+  const rawSlot = ctx.conflictingSlot || null;
+  const label = rawSlot
+    ? slotLabel(ctx.language, rawSlot)
+    : ctx.language === "ar"
+      ? "هذا الحقل"
+      : "that field";
   const incoming = ctx.conflictValues?.incoming || null;
   const existing = ctx.conflictValues?.existing || null;
   const both = incoming && existing;
   if (ctx.language === "ar") {
     if (both) {
-      return pick(ctx.turnSeed, [
-        `قبل ما نكمل، أي قيمة بالضبط تبون نحفظها لـ ${prettySlot}: "${existing}" أو "${incoming}"؟`,
-        `أيها الصحيح للـ ${prettySlot}: "${existing}" ولا "${incoming}"؟`,
-      ]);
+      return `${label}: «${existing}» أو «${incoming}»؟`;
     }
-    return pick(ctx.turnSeed, [
-      `عندنا قيمتين مختلفتين للـ ${prettySlot}. ممكن تأكد لنا القيمة الصحيحة قبل نكمل؟`,
-      `نبي نتأكد من القيمة الصحيحة للـ ${prettySlot} قبل نكمل.`,
-    ]);
+    // Note: we use the preposition `لـ` (without the definite article
+    // `ال`) because every entry in `SLOT_LABELS_AR` already carries its
+    // own article (e.g. "اسم المرسل"). Before the AR label map landed,
+    // the prompt used `للـ ` (for the) with the raw English slot key
+    // plugged in after the space — grammatically accidental and
+    // visually broken. `لـ ${label}` reads correctly for every entry in
+    // the map.
+    return `القيمة الصحيحة لـ ${label}؟`;
   }
   if (both) {
-    return pick(ctx.turnSeed, [
-      `Before we continue, which value should I keep for ${prettySlot}: "${existing}" or "${incoming}"?`,
-      `Quick check on ${prettySlot} — is the correct value "${existing}" or "${incoming}"?`,
-    ]);
+    return `${label}: "${existing}" or "${incoming}"?`;
   }
-  return pick(ctx.turnSeed, [
-    `I have two different values for ${prettySlot}. Could you confirm the correct one before we continue?`,
-    `Quick check — which value should I keep for ${prettySlot}?`,
-  ]);
+  return `Correct value for ${label}?`;
 }
 
 // ---------------------------------------------------------------------------

@@ -21,6 +21,7 @@ import {
   type ResponderSetRequestedSlotOp,
   type ResponderSetPendingAreaOp,
 } from "../../shared/responder-state-ops";
+import { getStashedBookingAuthority } from "../lib/tool-conversation-ids";
 import {
   isLlmAreaResolverEnabled,
   resolveAreaWithLlm,
@@ -43,6 +44,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
   } = intentGates;
   const {
     extractAreaTokensFromText,
+    alignAreaTokensToRequestedSlot,
     collectAreaEvidenceFromText,
     verifyAreaEvidence,
     createAreaSuggestionResult,
@@ -107,7 +109,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
       if (!primary) {
         try {
           console.log(
-            `[responder-ops/mark-slot-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)}`,
+            `[responder-ops/mark-slot-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)} conversation_id=${JSON.stringify(ctx?.ConversationId || ctx?.conversationId || ctx?.ConversationID || null)} session_key=${JSON.stringify(ctx?.SessionKey || ctx?.sessionKey || null)} controller_state_key=${JSON.stringify(ctx?.ControllerStateKey || ctx?.controllerStateKey || null)} reply_target=${JSON.stringify(ctx?.replyTarget || ctx?.ReplyTarget || ctx?.SenderId || ctx?.senderId || ctx?.current_customer_whatsapp || null)} to=${JSON.stringify(ctx?.To || ctx?.to || null)}`,
           );
         } catch {}
         return;
@@ -157,7 +159,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
       if (!primary) {
         try {
           console.log(
-            `[responder-ops/mark-pending-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)}`,
+            `[responder-ops/mark-pending-skip] reason=no_primary_id field=${field} aliases=${JSON.stringify(aliases)} conversation_id=${JSON.stringify(ctx?.ConversationId || ctx?.conversationId || ctx?.ConversationID || null)} session_key=${JSON.stringify(ctx?.SessionKey || ctx?.sessionKey || null)} controller_state_key=${JSON.stringify(ctx?.ControllerStateKey || ctx?.controllerStateKey || null)} reply_target=${JSON.stringify(ctx?.replyTarget || ctx?.ReplyTarget || ctx?.SenderId || ctx?.senderId || ctx?.current_customer_whatsapp || null)} to=${JSON.stringify(ctx?.To || ctx?.to || null)}`,
           );
         } catch {}
         return;
@@ -399,7 +401,85 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           })();
 
         if (visibleText) {
-          const rawTokens = extractAreaTokensFromText(visibleText);
+          // Class-17 (2026-04-21) — `stripped_tool_ctx_loses_booking_authority`.
+          //
+          // OpenClaw's tool runtime sometimes hands `get_price` a ctx that
+          // has been stripped of Surface/OriginatingChannel/
+          // ConversationLabel — the exact fields
+          // `isCustomerOctopusContext(ctx)` gates on. When that happens,
+          // `getNormalizedBookingAuthority(ctx)` returns an empty shell,
+          // `controllerEntry` is null, and the symmetric-rebind + DST
+          // misroute guards below silently no-op — which is how a
+          // `get_price(pickup=Mina Doha, dropoff=Mina Doha)` call on the
+          // Hawalli → Doha → "mina doha" canary survived the symmetric
+          // guard and collapsed into the `route_zero_distance` recovery
+          // reply.
+          //
+          // Fallback path: when ctx-derived authority is unavailable or
+          // empty, consult the per-turn snapshot published by
+          // `octopus-channel` at inbound ingress. Shape is normalised so
+          // every downstream reader (pending* / requestedSlot.options /
+          // stage) sees the same view regardless of source. ctx-derived
+          // authority stays authoritative when it's present — the stash
+          // is strictly a last-resort backup.
+          const ctxControllerEntry =
+            ctx && isCustomerOctopusContext(ctx)
+              ? (getNormalizedBookingAuthority(ctx) as any).controller
+              : null;
+          const ctxAuthoritySignalCount =
+            (ctxControllerEntry?.dialogState?.requestedSlot ? 1 : 0) +
+            (ctxControllerEntry?.pendingPickupAreaNameEn ? 1 : 0) +
+            (ctxControllerEntry?.pendingDropoffAreaNameEn ? 1 : 0);
+          let controllerEntry: any = ctxControllerEntry;
+          if (!controllerEntry || ctxAuthoritySignalCount === 0) {
+            const stashed = getStashedBookingAuthority(
+              "pricing_area_binding",
+            );
+            if (stashed) {
+              controllerEntry = {
+                ...(ctxControllerEntry || {}),
+                stage:
+                  ctxControllerEntry?.stage || stashed.stage || "idle",
+                bookingStep:
+                  ctxControllerEntry?.bookingStep ||
+                  stashed.bookingStep ||
+                  "none",
+                pendingPickupAreaNameEn:
+                  ctxControllerEntry?.pendingPickupAreaNameEn ??
+                  stashed.pendingPickupAreaNameEn,
+                pendingPickupAreaNameAr:
+                  ctxControllerEntry?.pendingPickupAreaNameAr ??
+                  stashed.pendingPickupAreaNameAr,
+                pendingDropoffAreaNameEn:
+                  ctxControllerEntry?.pendingDropoffAreaNameEn ??
+                  stashed.pendingDropoffAreaNameEn,
+                pendingDropoffAreaNameAr:
+                  ctxControllerEntry?.pendingDropoffAreaNameAr ??
+                  stashed.pendingDropoffAreaNameAr,
+                dialogState:
+                  ctxControllerEntry?.dialogState?.requestedSlot
+                    ? ctxControllerEntry.dialogState
+                    : {
+                        slots:
+                          ctxControllerEntry?.dialogState?.slots || {},
+                        requestedSlot: stashed.requestedSlot
+                          ? {
+                              name: stashed.requestedSlot.name,
+                              options: stashed.requestedSlot.options,
+                              askedTs: 0,
+                            }
+                          : null,
+                        version: 1,
+                      },
+              };
+            }
+          }
+          const requestedSlot =
+            controllerEntry?.dialogState?.requestedSlot ?? null;
+          const rawTokens = alignAreaTokensToRequestedSlot(
+            extractAreaTokensFromText(visibleText),
+            requestedSlot?.name,
+          );
           // Full-text n-gram evidence set: every area the customer could
           // plausibly be referring to, regardless of phrasing or prefixes.
           // Used to suppress false-positive smuggle rejections when the
@@ -421,11 +501,6 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           //   (3) That match is on the opposite side from the requestedSlot
           //       (i.e. the LLM put the answer in the wrong slot).
           try {
-            const controllerEntry = ctx && isCustomerOctopusContext(ctx)
-              ? (getNormalizedBookingAuthority(ctx) as any).controller
-              : null;
-            const requestedSlot = controllerEntry?.dialogState?.requestedSlot ?? null;
-
             // Symmetric-rebind guard (2026-04-21 area-clarification
             // regression). When a single-word clarification answer like
             // "mirqab" arrives for a `dropoff_area` clarification, some
@@ -626,8 +701,15 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           // Read prior-turn resolved area names (if any) so verifyAreaEvidence
           // can recognize a legitimate carry-forward instead of mis-flagging
           // it as a smuggle. See verifyAreaEvidence for full rationale.
+          //
+          // Class-17: prefer the effective authority we already built above
+          // (which transparently falls back to the stashed snapshot) so a
+          // stripped tool ctx doesn't cause a legitimate pending-area
+          // carry-forward to be misclassified as a smuggle attempt.
           const evidenceController =
-            (getNormalizedBookingAuthority(ctx) as any)?.controller || null;
+            controllerEntry ||
+            (getNormalizedBookingAuthority(ctx) as any)?.controller ||
+            null;
           const pendingPickupNameEn =
             evidenceController?.pendingPickupAreaNameEn ||
             evidenceController?.quotePickupAreaNameEn ||

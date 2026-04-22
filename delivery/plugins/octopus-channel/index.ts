@@ -44,6 +44,7 @@ import {
   sanityCheckBookingDraft,
   DraftSanityProblem,
 } from "../shared/responder-state-ops";
+import { validateProposedTurnDecision } from "../shared/proposer-schema";
 import {
   applyBookingFieldPatch,
   cleanName,
@@ -71,6 +72,8 @@ import {
   decidePreStateOutbound,
   decidePostStateOutbound,
   type OutboundDecisionLogEntry,
+  type OutboundDecisionKind,
+  type OutboundDecisionReason,
 } from "./lib/outbound-decision";
 import {
   extractForNextAction,
@@ -249,8 +252,14 @@ import type { OneBrainNextRequiredAction } from "./lib/one-brain-context";
 import {
   renderDirectiveReply,
   directiveHasServerRenderer,
-} from "./lib/directive-reply-registry";
-import type { DirectiveReplyRendererContext } from "./lib/directive-reply-registry";
+} from "../shared/directive-reply-registry";
+import type { DirectiveReplyRendererContext } from "../shared/directive-reply-registry";
+import type { OutboundProvenance } from "../shared/outbound-provenance";
+import {
+  provenanceFromDecision,
+  isValidOutboundProvenance,
+  OUTBOUND_PROVENANCE_VALUES,
+} from "../shared/outbound-provenance";
 import { formatLiveChannelContext } from "./lib/live-channel-context";
 import {
   formatCustomerProfileContext,
@@ -567,6 +576,9 @@ async function sweepInactivity(): Promise<void> {
             replyTarget: closeReplyTarget,
             text,
             source: "inactivity_close",
+            preferredLanguage: closeLang,
+            provenance: "deterministic_fallback",
+            provenanceReason: "inactivity_close",
           });
           api.logger.info(
             `[octopus] inactivity close sent conversation=${closeConvId} lang=${closeLang} reason=${closeReason}`,
@@ -624,6 +636,9 @@ async function sweepInactivity(): Promise<void> {
             replyTarget: entry.replyTarget,
             text,
             source: "inactivity_nudge",
+            preferredLanguage: entry.language === "ar" ? "ar" : "en",
+            provenance: "deterministic_fallback",
+            provenanceReason: "inactivity_nudge",
           });
           // Send succeeded — now persist nudgeSentTs. Re-read state to avoid
           // clobbering a concurrent customer activity write.
@@ -765,6 +780,8 @@ function flushDebounceBucket(key: string) {
             text: buildProviderIssueFallbackReply("en"),
             source: "processing_error_fallback",
             ingressIds,
+            provenance: "deterministic_fallback",
+            provenanceReason: "processing_error_fallback",
           });
         } catch (_) {}
       }
@@ -2746,6 +2763,31 @@ async function sendOctopusTextReply(params: {
   source?: OctopusReplySource;
   preferredLanguage?: "ar" | "en";
   ingressIds?: string[];
+  /**
+   * Trust tag for the text about to reach the wire. REQUIRED for every
+   * call site (defaulting is intentional so reviewers notice new
+   * untagged sites in diffs). The five-value enum is defined in
+   * `../shared/outbound-provenance.ts` with the mapping rules.
+   *
+   * - `llm_unverified` should never appear in steady state. When it
+   *   does, `[outbound/provenance]` is emitted at warn and a paired
+   *   `operator action required` event lets on-call triage catch the
+   *   bypass before it compounds.
+   */
+  provenance: OutboundProvenance;
+  /**
+   * Short reason code attached to the provenance log line for
+   * per-turn grep. Matches `OutboundDecisionReason` when derived from
+   * the main pipeline, otherwise a free-form identifier for canned
+   * wire paths (e.g. `inactivity_close`, `processing_error_fallback`).
+   */
+  provenanceReason: string;
+  /**
+   * Optional directive action — included in the provenance line so the
+   * eval-corpus can slice by directive without cross-referencing the
+   * earlier `[directive-render/trace]`. Null when not applicable.
+   */
+  provenanceDirective?: string | null;
 }): Promise<void> {
   const {
     api,
@@ -2756,7 +2798,44 @@ async function sendOctopusTextReply(params: {
     source = "reply",
     preferredLanguage = "en",
     ingressIds = [],
+    provenance: rawProvenance,
+    provenanceReason,
+    provenanceDirective = null,
   } = params;
+  // Runtime enum validation for the provenance param. TypeScript
+  // already constrains this at the five call sites inside this file,
+  // but the wire-send boundary is the enforcement surface — we want it
+  // to behave correctly even when a future JS caller, cross-plugin
+  // consumer, or build-step misconfiguration bypasses the type check.
+  //
+  // Tier 1 policy (2026-04-22): DO NOT refuse to send on invalid
+  // provenance. Instead, (a) coerce the tag to `llm_unverified` so the
+  // canonical `[outbound/provenance]` line still accounts for the
+  // send, and (b) emit a dedicated `operator action required` event
+  // with the exact bad value so on-call can locate the caller. This
+  // preserves the "zero behavioural change" guarantee while still
+  // surfacing the bypass loudly enough for the 48h observation
+  // window. Tier 2 (post-48h) will promote this to refuse-to-send.
+  let provenance: OutboundProvenance;
+  if (isValidOutboundProvenance(rawProvenance)) {
+    provenance = rawProvenance;
+  } else {
+    provenance = "llm_unverified";
+    logWebhookEvent(api.logger, "error", "operator action required", {
+      account: account.accountId,
+      conversation: conversationId,
+      replyTarget,
+      cause: "outbound_provenance_invalid",
+      remediation: "pass_a_valid_OutboundProvenance_literal_to_sendOctopusTextReply",
+      provided: typeof rawProvenance === "string"
+        ? rawProvenance
+        : `<non-string:${typeof rawProvenance}>`,
+      allowed: OUTBOUND_PROVENANCE_VALUES.join(","),
+      source,
+      provenanceReason,
+      ingressIds: ingressIds.length > 0 ? ingressIds.join(",") : undefined,
+    });
+  }
   const sanitized = sanitizeAgentReplyText(text);
   let outboundText = sanitized.replyText;
   if (!outboundText && sanitized.providerErrorSuppressed) {
@@ -2798,6 +2877,38 @@ async function sendOctopusTextReply(params: {
     providerErrorSuppressed: sanitized.providerErrorSuppressed,
     ingressIds: ingressIds.length > 0 ? ingressIds.join(",") : undefined,
   });
+  // One canonical [outbound/provenance] line per wire-send. Every
+  // customer-visible reply is accounted for by exactly one of these,
+  // regardless of whether the text came from the main webhook pipeline
+  // or from a canned early path (inactivity sweep, image/audio failure,
+  // location clarification, etc.). Downstream tooling (eval-corpus,
+  // dashboards) can grep on `[outbound/provenance]` and slice by
+  // `provenance` without reading any surrounding context.
+  //
+  // `llm_unverified` is treated as a bypass signal: the text reached
+  // the wire without going through `decidePostStateOutbound`'s C1+C2
+  // gates, which after this PR should never happen in production.
+  // Emitted at `warn` so on-call and the smoke harness notice
+  // immediately, with a paired `operator action required` event for
+  // the audit trail.
+  if (provenance === "llm_unverified") {
+    api.logger.warn(
+      `[outbound/provenance] conversation=${conversationId} provenance=${provenance} reason=${provenanceReason} directive=${provenanceDirective || "-"} source=${source} lang=${preferredLanguage} chars=${outboundText.length}`,
+    );
+    logWebhookEvent(api.logger, "warn", "operator action required", {
+      account: account.accountId,
+      conversation: conversationId,
+      replyTarget,
+      cause: "outbound_provenance_llm_unverified",
+      remediation: "route_call_site_through_decide_post_state_outbound",
+      source,
+      ingressIds: ingressIds.length > 0 ? ingressIds.join(",") : undefined,
+    });
+  } else {
+    api.logger.info(
+      `[outbound/provenance] conversation=${conversationId} provenance=${provenance} reason=${provenanceReason} directive=${provenanceDirective || "-"} source=${source} lang=${preferredLanguage} chars=${outboundText.length}`,
+    );
+  }
   const attemptStartedAt = Date.now();
   for (const [index, chunk] of chunks.entries()) {
     try {
@@ -3285,6 +3396,8 @@ async function handleInboundMessage(params: {
             : "Sorry, I couldn't read the image clearly. Please resend it or type the details.",
           preferredLanguage: imageFailureLanguage,
           ingressIds,
+          provenance: "deterministic_fallback",
+          provenanceReason: "image_read_failure",
         });
         return;
       }
@@ -3328,6 +3441,8 @@ async function handleInboundMessage(params: {
             : "Sorry, I couldn't understand the voice message clearly. Please type your request or send a clearer voice note.",
           preferredLanguage: audioFailureLanguage,
           ingressIds,
+          provenance: "deterministic_fallback",
+          provenanceReason: "audio_transcription_failure",
         });
       }
       return;
@@ -3978,6 +4093,8 @@ async function handleInboundMessage(params: {
       text: locationReply,
       preferredLanguage: preferredReplyLanguage,
       ingressIds,
+      provenance: "authoritative_substitute",
+      provenanceReason: "deterministic_location_clarification",
     });
     api.logger.info(
       `[controller] Deterministic location clarification reply sent conversation=${conversationId} lang=${preferredReplyLanguage} area=${JSON.stringify(nearestAreaName || resolvedLocation?.name || resolvedLocation?.address || "")} text=${JSON.stringify(locationReply)}`,
@@ -4425,6 +4542,78 @@ async function handleInboundMessage(params: {
     }
   }
 
+  // Class-11 fix (2026-04-21): `stripped_tool_ctx_loses_conversation_identity`.
+  //
+  // OpenClaw hands a thinner ctx into `tool.execute(...)` than the one we
+  // build here via `finalizeInboundContext`. When the LLM calls `get_price`
+  // on a clarification turn, `markPendingArea` / `markRequestedAreaSlot`
+  // get a ctx with null `ConversationId`/`SessionKey`/`ControllerStateKey`
+  // and cannot push responder-state ops under any key, so every clarify
+  // write is silently dropped.
+  //
+  // Mirror of `__ridersLastCustomerText` above: publish the current turn's
+  // identity on a well-known `globalThis` key that
+  // `plugins/riders-tools/lib/tool-conversation-ids.ts` reads as a FALLBACK
+  // (only when the ctx itself carries nothing). Keeping this as an
+  // ingress-side write avoids a cross-plugin import (see class-10 for the
+  // prior evidence that bundles sometimes split).
+  //
+  // The stash is TTL-guarded (5 min) and refreshed on every inbound turn,
+  // so it cannot bleed across conversations under any realistic load.
+  //
+  // Class-17 fix (2026-04-21): `stripped_tool_ctx_loses_booking_authority`.
+  //
+  // Class 11 restored conversation identity on a stripped ctx, but the
+  // symmetric-rebind + DST misroute guards inside `pricing.ts` also need
+  // the booking authority (pending area pins, DST `requestedSlot`) that
+  // `getNormalizedBookingAuthority(ctx)` would normally read from the ctx.
+  // That helper is gated on `isCustomerOctopusContext(ctx)` which requires
+  // `ctx.Surface`/`ctx.OriginatingChannel`/`ctx.ConversationLabel` — all
+  // of which are ALSO stripped by the same runtime path that lost
+  // conversation id. So the guards silently no-op and a symmetric
+  // `get_price(pickup=X, dropoff=X)` from the LLM survives all the way
+  // through to the outbound `route_zero_distance` recovery reply.
+  //
+  // The fix is deliberately narrow: extend the same well-known stash with a
+  // minimal authority snapshot (pending areas + requestedSlot + stage /
+  // bookingStep), refreshed on every inbound. Consumers in the tool path
+  // prefer the ctx-derived authority, and only fall back to the stash when
+  // ctx is stripped. Same discipline as class-11.
+  if (senderRole === "customer") {
+    const stashedRequestedSlot =
+      conversationControllerEntry?.dialogState?.requestedSlot ?? null;
+    (globalThis as any).__ridersCurrentTurnIdentity__ = {
+      conversationId: String(conversationId || ""),
+      sessionKey: String(sessionKey || ""),
+      controllerStateKey: String(controllerStateKey || ""),
+      replyTarget: String(replyTarget || ""),
+      senderId: String(senderId || ""),
+      bookingAuthority: conversationControllerEntry
+        ? {
+            stage: String(conversationControllerEntry.stage || "idle"),
+            bookingStep: String(conversationControllerEntry.bookingStep || "none"),
+            pendingPickupAreaNameEn:
+              conversationControllerEntry.pendingPickupAreaNameEn ?? null,
+            pendingPickupAreaNameAr:
+              conversationControllerEntry.pendingPickupAreaNameAr ?? null,
+            pendingDropoffAreaNameEn:
+              conversationControllerEntry.pendingDropoffAreaNameEn ?? null,
+            pendingDropoffAreaNameAr:
+              conversationControllerEntry.pendingDropoffAreaNameAr ?? null,
+            requestedSlot: stashedRequestedSlot
+              ? {
+                  name: String(stashedRequestedSlot.name || ""),
+                  options: Array.isArray(stashedRequestedSlot.options)
+                    ? [...stashedRequestedSlot.options]
+                    : null,
+                }
+              : null,
+          }
+        : null,
+      ts: Date.now(),
+    };
+  }
+
   const ctxPayload = api.runtime.channel.reply.finalizeInboundContext({
     Body: rawBody,
     BodyForAgent: rawBody,
@@ -4480,6 +4669,14 @@ async function handleInboundMessage(params: {
   // Legacy deterministic-greeting early-return removed: one-brain owns
   // greetings and replies via the agent LLM. The old branch was gated behind
   // `!isOneBrainConversation(replyTarget)` which is now provably `false`.
+  //
+  // Class-15 bypass gate (2026-04-21): snapshot the wall-clock at dispatcher
+  // entry. Inside `deliver` we compare `sessionGuard.lastToolTs >=
+  // turnStartMs` to determine whether `get_price` fired during THIS turn
+  // versus at any earlier time. Captured outside the closure so the check
+  // is robust to sessionGuard being loaded AFTER the LLM + tool calls
+  // complete.
+  const turnStartMs = Date.now();
   try {
     await api.runtime.channel.reply.dispatchReplyWithBufferedBlockDispatcher({
       ctx: ctxPayload,
@@ -4497,6 +4694,33 @@ async function handleInboundMessage(params: {
           // `order_submitted`, the customer is in post-order chat and any
           // recap-style "order placed" mention is legitimate.
           const stageAtTurnStart = conversationControllerEntry?.stage ?? null;
+          // Phase D baseline (2026-04-21): drift counter pre-turn snapshot.
+          //
+          // Observation-only: the `[drift/get-price-bypass]` log emitted at
+          // the end of this turn classifies `turn_kind` as either
+          // `initial_route` (route-evidence inbound on an idle conversation)
+          // or `post_clarify_continuation` (a clarification was pinned at
+          // turn start and the customer is answering it). The classification
+          // has to be based on the controller state BEFORE the drain
+          // possibly rewrites `pendingPickup/DropoffAreaNameEn` or
+          // `requestedSlot`, so these snapshots live alongside
+          // `stageAtTurnStart`. No behavior reads them. See the emit-site
+          // below marked `[drift/get-price-bypass]` for the log contract.
+          const pendingPickupAtTurnStart =
+            conversationControllerEntry?.pendingPickupAreaNameEn ?? null;
+          const pendingDropoffAtTurnStart =
+            conversationControllerEntry?.pendingDropoffAreaNameEn ?? null;
+          const requestedSlotNameAtTurnStart =
+            conversationControllerEntry?.dialogState?.requestedSlot?.name ?? null;
+          const requestedSlotOptionsAtTurnStart = Array.isArray(
+            conversationControllerEntry?.dialogState?.requestedSlot?.options,
+          )
+            ? [
+                ...(conversationControllerEntry!.dialogState!.requestedSlot!
+                  .options as string[]),
+              ]
+            : null;
+          const hadActiveQuotedRouteAtTurnStart = Boolean(activeQuotedRoute);
           // Lifted from the drain block so the post-reply hallucination guard
           // can consult this turn's field-rejection evidence. Any rejection
           // pushed here makes a "field is invalid, please resend" LLM reply
@@ -4534,6 +4758,35 @@ async function handleInboundMessage(params: {
           // Its presence proves that the current turn is mid-clarification,
           // and the quoted-state promotion block uses it as a hard veto.
           let turnDrainedRouteSideClarification = false;
+          // Phase A shadow (2026-04-21): captures the raw decision payload
+          // from the `proposed_turn_decision` responder-op so the
+          // post-decision `[structured-output/proposer]` emit can run
+          // `validateProposedTurnDecision` once and cross-reference
+          // `planned_tool_calls` / `pricing_decision.action` against this
+          // turn's actual tool invocations. Hoisted outside the drain
+          // block for the same reason as `turnDrainedRouteSideClarification`
+          // — observation must survive beyond the drain scope.
+          let proposedTurnDecisionRaw: unknown = null;
+          let proposedTurnDecisionCount = 0;
+          let proposedTurnDecisionTurnId: string | null = null;
+          // Distinct responder-op kinds that were actually drained this
+          // turn. Used by the `[structured-output/proposer]` emit to
+          // compare against the LLM's `planned_tool_calls`. Observation
+          // only — populated alongside the main drain loop.
+          const turnDrainedOpKinds = new Set<string>();
+          // v1.1 (2026-04-22): stage the LLM was observing when it decided
+          // whether to include `awaiting_confirmation` in its proposer
+          // payload. Captured BEFORE drain-driven stage promotions so the
+          // `[structured-output/proposer]` emit can decide whether the
+          // classification was expected or not. Reads from the persisted
+          // entry at the top of the turn; the value is read by the emit
+          // block much further below. `unknown` type keeps the captured
+          // value opaque to callers other than the emit.
+          const currentControllerStageForProposerEmit: string | null =
+            conversationControllerEntry &&
+            typeof conversationControllerEntry.stage === "string"
+              ? conversationControllerEntry.stage
+              : null;
           // ONE-BRAIN mode: simplified drain. One LLM per turn owns all reply
           // copy; we only merge booking patches into the draft, reset on cancel,
           // and flag handoff. No stage/step/hint threading, no deterministic
@@ -4581,6 +4834,15 @@ async function handleInboundMessage(params: {
                 const rejections = hallucinationGuardRejections;
                 const appliedOps: string[] = [];
                 for (const op of drained) {
+                  // Phase A shadow observation: accumulate the distinct
+                  // responder-op kinds seen this turn. The
+                  // `[structured-output/proposer]` emit downstream
+                  // compares this set against the LLM's declared
+                  // `planned_tool_calls`. Observation only.
+                  try {
+                    const kind = String((op as { op?: unknown }).op || "");
+                    if (kind) turnDrainedOpKinds.add(kind);
+                  } catch {}
                   if (op.op === "apply_booking_field") {
                     // Route every LLM-proposed field write through the
                     // one apply boundary. The boundary runs the full
@@ -4772,6 +5034,27 @@ async function handleInboundMessage(params: {
                     // NOT mutate controller state by itself.
                     appliedOps.push(
                       `propose_option_interpretation(${op.class ?? "-"}/${op.tier ?? "-"}/${op.confidence})`,
+                    );
+                  } else if (op.op === "proposed_turn_decision") {
+                    // Phase A (2026-04-21) — shadow-mode typed proposer
+                    // output. Carried through so the post-drain emit
+                    // can run `validateProposedTurnDecision` and compare
+                    // `planned_tool_calls` / `pricing_decision.action`
+                    // against this turn's actual tool invocations.
+                    // Emitting the op does NOT mutate any state and
+                    // does NOT gate any behavior — see
+                    // `[structured-output/proposer]` emit for the
+                    // conformance signal we log instead.
+                    proposedTurnDecisionCount += 1;
+                    if (proposedTurnDecisionCount === 1) {
+                      proposedTurnDecisionRaw = (
+                        op as { decision: unknown }
+                      ).decision;
+                      proposedTurnDecisionTurnId =
+                        (op as { turn_id?: string }).turn_id || null;
+                    }
+                    appliedOps.push(
+                      `proposed_turn_decision:shadow${proposedTurnDecisionCount > 1 ? `(dup=${proposedTurnDecisionCount})` : ""}`,
                     );
                   } else if (op.op === "start_booking" || op.op === "confirm_summary") {
                     // One-brain ignores these — `apply_booking_field` and
@@ -5300,6 +5583,19 @@ async function handleInboundMessage(params: {
           let turnReplyAuthor: "server" | "llm" | "fallback" = "llm";
           let turnReplyReason: string = "allow";
           let turnReplyDirective: string | null = null;
+          // Provenance tracking (2026-04-22). Separate from Phase 5
+          // `replyAuthor` / `reason`: those feed the existing
+          // `[one-brain/reply-attribution]` line and downstream
+          // dashboards; these four drive the new
+          // `[outbound/provenance]` line and the `sendOctopusTextReply`
+          // bypass assertion. Initial values reflect "pipeline hasn't
+          // run yet" — if the turn exits without setting
+          // `turnPostStateRan = true`, the derived provenance stays
+          // `llm_unverified` and the wire-send emits at warn.
+          let turnPostStateRan = false;
+          let turnPostStateWasLightweight = false;
+          let turnFinalDecision: OutboundDecisionKind = "allow";
+          let turnFinalReason: OutboundDecisionReason = "allow";
           // Step-4 consolidation: Region A of the former inline decision
           // pipeline (canonical overwrite, empty-fill, price whitelist,
           // same-route quote correction) is now a single pure call. It runs
@@ -5485,7 +5781,6 @@ async function handleInboundMessage(params: {
                     language: preferredReplyLanguage,
                     draft: conversationControllerEntry.bookingDraft,
                     entry: conversationControllerEntry,
-                    route: activeQuotedRoute || null,
                     conflictingSlot,
                     conflictValues,
                     turnSeed: String(
@@ -5536,6 +5831,14 @@ async function handleInboundMessage(params: {
             turnReplyAuthor = preDecision.replyAuthor;
             turnReplyReason = preDecision.reason;
             turnReplyDirective = directiveActionForRender;
+            // Seed the final decision from pre-state — post-state
+            // overwrites below if it substitutes. This lets pre-state
+            // substitutions (directive-registry, canonical overwrite,
+            // clarify-before-proceed, manual-confirm, etc.) survive
+            // into the provenance line even when post-state chose
+            // `allow`, which is the common path.
+            turnFinalDecision = preDecision.decision;
+            turnFinalReason = preDecision.reason;
             // Phase 3 (2026-04-20): when Region A substituted the server-
             // composed summary, promote the controller to
             // `summary_shown / summary_pending` in the same turn. Mirrors
@@ -5630,12 +5933,38 @@ async function handleInboundMessage(params: {
                 selectedDeliveryType: null,
                 quotedPrice: null,
                 bookingDraft: createEmptyBookingDraft(),
+                // Reset the dialog-state slot map alongside the booking
+                // draft on successful order placement. Without this,
+                // `slots.sender_name = {status:"filled", value:"…"}`
+                // (and the rest of the identity + address slot records)
+                // survive from the just-placed order into the NEXT
+                // booking in the same conversation, so the boundary
+                // flags any new value for an already-"filled" slot as
+                // `slot_conflict_with_filled_value` even though the
+                // customer is starting a fresh order. Empirically
+                // observed on conv 19294 (2026-04-22): Flow 1 placed
+                // EN order with `sender_name="Abdulaziz almulla"`, then
+                // Flow 2 voice note carried `sender_name="عبدالعزيز"`
+                // was rejected twice (fast_path + llm) with
+                // `slot_conflict_with_filled_value`, triggering a
+                // spurious CONFIRM_SLOT_CONFLICT whose AR renderer then
+                // leaked the raw slot key (Defect 2). The draft is
+                // already reset above, so DST must follow to stay in
+                // lockstep. Pattern mirrors the cancellation branch
+                // (see createEmptyDialogState / createRouteResetDialogState
+                // earlier in this file) — when DST is disabled via
+                // feature flag (`conversationControllerEntry.dialogState`
+                // is already null) we preserve null rather than
+                // materialising a state record.
+                dialogState: conversationControllerEntry.dialogState
+                  ? createEmptyDialogState()
+                  : null,
                 pendingReplyText: null,
                 submittedOrderUid,
               };
               if (submittedOrderUid) {
                 api.logger.info(
-                  `[post-order] stage=order_submitted uid=${submittedOrderUid} conversation=${conversationId}`,
+                  `[post-order] stage=order_submitted uid=${submittedOrderUid} conversation=${conversationId} dialog_state_reset=${conversationControllerEntry.dialogState ? "yes" : "na"}`,
                 );
               }
             } else if (sessionGuard.lastToolName === "track_order") {
@@ -5876,6 +6205,36 @@ async function handleInboundMessage(params: {
                 }
               }
             }
+            // Class-15 bypass detection (2026-04-21).
+            //
+            // Precondition tuple: this turn's inbound carried route
+            // evidence ("delivery salmiya to kuwait city pls", etc.)
+            // AND there was no active quoted route at turn start AND
+            // `get_price` did NOT fire during this turn. When all
+            // three hold, `decidePostStateOutbound` substitutes any
+            // free-composed area clarification with a deterministic
+            // repair reply. See `classFifteenBypass` in
+            // `outbound-decision.ts` + `looksLikeFreeComposedAreaClarification`
+            // in `shared/outbound-verify.ts`.
+            //
+            // `getPriceFiredThisTurn` compares the post-drain
+            // `sessionGuard.lastToolTs` against the dispatcher-entry
+            // `turnStartMs` snapshot. `>= turnStartMs` means the tool
+            // fired during this turn (riders-tools writes a fresh ts
+            // on every successful pricing call). Any earlier timestamp
+            // — including a stale `lastQuotedRoute` carried over from
+            // a previous turn / session — fails the check, which is
+            // what we want: the invariant is "this turn went through
+            // the tool", not "some turn at some point did".
+            const getPriceFiredThisTurn =
+              sessionGuard?.lastToolName === "get_price" &&
+              typeof sessionGuard?.lastToolTs === "number" &&
+              sessionGuard.lastToolTs >= turnStartMs;
+            const classFifteenBypass =
+              hasRouteEvidence(rawBody) &&
+              (stageAtTurnStart === null || stageAtTurnStart === "idle") &&
+              !activeQuotedRoute &&
+              !getPriceFiredThisTurn;
             const postDecision = decidePostStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -5890,10 +6249,30 @@ async function handleInboundMessage(params: {
               controllerTransitionHint,
               buildDeterministicGraceWindowReply,
               buildProviderIssueFallbackReply,
+              classFifteenBypass,
               conversationId,
             });
             replyText = postDecision.replyText;
             emitOutboundDecisionLogs(api, postDecision.logEntries);
+            // Provenance derivation: this branch always runs C1 + C2
+            // (the `hallucinationGuardEnabled` flag only gates C2 inside
+            // `decidePostStateOutbound`; C1's `verifyAndRepairOutbound`
+            // always runs when `conversationControllerEntry` is non-null,
+            // which is the condition for entering this branch). So
+            // `verifiedByPostDecision` is true whenever post-state chose
+            // `allow` / `allow_sanitized`, which lets us confidently
+            // emit `llm_verified` instead of `llm_unverified`.
+            turnPostStateRan = true;
+            // Post-state wins on substitution (same policy as
+            // `turnReplyAuthor`): if C1 / C2 rewrote the reply, the
+            // customer saw the substitute, so provenance should
+            // reflect that. On `allow`, preserve whatever pre-state
+            // already set so a `registry_rendered` upstream decision
+            // isn't demoted to `llm_verified`.
+            if (postDecision.decision !== "allow") {
+              turnFinalDecision = postDecision.decision;
+              turnFinalReason = postDecision.reason;
+            }
             // Phase 5 attribution: post-state wins when it substituted;
             // preserves pre-state attribution otherwise. "Post wins on
             // substitution" gives us the strongest outcome — if
@@ -5912,6 +6291,308 @@ async function handleInboundMessage(params: {
                 stage: "summary_shown" as ConversationFlowStage,
                 bookingStep: "summary_pending" as BookingCollectionStep,
               };
+            }
+            // [drift/get-price-bypass] Phase D baseline counter (2026-04-21).
+            //
+            // STRICTLY observation-only. No routing changes, no substitutions,
+            // no new guards. This block MAY NOT throw: a try/catch wraps the
+            // entire emit so a broken classifier cannot take down a turn.
+            //
+            // `turn_kind` partitions the turn into the two populations we
+            // actually care about measuring:
+            //
+            //   * `initial_route` — the customer opened with a route intent on
+            //     an idle conversation with no active quoted route. This is
+            //     the Class-15 canary population: we want to know how often
+            //     the LLM calls `get_price` on this turn vs. how often the
+            //     Class-15 repair had to substitute vs. how often a free
+            //     composition slipped past both.
+            //
+            //   * `post_clarify_continuation` — the previous turn pinned a
+            //     pending pickup or dropoff and set a DST `requestedSlot` for
+            //     a pickup_area/dropoff_area clarification. This is the
+            //     Class-16/17 canary population: the customer is answering the
+            //     clarification, and the LLM should be calling `get_price`
+            //     with the pinned side + the customer's answer. We want to
+            //     know how often this turn skips the tool entirely.
+            //
+            //   * `other` — everything else. Greetings, address collection,
+            //     booking-detail collection, informational Q&A, post-order
+            //     chat, etc. Not load-bearing for the two blocker classes.
+            //
+            // `outcome` is the fine-grained bucket per turn_kind. The whole
+            // emit is a single structured line so downstream tooling can
+            // aggregate cheaply. See BUG_CLASSES.md for the Phase D metric
+            // definition.
+            try {
+              const inboundHasRouteEvidence = hasRouteEvidence(rawBody);
+              const isIdleStart =
+                stageAtTurnStart === null || stageAtTurnStart === "idle";
+              const hadClarifyPending =
+                (pendingPickupAtTurnStart || pendingDropoffAtTurnStart) &&
+                (requestedSlotNameAtTurnStart === "pickup_area" ||
+                  requestedSlotNameAtTurnStart === "dropoff_area");
+              let turnKind: "initial_route" | "post_clarify_continuation" | "other";
+              if (
+                inboundHasRouteEvidence &&
+                isIdleStart &&
+                !hadActiveQuotedRouteAtTurnStart
+              ) {
+                turnKind = "initial_route";
+              } else if (hadClarifyPending) {
+                turnKind = "post_clarify_continuation";
+              } else {
+                turnKind = "other";
+              }
+              const postReasonStr = String(postDecision.reason || "");
+              const class15RepairFired =
+                postReasonStr === "replace_get_price_bypass";
+              let outcome:
+                | "tool_owned"
+                | "class15_repair"
+                | "turn1_bypass"
+                | "post_clarify_bypass"
+                | "irrelevant";
+              if (turnKind === "initial_route") {
+                if (getPriceFiredThisTurn) {
+                  outcome = "tool_owned";
+                } else if (class15RepairFired) {
+                  outcome = "class15_repair";
+                } else {
+                  outcome = "turn1_bypass";
+                }
+              } else if (turnKind === "post_clarify_continuation") {
+                outcome = getPriceFiredThisTurn
+                  ? "tool_owned"
+                  : "post_clarify_bypass";
+              } else {
+                outcome = "irrelevant";
+              }
+              const escapeLogString = (raw: string): string =>
+                raw.replace(/["\\\n\r]/g, " ").slice(0, 80);
+              const inboundPreview = escapeLogString(String(rawBody || ""));
+              const optionsPreview = Array.isArray(
+                requestedSlotOptionsAtTurnStart,
+              )
+                ? requestedSlotOptionsAtTurnStart
+                    .map((o) => String(o || "").trim())
+                    .filter(Boolean)
+                    .slice(0, 6)
+                    .join("|")
+                : "-";
+              api.logger.info(
+                `[drift/get-price-bypass] conversation=${conversationId} ` +
+                  `turn_kind=${turnKind} outcome=${outcome} ` +
+                  `get_price_fired=${getPriceFiredThisTurn ? "true" : "false"} ` +
+                  `class15_bypass_flag=${classFifteenBypass ? "true" : "false"} ` +
+                  `class15_repair_fired=${class15RepairFired ? "true" : "false"} ` +
+                  `stage_at_turn_start=${stageAtTurnStart || "-"} ` +
+                  `had_active_quoted_route=${hadActiveQuotedRouteAtTurnStart ? "true" : "false"} ` +
+                  `pending_pickup=${pendingPickupAtTurnStart || "-"} ` +
+                  `pending_dropoff=${pendingDropoffAtTurnStart || "-"} ` +
+                  `requested_slot=${requestedSlotNameAtTurnStart || "-"} ` +
+                  `requested_options=[${optionsPreview}] ` +
+                  `route_evidence_inbound=${inboundHasRouteEvidence ? "true" : "false"} ` +
+                  `reply_author=${turnReplyAuthor || "-"} ` +
+                  `reply_reason=${turnReplyReason || "-"} ` +
+                  `inbound="${inboundPreview}"`,
+              );
+            } catch (driftEmitError) {
+              try {
+                api.logger.warn(
+                  `[drift/get-price-bypass] emit failed conversation=${conversationId} error=${
+                    driftEmitError instanceof Error
+                      ? driftEmitError.message
+                      : String(driftEmitError)
+                  }`,
+                );
+              } catch {}
+            }
+            // [structured-output/proposer] Phase A shadow conformance emit
+            // (2026-04-21; extended 2026-04-22 with awaiting_confirmation).
+            //
+            // STRICTLY observation-only. No routing change, no substitution,
+            // no behavior gate. Paired with `[drift/get-price-bypass]` above.
+            //
+            // This is the single conformance signal the Phase A promotion
+            // gate (>=95% well-formed across the Phase C eval corpus) will
+            // be measured against. Shape:
+            //
+            //   present=<bool>         — did the LLM call `propose_turn_decision`?
+            //   schema_valid=<bool>    — did the payload pass v1.0/v1.1 validation?
+            //   schema_version=<enum|-> — the schema_version the payload declared
+            //                              (accepted set: v1.0 | v1.1).
+            //   turn_kind=<enum|->     — LLM's self-classification.
+            //   pricing_action=<enum|-> — LLM's declared pricing decision.
+            //   planned_tool_calls=[]  — names declared by the LLM.
+            //   fired_tool_ops=[]      — op names actually drained this turn.
+            //   plan_vs_fire=<tag>     — quick conformance bucket:
+            //     * `aligned`   — declared get_price AND get_price fired
+            //                     (or declared none AND none fired)
+            //     * `drift_declared_not_fired` — planned get_price, didn't call it
+            //     * `drift_fired_not_planned`  — called get_price, didn't plan it
+            //     * `n/a`       — decision missing / invalid / different action
+            //
+            // v1.1 (2026-04-22) additions for the awaiting-confirmation policy
+            // map. Observability-only today; the Region-A dispatch gate is
+            // wired up in a later PR (Phase B) once classification quality
+            // clears the live test pack:
+            //
+            //   ac_stage=<bool>           — was the current stage one of
+            //                                `summary_shown` / `awaiting_confirmation`?
+            //                                (i.e., was the classification expected?)
+            //   ac_kind=<enum|->          — LLM's 6-way classification, when present.
+            //                                One of: confirm_order, cancel_order,
+            //                                edit_order, informational_question,
+            //                                coherence_pleasantry, unclear.
+            //   ac_classification=<tag>   — conformance bucket for v1.1:
+            //     * `present`          — stage expected it, LLM provided it
+            //     * `missing`          — stage expected it, LLM omitted it
+            //     * `unexpected`       — LLM provided it outside the expected stages
+            //     * `n/a`              — stage didn't expect it and LLM omitted it
+            //
+            // Emitted inside try/catch so a broken classifier cannot take
+            // down a turn. See `plugins/shared/proposer-schema.ts` for the
+            // schema and validator, `plugins/riders-tools/tools/proposer.ts`
+            // for the tool registration.
+            try {
+              const present = proposedTurnDecisionRaw !== null;
+              const validation = present
+                ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                : null;
+              const schemaValid = validation ? validation.ok : false;
+              const declaredSchemaVersion =
+                validation && validation.ok
+                  ? validation.value.schema_version
+                  : "-";
+              const declaredTurnKind =
+                validation && validation.ok
+                  ? validation.value.turn_kind
+                  : "-";
+              const declaredAction =
+                validation && validation.ok
+                  ? validation.value.pricing_decision.action
+                  : "-";
+              const declaredPlannedCalls =
+                validation && validation.ok
+                  ? validation.value.planned_tool_calls
+                  : [];
+              // v1.1 awaiting-confirmation conformance fields.
+              //
+              // We key the "expected" bucket on the CURRENT stage observed at
+              // dispatch time (the controller entry visible to this emit). If
+              // the turn promoted from e.g. `collecting_booking_details` →
+              // `summary_shown` inside the same turn, the LLM had no way to
+              // know the stage would be `summary_shown` by the time this emit
+              // runs — so we read stage AT the point the LLM was invoked.
+              // `currentControllerStageForProposerEmit` is captured once,
+              // immediately before the LLM call, further above in this block.
+              // If it isn't available for some reason (early-return paths),
+              // fall back to the persisted entry stage.
+              const stageForAcExpectation =
+                (typeof currentControllerStageForProposerEmit === "string"
+                  ? currentControllerStageForProposerEmit
+                  : null) ||
+                (conversationControllerEntry &&
+                typeof conversationControllerEntry.stage === "string"
+                  ? conversationControllerEntry.stage
+                  : null);
+              const acStage =
+                stageForAcExpectation === "summary_shown" ||
+                stageForAcExpectation === "awaiting_confirmation";
+              const declaredAwaitingConfirmation =
+                validation && validation.ok
+                  ? validation.value.awaiting_confirmation || null
+                  : null;
+              const acKind =
+                declaredAwaitingConfirmation?.kind || "-";
+              let acClassification:
+                | "present"
+                | "missing"
+                | "unexpected"
+                | "n/a" = "n/a";
+              if (acStage && declaredAwaitingConfirmation) {
+                acClassification = "present";
+              } else if (acStage && !declaredAwaitingConfirmation) {
+                acClassification = "missing";
+              } else if (!acStage && declaredAwaitingConfirmation) {
+                acClassification = "unexpected";
+              }
+              const firedOpNames = Array.from(turnDrainedOpKinds)
+                .filter(
+                  (name) => !!name && name !== "proposed_turn_decision",
+                )
+                .sort();
+              const plannedGetPrice = declaredPlannedCalls.some(
+                (n) => String(n).trim().toLowerCase() === "get_price",
+              );
+              let planVsFire:
+                | "aligned"
+                | "drift_declared_not_fired"
+                | "drift_fired_not_planned"
+                | "n/a" = "n/a";
+              if (validation && validation.ok) {
+                if (declaredAction === "call_get_price") {
+                  planVsFire = getPriceFiredThisTurn
+                    ? "aligned"
+                    : "drift_declared_not_fired";
+                } else if (declaredAction === "none") {
+                  planVsFire = getPriceFiredThisTurn
+                    ? "drift_fired_not_planned"
+                    : "aligned";
+                }
+                if (
+                  planVsFire === "aligned" &&
+                  plannedGetPrice &&
+                  !getPriceFiredThisTurn
+                ) {
+                  planVsFire = "drift_declared_not_fired";
+                }
+                if (
+                  planVsFire === "aligned" &&
+                  !plannedGetPrice &&
+                  getPriceFiredThisTurn
+                ) {
+                  planVsFire = "drift_fired_not_planned";
+                }
+              }
+              const compactList = (arr: string[]): string =>
+                arr
+                  .map((s) => String(s).slice(0, 32).replace(/[,\]\[]/g, " "))
+                  .slice(0, 12)
+                  .join("|");
+              const errorsField =
+                validation && !validation.ok
+                  ? validation.errors.slice(0, 6).join(",")
+                  : "-";
+              api.logger.info(
+                `[structured-output/proposer] conversation=${conversationId} ` +
+                  `present=${present ? "true" : "false"} ` +
+                  `schema_valid=${schemaValid ? "true" : "false"} ` +
+                  `schema_version=${declaredSchemaVersion} ` +
+                  `turn_kind=${declaredTurnKind} ` +
+                  `pricing_action=${declaredAction} ` +
+                  `planned_tool_calls=[${compactList(declaredPlannedCalls)}] ` +
+                  `fired_tool_ops=[${compactList(firedOpNames)}] ` +
+                  `get_price_fired=${getPriceFiredThisTurn ? "true" : "false"} ` +
+                  `plan_vs_fire=${planVsFire} ` +
+                  `ac_stage=${acStage ? "true" : "false"} ` +
+                  `ac_kind=${acKind} ` +
+                  `ac_classification=${acClassification} ` +
+                  `duplicate_count=${proposedTurnDecisionCount} ` +
+                  `turn_id=${proposedTurnDecisionTurnId || "-"} ` +
+                  `errors=${errorsField}`,
+              );
+            } catch (proposerEmitError) {
+              try {
+                api.logger.warn(
+                  `[structured-output/proposer] emit failed conversation=${conversationId} error=${
+                    proposerEmitError instanceof Error
+                      ? proposerEmitError.message
+                      : String(proposerEmitError)
+                  }`,
+                );
+              } catch {}
             }
           } else {
             // No controller entry — handle the bare empty-reply fallbacks
@@ -5935,7 +6616,21 @@ async function handleInboundMessage(params: {
             });
             replyText = postDecision.replyText;
             emitOutboundDecisionLogs(api, postDecision.logEntries);
+            // In the no-controller branch, `decidePostStateOutbound`
+            // runs only the empty-reply fallbacks (B1/B2) — C1 + C2
+            // both require an entry and are skipped. That means an
+            // `allow` outcome here represents LLM text that never went
+            // through the verify / hallucination-guard gates, so
+            // `verifiedByPostDecision` stays false and the derived
+            // provenance is `llm_unverified`. Keeping the flag
+            // conservative here is what lets the eval-corpus distinguish
+            // genuinely unverified main-path turns from the routine
+            // passthrough case (which always has a controller entry).
+            turnPostStateRan = true;
+            turnPostStateWasLightweight = true;
             if (postDecision.decision !== "allow") {
+              turnFinalDecision = postDecision.decision;
+              turnFinalReason = postDecision.reason;
               turnReplyAuthor = postDecision.replyAuthor;
               turnReplyReason = postDecision.reason;
             }
@@ -5953,6 +6648,21 @@ async function handleInboundMessage(params: {
           } catch {}
           const pendingPrefix = conversationControllerEntry?.pendingReplyText?.trim();
           const outboundText = pendingPrefix ? `${pendingPrefix}\n\n${replyText}` : replyText;
+          // Derive outbound provenance from the final (decision, reason)
+          // pair. `verifiedByPostDecision` is true only when post-state
+          // ran the full C1 + C2 gates — the no-controller "lightweight"
+          // branch of `decidePostStateOutbound` runs just the
+          // empty-reply fallbacks, so it does NOT count as verified.
+          // Any `allow` outcome there still produces `llm_unverified`,
+          // which is the signal this PR is designed to surface.
+          const verifiedByPostDecision =
+            turnPostStateRan && !turnPostStateWasLightweight;
+          const outboundProvenance = provenanceFromDecision({
+            decision: turnFinalDecision,
+            reason: turnFinalReason,
+            replyAuthor: turnReplyAuthor,
+            verifiedByPostDecision,
+          });
           try {
             await sendOctopusTextReply({
               api,
@@ -5962,6 +6672,9 @@ async function handleInboundMessage(params: {
               text: outboundText,
               preferredLanguage: preferredReplyLanguage,
               ingressIds,
+              provenance: outboundProvenance,
+              provenanceReason: turnFinalReason,
+              provenanceDirective: turnReplyDirective,
             });
             if (pendingPrefix && conversationControllerEntry) {
               conversationControllerEntry = { ...conversationControllerEntry, pendingReplyText: null };

@@ -210,6 +210,28 @@ export type ResponderOptionInterpretationOp = {
   turn_id: string;
 };
 
+/**
+ * Phase A (2026-04-21): structured proposer-output op.
+ *
+ * Emitted by the `propose_turn_decision` tool. Carries the LLM's typed
+ * per-turn decision (turn_kind, pricing_decision, planned_tool_calls,
+ * customer_reply_draft). Shadow-mode only in this PR — the orchestrator
+ * reads it, logs conformance via `[structured-output/proposer]`, and
+ * does NOT route any behavior on it. See `proposer-schema.ts` for the
+ * validated shape carried in `decision`.
+ */
+export type ResponderProposedTurnDecisionOp = {
+  op: "proposed_turn_decision";
+  /**
+   * The raw JSON decision payload, pre-validation. Kept `unknown` here so
+   * the op type stays forward-compatible with future schema versions; the
+   * orchestrator runs `validateProposedTurnDecision` at drain time and
+   * emits the conformance signal with the validator's verdict.
+   */
+  decision: unknown;
+  turn_id: string;
+};
+
 export type ResponderStateOp =
   | ResponderBookingFieldOp
   | ResponderStartBookingOp
@@ -219,7 +241,8 @@ export type ResponderStateOp =
   | ResponderSetRequestedSlotOp
   | ResponderSetPendingAreaOp
   | ResponderCarryOverFromLastOrderOp
-  | ResponderOptionInterpretationOp;
+  | ResponderOptionInterpretationOp
+  | ResponderProposedTurnDecisionOp;
 
 // Class-10 fix (2026-04-21): `module_instance_isolation_drops_responder_ops`.
 //
@@ -323,6 +346,12 @@ function opDedupKey(op: ResponderStateOp): string {
       return `${base}|${(op.buckets || []).join(",")}`;
     case "propose_option_interpretation":
       return `${base}|${op.class || ""}|${op.tier || ""}|${op.confidence}`;
+    case "proposed_turn_decision":
+      // Dedup at most ONE decision per turn. Two pushes in the same turn
+      // would be a bug (the tool is supposed to be called exactly once),
+      // so dedup-by-turn-id is the right containment — we keep the first,
+      // observability log will flag the second.
+      return `${base}|decision`;
     default:
       return base;
   }

@@ -375,6 +375,7 @@ const moduleSrc = fs.readFileSync(
       "replace_clarify_option_before_proceed",
       "replace_directive_ask",
       "replace_field_rejection_hallucination",
+      "replace_get_price_bypass",
       "replace_manual_confirm_address_ask",
       "replace_manual_confirm_handoff",
       "replace_order_placed_hallucination",
@@ -382,7 +383,7 @@ const moduleSrc = fs.readFileSync(
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
     ],
-    "Reason codes must be exactly the fixed enum (14 entries after Phase 2 directive registry)",
+    "Reason codes must be exactly the fixed enum (15 entries after Class-15 replace_get_price_bypass)",
   );
 }
 

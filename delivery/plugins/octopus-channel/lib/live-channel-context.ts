@@ -198,7 +198,7 @@ export function formatLiveChannelContext(
       "STRICT: Always reply in the latest clear customer language. Do not mix Arabic and English in the same customer reply, and do not continue in Arabic after a new English customer message unless the customer switches back.",
     );
     lines.push(
-      "STRICT: For any pricing request or route-specific service question without an active quoted route, you MUST call get_price in this turn before replying. Never quote a remembered, cached, historical, or guessed price from memory, previous replies, customer memory, or past orders.",
+      "STRICT: For any pricing request or route-specific service question without an active quoted route, you MUST call get_price in this turn before replying. This includes concrete route intents where one side may be broad, fuzzy, or ambiguous (for example a parent area like Kuwait City): pass your best pickup/dropoff interpretation to get_price and let the tool return clarification_required. Do NOT ask a free-composed area clarification before the tool. Never quote a remembered, cached, historical, or guessed price from memory, previous replies, customer memory, or past orders.",
     );
     lines.push(
       "STRICT: If you do not have a fresh get_price result in the current turn, do not mention any numeric delivery price.",

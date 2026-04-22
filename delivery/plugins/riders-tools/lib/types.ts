@@ -47,7 +47,24 @@ export interface PricingResolverAmbiguityGroup {
   prompt_ar: string;
   prompt_en: string;
   aliases?: string[];
-  options?: { area_id: number; name_en: string; name_ar: string }[];
+  /**
+   * Class-12 invariant (2026-04-21): every ambiguity group MUST enumerate
+   * its member areas. Downstream consumers (the pricing tool's
+   * `markRequestedAreaSlot`, the directive reply renderer's `options`
+   * recap, and the DST-swap misroute guard in `pricing.ts`) all need a
+   * concrete list of `name_en` + `area_id` to (a) surface the choices to
+   * the customer, and (b) match the customer's next-turn answer back to
+   * the correct slot. When a group ships with `options` empty, every
+   * layer downstream degrades to a generic "What's the area?" ask and the
+   * DST-swap guard cannot bind the follow-up answer — this is the exact
+   * loop that bit us on `kuwait_city_downtown` → `Bnaid Al-Qar`.
+   *
+   * Enforced at `normalizePricingResolverAmbiguityGroup` + cross-checked
+   * in `validatePricingResolverConfig` so a group with `options.length
+   * === 0` or unknown `area_id` refuses to load — it's a startup error,
+   * never a runtime degradation.
+   */
+  options: { area_id: number; name_en: string; name_ar: string }[];
 }
 
 export interface PricingResolverConfig {

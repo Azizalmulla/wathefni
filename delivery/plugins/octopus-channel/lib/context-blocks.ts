@@ -170,7 +170,7 @@ export function formatBehaviorPolicyContext(
   if (hasPricingFlowRule) {
     lines.push("Critical pricing execution rule:");
     lines.push(
-      "- Before quoting any delivery price, you MUST call get_price with both pickup_area and dropoff_area. If either area is missing or ambiguous, clarify it first. Never quote from memory, assumption, or prior examples. Use only the get_price result.",
+      "- Before quoting any delivery price, you MUST call get_price with both pickup_area and dropoff_area. If the customer gave a concrete route intent but one side may be broad, fuzzy, or ambiguous, still call get_price with your best interpretation for both sides and let the tool return the clarification. Do NOT ask a free-composed area clarification before the tool. Only ask for an area yourself when that side is truly absent from the customer's message. Never quote from memory, assumption, or prior examples. Use only the get_price result.",
     );
   }
   if (filteredPhraseGuards.length > 0) {

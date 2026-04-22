@@ -63,6 +63,8 @@ import type {
   VerifyOutboundResult,
 } from "../../shared/outbound-verify";
 import {
+  buildClass15BypassRepairReply,
+  looksLikeFreeComposedAreaClarification,
   verifyAndRepairOutbound,
   verifyCompactFactualClaims,
 } from "../../shared/outbound-verify";
@@ -74,7 +76,7 @@ import type {
 import type {
   DirectiveReplyRendererContext as DirectiveReplyRenderContext,
   DirectiveReplyRenderResult,
-} from "./directive-reply-registry";
+} from "../../shared/directive-reply-registry";
 
 /**
  * Top-level decision kinds — the 5-way contract from the Step-4 spec.
@@ -184,6 +186,11 @@ export type OutboundDecisionReason =
   | "replace_manual_confirm_address_ask"
   | "replace_manual_confirm_handoff"
   | "replace_directive_ask"
+  // Class 15 (2026-04-21): on a route-intent turn where the LLM
+  // free-composed an area clarification WITHOUT calling get_price,
+  // substitute with a deterministic send-both-areas repair reply.
+  // See `classFifteenBypass` input + (B3) below.
+  | "replace_get_price_bypass"
   | "block_provider_error"
   | "fallback_empty_reply"
   | "preserve_clarification";
@@ -408,6 +415,32 @@ export type PostStateOutboundInput = {
    *  of circular plugin imports. */
   buildDeterministicGraceWindowReply: (language: "ar" | "en") => string;
   buildProviderIssueFallbackReply: (language: "ar" | "en") => string;
+
+  /**
+   * Class-15 bypass gating (2026-04-21).
+   *
+   * Set by the caller when:
+   *
+   *   - The inbound for this turn has route evidence (the customer
+   *     named or clearly referenced a pickup → delivery route).
+   *   - There was NO active quoted route at turn start.
+   *   - `get_price` was NOT called during this turn (sessionGuard
+   *     `lastToolName` / `lastToolTs` did not advance under
+   *     `get_price`).
+   *
+   * When set, Region D inspects the current `reply` and — if the
+   * shape matches `looksLikeFreeComposedAreaClarification` —
+   * substitutes with the deterministic repair reply
+   * (`buildClass15BypassRepairReply`). The fix stops the LLM from
+   * sending a tool-less free-composed area ask that downstream
+   * turns would then have to re-interpret without any server-owned
+   * pending-area / requested-slot state, and it forces the next
+   * customer turn to carry both areas so the tool-owned path is
+   * hit cleanly.
+   *
+   * Left `false` in every other case so the branch is a no-op on
+   * healthy turns. */
+  classFifteenBypass?: boolean;
 
   conversationId: string;
 };
@@ -654,18 +687,27 @@ function decidePreStateOutboundImpl(
   // generic registry doesn't need to replicate. For them the registry
   // dispatcher returns `{kind: "existing"}` and this block is a no-op.
   //
-  // Skipped when `sameRouteQuoteAction` is a switch/confirm-selected
-  // action this turn. In that case the customer just picked an option,
-  // and A4 below owns the recap/ask composition (or the LLM's reply
-  // passes through when it already contains the expected price). The
-  // directive dispatch would otherwise render just the bare next-slot
-  // ask and lose the price-recap context the customer expects
-  // immediately after a selection.
+  // Skipped when `sameRouteQuoteAction` is a `switch_option` action
+  // this turn. In that case the customer just switched to a different
+  // option and the new price must be recapped — A4 below owns that
+  // recap/ask composition (or the LLM's reply passes through when it
+  // already contains the expected price).
+  //
+  // 2026-04-22 — narrowed from `switch_option | confirm_selected_option`
+  // to `switch_option` only. `confirm_selected_option` does NOT change
+  // the price (the customer already heard it on the quote turn), so
+  // there is nothing to recap and the registry's next-slot ask
+  // (ASK_SENDER_NAME_AND_PHONE_DECISION after quote acceptance) is the
+  // correct outbound. Keeping `confirm_selected_option` in the skip
+  // caused a language-agnostic registry miss observed in conv 19294
+  // (2026-04-22): both the EN "lets go ahead woth the standard sedan"
+  // and AR "خلاص سيارة عادية لو سمحت" turns rendered an LLM-authored
+  // sender-name ask even though the directive was computed and tagged
+  // on the outbound-provenance line.
   // ------------------------------------------------------------------
   const skipDirectiveDispatchForSameRouteSwitch =
     !!input.sameRouteQuoteAction &&
-    (input.sameRouteQuoteAction.kind === "switch_option" ||
-      input.sameRouteQuoteAction.kind === "confirm_selected_option");
+    input.sameRouteQuoteAction.kind === "switch_option";
   if (
     !skipDirectiveDispatchForSameRouteSwitch &&
     input.directiveAction &&
@@ -685,6 +727,59 @@ function decidePreStateOutboundImpl(
           originalLen: reply ? reply.length : 0,
         },
       });
+      // Phase B measure-first (2026-04-21): observation-only trace so we
+      // can see which renderers layer verbs/shape on top of facts. The
+      // `facts` bundle captures the raw inputs a facts-only variant
+      // would use (area names, options, conflicting slot, sender name).
+      // Offline analysis computes the verbs-to-facts ratio by comparing
+      // `rendered` length to a minimal facts-only projection — no
+      // behavior change here.
+      //
+      // `emitOutboundDecisionLogs` only serialises `message`, so the
+      // full trace payload is JSON-packed into the message string on a
+      // single line for easy `rg`/`jq` post-processing.
+      try {
+        const ctx = input.directiveRenderContext;
+        const draft = ctx?.draft ?? null;
+        const entry = ctx?.entry ?? null;
+        const requestedSlot = entry?.dialogState?.requestedSlot ?? null;
+        const factsBundle = {
+          language: ctx?.language ?? null,
+          pendingPickupAreaNameEn: entry?.pendingPickupAreaNameEn ?? null,
+          pendingDropoffAreaNameEn: entry?.pendingDropoffAreaNameEn ?? null,
+          quotePickupAreaNameEn: entry?.quotePickupAreaNameEn ?? null,
+          quoteDropoffAreaNameEn: entry?.quoteDropoffAreaNameEn ?? null,
+          requested_slot_name: requestedSlot?.name ?? null,
+          requested_slot_options_count: Array.isArray(requestedSlot?.options)
+            ? requestedSlot.options.length
+            : 0,
+          senderName: draft?.senderName ?? null,
+          recipientName: draft?.recipientName ?? null,
+          conflictingSlot: ctx?.conflictingSlot ?? null,
+          conflictValues: ctx?.conflictValues ?? null,
+          turnSeed: ctx?.turnSeed ?? null,
+        };
+        const trace = {
+          conversation: input.conversationId,
+          sessionKey: input.sessionKeyForLogs,
+          action: input.directiveAction,
+          lang: factsBundle.language,
+          rendered_chars: outcome.text.length,
+          rendered: outcome.text,
+          facts: factsBundle,
+        };
+        logEntries.push({
+          level: "info",
+          message: `[directive-render/trace] ${JSON.stringify(trace)}`,
+          detail: {
+            action: input.directiveAction,
+            rendered_chars: outcome.text.length,
+          },
+        });
+      } catch {
+        // Tracing is observation-only; never block substitution on
+        // logging errors.
+      }
       // Phase 3 (2026-04-20): when the substituted reply is the server-
       // composed full order summary, flip `markedSummaryShown` so the
       // controller promotes to `summary_shown` / `summary_pending` in
@@ -923,6 +1018,54 @@ function decidePostStateOutboundImpl(
       level: "warn",
       message: `[octopus] LLM produced empty reply, using fallback conversation=${input.conversationId}`,
     });
+  }
+
+  // ------------------------------------------------------------------
+  // (B3) Class-15 bypass repair (2026-04-21).
+  //
+  // Invariant: a route-intent turn with no active quoted route MUST
+  // have gone through `get_price`. If the LLM instead free-composed
+  // an area clarification ("What's the delivery area?", "Which part
+  // of Kuwait City?") without calling the tool, downstream turns
+  // end up with no server-owned `pendingPickupAreaNameEn` /
+  // `requestedSlot`, which is the exact state shape that collapses
+  // the next single-token reply into a symmetric route.
+  //
+  // This branch detects the shape on the CURRENT turn and substitutes
+  // a short deterministic "send both areas together" reply so the
+  // next turn carries a full route back into the tool-owned path.
+  // It is a last-line defense: the prompt-side STRICT rule plus the
+  // directive-registry / `CustomerIntentHint=pricing_request` hint
+  // should already be pushing the LLM to call `get_price`, and this
+  // substitution is only expected to fire when the LLM skips the
+  // tool entirely.
+  //
+  // The gate is AND of three preconditions (all precomputed by the
+  // caller) so it never fires on healthy turns:
+  //
+  //   - `classFifteenBypass === true` (caller saw route-evidence
+  //     inbound + no active quoted route + get_price NOT called).
+  //   - `reply` matches the narrow free-composed area-ask shape.
+  //   - The decision is still `allow` (we haven't already replaced
+  //     with a higher-priority substitution).
+  // ------------------------------------------------------------------
+  if (
+    input.classFifteenBypass === true &&
+    decision === "allow" &&
+    looksLikeFreeComposedAreaClarification(reply)
+  ) {
+    const repaired = buildClass15BypassRepairReply(input.preferredLanguage);
+    logEntries.push({
+      level: "warn",
+      message: `[class-15/bypass] route_intent_turn_bypassed_get_price conversation=${input.conversationId} shape=free_composed_area_clarification original=${JSON.stringify(reply).slice(0, 240)}`,
+      detail: {
+        shape: "free_composed_area_clarification",
+        bypass: true,
+      },
+    });
+    reply = repaired;
+    decision = "replace_authoritative";
+    reason = "replace_get_price_bypass";
   }
 
   // ------------------------------------------------------------------

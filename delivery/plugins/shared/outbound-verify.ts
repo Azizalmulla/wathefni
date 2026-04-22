@@ -58,6 +58,126 @@ function normalizeForCompare(s: string): string {
 }
 
 /**
+ * Class-15 detector: does the reply look like a free-composed area
+ * clarification (LLM asking "what's the pickup/delivery area?" or "which
+ * part of X?") on a turn where the server knows `get_price` was not
+ * called?
+ *
+ * ## Why this exists
+ *
+ * On `stage=idle` + route-intent inbound (e.g. "delivery salmiya to
+ * kuwait city pls"), the architectural contract is: the LLM calls
+ * `get_price`, the tool returns `clarification_required` for the broad
+ * leg, and the LLM relays the tool-owned clarification. When the LLM
+ * instead free-composes an area ask WITHOUT calling `get_price`, no
+ * responder-state ops are emitted — `pendingPickupAreaNameEn` /
+ * `requestedSlot` stay null — so the next customer reply gets bound by
+ * the LLM under no server-owned context and collapses the route
+ * (symmetric-rebind class downstream).
+ *
+ * This detector matches the FORM of the drift (the free-composed
+ * clarification question). The caller combines it with two facts it
+ * already knows (`hasRouteEvidence(inbound) === true` and
+ * `get_price` was NOT called this turn) to confirm a Class-15 bypass
+ * and substitute a short server-composed repair that keeps the
+ * conversation on track deterministically.
+ *
+ * ## Patterns matched
+ *
+ * Intentionally NARROW — short, question-shaped replies about
+ * pickup / delivery / دwhich-part-of-X. Summary, recap, and generic
+ * helper asks are deliberately excluded: those live in other shapes
+ * (`route_price_recap`, `stub_summary`) and have their own handling.
+ */
+const FREE_COMPOSED_AREA_QUESTION_EN = [
+  // "What's the pickup/delivery area?" / "What is the pickup area?"
+  /\b(?:what(?:'s|\s+is)|which)\b[^?]{0,40}\b(?:pickup|delivery|dropoff|drop[\s-]?off)\s*(?:area|location|from|to)?\s*\??/i,
+  // "Which part of <X>?" / "Where in <X>?"
+  /\b(?:which\s+(?:part|area|neighbou?rhood|district)\s+of|where\s+in)\s+[A-Za-z'\- ]{3,40}\??/i,
+  // "Please clarify the pickup/delivery area" / "Could you clarify ..."
+  /\b(?:please\s+clarify|could\s+you\s+clarify|can\s+you\s+clarify|clarify\s+(?:the|your))\b[^?]{0,40}\b(?:pickup|delivery|dropoff|drop[\s-]?off|area)\b/i,
+  // "Share/send the pickup and delivery areas" without a price, a grounded
+  // recap, or a completed-booking signal (we gate context-sensitively in
+  // the caller).
+  /\b(?:send|share|tell\s+(?:me|us))\b[^?]{0,40}\b(?:pickup|delivery|dropoff|drop[\s-]?off)\s*(?:area|location)?\b/i,
+];
+
+const FREE_COMPOSED_AREA_QUESTION_AR = [
+  // "شنو/ما هي/أي منطقة الاستلام/التوصيل"
+  /(?:شنو|شو|ما\s*هي|ماهي|أي|اي|وين|فين|ايش)\s*[^؟?]{0,40}(?:منطقة\s*(?:الاستلام|التوصيل|الاستلام|الايصال|الايصال))/u,
+  // "أي جزء من <X>؟"
+  /(?:أي|اي)\s*(?:جزء|منطقة|حي)\s*من\s+[^؟?]{2,40}[؟?]/u,
+  // "أرسل/عطنا منطقة الاستلام/التوصيل"
+  /(?:أرسل|ارسل|عطنا|ابعت|ابعث)\s*[^؟?]{0,30}(?:منطقة\s*(?:الاستلام|التوصيل))/u,
+];
+
+const PRICE_TOKEN_RE = /\b\d+(?:[.,]\d{1,3})?\s*(?:kwd|kd|د\.?ك|دينار|dinars?)\b/i;
+
+export function looksLikeFreeComposedAreaClarification(
+  reply: string,
+): boolean {
+  if (!reply) return false;
+  const text = reply.trim();
+  if (text.length === 0 || text.length > 280) return false;
+  // Replies that quote a price are NOT free-composed area questions —
+  // those are route_price_recap / full-quote replies and have their own
+  // handling path. Narrowing here keeps this detector scoped to the
+  // "I'm asking for an area without talking to the tool" shape.
+  if (PRICE_TOKEN_RE.test(text)) return false;
+  // Require an interrogative token (Latin `?` or Arabic `؟`) OR a
+  // clear imperative verb ("please send/share ..."). Otherwise the
+  // caller's state-gating would carry the risk of suppressing
+  // legitimate non-question replies.
+  const hasQuestionMark = /[?؟]/.test(text);
+  if (!hasQuestionMark) {
+    // Imperative-only shapes still qualify if they name an area slot
+    // explicitly — e.g. "Please share the pickup area".
+    const imperativeWithArea =
+      /\b(?:please\s+)?(?:send|share|tell)\b[^.!?؟]{0,40}\b(?:pickup|delivery|dropoff|drop[\s-]?off)\s*(?:area|location)\b/i.test(
+        text,
+      ) ||
+      /(?:أرسل|ارسل|عطنا|ابعت|ابعث)\s*[^.!?؟]{0,30}(?:منطقة\s*(?:الاستلام|التوصيل))/u.test(
+        text,
+      );
+    if (!imperativeWithArea) return false;
+  }
+  for (const re of FREE_COMPOSED_AREA_QUESTION_EN) {
+    if (re.test(text)) return true;
+  }
+  for (const re of FREE_COMPOSED_AREA_QUESTION_AR) {
+    if (re.test(text)) return true;
+  }
+  return false;
+}
+
+/**
+ * Server-composed repair reply for the Class-15 bypass class (2026-04-21).
+ *
+ * Printed when the LLM free-composed an area clarification on a
+ * route-intent turn without calling `get_price`. Tight invariants:
+ *
+ *   - Short (fits in one WhatsApp bubble) so the UX doesn't feel like
+ *     a system error page.
+ *   - Explicit about what the customer should do ("send pickup and
+ *     delivery together") so the next turn contains a full route that
+ *     will survive to the tool call, rather than a single-token answer
+ *     that the server would have to re-interpret under a missing
+ *     `requestedSlot`.
+ *   - Deterministic phrasing — we do NOT pool across variants here.
+ *     This reply is an exception path the customer should only ever
+ *     see rarely; variability would just make the class harder to
+ *     detect in logs.
+ */
+export function buildClass15BypassRepairReply(
+  language: "ar" | "en",
+): string {
+  if (language === "ar") {
+    return "لحظة — عطنا منطقة الاستلام ومنطقة التوصيل سوا في رسالة وحدة عشان نطلع السعر الصحيح.";
+  }
+  return "One moment — please send the pickup area and the delivery area together so I can quote the correct price.";
+}
+
+/**
  * Does the reply text look like a "route + price recap" with nothing else?
  * This shape is only legal as a pre-booking quote presentation. Once booking
  * has started, it's a stub. We detect by: short text (<= ~160 chars), AND
