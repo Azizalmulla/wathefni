@@ -5764,6 +5764,12 @@ async function handleInboundMessage(params: {
           let turnReplyAuthor: "server" | "llm" | "fallback" = "llm";
           let turnReplyReason: string = "allow";
           let turnReplyDirective: string | null = null;
+          // Mirror of `directiveRenderContextForRender !== null` hoisted to
+          // this outer scope so the `[turn-decision/trace]` scaffold emit
+          // can read it. The source variable is declared inside the
+          // pre-state decision branch (~line 5868) and goes out of scope
+          // before the trace emit at the end of the turn.
+          let turnReplyDirectiveRenderContextPresent = false;
           // Provenance tracking (2026-04-22). Separate from Phase 5
           // `replyAuthor` / `reason`: those feed the existing
           // `[one-brain/reply-attribution]` line and downstream
@@ -6210,6 +6216,8 @@ async function handleInboundMessage(params: {
             turnReplyAuthor = preDecision.replyAuthor;
             turnReplyReason = preDecision.reason;
             turnReplyDirective = directiveActionForRender;
+            turnReplyDirectiveRenderContextPresent =
+              directiveRenderContextForRender !== null;
             // Seed the final decision from pre-state — post-state
             // overwrites below if it substitutes. This lets pre-state
             // substitutions (directive-registry, canonical overwrite,
@@ -7212,7 +7220,7 @@ async function handleInboundMessage(params: {
                   typeof replyText === "string" ? replyText.length : 0,
                 directive_action: turnReplyDirective,
                 directive_render_context_present:
-                  directiveRenderContextForRender !== null,
+                  turnReplyDirectiveRenderContextPresent,
                 marked_summary_shown:
                   conversationControllerEntry?.stage === "summary_shown",
               },
