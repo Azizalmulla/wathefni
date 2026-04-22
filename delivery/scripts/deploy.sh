@@ -125,6 +125,15 @@ DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_ACTION_SELE
 DEPLOY_CANARY_POST_ORDER_INTENT_SCHEMA_MARKER='POST_ORDER_INTENT_KINDS'
 DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER'
 DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER'
+# Unified turn-decision layer build canary markers (2026-04-22).
+# Relocation 1 (scaffold observer) — anchors the new module and its
+# late-turn callsite that emits the `[turn-decision/trace]` line. The
+# trace line is the regression gate for relocations 2–5; losing it
+# silently breaks diff-based verification of every subsequent
+# relocation. Observation-only; not a behaviour guard.
+# See delivery/ARCHITECTURE_TURN_DECISION.md.
+DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER='DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER'
+DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -438,6 +447,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER',
         'Phase 3c post_order_intent shadow emit marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER',
+        'turn-decision scaffold observer module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER',
+        'turn-decision [turn-decision/trace] callsite marker',
     ),
 ]
 

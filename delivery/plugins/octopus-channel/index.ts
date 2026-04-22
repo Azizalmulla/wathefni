@@ -277,6 +277,13 @@ import {
   diffActionDecisions,
   formatActionSelectionShadowLog,
 } from "../shared/action-selection-gate";
+import {
+  observeTurnDecision,
+  formatTurnDecisionTrace,
+} from "../shared/turn-decision";
+import type {
+  TurnDecisionObservedContext,
+} from "../shared/turn-decision";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
   provenanceFromDecision,
@@ -7155,6 +7162,137 @@ async function handleInboundMessage(params: {
               `[one-brain/reply-attribution] conversation=${conversationId} reply_author=${turnReplyAuthor} reason=${turnReplyReason} directive=${turnReplyDirective || "-"} stage=${conversationControllerEntry?.stage || "-"} lang=${preferredReplyLanguage}`,
             );
           } catch {}
+
+          // -----------------------------------------------------------
+          // Unified turn-decision trace (relocation 1: scaffold / pure
+          // observer).
+          //
+          // DEPLOY_CANARY_TURN_DECISION_CALLSITE_MARKER:
+          //     [turn-decision/trace] emit
+          //
+          // Every field in `TurnDecisionObservedContext` is a
+          // mechanical projection from values the four authorities
+          // have already computed. NO novel decision is made here.
+          // The scaffold's purpose is to (a) verify the
+          // `TurnDecision` output shape is complete against every
+          // real turn shape in production, (b) produce one structured
+          // trace line per turn that becomes the regression gate for
+          // relocations 2–5.
+          //
+          // See `delivery/ARCHITECTURE_TURN_DECISION.md` for the
+          // contract and the five-step relocation plan.
+          //
+          // Emits ONCE per turn. Try/catch so a scaffold bug can
+          // never take down a live turn.
+          // -----------------------------------------------------------
+          try {
+            const tdProposerValidation = proposedTurnDecisionRaw
+              ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+              : null;
+            const tdProposerValue =
+              tdProposerValidation && tdProposerValidation.ok
+                ? tdProposerValidation.value
+                : null;
+            const tdDrainedOpNames = Array.from(turnDrainedOpKinds).sort();
+            const tdBoundaryRejectionFields = Array.from(
+              new Set(
+                (hallucinationGuardRejections || [])
+                  .map((r) => r.field)
+                  .filter(Boolean),
+              ),
+            );
+            const tdObserved: TurnDecisionObservedContext = {
+              conversation_id: conversationId,
+              turn_id: proposedTurnDecisionTurnId,
+              outcome: {
+                decision: turnFinalDecision,
+                reason: turnFinalReason,
+                reply_author: turnReplyAuthor,
+                reply_text_chars:
+                  typeof replyText === "string" ? replyText.length : 0,
+                directive_action: turnReplyDirective,
+                directive_render_context_present:
+                  directiveRenderContextForRender !== null,
+                marked_summary_shown:
+                  conversationControllerEntry?.stage === "summary_shown",
+              },
+              proposer: {
+                present: proposedTurnDecisionRaw !== null,
+                schema_valid: !!(
+                  tdProposerValidation && tdProposerValidation.ok
+                ),
+                schema_version: tdProposerValue?.schema_version || "-",
+                turn_kind: tdProposerValue?.turn_kind || null,
+                ti_kind: tdProposerValue?.turn_intent?.kind || null,
+                ti_confidence:
+                  tdProposerValue?.turn_intent?.confidence || null,
+                ac_kind:
+                  tdProposerValue?.awaiting_confirmation?.kind || null,
+                po_kind: tdProposerValue?.post_order_intent?.kind || null,
+              },
+              drained_op_names: tdDrainedOpNames,
+              apply_boundary_rejection_fields: tdBoundaryRejectionFields,
+              state_summary: {
+                stage_at_turn_start: stageAtTurnStart,
+                stage_at_turn_end:
+                  conversationControllerEntry?.stage ?? null,
+                has_active_quoted_route: !!activeQuotedRoute,
+                has_draft: !!(
+                  conversationControllerEntry?.bookingDraft &&
+                  Object.keys(conversationControllerEntry.bookingDraft).some(
+                    (k) =>
+                      (conversationControllerEntry!.bookingDraft as any)[k] !=
+                      null,
+                  )
+                ),
+                missing_fields_count: (() => {
+                  try {
+                    if (!conversationControllerEntry) return 0;
+                    return computeOneBrainMissingFields(
+                      conversationControllerEntry.bookingDraft,
+                      conversationControllerEntry,
+                    ).length;
+                  } catch {
+                    return 0;
+                  }
+                })(),
+              },
+              language: preferredReplyLanguage,
+            };
+            const tdDecision = observeTurnDecision(tdObserved);
+            api.logger.info(
+              formatTurnDecisionTrace({
+                conversation_id: conversationId,
+                turn_id: proposedTurnDecisionTurnId,
+                language: preferredReplyLanguage,
+                decision: tdDecision,
+                input_summary: {
+                  stage_at_turn_start: stageAtTurnStart,
+                  stage_at_turn_end:
+                    conversationControllerEntry?.stage ?? null,
+                  has_active_quoted_route: !!activeQuotedRoute,
+                  drained_op_count: tdDrainedOpNames.length,
+                  reply_text_chars:
+                    typeof replyText === "string" ? replyText.length : 0,
+                  schema_version: tdObserved.proposer.schema_version,
+                  proposer_present: tdObserved.proposer.present,
+                  proposer_valid: tdObserved.proposer.schema_valid,
+                },
+              }),
+            );
+          } catch (turnDecisionTraceError) {
+            try {
+              api.logger.warn(
+                `[turn-decision/trace] emit_failed conversation=${conversationId} error=${
+                  turnDecisionTraceError instanceof Error
+                    ? turnDecisionTraceError.message
+                    : String(turnDecisionTraceError)
+                }`,
+              );
+            } catch {
+              // Scaffold trace never blocks a turn.
+            }
+          }
           const pendingPrefix = conversationControllerEntry?.pendingReplyText?.trim();
           const outboundText = pendingPrefix ? `${pendingPrefix}\n\n${replyText}` : replyText;
           // Derive outbound provenance from the final (decision, reason)
