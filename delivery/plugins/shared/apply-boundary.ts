@@ -309,61 +309,83 @@ function normalizeWhatsappEquivalence(
 }
 
 // ---------------------------------------------------------------------------
-// Requested-slot name-scope guard (Fix C, 2026-04-22 sender-step incident).
+// Requested-slot name-scope guard (Fix C, 2026-04-22 sender-step incident;
+// narrowed 2026-04-22 after the recipient-step regression on conv 19399).
 //
-// When `dialogState.requestedSlot.name` is a name slot (`sender_name` /
-// `recipient_name`) and a proposal writes the SAME-side phone field WITHOUT
-// also providing the name the server asked for, we drop the phone write.
-// The rationale:
+// Fires ONLY in the "narrow name-only ask" state:
 //
-//   * On a name-requested turn the customer's single utterance should
-//     answer the name. If the proposal only writes the phone, the
-//     "answer" slot is still missing and the pattern that follows —
-//     server re-asks, customer re-provides — is strictly a regression vs.
-//     accepting nothing and re-asking the full name+phone combined.
+//   * `dialogState.requestedSlot.name` is a name slot (`sender_name` /
+//     `recipient_name`), AND
+//   * the SAME-side phone is ALREADY filled on the draft (so the server
+//     cannot be asking for name+phone combined — it must be the narrow
+//     "name only" ask, e.g. `ASK_SENDER_NAME` after a WA-equivalence
+//     normalization populated `draft.senderPhone`).
 //
-//   * When the phone happens to match the customer's WhatsApp it is
-//     already collapsed by the WA-equivalence normalization above, so this
-//     guard only fires on genuinely-different numbers.
+// In that state, a proposal that writes the same-side phone WITHOUT
+// also writing the name is dropped: the customer did not answer the
+// actual question, and accepting a stray phone overwrite on top of the
+// phone we already have is strictly worse than re-asking for the name.
+//
+// Crucially, the guard does NOT fire in the combined `name+phone` ask
+// state (same-side phone is empty on the draft). There, a phone-only
+// answer is a legitimate partial answer — accepting it and re-asking
+// only for the name (once the ack-aware renderer primitive lands) is
+// the desired UX. Dropping it produces the visible regression on the
+// recipient step observed in the live log (customer sends recipient
+// phone, bot silently re-asks "recipient name and phone?").
+//
+// Notes:
+//
+//   * WA-equivalence normalization has already run (step 1b above), so
+//     any sender_phone that matched the customer's WhatsApp was rewritten
+//     into `phone_decision=use_whatsapp` and the raw field zeroed before
+//     reaching this guard.
 //
 //   * When the proposal writes BOTH name and phone on the same turn, the
-//     name is present and the guard does NOT fire — both writes land. This
-//     preserves the "volunteer-more" UX (customer answers name + phone in
-//     one breath).
+//     name side is present (hasNameWrite=true) and the guard does NOT
+//     fire regardless of draft state — both writes land. Preserves the
+//     "volunteer-more" UX.
 //
-// Implementation note: the guard runs AFTER coherence, so a name that was
-// rejected for being an acknowledgment ("ok") has already been nulled out
-// by the coherence pass. In that case, treating the patch as "no name
-// present" and dropping the phone is the right call — we want the
-// customer to re-provide a valid name, not to silently keep a half-
-// understood phone.
+//   * Runs AFTER coherence: a name rejected as acknowledgment ("ok") has
+//     been nulled out already, so treating the patch as "no name
+//     present" and dropping the phone is correct — we want a valid name,
+//     not to silently keep a half-understood phone.
 // ---------------------------------------------------------------------------
 const REQUESTED_SLOT_NAME_SCOPE: ReadonlyArray<{
   requested: SlotName;
   phoneField: "sender_phone" | "recipient_phone";
   nameField: "sender_name" | "recipient_name";
+  phoneSlotFilled: (draft: BookingDraft) => boolean;
 }> = [
   {
     requested: "sender_name",
     phoneField: "sender_phone",
     nameField: "sender_name",
+    phoneSlotFilled: (draft) => typeof draft.senderPhone === "string" && draft.senderPhone.trim().length > 0,
   },
   {
     requested: "recipient_name",
     phoneField: "recipient_phone",
     nameField: "recipient_name",
+    phoneSlotFilled: (draft) => typeof draft.recipientPhone === "string" && draft.recipientPhone.trim().length > 0,
   },
 ];
 
 function applyRequestedSlotNameScope(
   patch: BookingFieldPatch,
   dialogState: DialogState | null,
+  draft: BookingDraft,
 ): { patch: BookingFieldPatch; rejections: Array<{ field: string; received: string }> } {
   const rejections: Array<{ field: string; received: string }> = [];
   const requested = dialogState?.requestedSlot?.name ?? null;
   if (!requested) return { patch, rejections };
   const entry = REQUESTED_SLOT_NAME_SCOPE.find((e) => e.requested === requested);
   if (!entry) return { patch, rejections };
+  // Narrow-ask discriminator: only fire when the same-side phone is
+  // already resolved on the draft. If the phone is empty, this is a
+  // combined `name+phone` ask and a phone-only answer is a partial
+  // answer we must accept.
+  if (!entry.phoneSlotFilled(draft)) return { patch, rejections };
   const phoneVal = patch[entry.phoneField];
   const nameVal = patch[entry.nameField];
   const hasPhoneWrite = fieldHasValue(phoneVal);
@@ -612,14 +634,18 @@ export function applyProposals(
     // ---------------------------------------------------------------
     // 3b. Requested-slot name-scope guard (skipped for carryover).
     //
-    // On a name-requested turn, a same-side phone write without an
-    // accompanying name write is dropped. See
-    // `applyRequestedSlotNameScope` above. The WA-equivalence step
-    // already rewrote WA-equivalent phones into `phone_decision`, so
-    // this only affects genuinely-different phones.
+    // Fires ONLY in the narrow "name-only ask" state: requested slot
+    // is a name AND the same-side phone is already filled on the
+    // draft. In the combined `name+phone` ask state (same-side phone
+    // empty), a phone-only answer is a legitimate partial answer and
+    // this guard intentionally does not fire — dropping it would
+    // re-introduce the recipient-step regression observed on conv
+    // 19399 (customer sends recipient phone; bot silently re-asks
+    // "name and phone?"). See `applyRequestedSlotNameScope` above
+    // for the full contract.
     // ---------------------------------------------------------------
     if (proposal.source !== "carryover") {
-      const scoped = applyRequestedSlotNameScope(patch, dialogState);
+      const scoped = applyRequestedSlotNameScope(patch, dialogState, draft);
       if (scoped.rejections.length > 0) {
         patch = scoped.patch;
         for (const r of scoped.rejections) {

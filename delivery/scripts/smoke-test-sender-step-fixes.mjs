@@ -43,11 +43,13 @@
  *   S9  ASK_SENDER_NAME registry renderer produces the narrow AR/EN
  *       phrasings.
  *
- *   S10 Requested-slot name-scope guard (Fix C): with
- *       `dialogState.requestedSlot = { name: "sender_name" }`, an LLM
- *       patch that writes `sender_phone = "97777777"` (non-WA) and NO
+ *   S10 Requested-slot name-scope guard (Fix C) in the NARROW sender-
+ *       name ask state: `dialogState.requestedSlot = { name:
+ *       "sender_name" }` AND `draft.senderPhone` is already resolved
+ *       (e.g. a prior turn's WA-equivalence normalization populated
+ *       it). An LLM patch that writes a non-WA `sender_phone` and NO
  *       name is dropped with reason `requested_slot_name_scope`;
- *       draft.senderPhone remains null.
+ *       draft.senderPhone preserves the already-resolved value.
  *
  *   S11 Same state, but the patch carries BOTH `sender_name` and
  *       `sender_phone` — both land. The guard only fires when the
@@ -58,8 +60,25 @@
  *       never sees a phone to drop; the decision lands (draft
  *       `senderPhone` = WA, senderPhoneDecision="use_whatsapp").
  *
- *   S13 Recipient symmetry: with `requestedSlot.name = "recipient_name"`
- *       and a patch writing only `recipient_phone`, the guard drops it.
+ *   S13 Recipient symmetry in the NARROW recipient-name ask state:
+ *       with `requestedSlot.name = "recipient_name"` AND
+ *       `draft.recipientPhone` already filled, a new stray
+ *       recipient_phone patch is dropped. Defensive — the product
+ *       currently has no path that reaches this state (no narrow
+ *       ASK_RECIPIENT_NAME directive) but the guard is symmetric.
+ *
+ *   S13b Combined sender-name+phone ask: `requestedSlot.name =
+ *        "sender_name"` but `draft.senderPhone` is empty (the
+ *        server is asking the combined question). A phone-only
+ *        patch is a legitimate partial answer and MUST land — the
+ *        guard is suppressed in the combined-ask state. Narrowing
+ *        pin for the 2026-04-22 live regression.
+ *
+ *   S13c Combined recipient-name+phone ask — exact live trace from
+ *        conv 19399 turn 6. Customer sends only the recipient phone
+ *        ("٥٩٣٨٤٨٥٧") while the server had asked
+ *        `ASK_RECIPIENT_NAME_AND_PHONE`. The phone MUST land as a
+ *        partial answer; the guard MUST NOT fire. Regression pin.
  *
  *   S14 Full 19399 trace: Turn B arrives with a stale LLM write of
  *       `sender_phone = "99338566"` while `requestedSlot.name =
@@ -353,10 +372,16 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // S10 — Requested-slot name-scope guard: sender_phone without name on
-  //       a name-requested turn is dropped (non-WA phone)
+  // S10 — Requested-slot name-scope guard (narrow sender-name ask state):
+  //       sender phone is ALREADY resolved on the draft (narrow
+  //       `ASK_SENDER_NAME` scenario after Fix A collapsed the combined
+  //       ask), requestedSlot=sender_name, and the LLM writes a
+  //       non-WA sender_phone without a name. The stray phone is
+  //       dropped because the server's "name?" question was not
+  //       answered.
   // -------------------------------------------------------------------------
   {
+    const draft = { ...createEmptyBookingDraft(), senderPhone: WA };
     const proposal = llmProposal({
       op: {
         sender_phone: "97777777",
@@ -364,12 +389,16 @@ async function main() {
         turn_id: "s10",
       },
     });
-    const res = applyProposals([proposal], ctxWithRequestedSlot("sender_name"));
+    const res = applyProposals([proposal], ctxWithRequestedSlot("sender_name", draft));
     const rej = res.rejections.find((r) => r.field === "sender_phone");
-    assert.ok(rej, "S10: sender_phone rejection present");
+    assert.ok(rej, "S10: sender_phone rejection present (narrow-ask state)");
     assert.equal(rej.reason, "requested_slot_name_scope");
     assert.equal(rej.source, "llm");
-    assert.equal(res.draft.senderPhone, null, "S10: draft.senderPhone stays null");
+    assert.equal(
+      res.draft.senderPhone,
+      WA,
+      "S10: draft.senderPhone preserved as the already-resolved WA number",
+    );
     assert.equal(res.normalizations.length, 0);
   }
 
@@ -427,14 +456,20 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // S13 — Recipient symmetry: requestedSlot=recipient_name, patch has
-  //       only recipient_phone → dropped
+  // S13 — Recipient symmetry (narrow recipient-name ask state):
+  //       recipient phone is ALREADY resolved on the draft,
+  //       requestedSlot=recipient_name. Defensive test — this state is
+  //       not reached by the current selector (there is no
+  //       ASK_RECIPIENT_NAME narrow directive) but the boundary guard
+  //       is symmetric and a new stray recipient_phone write must
+  //       still be dropped.
   // -------------------------------------------------------------------------
   {
     const draft = {
       ...createEmptyBookingDraft(),
       senderName: "Aziz",
       senderPhone: WA,
+      recipientPhone: "99111111",
     };
     const proposal = llmProposal({
       op: {
@@ -445,9 +480,73 @@ async function main() {
     });
     const res = applyProposals([proposal], ctxWithRequestedSlot("recipient_name", draft));
     const rej = res.rejections.find((r) => r.field === "recipient_phone");
-    assert.ok(rej, "S13: recipient_phone rejection present");
+    assert.ok(rej, "S13: recipient_phone rejection present (narrow-ask state)");
     assert.equal(rej.reason, "requested_slot_name_scope");
-    assert.equal(res.draft.recipientPhone, null);
+    assert.equal(
+      res.draft.recipientPhone,
+      "99111111",
+      "S13: draft.recipientPhone preserved (already-resolved value)",
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // S13b — Combined sender-name+phone ask (Fix C narrowing regression
+  //        pin): requestedSlot=sender_name but draft.senderPhone is
+  //        empty. A phone-only patch is a partial answer to the
+  //        combined ask and MUST land — the name-scope guard is
+  //        suppressed in the combined-ask state to avoid the
+  //        "bot ignored my phone" regression.
+  // -------------------------------------------------------------------------
+  {
+    const proposal = llmProposal({
+      op: {
+        sender_phone: "97777777",
+        phone_decision: "different",
+        source_quote: "97777777",
+        turn_id: "s13b",
+      },
+    });
+    const res = applyProposals([proposal], ctxWithRequestedSlot("sender_name"));
+    assert.equal(
+      res.rejections.filter((r) => r.reason === "requested_slot_name_scope").length,
+      0,
+      "S13b: guard suppressed in combined-ask state (sender phone empty)",
+    );
+    assert.equal(res.draft.senderPhone, "97777777", "S13b: sender_phone landed");
+    assert.equal(res.senderPhoneDecision, "different");
+  }
+
+  // -------------------------------------------------------------------------
+  // S13c — Combined recipient-name+phone ask (live 19399 recipient-
+  //        step regression pin): requestedSlot=recipient_name, sender
+  //        already filled, draft.recipientPhone empty. Customer
+  //        answers with the recipient phone only (the exact live
+  //        trace: "٥٩٣٨٤٨٥٧"). Phone MUST land; guard MUST NOT fire.
+  // -------------------------------------------------------------------------
+  {
+    const draft = {
+      ...createEmptyBookingDraft(),
+      senderName: "Aziz",
+      senderPhone: WA,
+    };
+    const proposal = llmProposal({
+      op: {
+        recipient_phone: "59384857",
+        source_quote: "٥٩٣٨٤٨٥٧",
+        turn_id: "s13c",
+      },
+    });
+    const res = applyProposals([proposal], ctxWithRequestedSlot("recipient_name", draft));
+    assert.equal(
+      res.rejections.filter((r) => r.reason === "requested_slot_name_scope").length,
+      0,
+      "S13c: guard suppressed in combined recipient ask — phone lands as partial answer",
+    );
+    assert.equal(
+      res.draft.recipientPhone,
+      "59384857",
+      "S13c: recipient_phone landed (regression pin for conv 19399 turn 6)",
+    );
   }
 
   // -------------------------------------------------------------------------
