@@ -5787,6 +5787,23 @@ async function handleInboundMessage(params: {
           // decision layer consumes this to derive its own dispatch
           // decision in parallel with A4.
           let turnA1SubstituteIntent: A1SubstituteIntent | null = null;
+          // Relocation 3 (A1 → layer) inputs: mirrors of the three
+          // legacy pre-state gate flags (`clarifyOptionBeforeProceed`,
+          // `manualConfirmAddressAsk`, `manualConfirmHandoff`) hoisted
+          // to this outer scope so the `[turn-decision/trace]` emit
+          // at the end of the turn can read them. The source variables
+          // are declared inside the Region-A block (~line 5818+) and
+          // go out of scope before the trace emit site.
+          //
+          // DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER:
+          //     Reloc 3 `a1_inputs` wiring
+          let turnA1ClarifyOptionBeforeProceed = false;
+          let turnA1ManualConfirmAddressAskSnapshot:
+            | { side: "pickup" | "delivery"; option_type: string }
+            | null = null;
+          let turnA1ManualConfirmHandoffSnapshot:
+            | { option_type: string }
+            | null = null;
           // Provenance tracking (2026-04-22). Separate from Phase 5
           // `replyAuthor` / `reason`: those feed the existing
           // `[one-brain/reply-attribution]` line and downstream
@@ -5828,6 +5845,10 @@ async function handleInboundMessage(params: {
                 `[one-brain/clarify-option] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
               );
             }
+            // Reloc 3 mirror hoist: propagate the flag to outer scope so
+            // the turn-decision trace emit can read it without changing
+            // the inner-scope source.
+            turnA1ClarifyOptionBeforeProceed = clarifyOptionBeforeProceed;
 
             // Manual-confirm server-composed address-ask / handoff
             // substitution (Bug 4, 2026-04-20 manual-confirm signal drop
@@ -5878,6 +5899,20 @@ async function handleInboundMessage(params: {
                 );
               }
             }
+            // Reloc 3 mirror hoist: compact, transport-only projections
+            // of the manual-confirm gate inputs so the trace emit can
+            // read them at turn end. Keeps the `option_type` string
+            // (what the layer's deriveA1Substitute needs) and drops
+            // the rich option object (which the trace doesn't serialize).
+            turnA1ManualConfirmAddressAskSnapshot = manualConfirmAddressAsk
+              ? {
+                  side: manualConfirmAddressAsk.side,
+                  option_type: manualConfirmAddressAsk.option.delivery_type,
+                }
+              : null;
+            turnA1ManualConfirmHandoffSnapshot = manualConfirmHandoff
+              ? { option_type: manualConfirmHandoff.option.delivery_type }
+              : null;
 
             // Phase 2 (2026-04-20): compute the directive for this turn
             // and build the renderer context. The registry's
@@ -7262,6 +7297,41 @@ async function handleInboundMessage(params: {
                 directive_has_server_renderer: turnReplyDirective
                   ? directiveHasServerRenderer(turnReplyDirective as any)
                   : false,
+              },
+              // Relocation 3 (A1 → layer): supply the pre-state
+              // substitute-derivation inputs so `observeTurnDecision`
+              // can run `deriveA1Substitute` in parallel with the
+              // legacy Region-A pipeline. All fields are mechanical
+              // projections of state the legacy A1 site already
+              // consumed this turn — no novel decisions made here.
+              //
+              // Route-change gate is STRICT: the conjunction
+              //   proposer.turn_kind === "initial_route"
+              //   AND activeQuotedRoute !== null
+              //   AND sameRouteQuoteAction === null
+              // captures a fresh route proposal that the same-route
+              // followup resolver explicitly did not bind to the
+              // current quoted route. Loose route evidence (e.g. a
+              // bare area-name without a pickup/delivery pair) must
+              // not satisfy this gate.
+              a1_inputs: {
+                clarify_option_before_proceed_flag:
+                  turnA1ClarifyOptionBeforeProceed,
+                manual_confirm_address_ask:
+                  turnA1ManualConfirmAddressAskSnapshot,
+                manual_confirm_handoff: turnA1ManualConfirmHandoffSnapshot,
+                directive_action: turnReplyDirective,
+                directive_has_server_renderer: turnReplyDirective
+                  ? directiveHasServerRenderer(turnReplyDirective as any)
+                  : false,
+                same_route_quote_switch_option:
+                  sameRouteQuoteAction?.kind === "switch_option",
+                route_intent_fresh_this_turn: Boolean(
+                  tdProposerValue?.turn_kind === "initial_route" &&
+                    !!activeQuotedRoute &&
+                    sameRouteQuoteAction === null,
+                ),
+                observed_a1_intent: turnA1SubstituteIntent,
               },
               proposer: {
                 present: proposedTurnDecisionRaw !== null,

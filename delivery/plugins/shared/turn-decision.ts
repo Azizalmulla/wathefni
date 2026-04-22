@@ -1,8 +1,10 @@
 // ---------------------------------------------------------------------------
-// Unified turn-decision layer — SCAFFOLD + A4 DISPATCH (relocations 1–2).
+// Unified turn-decision layer — SCAFFOLD + A4 DISPATCH + A1 DERIVATION
+// (relocations 1–3).
 //
 // DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER: turn-decision scaffold observer
 // DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER: deriveDispatch
+// DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER: deriveA1Substitute
 //
 // ## What this file is, in one paragraph
 //
@@ -334,6 +336,43 @@ export interface TurnDecisionObservedContext {
     marked_summary_shown: boolean;
   };
 
+  // A1 substitute-derivation inputs (relocation 3). Optional — when
+  // absent the layer skips A1 derivation and the trace omits the
+  // `layer_a1_*` fields (behaves exactly like a pre-Reloc-3 callsite).
+  //
+  // Independence note: Reloc 2 (`a4_inputs.a1_substitute_intent`) keeps
+  // reading the *observed* legacy intent during the Reloc 3 shadow bake.
+  // The derived intent produced here is informational only until Reloc 3
+  // flips live; see ARCHITECTURE_TURN_DECISION.md §"Relocation 3" for
+  // the staging plan.
+  a1_inputs?: {
+    // Legacy A1 preconditions — each branch's gate input, collected at
+    // the callsite and replayed in the layer so rule priority mirrors
+    // the existing `decidePreStateOutbound` ordering bit-for-bit.
+    clarify_option_before_proceed_flag: boolean;
+    manual_confirm_address_ask: {
+      side: "pickup" | "delivery";
+      option_type: string;
+    } | null;
+    manual_confirm_handoff: { option_type: string } | null;
+    directive_action: string | null;
+    directive_has_server_renderer: boolean;
+    same_route_quote_switch_option: boolean;
+
+    // Strict route-change signal. Callsite computes as:
+    //   proposer.turn_kind === "initial_route" &&
+    //   has_active_quoted_route_at_turn_start &&
+    //   same_route_quote_action === null
+    // The layer does NOT relax this gate — loose evidence must not
+    // trigger accidental passthroughs.
+    route_intent_fresh_this_turn: boolean;
+
+    // Observed A1 substitute intent produced by the legacy pipeline
+    // this turn. Null when the reply was not overridden by A1. Used
+    // for agreement classification only; deriveA1Substitute ignores it.
+    observed_a1_intent: A1SubstituteIntent | null;
+  };
+
   // A4 dispatch inputs (relocation 2). Optional because earlier smoke
   // tests and older callsites may not supply them; when absent, the
   // layer skips dispatch derivation and the trace omits layer_source /
@@ -429,6 +468,15 @@ export interface TurnDecision {
       | "disagree_layer_passthrough"
       | "disagree_layer_substitute"
       | "disagree_other";
+
+    // A1 derivation (relocation 3): what the layer would have chosen
+    // for the pre-state substitute intent. Present only when
+    // `a1_inputs` was supplied. NOT executed; legacy A0c still owns
+    // the live reply. Divergences surface in `a1_agreement`.
+    derived_a1_intent?: A1SubstituteIntent;
+    derived_a1_reason?: string;
+    derived_a1_policy_rule?: string;
+    a1_agreement?: A1Agreement;
   };
 
   transitions: {
@@ -454,6 +502,240 @@ export interface TurnDecision {
     observed_decision: OutboundDecisionKind;
     observed_reply_author: ReplyAuthor;
   };
+}
+
+// ---------------------------------------------------------------------------
+// A1 SUBSTITUTE DERIVATION (relocation 3).
+//
+// Fresh decision from structured inputs — the layer's own answer to
+// "should the LLM's reply be substituted pre-state, and if so with
+// which intent?" computed independently of the legacy Region-A
+// pipeline. Intended to run in parallel with legacy A1 so divergences
+// surface explicitly in the trace.
+//
+// Rule priority mirrors legacy ordering (clarify-before-proceed →
+// manual-confirm address ask → manual-confirm handoff → directive
+// registry dispatch), with new SEMANTIC GATES inserted inside the
+// directive-dispatch branch:
+//
+//   - `ti_kind=clarifying_question` (high/medium confidence) →
+//     passthrough. Validated against real-turn data (conv 19534
+//     2026-04-22) where the LLM's draft ("Standard sedan usually
+//     takes around 2 to 5 hours on this route.") was strictly better
+//     than the legacy robotic re-ask.
+//   - `ti_kind=answered_partial` (high/medium confidence) →
+//     passthrough. Legacy re-renders the full combined ask even
+//     when one of two fields was supplied; letting the LLM
+//     acknowledge the partial answer is the lower-hostility default
+//     while we wait for Reloc 4 to narrow the directive itself.
+//   - Fresh-route intent (`turn_kind=initial_route` AND active
+//     quoted route AND NOT same-route switch) while in
+//     `quoted` / `collecting_booking_details` / `summary_shown` →
+//     passthrough. Covers the "price surra to salwa → Sender's
+//     full name?" failure mode.
+//
+// Gate caveats:
+//   - `ti_confidence=low` never triggers a passthrough; it falls
+//     through to `layer.a1.directive_ask.render` so we never act on
+//     a classifier we can't trust.
+//   - On `sameRouteQuoteAction.kind === "switch_option"` turns the
+//     directive-registry branch is skipped entirely (legacy parity);
+//     the semantic gates therefore never fire on switch-option
+//     turns either.
+//   - Route-change gate uses the strict `route_intent_fresh_this_turn`
+//     flag computed at the callsite. Loose route evidence (e.g. a
+//     bare area name with no pickup/delivery pair) does NOT pass
+//     the gate.
+//
+// Independence with Reloc 2:
+//   The A4 dispatch derivation continues to read the *observed*
+//   `a1_substitute_intent` during the Reloc 3 shadow bake. Reloc 3
+//   produces a *derived* intent that is informational-only until
+//   Reloc 3 flips, which keeps the Reloc 2 bake signal uncontaminated.
+// ---------------------------------------------------------------------------
+
+export type A1Agreement =
+  | "agree"
+  | "disagree_layer_passthrough"
+  | "disagree_layer_substitute"
+  | "disagree_other";
+
+export interface A1DeriveInputs {
+  // Legacy A1 preconditions — mirror A0*/A0c branch gates.
+  clarify_option_before_proceed_flag: boolean;
+  manual_confirm_address_ask: {
+    side: "pickup" | "delivery";
+    option_type: string;
+  } | null;
+  manual_confirm_handoff: { option_type: string } | null;
+  directive_action: string | null;
+  directive_has_server_renderer: boolean;
+  same_route_quote_switch_option: boolean;
+
+  // Proposer semantic signals (v1.3).
+  proposer_turn_kind: ProposedTurnKind | null;
+  proposer_ti_kind: TurnIntentKind | null;
+  proposer_ti_confidence: "high" | "medium" | "low" | null;
+
+  // State context — only the route-change gate reads this.
+  stage_at_turn_start: string | null;
+  has_active_quoted_route_at_turn_start: boolean;
+  route_intent_fresh_this_turn: boolean;
+}
+
+export interface A1Derivation {
+  // `A1SubstituteIntent` already includes `"allow"` — used by the
+  // derivation to signal "layer would let the LLM draft through".
+  intent: A1SubstituteIntent;
+  reason: string;
+  policy_rule: string;
+}
+
+const A1_ROUTE_CHANGE_STAGES: ReadonlySet<string> = new Set<string>([
+  "quoted",
+  "collecting_booking_details",
+  "summary_shown",
+]);
+
+function a1TiConfidenceIsTrustworthy(
+  confidence: "high" | "medium" | "low" | null,
+): boolean {
+  // Low-confidence classifications must fall through to the legacy-
+  // aligned `render` branch. Null is treated the same as low.
+  return confidence === "high" || confidence === "medium";
+}
+
+export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
+  // Rule 1: Clarify-option-before-proceed — legacy A0 branch.
+  if (input.clarify_option_before_proceed_flag) {
+    return {
+      intent: "replace_clarify_option_before_proceed",
+      reason: "clarify_option_before_proceed_flag",
+      policy_rule: "layer.a1.clarify_option_before_proceed",
+    };
+  }
+
+  // Rule 2: Manual-confirm address ask — legacy A0a branch.
+  if (input.manual_confirm_address_ask) {
+    return {
+      intent: "replace_manual_confirm_address_ask",
+      reason: `manual_confirm_address_ask:${input.manual_confirm_address_ask.side}`,
+      policy_rule: "layer.a1.manual_confirm_address_ask",
+    };
+  }
+
+  // Rule 3: Manual-confirm handoff — legacy A0b branch.
+  if (input.manual_confirm_handoff) {
+    return {
+      intent: "replace_manual_confirm_handoff",
+      reason: "manual_confirm_handoff",
+      policy_rule: "layer.a1.manual_confirm_handoff",
+    };
+  }
+
+  // Rule 4–8: Directive-registry dispatch branch (legacy A0c). Skipped
+  // entirely on `switch_option` turns to preserve legacy parity —
+  // that case falls through to the default "allow" below.
+  if (input.same_route_quote_switch_option) {
+    return {
+      intent: "allow",
+      reason: "same_route_quote_switch_option_skip",
+      policy_rule: "layer.a1.no_substitute",
+    };
+  }
+
+  if (input.directive_action) {
+    if (!input.directive_has_server_renderer) {
+      return {
+        intent: "allow",
+        reason: "directive_no_server_renderer",
+        policy_rule: "layer.a1.directive_ask.no_renderer",
+      };
+    }
+
+    const tiTrustworthy = a1TiConfidenceIsTrustworthy(
+      input.proposer_ti_confidence,
+    );
+
+    // Rule 4: Semantic gate — clarifying question passthrough.
+    if (tiTrustworthy && input.proposer_ti_kind === "clarifying_question") {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_clarifying",
+        policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
+      };
+    }
+
+    // Rule 5: Semantic gate — partial-answer passthrough.
+    if (tiTrustworthy && input.proposer_ti_kind === "answered_partial") {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_partial_answer",
+        policy_rule: "layer.a1.directive_ask.pass_on_partial_answer",
+      };
+    }
+
+    // Rule 6: Semantic gate — fresh route-change passthrough. STRICT:
+    // gate fires only when the callsite computed
+    // `route_intent_fresh_this_turn=true` AND the stage is one where
+    // a fresh route would make sense (quoted / collecting / summary).
+    // Loose evidence is intentionally excluded.
+    if (
+      input.route_intent_fresh_this_turn &&
+      input.stage_at_turn_start !== null &&
+      A1_ROUTE_CHANGE_STAGES.has(input.stage_at_turn_start) &&
+      input.has_active_quoted_route_at_turn_start
+    ) {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_route_change",
+        policy_rule: "layer.a1.directive_ask.pass_on_route_change",
+      };
+    }
+
+    // Rule 7: Directive-ask render (legacy-aligned default).
+    return {
+      intent: "replace_directive_ask",
+      reason: "a1_directive_ask_render",
+      policy_rule: "layer.a1.directive_ask.render",
+    };
+  }
+
+  // Rule 9: No A1 precondition fired → let the LLM draft through.
+  return {
+    intent: "allow",
+    reason: "no_a1_precondition",
+    policy_rule: "layer.a1.no_substitute",
+  };
+}
+
+export function classifyA1Agreement(
+  observed: A1SubstituteIntent | null,
+  derived: A1SubstituteIntent,
+): A1Agreement {
+  // Treat null observed as "allow" — the legacy pipeline did not
+  // override the LLM's draft. `allow_sanitized` and
+  // `preserve_clarification` are also pass-through outcomes from the
+  // A1 perspective; normalize them to "allow" for comparison.
+  const normalizedObserved: A1SubstituteIntent =
+    observed === null ||
+    observed === "allow_sanitized" ||
+    observed === "preserve_clarification"
+      ? "allow"
+      : observed;
+  const normalizedDerived: A1SubstituteIntent =
+    derived === "allow_sanitized" || derived === "preserve_clarification"
+      ? "allow"
+      : derived;
+
+  if (normalizedObserved === normalizedDerived) return "agree";
+  if (normalizedDerived === "allow" && normalizedObserved !== "allow") {
+    return "disagree_layer_passthrough";
+  }
+  if (normalizedObserved === "allow" && normalizedDerived !== "allow") {
+    return "disagree_layer_substitute";
+  }
+  return "disagree_other";
 }
 
 // ---------------------------------------------------------------------------
@@ -707,6 +989,41 @@ export function observeTurnDecision(
       undefined;
   }
 
+  // Relocation 3: layer-derived A1 substitute intent. Runs in parallel
+  // with the legacy Region-A pipeline when `a1_inputs` is supplied.
+  // Informational-only until Reloc 3 flips; Reloc 2's dispatch derivation
+  // intentionally continues to read the *observed* intent during this
+  // shadow bake to keep the two signals independent.
+  let derivedA1: A1Derivation | null = null;
+  let a1Agreement: A1Agreement | undefined;
+  if (ctx.a1_inputs) {
+    derivedA1 = deriveA1Substitute({
+      clarify_option_before_proceed_flag:
+        ctx.a1_inputs.clarify_option_before_proceed_flag,
+      manual_confirm_address_ask: ctx.a1_inputs.manual_confirm_address_ask,
+      manual_confirm_handoff: ctx.a1_inputs.manual_confirm_handoff,
+      directive_action: ctx.a1_inputs.directive_action,
+      directive_has_server_renderer:
+        ctx.a1_inputs.directive_has_server_renderer,
+      same_route_quote_switch_option:
+        ctx.a1_inputs.same_route_quote_switch_option,
+      proposer_turn_kind: ctx.proposer.turn_kind,
+      proposer_ti_kind: ctx.proposer.ti_kind,
+      proposer_ti_confidence: ctx.proposer.ti_confidence,
+      stage_at_turn_start: ctx.state_summary.stage_at_turn_start,
+      has_active_quoted_route_at_turn_start:
+        ctx.state_summary.has_active_quoted_route,
+      route_intent_fresh_this_turn:
+        ctx.a1_inputs.route_intent_fresh_this_turn,
+    });
+    a1Agreement = classifyA1Agreement(
+      ctx.a1_inputs.observed_a1_intent,
+      derivedA1.intent,
+    );
+    policyHits.push(derivedA1.policy_rule);
+    policyHits.push(`a1:${a1Agreement}`);
+  }
+
   // Relocation 2: layer-derived dispatch. Runs in parallel with the
   // observed projection when `a4_inputs` is supplied. Emits an explicit
   // agreement token so divergences are grep-able.
@@ -746,6 +1063,14 @@ export function observeTurnDecision(
             derived_reason: derivedDispatch.reason,
             derived_policy_rule: derivedDispatch.policy_rule,
             dispatch_agreement: dispatchAgreement,
+          }
+        : {}),
+      ...(derivedA1
+        ? {
+            derived_a1_intent: derivedA1.intent,
+            derived_a1_reason: derivedA1.reason,
+            derived_a1_policy_rule: derivedA1.policy_rule,
+            a1_agreement: a1Agreement,
           }
         : {}),
     },
@@ -808,6 +1133,12 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
       derived_reason: e.decision.reply.derived_reason ?? null,
       derived_policy_rule: e.decision.reply.derived_policy_rule ?? null,
       dispatch_agreement: e.decision.reply.dispatch_agreement ?? null,
+      // Relocation 3: A1 derivation. Null when callsite did not supply
+      // `a1_inputs` so analyzers can rely on field presence.
+      a1_intent: e.decision.reply.derived_a1_intent ?? null,
+      a1_reason: e.decision.reply.derived_a1_reason ?? null,
+      a1_policy_rule: e.decision.reply.derived_a1_policy_rule ?? null,
+      a1_agreement: e.decision.reply.a1_agreement ?? null,
     },
     op_plan: e.decision.op_plan.entries.map((x) => ({
       op: x.op_name,
@@ -833,6 +1164,8 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
     `reply_source=${e.decision.reply.source} ` +
     `layer_source=${e.decision.reply.derived_source || "-"} ` +
     `dispatch_agreement=${e.decision.reply.dispatch_agreement || "-"} ` +
+    `layer_a1_intent=${e.decision.reply.derived_a1_intent || "-"} ` +
+    `a1_agreement=${e.decision.reply.a1_agreement || "-"} ` +
     `observed_reason=${e.decision.trace.observed_reason} ` +
     `ti=${e.decision.trace.semantic_signals.ti_kind || "-"} ` +
     `ac=${e.decision.trace.semantic_signals.ac_kind || "-"} ` +
