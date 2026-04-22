@@ -255,8 +255,16 @@ import type { OneBrainNextRequiredAction } from "./lib/one-brain-context";
 import {
   renderDirectiveReply,
   directiveHasServerRenderer,
+  isRegisteredDirectiveAction,
 } from "../shared/directive-reply-registry";
-import type { DirectiveReplyRendererContext } from "../shared/directive-reply-registry";
+import type {
+  DirectiveReplyRendererContext,
+  DirectiveAction,
+} from "../shared/directive-reply-registry";
+import {
+  chooseAckPrefix,
+  formatReplyComposeShadowLog,
+} from "../shared/reply-compose";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
   provenanceFromDecision,
@@ -5875,6 +5883,97 @@ async function handleInboundMessage(params: {
                     `[one-brain/directive-dispatch] ${skipReason} conversation=${conversationId} action=${directive.action} stage=${conversationControllerEntry?.stage || "-"} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
                   );
                 }
+              }
+            }
+
+            // -----------------------------------------------------------
+            // Phase 2 Milestone 1 (2026-04-22): ack-aware reply compose —
+            // SHADOW ONLY.
+            //
+            // DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER:
+            //     [reply-compose/shadow] emit
+            //
+            // Directive-eligible collection turns already get server-
+            // rendered ask text via `renderDirectiveReply` (see the
+            // `directive-reply-registry` module). The ack prefix in front
+            // of that ask is still LLM-authored today, which is why
+            // `SKILL.md`'s first two "How every reply must behave"
+            // bullets carry the "always ack-and-advance in one message"
+            // rule — that rule exists to paper over the fact that the
+            // ack prefix is an author-time guess.
+            //
+            // M1 inverts ack-prefix selection: a registry keyed on
+            // `turn_intent.kind` (already emitted in shadow by the Phase
+            // 1 proposer schema) owns the prefix. After the flip-to-live
+            // the rendered reply is `${ackPrefix}\n${directiveAskText}`,
+            // deterministic top-to-bottom.
+            //
+            // This PR ships only the SHADOW EMIT. We compute the prefix
+            // the server WOULD choose, log it alongside the signals that
+            // drove the choice, and emit NOTHING into `replyText`.
+            // `preDecision` runs unchanged; the LLM's reply still flows
+            // through the existing substitution path.
+            //
+            // Guard: only fires when this turn has a directive scheduled
+            // for substitution (i.e. `directiveActionForRender` is non-
+            // null AND registered AND the controller entry exists). If
+            // the directive is skipped upstream (informational-question
+            // gate, order-confirmation gate, switch_option recap), the
+            // prefix is moot and we don't log.
+            //
+            // Try/catch: shadow emit must never crash a turn. The turn-
+            // intent validator is hand-rolled and closed-set, so the
+            // failure surface is basically "proposer payload wasn't a
+            // proposer payload" — but defensive anyway.
+            // -----------------------------------------------------------
+            try {
+              if (
+                directiveActionForRender &&
+                isRegisteredDirectiveAction(directiveActionForRender) &&
+                conversationControllerEntry
+              ) {
+                const directiveActionTyped: DirectiveAction =
+                  directiveActionForRender;
+                const tiValidation = proposedTurnDecisionRaw
+                  ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                  : null;
+                const tiParsed =
+                  tiValidation && tiValidation.ok
+                    ? tiValidation.value.turn_intent || null
+                    : null;
+                const choice = chooseAckPrefix({
+                  tiKind: tiParsed?.kind ?? null,
+                  tiConfidence: tiParsed?.confidence ?? null,
+                  directiveAction: directiveActionTyped,
+                  language: preferredReplyLanguage,
+                  draft: conversationControllerEntry.bookingDraft,
+                });
+                const emit = formatReplyComposeShadowLog({
+                  conversation_id: conversationId,
+                  session_key: guardSessionKey,
+                  directive_action: directiveActionTyped,
+                  language: preferredReplyLanguage,
+                  ti_kind: tiParsed?.kind ?? "-",
+                  ti_confidence: tiParsed?.confidence ?? "-",
+                  choice_kind: choice.kind,
+                  choice_reason:
+                    choice.kind === "prefix" ? "selected" : choice.reason,
+                  prefix_chars:
+                    choice.kind === "prefix" ? choice.text.length : 0,
+                });
+                api.logger.info(emit);
+              }
+            } catch (replyComposeShadowError) {
+              try {
+                api.logger.warn(
+                  `[reply-compose/shadow] emit_failed conversation=${conversationId} error=${
+                    replyComposeShadowError instanceof Error
+                      ? replyComposeShadowError.message
+                      : String(replyComposeShadowError)
+                  }`,
+                );
+              } catch {
+                // No further escalation — shadow mode cannot block the turn.
               }
             }
 

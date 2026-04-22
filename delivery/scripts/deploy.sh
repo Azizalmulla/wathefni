@@ -89,6 +89,15 @@ DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER='DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER'
 # quote) get blocked as price_mismatch again (conv 19400 regression).
 DEPLOY_CANARY_GUARD_VALIDSET_HELPER_MARKER='selectGuardQuotedRoute'
 DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER='collectActiveQuotedPrices'
+# Phase 2 Milestone 1 build canary markers (2026-04-22). Anchors the ack-
+# aware reply-compose module (`plugins/shared/reply-compose.ts`) and its
+# shadow-emit callsite in the octopus-channel dispatcher. Shadow-only in
+# this deploy — if either marker goes missing from a deployed bundle, the
+# `[reply-compose/shadow]` signal that M1.5 (flip-to-live) relies on for
+# pre-flip validation silently disappears. Observation-only; not a
+# behaviour guard this round.
+DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER'
+DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -357,6 +366,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER',
         'guard valid-set collectActiveQuotedPrices callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/reply-compose.ts'),
+        '$DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER',
+        'M1 ack-aware reply-compose module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER',
+        'M1 ack-aware reply-compose shadow callsite marker',
     ),
 ]
 
