@@ -50,6 +50,110 @@ export type SameRouteQuoteFollowupAction =
   | { kind: "show_other_options" }
   | null;
 
+/**
+ * Minimum shape of the post-drain session guard that carries the
+ * freshest `StoredQuotedRoute` materialised by this turn's pricing
+ * tool. Intentionally structural — the dispatcher's full guard object
+ * is assignable as-is.
+ */
+export type GuardQuotedRouteSource = {
+  lastToolName: string | null;
+  lastToolTs: number;
+  lastQuotedRoute: StoredQuotedRoute | null;
+} | null | undefined;
+
+/**
+ * Pick the freshest quoted-route snapshot for hallucination-guard input
+ * population.
+ *
+ * Two snapshots coexist during an octopus-channel turn:
+ *
+ *   1. `turnStartSnapshot` — pre-drain, read at dispatcher entry from
+ *      the persisted session. On an initial-route turn (no prior quote
+ *      on session) this is `null` for the entire handler.
+ *   2. `sessionGuard.lastQuotedRoute` — post-drain, reflects the route
+ *      just materialised by this turn's `get_price` call.
+ *
+ * When THIS turn actually ran `get_price`, #2 carries the complete
+ * `pricesByType` + `optionCatalog` union that the guard needs to accept
+ * catalog-valid replies (e.g. "Express sedan at 1.750 KWD" on a first
+ * quote). The gate (`lastToolName === "get_price"` AND
+ * `lastToolTs >= turnStartMs`) matches the one `getPriceFiredThisTurn`
+ * uses for the Class-15 bypass — ensuring we only trust the session
+ * snapshot when this turn genuinely went through the pricing tool,
+ * never a stale persisted snapshot from a prior session.
+ *
+ * Any other case falls back to the turn-start snapshot (which the
+ * caller has already freshness-gated via `isStoredQuotedRouteFresh`),
+ * preserving prior-turn behaviour on follow-up turns without a new
+ * pricing call.
+ *
+ * Pre-fix incident (2026-04-22, conv 19400): on an initial-route turn
+ * ("price for surra to salwa express pls") the truthful LLM reply
+ * "Express sedan at 1.750 KWD" was substituted with the neutral
+ * price-repair template because the guard's valid-set was built from
+ * the null `turnStartSnapshot` and fell back to the scalar default
+ * option (1.250 standard sedan), producing
+ * `price_mismatch mentioned=1.75 valid=1.25`. The LLM's answer was
+ * catalog-accurate; the guard input was under-populated.
+ */
+export function selectGuardQuotedRoute(input: {
+  turnStartSnapshot: StoredQuotedRoute | null | undefined;
+  sessionGuard: GuardQuotedRouteSource;
+  turnStartMs: number;
+}): StoredQuotedRoute | null {
+  const { turnStartSnapshot, sessionGuard, turnStartMs } = input;
+  if (
+    sessionGuard &&
+    sessionGuard.lastToolName === "get_price" &&
+    typeof sessionGuard.lastToolTs === "number" &&
+    Number.isFinite(sessionGuard.lastToolTs) &&
+    sessionGuard.lastToolTs >= turnStartMs &&
+    sessionGuard.lastQuotedRoute
+  ) {
+    return sessionGuard.lastQuotedRoute;
+  }
+  return turnStartSnapshot ?? null;
+}
+
+/**
+ * Canonical builder for the `activeQuotedPrices` array fed to the
+ * hallucination guard. The set is the union of:
+ *   (a) `pricesByType` — bookable vehicle-type prices
+ *       (sedan_normal/fast, van_normal/fast, cooled_van_normal/fast,
+ *       helper_standard) the customer can place an order for.
+ *   (b) `optionCatalog[*].quoted_price` — every option the customer is
+ *       ALLOWED TO HEAR A PRICE FOR, including manual-confirm options
+ *       (e.g. Helper service) surfaced to the LLM as
+ *       `other_options_if_customer_asks`.
+ *
+ * Invalid / non-finite / non-positive entries are skipped. Duplicates
+ * across (a) and (b) are intentionally preserved — the guard
+ * de-duplicates at match time and tolerates redundancy.
+ */
+export function collectActiveQuotedPrices(
+  route: StoredQuotedRoute | null | undefined,
+): number[] {
+  const out: number[] = [];
+  if (!route) {
+    return out;
+  }
+  for (const p of Object.values(route.pricesByType || {})) {
+    if (typeof p === "number" && Number.isFinite(p) && p > 0) {
+      out.push(p);
+    }
+  }
+  if (Array.isArray(route.optionCatalog)) {
+    for (const opt of route.optionCatalog) {
+      const qp = opt?.quoted_price;
+      if (typeof qp === "number" && Number.isFinite(qp) && qp > 0) {
+        out.push(qp);
+      }
+    }
+  }
+  return out;
+}
+
 export const BOOKABLE_QUOTED_OPTION_TYPES = new Set([
   "sedan_normal",
   "sedan_fast",

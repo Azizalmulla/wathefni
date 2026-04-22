@@ -241,6 +241,8 @@ import {
   matchQuotedOptionDiscriminated,
   matchLlmOptionInterpretation,
   resolveOptionFromProposals,
+  selectGuardQuotedRoute,
+  collectActiveQuotedPrices,
 } from "./lib/quoted-options";
 import {
   shouldIncludeQuotedRouteContext,
@@ -6263,24 +6265,40 @@ async function handleInboundMessage(params: {
             // as a price_mismatch and was substituted with the neutral
             // price_repair. The LLM's answer was correct; the guard was
             // under-informed.
-            const activeQuotedPrices: number[] = [];
-            if (activeQuotedRoute) {
-              for (const p of Object.values(
-                activeQuotedRoute.pricesByType || {},
-              )) {
-                if (typeof p === "number" && Number.isFinite(p) && p > 0) {
-                  activeQuotedPrices.push(p);
-                }
-              }
-              if (Array.isArray(activeQuotedRoute.optionCatalog)) {
-                for (const opt of activeQuotedRoute.optionCatalog) {
-                  const qp = opt?.quoted_price;
-                  if (typeof qp === "number" && Number.isFinite(qp) && qp > 0) {
-                    activeQuotedPrices.push(qp);
-                  }
-                }
-              }
-            }
+            //
+            // Source selection (2026-04-22): the outer `activeQuotedRoute`
+            // binding is a TURN-START snapshot taken at line ~3606 from
+            // `preDispatchGuardEntry.session?.lastQuotedRoute`. On an
+            // initial-route turn (no prior quote on session), that
+            // snapshot is `null` for the entire handler even when THIS
+            // turn's `get_price` materialised a fresh catalog inside the
+            // responder drain. Reading it here therefore leaves
+            // `activeQuotedPrices=[]`, and the guard falls back to the
+            // scalar `entry.quotedPrice` (the default option, e.g.
+            // standard sedan). A truthful reply naming a non-default
+            // option's price — "Express sedan at 1.750 KWD" on a first
+            // quote — then registers as a `price_mismatch
+            // mentioned=1.75 valid=1.25` and is replaced by the neutral
+            // price-repair template (live incident, conv 19400, 2026-04-22).
+            //
+            // Fix: prefer the POST-DRAIN snapshot on
+            // `sessionGuard.lastQuotedRoute` when THIS turn actually ran
+            // `get_price` (same gate `getPriceFiredThisTurn` uses below
+            // for the Class-15 bypass). That snapshot carries the full
+            // `pricesByType` + `optionCatalog` the tool just produced.
+            // Fall back to the turn-start `activeQuotedRoute` otherwise,
+            // which preserves prior-turn behaviour on follow-up turns
+            // where no new pricing call fired. Strictly a guard-input
+            // population fix — no schema change, no policy change, and
+            // no new quote-stage handling. See `selectGuardQuotedRoute`
+            // + `collectActiveQuotedPrices` in
+            // `lib/quoted-options.ts`.
+            const guardQuotedRoute = selectGuardQuotedRoute({
+              turnStartSnapshot: activeQuotedRoute,
+              sessionGuard,
+              turnStartMs,
+            });
+            const activeQuotedPrices = collectActiveQuotedPrices(guardQuotedRoute);
             // Class-15 bypass detection (2026-04-21).
             //
             // Precondition tuple: this turn's inbound carried route

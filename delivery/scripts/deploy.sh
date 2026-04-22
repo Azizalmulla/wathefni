@@ -80,6 +80,15 @@ DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER='[directive-render/trace]'
 DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER='DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER'
 DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER='DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER'
 DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER='DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER'
+# Guard valid-set population canary markers (2026-04-22). Anchors the
+# post-drain `sessionGuard.lastQuotedRoute` selection used to build the
+# hallucination guard's `activeQuotedPrices` input on initial-route
+# turns. If either symbol goes missing from a deployed bundle, the
+# guard silently reverts to the null turn-start snapshot and truthful
+# catalog-backed replies (e.g. "Express sedan 1.750 KWD" on a first
+# quote) get blocked as price_mismatch again (conv 19400 regression).
+DEPLOY_CANARY_GUARD_VALIDSET_HELPER_MARKER='selectGuardQuotedRoute'
+DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER='collectActiveQuotedPrices'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -338,6 +347,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER',
         'phase-1 turn_intent ti_classification shadow emit marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/quoted-options.ts'),
+        '$DEPLOY_CANARY_GUARD_VALIDSET_HELPER_MARKER',
+        'guard valid-set selectGuardQuotedRoute helper marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER',
+        'guard valid-set collectActiveQuotedPrices callsite marker',
     ),
 ]
 
