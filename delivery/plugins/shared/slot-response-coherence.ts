@@ -177,15 +177,41 @@ function looksLikeGreeting(text: string): boolean {
 // question path — not through acknowledgment. This differs from the
 // greeting patterns, which DO accept trailing `?` ("hello?") because a
 // greeting-with-question is still handled as a greeting.
+//
+// 2026-04-22 — multi-word acks added. Live transcript (conv 19399)
+// showed "أوكي تم" reaching the name-slot fast-path because the
+// single-token patterns below never fired. Rather than add a second
+// list of hand-rolled two-word Arabic pairs, we split the lexicons
+// into alternation fragments and build a fourth regex that matches
+// any two stacked ack tokens (EN/Arabizi/Arabic, in any order). That
+// closes "ok done", "yes noted", "تمام ماشي", "أوكي تم", "ok tamam",
+// etc. without enumerating pairs. Both tokens must be in the lexicon,
+// so legitimate "alright, I'm Aziz" / "ok Ali" are still NOT acks.
+const EN_ACK_ALT =
+  "ok|okay|okey|oki|okie|okies|alright|alrighty|aight|sure|fine|cool|nice|great|perfect|awesome|excellent|yes|yea|yeah|yep|yup|yess+|yass+|yh|y|mhm|mmhm|mhmm|done|noted|got\\s+it|sounds\\s+good|go\\s+ahead|go|do\\s+it|proceed|roger|copy|ack";
+const ARABIZI_ACK_ALT =
+  "tamam|tmam|tamaam|mashi|maashi|maashy|mashy|zain|zein|zen|yalla|yala|yallah|inshallah|inshalla|isa|akeed|akid|tab|tayeb|6ayeb";
+const AR_ACK_ALT =
+  "تمام|تم|تمت|طيب|ماشي|زين|زينو|اوكي|أوكي|اوكيه|أوكيه|اوك|أوك|عدل|نعم|ايه|أيه|ايوه|إي|اي|يلا|يلله|يالله|اكيد|أكيد|ان\\s*شاء\\s*الله|إن\\s*شاء\\s*الله|انشاء\\s*الله|إنشاء\\s*الله|حسنا|حسناً";
+
+const ANY_ACK_ALT = `${EN_ACK_ALT}|${ARABIZI_ACK_ALT}|${AR_ACK_ALT}`;
+
 const ACKNOWLEDGMENT_PATTERNS: RegExp[] = [
-  // English / Latin
-  /^(?:ok|okay|okey|oki|okie|okies|alright|alrighty|aight|sure|fine|cool|nice|great|perfect|awesome|excellent|yes|yea|yeah|yep|yup|yess+|yass+|yh|y|mhm|mmhm|mhmm|done|noted|got\s+it|sounds\s+good|go\s+ahead|go|do\s+it|proceed|roger|copy|ack)[\s.!،,]*$/iu,
-  // Arabizi — Kuwaiti affirmations that are letters-only (digit-embedded
-  // Arabizi like "9ah" is rare and we prefer a false negative to a false
-  // positive here).
-  /^(?:tamam|tmam|tamaam|mashi|maashi|maashy|mashy|zain|zein|zen|yalla|yala|yallah|inshallah|inshalla|isa|akeed|akid|tab|tayeb|6ayeb)[\s.!،,]*$/iu,
-  // Arabic script
-  /^(?:تمام|تم|تمت|طيب|ماشي|زين|زينو|اوكي|أوكي|اوكيه|أوكيه|اوك|أوك|عدل|نعم|ايه|أيه|ايوه|إي|اي|يلا|يلله|يالله|اكيد|أكيد|ان\s*شاء\s*الله|إن\s*شاء\s*الله|انشاء\s*الله|إنشاء\s*الله|حسنا|حسناً)[\s.!،,]*$/u,
+  // Single-token EN / Latin
+  new RegExp(`^(?:${EN_ACK_ALT})[\\s.!،,]*$`, "iu"),
+  // Single-token Arabizi — Kuwaiti affirmations that are letters-only
+  // (digit-embedded Arabizi like "9ah" is rare and we prefer a false
+  // negative to a false positive here).
+  new RegExp(`^(?:${ARABIZI_ACK_ALT})[\\s.!،,]*$`, "iu"),
+  // Single-token Arabic script
+  new RegExp(`^(?:${AR_ACK_ALT})[\\s.!،,]*$`, "u"),
+  // Two-token stacked ack in any script combination. Each token must be
+  // a known ack — this is the guarantee that "ok Ali" / "tamam Ahmad"
+  // don't get swallowed as acks just because the first token is one.
+  new RegExp(
+    `^(?:${ANY_ACK_ALT})\\s+(?:${ANY_ACK_ALT})[\\s.!،,]*$`,
+    "iu",
+  ),
 ];
 
 function looksLikeAcknowledgment(text: string): boolean {

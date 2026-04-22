@@ -473,15 +473,34 @@ export function extractRecipientNameAndPhone(params: {
     return { patch: null, confidence: "none", reasons };
   }
   const { match: phoneMatch, start, end } = digitGroups[0];
-  const namePart = (normalized.slice(0, start) + " " + normalized.slice(end))
+  const rawNamePart = (normalized.slice(0, start) + " " + normalized.slice(end))
     .replace(/[,،.;:/\-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  // Reject any label noise: "phone", "number", etc — those make this parse
-  // ambiguous and we'd rather let the LLM handle it.
-  if (/\b(phone|number|tel|رقم)\b/i.test(namePart)) {
-    reasons.push("contains_labels");
-    return { patch: null, confidence: "none", reasons };
+  // Label detection uses Unicode-aware whole-word lookarounds rather
+  // than `\b` because JavaScript's `\b` is ASCII-only and silently
+  // fails to anchor Arabic tokens (conv 19399 — "اسم احمد باشا رقم
+  // 5207777" passed the old `\b(...|رقم)\b` guard and corrupted
+  // recipient_name). We also accept `اسم`/`الاسم`/`name` so labeled
+  // answers like "اسم احمد باشا رقم 5207777" can be stripped and
+  // re-parsed instead of being dropped into the LLM's lap.
+  const LABEL_RE = /(?<![\p{L}\p{N}])(?:phone|number|tel|no\.?|name|رقم|رقمه|الرقم|اسم|الاسم)(?![\p{L}\p{N}])/iu;
+  let namePart = rawNamePart;
+  if (LABEL_RE.test(rawNamePart)) {
+    // Strip every label occurrence and re-validate. If the stripped
+    // residual still has a reasonable name shape, use it; otherwise
+    // fall back to "too ambiguous, let the LLM try".
+    const LABEL_RE_GLOBAL = new RegExp(LABEL_RE.source, "giu");
+    const stripped = rawNamePart
+      .replace(LABEL_RE_GLOBAL, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!stripped || stripped.length < 2 || !/[a-z\u0600-\u06ff]/i.test(stripped)) {
+      reasons.push("contains_labels_only");
+      return { patch: null, confidence: "none", reasons };
+    }
+    namePart = stripped;
+    reasons.push("labels_stripped");
   }
   const phoneClean = phoneMatch.replace(/\D+/g, "");
   if (phoneClean.length < 7 || phoneClean.length > 15) {

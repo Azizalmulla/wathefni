@@ -1,0 +1,462 @@
+#!/usr/bin/env node
+/**
+ * Smoke test: slot-fill regressions surfaced by conv 19399 (2026-04-22).
+ *
+ * Background
+ * ----------
+ * A live manual test on 2026-04-22 exposed four defects that together
+ * corrupted the sender/recipient identity block:
+ *
+ *   A) Multi-word Arabic acknowledgments ("أوكي تم") passed the
+ *      single-token ack patterns in `slot-response-coherence.ts` and
+ *      fell through to `answer` for name slots. The fast-path then
+ *      wrote "أوكي تم" to `sender_name` and the real name step was
+ *      skipped.
+ *
+ *   B) `extractRecipientNameAndPhone` rejected labeled Arabic answers
+ *      like "اسم احمد باشا رقم 5207777" because the legacy
+ *      `\b(...|رقم)\b` guard does not anchor on Arabic (ASCII `\b`).
+ *      The full corrupted residual was accepted as `recipient_name`.
+ *
+ *   C) When the fast-path pre-applied `sender_phone` on this turn, the
+ *      LLM's next `apply_booking_field` also wrote the same digit
+ *      group to `recipient_phone`. The slot was empty, the boundary
+ *      accepted the write, and the recipient side silently ended up
+ *      with the sender's WhatsApp number.
+ *
+ *   D) `CONFIRM_SLOT_CONFLICT` dispatch read `rec.conflictValue` off
+ *      the DST slot record, but the actual field is
+ *      `conflictCandidate`. The `both` branch of the renderer never
+ *      fired, so every AR/EN conflict prompt fell back to the
+ *      generic "Correct value for X?".
+ *
+ * This file pins the fixes end-to-end so they don't regress.
+ *
+ * Cases
+ * -----
+ *   1. multi-word acknowledgments classify as `acknowledgment` and
+ *      fast-path name extractors refuse them.
+ *   2. labeled Arabic + EN recipient answers strip the labels and
+ *      parse as `(recipient_name, recipient_phone)`; label-only
+ *      residuals are rejected; regression guards for unlabeled real
+ *      names still hold.
+ *   3. `applyCrossSidePhoneGuard` is symmetric and only triggers on
+ *      the counterpart side; same-side writes pass through; a drop
+ *      produces the stable `cross_side_phone_write_same_turn` reason.
+ *   4. DST conflict records expose `conflictCandidate` (the key the
+ *      dispatch site now reads), and `renderDirectiveReply` for
+ *      `CONFIRM_SLOT_CONFLICT` renders the two-value prompt in both
+ *      AR and EN when given that key.
+ *   5. Recovery — if `recipient_name` is already corrupted ("اسم احمد
+ *      باشا رقم"), a subsequent labeled answer parses cleanly, the
+ *      boundary raises a well-formed conflict whose `conflictCandidate`
+ *      is the clean value, and the renderer shows both values so the
+ *      customer can recover without support intervention.
+ */
+
+import assert from "node:assert/strict";
+import path from "node:path";
+import { deliveryRoot, loadDeliveryTsModule } from "./_helpers/riders-plugin-loader.mjs";
+
+async function main() {
+  const coherence = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/slot-response-coherence.ts"),
+  );
+  const fastPath = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/fast-path-extractor.ts"),
+  );
+  const crossSide = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/cross-side-phone-guard.ts"),
+  );
+  const dialogState = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/dialog-state.ts"),
+  );
+  const applyBoundary = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/apply-boundary.ts"),
+  );
+  const registry = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/directive-reply-registry.ts"),
+  );
+  const bookingDraft = await loadDeliveryTsModule(
+    import.meta.url,
+    path.join(deliveryRoot, "plugins/shared/booking-draft.ts"),
+  );
+
+  const { classifyResponseForSlot, isAcceptableSlotResponse } = coherence;
+  const { extractSenderNameAndDecision, extractRecipientNameAndPhone } = fastPath;
+  const { applyCrossSidePhoneGuard } = crossSide;
+  const { createEmptyDialogState, updateSlot } = dialogState;
+  const { applyProposals, llmProposal } = applyBoundary;
+  const { renderDirectiveReply } = registry;
+  const { createEmptyBookingDraft } = bookingDraft;
+
+  // -------------------------------------------------------------------------
+  // Fix 1 — multi-word acknowledgments
+  // -------------------------------------------------------------------------
+  const multiWordAcks = [
+    // Arabic × Arabic
+    "أوكي تم",
+    "اوكي تم",
+    "تمام ماشي",
+    "تم زين",
+    "طيب تمام",
+    // EN × EN
+    "ok done",
+    "yes noted",
+    "alright done",
+    "sure okay",
+    "ok got it",
+    // EN × Arabizi
+    "ok tamam",
+    "yes mashi",
+    // trailing punctuation
+    "ok done.",
+    "أوكي تم!",
+  ];
+  for (const text of multiWordAcks) {
+    for (const slot of ["sender_name", "recipient_name"]) {
+      const d = classifyResponseForSlot({ text, slot });
+      assert.equal(
+        d.kind,
+        "acknowledgment",
+        `expected acknowledgment for ${JSON.stringify(text)} on ${slot}, got ${d.kind} (${d.reason})`,
+      );
+      assert.equal(d.confidence, "high");
+      const res = isAcceptableSlotResponse({ text, slot });
+      assert.equal(res.acceptable, false, `${JSON.stringify(text)} must not be acceptable for ${slot}`);
+    }
+  }
+
+  // Fast-path for ASK_SENDER_NAME_AND_PHONE_DECISION must refuse
+  // multi-word acks (this is the exact conv 19399 entry point that
+  // used to write "أوكي تم" to sender_name).
+  for (const text of ["أوكي تم", "ok done", "تمام ماشي", "yes noted"]) {
+    const r = extractSenderNameAndDecision({ text });
+    assert.equal(
+      r.patch?.sender_name ?? null,
+      null,
+      `fast-path sender must refuse multi-word ack ${JSON.stringify(text)} as sender_name (reasons=${r.reasons?.join(",")})`,
+    );
+  }
+
+  // Negative — "ok Ali" has only ONE ack token + a real-name token,
+  // which must NOT be swallowed as an ack (still lets the boundary's
+  // own validator decide).
+  {
+    const d = classifyResponseForSlot({ text: "ok Ali", slot: "sender_name" });
+    assert.notEqual(
+      d.kind,
+      "acknowledgment",
+      `"ok Ali" must not be classified as a two-word ack`,
+    );
+  }
+  // Negative — legitimate names continue to extract cleanly.
+  {
+    const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla, use whatsapp" });
+    assert.equal(r.patch?.sender_name, "Aziz Al Mulla");
+  }
+
+  // -------------------------------------------------------------------------
+  // Fix 2 — labeled recipient answers strip labels and re-parse
+  // -------------------------------------------------------------------------
+  // AR labeled — the exact conv 19399 shape.
+  {
+    const r = extractRecipientNameAndPhone({ text: "اسم احمد باشا رقم 5207777" });
+    assert.equal(r.confidence, "high", `expected high confidence, reasons=${r.reasons?.join(",")}`);
+    assert.equal(r.patch?.recipient_name, "احمد باشا");
+    assert.equal(r.patch?.recipient_phone, "5207777");
+    assert.ok(
+      r.reasons.includes("labels_stripped"),
+      `expected labels_stripped in reasons, got [${r.reasons?.join(",")}]`,
+    );
+  }
+  // AR with الاسم / الرقم prefixed forms.
+  {
+    const r = extractRecipientNameAndPhone({ text: "الاسم احمد باشا الرقم 5207777" });
+    assert.equal(r.confidence, "high");
+    assert.equal(r.patch?.recipient_name, "احمد باشا");
+    assert.equal(r.patch?.recipient_phone, "5207777");
+  }
+  // EN labeled equivalent.
+  {
+    const r = extractRecipientNameAndPhone({ text: "name Ahmed Basha phone 52077777" });
+    assert.equal(r.confidence, "high");
+    assert.equal(r.patch?.recipient_name, "Ahmed Basha");
+    assert.equal(r.patch?.recipient_phone, "52077777");
+    assert.ok(r.reasons.includes("labels_stripped"));
+  }
+  // Label-only residual must be rejected (no name to extract).
+  {
+    const r = extractRecipientNameAndPhone({ text: "رقم 5207777" });
+    assert.equal(
+      r.patch,
+      null,
+      `label-only residual must refuse extraction, got ${JSON.stringify(r.patch)}`,
+    );
+    assert.ok(
+      r.reasons.includes("contains_labels_only"),
+      `expected contains_labels_only, got [${r.reasons?.join(",")}]`,
+    );
+  }
+  // Regression — unlabeled clean names still extract unchanged (no strip flag).
+  {
+    const r = extractRecipientNameAndPhone({ text: "Mohammed Hamad 99887766" });
+    assert.equal(r.confidence, "high");
+    assert.equal(r.patch?.recipient_name, "Mohammed Hamad");
+    assert.equal(r.patch?.recipient_phone, "99887766");
+    assert.ok(
+      !r.reasons.includes("labels_stripped"),
+      `clean name must not flag labels_stripped, got [${r.reasons?.join(",")}]`,
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Fix 3 — cross-side phone guard
+  // -------------------------------------------------------------------------
+  // Fast-path already pre-applied sender_phone this turn → recipient
+  // side must be dropped.
+  {
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: ["sender_phone", "phone_decision"],
+      senderPhone: "99338566",
+      recipientPhone: "99338566",
+    });
+    assert.equal(out.senderPhone, "99338566", "same-side write must pass through");
+    assert.equal(out.recipientPhone, null, "cross-side write must be dropped");
+    assert.equal(out.drops.length, 1);
+    assert.deepEqual(out.drops[0], {
+      field: "recipient_phone",
+      triggeredBy: "sender_phone",
+      value: "99338566",
+      reason: "cross_side_phone_write_same_turn",
+    });
+  }
+  // Symmetric case — fast-path had already written recipient_phone.
+  {
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: ["recipient_phone", "recipient_name"],
+      senderPhone: "5207777",
+      recipientPhone: "5207777",
+    });
+    assert.equal(out.senderPhone, null, "cross-side write must be dropped");
+    assert.equal(out.recipientPhone, "5207777", "same-side write must pass through");
+    assert.equal(out.drops.length, 1);
+    assert.equal(out.drops[0].field, "sender_phone");
+    assert.equal(out.drops[0].triggeredBy, "recipient_phone");
+  }
+  // No fast-path pre-apply → LLM patches pass through unchanged.
+  {
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: [],
+      senderPhone: "99338566",
+      recipientPhone: "5207777",
+    });
+    assert.equal(out.senderPhone, "99338566");
+    assert.equal(out.recipientPhone, "5207777");
+    assert.equal(out.drops.length, 0);
+  }
+  // Same-side idempotent write with no counterpart → no drop.
+  {
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: ["sender_phone"],
+      senderPhone: "99338566",
+      recipientPhone: null,
+    });
+    assert.equal(out.senderPhone, "99338566");
+    assert.equal(out.recipientPhone, null);
+    assert.equal(out.drops.length, 0);
+  }
+  // Fast-path pre-applied non-phone fields (e.g. name) → phones pass through.
+  {
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: ["recipient_name"],
+      senderPhone: "99338566",
+      recipientPhone: "5207777",
+    });
+    assert.equal(out.senderPhone, "99338566");
+    assert.equal(out.recipientPhone, "5207777");
+    assert.equal(out.drops.length, 0);
+  }
+
+  // -------------------------------------------------------------------------
+  // Fix 4 — DST exposes conflictCandidate (the key the dispatch site
+  // now reads), and the renderer produces the two-value prompt.
+  // -------------------------------------------------------------------------
+  {
+    let state = createEmptyDialogState();
+    // First write — accepted and filled.
+    const r1 = updateSlot(state, "recipient_name", "احمد الباشا", "llm_apply");
+    state = r1.state;
+    assert.equal(r1.decision.action, "accepted");
+    // Second write with a different value — raises a conflict and
+    // stashes the incoming value on `conflictCandidate` (not
+    // `conflictValue`).
+    const r2 = updateSlot(state, "recipient_name", "محمد الباشا", "llm_apply");
+    state = r2.state;
+    assert.equal(r2.decision.action, "conflict");
+    const rec = state.slots.recipient_name;
+    assert.equal(rec?.status, "conflict");
+    assert.equal(rec?.value, "احمد الباشا");
+    assert.equal(
+      rec?.conflictCandidate,
+      "محمد الباشا",
+      "DST must store incoming on `conflictCandidate` — the key the dispatch site reads",
+    );
+    // Verify the key name itself — a regression here would silently
+    // re-break Fix 4's plumbing.
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(rec, "conflictCandidate"),
+      "SlotRecord must expose `conflictCandidate` (not `conflictValue`)",
+    );
+    assert.equal(
+      rec?.conflictValue,
+      undefined,
+      "SlotRecord must NOT expose a `conflictValue` field (the original typo)",
+    );
+
+    // Renderer — with both values plumbed through, AR + EN must emit
+    // the "«existing» or «incoming»?" shape.
+    const arCtx = {
+      language: "ar",
+      draft: createEmptyBookingDraft(),
+      entry: {},
+      conflictingSlot: "recipient_name",
+      conflictValues: { existing: rec.value, incoming: rec.conflictCandidate },
+      turnSeed: "seed-ar",
+    };
+    const arResult = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", arCtx);
+    assert.equal(arResult.kind, "render");
+    assert.ok(
+      arResult.text.includes("احمد الباشا") && arResult.text.includes("محمد الباشا"),
+      `AR two-value prompt must include both values, got: ${JSON.stringify(arResult.text)}`,
+    );
+    assert.ok(
+      arResult.text.includes("«") && arResult.text.includes("»"),
+      `AR two-value prompt must use Arabic quotation marks, got: ${JSON.stringify(arResult.text)}`,
+    );
+    assert.ok(
+      !arResult.text.startsWith("القيمة الصحيحة لـ"),
+      `AR must not fall back to the generic "القيمة الصحيحة لـ" prompt, got: ${JSON.stringify(arResult.text)}`,
+    );
+
+    const enCtx = { ...arCtx, language: "en", turnSeed: "seed-en" };
+    const enResult = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", enCtx);
+    assert.equal(enResult.kind, "render");
+    assert.ok(
+      enResult.text.includes("احمد الباشا") && enResult.text.includes("محمد الباشا"),
+      `EN two-value prompt must include both values, got: ${JSON.stringify(enResult.text)}`,
+    );
+    assert.ok(
+      !enResult.text.startsWith("Correct value for"),
+      `EN must not fall back to the generic "Correct value for" prompt, got: ${JSON.stringify(enResult.text)}`,
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Recovery — corrupted recipient_name is recoverable end-to-end
+  // (Fix 2 extracts cleanly → apply boundary raises a well-formed
+  // conflict on the pre-corrupted slot → renderer shows both values).
+  // -------------------------------------------------------------------------
+  {
+    // Pre-seed DST with the exact corrupted residual conv 19399 ended
+    // up with, as if Fix 2 had not yet been deployed. Sender identity
+    // is pre-resolved to match the realistic state — the corruption
+    // only happens at the RECIPIENT step, by which point the
+    // ambiguous-pair guard is already satisfied.
+    let state = createEmptyDialogState();
+    state = updateSlot(state, "sender_name", "عبدالعزيز الملا", "customer_fast_path").state;
+    state = updateSlot(state, "sender_phone", "96599338566", "customer_fast_path").state;
+    state = updateSlot(state, "recipient_name", "اسم احمد باشا رقم", "llm_apply").state;
+    assert.equal(state.slots.recipient_name?.status, "filled");
+    assert.equal(state.slots.recipient_name?.value, "اسم احمد باشا رقم");
+
+    // Customer sends the labeled answer again. Fix 2 strips the
+    // labels and returns the clean parse.
+    const extracted = extractRecipientNameAndPhone({
+      text: "اسم احمد باشا رقم 5207777",
+    });
+    assert.equal(extracted.confidence, "high");
+    assert.equal(extracted.patch?.recipient_name, "احمد باشا");
+    assert.equal(extracted.patch?.recipient_phone, "5207777");
+
+    // Drive the clean patch through the apply boundary. The boundary
+    // consults the DST we pre-seeded and raises a conflict (old vs
+    // new). The `conflictCandidate` on the resulting slot record MUST
+    // be the clean value — which is exactly what the dispatch site
+    // now surfaces into `conflictValues.incoming` for the renderer.
+    const draft = {
+      ...createEmptyBookingDraft(),
+      senderName: "عبدالعزيز الملا",
+      senderPhone: "96599338566",
+    };
+    const res = applyProposals(
+      [
+        llmProposal({
+          op: {
+            recipient_name: extracted.patch.recipient_name,
+            recipient_phone: extracted.patch.recipient_phone,
+            source_quote: "اسم احمد باشا رقم 5207777",
+          },
+        }),
+      ],
+      {
+        draft,
+        dialogState: state,
+        whatsappNumber: "96599338566",
+        stage: "collecting_booking_details",
+      },
+    );
+    // The boundary should have raised a conflict on recipient_name
+    // because the pre-seeded corrupted value disagrees with the
+    // clean incoming value.
+    const conflictFields = res.conflicts.map((c) => c.slot);
+    assert.ok(
+      conflictFields.includes("recipient_name"),
+      `expected recipient_name in conflicts, got conflicts=[${JSON.stringify(res.conflicts)}] rejections=[${JSON.stringify(res.rejections)}]`,
+    );
+    const recAfter = res.dialogState.slots.recipient_name;
+    assert.equal(recAfter?.status, "conflict");
+    assert.equal(recAfter?.value, "اسم احمد باشا رقم", "existing stays as the pre-corruption garbage");
+    assert.equal(
+      recAfter?.conflictCandidate,
+      "احمد باشا",
+      "incoming must be the Fix-2-cleaned value",
+    );
+
+    // Finally — feed the real DST-derived values into the renderer.
+    const ctx = {
+      language: "ar",
+      draft,
+      entry: {},
+      conflictingSlot: "recipient_name",
+      conflictValues: {
+        existing: recAfter.value,
+        incoming: recAfter.conflictCandidate,
+      },
+      turnSeed: "recovery-seed",
+    };
+    const render = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", ctx);
+    assert.equal(render.kind, "render");
+    assert.ok(
+      render.text.includes("اسم احمد باشا رقم"),
+      `renderer must surface the corrupted value so the customer sees it, got: ${JSON.stringify(render.text)}`,
+    );
+    assert.ok(
+      render.text.includes("احمد باشا"),
+      `renderer must surface the clean incoming value, got: ${JSON.stringify(render.text)}`,
+    );
+  }
+
+  console.log("smoke-test-slot-fill-fixes: OK");
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

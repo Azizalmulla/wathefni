@@ -68,6 +68,7 @@ import {
   llmProposal,
   type Proposal,
 } from "../shared/apply-boundary";
+import { applyCrossSidePhoneGuard } from "../shared/cross-side-phone-guard";
 import {
   decidePreStateOutbound,
   decidePostStateOutbound,
@@ -4854,13 +4855,51 @@ async function handleInboundMessage(params: {
                     // LLM and fast-path proposals go through one code
                     // path. See `plugins/shared/apply-boundary.ts` and
                     // `ARCHITECTURE.md`.
+                    //
+                    // 2026-04-22 — same-turn cross-side phone guard.
+                    // Live conv 19399: the customer answered
+                    // ASK_SENDER_PHONE with a single number, the
+                    // fast-path correctly pre-applied it to
+                    // `sender_phone`, but then the LLM's
+                    // apply_booking_field mirrored the SAME digit
+                    // string into `recipient_phone` in the very next
+                    // op. The boundary accepted it (the slot was
+                    // empty), silently corrupting the recipient side.
+                    // Rule: once the fast-path has resolved one side's
+                    // phone on this turn, drop any counterpart-side
+                    // phone on the LLM's patch. Symmetric for sender
+                    // and recipient so a future
+                    // ASK_RECIPIENT_NAME_AND_PHONE / sender-mirror
+                    // variant lands the same way. The guard only
+                    // masks the cross-side field; same-side phone
+                    // writes remain idempotent (boundary returns
+                    // unchanged).
+                    const crossSideGuard = applyCrossSidePhoneGuard({
+                      fastPathPreApplied,
+                      senderPhone: op.sender_phone ?? null,
+                      recipientPhone: op.recipient_phone ?? null,
+                    });
+                    for (const drop of crossSideGuard.drops) {
+                      try {
+                        api.logger.warn(
+                          `[one-brain/drain/cross-side-phone-drop] conversation=${conversationId} fast_path_applied=${drop.triggeredBy} dropped_llm_field=${drop.field} value=${JSON.stringify(drop.value)} reason=${drop.reason} turn_id=${op.turn_id || "-"}`,
+                        );
+                      } catch {}
+                      rejections.push({
+                        field: drop.field,
+                        reason: drop.reason,
+                        received: drop.value,
+                      });
+                    }
+                    const llmSenderPhone = crossSideGuard.senderPhone;
+                    const llmRecipientPhone = crossSideGuard.recipientPhone;
                     const proposal: Proposal = llmProposal({
                       op: {
                         sender_name: op.sender_name ?? null,
-                        sender_phone: op.sender_phone ?? null,
+                        sender_phone: llmSenderPhone,
                         phone_decision: (op.phone_decision as any) ?? null,
                         recipient_name: op.recipient_name ?? null,
-                        recipient_phone: op.recipient_phone ?? null,
+                        recipient_phone: llmRecipientPhone,
                         address_block: op.address_block ?? null,
                         address_street: op.address_street ?? null,
                         address_house: op.address_house ?? null,
@@ -5764,15 +5803,27 @@ async function handleInboundMessage(params: {
                     conflictingSlot = directive.field;
                     const slots = conversationControllerEntry.dialogState?.slots || {};
                     const rec = (slots as any)[directive.field];
+                    // 2026-04-22 — the DST field that holds the new,
+                    // not-yet-confirmed value is `conflictCandidate`
+                    // (see `dialog-state.ts::SlotRecord`). The original
+                    // plumbing here read `rec.conflictValue`, which
+                    // simply does not exist on the record — so the
+                    // `both` branch in `renderConfirmSlotConflict`
+                    // never fired and every AR/EN conflict prompt fell
+                    // back to the generic "القيمة الصحيحة لـ X؟" /
+                    // "Correct value for X?" wording. Reading the
+                    // correct field surfaces both values so the
+                    // renderer can emit the nicer
+                    // "«existing» أو «incoming»؟" shape.
                     if (
                       rec &&
                       rec.status === "conflict" &&
                       typeof rec.value === "string" &&
-                      typeof rec.conflictValue === "string"
+                      typeof rec.conflictCandidate === "string"
                     ) {
                       conflictValues = {
                         existing: rec.value,
-                        incoming: rec.conflictValue,
+                        incoming: rec.conflictCandidate,
                       };
                     }
                   }
