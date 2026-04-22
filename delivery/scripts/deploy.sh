@@ -115,6 +115,16 @@ DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_SLOT_APPLY_G
 # relies on to measure legacy-vs-m3 agreement rate. Observation-only.
 DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER'
 DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER'
+# Phase 3c build canary markers (2026-04-22). Anchors the three surfaces
+# of the v1.3 `post_order_intent` shadow classification: schema literal
+# (the enum itself), prompt rule 14 (telling the LLM when to emit), and
+# the `po_*` emit fields on the `[structured-output/proposer]` line. If
+# any of these go missing from a deployed bundle, the Phase 3c
+# conformance signal silently drops to noise. Shadow-only, observation-
+# only.
+DEPLOY_CANARY_POST_ORDER_INTENT_SCHEMA_MARKER='POST_ORDER_INTENT_KINDS'
+DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER'
+DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -413,6 +423,21 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER',
         'M3 action-selection shadow callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/proposer-schema.ts'),
+        '$DEPLOY_CANARY_POST_ORDER_INTENT_SCHEMA_MARKER',
+        'Phase 3c post_order_intent schema enum marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
+        '$DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER',
+        'Phase 3c post_order_intent rule 14 prompt marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER',
+        'Phase 3c post_order_intent shadow emit marker',
     ),
 ]
 

@@ -346,7 +346,7 @@ Reference format (for awareness — this is what the server emits):
 
     Shall I confirm this order?
 
-If your reply ever tries to write a summary while the directive is active, the LLM draft is silently replaced. A post-state regression alarm (`replace_summary_fact_drift`) catches any drift if the LLM produced a summary that disagreed with state — after Phase 3 this alarm should essentially never fire. Don't rely on it to fix up your summary: the server writes the summary, full stop.
+If your reply ever tries to write a summary while the directive is active, the LLM draft is silently replaced. A post-state regression alarm (`replace_summary_fact_drift`) catches any drift if the LLM produced a summary that disagreed with state — since the Phase-3 server-composed summary is now the default path, this alarm is effectively a regression canary rather than a routine substitution signal. Don't rely on it to fix up your summary: the server writes the summary, full stop.
 
 ### Edit turns (post-summary or mid-confirmation)
 
@@ -431,7 +431,7 @@ Collection-flow asks are server-composed. On turns where `next_required_action` 
 
 your draft reply is replaced by a server-rendered ask. The server names the correct field in the correct language; you don't have to worry about phrasing, word order, or Arabizi-vs-English switching on these asks. What still matters on your side is the OP layer — apply any values the customer just provided via `apply_booking_field`, emit state transitions via the right tools, and keep your intent routing clean.
 
-Same pattern as the manual-confirm address-ask / handoff replies below: state drives the reply, the LLM drives the ops. The exception is the two directives that stay LLM-owned — `POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF` (post-order intent routing is context-dependent) and `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED` (still LLM today; becoming server-composed next).
+Same pattern as the manual-confirm address-ask / handoff replies below: state drives the reply, the LLM drives the ops. `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED` is server-composed too — the server renders the full summary from state on the summary-shown turn, and only the CONFIRM turn itself (customer said "yes" after the summary) stays LLM-owned because it needs to call `create_simple_order` and acknowledge the placed order with tracking info. The one remaining LLM-owned directive in this region is `POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF` (post-order intent routing is context-dependent).
 
 ### Manual-confirmation options (Helper service, refrigerated van, etc.)
 

@@ -7036,6 +7036,33 @@ async function handleInboundMessage(params: {
               // can be computed without correlating to a second emit.
               const tiAddressedFieldsList =
                 declaredTurnIntent?.addressed_fields || [];
+              // v1.3 (2026-04-22) — post_order_intent conformance fields.
+              // Expected when the LLM self-declared turn_kind === "post_order_chat".
+              // Same four-bucket classification as ac / ti:
+              //   * present    — turn_kind was post_order_chat, LLM provided it
+              //   * missing    — turn_kind was post_order_chat, LLM omitted it
+              //   * unexpected — LLM provided it on a non-post-order turn_kind
+              //   * n/a        — turn_kind wasn't post_order_chat AND LLM omitted it
+              //
+              // DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER: po_classification shadow emit
+              const declaredPostOrderIntent =
+                validation && validation.ok
+                  ? validation.value.post_order_intent || null
+                  : null;
+              const poStage = declaredTurnKind === "post_order_chat";
+              const poKind = declaredPostOrderIntent?.kind || "-";
+              let poClassification:
+                | "present"
+                | "missing"
+                | "unexpected"
+                | "n/a" = "n/a";
+              if (poStage && declaredPostOrderIntent) {
+                poClassification = "present";
+              } else if (poStage && !declaredPostOrderIntent) {
+                poClassification = "missing";
+              } else if (!poStage && declaredPostOrderIntent) {
+                poClassification = "unexpected";
+              }
               api.logger.info(
                 `[structured-output/proposer] conversation=${conversationId} ` +
                   `stage=${stageForAcExpectation || "-"} ` +
@@ -7058,6 +7085,9 @@ async function handleInboundMessage(params: {
                   `ti_addressed_fields_count=${tiAddressedFieldsCount} ` +
                   `ti_addressed_fields=[${compactList(tiAddressedFieldsList)}] ` +
                   `ti_classification=${tiClassification} ` +
+                  `po_stage=${poStage ? "true" : "false"} ` +
+                  `po_kind=${poKind} ` +
+                  `po_classification=${poClassification} ` +
                   `duplicate_count=${proposedTurnDecisionCount} ` +
                   `turn_id=${proposedTurnDecisionTurnId || "-"} ` +
                   `errors=${errorsField}`,

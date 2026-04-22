@@ -69,6 +69,14 @@ const TURN_INTENT_ADDRESSED_FIELDS = [
   "route",
   "option",
 ];
+const POST_ORDER_INTENT_KINDS = [
+  "track",
+  "cancel_this_order",
+  "recreate_same",
+  "recreate_modified",
+  "customer_support",
+  "unclear",
+];
 const AWAITING_CONFIRMATION_KINDS = [
   "confirm_order",
   "cancel_order",
@@ -133,9 +141,11 @@ function makeAccumulator() {
     },
     tiClassification: new Map(),
     acClassification: new Map(),
+    poClassification: new Map(),
     tiKind: new Map(),
     tiConfidence: new Map(),
     acKind: new Map(),
+    poKind: new Map(),
     fieldCoverage: new Map(), // stage → { totalWithTi, perField:Map<field, count> }
     fieldCoverageByRequestedSlot: new Map(),
     kindByStage: new Map(), // stage → Map<kind, count>
@@ -212,6 +222,12 @@ function record(acc, parsed) {
 
   const acKind = t.ac_kind || "-";
   if (acClass === "present" && acKind !== "-") inc(acc.acKind, acKind);
+
+  // po_classification bucket (Phase 3c, v1.3).
+  const poClass = t.po_classification || "n/a";
+  inc(acc.poClassification, poClass);
+  const poKind = t.po_kind || "-";
+  if (poClass === "present" && poKind !== "-") inc(acc.poKind, poKind);
 
   // addressed_fields coverage by stage / requested_slot — only counts rows
   // that actually carried turn_intent (classification=present). "absent"
@@ -459,6 +475,47 @@ function renderReport(acc, { top = 3, minSamples = 0 } = {}) {
   );
   out.push("");
 
+  // po_classification (Phase 3c, v1.3 — post_order_intent shadow).
+  const poRows = CLASSIFICATION_BUCKETS.map((b) => [
+    b,
+    String(acc.poClassification.get(b) || 0),
+    pct(acc.poClassification.get(b) || 0, emitCount),
+  ]);
+  out.push(
+    renderTable({
+      title: "po_classification  (post_order_intent shadow, v1.3 — side-signal)",
+      columns: [
+        { label: "bucket", align: "left" },
+        { label: "count", align: "right" },
+        { label: "share", align: "right" },
+      ],
+      rows: poRows,
+    }),
+  );
+  out.push("");
+
+  // po_kind distribution over present rows.
+  const poPresent = acc.poClassification.get("present") || 0;
+  if (poPresent > 0) {
+    const poKindRows = POST_ORDER_INTENT_KINDS.map((k) => [
+      k,
+      String(acc.poKind.get(k) || 0),
+      pct(acc.poKind.get(k) || 0, poPresent),
+    ]);
+    out.push(
+      renderTable({
+        title: `po_kind distribution  (n=${poPresent} rows with po_classification=present)`,
+        columns: [
+          { label: "kind", align: "left" },
+          { label: "count", align: "right" },
+          { label: "share", align: "right" },
+        ],
+        rows: poKindRows,
+      }),
+    );
+    out.push("");
+  }
+
   // ti_kind distribution (over present rows).
   if (tiPresent > 0) {
     const tiKindRows = TURN_INTENT_KINDS.map((k) => [
@@ -691,6 +748,8 @@ function compactEmitSample(t) {
     "ti_addressed_fields",
     "ac_kind",
     "ac_classification",
+    "po_kind",
+    "po_classification",
     "errors",
   ];
   const parts = [];
@@ -743,6 +802,12 @@ function toJson(acc) {
     ),
     ac_kind: Object.fromEntries(
       AWAITING_CONFIRMATION_KINDS.map((k) => [k, acc.acKind.get(k) || 0]),
+    ),
+    po_classification: Object.fromEntries(
+      CLASSIFICATION_BUCKETS.map((b) => [b, acc.poClassification.get(b) || 0]),
+    ),
+    po_kind: Object.fromEntries(
+      POST_ORDER_INTENT_KINDS.map((k) => [k, acc.poKind.get(k) || 0]),
     ),
     field_coverage_by_stage: coverageToObj(acc.fieldCoverage),
     field_coverage_by_requested_slot: coverageToObj(acc.fieldCoverageByRequestedSlot),

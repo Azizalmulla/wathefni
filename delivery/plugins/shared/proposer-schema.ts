@@ -292,6 +292,65 @@ export type TurnIntentAddressedField =
   | "route"
   | "option";
 
+// ---------------------------------------------------------------------------
+// v1.3 (2026-04-22): post-order intent routing (Phase 3c, shadow).
+//
+// When the conversation is post-order — an order has been placed and the
+// customer is asking follow-up questions — the LLM classifies the turn
+// against the last remaining LLM-owned directive family,
+// `POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF`. The legacy path
+// leaves intent routing entirely to the LLM (free-text with a
+// `forbidden_reply_shapes` guard). This primitive makes the routing
+// observable first, then server-driven later.
+//
+// Rollout contract matches awaiting_confirmation / turn_intent:
+//   * optional at the shape layer for v1.0..v1.3 payloads
+//   * required-by-convention when `turn_kind === "post_order_chat"` —
+//     enforced as a conformance miss at the emit, not a validator fail
+//   * shadow-only in this PR
+//
+// Kind definitions (keep in sync with prompt-side text in rule 14):
+//   - track              — asking about the current order's status,
+//                          driver, ETA, tracking link, location. "where
+//                          is my driver?", "تتبع الطلب", "is he close?"
+//   - cancel_this_order  — wants to cancel the placed order. Distinct
+//                          from cancel_order in AC (which cancels the
+//                          DRAFT before placement).
+//   - recreate_same      — wants to place the same order again with no
+//                          changes. "send another", "ارسل نفس الطلب".
+//   - recreate_modified  — wants to place a new order using the prior
+//                          one as a template, with edits. "same thing
+//                          but to a different address".
+//   - customer_support   — a complaint, concern, or request that the
+//                          bot cannot handle directly: damage, driver
+//                          behavior, refund, account issue. Routes to
+//                          human handoff.
+//   - unclear            — ambiguous / too short / off-topic.
+// ---------------------------------------------------------------------------
+
+export type PostOrderIntentKind =
+  | "track"
+  | "cancel_this_order"
+  | "recreate_same"
+  | "recreate_modified"
+  | "customer_support"
+  | "unclear";
+
+export const POST_ORDER_INTENT_KINDS: readonly PostOrderIntentKind[] = [
+  "track",
+  "cancel_this_order",
+  "recreate_same",
+  "recreate_modified",
+  "customer_support",
+  "unclear",
+] as const;
+
+export interface ProposedPostOrderIntent {
+  kind: PostOrderIntentKind;
+  /** One-line rationale (≤200 chars). Observability only. */
+  reason: string;
+}
+
 export const TURN_INTENT_ADDRESSED_FIELDS: readonly TurnIntentAddressedField[] = [
   "sender_name",
   "sender_phone",
@@ -314,12 +373,13 @@ export interface ProposedTurnIntent {
   reason: string;
 }
 
-export type ProposerSchemaVersion = "1.0" | "1.1" | "1.2";
+export type ProposerSchemaVersion = "1.0" | "1.1" | "1.2" | "1.3";
 
 export const PROPOSER_SCHEMA_VERSIONS: readonly ProposerSchemaVersion[] = [
   "1.0",
   "1.1",
   "1.2",
+  "1.3",
 ] as const;
 
 export interface ProposedTurnDecision {
@@ -344,6 +404,12 @@ export interface ProposedTurnDecision {
    * Shadow-only in this PR; consumer wiring is a later PR.
    */
   turn_intent?: ProposedTurnIntent | null;
+  /**
+   * v1.3 addition. Present when the LLM classified the turn for the
+   * post-order intent routing policy map; required-by-convention when
+   * `turn_kind === "post_order_chat"`. Shadow-only in this PR.
+   */
+  post_order_intent?: ProposedPostOrderIntent | null;
   rationale?: string;
 }
 
@@ -626,6 +692,47 @@ export function validateProposedTurnDecision(
     }
   }
 
+  // v1.3 (2026-04-22): post_order_intent. Same rollout contract as v1.1
+  // awaiting_confirmation — optional at the shape layer; missing on a
+  // post_order_chat turn is a conformance miss, not a payload failure.
+  const postOrderIntentRaw = obj.post_order_intent;
+  let postOrderIntent: ProposedPostOrderIntent | null = null;
+  if (postOrderIntentRaw !== undefined && postOrderIntentRaw !== null) {
+    if (
+      typeof postOrderIntentRaw !== "object" ||
+      Array.isArray(postOrderIntentRaw)
+    ) {
+      errors.push("post_order_intent_not_object");
+    } else {
+      const poObj = postOrderIntentRaw as Record<string, unknown>;
+      const kind = poObj.kind;
+      const reason = poObj.reason;
+      if (
+        typeof kind !== "string" ||
+        !POST_ORDER_INTENT_KINDS.includes(kind as PostOrderIntentKind)
+      ) {
+        errors.push(
+          `post_order_intent.kind_invalid:${
+            typeof kind === "string" ? kind : "-"
+          }`,
+        );
+      }
+      if (typeof reason !== "string") {
+        errors.push("post_order_intent.reason_not_string");
+      }
+      if (
+        typeof kind === "string" &&
+        POST_ORDER_INTENT_KINDS.includes(kind as PostOrderIntentKind) &&
+        typeof reason === "string"
+      ) {
+        postOrderIntent = {
+          kind: kind as PostOrderIntentKind,
+          reason: reason.trim().slice(0, 200),
+        };
+      }
+    }
+  }
+
   if (errors.length > 0) {
     return { ok: false, errors };
   }
@@ -643,6 +750,9 @@ export function validateProposedTurnDecision(
       ? { awaiting_confirmation: awaitingConfirmation }
       : {}),
     ...(turnIntent !== null ? { turn_intent: turnIntent } : {}),
+    ...(postOrderIntent !== null
+      ? { post_order_intent: postOrderIntent }
+      : {}),
     ...(rationale !== undefined ? { rationale } : {}),
   };
 
@@ -820,6 +930,37 @@ export const PROPOSE_TURN_DECISION_TOOL_SCHEMA = {
         "'awaiting_confirmation'; omit (or null) on pre-booking turns. " +
         "In shadow mode today — no behavior wiring; the server logs this " +
         "for conformance analysis only.",
+    },
+    post_order_intent: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      required: ["kind", "reason"],
+      properties: {
+        kind: {
+          type: "string",
+          enum: [...POST_ORDER_INTENT_KINDS],
+          description:
+            "How the customer's turn relates to the order just placed. " +
+            "track: asking about driver / ETA / tracking / location. " +
+            "cancel_this_order: wants to cancel the PLACED order (distinct " +
+            "from cancel_order in awaiting_confirmation which cancels the " +
+            "DRAFT). recreate_same: wants to place the same order again. " +
+            "recreate_modified: wants to place a new order using this one " +
+            "as a template with edits. customer_support: complaint / " +
+            "damage / driver behavior / refund / account — needs human " +
+            "handoff. unclear: ambiguous or off-topic.",
+        },
+        reason: {
+          type: "string",
+          description:
+            "One-line rationale for the kind. <=200 chars. " +
+            "Observability only — not shown to the customer.",
+        },
+      },
+      description:
+        "Your classification of this post-order turn. REQUIRED when " +
+        "`turn_kind === \"post_order_chat\"`; omit (or null) on any earlier " +
+        "stage. Shadow mode today; server logs conformance only.",
     },
     rationale: {
       type: "string",
