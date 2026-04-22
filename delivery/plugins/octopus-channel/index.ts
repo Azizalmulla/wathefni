@@ -265,6 +265,12 @@ import {
   chooseAckPrefix,
   formatReplyComposeShadowLog,
 } from "../shared/reply-compose";
+import {
+  decideSlotApplyGate,
+  formatSlotApplyGateShadowLog,
+  extractDataFieldsFromPatch,
+  countUngateablePatchFields,
+} from "../shared/slot-apply-gate";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
   provenanceFromDecision,
@@ -4929,6 +4935,95 @@ async function handleInboundMessage(params: {
                         turn_id: op.turn_id ?? null,
                       },
                     });
+                    // -------------------------------------------------
+                    // Phase 2 Milestone 2 (2026-04-22): slot-apply gate
+                    // — SHADOW ONLY.
+                    //
+                    // DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER:
+                    //     [slot-apply-gate/shadow] emit
+                    //
+                    // Computes what the turn_intent-driven apply gate
+                    // would decide on this LLM-drained patch and logs
+                    // the decision. The patch is NOT masked; the
+                    // existing `applyProposals` runs unchanged. Flip-
+                    // to-live will either (a) mask `blockedFields` off
+                    // the patch before calling `applyProposals`, or
+                    // (b) skip the call entirely on `block_all`.
+                    //
+                    // Order-of-arrival note: both `apply_booking_field`
+                    // and `proposed_turn_decision` ops arrive through
+                    // the same drain loop. If the LLM emits the
+                    // proposer op FIRST (the convention — the tool
+                    // description positions `propose_turn_decision` as
+                    // the meta-decision that frames subsequent tool
+                    // calls), `proposedTurnDecisionRaw` is populated
+                    // before this shadow emit runs and we see
+                    // `ti_kind`. If the LLM emits the apply op first,
+                    // we see `ti_kind=-` at this callsite and the gate
+                    // correctly falls back to `allow
+                    // turn_intent_missing`. That ordering signal is
+                    // itself observable data we want — it tells us
+                    // how often the LLM is inverting the expected
+                    // emit order.
+                    //
+                    // Try/catch: shadow emit must never crash a turn.
+                    // -------------------------------------------------
+                    try {
+                      const tiValidationForGate = proposedTurnDecisionRaw
+                        ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                        : null;
+                      const tiForGate =
+                        tiValidationForGate && tiValidationForGate.ok
+                          ? tiValidationForGate.value.turn_intent || null
+                          : null;
+                      const gateDecision = decideSlotApplyGate({
+                        tiKind: tiForGate?.kind ?? null,
+                        tiConfidence: tiForGate?.confidence ?? null,
+                        tiAddressedFields: tiForGate?.addressed_fields ?? null,
+                        proposalSource: proposal.source,
+                        patch: proposal.patch,
+                      });
+                      const dataFieldsCount = extractDataFieldsFromPatch(
+                        proposal.patch,
+                      ).length;
+                      const ungateableCount = countUngateablePatchFields(
+                        proposal.patch,
+                      );
+                      const emit = formatSlotApplyGateShadowLog({
+                        conversation_id: conversationId,
+                        turn_id: op.turn_id ?? null,
+                        proposal_source: proposal.source,
+                        ti_kind: tiForGate?.kind ?? "-",
+                        ti_confidence: tiForGate?.confidence ?? "-",
+                        ti_addressed_fields_count:
+                          tiForGate?.addressed_fields.length ?? 0,
+                        patch_data_fields_count: dataFieldsCount,
+                        ungateable_fields_count: ungateableCount,
+                        decision_kind: gateDecision.kind,
+                        decision_reason: gateDecision.reason,
+                        blocked_fields:
+                          gateDecision.kind === "block_partial"
+                            ? gateDecision.blockedFields
+                            : [],
+                        allowed_fields:
+                          gateDecision.kind === "block_partial"
+                            ? gateDecision.allowedFields
+                            : [],
+                      });
+                      api.logger.info(emit);
+                    } catch (slotApplyGateShadowError) {
+                      try {
+                        api.logger.warn(
+                          `[slot-apply-gate/shadow] emit_failed conversation=${conversationId} turn_id=${op.turn_id || "-"} error=${
+                            slotApplyGateShadowError instanceof Error
+                              ? slotApplyGateShadowError.message
+                              : String(slotApplyGateShadowError)
+                          }`,
+                        );
+                      } catch {
+                        // Shadow emit never blocks a turn.
+                      }
+                    }
                     const boundaryRes = applyProposals([proposal], {
                       draft: nextDraft,
                       dialogState: nextDialogState,

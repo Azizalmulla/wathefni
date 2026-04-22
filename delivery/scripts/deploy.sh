@@ -98,6 +98,16 @@ DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER='collectActiveQuotedPrices'
 # behaviour guard this round.
 DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER'
 DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER'
+# Phase 2 Milestone 2 build canary markers (2026-04-22). Anchors the
+# turn_intent-gated slot-apply module
+# (`plugins/shared/slot-apply-gate.ts`) and its shadow-emit callsite at
+# the LLM-drain apply path in the octopus-channel dispatcher. Shadow-
+# only in this deploy — if either marker goes missing, the
+# `[slot-apply-gate/shadow]` signal the M2.flip gate will depend on for
+# pre-flip block-rate validation silently disappears. Observation-only;
+# not a behaviour guard.
+DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER'
+DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -376,6 +386,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER',
         'M1 ack-aware reply-compose shadow callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/slot-apply-gate.ts'),
+        '$DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER',
+        'M2 turn_intent-gated slot-apply module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER',
+        'M2 slot-apply-gate shadow callsite marker',
     ),
 ]
 
