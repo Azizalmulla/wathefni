@@ -7461,6 +7461,33 @@ async function handleInboundMessage(params: {
                 ),
                 observed_a1_intent: turnA1SubstituteIntent,
               },
+              // Relocation 4 (directive → layer): supply the candidate
+              // state-machine directive and the meaning-gate inputs so
+              // `observeTurnDecision` can run `decideDirectiveDisposition`
+              // in parallel with the legacy pipeline. Shadow-only in
+              // this cut — the callsite does not act on the derived
+              // disposition yet.
+              //
+              // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER
+              //
+              // `state_directive_action` reuses `turnReplyDirective`
+              // (the directive that actually fired this turn). For
+              // shadow purposes this is equivalent to the state
+              // machine's answer since, in the legacy pipeline, the
+              // state machine's output always becomes the fired
+              // directive when non-null.
+              directive_inputs: {
+                state_directive_action: turnReplyDirective,
+                same_route_quote_switch_option:
+                  sameRouteQuoteAction?.kind === "switch_option",
+                hallucination_guard_fired:
+                  (hallucinationGuardRejections || []).length > 0,
+                route_intent_fresh_this_turn: Boolean(
+                  tdProposerValue?.turn_kind === "initial_route" &&
+                    !!activeQuotedRoute &&
+                    sameRouteQuoteAction === null,
+                ),
+              },
               proposer: {
                 present: proposedTurnDecisionRaw !== null,
                 schema_valid: !!(

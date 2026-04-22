@@ -152,6 +152,14 @@ DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_C
 # three semantic-gate passthroughs will NOT take effect live.
 DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER'
 DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER'
+# Relocation 4 (directive → layer, 2026-04-22): decideDirectiveDisposition
+# export present in the module, and directive_inputs block wired at the
+# trace callsite. Absence means the deployed build predates the
+# directive-disposition derivation and the trace will not emit the
+# `directive_disposition` / `directive_agreement` tokens that the bake
+# review and the subsequent live flip rely on. Shadow-only in this cut.
+DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER'
+DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -505,6 +513,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER',
         'turn-decision A1 flip callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER',
+        'turn-decision directive-disposition module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER',
+        'turn-decision directive_inputs callsite marker',
     ),
 ]
 

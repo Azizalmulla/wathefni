@@ -1,10 +1,11 @@
 // ---------------------------------------------------------------------------
 // Unified turn-decision layer — SCAFFOLD + A4 DISPATCH + A1 DERIVATION
-// (relocations 1–3).
+// + DIRECTIVE DISPOSITION (relocations 1–4).
 //
 // DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER: turn-decision scaffold observer
 // DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER: deriveDispatch
 // DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER: deriveA1Substitute
+// DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER: decideDirectiveDisposition
 //
 // ## What this file is, in one paragraph
 //
@@ -373,6 +374,49 @@ export interface TurnDecisionObservedContext {
     observed_a1_intent: A1SubstituteIntent | null;
   };
 
+  // Directive-disposition inputs (relocation 4). Optional — when absent
+  // the layer skips disposition derivation and the trace omits the
+  // `directive_disposition_*` fields (behaves exactly like a pre-Reloc-4
+  // callsite).
+  //
+  // The layer's role here is narrow: given the state machine's candidate
+  // directive for this turn, decide whether it is ALLOWED to fire or
+  // should be SUPPRESSED because the turn's meaning signals indicate the
+  // customer is not actually answering the current step. Legacy behaviour
+  // has no "suppress" option — every non-null directive was always
+  // allowed — so `legacy_would_have` is always `"allow"` and every
+  // "suppress" outcome is a layer-initiated divergence.
+  //
+  // The state machine (`computeOneBrainNextRequiredAction`) stays
+  // unchanged. Reloc 4 gives the layer veto power over its output
+  // without rewriting its internals. Shadow-only in the first cut; the
+  // callsite acts on the disposition only after the live flip behind
+  // `RIDERS_TURN_DECISION_DIRECTIVE_FLIP`.
+  directive_inputs?: {
+    // Candidate directive produced by the state machine for this turn.
+    // Null when the state machine had nothing to say (pre-quote /
+    // chit-chat) — the disposition derivation short-circuits to `allow`
+    // in that case.
+    state_directive_action: string | null;
+
+    // Skip condition — on switch-option turns the legacy A0c branch is
+    // already a no-op (see Reloc 3), so the disposition layer also
+    // falls through to `allow` to preserve parity.
+    same_route_quote_switch_option: boolean;
+
+    // Safeguard — when the hallucination guard fired, the LLM's draft
+    // is untrusted; the directive takes over as damage control and
+    // the disposition layer MUST allow it.
+    hallucination_guard_fired: boolean;
+
+    // Strict fresh-route signal (same computation as `a1_inputs`).
+    // Must be `true` only when the proposer said `initial_route` AND
+    // there was an active quoted route at turn start AND the same-route
+    // followup resolver did not bind it. Loose evidence must not fire
+    // this gate.
+    route_intent_fresh_this_turn: boolean;
+  };
+
   // A4 dispatch inputs (relocation 2). Optional because earlier smoke
   // tests and older callsites may not supply them; when absent, the
   // layer skips dispatch derivation and the trace omits layer_source /
@@ -477,6 +521,17 @@ export interface TurnDecision {
     derived_a1_reason?: string;
     derived_a1_policy_rule?: string;
     a1_agreement?: A1Agreement;
+
+    // Directive disposition (relocation 4): whether the layer would
+    // allow or suppress the state machine's candidate directive for
+    // this turn, given the turn's meaning. Present only when
+    // `directive_inputs` was supplied. NOT executed in the shadow cut;
+    // legacy behaviour always allows. Every `suppress` in this field is
+    // a layer-initiated divergence worth auditing.
+    derived_directive_disposition?: DirectiveDisposition;
+    derived_directive_reason?: string;
+    derived_directive_policy_rule?: string;
+    directive_disposition_agreement?: DirectiveDispositionAgreement;
   };
 
   transitions: {
@@ -736,6 +791,197 @@ export function classifyA1Agreement(
     return "disagree_layer_substitute";
   }
   return "disagree_other";
+}
+
+// ---------------------------------------------------------------------------
+// DIRECTIVE DISPOSITION DERIVATION (relocation 4).
+//
+// The state machine (`computeOneBrainNextRequiredAction`) looks at the
+// booking draft and emits a candidate directive like `ASK_SENDER_NAME`
+// or `CLARIFY_OPTION_BEFORE_PROCEED`. Historically, if the state
+// machine returned a non-null directive, it ALWAYS fired — forbidden-
+// shape injection into the prompt, A0c registry dispatch, the whole
+// pipeline. That is the structural source of the "step-loop" behaviour:
+// the form pushes itself onto the customer regardless of what the
+// customer's turn actually means.
+//
+// `decideDirectiveDisposition` is the narrow inversion. Given:
+//   - what the state machine proposed, and
+//   - the turn's meaning signals (fresh route, clarifying question,
+//     cancel intent, correction intent),
+// it decides whether the directive is ALLOWED to fire this turn or
+// should be SUPPRESSED because the customer is not actually answering
+// the current step.
+//
+// Policy rules (first match wins):
+//
+//   * `allow_when_no_state_directive` — state machine returned null,
+//     nothing for the layer to veto.
+//   * `allow_on_same_route_switch_option` — legacy parity: switch-
+//     option turns already skip A0c, so the layer aligns.
+//   * `allow_on_hallucination_guard` — guard fired, the LLM's draft is
+//     untrusted, so the directive takes over as damage control.
+//   * `suppress_on_fresh_route_request` — strict fresh-route signal
+//     (same gate as Reloc 3's route-change passthrough) while in a
+//     stage where a fresh route makes sense. No confidence gate —
+//     the strict flag does the filtering.
+//   * `suppress_on_clarifying_question` — `ti_kind=clarifying_question`
+//     at high/medium confidence.
+//   * `suppress_on_cancel_intent` — `ac_kind=cancel_order` (only set on
+//     summary/confirmation stages; the validator ensures this).
+//   * `suppress_on_correction_intent` — `ti_kind=corrected_prior` at
+//     high/medium confidence.
+//   * `allow_default` — directive stands.
+//
+// Legacy comparison:
+//   `legacy_would_have` is always `"allow"` because the current
+//   pipeline has no "suppress" option. Agreement is therefore binary:
+//   `agree` (layer also allows) or `disagree_layer_suppress`. Every
+//   suppress is a divergence worth reviewing.
+//
+// Shadow discipline:
+//   The first cut is OBSERVATION ONLY. `observeTurnDecision` fills in
+//   `derived_directive_disposition` and the trace emits it, but the
+//   callsite does NOT act on it. The live flip behind
+//   `RIDERS_TURN_DECISION_DIRECTIVE_FLIP` comes after the bake.
+// ---------------------------------------------------------------------------
+
+export type DirectiveDisposition = "allow" | "suppress";
+
+export type DirectiveDispositionAgreement =
+  | "agree"
+  | "disagree_layer_suppress";
+
+export interface DirectiveDispositionInputs {
+  // Candidate directive from `computeOneBrainNextRequiredAction`.
+  state_directive_action: string | null;
+
+  // Proposer semantic signals.
+  proposer_turn_kind: ProposedTurnKind | null;
+  proposer_ti_kind: TurnIntentKind | null;
+  proposer_ti_confidence: "high" | "medium" | "low" | null;
+  proposer_ac_kind: AwaitingConfirmationKind | null;
+
+  // State context.
+  stage_at_turn_start: string | null;
+  has_active_quoted_route_at_turn_start: boolean;
+  route_intent_fresh_this_turn: boolean;
+
+  // Skip conditions & safeguards.
+  same_route_quote_switch_option: boolean;
+  hallucination_guard_fired: boolean;
+}
+
+export interface DirectiveDispositionDerivation {
+  disposition: DirectiveDisposition;
+  reason: string;
+  policy_rule: string;
+}
+
+const DIRECTIVE_ROUTE_CHANGE_STAGES: ReadonlySet<string> = new Set<string>([
+  "quoted",
+  "collecting_booking_details",
+  "summary_shown",
+  "awaiting_confirmation",
+]);
+
+function directiveTiConfidenceIsTrustworthy(
+  confidence: "high" | "medium" | "low" | null,
+): boolean {
+  return confidence === "high" || confidence === "medium";
+}
+
+export function decideDirectiveDisposition(
+  input: DirectiveDispositionInputs,
+): DirectiveDispositionDerivation {
+  if (!input.state_directive_action) {
+    return {
+      disposition: "allow",
+      reason: "no_state_directive",
+      policy_rule: "layer.directive.allow_when_no_state_directive",
+    };
+  }
+
+  if (input.same_route_quote_switch_option) {
+    return {
+      disposition: "allow",
+      reason: "same_route_quote_switch_option",
+      policy_rule: "layer.directive.allow_on_same_route_switch_option",
+    };
+  }
+
+  if (input.hallucination_guard_fired) {
+    return {
+      disposition: "allow",
+      reason: "hallucination_guard_fired",
+      policy_rule: "layer.directive.allow_on_hallucination_guard",
+    };
+  }
+
+  // Rule: fresh route-change suppression. STRICT — relies on the
+  // callsite-computed `route_intent_fresh_this_turn` flag AND a stage
+  // where a fresh route would make structural sense. No confidence
+  // gate — the conjunction at the callsite already filters loose
+  // evidence.
+  if (
+    input.route_intent_fresh_this_turn &&
+    input.stage_at_turn_start !== null &&
+    DIRECTIVE_ROUTE_CHANGE_STAGES.has(input.stage_at_turn_start) &&
+    input.has_active_quoted_route_at_turn_start
+  ) {
+    return {
+      disposition: "suppress",
+      reason: "fresh_route_request",
+      policy_rule: "layer.directive.suppress_on_fresh_route_request",
+    };
+  }
+
+  const tiTrustworthy = directiveTiConfidenceIsTrustworthy(
+    input.proposer_ti_confidence,
+  );
+
+  if (tiTrustworthy && input.proposer_ti_kind === "clarifying_question") {
+    return {
+      disposition: "suppress",
+      reason: "clarifying_question",
+      policy_rule: "layer.directive.suppress_on_clarifying_question",
+    };
+  }
+
+  // Cancel intent only has a validated value on summary/awaiting-
+  // confirmation stages where `awaiting_confirmation` is required; the
+  // validator guarantees it is null outside those stages, so no extra
+  // stage check is needed here.
+  if (input.proposer_ac_kind === "cancel_order") {
+    return {
+      disposition: "suppress",
+      reason: "cancel_intent",
+      policy_rule: "layer.directive.suppress_on_cancel_intent",
+    };
+  }
+
+  if (tiTrustworthy && input.proposer_ti_kind === "corrected_prior") {
+    return {
+      disposition: "suppress",
+      reason: "correction_intent",
+      policy_rule: "layer.directive.suppress_on_correction_intent",
+    };
+  }
+
+  return {
+    disposition: "allow",
+    reason: "no_suppress_rule_fired",
+    policy_rule: "layer.directive.allow_default",
+  };
+}
+
+export function classifyDirectiveDispositionAgreement(
+  derived: DirectiveDisposition,
+): DirectiveDispositionAgreement {
+  // Legacy has no suppress option — every non-null directive was
+  // always allowed. So the comparison is simply: did the layer also
+  // allow, or did it want to suppress?
+  return derived === "allow" ? "agree" : "disagree_layer_suppress";
 }
 
 // ---------------------------------------------------------------------------
@@ -1024,6 +1270,37 @@ export function observeTurnDecision(
     policyHits.push(`a1:${a1Agreement}`);
   }
 
+  // Relocation 4: layer-derived directive disposition. Runs in parallel
+  // with the state machine when `directive_inputs` is supplied; the
+  // callsite does not act on it yet in the shadow cut.
+  //
+  // Legacy behaviour: every non-null directive always fired, so
+  // agreement is binary (allow ⇒ agree, suppress ⇒ disagree).
+  let derivedDirective: DirectiveDispositionDerivation | null = null;
+  let directiveAgreement: DirectiveDispositionAgreement | undefined;
+  if (ctx.directive_inputs) {
+    derivedDirective = decideDirectiveDisposition({
+      state_directive_action: ctx.directive_inputs.state_directive_action,
+      proposer_turn_kind: ctx.proposer.turn_kind,
+      proposer_ti_kind: ctx.proposer.ti_kind,
+      proposer_ti_confidence: ctx.proposer.ti_confidence,
+      proposer_ac_kind: ctx.proposer.ac_kind,
+      stage_at_turn_start: ctx.state_summary.stage_at_turn_start,
+      has_active_quoted_route_at_turn_start:
+        ctx.state_summary.has_active_quoted_route,
+      route_intent_fresh_this_turn:
+        ctx.directive_inputs.route_intent_fresh_this_turn,
+      same_route_quote_switch_option:
+        ctx.directive_inputs.same_route_quote_switch_option,
+      hallucination_guard_fired: ctx.directive_inputs.hallucination_guard_fired,
+    });
+    directiveAgreement = classifyDirectiveDispositionAgreement(
+      derivedDirective.disposition,
+    );
+    policyHits.push(derivedDirective.policy_rule);
+    policyHits.push(`directive:${directiveAgreement}`);
+  }
+
   // Relocation 2: layer-derived dispatch. Runs in parallel with the
   // observed projection when `a4_inputs` is supplied. Emits an explicit
   // agreement token so divergences are grep-able.
@@ -1071,6 +1348,14 @@ export function observeTurnDecision(
             derived_a1_reason: derivedA1.reason,
             derived_a1_policy_rule: derivedA1.policy_rule,
             a1_agreement: a1Agreement,
+          }
+        : {}),
+      ...(derivedDirective
+        ? {
+            derived_directive_disposition: derivedDirective.disposition,
+            derived_directive_reason: derivedDirective.reason,
+            derived_directive_policy_rule: derivedDirective.policy_rule,
+            directive_disposition_agreement: directiveAgreement,
           }
         : {}),
     },
@@ -1139,6 +1424,15 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
       a1_reason: e.decision.reply.derived_a1_reason ?? null,
       a1_policy_rule: e.decision.reply.derived_a1_policy_rule ?? null,
       a1_agreement: e.decision.reply.a1_agreement ?? null,
+      // Relocation 4: directive disposition. Null when callsite did
+      // not supply `directive_inputs`.
+      directive_disposition:
+        e.decision.reply.derived_directive_disposition ?? null,
+      directive_reason: e.decision.reply.derived_directive_reason ?? null,
+      directive_policy_rule:
+        e.decision.reply.derived_directive_policy_rule ?? null,
+      directive_disposition_agreement:
+        e.decision.reply.directive_disposition_agreement ?? null,
     },
     op_plan: e.decision.op_plan.entries.map((x) => ({
       op: x.op_name,
@@ -1166,6 +1460,8 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
     `dispatch_agreement=${e.decision.reply.dispatch_agreement || "-"} ` +
     `layer_a1_intent=${e.decision.reply.derived_a1_intent || "-"} ` +
     `a1_agreement=${e.decision.reply.a1_agreement || "-"} ` +
+    `directive_disposition=${e.decision.reply.derived_directive_disposition || "-"} ` +
+    `directive_agreement=${e.decision.reply.directive_disposition_agreement || "-"} ` +
     `observed_reason=${e.decision.trace.observed_reason} ` +
     `ti=${e.decision.trace.semantic_signals.ti_kind || "-"} ` +
     `ac=${e.decision.trace.semantic_signals.ac_kind || "-"} ` +
