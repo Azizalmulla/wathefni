@@ -108,6 +108,13 @@ DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_
 # not a behaviour guard.
 DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER'
 DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER'
+# Phase 2 Milestone 3 build canary markers (2026-04-22). Anchors the
+# action-selection gate module (`plugins/shared/action-selection-gate.ts`)
+# and its shadow-emit callsite in the directive-dispatch block. The
+# shadow emit is what the coordinated M1/M2/M3 flip readiness review
+# relies on to measure legacy-vs-m3 agreement rate. Observation-only.
+DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER'
+DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -396,6 +403,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER',
         'M2 slot-apply-gate shadow callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/action-selection-gate.ts'),
+        '$DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER',
+        'M3 action-selection-gate module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER',
+        'M3 action-selection shadow callsite marker',
     ),
 ]
 

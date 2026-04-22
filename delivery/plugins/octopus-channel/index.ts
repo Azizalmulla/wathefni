@@ -271,6 +271,12 @@ import {
   extractDataFieldsFromPatch,
   countUngateablePatchFields,
 } from "../shared/slot-apply-gate";
+import {
+  computeLegacyActionDecision,
+  decideActionSelection,
+  diffActionDecisions,
+  formatActionSelectionShadowLog,
+} from "../shared/action-selection-gate";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
   provenanceFromDecision,
@@ -5977,6 +5983,100 @@ async function handleInboundMessage(params: {
                   api.logger.info(
                     `[one-brain/directive-dispatch] ${skipReason} conversation=${conversationId} action=${directive.action} stage=${conversationControllerEntry?.stage || "-"} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
                   );
+                }
+
+                // ---------------------------------------------------
+                // Phase 2 Milestone 3 (2026-04-22): action-selection
+                // shadow — turn_intent / awaiting_confirmation driven
+                // decision, compared against the legacy word-list
+                // gates above. OBSERVATION ONLY.
+                //
+                // DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER:
+                //     [action-selection/shadow] emit
+                //
+                // The two gates just above (customerConfirmedOrder,
+                // customerAskingInformational) represent today's
+                // live action-selection logic: hard-coded word-list
+                // heuristics that decide whether to suppress the
+                // server's directive render. M3 replaces them with
+                // a semantic decision driven by `turn_intent.kind`
+                // (and `awaiting_confirmation.kind` on summary
+                // turns). This block runs AFTER the legacy gates so
+                // `directiveActionForRender` already reflects the
+                // live behaviour; the shadow log captures what M3
+                // would have decided and the agreement bucket for
+                // the pre-flip review.
+                //
+                // We register `isRegisteredDirectiveAction` before
+                // diffing so a stray runtime directive name that
+                // isn't in the registry doesn't crash the emit.
+                // Wrapped in try/catch; observation-only.
+                // ---------------------------------------------------
+                try {
+                  if (isRegisteredDirectiveAction(directive.action)) {
+                    const directiveTyped = directive.action as
+                      | typeof directive.action
+                      | DirectiveAction;
+                    const legacyDecision = computeLegacyActionDecision({
+                      directiveAction: directiveTyped as DirectiveAction,
+                      stage: conversationControllerEntry?.stage || null,
+                      isInformationalOptionQuestion: Boolean(
+                        directiveIsCollectionOrSummary &&
+                          conversationControllerEntry?.stage === "quoted" &&
+                          isInformationalOptionQuestion(rawBody || null),
+                      ),
+                      isExplicitOrderConfirmation: Boolean(
+                        isSummaryDirective &&
+                          isExplicitOrderConfirmation(rawBody || null),
+                      ),
+                    });
+                    const tiValidationForAction = proposedTurnDecisionRaw
+                      ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                      : null;
+                    const tiForAction =
+                      tiValidationForAction && tiValidationForAction.ok
+                        ? tiValidationForAction.value.turn_intent || null
+                        : null;
+                    const acForAction =
+                      tiValidationForAction && tiValidationForAction.ok
+                        ? tiValidationForAction.value.awaiting_confirmation ||
+                          null
+                        : null;
+                    const m3Decision = decideActionSelection({
+                      directiveAction: directiveTyped as DirectiveAction,
+                      stage: conversationControllerEntry?.stage || null,
+                      tiKind: tiForAction?.kind ?? null,
+                      tiConfidence: tiForAction?.confidence ?? null,
+                      acKind: acForAction?.kind ?? null,
+                    });
+                    const agreement = diffActionDecisions(
+                      legacyDecision,
+                      m3Decision,
+                    );
+                    const emit = formatActionSelectionShadowLog({
+                      conversation_id: conversationId,
+                      directive_action: directiveTyped,
+                      stage: conversationControllerEntry?.stage || "-",
+                      ti_kind: tiForAction?.kind ?? "-",
+                      ti_confidence: tiForAction?.confidence ?? "-",
+                      ac_kind: acForAction?.kind ?? "-",
+                      legacy_decision: legacyDecision,
+                      m3_decision_kind: m3Decision.kind,
+                      m3_decision_reason: m3Decision.reason,
+                      agreement,
+                    });
+                    api.logger.info(emit);
+                  }
+                } catch (actionSelectionShadowError) {
+                  try {
+                    api.logger.warn(
+                      `[action-selection/shadow] emit_failed conversation=${conversationId} error=${
+                        actionSelectionShadowError instanceof Error
+                          ? actionSelectionShadowError.message
+                          : String(actionSelectionShadowError)
+                      }`,
+                    );
+                  } catch {}
                 }
               }
             }

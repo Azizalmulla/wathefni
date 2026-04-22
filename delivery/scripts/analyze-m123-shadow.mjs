@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // ---------------------------------------------------------------------------
-// Phase 2 Milestones 1 + 2 combined shadow-signal analyzer (2026-04-22).
+// Phase 2 Milestones 1 + 2 + 3 combined shadow-signal analyzer (2026-04-22).
 //
-// Parses three log streams that M1 + M2 emit per turn and produces a
+// Parses four log streams that M1 / M2 / M3 emit per turn and produces a
 // human-readable report you can review before the coordinated flip-to-live.
 //
 //   [structured-output/proposer]   — Phase 1 shadow (ti_kind, ti_addressed_*,
@@ -12,6 +12,10 @@
 //                                    server would prepend to the directive ask.
 //   [slot-apply-gate/shadow]       — M2 (2026-04-22). What the apply gate
 //                                    would do with this LLM-drained patch.
+//   [action-selection/shadow]      — M3 (2026-04-22). What decision the
+//                                    action-selection gate would make
+//                                    (advance/hold/no_op) and how often it
+//                                    agrees with the legacy word-list gates.
 //
 // Key questions the report answers:
 //
@@ -79,6 +83,8 @@ const M1_PREFIX = "[reply-compose/shadow]";
 const M1_EMIT_FAILED = "[reply-compose/shadow] emit_failed";
 const M2_PREFIX = "[slot-apply-gate/shadow]";
 const M2_EMIT_FAILED = "[slot-apply-gate/shadow] emit_failed";
+const M3_PREFIX = "[action-selection/shadow]";
+const M3_EMIT_FAILED = "[action-selection/shadow] emit_failed";
 const PROPOSER_PREFIX = "[structured-output/proposer]";
 const PROPOSER_EMIT_FAILED = "[structured-output/proposer] emit failed";
 
@@ -123,6 +129,15 @@ const M2_ALLOW_REASONS = [
   "addressed_fields_empty_permissive",
   "empty_patch_after_meta_filter",
 ];
+
+const M3_AGREEMENT_BUCKETS = [
+  "agree",
+  "disagree_m3_holds",
+  "disagree_m3_advances",
+  "disagree_other",
+];
+
+const M3_DECISION_KINDS = ["advance", "hold", "no_op"];
 
 const ACK_ELIGIBLE_DIRECTIVES = [
   "ASK_MISSING_AREAS",
@@ -241,6 +256,18 @@ function makeState() {
       byTiKind: Object.create(null),
       byTurnId: Object.create(null), // turn_id → {ti_kind, ti_addressed, conversation}
     },
+    m3: {
+      total: 0,
+      emitFailures: 0,
+      byAgreement: Object.create(null),
+      byLegacyDecision: Object.create(null),
+      byM3DecisionKind: Object.create(null),
+      byM3DecisionReason: Object.create(null),
+      byDirectiveAgreement: Object.create(null), // directive → {agree, holds, advances, other}
+      byTiKindAgreement: Object.create(null),
+      disagreeM3HoldsSamples: [],
+      disagreeM3AdvancesSamples: [],
+    },
   };
 }
 
@@ -255,11 +282,12 @@ function bump(obj, key) {
 function ingest(state, line) {
   state.totalLines += 1;
 
-  // Fast filter — our three prefixes anywhere in the line.
+  // Fast filter — our prefixes anywhere in the line.
   const hasM1 = line.includes(M1_PREFIX);
   const hasM2 = line.includes(M2_PREFIX);
+  const hasM3 = line.includes(M3_PREFIX);
   const hasProp = line.includes(PROPOSER_PREFIX);
-  if (!hasM1 && !hasM2 && !hasProp) return;
+  if (!hasM1 && !hasM2 && !hasM3 && !hasProp) return;
 
   // Emit-failure lines — count separately, do NOT parse kvs from them.
   if (hasM1 && line.includes(M1_EMIT_FAILED)) {
@@ -268,6 +296,10 @@ function ingest(state, line) {
   }
   if (hasM2 && line.includes(M2_EMIT_FAILED)) {
     state.m2.emitFailures += 1;
+    return;
+  }
+  if (hasM3 && line.includes(M3_EMIT_FAILED)) {
+    state.m3.emitFailures += 1;
     return;
   }
   if (hasProp && line.includes(PROPOSER_EMIT_FAILED)) {
@@ -392,6 +424,72 @@ function ingest(state, line) {
         blocked,
         allowed,
       });
+    }
+    return;
+  }
+
+  if (hasM3) {
+    const directive = tok.directive || "-";
+    const tiKind = tok.ti_kind || "-";
+    const acKind = tok.ac_kind || "-";
+    const legacy = tok.legacy || "-";
+    const m3Kind = tok.m3 || "-";
+    const m3Reason = tok.m3_reason || "-";
+    const agreement = tok.agreement || "-";
+
+    state.m3.total += 1;
+    bump(state.m3.byAgreement, agreement);
+    bump(state.m3.byLegacyDecision, legacy);
+    bump(state.m3.byM3DecisionKind, m3Kind);
+    bump(state.m3.byM3DecisionReason, m3Reason);
+
+    if (!state.m3.byDirectiveAgreement[directive]) {
+      state.m3.byDirectiveAgreement[directive] = {
+        agree: 0,
+        disagree_m3_holds: 0,
+        disagree_m3_advances: 0,
+        disagree_other: 0,
+        total: 0,
+      };
+    }
+    const da = state.m3.byDirectiveAgreement[directive];
+    da.total += 1;
+    if (agreement in da) da[agreement] += 1;
+
+    if (!state.m3.byTiKindAgreement[tiKind]) {
+      state.m3.byTiKindAgreement[tiKind] = {
+        agree: 0,
+        disagree_m3_holds: 0,
+        disagree_m3_advances: 0,
+        disagree_other: 0,
+        total: 0,
+      };
+    }
+    const tk = state.m3.byTiKindAgreement[tiKind];
+    tk.total += 1;
+    if (agreement in tk) tk[agreement] += 1;
+
+    const sample = {
+      conversation: tok.conversation || null,
+      directive,
+      stage: tok.stage || "-",
+      tiKind,
+      acKind,
+      legacy,
+      m3Kind,
+      m3Reason,
+    };
+    if (
+      agreement === "disagree_m3_holds" &&
+      state.m3.disagreeM3HoldsSamples.length < topN
+    ) {
+      state.m3.disagreeM3HoldsSamples.push(sample);
+    }
+    if (
+      agreement === "disagree_m3_advances" &&
+      state.m3.disagreeM3AdvancesSamples.length < topN
+    ) {
+      state.m3.disagreeM3AdvancesSamples.push(sample);
     }
     return;
   }
@@ -577,12 +675,107 @@ function renderTextReport(state) {
   }
   lines.push(``);
 
+  // --- M3 -------------------------------------------------------------------
+  lines.push(`## M3 — action-selection shadow`);
+  lines.push(`Total emits: ${state.m3.total} (failures: ${state.m3.emitFailures})`);
+  if (state.m3.total === 0) {
+    lines.push(`  (no M3 emits seen)`, ``);
+  } else {
+    lines.push(``, `### Agreement with legacy gates`);
+    for (const bucket of M3_AGREEMENT_BUCKETS) {
+      const n = state.m3.byAgreement[bucket] || 0;
+      if (n === 0 && minSamples > 0) continue;
+      lines.push(
+        `  ${bucket.padEnd(24)} ${String(n).padStart(6)}  ${pct(n, state.m3.total)}`,
+      );
+    }
+
+    lines.push(``, `### Legacy decision distribution`);
+    for (const [k, n] of sortedEntries(state.m3.byLegacyDecision)) {
+      lines.push(
+        `  ${k.padEnd(24)} ${String(n).padStart(6)}  ${pct(n, state.m3.total)}`,
+      );
+    }
+
+    lines.push(``, `### M3 decision kind`);
+    for (const k of M3_DECISION_KINDS) {
+      const n = state.m3.byM3DecisionKind[k] || 0;
+      if (n === 0 && minSamples > 0) continue;
+      lines.push(
+        `  ${k.padEnd(12)} ${String(n).padStart(6)}  ${pct(n, state.m3.total)}`,
+      );
+    }
+
+    lines.push(``, `### M3 decision reason (top)`);
+    const reasonEntries = sortedEntries(state.m3.byM3DecisionReason).slice(0, 12);
+    for (const [r, n] of reasonEntries) {
+      lines.push(
+        `  ${r.padEnd(44)} ${String(n).padStart(6)}  ${pct(n, state.m3.total)}`,
+      );
+    }
+
+    lines.push(``, `### Per ti_kind agreement (sorted by volume)`);
+    lines.push(
+      `  ${"ti_kind".padEnd(22)} ${"agree".padStart(7)} ${"m3_more".padStart(9)} ${"m3_less".padStart(9)} ${"total".padStart(7)}`,
+    );
+    const tkEntries = Object.entries(state.m3.byTiKindAgreement).sort(
+      (a, b) => b[1].total - a[1].total,
+    );
+    for (const [k, v] of tkEntries) {
+      if (v.total < minSamples) continue;
+      lines.push(
+        `  ${k.padEnd(22)} ${String(v.agree).padStart(7)} ${String(v.disagree_m3_holds).padStart(9)} ${String(v.disagree_m3_advances).padStart(9)} ${String(v.total).padStart(7)}`,
+      );
+    }
+
+    lines.push(``, `### Per directive agreement (top by volume)`);
+    lines.push(
+      `  ${"directive".padEnd(42)} ${"agree".padStart(7)} ${"m3_more".padStart(9)} ${"m3_less".padStart(9)} ${"total".padStart(7)}`,
+    );
+    const dirEntries = Object.entries(state.m3.byDirectiveAgreement)
+      .filter(([_, v]) => v.total >= minSamples)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 15);
+    for (const [k, v] of dirEntries) {
+      lines.push(
+        `  ${k.padEnd(42)} ${String(v.agree).padStart(7)} ${String(v.disagree_m3_holds).padStart(9)} ${String(v.disagree_m3_advances).padStart(9)} ${String(v.total).padStart(7)}`,
+      );
+    }
+
+    if (state.m3.disagreeM3HoldsSamples.length > 0) {
+      lines.push(
+        ``,
+        `### Samples: M3 holds where legacy advanced (new coverage M3 adds)`,
+      );
+      for (const s of state.m3.disagreeM3HoldsSamples) {
+        lines.push(
+          `  conv=${s.conversation || "-"} dir=${s.directive} stage=${s.stage} ti=${s.tiKind} ac=${s.acKind} legacy=${s.legacy} m3=${s.m3Kind}/${s.m3Reason}`,
+        );
+      }
+    }
+
+    if (state.m3.disagreeM3AdvancesSamples.length > 0) {
+      lines.push(
+        ``,
+        `### Samples: M3 advances where legacy held (potential regressions — inspect)`,
+      );
+      for (const s of state.m3.disagreeM3AdvancesSamples) {
+        lines.push(
+          `  conv=${s.conversation || "-"} dir=${s.directive} stage=${s.stage} ti=${s.tiKind} ac=${s.acKind} legacy=${s.legacy} m3=${s.m3Kind}/${s.m3Reason}`,
+        );
+      }
+    }
+  }
+  lines.push(``);
+
   // --- Flip readiness summary -----------------------------------------------
   lines.push(`## Flip readiness summary`);
   const m1Miss = state.m1.total > 0 ? state.m1.missingTiCount / state.m1.total : 0;
   const m2MissOrder =
     state.m2.total > 0 ? state.m2.orderingMissingTi / state.m2.total : 0;
   const pasteBlocks = state.m2.byDecisionReason["ti_kind_unclear"] || 0;
+  const m3Agreement = state.m3.byAgreement["agree"] || 0;
+  const m3Regression = state.m3.byAgreement["disagree_m3_advances"] || 0;
 
   lines.push(
     `  M1 turn_intent_missing rate: ${pct(state.m1.missingTiCount, state.m1.total)}`,
@@ -591,10 +784,19 @@ function renderTextReport(state) {
     `  M2 apply_before_proposer rate: ${pct(state.m2.orderingMissingTi, state.m2.total)}`,
   );
   lines.push(`  M2 paste-class blocks observed: ${pasteBlocks}`);
+  lines.push(
+    `  M3 agreement rate: ${pct(m3Agreement, state.m3.total)} (${m3Agreement}/${state.m3.total})`,
+  );
+  lines.push(
+    `  M3 regression candidates (legacy held, M3 advances): ${m3Regression}`,
+  );
   lines.push(``);
   lines.push(`Heuristic guidance (NOT a hard gate — review the full tables):`);
   lines.push(`  * M1.5 flip: prefer M1 turn_intent_missing < ~15%.`);
   lines.push(`  * M2 flip:   prefer M2 apply_before_proposer < ~10%.`);
+  lines.push(`  * M3 flip:   prefer agreement rate >= ~90% AND zero`);
+  lines.push(`              disagree_m3_advances samples look like real`);
+  lines.push(`              regressions when inspected manually.`);
   lines.push(`  * Fire drill: if paste-class blocks > 0 AND those conversations`);
   lines.push(`                appear to be legitimate booking turns — DO NOT FLIP.`);
   lines.push(`                Investigate the transcripts before flipping.`);
@@ -606,6 +808,12 @@ function renderTextReport(state) {
     lines.push(
       ``,
       `⚠ M2 apply_before_proposer rate above 10% — tool-call ordering issue.`,
+    );
+  }
+  if (state.m3.total >= 20 && m3Agreement / state.m3.total < 0.8) {
+    lines.push(
+      ``,
+      `⚠ M3 agreement rate below 80% — review disagreement samples before flipping.`,
     );
   }
 
@@ -649,6 +857,18 @@ function renderJson(state) {
       paste_class_samples: state.m2.pasteClassSamples,
       partial_block_samples: state.m2.partialBlockSamples,
     },
+    m3: {
+      total: state.m3.total,
+      emit_failures: state.m3.emitFailures,
+      by_agreement: { ...state.m3.byAgreement },
+      by_legacy_decision: { ...state.m3.byLegacyDecision },
+      by_m3_decision_kind: { ...state.m3.byM3DecisionKind },
+      by_m3_decision_reason: { ...state.m3.byM3DecisionReason },
+      by_directive_agreement: { ...state.m3.byDirectiveAgreement },
+      by_ti_kind_agreement: { ...state.m3.byTiKindAgreement },
+      disagree_m3_holds_samples: state.m3.disagreeM3HoldsSamples,
+      disagree_m3_advances_samples: state.m3.disagreeM3AdvancesSamples,
+    },
   };
 }
 
@@ -673,6 +893,10 @@ function runSelftest() {
     // Proposer
     `2026-04-22 INFO [structured-output/proposer] conversation=c1 turn_id=t1 ti_stage=true ti_kind=answered_partial ti_confidence=high ti_addressed_fields=[sender_name|sender_phone] ti_classification=present`,
     `2026-04-22 INFO [structured-output/proposer] conversation=c2 turn_id=t2 ti_stage=true ti_kind=unclear ti_confidence=high ti_addressed_fields=[] ti_classification=present`,
+    // M3 cases
+    `2026-04-22 INFO [action-selection/shadow] conversation=c1 directive=ASK_SENDER_NAME stage=collecting_booking_details ti_kind=answered_partial ti_confidence=high ac_kind=- legacy=advance m3=advance m3_reason=answered_kind_advances agreement=agree`,
+    `2026-04-22 INFO [action-selection/shadow] conversation=c2 directive=ASK_SENDER_NAME stage=collecting_booking_details ti_kind=unclear ti_confidence=high ac_kind=- legacy=advance m3=hold m3_reason=ti_unclear_holds_for_retry agreement=disagree_m3_holds`,
+    `2026-04-22 INFO [action-selection/shadow] conversation=c3 directive=WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED stage=summary_shown ti_kind=answered_full ti_confidence=high ac_kind=confirm_order legacy=hold_confirm m3=hold m3_reason=ac_confirm_order_llm_owns_reply agreement=agree`,
   ];
   const state = makeState();
   for (const l of fixture) ingest(state, l);
@@ -738,14 +962,38 @@ function runSelftest() {
     `proposer t2 ti_kind expected unclear`,
   );
 
+  assert(state.m3.total === 3, `m3.total expected 3 got ${state.m3.total}`);
+  assert(state.m3.byAgreement.agree === 2, `m3 agree expected 2`);
+  assert(
+    state.m3.byAgreement.disagree_m3_holds === 1,
+    `m3 disagree_m3_holds expected 1`,
+  );
+  assert(
+    state.m3.byLegacyDecision.advance === 2,
+    `m3 legacy advance expected 2`,
+  );
+  assert(
+    state.m3.byLegacyDecision.hold_confirm === 1,
+    `m3 legacy hold_confirm expected 1`,
+  );
+  assert(state.m3.byM3DecisionKind.advance === 1, `m3 advance expected 1`);
+  assert(state.m3.byM3DecisionKind.hold === 2, `m3 hold expected 2`);
+  assert(
+    state.m3.disagreeM3HoldsSamples.length === 1,
+    `m3 disagree_m3_holds samples expected 1`,
+  );
+
   // Smoke the report writers too.
   const txt = renderTextReport(state);
   assert(txt.includes("M1 — reply-compose shadow"), `text report missing M1 header`);
   assert(txt.includes("M2 — slot-apply-gate shadow"), `text report missing M2 header`);
+  assert(txt.includes("M3 — action-selection shadow"), `text report missing M3 header`);
   assert(txt.includes("Paste-class samples"), `text report missing paste-class section`);
+  assert(txt.includes("M3 agreement rate"), `text report missing M3 agreement summary`);
   const json = renderJson(state);
   assert(json.m1.total === 4, `json m1.total`);
   assert(json.m2.total === 5, `json m2.total`);
+  assert(json.m3.total === 3, `json m3.total`);
 
   console.log("[analyze-m1-m2-shadow] SELFTEST OK");
   process.exit(0);
