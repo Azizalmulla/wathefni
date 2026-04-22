@@ -5,6 +5,9 @@
 // DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER: turn-decision scaffold observer
 // DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER: deriveDispatch
 // DEPLOY_CANARY_TURN_DECISION_A1_RELOC_MARKER: deriveA1Substitute
+// DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER: semantic gates
+//   outrank legacy A0 / A0a / A0b substitutions when the proposer's
+//   turn_intent is trustworthy (2026-04-23 hoist).
 // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER: decideDirectiveDisposition
 //
 // ## What this file is, in one paragraph
@@ -661,6 +664,70 @@ function a1TiConfidenceIsTrustworthy(
 }
 
 export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
+  // ------------------------------------------------------------------
+  // Rule 0 family (2026-04-23 hoist): SEMANTIC GATES RUN FIRST.
+  //
+  // DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER.
+  //
+  // The previous ordering put A0 (clarify_option_before_proceed),
+  // A0a (manual_confirm_address_ask), A0b (manual_confirm_handoff)
+  // ABOVE the three semantic gates (pass_on_clarifying /
+  // pass_on_partial_answer / pass_on_route_change). That caused the
+  // step-loop symptom even after the Reloc 3 live flip: when the
+  // customer asked a clarifying question (e.g. "wdym manual
+  // confirmation?") while the legacy pipeline had already armed the
+  // clarify-before-proceed flag, A0 fired first and the option-list
+  // dump returned — the semantic gates were never evaluated.
+  //
+  // The hoist changes nothing about what the legacy branches can do;
+  // it only reorders priority so a confident semantic reading of the
+  // turn outranks the "am I on this step?" substitutions.
+  //
+  // Switch-option turns still bypass gating to preserve the deterministic
+  // price-recap path (A4 owns that composition). The route-change gate
+  // already requires a fresh-route signal, so switch_option (which is
+  // NOT fresh-route) won't collide with it regardless.
+  //
+  // Safeguards continue to live at the callsite: the flip only activates
+  // when ti_confidence is high/medium and the hallucination guard has
+  // NOT rejected the draft. Env flag `RIDERS_TURN_DECISION_A1_FLIP=off`
+  // disables the live flip entirely.
+  // ------------------------------------------------------------------
+  if (!input.same_route_quote_switch_option) {
+    const tiTrustworthy = a1TiConfidenceIsTrustworthy(
+      input.proposer_ti_confidence,
+    );
+
+    if (tiTrustworthy && input.proposer_ti_kind === "clarifying_question") {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_clarifying",
+        policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
+      };
+    }
+
+    if (tiTrustworthy && input.proposer_ti_kind === "answered_partial") {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_partial_answer",
+        policy_rule: "layer.a1.directive_ask.pass_on_partial_answer",
+      };
+    }
+
+    if (
+      input.route_intent_fresh_this_turn &&
+      input.stage_at_turn_start !== null &&
+      A1_ROUTE_CHANGE_STAGES.has(input.stage_at_turn_start) &&
+      input.has_active_quoted_route_at_turn_start
+    ) {
+      return {
+        intent: "allow",
+        reason: "a1_directive_ask_pass_on_route_change",
+        policy_rule: "layer.a1.directive_ask.pass_on_route_change",
+      };
+    }
+  }
+
   // Rule 1: Clarify-option-before-proceed — legacy A0 branch.
   if (input.clarify_option_before_proceed_flag) {
     return {
@@ -688,9 +755,8 @@ export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
     };
   }
 
-  // Rule 4–8: Directive-registry dispatch branch (legacy A0c). Skipped
-  // entirely on `switch_option` turns to preserve legacy parity —
-  // that case falls through to the default "allow" below.
+  // Rule 4: Switch-option skip — legacy A0c branch bypasses the
+  // directive-registry dispatch on switch turns; A4 owns the recap.
   if (input.same_route_quote_switch_option) {
     return {
       intent: "allow",
@@ -699,6 +765,12 @@ export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
     };
   }
 
+  // Rule 5–6: Directive-registry dispatch branch (legacy A0c).
+  //
+  // Note: the three semantic gates from Rule 0 already took precedence
+  // for trustworthy clarifying/partial/route-change turns. This branch
+  // is the "no semantic veto applied" default for directive-bearing
+  // turns.
   if (input.directive_action) {
     if (!input.directive_has_server_renderer) {
       return {
@@ -708,47 +780,6 @@ export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
       };
     }
 
-    const tiTrustworthy = a1TiConfidenceIsTrustworthy(
-      input.proposer_ti_confidence,
-    );
-
-    // Rule 4: Semantic gate — clarifying question passthrough.
-    if (tiTrustworthy && input.proposer_ti_kind === "clarifying_question") {
-      return {
-        intent: "allow",
-        reason: "a1_directive_ask_pass_on_clarifying",
-        policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
-      };
-    }
-
-    // Rule 5: Semantic gate — partial-answer passthrough.
-    if (tiTrustworthy && input.proposer_ti_kind === "answered_partial") {
-      return {
-        intent: "allow",
-        reason: "a1_directive_ask_pass_on_partial_answer",
-        policy_rule: "layer.a1.directive_ask.pass_on_partial_answer",
-      };
-    }
-
-    // Rule 6: Semantic gate — fresh route-change passthrough. STRICT:
-    // gate fires only when the callsite computed
-    // `route_intent_fresh_this_turn=true` AND the stage is one where
-    // a fresh route would make sense (quoted / collecting / summary).
-    // Loose evidence is intentionally excluded.
-    if (
-      input.route_intent_fresh_this_turn &&
-      input.stage_at_turn_start !== null &&
-      A1_ROUTE_CHANGE_STAGES.has(input.stage_at_turn_start) &&
-      input.has_active_quoted_route_at_turn_start
-    ) {
-      return {
-        intent: "allow",
-        reason: "a1_directive_ask_pass_on_route_change",
-        policy_rule: "layer.a1.directive_ask.pass_on_route_change",
-      };
-    }
-
-    // Rule 7: Directive-ask render (legacy-aligned default).
     return {
       intent: "replace_directive_ask",
       reason: "a1_directive_ask_render",
@@ -756,7 +787,7 @@ export function deriveA1Substitute(input: A1DeriveInputs): A1Derivation {
     };
   }
 
-  // Rule 9: No A1 precondition fired → let the LLM draft through.
+  // Rule 7: No A1 precondition fired → let the LLM draft through.
   return {
     intent: "allow",
     reason: "no_a1_precondition",

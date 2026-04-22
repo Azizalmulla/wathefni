@@ -293,26 +293,41 @@ export type PreStateOutboundInput = {
    * not a switch_option), this field is populated with
    * `{ allowed: true, policyRule, legacyWouldHave }`.
    *
-   * Effect inside Region A: the A0c directive-registry dispatch branch
-   * is skipped — the LLM's draft survives through the rest of the
-   * pipeline (canonical overwrite, empty-reply fallback, etc.) exactly
-   * as if `directiveAction` had been null. All other A1 gates
-   * (clarify-before-proceed, manual-confirm address ask, manual-confirm
-   * handoff) run unchanged.
+   * Effect inside Region A: whichever of the A0 / A0a / A0b / A0c
+   * substitution branches would have fired this turn is skipped —
+   * the LLM's draft survives through the rest of the pipeline
+   * (canonical overwrite, empty-reply fallback, price whitelist,
+   * same-route quote correction) exactly as if those preconditions
+   * had been absent.
+   *
+   * 2026-04-23 hoist: the skip was extended from A0c only to the full
+   * A0 family. Previously the callsite-side flip layered on top of the
+   * derived A0c branch, but `deriveA1Substitute` returned A0/A0a/A0b
+   * BEFORE evaluating the semantic gates — so clarifying questions
+   * during a clarify-before-proceed turn never passed through. Hoisting
+   * the gates above A0 in the derivation + skipping the matching legacy
+   * branches here closes that gap.
    *
    * Safeguards live at the CALLSITE — this struct is trusted. When
    * flip safeguards fail or the env flag is "off", the callsite
    * passes null and Region A behaves identically to the pre-Reloc-3
-   * build. `[turn-decision/flip]` log line is emitted via
-   * `logEntries` whenever the skip actually fires.
+   * build. `[turn-decision/flip]` log line is emitted ONCE per turn
+   * via `logEntries` whenever the skip actually fires.
    */
   layerA1Passthrough?: {
     allowed: boolean;
     /** e.g. "layer.a1.directive_ask.pass_on_clarifying" */
     policyRule: string;
-    /** Directive the legacy branch would have rendered — `directiveAction`
-     *  at call time — captured for the flip log. */
+    /** Which legacy Region-A branch would have fired absent the
+     *  passthrough — either a directive name (for A0c) or one of
+     *  "clarify_option_before_proceed" | "manual_confirm_address_ask" |
+     *  "manual_confirm_handoff" for the A0 family. Captured at
+     *  call time for the flip log. */
     legacyWouldHave: string;
+    /** Which legacy Region-A branch the payload targets. Determines
+     *  which of A0 / A0a / A0b / A0c this passthrough actually skips.
+     *  Added 2026-04-23 alongside the semantic-gate hoist. */
+    legacyBranch: "a0_clarify_before_proceed" | "a0a_manual_confirm_address_ask" | "a0b_manual_confirm_handoff" | "a0c_directive_ask";
   } | null;
 
   /** Plugin-local deterministic builder, injected to keep this module free
@@ -580,6 +595,42 @@ function decidePreStateOutboundImpl(
   let reason: OutboundDecisionReason = "allow";
 
   // ------------------------------------------------------------------
+  // Relocation 3 flip — passthrough gate (2026-04-22, hoisted
+  // 2026-04-23 to cover A0 family).
+  //
+  // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER.
+  //
+  // When `deriveA1Substitute` returned `allow` via one of the three
+  // semantic gates AND the callsite's safeguards passed, skip whichever
+  // legacy Region-A substitution would have fired. The flip log is
+  // emitted ONCE for the turn here so grepping
+  // `[turn-decision/flip]` surfaces every skip regardless of which
+  // branch it targeted. Per-branch skip checks below short-circuit on
+  // the same `allowed === true` flag.
+  // ------------------------------------------------------------------
+  const skipRegionAForLayerA1Passthrough =
+    !!input.layerA1Passthrough &&
+    input.layerA1Passthrough.allowed === true;
+  if (skipRegionAForLayerA1Passthrough) {
+    logEntries.push({
+      level: "info",
+      message:
+        `[turn-decision/flip] conversation=${input.conversationId} ` +
+        `sessionKey=${input.sessionKeyForLogs} ` +
+        `rule=${input.layerA1Passthrough!.policyRule} ` +
+        `legacy_branch=${input.layerA1Passthrough!.legacyBranch} ` +
+        `legacy_would_have=${input.layerA1Passthrough!.legacyWouldHave} ` +
+        `action=${input.directiveAction ?? "none"}`,
+      detail: {
+        rule: input.layerA1Passthrough!.policyRule,
+        legacy_branch: input.layerA1Passthrough!.legacyBranch,
+        legacy_would_have: input.layerA1Passthrough!.legacyWouldHave,
+        action: input.directiveAction,
+      },
+    });
+  }
+
+  // ------------------------------------------------------------------
   // (A0) Clarify-before-proceed substitution (Bug 1, 2026-04-20).
   //
   // When the upstream directive gate fired `CLARIFY_OPTION_BEFORE_PROCEED`
@@ -593,6 +644,7 @@ function decidePreStateOutboundImpl(
   // correction, all of which would substitute the wrong text here.
   // ------------------------------------------------------------------
   if (
+    !skipRegionAForLayerA1Passthrough &&
     input.clarifyOptionBeforeProceed &&
     input.activeQuotedRoute &&
     input.buildDeterministicClarifyOptionBeforeProceedReply
@@ -636,6 +688,7 @@ function decidePreStateOutboundImpl(
   // manual-confirm path is the dominant Region-A substitution.
   // ------------------------------------------------------------------
   if (
+    !skipRegionAForLayerA1Passthrough &&
     input.manualConfirmAddressAsk &&
     input.activeQuotedRoute &&
     input.buildDeterministicManualConfirmAddressAskReply
@@ -677,6 +730,7 @@ function decidePreStateOutboundImpl(
   // `request_handoff` op this turn.
   // ------------------------------------------------------------------
   if (
+    !skipRegionAForLayerA1Passthrough &&
     input.manualConfirmHandoff &&
     input.activeQuotedRoute &&
     input.buildDeterministicManualConfirmHandoffReply
@@ -743,46 +797,18 @@ function decidePreStateOutboundImpl(
     !!input.sameRouteQuoteAction &&
     input.sameRouteQuoteAction.kind === "switch_option";
 
-  // Relocation 3 flip (2026-04-22). First concrete cut against the
-  // step-loop branch: when the turn-decision layer's
-  // `deriveA1Substitute` chose `allow` via a semantic gate
-  // (clarifying question, partial answer, or strict fresh route
-  // change) AND the callsite's live-only safeguards passed, skip
-  // the directive-registry dispatch so the LLM's draft survives.
-  //
-  // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER.
-  //
-  // The log line is emitted via logEntries so the callsite's
-  // `emitOutboundDecisionLogs` carries it into the journal alongside
-  // every other outbound-decision signal. Grepping
-  // `[turn-decision/flip]` in live logs is the authoritative source
-  // of truth for whether the flip actually took effect on a turn.
-  const skipDirectiveDispatchForLayerA1Passthrough =
-    !!input.layerA1Passthrough &&
-    input.layerA1Passthrough.allowed === true;
-  if (
-    skipDirectiveDispatchForLayerA1Passthrough &&
-    input.directiveAction &&
-    input.renderDirectiveReply
-  ) {
-    logEntries.push({
-      level: "info",
-      message:
-        `[turn-decision/flip] conversation=${input.conversationId} ` +
-        `sessionKey=${input.sessionKeyForLogs} ` +
-        `rule=${input.layerA1Passthrough!.policyRule} ` +
-        `legacy_would_have=${input.layerA1Passthrough!.legacyWouldHave} ` +
-        `action=${input.directiveAction}`,
-      detail: {
-        rule: input.layerA1Passthrough!.policyRule,
-        legacy_would_have: input.layerA1Passthrough!.legacyWouldHave,
-        action: input.directiveAction,
-      },
-    });
-  }
+  // Relocation 3 flip (2026-04-22, hoisted 2026-04-23): when the
+  // turn-decision layer's `deriveA1Substitute` chose `allow` via a
+  // semantic gate (clarifying question, partial answer, or strict
+  // fresh route change) AND the callsite's live-only safeguards
+  // passed, `skipRegionAForLayerA1Passthrough` is true and the A0
+  // family branches above were already bypassed. Here we also bypass
+  // the A0c directive-registry dispatch so the LLM's draft survives.
+  // The `[turn-decision/flip]` line was already emitted at the top
+  // of this function; per-branch logging is intentionally absent.
   if (
     !skipDirectiveDispatchForSameRouteSwitch &&
-    !skipDirectiveDispatchForLayerA1Passthrough &&
+    !skipRegionAForLayerA1Passthrough &&
     input.directiveAction &&
     input.directiveRenderContext &&
     input.renderDirectiveReply

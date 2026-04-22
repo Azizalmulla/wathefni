@@ -6346,6 +6346,33 @@ async function handleInboundMessage(params: {
               a1FlipProposerValue?.turn_intent?.confidence === "medium";
             const a1FlipHallucinationGuardFired =
               (hallucinationGuardRejections || []).length > 0;
+            // 2026-04-23 hoist — determine which legacy Region-A branch
+            // would have fired absent the passthrough. A0 / A0a / A0b
+            // outrank A0c in `decidePreStateOutbound`, so we match that
+            // precedence here.
+            let a1FlipLegacyBranch:
+              | "a0_clarify_before_proceed"
+              | "a0a_manual_confirm_address_ask"
+              | "a0b_manual_confirm_handoff"
+              | "a0c_directive_ask"
+              | null = null;
+            let a1FlipLegacyWouldHave: string | null = null;
+            if (clarifyOptionBeforeProceed && activeQuotedRoute) {
+              a1FlipLegacyBranch = "a0_clarify_before_proceed";
+              a1FlipLegacyWouldHave = "clarify_option_before_proceed";
+            } else if (manualConfirmAddressAsk && activeQuotedRoute) {
+              a1FlipLegacyBranch = "a0a_manual_confirm_address_ask";
+              a1FlipLegacyWouldHave = `manual_confirm_address_ask:${manualConfirmAddressAsk.side}`;
+            } else if (manualConfirmHandoff && activeQuotedRoute) {
+              a1FlipLegacyBranch = "a0b_manual_confirm_handoff";
+              a1FlipLegacyWouldHave = "manual_confirm_handoff";
+            } else if (
+              directiveActionForRender &&
+              a1FlipDirectiveHasServerRenderer
+            ) {
+              a1FlipLegacyBranch = "a0c_directive_ask";
+              a1FlipLegacyWouldHave = directiveActionForRender;
+            }
             const a1FlipAllowed = Boolean(
               !a1FlipEnvOff &&
                 a1FlipDerivation &&
@@ -6353,14 +6380,19 @@ async function handleInboundMessage(params: {
                 A1_FLIP_PASSTHROUGH_RULES.has(a1FlipDerivation.policy_rule) &&
                 a1FlipConfidenceOk &&
                 !a1FlipHallucinationGuardFired &&
-                !a1FlipSameRouteSwitch,
+                !a1FlipSameRouteSwitch &&
+                a1FlipLegacyBranch !== null,
             );
             const a1FlipPayload =
-              a1FlipAllowed && a1FlipDerivation && directiveActionForRender
+              a1FlipAllowed &&
+              a1FlipDerivation &&
+              a1FlipLegacyBranch &&
+              a1FlipLegacyWouldHave
                 ? {
                     allowed: true as const,
                     policyRule: a1FlipDerivation.policy_rule,
-                    legacyWouldHave: directiveActionForRender,
+                    legacyBranch: a1FlipLegacyBranch,
+                    legacyWouldHave: a1FlipLegacyWouldHave,
                   }
                 : null;
 

@@ -152,6 +152,14 @@ DEPLOY_CANARY_TURN_DECISION_A1_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_C
 # three semantic-gate passthroughs will NOT take effect live.
 DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_BRANCH_MARKER'
 DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER'
+# Relocation 3 HOIST (2026-04-23): semantic gates (pass_on_clarifying /
+# pass_on_partial_answer / pass_on_route_change) now run ABOVE the
+# legacy A0 / A0a / A0b substitutions inside `deriveA1Substitute`, and
+# the A1 passthrough also bypasses those A0-family branches inside
+# `decidePreStateOutbound`. Absence means the deployed build still has
+# the pre-hoist ordering and clarifying questions during a
+# clarify-before-proceed turn will continue to dump the option list.
+DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER'
 # Relocation 4 (directive → layer, 2026-04-22): decideDirectiveDisposition
 # export present in the module, and directive_inputs block wired at the
 # trace callsite. Absence means the deployed build predates the
@@ -513,6 +521,11 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER',
         'turn-decision A1 flip callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER',
+        'turn-decision A1 semantic-gate hoist marker',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),

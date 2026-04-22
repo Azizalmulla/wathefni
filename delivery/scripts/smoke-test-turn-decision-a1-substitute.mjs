@@ -280,15 +280,129 @@ const A1_CASES = [
     expected_policy_rule: "layer.a1.no_substitute",
   },
 
-  // Priority: clarify-before-proceed beats directive (rule 1 > rule 4–7).
+  // ------------------------------------------------------------------
+  // 2026-04-23 semantic-gate hoist (Rule 0 family):
+  //   the 3 semantic gates now run BEFORE A0 / A0a / A0b. A0 / A0a /
+  //   A0b still own the substitution when the turn does NOT present a
+  //   trustworthy clarifying / partial-answer / fresh-route signal.
+  // ------------------------------------------------------------------
+
+  // Hoist: pass_on_clarifying outranks A0 (clarify-before-proceed).
   {
-    name: "priority.clarify_beats_directive",
+    name: "hoist.pass_on_clarifying_beats_a0",
     inputs: baseInputs({
       clarify_option_before_proceed_flag: true,
-      directive_action: "ASK_SENDER_NAME_AND_PHONE_DECISION",
-      directive_has_server_renderer: true,
       proposer_ti_kind: "clarifying_question",
       proposer_ti_confidence: "high",
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
+  },
+
+  // Hoist: pass_on_clarifying outranks A0a (manual_confirm_address_ask).
+  {
+    name: "hoist.pass_on_clarifying_beats_a0a",
+    inputs: baseInputs({
+      manual_confirm_address_ask: {
+        side: "pickup",
+        option_type: "refrigerator_v1",
+      },
+      proposer_ti_kind: "clarifying_question",
+      proposer_ti_confidence: "medium",
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
+  },
+
+  // Hoist: pass_on_clarifying outranks A0b (manual_confirm_handoff).
+  {
+    name: "hoist.pass_on_clarifying_beats_a0b",
+    inputs: baseInputs({
+      manual_confirm_handoff: { option_type: "refrigerator_v1" },
+      proposer_ti_kind: "clarifying_question",
+      proposer_ti_confidence: "high",
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.directive_ask.pass_on_clarifying",
+  },
+
+  // Hoist: pass_on_partial_answer outranks A0 / A0a / A0b.
+  {
+    name: "hoist.pass_on_partial_answer_beats_a0",
+    inputs: baseInputs({
+      clarify_option_before_proceed_flag: true,
+      proposer_ti_kind: "answered_partial",
+      proposer_ti_confidence: "high",
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.directive_ask.pass_on_partial_answer",
+  },
+
+  // Hoist: pass_on_route_change outranks A0 / A0a / A0b.
+  {
+    name: "hoist.pass_on_route_change_beats_a0",
+    inputs: baseInputs({
+      clarify_option_before_proceed_flag: true,
+      proposer_turn_kind: "initial_route",
+      stage_at_turn_start: "quoted",
+      has_active_quoted_route_at_turn_start: true,
+      route_intent_fresh_this_turn: true,
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.directive_ask.pass_on_route_change",
+  },
+
+  // Safeguard: A0 still fires when the turn is NOT a clarifying /
+  // partial / fresh-route signal. Hoisted gates only apply to the
+  // three semantic kinds with trustworthy confidence.
+  {
+    name: "hoist.a0_still_fires_on_answered_full",
+    inputs: baseInputs({
+      clarify_option_before_proceed_flag: true,
+      proposer_ti_kind: "answered_full",
+      proposer_ti_confidence: "high",
+    }),
+    expected_intent: "replace_clarify_option_before_proceed",
+    expected_policy_rule: "layer.a1.clarify_option_before_proceed",
+  },
+
+  // Safeguard: A0 still fires when classifier confidence is too low
+  // to trust the semantic signal (hoisted gates check trustworthiness).
+  {
+    name: "hoist.a0_still_fires_on_low_confidence_clarifying",
+    inputs: baseInputs({
+      clarify_option_before_proceed_flag: true,
+      proposer_ti_kind: "clarifying_question",
+      proposer_ti_confidence: "low",
+    }),
+    expected_intent: "replace_clarify_option_before_proceed",
+    expected_policy_rule: "layer.a1.clarify_option_before_proceed",
+  },
+
+  // Safeguard: switch-option turns bypass the hoisted gates entirely
+  // (A4 owns the same-route recap composition on switch).
+  {
+    name: "hoist.switch_option_bypasses_semantic_gates",
+    inputs: baseInputs({
+      same_route_quote_switch_option: true,
+      proposer_ti_kind: "clarifying_question",
+      proposer_ti_confidence: "high",
+    }),
+    expected_intent: "allow",
+    expected_policy_rule: "layer.a1.no_substitute",
+  },
+
+  // Safeguard: the route-change gate itself is still strict even after
+  // the hoist — when stage is NOT one of quoted/collecting/summary,
+  // the gate must NOT fire and A0 retains priority.
+  {
+    name: "hoist.a0_still_fires_when_route_change_gate_stage_mismatched",
+    inputs: baseInputs({
+      clarify_option_before_proceed_flag: true,
+      proposer_turn_kind: "initial_route",
+      stage_at_turn_start: "idle",
+      has_active_quoted_route_at_turn_start: false,
+      route_intent_fresh_this_turn: true,
     }),
     expected_intent: "replace_clarify_option_before_proceed",
     expected_policy_rule: "layer.a1.clarify_option_before_proceed",
@@ -424,15 +538,33 @@ async function runSourceLevelChecks(fails) {
     );
   }
   if (
-    !outboundSrc.includes("skipDirectiveDispatchForLayerA1Passthrough")
+    !outboundSrc.includes("skipRegionAForLayerA1Passthrough")
   ) {
     fails.push(
-      `outbound: skipDirectiveDispatchForLayerA1Passthrough guard missing from ${OUTBOUND_REL}`,
+      `outbound: skipRegionAForLayerA1Passthrough guard missing from ${OUTBOUND_REL}`,
     );
   }
   if (!outboundSrc.includes("[turn-decision/flip]")) {
     fails.push(
       `outbound: [turn-decision/flip] log line missing from ${OUTBOUND_REL}`,
+    );
+  }
+  if (!outboundSrc.includes("legacyBranch")) {
+    fails.push(
+      `outbound: legacyBranch field (A0-family passthrough) missing from ${OUTBOUND_REL}`,
+    );
+  }
+  // 2026-04-23 hoist — semantic gates must run before legacy A0 family.
+  if (
+    !moduleSrc.includes("DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER")
+  ) {
+    fails.push(
+      `module: DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER missing from ${MODULE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("a1FlipLegacyBranch")) {
+    fails.push(
+      `callsite: a1FlipLegacyBranch derivation missing from ${CALLSITE_REL}`,
     );
   }
   if (!callsiteSrc.includes("RIDERS_TURN_DECISION_A1_FLIP")) {
