@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // Unified turn-decision layer — SCAFFOLD + A4 DISPATCH + A1 DERIVATION
-// + DIRECTIVE DISPOSITION (relocations 1–4).
+// + DIRECTIVE DISPOSITION + TURN DISPOSITION (relocations 1–5).
 //
 // DEPLOY_CANARY_TURN_DECISION_MODULE_MARKER: turn-decision scaffold observer
 // DEPLOY_CANARY_TURN_DECISION_A4_RELOC_MARKER: deriveDispatch
@@ -9,6 +9,11 @@
 //   outrank legacy A0 / A0a / A0b substitutions when the proposer's
 //   turn_intent is trustworthy (2026-04-23 hoist).
 // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER: decideDirectiveDisposition
+// DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER: decideTurnDisposition
+//   (relocation 5 Phase 5.0, 2026-04-23) — meaning-authors-first shadow.
+//   When `disposition_inputs` is supplied the layer classifies the turn
+//   into the eight-disposition set and emits disposition=/authored_directive=/
+//   state_consistency= tokens. Shadow-only; callsite does not consume.
 //
 // ## What this file is, in one paragraph
 //
@@ -71,9 +76,19 @@ import type {
   ProposedAwaitingConfirmation,
   ProposedPostOrderIntent,
   TurnIntentKind,
+  TurnIntentAddressedField,
   AwaitingConfirmationKind,
   PostOrderIntentKind,
 } from "./proposer-schema";
+import {
+  classifyStateConsistency,
+  decideTurnDisposition,
+} from "./turn-disposition";
+import type {
+  StateConsistency,
+  TurnDisposition,
+  TurnDispositionDecision,
+} from "./turn-disposition";
 import type {
   OutboundDecisionKind,
   OutboundDecisionReason,
@@ -420,6 +435,47 @@ export interface TurnDecisionObservedContext {
     route_intent_fresh_this_turn: boolean;
   };
 
+  // Turn disposition inputs (relocation 5 — Phase 5.0 shadow, 2026-04-23).
+  // Optional — when absent the layer skips disposition derivation and
+  // the trace omits `disposition_*` / `state_consistency` fields
+  // (behaves exactly like a pre-Reloc-5 callsite).
+  //
+  // These inputs are a STRICT SUPERSET of what earlier relocations need
+  // because Reloc 5 is the first cut where MEANING authors behaviour
+  // rather than reviewing it. The layer consumes:
+  //   - proposer signals (first-class; same as Reloc 3/4)
+  //   - addressed-fields bookkeeping (intersection + delta vs
+  //     state-machine `missing`)
+  //   - state snapshot (scalar — WHICH field is missing stays a state-
+  //     machine concern, invoked only on `continue_step`)
+  //   - tool-result context that MATERIALLY changes disposition
+  //   - minimal callsite hints
+  //   - state-machine candidate directive (so `continue_step` delegates
+  //     by read-through and the consistency classifier can compare)
+  //
+  // Shadow-only; callsite does not consume the decision.
+  disposition_inputs?: {
+    addressed_missing_fields: string[];
+    addressed_non_missing_fields: string[];
+    state: {
+      stage_at_turn_start: string | null;
+      has_active_quoted_route: boolean;
+      active_quoted_route_has_manual_confirm_option: boolean;
+      has_summary_shown: boolean;
+      is_post_order: boolean;
+      missing_fields_count: number;
+    };
+    tool_context: {
+      get_price_ran_this_turn: boolean;
+      start_booking_drained_this_turn: boolean;
+      hallucination_guard_fired: boolean;
+    };
+    hints: {
+      same_route_switch_option: boolean;
+    };
+    state_machine_candidate_directive: string | null;
+  };
+
   // A4 dispatch inputs (relocation 2). Optional because earlier smoke
   // tests and older callsites may not supply them; when absent, the
   // layer skips dispatch derivation and the trace omits layer_source /
@@ -455,6 +511,10 @@ export interface TurnDecisionObservedContext {
     turn_kind: ProposedTurnKind | null;
     ti_kind: TurnIntentKind | null;
     ti_confidence: "high" | "medium" | "low" | null;
+    // Closed-set addressed fields from `ProposedTurnIntent.addressed_fields`.
+    // Reloc 5 (2026-04-23) reads this into the disposition-layer
+    // bookkeeping. Optional for backwards-compat with earlier callsites.
+    ti_addressed_fields?: TurnIntentAddressedField[];
     ac_kind: AwaitingConfirmationKind | null;
     po_kind: PostOrderIntentKind | null;
   };
@@ -535,6 +595,24 @@ export interface TurnDecision {
     derived_directive_reason?: string;
     derived_directive_policy_rule?: string;
     directive_disposition_agreement?: DirectiveDispositionAgreement;
+
+    // Turn disposition (relocation 5 Phase 5.0 shadow): the layer's
+    // meaning-authors-first classification of what the customer is
+    // trying to do THIS turn. Present only when `disposition_inputs`
+    // was supplied. NOT consumed in the shadow cut; the callsite
+    // continues to run the state machine as the live authority.
+    // Divergences surface through `state_consistency` which compares
+    // the layer's `authored_directive` against the state machine's
+    // candidate directive.
+    derived_disposition?: TurnDisposition;
+    derived_disposition_rule?: string;
+    derived_disposition_reason?: string;
+    derived_authored_directive?: string | null;
+    derived_state_machine_called?: boolean;
+    derived_state_machine_subroutine?: "next_missing_field" | "post_order_routing" | null;
+    derived_state_machine_result_directive?: string | null;
+    derived_disposition_fallthrough?: string | null;
+    state_consistency?: StateConsistency;
   };
 
   transitions: {
@@ -1332,6 +1410,46 @@ export function observeTurnDecision(
     policyHits.push(`directive:${directiveAgreement}`);
   }
 
+  // Relocation 5 Phase 5.0 (2026-04-23): layer-authored turn
+  // disposition. Runs in parallel with the state machine when
+  // `disposition_inputs` is supplied; shadow-only — the callsite
+  // continues to act on the state machine's directive, not the
+  // layer's. Every `state_consistency=disagree_*` in the trace is a
+  // turn the Phase 5.1 flip would have authored differently.
+  let derivedDisposition: TurnDispositionDecision | null = null;
+  let stateConsistency: StateConsistency | undefined;
+  if (ctx.disposition_inputs) {
+    derivedDisposition = decideTurnDisposition({
+      proposer: ctx.proposer.present
+        ? {
+            turn_kind: ctx.proposer.turn_kind,
+            ti_kind: ctx.proposer.ti_kind,
+            ti_confidence: ctx.proposer.ti_confidence,
+            ti_addressed_fields: ctx.proposer.ti_addressed_fields ?? [],
+            ac_kind: ctx.proposer.ac_kind,
+            po_kind: ctx.proposer.po_kind,
+          }
+        : null,
+      addressed_missing_fields:
+        ctx.disposition_inputs.addressed_missing_fields,
+      addressed_non_missing_fields:
+        ctx.disposition_inputs.addressed_non_missing_fields,
+      state: ctx.disposition_inputs.state,
+      tool_context: ctx.disposition_inputs.tool_context,
+      hints: ctx.disposition_inputs.hints,
+      state_machine_candidate_directive:
+        ctx.disposition_inputs.state_machine_candidate_directive,
+    });
+    stateConsistency = classifyStateConsistency(
+      derivedDisposition.disposition,
+      derivedDisposition.authored_directive,
+      ctx.disposition_inputs.state_machine_candidate_directive,
+    );
+    policyHits.push(derivedDisposition.policy_rule);
+    policyHits.push(`disposition:${derivedDisposition.disposition}`);
+    policyHits.push(`state_consistency:${stateConsistency}`);
+  }
+
   // Relocation 2: layer-derived dispatch. Runs in parallel with the
   // observed projection when `a4_inputs` is supplied. Emits an explicit
   // agreement token so divergences are grep-able.
@@ -1387,6 +1505,24 @@ export function observeTurnDecision(
             derived_directive_reason: derivedDirective.reason,
             derived_directive_policy_rule: derivedDirective.policy_rule,
             directive_disposition_agreement: directiveAgreement,
+          }
+        : {}),
+      ...(derivedDisposition
+        ? {
+            derived_disposition: derivedDisposition.disposition,
+            derived_disposition_rule: derivedDisposition.policy_rule,
+            derived_disposition_reason: derivedDisposition.reason,
+            derived_authored_directive:
+              derivedDisposition.authored_directive,
+            derived_state_machine_called:
+              derivedDisposition.state_machine_call.called,
+            derived_state_machine_subroutine:
+              derivedDisposition.state_machine_call.subroutine,
+            derived_state_machine_result_directive:
+              derivedDisposition.state_machine_call.result_directive,
+            derived_disposition_fallthrough:
+              derivedDisposition.trace_annotations.fallthrough_reason,
+            state_consistency: stateConsistency,
           }
         : {}),
     },
@@ -1464,6 +1600,21 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
         e.decision.reply.derived_directive_policy_rule ?? null,
       directive_disposition_agreement:
         e.decision.reply.directive_disposition_agreement ?? null,
+      // Relocation 5 Phase 5.0 shadow: turn disposition. Null when
+      // callsite did not supply `disposition_inputs`.
+      disposition: e.decision.reply.derived_disposition ?? null,
+      disposition_rule: e.decision.reply.derived_disposition_rule ?? null,
+      disposition_reason: e.decision.reply.derived_disposition_reason ?? null,
+      authored_directive: e.decision.reply.derived_authored_directive ?? null,
+      state_machine_called:
+        e.decision.reply.derived_state_machine_called ?? null,
+      state_machine_subroutine:
+        e.decision.reply.derived_state_machine_subroutine ?? null,
+      state_machine_result_directive:
+        e.decision.reply.derived_state_machine_result_directive ?? null,
+      disposition_fallthrough:
+        e.decision.reply.derived_disposition_fallthrough ?? null,
+      state_consistency: e.decision.reply.state_consistency ?? null,
     },
     op_plan: e.decision.op_plan.entries.map((x) => ({
       op: x.op_name,
@@ -1493,6 +1644,9 @@ export function formatTurnDecisionTrace(e: TurnDecisionTraceEmit): string {
     `a1_agreement=${e.decision.reply.a1_agreement || "-"} ` +
     `directive_disposition=${e.decision.reply.derived_directive_disposition || "-"} ` +
     `directive_agreement=${e.decision.reply.directive_disposition_agreement || "-"} ` +
+    `disposition=${e.decision.reply.derived_disposition || "-"} ` +
+    `authored_directive=${e.decision.reply.derived_authored_directive || "-"} ` +
+    `state_consistency=${e.decision.reply.state_consistency || "-"} ` +
     `observed_reason=${e.decision.trace.observed_reason} ` +
     `ti=${e.decision.trace.semantic_signals.ti_kind || "-"} ` +
     `ac=${e.decision.trace.semantic_signals.ac_kind || "-"} ` +

@@ -168,6 +168,19 @@ DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER='DEPLOY_CANARY_TURN_DE
 # review and the subsequent live flip rely on. Shadow-only in this cut.
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER'
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER'
+# Relocation 5 Phase 5.0 shadow (2026-04-23): decideTurnDisposition
+# authored in `plugins/shared/turn-disposition.ts` with the
+# `DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER` canary, plus the
+# `disposition_inputs` block wired at the trace callsite alongside
+# the `DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER` canary.
+# Absence means the deployed build predates the meaning-authors-first
+# layer — the trace will not emit `disposition=` /
+# `authored_directive=` / `state_consistency=` tokens that the bake
+# review relies on. Shadow-only in this cut; callsite does not
+# consume the derived disposition.
+DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER'
+DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER'
+DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -536,6 +549,21 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER',
         'turn-decision directive_inputs callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),
+        '$DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER',
+        'turn-disposition (Reloc 5 Phase 5.0) module marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER',
+        'turn-decision disposition reloc (5.0) module marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER',
+        'turn-disposition disposition_inputs callsite marker',
     ),
 ]
 

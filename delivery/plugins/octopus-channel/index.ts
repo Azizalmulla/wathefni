@@ -7520,6 +7520,90 @@ async function handleInboundMessage(params: {
                     sameRouteQuoteAction === null,
                 ),
               },
+              // Relocation 5 Phase 5.0 shadow (2026-04-23): supply the
+              // meaning-authors-first inputs so `observeTurnDecision`
+              // can run `decideTurnDisposition` in parallel with the
+              // state machine. Shadow-only — the callsite does not act
+              // on the derived disposition yet; the state machine
+              // still authors the live directive.
+              //
+              // DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER.
+              //
+              // The `addressed_*` fields are computed as the intersection
+              // (and delta) of the proposer's `ti_addressed_fields` with
+              // the state-machine `missing` list. `state_machine_candidate_directive`
+              // reuses `turnReplyDirective` so the consistency classifier
+              // can compare layer-authored directives against what the
+              // state machine actually produced this turn.
+              disposition_inputs: (() => {
+                const tiAddressedFields =
+                  tdProposerValue?.turn_intent?.addressed_fields ?? [];
+                let missingList: string[] = [];
+                try {
+                  if (conversationControllerEntry) {
+                    missingList = computeOneBrainMissingFields(
+                      conversationControllerEntry.bookingDraft,
+                      conversationControllerEntry,
+                    ) as string[];
+                  }
+                } catch {
+                  missingList = [];
+                }
+                const missingSet = new Set(missingList);
+                const addressedMissing = tiAddressedFields.filter((f) =>
+                  missingSet.has(f),
+                );
+                const addressedNonMissing = tiAddressedFields.filter(
+                  (f) => !missingSet.has(f),
+                );
+                const manualConfirmOptionPresent = (() => {
+                  try {
+                    const options =
+                      activeQuotedRoute?.optionCatalog ?? [];
+                    return options.some(
+                      (o: any) =>
+                        String(o?.direct_chat_booking_status || "")
+                          .trim()
+                          .toLowerCase() ===
+                        "manual_confirmation_required",
+                    );
+                  } catch {
+                    return false;
+                  }
+                })();
+                return {
+                  addressed_missing_fields: addressedMissing,
+                  addressed_non_missing_fields: addressedNonMissing,
+                  state: {
+                    stage_at_turn_start: stageAtTurnStart,
+                    has_active_quoted_route: !!activeQuotedRoute,
+                    active_quoted_route_has_manual_confirm_option:
+                      manualConfirmOptionPresent,
+                    has_summary_shown:
+                      conversationControllerEntry?.stage ===
+                        "summary_shown" ||
+                      conversationControllerEntry?.stage ===
+                        "awaiting_confirmation",
+                    is_post_order:
+                      conversationControllerEntry?.stage ===
+                      "order_submitted",
+                    missing_fields_count: missingList.length,
+                  },
+                  tool_context: {
+                    get_price_ran_this_turn:
+                      tdDrainedOpNames.includes("get_price"),
+                    start_booking_drained_this_turn:
+                      tdDrainedOpNames.includes("start_booking"),
+                    hallucination_guard_fired:
+                      (hallucinationGuardRejections || []).length > 0,
+                  },
+                  hints: {
+                    same_route_switch_option:
+                      sameRouteQuoteAction?.kind === "switch_option",
+                  },
+                  state_machine_candidate_directive: turnReplyDirective,
+                };
+              })(),
               proposer: {
                 present: proposedTurnDecisionRaw !== null,
                 schema_valid: !!(
@@ -7530,6 +7614,8 @@ async function handleInboundMessage(params: {
                 ti_kind: tdProposerValue?.turn_intent?.kind || null,
                 ti_confidence:
                   tdProposerValue?.turn_intent?.confidence || null,
+                ti_addressed_fields:
+                  tdProposerValue?.turn_intent?.addressed_fields ?? [],
                 ac_kind:
                   tdProposerValue?.awaiting_confirmation?.kind || null,
                 po_kind: tdProposerValue?.post_order_intent?.kind || null,
