@@ -177,6 +177,13 @@ export type DirectiveAction =
   | "ASK_DELIVERY_AREA"
   // Collection-flow field asks — SERVER-COMPOSED (Phase 2).
   | "ASK_SENDER_NAME_AND_PHONE_DECISION"
+  // Narrower sender ask — emitted when the sender phone is already
+  // resolved (either via a direct write or a `use_whatsapp` decision)
+  // but the sender name is still missing. Added 2026-04-22 to stop
+  // re-emitting the combined ask after only the phone landed. See
+  // `one-brain-context.ts` selector and the live-run sender-step
+  // incident on conversation 19399.
+  | "ASK_SENDER_NAME"
   | "ASK_SENDER_PHONE"
   | "ASK_RECIPIENT_NAME_AND_PHONE"
   | "ASK_PICKUP_ADDRESS"
@@ -445,6 +452,19 @@ function renderAskSenderNameAndPhoneDecision(
   return "Sender's full name? Use this WhatsApp number, or a different one?";
 }
 
+function renderAskSenderName(ctx: DirectiveReplyRendererContext): string {
+  // Narrow sender-name ask. Fired when the sender phone is already
+  // resolved (draft.senderPhone populated — either via a `use_whatsapp`
+  // decision or an explicit write) but the sender name is still
+  // missing. The factual anchor is intentionally minimal: saying more
+  // risks repeating the previous combined ask, which is precisely what
+  // this directive exists to stop.
+  if (ctx.language === "ar") {
+    return "اسم المرسل الكامل؟";
+  }
+  return "Sender's full name?";
+}
+
 function renderAskSenderPhone(ctx: DirectiveReplyRendererContext): string {
   // Phase B trim: preserve the sender-name fact as a brief anchor; drop
   // the pool entirely.
@@ -582,6 +602,7 @@ export const DIRECTIVE_REPLY_RENDERERS = {
     kind: "server",
     render: renderAskSenderNameAndPhoneDecision,
   },
+  ASK_SENDER_NAME: { kind: "server", render: renderAskSenderName },
   ASK_SENDER_PHONE: { kind: "server", render: renderAskSenderPhone },
   ASK_RECIPIENT_NAME_AND_PHONE: {
     kind: "server",

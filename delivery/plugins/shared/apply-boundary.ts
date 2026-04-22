@@ -60,7 +60,9 @@ import {
   type BookingFieldPatch,
   type PhoneDecision,
   type SlotConflict,
+  PHONE_MIN_DIGITS,
   applyBookingFieldPatch,
+  cleanPhone,
 } from "./booking-draft.js";
 import {
   type DialogState,
@@ -109,8 +111,31 @@ export type BoundaryRejectionReason =
   | "coherence_topic_change"
   | "coherence_ambiguous"
   | "coherence_empty"
+  // Requested-slot name-scope guard: on a name-requested turn we reject
+  // same-side phone writes that aren't accompanied by a same-side name in
+  // the patch. See `applyRequestedSlotNameScope` below.
+  | "requested_slot_name_scope"
   // Shape gate — passes through whatever `applyBookingFieldPatch` says
   | string;
+
+/**
+ * A soft normalization applied by the boundary before the shape+apply
+ * step. Normalizations are not rejections — the write still lands, just
+ * in a different field (e.g. a sender_phone write that matches the
+ * customer's WhatsApp tail collapses into `phone_decision=use_whatsapp`).
+ * Surfaced on `BoundaryResult.normalizations` so the caller can log them
+ * for provenance / observability.
+ */
+export type BoundaryNormalizationKind =
+  | "whatsapp_equivalence_sender_phone";
+
+export type BoundaryNormalization = {
+  kind: BoundaryNormalizationKind;
+  field: keyof BookingFieldPatch;
+  incoming: string;
+  mappedTo: string;
+  source: ProposalSource;
+};
 
 export type BoundaryRejection = {
   field: string;
@@ -135,6 +160,9 @@ export type BoundaryResult = {
   /** Sender phone decision, if any proposal set one. Mirrors
    *  `ApplyPatchResult.senderPhoneDecision`. */
   senderPhoneDecision: PhoneDecision | null;
+  /** Soft normalizations applied before shape+apply. Not failures —
+   *  surfaced for logging only. */
+  normalizations: BoundaryNormalization[];
 };
 
 export type BoundaryContext = {
@@ -206,6 +234,148 @@ const COHERENCE_GATED_FIELDS: ReadonlyArray<{
   { field: "sender_name", slot: "sender_name" },
   { field: "recipient_name", slot: "recipient_name" },
 ];
+
+// ---------------------------------------------------------------------------
+// WhatsApp-equivalence normalization (Fix A, 2026-04-22 sender-step incident).
+//
+// When a proposal writes `sender_phone = X` and X is the same phone as the
+// customer's WhatsApp number — either an exact match, or X is the local-part
+// and WA carries a country code (or vice versa) — the semantic is the same
+// as `phone_decision = use_whatsapp`. Before this normalization, that case
+// landed as a raw `sender_phone` write, and any subsequent "use_whatsapp"
+// evidence (voice-spelled digits, LLM transliteration lag) would later
+// conflict with the already-written phone. Collapsing early lets the
+// apply-boundary treat this as the "use the WA number" path, which is what
+// the customer meant.
+//
+// Conservative match: both sides must pass `cleanPhone` (>= PHONE_MIN_DIGITS,
+// digits only) and either
+//   - cand === wa, or
+//   - one is a strict suffix of the other, with the shorter one >=
+//     PHONE_MIN_DIGITS (so a coincidental 3-digit tail doesn't trigger).
+//
+// This catches both fast-path and LLM writes because every proposal passes
+// through `applyProposals`. Live defect on conversation 19399 turn B (voice
+// transcript of digits spelled out, LLM wrote sender_phone=99338566 while
+// WA=96599338566 — a tail match, normalized to use_whatsapp here).
+// ---------------------------------------------------------------------------
+function senderPhoneMatchesWhatsapp(
+  candidate: string,
+  whatsappNumber: string | null,
+): { matched: boolean; mappedTo: string | null } {
+  if (!whatsappNumber) return { matched: false, mappedTo: null };
+  const cand = cleanPhone(candidate).value;
+  const wa = cleanPhone(whatsappNumber).value;
+  if (!cand || !wa) return { matched: false, mappedTo: null };
+  if (cand === wa) return { matched: true, mappedTo: wa };
+  const longer = cand.length >= wa.length ? cand : wa;
+  const shorter = cand.length >= wa.length ? wa : cand;
+  if (shorter.length < PHONE_MIN_DIGITS) return { matched: false, mappedTo: null };
+  if (longer.endsWith(shorter)) return { matched: true, mappedTo: wa };
+  return { matched: false, mappedTo: null };
+}
+
+function normalizeWhatsappEquivalence(
+  patch: BookingFieldPatch,
+  whatsappNumber: string | null,
+): { patch: BookingFieldPatch; normalized: BoundaryNormalization | null } {
+  if (patch.sender_phone == null || typeof patch.sender_phone !== "string") {
+    return { patch, normalized: null };
+  }
+  const { matched, mappedTo } = senderPhoneMatchesWhatsapp(
+    patch.sender_phone,
+    whatsappNumber,
+  );
+  if (!matched || !mappedTo) return { patch, normalized: null };
+  const next: BookingFieldPatch = { ...patch };
+  const incoming = next.sender_phone as string;
+  next.sender_phone = null;
+  // If the LLM signalled "different" while providing the WA local-part,
+  // the equivalence wins — the two digits are the same number. Likewise
+  // if no decision was signalled at all.
+  if (next.phone_decision !== "use_whatsapp") {
+    next.phone_decision = "use_whatsapp";
+  }
+  return {
+    patch: next,
+    normalized: {
+      kind: "whatsapp_equivalence_sender_phone",
+      field: "sender_phone",
+      incoming,
+      mappedTo,
+      source: "llm",
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Requested-slot name-scope guard (Fix C, 2026-04-22 sender-step incident).
+//
+// When `dialogState.requestedSlot.name` is a name slot (`sender_name` /
+// `recipient_name`) and a proposal writes the SAME-side phone field WITHOUT
+// also providing the name the server asked for, we drop the phone write.
+// The rationale:
+//
+//   * On a name-requested turn the customer's single utterance should
+//     answer the name. If the proposal only writes the phone, the
+//     "answer" slot is still missing and the pattern that follows —
+//     server re-asks, customer re-provides — is strictly a regression vs.
+//     accepting nothing and re-asking the full name+phone combined.
+//
+//   * When the phone happens to match the customer's WhatsApp it is
+//     already collapsed by the WA-equivalence normalization above, so this
+//     guard only fires on genuinely-different numbers.
+//
+//   * When the proposal writes BOTH name and phone on the same turn, the
+//     name is present and the guard does NOT fire — both writes land. This
+//     preserves the "volunteer-more" UX (customer answers name + phone in
+//     one breath).
+//
+// Implementation note: the guard runs AFTER coherence, so a name that was
+// rejected for being an acknowledgment ("ok") has already been nulled out
+// by the coherence pass. In that case, treating the patch as "no name
+// present" and dropping the phone is the right call — we want the
+// customer to re-provide a valid name, not to silently keep a half-
+// understood phone.
+// ---------------------------------------------------------------------------
+const REQUESTED_SLOT_NAME_SCOPE: ReadonlyArray<{
+  requested: SlotName;
+  phoneField: "sender_phone" | "recipient_phone";
+  nameField: "sender_name" | "recipient_name";
+}> = [
+  {
+    requested: "sender_name",
+    phoneField: "sender_phone",
+    nameField: "sender_name",
+  },
+  {
+    requested: "recipient_name",
+    phoneField: "recipient_phone",
+    nameField: "recipient_name",
+  },
+];
+
+function applyRequestedSlotNameScope(
+  patch: BookingFieldPatch,
+  dialogState: DialogState | null,
+): { patch: BookingFieldPatch; rejections: Array<{ field: string; received: string }> } {
+  const rejections: Array<{ field: string; received: string }> = [];
+  const requested = dialogState?.requestedSlot?.name ?? null;
+  if (!requested) return { patch, rejections };
+  const entry = REQUESTED_SLOT_NAME_SCOPE.find((e) => e.requested === requested);
+  if (!entry) return { patch, rejections };
+  const phoneVal = patch[entry.phoneField];
+  const nameVal = patch[entry.nameField];
+  const hasPhoneWrite = fieldHasValue(phoneVal);
+  const hasNameWrite = fieldHasValue(nameVal);
+  if (hasPhoneWrite && !hasNameWrite) {
+    const next: BookingFieldPatch = { ...patch };
+    next[entry.phoneField] = null;
+    rejections.push({ field: entry.phoneField, received: String(phoneVal) });
+    return { patch: next, rejections };
+  }
+  return { patch, rejections };
+}
 
 // ---------------------------------------------------------------------------
 // Edit-intent detector
@@ -319,11 +489,12 @@ export function applyProposals(
   const applied: Array<keyof BookingFieldPatch> = [];
   const rejections: BoundaryRejection[] = [];
   const conflicts: SlotConflict[] = [];
+  const normalizations: BoundaryNormalization[] = [];
   let requestedSlotOverride: SlotName | null = null;
   let senderPhoneDecision: PhoneDecision | null = null;
 
   for (const proposal of proposals) {
-    const patch: BookingFieldPatch = { ...proposal.patch };
+    let patch: BookingFieldPatch = { ...proposal.patch };
     const sourceQuote = proposal.source_quote;
 
     // ---------------------------------------------------------------
@@ -343,6 +514,25 @@ export function applyProposals(
         });
       }
       continue;
+    }
+
+    // ---------------------------------------------------------------
+    // 1b. WhatsApp-equivalence normalization.
+    //
+    // Runs before any gate so downstream checks see the semantically-
+    // correct patch. Not a rejection — logged on `normalizations` for
+    // provenance. Skipped for carryover (carried-over phones are
+    // already-trusted values).
+    // ---------------------------------------------------------------
+    if (proposal.source !== "carryover") {
+      const waNorm = normalizeWhatsappEquivalence(patch, ctx.whatsappNumber);
+      if (waNorm.normalized) {
+        patch = waNorm.patch;
+        normalizations.push({
+          ...waNorm.normalized,
+          source: proposal.source,
+        });
+      }
     }
 
     // ---------------------------------------------------------------
@@ -420,6 +610,30 @@ export function applyProposals(
     }
 
     // ---------------------------------------------------------------
+    // 3b. Requested-slot name-scope guard (skipped for carryover).
+    //
+    // On a name-requested turn, a same-side phone write without an
+    // accompanying name write is dropped. See
+    // `applyRequestedSlotNameScope` above. The WA-equivalence step
+    // already rewrote WA-equivalent phones into `phone_decision`, so
+    // this only affects genuinely-different phones.
+    // ---------------------------------------------------------------
+    if (proposal.source !== "carryover") {
+      const scoped = applyRequestedSlotNameScope(patch, dialogState);
+      if (scoped.rejections.length > 0) {
+        patch = scoped.patch;
+        for (const r of scoped.rejections) {
+          rejections.push({
+            field: r.field,
+            reason: "requested_slot_name_scope",
+            received: r.received,
+            source: proposal.source,
+          });
+        }
+      }
+    }
+
+    // ---------------------------------------------------------------
     // 4. Edit-intent detection.
     //
     // For LLM and fast-path proposals (never carryover — a carried-over
@@ -481,6 +695,7 @@ export function applyProposals(
     conflicts,
     requestedSlotOverride,
     senderPhoneDecision,
+    normalizations,
   };
 }
 

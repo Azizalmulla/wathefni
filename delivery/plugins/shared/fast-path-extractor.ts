@@ -31,6 +31,7 @@ import { isAcceptableSlotResponse } from "./slot-response-coherence";
 
 export type FastPathAction =
   | "ASK_SENDER_NAME_AND_PHONE_DECISION"
+  | "ASK_SENDER_NAME"
   | "ASK_SENDER_PHONE"
   | "ASK_RECIPIENT_NAME_AND_PHONE"
   | "ASK_PICKUP_ADDRESS"
@@ -562,6 +563,15 @@ export function extractForNextAction(params: {
     case "ASK_SENDER_PHONE":
       return extractSenderPhone({ text: params.text, whatsappNumber: params.whatsappNumber });
     case "ASK_SENDER_NAME_AND_PHONE_DECISION":
+      return extractSenderNameAndDecision({ text: params.text });
+    case "ASK_SENDER_NAME":
+      // Narrow name-only ask. The customer is expected to answer with a
+      // name; occasionally they volunteer the phone too. Reuse the
+      // combined extractor — it already handles "name only" and
+      // "name + phone/decision" cleanly, and the apply-boundary will
+      // drop any stray phone on a name-requested turn unless a valid
+      // name is also in the same patch (see
+      // `apply-boundary.ts::applyRequestedSlotNameScope`).
       return extractSenderNameAndDecision({ text: params.text });
     case "ASK_RECIPIENT_NAME_AND_PHONE":
       return extractRecipientNameAndPhone({ text: params.text });

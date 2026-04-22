@@ -4423,6 +4423,15 @@ async function handleInboundMessage(params: {
               );
             }
           }
+          if (boundaryRes.normalizations.length > 0) {
+            for (const n of boundaryRes.normalizations) {
+              try {
+                api.logger.info(
+                  `[one-brain/boundary/normalize] kind=${n.kind} field=${n.field} incoming=${JSON.stringify(n.incoming)} mapped_to=${JSON.stringify(n.mappedTo)} source=${n.source} conversation=${conversationId}`,
+                );
+              } catch {}
+            }
+          }
         } else if (fastResult.confidence === "none" && fastResult.reasons.length > 0) {
           // Coverage telemetry. For address actions we emit at `info`
           // so prod aggregation shows us which shape-classes the
@@ -4936,6 +4945,21 @@ async function handleInboundMessage(params: {
                       api.logger.warn(
                         `[one-brain/dst] slot conflicts conversation=${conversationId} ${JSON.stringify(boundaryRes.conflicts)}`,
                       );
+                    }
+                    // 2026-04-22 sender-step incident: surface the
+                    // WhatsApp-equivalence normalization so live traces
+                    // show when a sender_phone write collapsed into a
+                    // `phone_decision=use_whatsapp` patch at the
+                    // boundary. Defense-in-depth against both fast-path
+                    // and LLM writes of the customer's own number.
+                    if (boundaryRes.normalizations.length > 0) {
+                      for (const n of boundaryRes.normalizations) {
+                        try {
+                          api.logger.info(
+                            `[one-brain/boundary/normalize] kind=${n.kind} field=${n.field} incoming=${JSON.stringify(n.incoming)} mapped_to=${JSON.stringify(n.mappedTo)} source=${n.source} conversation=${conversationId} turn_id=${op.turn_id || "-"}`,
+                          );
+                        } catch {}
+                      }
                     }
                     appliedOps.push(`apply_booking_field(${boundaryRes.applied.join(",")})`);
                   } else if (op.op === "cancel_booking") {
@@ -5781,6 +5805,7 @@ async function handleInboundMessage(params: {
                 //     dispatch, so they are unaffected.
                 const directiveIsCollectionOrSummary =
                   directive.action === "ASK_SENDER_NAME_AND_PHONE_DECISION" ||
+                  directive.action === "ASK_SENDER_NAME" ||
                   directive.action === "ASK_SENDER_PHONE" ||
                   directive.action === "ASK_RECIPIENT_NAME_AND_PHONE" ||
                   directive.action === "ASK_PICKUP_ADDRESS" ||
