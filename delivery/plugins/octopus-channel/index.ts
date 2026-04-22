@@ -6485,7 +6485,8 @@ async function handleInboundMessage(params: {
               } catch {}
             }
             // [structured-output/proposer] Phase A shadow conformance emit
-            // (2026-04-21; extended 2026-04-22 with awaiting_confirmation).
+            // (2026-04-21; extended 2026-04-22 with awaiting_confirmation
+            //  and turn_intent).
             //
             // STRICTLY observation-only. No routing change, no substitution,
             // no behavior gate. Paired with `[drift/get-price-bypass]` above.
@@ -6527,10 +6528,49 @@ async function handleInboundMessage(params: {
             //     * `unexpected`       — LLM provided it outside the expected stages
             //     * `n/a`              — stage didn't expect it and LLM omitted it
             //
+            // v1.2 (2026-04-22) additions for the general turn_intent semantic
+            // layer. Observability-only today; no behavior is wired to these
+            // fields yet — the Phase 2 server-side policy map will consume
+            // them only after conformance clears on the live test pack.
+            //
+            //   ti_stage=<bool>               — was the turn inside the
+            //                                   turn_intent expectation window?
+            //                                   True iff the stage is one of
+            //                                   `collecting_booking_details` /
+            //                                   `summary_shown` /
+            //                                   `awaiting_confirmation`, OR the
+            //                                   server had a non-null
+            //                                   `requestedSlot` at turn start.
+            //   ti_kind=<enum|->              — LLM's 8-way classification of
+            //                                   the customer's turn relative to
+            //                                   the server's last ask.
+            //   ti_confidence=<enum|->        — LLM-declared confidence (high /
+            //                                   medium / low).
+            //   ti_addressed_fields_count=<n> — how many closed-set tokens the
+            //                                   LLM flagged as addressed this
+            //                                   turn; empty array records 0.
+            //   ti_addressed_fields=[a|b|c]   — compact list of the actual
+            //                                   tokens (same `|`-delimited
+            //                                   shape as planned_tool_calls).
+            //                                   Empty `[]` when omitted /
+            //                                   addressed nothing. Used by the
+            //                                   analyzer to produce per-field
+            //                                   coverage tables by stage /
+            //                                   requested_slot.
+            //   ti_classification=<tag>       — conformance bucket for v1.2,
+            //                                   same four-value shape as the
+            //                                   ac_classification bucket:
+            //     * `present`    — stage expected it, LLM provided it
+            //     * `missing`    — stage expected it, LLM omitted it
+            //     * `unexpected` — LLM provided it outside expected stages
+            //     * `n/a`        — stage didn't expect it and LLM omitted it
+            //
             // Emitted inside try/catch so a broken classifier cannot take
             // down a turn. See `plugins/shared/proposer-schema.ts` for the
             // schema and validator, `plugins/riders-tools/tools/proposer.ts`
             // for the tool registration.
+            //
+            // DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER: ti_classification shadow emit
             try {
               const present = proposedTurnDecisionRaw !== null;
               const validation = present
@@ -6594,6 +6634,40 @@ async function handleInboundMessage(params: {
               } else if (!acStage && declaredAwaitingConfirmation) {
                 acClassification = "unexpected";
               }
+              // v1.2 turn_intent conformance fields. Same pattern as
+              // awaiting_confirmation, but the expectation window is
+              // broader: any of the three collection stages, OR a
+              // non-null `requestedSlot` at turn start (the server just
+              // asked for a specific slot). Stage is read from the same
+              // `currentControllerStageForProposerEmit` snapshot used
+              // for ac_stage — we want the LLM-visible stage, not any
+              // mid-turn promotion.
+              const tiStage =
+                stageForAcExpectation === "collecting_booking_details" ||
+                stageForAcExpectation === "summary_shown" ||
+                stageForAcExpectation === "awaiting_confirmation" ||
+                requestedSlotNameAtTurnStart !== null;
+              const declaredTurnIntent =
+                validation && validation.ok
+                  ? validation.value.turn_intent || null
+                  : null;
+              const tiKind = declaredTurnIntent?.kind || "-";
+              const tiConfidence = declaredTurnIntent?.confidence || "-";
+              const tiAddressedFieldsCount = declaredTurnIntent
+                ? declaredTurnIntent.addressed_fields.length
+                : 0;
+              let tiClassification:
+                | "present"
+                | "missing"
+                | "unexpected"
+                | "n/a" = "n/a";
+              if (tiStage && declaredTurnIntent) {
+                tiClassification = "present";
+              } else if (tiStage && !declaredTurnIntent) {
+                tiClassification = "missing";
+              } else if (!tiStage && declaredTurnIntent) {
+                tiClassification = "unexpected";
+              }
               const firedOpNames = Array.from(turnDrainedOpKinds)
                 .filter(
                   (name) => !!name && name !== "proposed_turn_decision",
@@ -6641,8 +6715,19 @@ async function handleInboundMessage(params: {
                 validation && !validation.ok
                   ? validation.errors.slice(0, 6).join(",")
                   : "-";
+              // v1.2 (2026-04-22): analyzer-oriented context fields. `stage`
+              // and `requested_slot` are what the analyzer uses to slice
+              // conformance by collection state — without them, coverage
+              // tables can only be read in aggregate. `ti_addressed_fields`
+              // is the actual token list (same compact shape as
+              // planned_tool_calls / fired_tool_ops) so per-field coverage
+              // can be computed without correlating to a second emit.
+              const tiAddressedFieldsList =
+                declaredTurnIntent?.addressed_fields || [];
               api.logger.info(
                 `[structured-output/proposer] conversation=${conversationId} ` +
+                  `stage=${stageForAcExpectation || "-"} ` +
+                  `requested_slot=${requestedSlotNameAtTurnStart || "-"} ` +
                   `present=${present ? "true" : "false"} ` +
                   `schema_valid=${schemaValid ? "true" : "false"} ` +
                   `schema_version=${declaredSchemaVersion} ` +
@@ -6655,6 +6740,12 @@ async function handleInboundMessage(params: {
                   `ac_stage=${acStage ? "true" : "false"} ` +
                   `ac_kind=${acKind} ` +
                   `ac_classification=${acClassification} ` +
+                  `ti_stage=${tiStage ? "true" : "false"} ` +
+                  `ti_kind=${tiKind} ` +
+                  `ti_confidence=${tiConfidence} ` +
+                  `ti_addressed_fields_count=${tiAddressedFieldsCount} ` +
+                  `ti_addressed_fields=[${compactList(tiAddressedFieldsList)}] ` +
+                  `ti_classification=${tiClassification} ` +
                   `duplicate_count=${proposedTurnDecisionCount} ` +
                   `turn_id=${proposedTurnDecisionTurnId || "-"} ` +
                   `errors=${errorsField}`,

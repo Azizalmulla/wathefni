@@ -1,5 +1,7 @@
 /**
- * Phase A (2026-04-21): typed proposer output schema v1.0 → v1.1.
+ * Phase A (2026-04-21): typed proposer output schema v1.0 → v1.1 → v1.2.
+ *
+ * DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER: v1.2 turn_intent shadow
  *
  * ## Why this module exists
  *
@@ -58,14 +60,15 @@
  *
  * ## Version policy
  *
- * The validator accepts BOTH `"1.0"` and `"1.1"` payloads. `awaiting_confirmation`
- * is OPTIONAL at the schema-shape layer regardless of version — the "it's
- * required at summary stages" rule is a prompt-side invariant, not a
- * validator rule, so we don't fail a turn just because the LLM forgot the
- * field. The drain-time emit records missing-but-expected as an
- * observability bucket instead. Unknown extra fields are silently dropped,
- * so a mix of v1.0 and v1.1 payloads is safe in flight during prompt
- * rollout.
+ * The validator accepts `"1.0"`, `"1.1"`, and `"1.2"` payloads.
+ * `awaiting_confirmation` (v1.1) and `turn_intent` (v1.2) are both
+ * OPTIONAL at the schema-shape layer regardless of version — the "it's
+ * required at summary stages" / "it's required on collection turns" rules
+ * are prompt-side invariants, not validator rules, so we don't fail a turn
+ * just because the LLM forgot the field. The drain-time emit records
+ * missing-but-expected as an observability bucket instead. Unknown extra
+ * fields at the top level are silently dropped, so a mix of v1.0 / v1.1 /
+ * v1.2 payloads is safe in flight during prompt rollout.
  *
  * ## Why no external schema library
  *
@@ -189,11 +192,134 @@ export interface ProposedAwaitingConfirmation {
   reason: string;
 }
 
-export type ProposerSchemaVersion = "1.0" | "1.1";
+// ---------------------------------------------------------------------------
+// v1.2 (2026-04-22): turn-intent semantic classification (Phase 1, shadow).
+//
+// The missing turn-level semantic layer, spelled out. For EVERY customer
+// turn (not just summary stages), the LLM classifies the utterance
+// RELATIVE TO THE ASK THE SERVER MADE. Unlike `awaiting_confirmation`,
+// which is specific to summary stages and drives a small 6-way policy
+// map, `turn_intent` is the general primitive the server will use to
+// stop reacting to surface words and start reacting to meaning across
+// the whole collection flow.
+//
+// Same rollout contract as `awaiting_confirmation`:
+//   - optional at the shape layer for v1.0 / v1.1 / v1.2 payloads
+//   - required-by-convention when the server just asked for a slot or
+//     is inside collecting_booking_details / summary_shown /
+//     awaiting_confirmation (enforced at the emit as a conformance miss,
+//     NOT as a validator error)
+//   - observation-only in this PR; no behavior wiring
+//
+// The `kind` set is intentionally small and closed. `addressed_fields`
+// is intentionally coarser than the full SlotName enum — policy cares
+// about "did the customer address the pickup address?" as a unit, not
+// which of block/street/house/avenue/extra they named. Sub-slot
+// extraction is already handled by fast-path + apply-boundary; the
+// turn-intent layer sits above that and must stay small enough to be
+// auditable.
+//
+// Prompt-side description lives in one-brain-context.ts rule 13. The
+// two sets of literals MUST stay in sync; the smoke test anchors
+// against both.
+// ---------------------------------------------------------------------------
+
+export type TurnIntentKind =
+  | "answered_full"
+  | "answered_partial"
+  | "answered_unasked"
+  | "corrected_prior"
+  | "clarifying_question"
+  | "acknowledgement"
+  | "refused_or_stuck"
+  | "unclear";
+
+export const TURN_INTENT_KINDS: readonly TurnIntentKind[] = [
+  "answered_full",
+  "answered_partial",
+  "answered_unasked",
+  "corrected_prior",
+  "clarifying_question",
+  "acknowledgement",
+  "refused_or_stuck",
+  "unclear",
+] as const;
+
+export type TurnIntentConfidence = "high" | "medium" | "low";
+
+export const TURN_INTENT_CONFIDENCES: readonly TurnIntentConfidence[] = [
+  "high",
+  "medium",
+  "low",
+] as const;
+
+/**
+ * Closed set of tokens the LLM may put in
+ * `turn_intent.addressed_fields`. Intentionally coarser than the full
+ * `SlotName` enum: policy cares about identity / route / option / coarse
+ * address blocks, not which sub-field of the address was named. Adding
+ * finer-grained tokens here is a deliberate design choice, not a
+ * drift-forward move — the whole point of this layer is to stay small.
+ *
+ * Semantics:
+ *   - sender_name / sender_phone       — identity fields
+ *   - recipient_name / recipient_phone — identity fields
+ *   - pickup_area / dropoff_area       — area-level route components
+ *   - pickup_address / delivery_address — coarse address markers; cover
+ *     block / street / house / avenue / extra as a single unit. Fine-
+ *     grained sub-slots are extraction concerns, not policy concerns.
+ *   - route                            — pickup+dropoff area pair
+ *                                        delivered together on an
+ *                                        initial-route turn.
+ *   - option                           — vehicle-class / service-option
+ *                                        switches ("make it fast box
+ *                                        van", "standard sedan
+ *                                        instead").
+ *
+ * Empty array is valid and conveys "customer addressed nothing this
+ * turn" (acknowledgement / pleasantry / refused / unclear). Unknown
+ * tokens are rejected by the validator.
+ */
+export type TurnIntentAddressedField =
+  | "sender_name"
+  | "sender_phone"
+  | "recipient_name"
+  | "recipient_phone"
+  | "pickup_area"
+  | "dropoff_area"
+  | "pickup_address"
+  | "delivery_address"
+  | "route"
+  | "option";
+
+export const TURN_INTENT_ADDRESSED_FIELDS: readonly TurnIntentAddressedField[] = [
+  "sender_name",
+  "sender_phone",
+  "recipient_name",
+  "recipient_phone",
+  "pickup_area",
+  "dropoff_area",
+  "pickup_address",
+  "delivery_address",
+  "route",
+  "option",
+] as const;
+
+export interface ProposedTurnIntent {
+  kind: TurnIntentKind;
+  /** Closed-set tokens; see `TurnIntentAddressedField` doc. May be empty. */
+  addressed_fields: TurnIntentAddressedField[];
+  confidence: TurnIntentConfidence;
+  /** One-line rationale (≤200 chars). Observability only. */
+  reason: string;
+}
+
+export type ProposerSchemaVersion = "1.0" | "1.1" | "1.2";
 
 export const PROPOSER_SCHEMA_VERSIONS: readonly ProposerSchemaVersion[] = [
   "1.0",
   "1.1",
+  "1.2",
 ] as const;
 
 export interface ProposedTurnDecision {
@@ -209,6 +335,15 @@ export interface ProposedTurnDecision {
    * payloads simply never include this field.
    */
   awaiting_confirmation?: ProposedAwaitingConfirmation | null;
+  /**
+   * v1.2 addition. Present when the LLM classified the customer turn
+   * RELATIVE TO THE SERVER'S ASK (`turn_intent`). Optional at the shape
+   * layer for all schema versions — "forgot to include it on a
+   * collection turn" is a conformance miss recorded by the
+   * `[structured-output/proposer]` emit, not a payload-level rejection.
+   * Shadow-only in this PR; consumer wiring is a later PR.
+   */
+  turn_intent?: ProposedTurnIntent | null;
   rationale?: string;
 }
 
@@ -224,12 +359,15 @@ export type ValidateResult<T> =
  * extra fields are silently dropped — future schema versions can add
  * fields without breaking the v1.0 parser.
  *
- * Accepts both `"1.0"` and `"1.1"` payloads. v1.1 introduces the optional
- * `awaiting_confirmation` field; if present AND non-null it must carry a
- * valid `kind` + `reason`. Absence is not a validator-level error — the
- * "must be present when stage is summary_shown/awaiting_confirmation"
- * invariant is enforced at the observability layer (drain emit records
- * missing-but-expected) and, in Phase B, at the Region-A dispatch gate.
+ * Accepts `"1.0"`, `"1.1"`, and `"1.2"` payloads. v1.1 introduces the
+ * optional `awaiting_confirmation` field; v1.2 introduces the optional
+ * `turn_intent` field. If either field IS present and non-null, its
+ * subfields must pass the closed-set checks (kind / confidence /
+ * addressed_fields / reason). Absence is not a validator-level error —
+ * the "must be present when stage is summary_shown/awaiting_confirmation"
+ * and "must be present on collection turns" invariants are enforced at
+ * the observability layer (drain emit records missing-but-expected) and,
+ * in later phases, at the dispatch gate.
  */
 export function validateProposedTurnDecision(
   raw: unknown,
@@ -391,6 +529,103 @@ export function validateProposedTurnDecision(
     }
   }
 
+  // v1.2 (2026-04-22): turn_intent semantic classification.
+  // Optional at the shape layer for ALL schema versions — missing is
+  // never a validator error; a collection-stage turn that omits
+  // turn_intent is recorded as `ti_classification=missing` in the
+  // emit, same pattern as awaiting_confirmation. When present AND
+  // non-null, every field must pass the closed-set checks: kind,
+  // confidence, and every entry of addressed_fields. Unknown tokens
+  // fail the payload; we explicitly do NOT silently drop unknown
+  // addressed_fields entries, because the point of this primitive is
+  // to keep the field set small and auditable.
+  const turnIntentRaw = obj.turn_intent;
+  let turnIntent: ProposedTurnIntent | null = null;
+  if (turnIntentRaw !== undefined && turnIntentRaw !== null) {
+    if (typeof turnIntentRaw !== "object" || Array.isArray(turnIntentRaw)) {
+      errors.push("turn_intent_not_object");
+    } else {
+      const tiObj = turnIntentRaw as Record<string, unknown>;
+      const kind = tiObj.kind;
+      const confidence = tiObj.confidence;
+      const reason = tiObj.reason;
+      const addressedFieldsRaw = tiObj.addressed_fields;
+
+      if (
+        typeof kind !== "string" ||
+        !TURN_INTENT_KINDS.includes(kind as TurnIntentKind)
+      ) {
+        errors.push(
+          `turn_intent.kind_invalid:${
+            typeof kind === "string" ? kind : "-"
+          }`,
+        );
+      }
+      if (
+        typeof confidence !== "string" ||
+        !TURN_INTENT_CONFIDENCES.includes(confidence as TurnIntentConfidence)
+      ) {
+        errors.push(
+          `turn_intent.confidence_invalid:${
+            typeof confidence === "string" ? confidence : "-"
+          }`,
+        );
+      }
+      if (typeof reason !== "string") {
+        errors.push("turn_intent.reason_not_string");
+      }
+
+      let addressedFields: TurnIntentAddressedField[] = [];
+      if (!Array.isArray(addressedFieldsRaw)) {
+        errors.push("turn_intent.addressed_fields_not_array");
+      } else {
+        // Cap at the size of the closed set so a drift-forward LLM can't
+        // push the array into an observability hot path. Duplicates are
+        // permitted at the payload level and de-duped at consumption;
+        // they aren't a validator failure.
+        if (addressedFieldsRaw.length > TURN_INTENT_ADDRESSED_FIELDS.length) {
+          errors.push(
+            `turn_intent.addressed_fields_too_long:${addressedFieldsRaw.length}`,
+          );
+        }
+        for (let i = 0; i < addressedFieldsRaw.length; i += 1) {
+          const entry = addressedFieldsRaw[i];
+          if (typeof entry !== "string") {
+            errors.push(`turn_intent.addressed_fields.${i}_not_string`);
+            continue;
+          }
+          if (
+            !TURN_INTENT_ADDRESSED_FIELDS.includes(
+              entry as TurnIntentAddressedField,
+            )
+          ) {
+            errors.push(
+              `turn_intent.addressed_fields.${i}_unknown:${entry}`,
+            );
+            continue;
+          }
+          addressedFields.push(entry as TurnIntentAddressedField);
+        }
+      }
+
+      if (
+        typeof kind === "string" &&
+        TURN_INTENT_KINDS.includes(kind as TurnIntentKind) &&
+        typeof confidence === "string" &&
+        TURN_INTENT_CONFIDENCES.includes(confidence as TurnIntentConfidence) &&
+        typeof reason === "string" &&
+        Array.isArray(addressedFieldsRaw)
+      ) {
+        turnIntent = {
+          kind: kind as TurnIntentKind,
+          addressed_fields: addressedFields,
+          confidence: confidence as TurnIntentConfidence,
+          reason: reason.trim().slice(0, 200),
+        };
+      }
+    }
+  }
+
   if (errors.length > 0) {
     return { ok: false, errors };
   }
@@ -407,6 +642,7 @@ export function validateProposedTurnDecision(
     ...(awaitingConfirmation !== null
       ? { awaiting_confirmation: awaitingConfirmation }
       : {}),
+    ...(turnIntent !== null ? { turn_intent: turnIntent } : {}),
     ...(rationale !== undefined ? { rationale } : {}),
   };
 
@@ -436,9 +672,10 @@ export const PROPOSE_TURN_DECISION_TOOL_SCHEMA = {
       type: "string",
       enum: [...PROPOSER_SCHEMA_VERSIONS],
       description:
-        "Schema version. Use '1.1' when declaring `awaiting_confirmation` on " +
-        "summary-stage turns; '1.0' remains accepted for backward compat. " +
-        "Validator accepts both.",
+        "Schema version. Use '1.2' when declaring `turn_intent` on any " +
+        "collection / summary / awaiting-confirmation turn; '1.1' when " +
+        "declaring `awaiting_confirmation` only; '1.0' remains accepted " +
+        "for backward compat. Validator accepts all three.",
     },
     turn_kind: {
       type: "string",
@@ -520,6 +757,69 @@ export const PROPOSE_TURN_DECISION_TOOL_SCHEMA = {
         "cancel, run the correction flow, answer the question, acknowledge " +
         "politely, or ask a short clarification. In shadow mode today — the " +
         "Region-A gate wires this up in a later PR.",
+    },
+    turn_intent: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      required: ["kind", "addressed_fields", "confidence", "reason"],
+      properties: {
+        kind: {
+          type: "string",
+          enum: [...TURN_INTENT_KINDS],
+          description:
+            "How the customer's turn relates to the server's most recent ask. " +
+            "answered_full: the turn supplies all fields the server asked for. " +
+            "answered_partial: supplies some but not all asked fields (e.g. " +
+            "phone only when asked for name+phone). answered_unasked: supplies " +
+            "a field the server did NOT ask for this turn (volunteered data, " +
+            "off-script). corrected_prior: overrides a previously-captured " +
+            "value (\"make it block 5 not 4\"). clarifying_question: the " +
+            "customer asked a question instead of answering. acknowledgement: " +
+            "pleasantry / thanks / filler with no information content. " +
+            "refused_or_stuck: declined / said they don't know / expressed " +
+            "frustration. unclear: cannot confidently place in the seven " +
+            "categories above. Classify by meaning, not surface words.",
+        },
+        addressed_fields: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: [...TURN_INTENT_ADDRESSED_FIELDS],
+          },
+          description:
+            "Closed-set tokens naming which fields the customer's turn " +
+            "actually addressed, in order of salience. USE THE COARSE " +
+            "TOKENS: pickup_address / delivery_address cover block/street/" +
+            "house/avenue/extra as a unit (don't break those out). " +
+            "Use 'route' when both pickup and dropoff areas were given " +
+            "together in a single utterance. Use 'option' for vehicle / " +
+            "service-option switches. Empty array is valid — it means the " +
+            "turn addressed no field (acknowledgement, refused, unclear, " +
+            "or a question that didn't advance the slot state).",
+        },
+        confidence: {
+          type: "string",
+          enum: [...TURN_INTENT_CONFIDENCES],
+          description:
+            "How sure you are about the kind+addressed_fields pair. Use " +
+            "'high' only when the turn clearly maps to exactly one kind; " +
+            "'low' when you had to pick a best-fit.",
+        },
+        reason: {
+          type: "string",
+          description:
+            "One-line rationale for the kind + addressed_fields pair. " +
+            "<=200 chars. Observability only — not shown to the customer.",
+        },
+      },
+      description:
+        "Your per-turn semantic classification of the customer's utterance " +
+        "RELATIVE TO THE SERVER'S LAST ASK. REQUIRED when the server just " +
+        "asked for a slot or the current_conversation_stage is " +
+        "'collecting_booking_details' / 'summary_shown' / " +
+        "'awaiting_confirmation'; omit (or null) on pre-booking turns. " +
+        "In shadow mode today — no behavior wiring; the server logs this " +
+        "for conformance analysis only.",
     },
     rationale: {
       type: "string",

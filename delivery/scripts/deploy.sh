@@ -69,6 +69,17 @@ DEPLOY_CANARY_PROPOSER_CONTRACT_MARKER='structured_output_v1'
 # octopus-channel bundle so we can keep reading verbs-vs-facts ratios.
 # Observation-only — not a behavior guard.
 DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER='[directive-render/trace]'
+# Phase 1 turn-intent build canary markers (2026-04-22). The three
+# anchor points of the v1.2 shadow layer: schema definition (new
+# TurnIntent types + validator), prompt rule (Rule 13 telling the LLM
+# when to emit `turn_intent`), and emit (ti_* fields on the
+# `[structured-output/proposer]` log line). If any of these go missing
+# from a deployed bundle, the turn-intent conformance signal silently
+# drops to noise — Phase 2 policy wiring relies on these three being
+# present and consistent. Shadow-only, observation-only.
+DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER='DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER'
+DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER='DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER'
+DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER='DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -312,6 +323,21 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/outbound-decision.ts'),
         '$DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER',
         'phase-b directive-render trace emit marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/proposer-schema.ts'),
+        '$DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER',
+        'phase-1 turn_intent v1.2 schema marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
+        '$DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER',
+        'phase-1 turn_intent rule 13 prompt marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER',
+        'phase-1 turn_intent ti_classification shadow emit marker',
     ),
 ]
 
