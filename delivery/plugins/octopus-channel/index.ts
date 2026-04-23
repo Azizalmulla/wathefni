@@ -1831,31 +1831,16 @@ async function findSessionGuardEntryWithPersistence(
 // hasStructuredBookingLocation, hasCompleteTextAddress, hasSatisfiedBookingAddress
 // moved to ./lib/booking-flow.ts (wave 4).
 
-function getStandaloneLocationAutoAssignmentRole(
-  controllerEntry: PersistedConversationControllerEntry | null,
-): "pickup" | "delivery" | null {
-  if (!controllerEntry) {
-    return null;
-  }
-  if (
-    controllerEntry.stage === "collecting_booking_details" ||
-    controllerEntry.stage === "summary_shown" ||
-    controllerEntry.stage === "awaiting_confirmation" ||
-    controllerEntry.stage === "order_submitted" ||
-    controllerEntry.bookingStep !== "none"
-  ) {
-    return null;
-  }
-  const hasPickup = hasSatisfiedBookingAddress(controllerEntry.bookingDraft, "pickup");
-  const hasDelivery = hasSatisfiedBookingAddress(controllerEntry.bookingDraft, "delivery");
-  if (hasPickup && !hasDelivery) {
-    return "delivery";
-  }
-  if (!hasPickup && hasDelivery) {
-    return "pickup";
-  }
-  return null;
-}
+// getStandaloneLocationAutoAssignmentRole and its call site were deleted in
+// authority-cutover Cut A (2026-04-23). The helper silently auto-assigned
+// an incoming pin to the opposite side (if pickup was filled, it filled
+// delivery; and vice-versa) without the customer saying which role they
+// meant. That silently mutated draft state (pickup+delivery both set to
+// the same area on re-pin, or a second pin blindly bound to the missing
+// side), and the LLM then saw a contradictory draft (stage=idle with two
+// addresses filled) and fell back to a generic welcome. Pins without a
+// declared role now only persist as `pendingLocation` and the LLM asks
+// the customer to bind the pin to pickup or delivery.
 
 function applyStandaloneLocationAssignment(params: {
   controllerEntry: PersistedConversationControllerEntry;
@@ -4054,28 +4039,14 @@ async function handleInboundMessage(params: {
         `[controller] standalone location assigned from same-turn role routed through agent conversation=${conversationId} role=${declaredStandaloneRole}`,
       );
     }
-    const autoRole = getStandaloneLocationAutoAssignmentRole(conversationControllerEntry);
-    if (autoRole) {
-      conversationControllerEntry = {
-        ...clearQuotedRouteContext(applyStandaloneLocationAssignment({
-          controllerEntry: conversationControllerEntry,
-          location: persistedResolvedLocation,
-          role: autoRole,
-        })),
-        lastActivityTs: Date.now(),
-        language: preferredReplyLanguage,
-        explicitLanguage: explicitLanguageRequest || conversationControllerEntry.explicitLanguage,
-        conversationId,
-        replyTarget,
-        accountId: account.accountId,
-      };
-      await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-      mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-      controllerTransitionHint = `location_saved:${autoRole}`;
-      api.logger.info(
-        `[controller] standalone location auto-assigned routed through agent conversation=${conversationId} role=${autoRole} stage=${conversationControllerEntry.stage} step=${conversationControllerEntry.bookingStep}`,
-      );
-    }
+    // Authority cutover Cut A (2026-04-23): the "standalone location
+    // auto-assigned" branch was removed. It previously looked at the
+    // current draft and, if one side was filled, silently bound a new
+    // pin to the opposite side without asking. This silently mutated
+    // state (pickup+delivery could both become the same area on a
+    // same-area re-pin) and left the LLM seeing a contradictory draft.
+    // Pins without a declared role now fall through to the pendingLocation
+    // persistence block below; the LLM asks which role to bind the pin to.
   }
   // Authority cutover phase 2 (2026-04-23): the server-composed
   // "pickup or delivery?" reply (`deterministic_location_clarification`)
@@ -8660,7 +8631,6 @@ export const __testables = {
   getLocationRoleSelection,
   getDeclaredLocationRole,
   applyPendingLocationRoleSelection,
-  getStandaloneLocationAutoAssignmentRole,
   applyStandaloneLocationAssignment,
   applyVolunteeredFutureBookingFields,
   clearQuotedRouteContext,

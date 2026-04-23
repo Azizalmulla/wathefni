@@ -123,52 +123,15 @@ async function main() {
   assert(pendingResult?.entry.bookingDraft.pickupLocation?.name === "Qibla", "pickup location should be saved");
   assert(pendingResult?.entry.bookingDraft.pendingLocation === null, "pending location should be cleared after binding");
 
-  const idleWithPickupOnly = buildControllerEntry(shared, {
-    stage: "idle",
-    bookingStep: "none",
-    bookingDraft: {
-      ...shared.createEmptyBookingDraft(),
-      pickupLocation: pendingLocation,
-    },
-  });
-  assert(
-    t.getStandaloneLocationAutoAssignmentRole(idleWithPickupOnly) === "delivery",
-    "when pickup is already saved, the next standalone location should default to delivery",
-  );
-  const salmiyaLocation = {
-    source: "map_link",
-    latitude: 29.3336,
-    longitude: 48.0761,
-    name: "Salmiya",
-    address: "Salmiya, Kuwait",
-    resolvedAreaName: "Salmiya",
-  };
-  const autoAssignedDelivery = t.applyStandaloneLocationAssignment({
-    controllerEntry: idleWithPickupOnly,
-    location: salmiyaLocation,
-    role: "delivery",
-  });
-  assert(
-    autoAssignedDelivery.bookingDraft.pickupLocation?.name === "Qibla",
-    "auto-assignment should preserve the original pickup location",
-  );
-  assert(
-    autoAssignedDelivery.bookingDraft.deliveryLocation?.name === "Salmiya",
-    "auto-assignment should save the second standalone location as delivery",
-  );
-
-  const idleWithDeliveryOnly = buildControllerEntry(shared, {
-    stage: "idle",
-    bookingStep: "none",
-    bookingDraft: {
-      ...shared.createEmptyBookingDraft(),
-      deliveryLocation: salmiyaLocation,
-    },
-  });
-  assert(
-    t.getStandaloneLocationAutoAssignmentRole(idleWithDeliveryOnly) === "pickup",
-    "when delivery is already saved, the next standalone location should default to pickup",
-  );
+  // Authority cutover Cut A (2026-04-23): the
+  // `getStandaloneLocationAutoAssignmentRole` helper and its callsite
+  // were deleted. Pins without an explicit role in the same turn no
+  // longer silently auto-bind to the opposite side; they persist as
+  // `pendingLocation` and the LLM asks the customer to bind them. The
+  // corresponding test cases were removed here. `applyStandaloneLocationAssignment`
+  // is still exercised via the declared-role and sender/recipient pin
+  // paths (see the pending-location role selection test above and the
+  // live-flow assertions below).
 
   const quotedEntry = buildControllerEntry(shared, {
     stage: "quoted",
@@ -392,9 +355,12 @@ async function main() {
   );
   assert(
     source.includes("clearQuotedRouteContext") &&
-      source.includes("standalone location auto-assigned") &&
       source.includes("location_saved:"),
     "source should clear stale quote context and route saved-location acknowledgments through the agent",
+  );
+  assert(
+    !source.includes("getStandaloneLocationAutoAssignmentRole("),
+    "Cut A: the silent standalone auto-assign helper must not be called from live code",
   );
   assert(
     source.includes("pre-dispatch quoted conversation transitioned to booking-details stage") &&

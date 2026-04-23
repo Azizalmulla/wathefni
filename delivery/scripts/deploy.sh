@@ -78,7 +78,6 @@ DEPLOY_CANARY_DIRECTIVE_TRACE_MARKER='[directive-render/trace]'
 # drops to noise — Phase 2 policy wiring relies on these three being
 # present and consistent. Shadow-only, observation-only.
 DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER='DEPLOY_CANARY_TURN_INTENT_SCHEMA_MARKER'
-DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER='DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER'
 DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER='DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER'
 # Guard valid-set population canary markers (2026-04-22). Anchors the
 # post-drain `sessionGuard.lastQuotedRoute` selection used to build the
@@ -227,8 +226,6 @@ DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_TUR
 # (the prompt no longer carries state-machine authoring imperatives to
 # gate); the decision is still computed and fed to the turn router.
 DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER'
-DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER'
-DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER'
 # ---------------------------------------------------------------------------
 # Turn Router (Cut 9.0) — top-level meaning-first dispatcher. Module +
 # import + callsite + state-machine gate anchors. `meaning_first` is
@@ -487,11 +484,6 @@ checks = [
         'phase-1 turn_intent v1.2 schema marker',
     ),
     (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
-        '$DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER',
-        'phase-1 turn_intent rule 13 prompt marker',
-    ),
-    (
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER',
         'phase-1 turn_intent ti_classification shadow emit marker',
@@ -630,16 +622,6 @@ checks = [
         Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),
         '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER',
         'prompt-shaping disposition module marker (Cut #6, Reloc 5 input-side)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER',
-        'prompt-shaping disposition import marker (Cut #6, Reloc 5 input-side)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER',
-        'prompt-shaping disposition callsite marker (Cut #6, Reloc 5 input-side)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-router.ts'),
