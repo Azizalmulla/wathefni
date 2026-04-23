@@ -6060,15 +6060,18 @@ async function handleInboundMessage(params: {
                   //
                   // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER.
                   // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER.
+                  // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER.
                   //
-                  // NARROW v1: only the `suppress_on_correction_intent`
-                  // policy rule is honored live. The other Reloc 4 suppress
-                  // rules (`suppress_on_fresh_route_request`,
+                  // NARROW v2 (Cut #3): the allowlist honors TWO policy
+                  // rules live — `suppress_on_correction_intent` (Cut #2)
+                  // and `suppress_on_acknowledgement_intent` (Cut #3).
+                  // The remaining three Reloc 4 suppress rules
+                  // (`suppress_on_fresh_route_request`,
                   // `suppress_on_clarifying_question`,
                   // `suppress_on_cancel_intent`) stay shadow-only until
-                  // each becomes its own cut. This matches the Cut #1
-                  // pattern: one loud failure mode, one narrow
-                  // authority-removal cut.
+                  // each becomes its own narrow cut. This matches the
+                  // same authority-removal pattern: one loud failure
+                  // mode, one narrow cut at a time.
                   //
                   // Orthogonal safeguards (NOT about confidence — per-rule
                   // confidence policy lives inside
@@ -6159,6 +6162,7 @@ async function handleInboundMessage(params: {
 
                     const DIRECTIVE_FLIP_SUPPRESS_RULES = new Set<string>([
                       "layer.directive.suppress_on_correction_intent",
+                      "layer.directive.suppress_on_acknowledgement_intent",
                     ]);
                     const directiveFlipAllowed = Boolean(
                       !directiveFlipEnvOff &&

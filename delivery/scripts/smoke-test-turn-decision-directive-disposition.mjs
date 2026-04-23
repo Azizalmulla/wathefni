@@ -283,16 +283,57 @@ const DISPOSITION_CASES = [
     expected_policy_rule: "layer.directive.allow_default",
   },
 
-  // Acknowledgement → allow (no suppress rule covers it; the bot
-  // should keep pushing on the step).
+  // Cut #3 (2026-04-23): acknowledgement at high/medium confidence
+  // now SUPPRESSES the state-machine directive so the LLM's ack
+  // reply passes through.
   {
-    name: "acknowledgement_allow_default",
+    name: "acknowledgement_suppress_high",
     inputs: baseInputs({
       proposer_ti_kind: "acknowledgement",
       proposer_ti_confidence: "high",
     }),
+    expected_disposition: "suppress",
+    expected_policy_rule: "layer.directive.suppress_on_acknowledgement_intent",
+  },
+  {
+    name: "acknowledgement_suppress_medium",
+    inputs: baseInputs({
+      proposer_ti_kind: "acknowledgement",
+      proposer_ti_confidence: "medium",
+    }),
+    expected_disposition: "suppress",
+    expected_policy_rule: "layer.directive.suppress_on_acknowledgement_intent",
+  },
+  // Floor intact: low / null confidence must NOT trigger the
+  // acknowledgement suppression — fall through to allow_default.
+  {
+    name: "acknowledgement_floor_low",
+    inputs: baseInputs({
+      proposer_ti_kind: "acknowledgement",
+      proposer_ti_confidence: "low",
+    }),
     expected_disposition: "allow",
     expected_policy_rule: "layer.directive.allow_default",
+  },
+  {
+    name: "acknowledgement_floor_null",
+    inputs: baseInputs({
+      proposer_ti_kind: "acknowledgement",
+      proposer_ti_confidence: null,
+    }),
+    expected_disposition: "allow",
+    expected_policy_rule: "layer.directive.allow_default",
+  },
+  // Hallucination guard outranks acknowledgement (damage-control rule).
+  {
+    name: "acknowledgement_guard_outranks",
+    inputs: baseInputs({
+      proposer_ti_kind: "acknowledgement",
+      proposer_ti_confidence: "high",
+      hallucination_guard_fired: true,
+    }),
+    expected_disposition: "allow",
+    expected_policy_rule: "layer.directive.allow_on_hallucination_guard",
   },
 
   // Unclear turn → allow (don't gamble on an unclear classification).
@@ -381,6 +422,15 @@ async function runSourceLevelChecks(fails) {
       `callsite: DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER missing from ${CALLSITE_REL}`,
     );
   }
+  if (
+    !callsiteSrc.includes(
+      "DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER",
+    )
+  ) {
+    fails.push(
+      `callsite: DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER missing from ${CALLSITE_REL}`,
+    );
+  }
   if (!callsiteSrc.includes("RIDERS_TURN_DECISION_DIRECTIVE_FLIP")) {
     fails.push(
       `callsite: RIDERS_TURN_DECISION_DIRECTIVE_FLIP env flag missing from ${CALLSITE_REL}`,
@@ -391,7 +441,11 @@ async function runSourceLevelChecks(fails) {
       `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES set missing from ${CALLSITE_REL} (scoping the flip to a single policy rule)`,
     );
   }
-  // v1 must be narrow: only correction rule in the set.
+  // v2 (Cut #3): the allowlist must contain exactly the two live
+  // rules (correction + acknowledgement). The remaining three Reloc 4
+  // suppress rules must stay SHADOW-ONLY — adding them here would be
+  // an architectural regression (bypassing the "one narrow cut at a
+  // time" discipline).
   const suppressRulesBlockMatch = callsiteSrc.match(
     /const\s+DIRECTIVE_FLIP_SUPPRESS_RULES\s*=\s*new\s+Set<string>\(\[([\s\S]*?)\]\)/,
   );
@@ -404,6 +458,9 @@ async function runSourceLevelChecks(fails) {
     const hasCorrection = body.includes(
       "layer.directive.suppress_on_correction_intent",
     );
+    const hasAck = body.includes(
+      "layer.directive.suppress_on_acknowledgement_intent",
+    );
     const hasOthers =
       body.includes("layer.directive.suppress_on_fresh_route_request") ||
       body.includes("layer.directive.suppress_on_clarifying_question") ||
@@ -413,9 +470,14 @@ async function runSourceLevelChecks(fails) {
         `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must include "layer.directive.suppress_on_correction_intent" (Cut #2 target)`,
       );
     }
+    if (!hasAck) {
+      fails.push(
+        `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must include "layer.directive.suppress_on_acknowledgement_intent" (Cut #3 target)`,
+      );
+    }
     if (hasOthers) {
       fails.push(
-        `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must be NARROW (only correction); other suppress rules stay shadow until their own cuts`,
+        `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must stay NARROW (correction + acknowledgement only); fresh_route / clarifying / cancel suppress rules stay shadow until their own cuts`,
       );
     }
   }
@@ -439,6 +501,7 @@ async function runSourceLevelChecks(fails) {
     "layer.directive.suppress_on_clarifying_question",
     "layer.directive.suppress_on_cancel_intent",
     "layer.directive.suppress_on_correction_intent",
+    "layer.directive.suppress_on_acknowledgement_intent",
     "layer.directive.allow_default",
   ];
   const missing = RULE_IDS.filter((p) => !moduleSrc.includes(p));

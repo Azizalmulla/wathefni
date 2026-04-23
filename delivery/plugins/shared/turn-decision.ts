@@ -940,7 +940,16 @@ export function classifyA1Agreement(
 //     summary/confirmation stages; the validator ensures this).
 //   * `suppress_on_correction_intent` — `ti_kind=corrected_prior` at
 //     high/medium confidence.
-//   * `allow_default` — directive stands.
+//   * `suppress_on_acknowledgement_intent` — `ti_kind=acknowledgement`
+//     at high/medium confidence. Pure pleasantries / fillers /
+//     acknowledgements mid-flow. The customer is not answering the
+//     current step — they are acknowledging the previous turn. Push
+//     back the state-machine directive and let the LLM's ack reply
+//     pass through so the bot doesn't re-stamp the same slot ask.
+//     NOTE: scoped to `acknowledgement` ONLY. `unclear` and
+//     `refused_or_stuck` (which Reloc 5's disposition layer groups
+//     alongside ack) are NOT included here — they have different
+//     ideal behaviours and will get their own rules if/when needed.
 //
 // Legacy comparison:
 //   `legacy_would_have` is always `"allow"` because the current
@@ -955,17 +964,24 @@ export function classifyA1Agreement(
 //
 //   2026-04-23 Cut #2 (Job-A authority removal): the NARROW live flip
 //   behind `RIDERS_TURN_DECISION_DIRECTIVE_FLIP` is now ACTIVE for
-//   exactly ONE policy rule: `suppress_on_correction_intent`. The
-//   callsite (in `octopus-channel/index.ts`) consults
-//   `decideDirectiveDisposition` right after it would have set
-//   `directiveActionForRender`, and if the derivation returns
-//   `suppress` with `policy_rule=layer.directive.suppress_on_correction_intent`,
-//   the directive is cleared so the LLM's draft passes through. The
-//   other three suppress rules (`suppress_on_fresh_route_request`,
+//   `suppress_on_correction_intent`. The callsite (in
+//   `octopus-channel/index.ts`) consults `decideDirectiveDisposition`
+//   right after it would have set `directiveActionForRender`, and if
+//   the derivation returns `suppress` with a rule that lives in the
+//   callsite's `DIRECTIVE_FLIP_SUPPRESS_RULES` allowlist, the
+//   directive is cleared so the LLM's draft passes through.
+//
+//   2026-04-23 Cut #3 (Job-A authority removal): the allowlist now
+//   ALSO includes `suppress_on_acknowledgement_intent`. Mid-flow
+//   acknowledgements (`ok`, `thanks`, `got it`) no longer trigger the
+//   state-machine directive to re-stamp the same slot ask on the
+//   customer. See
+//   `DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER`.
+//
+//   The remaining three suppress rules (`suppress_on_fresh_route_request`,
 //   `suppress_on_clarifying_question`, `suppress_on_cancel_intent`)
 //   remain shadow-only and will each become their own narrow cut
-//   before flipping live. See
-//   `DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER`.
+//   before flipping live.
 // ---------------------------------------------------------------------------
 
 export type DirectiveDisposition = "allow" | "suppress";
@@ -1087,6 +1103,14 @@ export function decideDirectiveDisposition(
       disposition: "suppress",
       reason: "correction_intent",
       policy_rule: "layer.directive.suppress_on_correction_intent",
+    };
+  }
+
+  if (tiTrustworthy && input.proposer_ti_kind === "acknowledgement") {
+    return {
+      disposition: "suppress",
+      reason: "acknowledgement_intent",
+      policy_rule: "layer.directive.suppress_on_acknowledgement_intent",
     };
   }
 

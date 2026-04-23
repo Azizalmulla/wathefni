@@ -191,6 +191,18 @@ DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISI
 # `actually my name is X` failure mode is still live.
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER'
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER'
+# Cut #3 (2026-04-23, Job-A authority removal): narrow live flip of the
+# directive-disposition layer's `suppress_on_acknowledgement_intent`
+# rule. When the layer classifies the turn as `acknowledgement` at
+# high/medium confidence, the state-machine directive is cleared at
+# the callsite so the LLM's ack reply passes through instead of the
+# state machine re-stamping the same slot ask. The remaining three
+# Reloc 4 suppress rules (fresh route, clarifying, cancel) stay
+# shadow-only until each becomes its own cut. Absence means the
+# deployed build still pushes the candidate directive on mid-flow
+# acknowledgement turns, and the `ok` / `thanks` loop failure mode is
+# still live.
+DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER'
 # Relocation 5 Phase 5.0 shadow (2026-04-23): decideTurnDisposition
 # authored in `plugins/shared/turn-disposition.ts` with the
 # `DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER` canary, plus the
@@ -577,6 +589,11 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER',
         'turn-decision directive flip correction marker (Cut #2, correction)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER',
+        'turn-decision directive flip acknowledgement marker (Cut #3, acknowledgement)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
