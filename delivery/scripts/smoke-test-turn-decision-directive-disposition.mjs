@@ -357,6 +357,79 @@ async function runSourceLevelChecks(fails) {
     );
   }
 
+  // Cut #2 (2026-04-23, Job-A authority removal) — the NARROW live flip
+  // of `suppress_on_correction_intent`. The callsite must (a) carry the
+  // marker canaries, (b) honor the `RIDERS_TURN_DECISION_DIRECTIVE_FLIP`
+  // env flag, (c) scope the flip to exactly ONE policy rule via a
+  // `DIRECTIVE_FLIP_SUPPRESS_RULES` set, and (d) emit a
+  // `[turn-decision/flip] kind=directive` log line when fired.
+  if (
+    !callsiteSrc.includes(
+      "DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER",
+    )
+  ) {
+    fails.push(
+      `callsite: DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (
+    !callsiteSrc.includes(
+      "DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER",
+    )
+  ) {
+    fails.push(
+      `callsite: DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("RIDERS_TURN_DECISION_DIRECTIVE_FLIP")) {
+    fails.push(
+      `callsite: RIDERS_TURN_DECISION_DIRECTIVE_FLIP env flag missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!callsiteSrc.includes("DIRECTIVE_FLIP_SUPPRESS_RULES")) {
+    fails.push(
+      `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES set missing from ${CALLSITE_REL} (scoping the flip to a single policy rule)`,
+    );
+  }
+  // v1 must be narrow: only correction rule in the set.
+  const suppressRulesBlockMatch = callsiteSrc.match(
+    /const\s+DIRECTIVE_FLIP_SUPPRESS_RULES\s*=\s*new\s+Set<string>\(\[([\s\S]*?)\]\)/,
+  );
+  if (!suppressRulesBlockMatch) {
+    fails.push(
+      `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES block not parseable in ${CALLSITE_REL}`,
+    );
+  } else {
+    const body = suppressRulesBlockMatch[1];
+    const hasCorrection = body.includes(
+      "layer.directive.suppress_on_correction_intent",
+    );
+    const hasOthers =
+      body.includes("layer.directive.suppress_on_fresh_route_request") ||
+      body.includes("layer.directive.suppress_on_clarifying_question") ||
+      body.includes("layer.directive.suppress_on_cancel_intent");
+    if (!hasCorrection) {
+      fails.push(
+        `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must include "layer.directive.suppress_on_correction_intent" (Cut #2 target)`,
+      );
+    }
+    if (hasOthers) {
+      fails.push(
+        `callsite: DIRECTIVE_FLIP_SUPPRESS_RULES must be NARROW (only correction); other suppress rules stay shadow until their own cuts`,
+      );
+    }
+  }
+  if (!callsiteSrc.includes("[turn-decision/flip] kind=directive")) {
+    fails.push(
+      `callsite: [turn-decision/flip] kind=directive log line missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (!/directiveActionForRender\s*=\s*null/.test(callsiteSrc)) {
+    fails.push(
+      `callsite: directive flip must clear directiveActionForRender when fired in ${CALLSITE_REL}`,
+    );
+  }
+
   // Expected policy_rule ids — these are string literals in the module.
   const RULE_IDS = [
     "layer.directive.allow_when_no_state_directive",

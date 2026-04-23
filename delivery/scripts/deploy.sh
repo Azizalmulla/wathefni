@@ -179,6 +179,18 @@ DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER='DEPLOY_CANAR
 # review and the subsequent live flip rely on. Shadow-only in this cut.
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_RELOC_MARKER'
 DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_CALLSITE_MARKER'
+# Cut #2 (2026-04-23, Job-A authority removal): narrow live flip of the
+# directive-disposition layer's `suppress_on_correction_intent` rule.
+# When the layer classifies the turn as `corrected_prior` at high/medium
+# confidence, the state-machine directive is cleared at the callsite so
+# the LLM's acknowledge-the-correction draft passes through instead of
+# being overridden by the A0c server render. The other three Reloc 4
+# suppress rules (fresh route, clarifying, cancel) stay shadow-only
+# until each becomes its own cut. Absence means the deployed build
+# still pushes the candidate directive on correction turns, and the
+# `actually my name is X` failure mode is still live.
+DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER'
+DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER='DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER'
 # Relocation 5 Phase 5.0 shadow (2026-04-23): decideTurnDisposition
 # authored in `plugins/shared/turn-disposition.ts` with the
 # `DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER` canary, plus the
@@ -555,6 +567,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER',
         'turn-decision A1 flip confidence-gate removal marker (Job-A authority removal)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER',
+        'turn-decision directive flip callsite marker (Cut #2, correction)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER',
+        'turn-decision directive flip correction marker (Cut #2, correction)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),

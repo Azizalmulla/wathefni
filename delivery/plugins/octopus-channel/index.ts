@@ -281,11 +281,13 @@ import {
   observeTurnDecision,
   formatTurnDecisionTrace,
   deriveA1Substitute,
+  decideDirectiveDisposition,
 } from "../shared/turn-decision";
 import type {
   TurnDecisionObservedContext,
   A1SubstituteIntent,
   A1Derivation,
+  DirectiveDispositionDerivation,
 } from "../shared/turn-decision";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
@@ -6043,6 +6045,157 @@ async function handleInboundMessage(params: {
                         conversationId,
                     ),
                   };
+
+                  // ----------------------------------------------------------
+                  // Cut #2 (2026-04-23): Correction/edit authority removal.
+                  // The second concrete cut in the Job-A authority removal
+                  // plan. When the turn-decision layer classifies the turn
+                  // as a correction (`ti_kind=corrected_prior` at high/
+                  // medium confidence), the state machine's candidate
+                  // directive is NOT what the customer is asking for this
+                  // turn — they are correcting a prior field. Suppress the
+                  // directive here so the LLM's acknowledge-the-correction
+                  // reply passes through instead of being overridden by
+                  // the A0c server render.
+                  //
+                  // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CALLSITE_MARKER.
+                  // DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER.
+                  //
+                  // NARROW v1: only the `suppress_on_correction_intent`
+                  // policy rule is honored live. The other Reloc 4 suppress
+                  // rules (`suppress_on_fresh_route_request`,
+                  // `suppress_on_clarifying_question`,
+                  // `suppress_on_cancel_intent`) stay shadow-only until
+                  // each becomes its own cut. This matches the Cut #1
+                  // pattern: one loud failure mode, one narrow
+                  // authority-removal cut.
+                  //
+                  // Orthogonal safeguards (NOT about confidence — per-rule
+                  // confidence policy lives inside
+                  // `decideDirectiveDisposition`, same single-source-of-
+                  // truth pattern as Cut #1):
+                  //   1. Env flag `RIDERS_TURN_DECISION_DIRECTIVE_FLIP`
+                  //      default "on", explicit "off" is the one-line
+                  //      rollback.
+                  //   2. Derived `policy_rule` must be in the tight
+                  //      `DIRECTIVE_FLIP_SUPPRESS_RULES` set (just the
+                  //      correction rule for v1).
+                  //   3. Hallucination guard did NOT fire. The derivation
+                  //      encodes this as an `allow_on_hallucination_guard`
+                  //      rule that fires BEFORE the correction rule, but
+                  //      the callsite checks again for defence in depth.
+                  //   4. `sameRouteQuoteAction` is not a switch_option
+                  //      (defensive; the derivation's own gate also
+                  //      covers this).
+                  //
+                  // Effect when fired: clear `directiveActionForRender` and
+                  // `directiveRenderContextForRender` so the Region-A A0c
+                  // substitution path has nothing to dispatch. Log
+                  // `[turn-decision/flip] kind=directive` with the legacy
+                  // directive name we just cleared so the flip is
+                  // auditable alongside Cut #1's A1 flip log.
+                  // ----------------------------------------------------------
+                  try {
+                    const directiveFlipEnvOff =
+                      (process.env.RIDERS_TURN_DECISION_DIRECTIVE_FLIP || "on")
+                        .trim()
+                        .toLowerCase() === "off";
+                    const directiveFlipProposerValidation = proposedTurnDecisionRaw
+                      ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                      : null;
+                    const directiveFlipProposerValue =
+                      directiveFlipProposerValidation &&
+                      directiveFlipProposerValidation.ok
+                        ? directiveFlipProposerValidation.value
+                        : null;
+                    const directiveFlipSameRouteSwitch =
+                      sameRouteQuoteAction?.kind === "switch_option";
+                    const directiveFlipHallucinationGuardFired =
+                      (hallucinationGuardRejections || []).length > 0;
+                    const directiveFlipRouteIntentFreshThisTurn = Boolean(
+                      directiveFlipProposerValue?.turn_kind === "initial_route" &&
+                        !!activeQuotedRoute &&
+                        sameRouteQuoteAction === null,
+                    );
+                    let directiveFlipDerivation:
+                      | DirectiveDispositionDerivation
+                      | null = null;
+                    try {
+                      directiveFlipDerivation = decideDirectiveDisposition({
+                        state_directive_action: directive.action,
+                        proposer_turn_kind:
+                          directiveFlipProposerValue?.turn_kind ?? null,
+                        proposer_ti_kind:
+                          directiveFlipProposerValue?.turn_intent?.kind ?? null,
+                        proposer_ti_confidence:
+                          directiveFlipProposerValue?.turn_intent?.confidence ??
+                          null,
+                        proposer_ac_kind:
+                          directiveFlipProposerValue?.awaiting_confirmation
+                            ?.kind ?? null,
+                        stage_at_turn_start: stageAtTurnStart,
+                        has_active_quoted_route_at_turn_start: !!activeQuotedRoute,
+                        route_intent_fresh_this_turn:
+                          directiveFlipRouteIntentFreshThisTurn,
+                        same_route_quote_switch_option:
+                          directiveFlipSameRouteSwitch,
+                        hallucination_guard_fired:
+                          directiveFlipHallucinationGuardFired,
+                      });
+                    } catch (directiveFlipDeriveError) {
+                      try {
+                        api.logger.warn(
+                          `[turn-decision/flip] kind=directive derive_failed conversation=${conversationId} error=${
+                            directiveFlipDeriveError instanceof Error
+                              ? directiveFlipDeriveError.message
+                              : String(directiveFlipDeriveError)
+                          }`,
+                        );
+                      } catch {
+                        // Never block the turn on flip-layer errors.
+                      }
+                      directiveFlipDerivation = null;
+                    }
+
+                    const DIRECTIVE_FLIP_SUPPRESS_RULES = new Set<string>([
+                      "layer.directive.suppress_on_correction_intent",
+                    ]);
+                    const directiveFlipAllowed = Boolean(
+                      !directiveFlipEnvOff &&
+                        directiveFlipDerivation &&
+                        directiveFlipDerivation.disposition === "suppress" &&
+                        DIRECTIVE_FLIP_SUPPRESS_RULES.has(
+                          directiveFlipDerivation.policy_rule,
+                        ) &&
+                        !directiveFlipHallucinationGuardFired &&
+                        !directiveFlipSameRouteSwitch,
+                    );
+
+                    if (directiveFlipAllowed && directiveFlipDerivation) {
+                      const legacyDirective = directiveActionForRender;
+                      directiveActionForRender = null;
+                      directiveRenderContextForRender = null;
+                      try {
+                        api.logger.info(
+                          `[turn-decision/flip] kind=directive conversation=${conversationId} policy_rule=${directiveFlipDerivation.policy_rule} legacy_would_have=${legacyDirective || "-"} ti_kind=${directiveFlipProposerValue?.turn_intent?.kind || "-"} ti_confidence=${directiveFlipProposerValue?.turn_intent?.confidence || "-"} stage=${stageAtTurnStart || "-"}`,
+                        );
+                      } catch {
+                        // Never block the turn on log failures.
+                      }
+                    }
+                  } catch (directiveFlipOuterError) {
+                    try {
+                      api.logger.warn(
+                        `[turn-decision/flip] kind=directive outer_failed conversation=${conversationId} error=${
+                          directiveFlipOuterError instanceof Error
+                            ? directiveFlipOuterError.message
+                            : String(directiveFlipOuterError)
+                        }`,
+                      );
+                    } catch {
+                      // Never block the turn on flip-layer errors.
+                    }
+                  }
                 } else {
                   const skipReason = customerAskingInformational
                     ? "skipped_on_informational_option_question"

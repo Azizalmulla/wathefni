@@ -949,10 +949,23 @@ export function classifyA1Agreement(
 //   suppress is a divergence worth reviewing.
 //
 // Shadow discipline:
-//   The first cut is OBSERVATION ONLY. `observeTurnDecision` fills in
-//   `derived_directive_disposition` and the trace emits it, but the
-//   callsite does NOT act on it. The live flip behind
-//   `RIDERS_TURN_DECISION_DIRECTIVE_FLIP` comes after the bake.
+//   The first cut (Reloc 4 design landing) was OBSERVATION ONLY —
+//   `observeTurnDecision` fills in `derived_directive_disposition`
+//   and the trace emits it, but the callsite does NOT act on it.
+//
+//   2026-04-23 Cut #2 (Job-A authority removal): the NARROW live flip
+//   behind `RIDERS_TURN_DECISION_DIRECTIVE_FLIP` is now ACTIVE for
+//   exactly ONE policy rule: `suppress_on_correction_intent`. The
+//   callsite (in `octopus-channel/index.ts`) consults
+//   `decideDirectiveDisposition` right after it would have set
+//   `directiveActionForRender`, and if the derivation returns
+//   `suppress` with `policy_rule=layer.directive.suppress_on_correction_intent`,
+//   the directive is cleared so the LLM's draft passes through. The
+//   other three suppress rules (`suppress_on_fresh_route_request`,
+//   `suppress_on_clarifying_question`, `suppress_on_cancel_intent`)
+//   remain shadow-only and will each become their own narrow cut
+//   before flipping live. See
+//   `DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_CORRECTION_MARKER`.
 // ---------------------------------------------------------------------------
 
 export type DirectiveDisposition = "allow" | "suppress";
