@@ -958,6 +958,37 @@ export function deriveRequestedSlotFromMissing(
 }
 
 /**
+ * Return the first DST slot currently in `status: "conflict"`, matching the
+ * selection order used by `computeOneBrainNextRequiredAction`'s conflict gate
+ * (first entry of `Object.entries(state.slots)`). Returns null when no slot
+ * is in conflict.
+ *
+ * Used by the post-drain requested-slot pin (Cut #4, 2026-04-23) in
+ * `octopus-channel/index.ts` so that `dialogState.requestedSlot` always
+ * mirrors the directive-level conflict slot while a conflict is open,
+ * instead of drifting to whatever slot happens to be missing next.
+ *
+ * IMPORTANT: this helper and the one-brain conflict gate MUST agree on
+ * which slot is "the" conflict slot. Both use first-hit in entries order.
+ * If either side changes selection policy, update the other in lockstep.
+ *
+ * DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER — do not remove. Deploy
+ * verifier greps for this marker; absence means the deployed build
+ * predates Cut #4 and stale-conflict split-brain can recur.
+ */
+export function findFirstConflictSlot(
+  state: DialogState | null | undefined,
+): SlotName | null {
+  if (!state || !state.slots) return null;
+  for (const [name, record] of Object.entries(state.slots)) {
+    if (record && record.status === "conflict") {
+      return name as SlotName;
+    }
+  }
+  return null;
+}
+
+/**
  * Env-flag kill-switch for the whole DST layer. Default ON.
  *
  * When disabled:

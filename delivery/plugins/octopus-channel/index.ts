@@ -56,6 +56,7 @@ import {
   createEmptyDialogState,
   createRouteResetDialogState,
   deriveRequestedSlotFromMissing,
+  findFirstConflictSlot,
   setRequestedSlot,
   clearRequestedSlot,
   type SlotName,
@@ -5540,48 +5541,118 @@ async function handleInboundMessage(params: {
                   // directive.
                   if (!cancelled && nextEntry.dialogState) {
                     const existingRequested = nextEntry.dialogState.requestedSlot;
-                    const pushedRequestedThisTurn = drained.some(
-                      (op) => op.op === "set_requested_slot",
+                    // ----------------------------------------------------
+                    // Cut #4 (2026-04-23) — DST conflict-slot pinning.
+                    // DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER
+                    //
+                    // When any DST slot is `status: "conflict"`, the
+                    // directive gate in computeOneBrainNextRequiredAction
+                    // forces CONFIRM_SLOT_CONFLICT(field). `requestedSlot`
+                    // must mirror that choice so the NEXT turn's prompt
+                    // context and apply-boundary guards route the
+                    // customer's disambiguation reply back to the
+                    // conflict slot — not whichever downstream slot
+                    // happens to be missing next.
+                    //
+                    // Source-of-bug: `deriveRequestedSlotFromMissing`
+                    // walks only the MISSING-field markers. A slot in
+                    // conflict is still "filled" at draft-level (the
+                    // incumbent value is mirrored back), so it is
+                    // INVISIBLE to that derivation. Missing-field
+                    // derivation would therefore walk past the open
+                    // conflict to the next missing slot (e.g.
+                    // sender_phone while sender_name is still in
+                    // conflict), producing a split-brain: directive
+                    // gate says CONFIRM_SLOT_CONFLICT(sender_name),
+                    // requestedSlot drifts to sender_phone. Later
+                    // turns (especially `ok`/acknowledgement) then
+                    // re-arm the conflict against a prompt context
+                    // that no longer pointed to the right slot,
+                    // producing the 2026-04-23 "aziz vs ahmad" loop.
+                    //
+                    // Fix: pin requestedSlot to the first conflict
+                    // slot whenever one exists. This runs BEFORE the
+                    // tool-pushed-requested check AND before the
+                    // missing-field derivation so the conflict always
+                    // wins at the requested-slot register. It is a
+                    // no-op when no slot is in conflict.
+                    //
+                    // Invariant: findFirstConflictSlot() uses the same
+                    // "first entry in Object.entries(slots) where
+                    // status==='conflict'" rule as the one-brain
+                    // conflict gate — keep them in lockstep.
+                    // ----------------------------------------------------
+                    const conflictSlotForPin = findFirstConflictSlot(
+                      nextEntry.dialogState,
                     );
-                    if (!pushedRequestedThisTurn) {
-                      const nextMissing = computeOneBrainMissingFields(
-                        nextEntry.bookingDraft,
-                        nextEntry,
+                    if (conflictSlotForPin) {
+                      if (
+                        !existingRequested ||
+                        existingRequested.name !== conflictSlotForPin
+                      ) {
+                        nextEntry = {
+                          ...nextEntry,
+                          dialogState: setRequestedSlot(
+                            nextEntry.dialogState,
+                            {
+                              name: conflictSlotForPin,
+                              options: null,
+                              askedTs: Date.now(),
+                            },
+                          ),
+                        };
+                        try {
+                          api.logger.info(
+                            `[dst-conflict-pin] conversation=${conversationId} pinned_slot=${conflictSlotForPin} prior_requested=${existingRequested?.name || "-"}`,
+                          );
+                        } catch {
+                          // Never block the turn on log failures.
+                        }
+                      }
+                    } else {
+                      const pushedRequestedThisTurn = drained.some(
+                        (op) => op.op === "set_requested_slot",
                       );
-                      const directive = computeOneBrainNextRequiredAction({
-                        draft: nextEntry.bookingDraft,
-                        entry: nextEntry,
-                        missing: nextMissing,
-                      });
-                      if (directive) {
-                        const derivedSlot = deriveRequestedSlotFromMissing(nextMissing);
-                        if (derivedSlot) {
-                          // Only update if changed, to avoid spurious
-                          // askedTs resets that would make log diffs noisy.
-                          if (
-                            !existingRequested ||
-                            existingRequested.name !== derivedSlot
-                          ) {
+                      if (!pushedRequestedThisTurn) {
+                        const nextMissing = computeOneBrainMissingFields(
+                          nextEntry.bookingDraft,
+                          nextEntry,
+                        );
+                        const directive = computeOneBrainNextRequiredAction({
+                          draft: nextEntry.bookingDraft,
+                          entry: nextEntry,
+                          missing: nextMissing,
+                        });
+                        if (directive) {
+                          const derivedSlot = deriveRequestedSlotFromMissing(nextMissing);
+                          if (derivedSlot) {
+                            // Only update if changed, to avoid spurious
+                            // askedTs resets that would make log diffs noisy.
+                            if (
+                              !existingRequested ||
+                              existingRequested.name !== derivedSlot
+                            ) {
+                              nextEntry = {
+                                ...nextEntry,
+                                dialogState: setRequestedSlot(
+                                  nextEntry.dialogState,
+                                  {
+                                    name: derivedSlot,
+                                    options: null,
+                                    askedTs: Date.now(),
+                                  },
+                                ),
+                              };
+                            }
+                          } else if (existingRequested) {
+                            // No specific slot required → clear the old one
+                            // (e.g. we moved past the sender-phone ask to the
+                            // address step).
                             nextEntry = {
                               ...nextEntry,
-                              dialogState: setRequestedSlot(
-                                nextEntry.dialogState,
-                                {
-                                  name: derivedSlot,
-                                  options: null,
-                                  askedTs: Date.now(),
-                                },
-                              ),
+                              dialogState: clearRequestedSlot(nextEntry.dialogState),
                             };
                           }
-                        } else if (existingRequested) {
-                          // No specific slot required → clear the old one
-                          // (e.g. we moved past the sender-phone ask to the
-                          // address step).
-                          nextEntry = {
-                            ...nextEntry,
-                            dialogState: clearRequestedSlot(nextEntry.dialogState),
-                          };
                         }
                       }
                     }

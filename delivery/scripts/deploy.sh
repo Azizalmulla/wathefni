@@ -216,6 +216,22 @@ DEPLOY_CANARY_TURN_DECISION_DIRECTIVE_FLIP_ACKNOWLEDGEMENT_MARKER='DEPLOY_CANARY
 DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_MODULE_MARKER'
 DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER='DEPLOY_CANARY_TURN_DECISION_DISPOSITION_RELOC_MARKER'
 DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER'
+# Cut #4 (2026-04-23, state coherence): DST conflict-slot pinning. When
+# any DST slot is `status: "conflict"`, the post-drain requested-slot
+# derivation in octopus-channel/index.ts pins `requestedSlot` to that
+# slot — overriding both the missing-field derivation (which walks
+# past conflicts because conflicting slots are still "filled" at
+# draft-level and invisible to deriveRequestedSlotFromMissing) and
+# any tool-pushed requested slot. This repairs the split-brain where
+# the directive gate said CONFIRM_SLOT_CONFLICT(sender_name) while
+# `requestedSlot` had drifted to sender_phone, producing the
+# 2026-04-23 "aziz vs ahmad" stale-conflict loop. Absence means the
+# deployed build predates this fix — later `ok`/ack turns can still
+# re-arm the conflict against a prompt context that no longer points
+# to the right slot. Invariant: findFirstConflictSlot() uses the same
+# first-hit-in-entries order as the one-brain conflict gate; keep them
+# in lockstep.
+DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER='DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -619,6 +635,16 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER',
         'turn-disposition disposition_inputs callsite marker',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/dialog-state.ts'),
+        '$DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER',
+        'dst conflict-slot pin helper marker (Cut #4, state coherence)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER',
+        'dst conflict-slot pin callsite marker (Cut #4, state coherence)',
     ),
 ]
 
