@@ -378,15 +378,17 @@ function assertCallSiteCarriesProvenance(site, origin) {
     totalCallSites += sites.length;
   }
 
-  // The canonical file (index.ts) must own at least 7 call sites — the
-  // six early paths plus the main decidePostStateOutbound path. This
-  // catches a regression that removes the send entirely from the
-  // pipeline.
+  // The canonical file (index.ts) must own at least a handful of call
+  // sites — the early paths plus the main decidePostStateOutbound
+  // path. This catches a regression that removes the send entirely
+  // from the pipeline. Authority-cutover phase 2 (2026-04-23) deleted
+  // the `deterministic_location_clarification` early-return author,
+  // so the lower bound was relaxed from 7 to 5.
   const indexRel = "plugins/octopus-channel/index.ts";
   const indexEntry = perFile.find((p) => p.file === indexRel);
   assert.ok(
-    indexEntry && indexEntry.count >= 7,
-    `S1: expected >= 7 sendOctopusTextReply call sites in ${indexRel}, found ${indexEntry?.count || 0}`,
+    indexEntry && indexEntry.count >= 5,
+    `S1: expected >= 5 sendOctopusTextReply call sites in ${indexRel}, found ${indexEntry?.count || 0}`,
   );
   console.log(
     `S1: OK (${totalCallSites} call sites across ${perFile.length} files; all carry provenance + provenanceReason)`,
@@ -430,13 +432,16 @@ function assertCallSiteCarriesProvenance(site, origin) {
     path.join(root, "plugins/octopus-channel/index.ts"),
     "utf8",
   );
+  // Authority-cutover phase 2 (2026-04-23): the
+  // `deterministic_location_clarification` early-return author was
+  // deleted; its provenanceReason is no longer emitted by any call
+  // site in index.ts.
   const expectedReasons = [
     "inactivity_close",
     "inactivity_nudge",
     "processing_error_fallback",
     "image_read_failure",
     "audio_transcription_failure",
-    "deterministic_location_clarification",
   ];
   for (const reason of expectedReasons) {
     assert.ok(

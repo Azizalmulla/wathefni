@@ -236,8 +236,6 @@ import {
   buildQuotedOptionAliases,
   scoreQuotedOptionMatch,
   detectCancelContradictsOptionMention,
-  detectExplicitOptionMention,
-  detectVagueProceedSignal,
   routeHasManualConfirmOption,
   resolveSameRouteQuoteFollowupAction,
   buildDeterministicSelectedQuotedOptionReply,
@@ -1853,40 +1851,11 @@ async function findSessionGuardEntryWithPersistence(
 
 // buildQuotedRouteContextLines moved to ./lib/quoted-options.ts (wave 5).
 
-function buildDeterministicLocationClarificationReply(params: {
-  language: "ar" | "en";
-  nearestAreaName: string | null;
-  locationMessage: OctopusInboundLocationMessage | null;
-}): string {
-  const areaLabel =
-    params.nearestAreaName ||
-    params.locationMessage?.name ||
-    params.locationMessage?.address ||
-    (params.language === "ar" ? "الموقع المرسل" : "the shared location");
-  return params.language === "ar"
-    ? `تمام، المنطقة ${areaLabel}. تبون نعتبرها موقع الاستلام ولا التسليم؟`
-    : `Understood. The area is ${areaLabel}. Should I treat this as the pickup location or the delivery location?`;
-}
-
-function shouldUseDeterministicLocationClarification(params: {
-  controllerEntry: PersistedConversationControllerEntry | null;
-  locationMessage: OctopusInboundLocationMessage | null;
-}): boolean {
-  if (!params.locationMessage) {
-    return false;
-  }
-  const stage = String(params.controllerEntry?.stage || "idle");
-  const bookingStep = String(params.controllerEntry?.bookingStep || "none");
-  if (
-    stage === "collecting_booking_details" ||
-    stage === "summary_shown" ||
-    stage === "awaiting_confirmation" ||
-    stage === "order_submitted"
-  ) {
-    return false;
-  }
-  return bookingStep === "none";
-}
+// buildDeterministicLocationClarificationReply + shouldUseDeterministicLocationClarification
+// deleted in authority-cutover phase 2 (2026-04-23). The server-composed
+// "pickup or delivery?" reply was a pre-LLM early-return author that
+// wrote partial state without advancing the stage; see the rewrite in
+// the main flow for the new pendingLocation-only persistence.
 
 // hasStructuredBookingLocation, hasCompleteTextAddress, hasSatisfiedBookingAddress
 // moved to ./lib/booking-flow.ts (wave 4).
@@ -4137,51 +4106,47 @@ async function handleInboundMessage(params: {
       );
     }
   }
+  // Authority cutover phase 2 (2026-04-23): the server-composed
+  // "pickup or delivery?" reply (`deterministic_location_clarification`)
+  // was a pre-LLM early-return author. It wrote `pendingLocation` to
+  // the draft, sent a canned Arabic/English clarification, and then
+  // bypassed the LLM entirely. On the follow-up turn (customer answers
+  // "delivery pls") the stage was still `idle` / bookingStep=`none`,
+  // the LLM saw no evidence of a booking in progress, and fell back
+  // to a welcome reply — the exact "Delivery pls → welcome reset"
+  // failure from the 2026-04-23 transcript. We now only persist the
+  // shared location; `pending_shared_location` surfaces in the prompt
+  // and the LLM composes the follow-up itself.
   if (
     senderRole === "customer" &&
     replyTarget &&
-    shouldUseDeterministicLocationClarification({
-      controllerEntry: conversationControllerEntry,
-      locationMessage: resolvedLocation,
-    })
+    conversationControllerEntry &&
+    resolvedLocation &&
+    persistedResolvedLocation &&
+    (conversationControllerEntry.bookingStep || "none") === "none" &&
+    conversationControllerEntry.stage !== "collecting_booking_details" &&
+    conversationControllerEntry.stage !== "summary_shown" &&
+    conversationControllerEntry.stage !== "awaiting_confirmation" &&
+    conversationControllerEntry.stage !== "order_submitted"
   ) {
-    if (conversationControllerEntry) {
-      conversationControllerEntry = {
-        ...conversationControllerEntry,
-        lastActivityTs: Date.now(),
-        language: preferredReplyLanguage,
-        explicitLanguage: explicitLanguageRequest || conversationControllerEntry.explicitLanguage,
-        conversationId,
-        replyTarget,
-        accountId: account.accountId,
-        bookingDraft: {
-          ...conversationControllerEntry.bookingDraft,
-          pendingLocation: persistedResolvedLocation,
-        },
-      };
-      await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-      mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-    }
-    const locationReply = buildDeterministicLocationClarificationReply({
+    conversationControllerEntry = {
+      ...conversationControllerEntry,
+      lastActivityTs: Date.now(),
       language: preferredReplyLanguage,
-      nearestAreaName,
-      locationMessage: resolvedLocation,
-    });
-    await sendOctopusTextReply({
-      api,
-      account,
+      explicitLanguage: explicitLanguageRequest || conversationControllerEntry.explicitLanguage,
       conversationId,
       replyTarget,
-      text: locationReply,
-      preferredLanguage: preferredReplyLanguage,
-      ingressIds,
-      provenance: "authoritative_substitute",
-      provenanceReason: "deterministic_location_clarification",
-    });
+      accountId: account.accountId,
+      bookingDraft: {
+        ...conversationControllerEntry.bookingDraft,
+        pendingLocation: persistedResolvedLocation,
+      },
+    };
+    await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
+    mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
     api.logger.info(
-      `[controller] Deterministic location clarification reply sent conversation=${conversationId} lang=${preferredReplyLanguage} area=${JSON.stringify(nearestAreaName || resolvedLocation?.name || resolvedLocation?.address || "")} text=${JSON.stringify(locationReply)}`,
+      `[controller] shared-location persisted as pendingLocation conversation=${conversationId} area=${JSON.stringify(nearestAreaName || resolvedLocation?.name || resolvedLocation?.address || "")}`,
     );
-    return;
   }
   // Save location pin during non-address booking steps (sender/recipient) as pendingLocation
   // so it's preserved for the address step instead of being silently lost.
@@ -6168,267 +6133,40 @@ async function handleInboundMessage(params: {
           // computation — preserving pre-Step-4 behavior.
           {
             // ----------------------------------------------------------
-            // Cut 7b (2026-04-23): A0 / A0a / A0b ARMING disposition gate.
+            // Authority cutover phase 2 (2026-04-23): the Region-A
+            // pre-LLM authors (A0 clarify-before-proceed, A0a manual-
+            // confirm address-ask, A0b manual-confirm handoff) are
+            // demoted to permanent no-ops. They used to arm from raw
+            // text regex (`detectVagueProceedSignal`) + controller
+            // flags and outrank the LLM's draft with server-composed
+            // substitutions (the options-menu / address-ask / handoff
+            // text). The LLM with the slimmed prompt composes all
+            // three naturally from `route_options` / `selected_service`
+            // / `manual_confirmation_required` facts.
             //
-            // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER.
+            // The three flag variables are kept as constants so the
+            // downstream `decidePreStateOutbound` / turn-decision
+            // trace plumbing still compiles; those consumers become
+            // dead code and are removed in a follow-up phase.
             //
-            // Structural authority downgrade for the pre-LLM Region-A
-            // substitution branches. Before this cut:
-            //
-            //   * `clarifyOptionBeforeProceed` armed purely from
-            //     `detectVagueProceedSignal` (substring match on the
-            //     raw customer text) + catalog shape. Once armed, A0
-            //     outranks canonical overwrite, empty-fill, price
-            //     whitelist, same-route recap, and A0c — and stamps
-            //     the options menu over whatever the LLM drafted.
-            //   * `manualConfirmAddressAsk` / `manualConfirmHandoff`
-            //     armed from controller state + selected option. Once
-            //     armed, A0a/A0b substitute the server-composed
-            //     address ask / handoff text.
-            //
-            // The 2026-04-23 transcript showed the exact failure mode
-            // this gate targets: customer on a manual-confirm-capable
-            // quote asked "so i cant order rn if its manual
-            // confirmation" (a clarifying question). `detectVagueProceedSignal`
-            // matched `"confirm"` as a substring inside `"confirmation"`,
-            // armed `clarifyOptionBeforeProceed`, and A0 substituted
-            // the options-menu over the LLM's direct answer.
-            //
-            // The underlying asymmetry is that these three branches
-            // read only mechanical signals (state flags + raw-text
-            // regex) before any semantic understanding of the turn
-            // exists. The A1 flip's `pass_on_clarifying` can bypass
-            // them AFTER the LLM returns, but only when the proposer
-            // is present AND labels `turn_intent.kind=clarifying_question`
-            // at high/medium confidence. When the LLM mis-classifies
-            // (or the prompt biases it toward `proceed`), the A1 flip
-            // is silent and A0 wins by default.
-            //
-            // This cut moves the decision forward. `promptShapingDecision`
-            // is computed BEFORE the LLM invocation using server-side
-            // signals + regex detectors (including the new
-            // `isContextualClarifyingQuestion` that catches indirect
-            // interrogatives like "so i cant X if Y"). When the pre-LLM
-            // disposition is NOT `continue_step` — i.e. the heuristic
-            // reads the turn as `answer` / `requote` / `cancel_confirmation`
-            // / `acknowledge` / `idle` — the three arming flags are
-            // forced off. A0/A0a/A0b become subroutines gated by
-            // meaning instead of self-authoring by default.
-            //
-            // Gate scope — A0/A0a/A0b arming only. The corresponding
-            // directive-registry entries (`CLARIFY_OPTION_BEFORE_PROCEED`,
-            // `ASK_*_FOR_MANUAL_CONFIRM`, `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM`)
-            // are marked `server_existing` in the registry, so A0c never
-            // renders them itself — it defers back to A0/A0a/A0b. Gating
-            // the three arming flags here is sufficient to suppress the
-            // substitution end-to-end for these directives; no separate
-            // A0c suppression is needed.
-            //
-            // Live-only safeguards:
-            //   1. Env flag `RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE`
-            //      default "off" during bake; explicit "on" enables.
-            //      The one-line rollback is unset the var.
-            //   2. Only activates for customer turns (agent/operator
-            //      replies never reach this block anyway; guarded by
-            //      the surrounding customer-only code path).
-            //   3. Heuristic false-positive cost is bounded: when the
-            //      gate mis-reads a genuine proceed as a question, the
-            //      LLM composes the reply. The LLM has the full
-            //      catalog / prices / manual-confirm caveat in its
-            //      prompt and produces a contextually appropriate
-            //      response. No safety invariant depends on A0/A0a/A0b
-            //      firing — they are verbosity-smoothing substitutions,
-            //      not guard rails.
-            //
-            // Asymmetry with Cut #5 (post-LLM authoring gate):
-            // Cut #5 gates `directiveActionForRender` (A0c) using the
-            // post-LLM authoritative disposition. Cut 7b gates A0/A0a/A0b
-            // using the pre-LLM heuristic disposition. Both layers
-            // read independent classifier outputs; neither reads the
-            // other. On turns where both agree (continue_step or not),
-            // behavior is identical to one or the other. On turns
-            // where they disagree, the weaker layer loses its branch
-            // and the other layer's decision stands — by design, since
-            // pre-LLM vs post-LLM have different authority scopes.
-            //
-            // Trace: `[a0-arming/disposition]` — one line per customer
-            // turn, emitted UNCONDITIONALLY (even when env-off and
-            // even on `continue_step`). Records the full matrix:
-            // flag, disposition, policy_rule, would-have-armed vs
-            // armed for each of the three branches, gated reason,
-            // stage, has_quote.
+            // Deleted in this phase:
+            //   * A0 arming env gate (RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE)
+            //   * `detectVagueProceedSignal` consumption at this callsite
+            //   * `[a0-arming/disposition]` trace emission
+            //   * `[one-brain/clarify-option]` / `[one-brain/manual-confirm]` traces
+            //   * the three A0 arming canary markers
             // ----------------------------------------------------------
-            const a0ArmingGateEnvLive =
-              (process.env.RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE || "off")
-                .trim()
-                .toLowerCase() === "on";
-            const a0ArmingDisposition =
-              promptShapingDecision?.disposition ?? null;
-            const a0ArmingDispositionIsNonContinue = Boolean(
-              a0ArmingDisposition !== null &&
-                a0ArmingDisposition !== "continue_step",
-            );
-            const a0ArmingGateBlocks = Boolean(
-              a0ArmingGateEnvLive && a0ArmingDispositionIsNonContinue,
-            );
-
-            // Clarify-before-proceed gate (Bug 1, 2026-04-20 manual-
-            // confirm incident). Evaluated at Region-A time so the
-            // controller entry reflects any drain-loop updates from this
-            // turn. Fires only on `stage=quoted` with a mixed-bookability
-            // catalog and a vague proceed signal that does not name an
-            // option — see `computeOneBrainNextRequiredAction` for the
-            // authoritative invariants, kept in sync with the outbound
-            // substitute below. Cut 7b: arming is additionally gated
-            // on pre-LLM disposition being `continue_step`.
-            const clarifyOptionBeforeProceedWouldHaveArmed = Boolean(
-              conversationControllerEntry?.stage === "quoted" &&
-                activeQuotedRoute &&
-                rawBody &&
-                routeHasManualConfirmOption(activeQuotedRoute) &&
-                detectVagueProceedSignal(rawBody) &&
-                !detectExplicitOptionMention({ text: rawBody, route: activeQuotedRoute }),
-            );
-            const clarifyOptionBeforeProceed =
-              !a0ArmingGateBlocks && clarifyOptionBeforeProceedWouldHaveArmed;
-            if (clarifyOptionBeforeProceed) {
-              api.logger.info(
-                `[one-brain/clarify-option] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
-              );
-            } else if (
-              a0ArmingGateBlocks &&
-              clarifyOptionBeforeProceedWouldHaveArmed
-            ) {
-              api.logger.info(
-                `[one-brain/clarify-option] gate=suppressed_by_disposition conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} disposition=${a0ArmingDisposition ?? "-"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
-              );
-            }
-            // Reloc 3 mirror hoist: propagate the flag to outer scope so
-            // the turn-decision trace emit can read it without changing
-            // the inner-scope source.
-            turnA1ClarifyOptionBeforeProceed = clarifyOptionBeforeProceed;
-
-            // Manual-confirm server-composed address-ask / handoff
-            // substitution (Bug 4, 2026-04-20 manual-confirm signal drop
-            // incident). When the controller has a fresh quote AND the
-            // selected option is flagged `manual_confirmation_required`,
-            // we compute whether the next server-directed action is an
-            // address ask (pickup or delivery) or the handoff itself,
-            // and pass that to Region-A so the reply text is rendered
-            // deterministically. This is the single-source-of-truth
-            // sibling of `computeOneBrainNextRequiredAction` — we
-            // replicate just the manual-confirm sub-branch here because
-            // Region A runs BEFORE the controller-state mutation block
-            // and must not depend on the LLM's emitted directive text.
-            //
-            // Cut 7b: compute the "would have armed" shadow first so
-            // the gate can suppress the arming AND the trace can
-            // still record what would have happened.
-            let manualConfirmAddressAskWouldHave:
-              | {
-                  side: "pickup" | "delivery";
-                  option: RouteQuoteOption;
-                }
+            const clarifyOptionBeforeProceed = false;
+            const manualConfirmAddressAsk:
+              | { side: "pickup" | "delivery"; option: RouteQuoteOption }
               | null = null;
-            let manualConfirmHandoffWouldHave:
+            const manualConfirmHandoff:
               | { option: RouteQuoteOption }
               | null = null;
-            if (
-              conversationControllerEntry?.stage === "quoted" &&
-              activeQuotedRoute &&
-              conversationControllerEntry.selectedDeliveryType &&
-              String(
-                conversationControllerEntry.selectedQuoteOptionDirectChatBookingStatus || "",
-              )
-                .trim()
-                .toLowerCase() === "manual_confirmation_required"
-            ) {
-              const selectedOption = getActiveSelectedQuotedOption(
-                activeQuotedRoute,
-                conversationControllerEntry,
-              );
-              if (selectedOption) {
-                const draft = conversationControllerEntry.bookingDraft;
-                const pickupSatisfied = hasSatisfiedBookingAddress(draft, "pickup");
-                const deliverySatisfied = hasSatisfiedBookingAddress(draft, "delivery");
-                if (!pickupSatisfied) {
-                  manualConfirmAddressAskWouldHave = {
-                    side: "pickup",
-                    option: selectedOption,
-                  };
-                } else if (!deliverySatisfied) {
-                  manualConfirmAddressAskWouldHave = {
-                    side: "delivery",
-                    option: selectedOption,
-                  };
-                } else {
-                  manualConfirmHandoffWouldHave = { option: selectedOption };
-                }
-                if (!a0ArmingGateBlocks) {
-                  api.logger.info(
-                    `[one-brain/manual-confirm] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} pickupSatisfied=${pickupSatisfied} deliverySatisfied=${deliverySatisfied}`,
-                  );
-                } else {
-                  api.logger.info(
-                    `[one-brain/manual-confirm] gate=suppressed_by_disposition conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} disposition=${a0ArmingDisposition ?? "-"}`,
-                  );
-                }
-              }
-            }
-            const manualConfirmAddressAsk = a0ArmingGateBlocks
-              ? null
-              : manualConfirmAddressAskWouldHave;
-            const manualConfirmHandoff = a0ArmingGateBlocks
-              ? null
-              : manualConfirmHandoffWouldHave;
-
-            // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER.
-            try {
-              api.logger.info(
-                `[a0-arming/disposition] conversation=${conversationId} flag=${
-                  a0ArmingGateEnvLive ? "on" : "off"
-                } disposition=${
-                  a0ArmingDisposition ?? "-"
-                } policy_rule=${
-                  promptShapingDecision?.policy_rule ?? "-"
-                } gated=${
-                  a0ArmingGateBlocks ? "yes" : "no"
-                } clarify_would_have=${
-                  clarifyOptionBeforeProceedWouldHaveArmed ? "yes" : "no"
-                } clarify_armed=${
-                  clarifyOptionBeforeProceed ? "yes" : "no"
-                } mc_ask_would_have=${
-                  manualConfirmAddressAskWouldHave
-                    ? manualConfirmAddressAskWouldHave.side
-                    : "-"
-                } mc_ask_armed=${
-                  manualConfirmAddressAsk ? manualConfirmAddressAsk.side : "-"
-                } mc_handoff_would_have=${
-                  manualConfirmHandoffWouldHave ? "yes" : "no"
-                } mc_handoff_armed=${
-                  manualConfirmHandoff ? "yes" : "no"
-                } stage=${
-                  conversationControllerEntry?.stage ?? "-"
-                } has_quote=${activeQuotedRoute ? "yes" : "no"}`,
-              );
-            } catch {
-              // Never block the turn on trace emit failure.
-            }
-            // Reloc 3 mirror hoist: compact, transport-only projections
-            // of the manual-confirm gate inputs so the trace emit can
-            // read them at turn end. Keeps the `option_type` string
-            // (what the layer's deriveA1Substitute needs) and drops
-            // the rich option object (which the trace doesn't serialize).
-            turnA1ManualConfirmAddressAskSnapshot = manualConfirmAddressAsk
-              ? {
-                  side: manualConfirmAddressAsk.side,
-                  option_type: manualConfirmAddressAsk.option.delivery_type,
-                }
-              : null;
-            turnA1ManualConfirmHandoffSnapshot = manualConfirmHandoff
-              ? { option_type: manualConfirmHandoff.option.delivery_type }
-              : null;
-
+            turnA1ClarifyOptionBeforeProceed = false;
+            turnA1ManualConfirmAddressAskSnapshot = null;
+            turnA1ManualConfirmHandoffSnapshot = null;
+            // --- legacy A0 arming block deleted; replacement ends here ---
             // Phase 2 (2026-04-20): compute the directive for this turn
             // and build the renderer context. The registry's
             // compile-time exhaustiveness guarantees every directive has
