@@ -289,30 +289,20 @@ import type {
 // DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER.
 import { decideTurnDisposition } from "../shared/turn-disposition";
 import type { TurnDispositionDecision } from "../shared/turn-disposition";
-// Cut #6 (2026-04-23): prompt-shaping disposition. Pre-LLM heuristic that
-// decides whether the system prompt carries state-machine authoring
-// imperatives this turn. Input-side counterpart of Cut #5's output-side
-// inversion. Default-off (env `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE=on`
-// to enable). When the pre-LLM disposition is anything other than
-// `continue_step`, the prompt drops `next_required_action`,
-// `forbidden_reply_shapes`, `requested_slot_rule`, `pending_area_rule`,
-// `slot_conflicts_rule`, and hard rules 4 and 10; state FACTS stay.
-// DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER.
+// Pre-LLM prompt-shaping disposition heuristic (Cut #6). The prompt
+// formatter no longer consumes this value — the state-machine authoring
+// imperatives were removed unconditionally in the authority cutover —
+// but the decision still feeds the turn router below and its own
+// `[prompt-disposition/shaping]` trace.
 import { computePromptShapingDisposition } from "../shared/turn-disposition";
-// Cut 9.0 (2026-04-23): Turn Router — top-level meaning-first dispatcher.
-// Runs once per customer turn, BEFORE the state machine, and classifies
-// the turn into a dispatch MODE. Downstream consumers read the decision
-// to answer "should `computeOneBrainNextRequiredAction` author this
-// turn?" / "should the prompt carry state imperatives?" / "should
-// Region-A substitutions arm?". Dark-land scaffold: one consumer
-// (state-machine authoring gate) is wired; the env flag
-// `RIDERS_TURN_ROUTER_DEFAULT_MODE` stays at the legacy "advance_form"
-// default so behaviour is unchanged until the flip. See
+// Turn Router (Cut 9.0) — top-level meaning-first dispatcher. Runs once
+// per customer turn, BEFORE the state machine, and classifies the turn
+// into a dispatch MODE. The state-machine authoring gate at the
+// Region-B author block consumes `invoke_state_machine`. See
 // `plugins/shared/turn-router.ts` for the full rationale.
 // DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER.
 import {
   classifyTurn,
-  parseTurnRouterDefaultModeEnv,
 } from "../shared/turn-router";
 import type {
   TurnRouterDecision,
@@ -4539,51 +4529,22 @@ async function handleInboundMessage(params: {
   }
 
   // ------------------------------------------------------------------
-  // Cut #6 (2026-04-23, Reloc 5 input-side): pre-LLM prompt-shaping
-  // disposition.
+  // Pre-LLM prompt-shaping disposition (Cut #6, 2026-04-23).
   //
-  // DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER.
+  // Runs BEFORE the LLM invocation. The disposition is computed from
+  // server-side signals only — stage, active quoted route, requested
+  // slot, missing-field count, customer inbound text. Distinct from
+  // Cut #5's `decideTurnDisposition`, which runs AFTER the LLM
+  // returns with the proposer reading.
   //
-  // Runs BEFORE the LLM invocation (we're building the system prompt
-  // here). The disposition is computed from server-side signals only —
-  // stage, active quoted route, requested slot, missing-field count,
-  // customer inbound text. Proposer output is NOT available at this
-  // point in the turn (it comes back FROM the LLM call that consumes
-  // this prompt). That's why this layer is distinct from Cut #5's
-  // `decideTurnDisposition`, which runs AFTER the LLM returns on the
-  // output side with the full proposer reading.
-  //
-  // Asymmetry is intentional: the pre-LLM layer is a weaker
-  // classifier (regex-level), and its job is prompt shaping only. The
-  // post-LLM layer stays authoritative for output decisions. Neither
-  // reads the other's output. The four-cell matrix
-  // (pre × post disposition) guarantees every combination is
-  // ≥ today's behaviour; see `turn-disposition.ts` for the proof.
-  //
-  // Default OFF during bake (env `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE`
-  // must be explicitly `on` to enable). The one-line rollback is
-  // unset the var. When off, `promptShapingDisposition` is forced
-  // null and the prompt is identical to today.
-  //
-  // Trace: `[prompt-disposition/shaping]` — one line per customer
-  // turn, emitted UNCONDITIONALLY (even when env-off and even on
-  // `continue_step`), so a triager can grep per-conversation and see
-  // flag, disposition, policy_rule, whether state imperatives were
-  // skipped, whether hard rules were shaped, stage, has_quote.
+  // Authority cutover phase 5 (2026-04-23): the Cut #6 env gate
+  // (`RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE`) is gone. The prompt
+  // formatter no longer consumes `promptShapingDisposition` at all
+  // (Phase 1 slimmed the state-authoring imperatives unconditionally),
+  // so this layer is now pure observability + the feed into the
+  // turn router below. Trace `[prompt-disposition/shaping]` still
+  // emits one line per customer turn.
   // ------------------------------------------------------------------
-  const promptShapingEnvLive =
-    (process.env.RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE || "off")
-      .trim()
-      .toLowerCase() === "on";
-  // Cut 7b (2026-04-23): the pre-LLM disposition is now consumed by
-  // TWO downstream effects — prompt-shaping (Cut #6) AND the
-  // A0/A0a/A0b arming gate (Cut 7b, downstream at Region A). Each
-  // effect has its own env flag. The DECISION itself must be computed
-  // unconditionally for customer turns so both gates can read the
-  // same disposition value, and the matrix trace stays observable
-  // even when both effects are dark.
-  //
-  // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER.
   let promptShapingDecision: TurnDispositionDecision | null = null;
   if (senderRole === "customer") {
     try {
@@ -4623,32 +4584,13 @@ async function handleInboundMessage(params: {
       promptShapingDecision = null;
     }
   }
-  // Disposition passed to the prompt builder — `null` when the
-  // Cut #6 env flag is off or when the disposition is `continue_step`
-  // (identity path). The decision itself remains in
-  // `promptShapingDecision` for the trace and the Cut 7b arming gate.
-  const promptShapingDispositionForPrompt =
-    promptShapingEnvLive &&
-    promptShapingDecision &&
-    promptShapingDecision.disposition !== "continue_step"
-      ? promptShapingDecision.disposition
-      : null;
-  const promptShapingStateImperativesSkipped = Boolean(
-    promptShapingDispositionForPrompt,
-  );
   if (senderRole === "customer") {
     try {
       api.logger.info(
-        `[prompt-disposition/shaping] conversation=${conversationId} flag=${
-          promptShapingEnvLive ? "on" : "off"
-        } disposition=${
+        `[prompt-disposition/shaping] conversation=${conversationId} disposition=${
           promptShapingDecision?.disposition ?? "-"
         } policy_rule=${
           promptShapingDecision?.policy_rule ?? "-"
-        } state_imperatives_skipped=${
-          promptShapingStateImperativesSkipped ? "yes" : "no"
-        } hard_rules_shaped=${
-          promptShapingStateImperativesSkipped ? "yes" : "no"
         } stage=${conversationControllerEntry?.stage ?? "-"} has_quote=${
           activeQuotedRoute ? "yes" : "no"
         } requested_slot=${
@@ -4683,17 +4625,13 @@ async function handleInboundMessage(params: {
   // the legacy default the router's flags are inert. See
   // `plugins/shared/turn-router.ts` for the full rationale.
   //
-  // Env flag: `RIDERS_TURN_ROUTER_DEFAULT_MODE`
-  //   * unset / "advance_form" (default) — legacy behaviour; zero change.
-  //   * "meaning_first"                   — fallthrough continue_step
-  //                                         routes to `answer`; state
-  //                                         machine authoring is
-  //                                         suppressed on uncertain turns.
+  // Authority cutover phase 5 (2026-04-23): the env flag
+  // (`RIDERS_TURN_ROUTER_DEFAULT_MODE`) is gone — `meaning_first` is
+  // the only mode now. On `default_applied` fallthrough the router's
+  // `invoke_state_machine=false` can suppress state-machine authoring
+  // (see the gate at the Region-B author block below).
   // --------------------------------------------------------------------
-  const turnRouterDefaultMode: TurnRouterDefaultMode =
-    parseTurnRouterDefaultModeEnv(
-      process.env.RIDERS_TURN_ROUTER_DEFAULT_MODE,
-    );
+  const turnRouterDefaultMode: TurnRouterDefaultMode = "meaning_first";
   let turnRouterDecision: TurnRouterDecision | null = null;
   if (senderRole === "customer") {
     try {
@@ -4771,7 +4709,6 @@ async function handleInboundMessage(params: {
     quoteFollowupHint,
     controllerTransitionHint,
     currentCustomerText: rawBody,
-    promptShapingDisposition: promptShapingDispositionForPrompt,
   });
   const customerProfileContext = senderRole === "customer" ? formatCustomerProfileContext(customerProfile) : null;
   const behaviorContext = senderRole === "customer"
@@ -6115,44 +6052,36 @@ async function handleInboundMessage(params: {
               // with a uniform trace shape.
               //
               // Orthogonal safeguards (the disposition derivation already
-              // encodes most of these internally; we re-check the env flag
-              // at the callsite for one-line rollback):
-              //   1. Env flag `RIDERS_TURN_DISPOSITION_AUTHOR_LIVE` default
-              //      "on"; explicit "off" restores legacy behaviour.
-              //   2. Missing / invalid proposer → Rule 2 falls through to
+              // encodes most of these internally):
+              //   1. Missing / invalid proposer → Rule 2 falls through to
               //      `continue_step` with `no_proposer` fallthrough reason.
               //      State grounds the turn.
-              //   3. Low-confidence classifications that don't match a
+              //   2. Low-confidence classifications that don't match a
               //      rule fall through to Rule 9's `continue_step`
               //      default. State grounds the turn.
-              //   4. Hallucination guard fired on a manual-confirm route
+              //   3. Hallucination guard fired on a manual-confirm route
               //      → Rule 3 emits `handoff`, state-machine directive
-              //      is NOT re-emitted (the A0a/A0b manual-confirm
-              //      branches in Region A still fire from their own
-              //      flags). For non-manual-confirm routes with guard
-              //      fired, default `continue_step` applies and the
-              //      existing hallucination-guard repair paths (C1/C2)
-              //      still run.
-              //   5. Switch-option turns → Rule 9's
-              //      `switch_option_skip` → `continue_step`. The A4
-              //      recap path in `outbound-decision.ts` owns those
-              //      as today.
+              //      is NOT re-emitted. For non-manual-confirm routes
+              //      with guard fired, default `continue_step` applies
+              //      and the existing hallucination-guard repair paths
+              //      (C1/C2) still run.
+              //   4. Switch-option turns → Rule 9's `switch_option_skip`
+              //      → `continue_step`. The A4 recap path in
+              //      `outbound-decision.ts` owns those as today.
               //
               // Trace: `[turn-disposition/authoring]` — one line per turn,
-              // emitted UNCONDITIONALLY (even when env-off and even on
-              // `continue_step`) so a triager can grep per-conversation
-              // and see the full per-turn shape: flag, disposition,
-              // policy_rule, whether state-machine authoring was skipped,
-              // whether the prompt directive injection was skipped (always
-              // `no` for this cut — prompt-side gate is a separate follow-
-              // up since the proposer output isn't available at prompt-
-              // build time), the legacy directive that would have been
-              // authored, and the proposer signals that drove the choice.
+              // emitted UNCONDITIONALLY (even on `continue_step`) so a
+              // triager can grep per-conversation and see the full per-
+              // turn shape: disposition, policy_rule, whether state-
+              // machine authoring was skipped, whether the prompt
+              // directive injection was skipped, the legacy directive
+              // that would have been authored, and the proposer signals
+              // that drove the choice.
+              //
+              // Authority cutover phase 5 (2026-04-23): the one-line
+              // rollback env flag was removed — the Cut #5 authoring
+              // gate is baked on.
               // ----------------------------------------------------------
-              const dispositionAuthoringEnvOff =
-                (process.env.RIDERS_TURN_DISPOSITION_AUTHOR_LIVE || "on")
-                  .trim()
-                  .toLowerCase() === "off";
               const dispositionProposerValidation = proposedTurnDecisionRaw
                 ? validateProposedTurnDecision(proposedTurnDecisionRaw)
                 : null;
@@ -6259,16 +6188,13 @@ async function handleInboundMessage(params: {
                   !turnRouterDecision.invoke_state_machine,
               );
               const stateMachineAuthoringSkipped = Boolean(
-                (!dispositionAuthoringEnvOff &&
-                  authoringDisposition &&
+                (authoringDisposition &&
                   authoringDisposition.disposition !== "continue_step") ||
                   routerStateMachineGateFires,
               );
               try {
                 api.logger.info(
-                  `[turn-disposition/authoring] conversation=${conversationId} sessionKey=${guardSessionKey} flag=${
-                    dispositionAuthoringEnvOff ? "off" : "on"
-                  } disposition=${
+                  `[turn-disposition/authoring] conversation=${conversationId} sessionKey=${guardSessionKey} disposition=${
                     authoringDisposition?.disposition ?? "-"
                   } policy_rule=${
                     authoringDisposition?.policy_rule ?? "-"

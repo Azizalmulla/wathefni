@@ -89,41 +89,14 @@ DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER='DEPLOY_CANARY_TURN_INTENT_EMIT_MARKER'
 # quote) get blocked as price_mismatch again (conv 19400 regression).
 DEPLOY_CANARY_GUARD_VALIDSET_HELPER_MARKER='selectGuardQuotedRoute'
 DEPLOY_CANARY_GUARD_VALIDSET_CALLSITE_MARKER='collectActiveQuotedPrices'
-# Phase 2 Milestone 1 build canary markers (2026-04-22). Anchors the ack-
-# aware reply-compose module (`plugins/shared/reply-compose.ts`) and its
-# shadow-emit callsite in the octopus-channel dispatcher. Shadow-only in
-# this deploy — if either marker goes missing from a deployed bundle, the
-# `[reply-compose/shadow]` signal that M1.5 (flip-to-live) relies on for
-# pre-flip validation silently disappears. Observation-only; not a
-# behaviour guard this round.
-DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER'
-DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER'
-# Phase 2 Milestone 2 build canary markers (2026-04-22). Anchors the
-# turn_intent-gated slot-apply module
-# (`plugins/shared/slot-apply-gate.ts`) and its shadow-emit callsite at
-# the LLM-drain apply path in the octopus-channel dispatcher. Shadow-
-# only in this deploy — if either marker goes missing, the
-# `[slot-apply-gate/shadow]` signal the M2.flip gate will depend on for
-# pre-flip block-rate validation silently disappears. Observation-only;
-# not a behaviour guard.
-DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER'
-DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER'
-# Phase 2 Milestone 3 build canary markers (2026-04-22). Anchors the
-# action-selection gate module (`plugins/shared/action-selection-gate.ts`)
-# and its shadow-emit callsite in the directive-dispatch block. The
-# shadow emit is what the coordinated M1/M2/M3 flip readiness review
-# relies on to measure legacy-vs-m3 agreement rate. Observation-only.
-DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER'
-DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER='DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER'
-# Phase 3c build canary markers (2026-04-22). Anchors the three surfaces
-# of the v1.3 `post_order_intent` shadow classification: schema literal
-# (the enum itself), prompt rule 14 (telling the LLM when to emit), and
-# the `po_*` emit fields on the `[structured-output/proposer]` line. If
-# any of these go missing from a deployed bundle, the Phase 3c
-# conformance signal silently drops to noise. Shadow-only, observation-
-# only.
+# Authority cutover phase 4 (2026-04-23): the Phase 2 M1/M2/M3 shadow
+# modules (reply-compose, slot-apply-gate, action-selection-gate) were
+# deleted outright along with their shadow-emit callsites; their
+# build canaries are removed. Phase 3c post_order_intent prompt rule
+# was removed in Phase 1; only the schema and emit markers remain
+# relevant until post_order_intent is fully pulled from the proposer
+# schema in a later phase.
 DEPLOY_CANARY_POST_ORDER_INTENT_SCHEMA_MARKER='POST_ORDER_INTENT_KINDS'
-DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER'
 DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER='DEPLOY_CANARY_POST_ORDER_INTENT_EMIT_MARKER'
 # Unified turn-decision layer build canary markers (2026-04-22).
 # Relocation 1 (scaffold observer) — anchors the new module and its
@@ -248,77 +221,18 @@ DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER='DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_
 # = one-line rollback).
 DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER'
 DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER'
-# Cut #6 (2026-04-23, Reloc 5 input-side): prompt-shaping disposition.
-# Pre-LLM heuristic classifier that decides whether the system prompt
-# carries the state-machine's authoring imperatives this turn. Module
-# exports `computePromptShapingDisposition` (pure function, server-side
-# signals only, no LLM call); callsite computes it just before the
-# prompt builder runs and emits the `[prompt-disposition/shaping]`
-# trace unconditionally; gate inside `formatOneBrainLiveChannelContext`
-# drops `next_required_action` / `forbidden_reply_shapes` /
-# `requested_slot_rule` / `pending_area_rule` / `slot_conflicts_rule`
-# and hard rules 4 and 10 when disposition ≠ `continue_step`. State
-# FACTS stay. Default OFF during bake (env
-# `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE=on` to enable). Three markers
-# anchor the three surfaces: module, callsite, gate. Absence of ANY
-# means the input-side inversion is not deployed and the LLM continues
-# to be prompted as a state machine even on non-`continue_step` turns
-# — exactly the residual Cut #5 left behind.
+# Pre-LLM prompt-shaping disposition (Cut #6). Module + import + callsite
+# anchors. The per-rule GATE marker inside
+# `formatOneBrainLiveChannelContext` was removed in the authority cutover
+# (the prompt no longer carries state-machine authoring imperatives to
+# gate); the decision is still computed and fed to the turn router.
 DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER'
 DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER'
 DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER'
-DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER'
 # ---------------------------------------------------------------------------
-# Cut 7b (2026-04-23): A0 / A0a / A0b ARMING disposition gate.
-#
-# Structural authority downgrade for the pre-LLM Region-A substitution
-# branches (clarify-option-before-proceed, manual-confirm address ask,
-# manual-confirm handoff). Before this cut, all three armed purely
-# from mechanical signals (regex + state flags) and stamped their
-# server-rendered text over whatever the LLM drafted. With the gate
-# on, arming is conditional on the pre-LLM disposition being
-# `continue_step` — i.e. the heuristic classifier agrees the turn is
-# actually advancing the booking step. On `answer` / `requote` /
-# `cancel` / `acknowledge` / `idle` turns, A0/A0a/A0b are suppressed
-# and the LLM's draft passes through.
-#
-# Four markers anchor the four surfaces: detector definition, detector
-# import, injection into the prompt-shaping disposition's `answer`
-# rule, callsite gate at Region A, and the trace emit. Absence of ANY
-# means the gate is not deployed and the pre-LLM mechanical branches
-# continue to self-author by default.
-#
-# Default OFF during bake (env
-# `RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE=on` to enable).
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER'
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER'
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER'
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER'
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER'
-DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER'
-# ---------------------------------------------------------------------------
-# Cut 9.0 (2026-04-23): Turn Router — top-level meaning-first dispatcher.
-#
-# The inversion cut. Before Cut 9, every customer turn ran the state
-# machine unconditionally and three narrow gates (Cut #5 / #6 / 7b)
-# vetoed individual branches when meaning disagreed. Under uncertainty,
-# state won. Cut 9 adds a top-level router that classifies the turn
-# into a MODE before any state-machine subroutine runs, and exposes
-# consumer flags so downstream blocks can ask "should I author this
-# turn?". Scaffold landing: the module + callsite + trace emit + ONE
-# consumer (state-machine authoring gate) are live; the env flag
-# stays at the legacy `advance_form` default so behaviour is
-# unchanged until the flip to `meaning_first`.
-#
-# Four markers anchor the four surfaces: module definition, import at
-# the callsite file, the callsite dispatch block where the router is
-# computed and traced, and the state-machine authoring gate where the
-# one wired consumer lives. Absence of ANY means the router is not
-# deployed and the legacy dispatch order (state authors by default) is
-# unchanged.
-#
-# Default OFF during bake (env
-# `RIDERS_TURN_ROUTER_DEFAULT_MODE=meaning_first` to enable the flip).
+# Turn Router (Cut 9.0) — top-level meaning-first dispatcher. Module +
+# import + callsite + state-machine gate anchors. `meaning_first` is
+# hardcoded post-cutover; the env flag that used to toggle this is gone.
 DEPLOY_CANARY_TURN_ROUTER_MODULE_MARKER='DEPLOY_CANARY_TURN_ROUTER_MODULE_MARKER'
 DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER='DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER'
 DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER='DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER'
@@ -593,44 +507,9 @@ checks = [
         'guard valid-set collectActiveQuotedPrices callsite marker',
     ),
     (
-        Path('$VPS_SHARED_PLUGIN_DIR/reply-compose.ts'),
-        '$DEPLOY_CANARY_REPLY_COMPOSE_MODULE_MARKER',
-        'M1 ack-aware reply-compose module marker',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_REPLY_COMPOSE_SHADOW_CALLSITE_MARKER',
-        'M1 ack-aware reply-compose shadow callsite marker',
-    ),
-    (
-        Path('$VPS_SHARED_PLUGIN_DIR/slot-apply-gate.ts'),
-        '$DEPLOY_CANARY_SLOT_APPLY_GATE_MODULE_MARKER',
-        'M2 turn_intent-gated slot-apply module marker',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_SLOT_APPLY_GATE_SHADOW_CALLSITE_MARKER',
-        'M2 slot-apply-gate shadow callsite marker',
-    ),
-    (
-        Path('$VPS_SHARED_PLUGIN_DIR/action-selection-gate.ts'),
-        '$DEPLOY_CANARY_ACTION_SELECTION_GATE_MODULE_MARKER',
-        'M3 action-selection-gate module marker',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_ACTION_SELECTION_SHADOW_CALLSITE_MARKER',
-        'M3 action-selection shadow callsite marker',
-    ),
-    (
         Path('$VPS_SHARED_PLUGIN_DIR/proposer-schema.ts'),
         '$DEPLOY_CANARY_POST_ORDER_INTENT_SCHEMA_MARKER',
         'Phase 3c post_order_intent schema enum marker',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
-        '$DEPLOY_CANARY_POST_ORDER_INTENT_PROMPT_MARKER',
-        'Phase 3c post_order_intent rule 14 prompt marker',
     ),
     (
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
@@ -761,41 +640,6 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER',
         'prompt-shaping disposition callsite marker (Cut #6, Reloc 5 input-side)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
-        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER',
-        'prompt-shaping disposition gate marker (Cut #6, Reloc 5 input-side)',
-    ),
-    (
-        Path('$VPS_SHARED_PLUGIN_DIR/conversation-policy.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER',
-        'A0 arming-gate detector definition marker (Cut 7b, pre-LLM authority downgrade)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER',
-        'A0 arming-gate detector import marker (Cut 7b, pre-LLM authority downgrade)',
-    ),
-    (
-        Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER',
-        'A0 arming-gate disposition-injection marker (Cut 7b, pre-LLM authority downgrade)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER',
-        'A0 arming-gate unconditional-decision marker (Cut 7b, pre-LLM authority downgrade)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER',
-        'A0 arming-gate callsite marker (Cut 7b, pre-LLM authority downgrade)',
-    ),
-    (
-        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
-        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER',
-        'A0 arming-gate trace emit marker (Cut 7b, pre-LLM authority downgrade)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-router.ts'),

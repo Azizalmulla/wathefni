@@ -163,14 +163,14 @@ assert(
   idxSrc.includes("DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER"),
   "(5) import canary marker present in index.ts",
 );
+// Phase 5 (2026-04-23): `parseTurnRouterDefaultModeEnv` and the
+// `RIDERS_TURN_ROUTER_DEFAULT_MODE` env flag were removed — the router
+// default is hardcoded `meaning_first`. Only `classifyTurn` is imported.
 assert(
-  /import\s*\{\s*(?:[\w,\s]*\b)?classifyTurn\b[\s\S]*?parseTurnRouterDefaultModeEnv[\s\S]*?\}\s*from\s*["']\.\.\/shared\/turn-router["']/.test(
+  /import\s*\{\s*classifyTurn\s*,?\s*\}\s*from\s*["']\.\.\/shared\/turn-router["']/.test(
     idxSrc,
-  ) ||
-    /import\s*\{\s*(?:[\w,\s]*\b)?parseTurnRouterDefaultModeEnv\b[\s\S]*?classifyTurn[\s\S]*?\}\s*from\s*["']\.\.\/shared\/turn-router["']/.test(
-      idxSrc,
-    ),
-  "(6) classifyTurn + parseTurnRouterDefaultModeEnv imported",
+  ),
+  "(6) classifyTurn imported from ../shared/turn-router",
 );
 assert(
   /import type\s*\{\s*(?:[\w,\s]*\b)?TurnRouterDecision\b[\s\S]*?TurnRouterDefaultMode[\s\S]*?\}\s*from\s*["']\.\.\/shared\/turn-router["']/.test(
@@ -186,10 +186,14 @@ assert(
   "(8) callsite canary marker present in index.ts",
 );
 assert(
-  /parseTurnRouterDefaultModeEnv\s*\(\s*[\s\S]*?process\.env\.RIDERS_TURN_ROUTER_DEFAULT_MODE/.test(
+  !/process\.env\.RIDERS_TURN_ROUTER_DEFAULT_MODE/.test(idxSrc),
+  "(9) RIDERS_TURN_ROUTER_DEFAULT_MODE env read removed (baked meaning_first)",
+);
+assert(
+  /turnRouterDefaultMode\s*:\s*TurnRouterDefaultMode\s*=\s*["']meaning_first["']/.test(
     idxSrc,
   ),
-  "(9) env flag RIDERS_TURN_ROUTER_DEFAULT_MODE read via parse helper",
+  "(9b) turnRouterDefaultMode hardcoded to meaning_first",
 );
 const callsiteIdx = idxSrc.indexOf(
   "DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER",
@@ -249,7 +253,7 @@ assert(
   "(13) routerStateMachineGateFires gated on default_mode=meaning_first AND !invoke_state_machine",
 );
 assert(
-  /const\s+stateMachineAuthoringSkipped\s*=\s*Boolean\s*\(\s*\(\s*!dispositionAuthoringEnvOff[\s\S]*?authoringDisposition\.disposition\s*!==\s*["']continue_step["']\s*\)\s*\|\|\s*routerStateMachineGateFires/.test(
+  /const\s+stateMachineAuthoringSkipped\s*=\s*Boolean\s*\(\s*\(\s*authoringDisposition[\s\S]*?authoringDisposition\.disposition\s*!==\s*["']continue_step["']\s*\)\s*\|\|\s*routerStateMachineGateFires/.test(
     gateWindow,
   ),
   "(14) stateMachineAuthoringSkipped ORs routerStateMachineGateFires into Cut #5 skip",

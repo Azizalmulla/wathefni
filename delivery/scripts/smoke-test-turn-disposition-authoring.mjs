@@ -124,20 +124,12 @@ assert(
   `authoring-gate block runs BEFORE registry dispatch (marker=${authoringGateMarkerIdx}, if=${directiveRenderIfIdx})`,
 );
 
-// 5. Env flag RIDERS_TURN_DISPOSITION_AUTHOR_LIVE wired default "on",
-//    explicit "off" rollback — matches the repo convention for the
-//    four prior Job-A authority-removal cuts.
+// 5. Authority cutover phase 5 (2026-04-23): the
+//    `RIDERS_TURN_DISPOSITION_AUTHOR_LIVE` env flag is gone — the gate
+//    is baked on. Assert the env read no longer exists.
 assert(
-  /process\.env\.RIDERS_TURN_DISPOSITION_AUTHOR_LIVE\s*\|\|\s*["']on["']/.test(
-    indexSrc,
-  ),
-  "RIDERS_TURN_DISPOSITION_AUTHOR_LIVE flag default 'on'",
-);
-assert(
-  /RIDERS_TURN_DISPOSITION_AUTHOR_LIVE[^}]*\.toLowerCase\(\)\s*===\s*["']off["']/s.test(
-    indexSrc,
-  ),
-  "RIDERS_TURN_DISPOSITION_AUTHOR_LIVE explicit 'off' = rollback",
+  !/RIDERS_TURN_DISPOSITION_AUTHOR_LIVE/.test(indexSrc),
+  "RIDERS_TURN_DISPOSITION_AUTHOR_LIVE env read removed (baked on)",
 );
 
 // 6. Gate condition on the directive assignment includes the new flag.
@@ -209,7 +201,6 @@ for (const token of [
   "turn_kind=",
   "stage=",
   "fallthrough=",
-  "flag=",
 ]) {
   assert(
     traceWindow.includes(token),
@@ -218,17 +209,17 @@ for (const token of [
 }
 
 // 9. Defensive posture: stateMachineAuthoringSkipped is true when
-//    (a) Cut #5: the env flag is on AND the layer returned a
-//        non-continue disposition, OR
+//    (a) Cut #5: the layer returned a non-continue disposition, OR
 //    (b) Cut 9.0: the router's state-machine gate fired
 //        (meaning_first default AND !invoke_state_machine).
-//    This is the single-line safety net: both authoring cuts OR
-//    together, and either can skip the state-machine render.
+//    Phase 5 (2026-04-23): the `RIDERS_TURN_DISPOSITION_AUTHOR_LIVE`
+//    env flag was removed, so the guard on the Cut #5 branch is now
+//    just the disposition check (no env predicate).
 assert(
-  /stateMachineAuthoringSkipped\s*=\s*Boolean\s*\(\s*\n?\s*\(\s*!dispositionAuthoringEnvOff\s*&&\s*\n?\s*authoringDisposition\s*&&\s*\n?\s*authoringDisposition\.disposition\s*!==\s*["']continue_step["']\s*\)\s*\|\|\s*\n?\s*routerStateMachineGateFires\s*,?\s*\n?\s*\)/s.test(
+  /stateMachineAuthoringSkipped\s*=\s*Boolean\s*\(\s*\n?\s*\(\s*authoringDisposition\s*&&\s*\n?\s*authoringDisposition\.disposition\s*!==\s*["']continue_step["']\s*\)\s*\|\|\s*\n?\s*routerStateMachineGateFires\s*,?\s*\n?\s*\)/s.test(
     indexSrc,
   ),
-  "stateMachineAuthoringSkipped guarded by (Cut #5 env-on AND non-continue disposition) OR (Cut 9 router gate)",
+  "stateMachineAuthoringSkipped guarded by (Cut #5 non-continue disposition) OR (Cut 9 router gate)",
 );
 
 // ---------------------------------------------------------------------------
