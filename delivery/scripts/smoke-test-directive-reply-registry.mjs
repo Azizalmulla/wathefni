@@ -71,10 +71,11 @@ const { createEmptyBookingDraft } = policy;
     "utf8",
   );
   const emittedActions = new Set();
-  // Matches both object-literal form (`action: "X"`) and variable-
-  // assignment form (`action = "X"`) so conditional branches that set
-  // action before returning are caught too.
-  const re = /\baction\s*[:=]\s*"([A-Z_]+)"/g;
+  // Matches object-literal form (`action: "X"`), bare assignment
+  // (`action = "X"`), and typed declarations like
+  // `let action: DirectiveAction = "X"` so conditional branches that set
+  // action before returning are all caught.
+  const re = /\baction(?:\s*:\s*[A-Za-z_][A-Za-z0-9_]*)?\s*[:=]\s*"([A-Z_]+)"/g;
   let m;
   while ((m = re.exec(src)) !== null) emittedActions.add(m[1]);
   const registered = new Set(Object.keys(DIRECTIVE_REPLY_RENDERERS));
@@ -84,9 +85,16 @@ const { createEmptyBookingDraft } = policy;
     [],
     `E1: emitted actions missing from registry: ${missing.join(", ")}`,
   );
-  // Also: the registry must not carry any action that is never emitted
-  // (stale entries). If this fires, prune the registry.
-  const orphans = [...registered].filter((a) => !emittedActions.has(a));
+  // Authority-cutover (2026-04-23): CLARIFY_OPTION_BEFORE_PROCEED was
+  // removed from `computeOneBrainNextRequiredAction`'s emission sites
+  // as part of Phase 1 of the cutover. The registry entry (plus the A0
+  // Region-A substitution that consumes the `directive.action` string
+  // in `index.ts` / `outbound-decision.ts`) is deleted in Phase 2.
+  // Until then this is a known orphan.
+  const ALLOWED_ORPHANS = new Set(["CLARIFY_OPTION_BEFORE_PROCEED"]);
+  const orphans = [...registered].filter(
+    (a) => !emittedActions.has(a) && !ALLOWED_ORPHANS.has(a),
+  );
   assert.deepEqual(
     orphans,
     [],

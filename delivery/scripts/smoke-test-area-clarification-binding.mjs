@@ -371,16 +371,10 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
     /pending_pickup_area:\s*Salmiya/.test(ctxBlock),
     "C1: context must surface pending_pickup_area",
   );
-  assert.ok(
-    /pending_area_rule:/.test(ctxBlock),
-    "C1: context must surface pending_area_rule",
-  );
-  assert.ok(
-    /Symmetric `get_price\(pickup=X, dropoff=X\)` calls are always wrong/.test(
-      ctxBlock,
-    ),
-    "C1: pending_area_rule must forbid symmetric get_price",
-  );
+  // Authority-cutover (2026-04-23): the `pending_area_rule` imperative was
+  // removed. The symmetric-rebind guard on `get_price` is still enforced
+  // server-side; the prompt now surfaces only the FACT (`pending_pickup_area`
+  // above) and the LLM reads it.
 }
 
 // ---------------------------------------------------------------------------
