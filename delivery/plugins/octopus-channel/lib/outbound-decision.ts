@@ -338,64 +338,28 @@ export type PreStateOutboundInput = {
     option: RouteQuoteOption;
   }) => string;
 
-  /** Plugin-local deterministic clarify-before-proceed reply builder. */
-  buildDeterministicClarifyOptionBeforeProceedReply?: (args: {
-    language: "ar" | "en";
-    route: StoredQuotedRoute;
-  }) => string;
-
-  /**
-   * Manual-confirm address-ask substitution (Bug 4, 2026-04-20).
-   *
-   * Set by the caller when `next_required_action` is one of
-   * `ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM` / `ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM`
-   * AND the selected option has `direct_chat_booking_status === "manual_confirmation_required"`.
-   * When set, Region A substitutes the LLM reply with
-   * `buildDeterministicManualConfirmAddressAskReply(...)` so the
-   * "needs manual confirmation" signal can never be dropped.
-   */
-  manualConfirmAddressAsk?: {
-    side: "pickup" | "delivery";
-    option: RouteQuoteOption;
-  } | null;
-
-  /**
-   * Manual-confirm handoff substitution (Bug 4 companion).
-   *
-   * Set when `next_required_action === "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM"`.
-   * Causes Region A to substitute
-   * `buildDeterministicManualConfirmHandoffReply(...)`.
-   */
-  manualConfirmHandoff?: {
-    option: RouteQuoteOption;
-  } | null;
-
-  /** Deterministic manual-confirm reply builders (see `quoted-options.ts`). */
-  buildDeterministicManualConfirmAddressAskReply?: (args: {
-    language: "ar" | "en";
-    route: StoredQuotedRoute;
-    option: RouteQuoteOption;
-    side: "pickup" | "delivery";
-  }) => string;
-  buildDeterministicManualConfirmHandoffReply?: (args: {
-    language: "ar" | "en";
-    route: StoredQuotedRoute;
-    option: RouteQuoteOption;
-  }) => string;
+  // Authority-cutover Phase 6 (2026-04-23): the A0 / A0a / A0b Region-A
+  // substitutions for clarify-before-proceed and manual-confirm
+  // address-ask / handoff were deleted in phases 2-3, along with their
+  // consumer branches in `decidePreStateOutbound`. The corresponding
+  // optional inputs (`buildDeterministicClarifyOptionBeforeProceedReply`,
+  // `manualConfirmAddressAsk`, `manualConfirmHandoff`,
+  // `buildDeterministicManualConfirmAddressAskReply`,
+  // `buildDeterministicManualConfirmHandoffReply`) are gone too. The LLM
+  // handles those flows end-to-end via hard rule 8 and the active-route
+  // facts in the system-context block.
 
   /**
    * Phase 2 (2026-04-20): directive-to-reply registry inputs.
    *
    * When `directiveAction` names a directive whose registry spec is
    * `{kind: "server"}`, Region A substitutes the LLM's draft with the
-   * server-rendered ask. Directives that live in dedicated branches
-   * (clarify-before-proceed, manual-confirm family) are still handled
-   * by their specific substitutions — the registry dispatcher
-   * short-circuits with `{kind: "existing"}` for those.
+   * server-rendered ask. Directives whose registry spec is
+   * `{kind: "llm_owned"}` (post-order intent, summary gate) pass the
+   * LLM's draft through unchanged.
    *
    * Left null when the caller has no directive computed for this turn
-   * (e.g. idle stage) or the directive is LLM-owned (post-order intent,
-   * Phase-3 summary).
+   * (e.g. idle stage).
    */
   directiveAction?: string | null;
   /** Pre-built renderer context (draft + entry + route + turnSeed). */

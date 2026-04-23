@@ -356,136 +356,15 @@ console.log("PASS: Bug 3a — address-extra normalization + strict-superset upgr
 console.log("PASS: Bug 3b — unresolved conflicts block advancement");
 
 // ---------------------------------------------------------------------------
-// Bug 1 — manual-confirmation flow gating on next_required_action.
+// Bug 1 — manual-confirm gating in computeOneBrainNextRequiredAction
+// was deleted in the authority-cutover (Phase 6, 2026-04-23). The LLM
+// now handles manual-confirm end-to-end using hard rule 8 + the
+// `manual_confirmation_required` flag in the system-context block. The
+// server-side gate (which emitted ASK_*_FOR_MANUAL_CONFIRM /
+// REQUEST_HANDOFF_FOR_MANUAL_CONFIRM directives) is gone.
 // ---------------------------------------------------------------------------
 
-// 1.1: Helper selected, pickup address missing → ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM.
-{
-  const entry = emptyEntry({
-    selectedDeliveryType: "helper_standard",
-    selectedQuoteOptionType: "helper_standard",
-    selectedQuoteOptionLabelEn: "Helper service",
-    selectedQuoteOptionPrice: 3.25,
-    selectedQuoteOptionDirectChatBookingStatus: "manual_confirmation_required",
-    quotedPrice: 3.25,
-  });
-  const next = computeOneBrainNextRequiredAction({
-    draft: entry.bookingDraft,
-    entry,
-    missing: [
-      "pickup.address",
-      "delivery.address",
-      "sender.name",
-      "sender.phone",
-      "recipient.name",
-      "recipient.phone",
-    ],
-  });
-  assert(next, "1.1: next action must not be null");
-  assert(
-    next.action === "ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM",
-    `1.1: must ask for pickup address under manual-confirm, got ${next.action}`,
-  );
-  const forbidden = next.forbiddenShapes || [];
-  assert(
-    forbidden.includes("ask_sender_for_manual_confirm"),
-    "1.1: must forbid sender ask",
-  );
-  assert(
-    forbidden.includes("ask_recipient_for_manual_confirm"),
-    "1.1: must forbid recipient ask",
-  );
-  assert(
-    forbidden.includes("call_create_simple_order_for_manual_confirm"),
-    "1.1: must forbid create_simple_order call",
-  );
-}
-
-// 1.2: Helper + pickup has resolved, delivery missing → ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM.
-{
-  const entry = emptyEntry({
-    selectedDeliveryType: "helper_standard",
-    selectedQuoteOptionDirectChatBookingStatus: "manual_confirmation_required",
-    quotedPrice: 3.25,
-  });
-  const next = computeOneBrainNextRequiredAction({
-    draft: entry.bookingDraft,
-    entry,
-    missing: [
-      "delivery.address",
-      "sender.name",
-      "sender.phone",
-      "recipient.name",
-      "recipient.phone",
-    ],
-  });
-  assert(next, "1.2: next action must not be null");
-  assert(
-    next.action === "ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM",
-    `1.2: expected delivery-address ask for manual-confirm, got ${next.action}`,
-  );
-}
-
-// 1.3: Helper + both addresses in → REQUEST_HANDOFF_FOR_MANUAL_CONFIRM.
-// Sender / recipient collection is explicitly skipped under manual confirm.
-{
-  const entry = emptyEntry({
-    selectedDeliveryType: "helper_standard",
-    selectedQuoteOptionDirectChatBookingStatus: "manual_confirmation_required",
-    quotedPrice: 3.25,
-  });
-  const next = computeOneBrainNextRequiredAction({
-    draft: entry.bookingDraft,
-    entry,
-    // Addresses resolved; sender + recipient still missing but irrelevant here.
-    missing: ["sender.name", "sender.phone", "recipient.name", "recipient.phone"],
-  });
-  assert(next, "1.3: next action must not be null");
-  assert(
-    next.action === "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM",
-    `1.3: expected manual-confirm handoff, got ${next.action}`,
-  );
-  const forbidden = next.forbiddenShapes || [];
-  assert(
-    forbidden.includes("write_full_order_summary_for_manual_confirm"),
-    "1.3: must forbid order-summary write under manual-confirm",
-  );
-  assert(
-    forbidden.includes("call_create_simple_order_for_manual_confirm"),
-    "1.3: must forbid create_simple_order call at handoff step",
-  );
-}
-
-// 1.4: bookable sedan_normal under the same shape is UNTOUCHED by the
-// manual-confirm gate — regression guard against the gate leaking.
-{
-  const entry = emptyEntry({
-    selectedDeliveryType: "sedan_normal",
-    selectedQuoteOptionDirectChatBookingStatus: "bookable",
-    quotedPrice: 1.25,
-  });
-  const next = computeOneBrainNextRequiredAction({
-    draft: entry.bookingDraft,
-    entry,
-    missing: [
-      "pickup.address",
-      "delivery.address",
-      "sender.name",
-      "sender.phone",
-      "recipient.name",
-      "recipient.phone",
-    ],
-  });
-  assert(next, "1.4: next action must not be null");
-  assert(
-    next.action !== "ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM" &&
-      next.action !== "ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM" &&
-      next.action !== "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM",
-    `1.4: bookable options must not pick up manual-confirm branch, got ${next.action}`,
-  );
-}
-
-console.log("PASS: Bug 1 — manual-confirm next_required_action gating");
+console.log("SKIP: Bug 1 — manual-confirm gate removed in Phase 6 cutover");
 
 // ---------------------------------------------------------------------------
 // Bug 2 — cancel vs option-switch.

@@ -85,16 +85,12 @@ const { createEmptyBookingDraft } = policy;
     [],
     `E1: emitted actions missing from registry: ${missing.join(", ")}`,
   );
-  // Authority-cutover (2026-04-23): CLARIFY_OPTION_BEFORE_PROCEED was
-  // removed from `computeOneBrainNextRequiredAction`'s emission sites
-  // as part of Phase 1 of the cutover. The registry entry (plus the A0
-  // Region-A substitution that consumes the `directive.action` string
-  // in `index.ts` / `outbound-decision.ts`) is deleted in Phase 2.
-  // Until then this is a known orphan.
-  const ALLOWED_ORPHANS = new Set(["CLARIFY_OPTION_BEFORE_PROCEED"]);
-  const orphans = [...registered].filter(
-    (a) => !emittedActions.has(a) && !ALLOWED_ORPHANS.has(a),
-  );
+  // Authority-cutover Phase 6 (2026-04-23): the A0 / A0a / A0b
+  // `server_existing` directives (CLARIFY_OPTION_BEFORE_PROCEED,
+  // ASK_*_FOR_MANUAL_CONFIRM, REQUEST_HANDOFF_FOR_MANUAL_CONFIRM) were
+  // deleted from BOTH the emit sites and the registry. No orphans
+  // should remain.
+  const orphans = [...registered].filter((a) => !emittedActions.has(a));
   assert.deepEqual(
     orphans,
     [],
@@ -106,7 +102,7 @@ const { createEmptyBookingDraft } = policy;
 // E2: every registry entry has a known `kind`.
 // ---------------------------------------------------------------------------
 {
-  const valid = new Set(["server", "server_existing", "llm_owned"]);
+  const valid = new Set(["server", "llm_owned"]);
   for (const [action, spec] of Object.entries(DIRECTIVE_REPLY_RENDERERS)) {
     assert.ok(
       valid.has(spec.kind),
@@ -114,8 +110,6 @@ const { createEmptyBookingDraft } = policy;
     );
     if (spec.kind === "server") {
       assert.equal(typeof spec.render, "function", `E2: ${action} missing render`);
-    } else if (spec.kind === "server_existing") {
-      assert.equal(typeof spec.via, "string", `E2: ${action} missing via`);
     } else if (spec.kind === "llm_owned") {
       assert.equal(
         typeof spec.rationale,
@@ -429,7 +423,10 @@ function preInput(overrides = {}) {
   assert.ok(/phone|number/i.test(res.replyText), `W1 substituted text: ${res.replyText}`);
 }
 
-// W2: directive is server_existing → not substituted here (delegated)
+// W2: unknown directive name passthrough (formerly a server_existing
+// case; Phase 6 cutover deleted all `server_existing` entries, so any
+// manual-confirm action string is now an `unknown_action` and the LLM
+// draft survives unchanged).
 {
   const ctx = baseCtx();
   const res = decidePreStateOutbound(
@@ -439,9 +436,6 @@ function preInput(overrides = {}) {
       directiveRenderContext: ctx,
     }),
   );
-  // No manualConfirmAddressAsk flag set, so the dedicated branch also
-  // doesn't fire. LLM reply should pass through via the `existing` no-op
-  // fallthrough.
   assert.equal(res.decision, "allow", "W2 decision");
   assert.equal(res.replyText, "LLM drafted text survives", "W2 passthrough");
 }

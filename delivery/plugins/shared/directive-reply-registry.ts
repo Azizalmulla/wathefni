@@ -30,25 +30,26 @@
 //   - `{ kind: "server", render: fn }`            — this registry owns the
 //                                                   reply. Region A will
 //                                                   substitute via `render`.
-//   - `{ kind: "server_existing", via: "…" }`     — server-composed, but the
-//                                                   substitution lives
-//                                                   elsewhere (the dedicated
-//                                                   Region-A branches for
-//                                                   manual-confirm /
-//                                                   clarify-before-proceed).
-//                                                   Listed here so the
-//                                                   exhaustiveness check
-//                                                   covers them.
 //   - `{ kind: "llm_owned", rationale: "…" }`     — intentionally left to
 //                                                   the LLM (e.g. post-order
 //                                                   intent routing; summary
 //                                                   text is a Phase 3 target).
 //
+// Authority-cutover Phase 6 (2026-04-23): the former third variant
+// (`server_existing`, referencing the A0/A0a/A0b Region-A substitutions)
+// is gone. Those substitutions were deleted in cutover phases 2-3, so
+// the `kind: "server_existing"` entries referenced a render path that
+// no longer existed. Removed along with the four directives that used
+// it: ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM,
+// ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM,
+// REQUEST_HANDOFF_FOR_MANUAL_CONFIRM, CLARIFY_OPTION_BEFORE_PROCEED.
+// The LLM now handles manual-confirm end-to-end via hard rule 8 +
+// `manual_confirmation_required` facts in the prompt.
+//
 // The dispatcher `renderDirectiveReply` returns a discriminated result
 // that lets the outbound-decision module decide what to do:
 //
 //   - `{ kind: "render"; text }`   → substitute with `text`
-//   - `{ kind: "existing"; via }`  → skip; another Region-A branch owns it
 //   - `{ kind: "llm_owned" }`      → pass the LLM's draft through unchanged
 //   - `{ kind: "unknown_action" }` → unknown directive (defensive; should
 //                                    never fire because of the exhaustive
@@ -193,17 +194,11 @@ export type DirectiveAction =
   // `collectionMissing` filter, but the compile-time exhaustiveness
   // tripwire forces us to carry a renderer.
   | "COLLECT_NEXT_MISSING_FIELD"
-  // Manual-confirm flow — server-composed, substitution lives in
-  // dedicated Region-A branches (Bug 4, 2026-04-20).
-  | "ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM"
-  | "ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM"
-  | "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM"
-  // Option-disambiguation clarify — server-composed, substitution lives
-  // in a dedicated Region-A branch (Bug 1, 2026-04-20).
-  | "CLARIFY_OPTION_BEFORE_PROCEED"
   // LLM-owned: the customer's post-order intent is context-dependent
   // (track vs cancel vs re-order vs handoff); a generic renderer would
-  // be a downgrade. Guarded by `POST_ORDER_ONLY_*` forbidden shapes.
+  // be a downgrade. The hallucination guard uses this action as its
+  // signal to repair post-order-flow hallucinations via a deterministic
+  // nudge (see `reply-hallucination-guard.ts`).
   | "POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF"
   // LLM-owned for Phase 2 — becomes server-composed in Phase 3.
   | "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED";
@@ -238,14 +233,6 @@ export type DirectiveReplyRenderer = (
 
 type DirectiveReplyRendererSpec =
   | { kind: "server"; render: DirectiveReplyRenderer }
-  | {
-      kind: "server_existing";
-      via:
-        | "clarify_option_before_proceed"
-        | "manual_confirm_pickup_ask"
-        | "manual_confirm_delivery_ask"
-        | "manual_confirm_handoff";
-    }
   | { kind: "llm_owned"; rationale: string };
 
 // ---------------------------------------------------------------------------
@@ -254,14 +241,6 @@ type DirectiveReplyRendererSpec =
 
 export type DirectiveReplyRenderResult =
   | { kind: "render"; text: string }
-  | {
-      kind: "existing";
-      via:
-        | "clarify_option_before_proceed"
-        | "manual_confirm_pickup_ask"
-        | "manual_confirm_delivery_ask"
-        | "manual_confirm_handoff";
-    }
   | { kind: "llm_owned"; rationale: string }
   | { kind: "unknown_action"; action: string };
 
@@ -612,23 +591,6 @@ export const DIRECTIVE_REPLY_RENDERERS = {
   ASK_DELIVERY_ADDRESS: { kind: "server", render: renderAskDeliveryAddress },
   CONFIRM_SLOT_CONFLICT: { kind: "server", render: renderConfirmSlotConflict },
 
-  ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM: {
-    kind: "server_existing",
-    via: "manual_confirm_pickup_ask",
-  },
-  ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM: {
-    kind: "server_existing",
-    via: "manual_confirm_delivery_ask",
-  },
-  REQUEST_HANDOFF_FOR_MANUAL_CONFIRM: {
-    kind: "server_existing",
-    via: "manual_confirm_handoff",
-  },
-  CLARIFY_OPTION_BEFORE_PROCEED: {
-    kind: "server_existing",
-    via: "clarify_option_before_proceed",
-  },
-
   POST_ORDER_ONLY_TRACK_CANCEL_RECREATE_OR_HANDOFF: {
     kind: "llm_owned",
     rationale:
@@ -660,8 +622,6 @@ export function renderDirectiveReply(
   switch (spec.kind) {
     case "server":
       return { kind: "render", text: spec.render(ctx) };
-    case "server_existing":
-      return { kind: "existing", via: spec.via };
     case "llm_owned":
       return { kind: "llm_owned", rationale: spec.rationale };
     default: {

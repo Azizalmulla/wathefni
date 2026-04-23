@@ -259,83 +259,25 @@ export function computeOneBrainNextRequiredAction(params: {
     return null;
   }
 
-  // Manual-confirmation selection gate. Some option types (typically
-  // Helper service) are flagged as `manual_confirmation_required` on
-  // the route's `optionCatalog`. They cannot be placed via
-  // `create_simple_order`; our team schedules them manually. When the
-  // customer has selected such an option, the collection flow is
-  // truncated: pickup address, delivery address, then `request_handoff`
-  // with a `manual_confirm_<type>` reason. Sender/recipient identity is
-  // NOT collected (the team collects that directly). See Bug 1 in the
-  // 2026-04-20 retro and hard rule 8 in the live channel context.
+  // Authority-cutover Phase 6 (2026-04-23): the manual-confirmation
+  // selection gate (`isManualConfirmSelection → ASK_*_FOR_MANUAL_CONFIRM
+  // / REQUEST_HANDOFF_FOR_MANUAL_CONFIRM`) lived here pre-cutover. It
+  // was the upstream companion to the A0a / A0b Region-A substitutions
+  // that authored the manual-confirm address asks and handoff reply
+  // from `outbound-decision.ts`. Those substitutions were deleted in
+  // cutover phases 2 and 3, which left this gate emitting three
+  // directive actions that had no render path:
   //
-  // The tool-level guard (`getDirectChatBookingBlockReason`) already
-  // blocks any `create_simple_order` attempt for this status. This
-  // directive is the upstream steer — it keeps the LLM from even
-  // starting sender collection, which was the visible failure mode.
-  const selectedDirectChatStatus = String(
-    entry.selectedQuoteOptionDirectChatBookingStatus || "",
-  )
-    .trim()
-    .toLowerCase();
-  const isManualConfirmSelection =
-    selectedDirectChatStatus === "manual_confirmation_required";
-  if (isManualConfirmSelection) {
-    const pickupMissing = missing.includes("pickup.address");
-    const deliveryMissing = missing.includes("delivery.address");
-    // Bug 4 (2026-04-20 manual-confirm signal drop incident): the LLM
-    // previously produced address-ask replies that looked identical to
-    // the direct-booking flow (e.g. "Express refrigerated van is 2.250
-    // KWD. Send the pickup address first."). The outbound decision now
-    // substitutes a deterministic, server-composed reply via
-    // `buildDeterministicManualConfirmAddressAskReply`, but we keep the
-    // forbidden-shape signal here so the LLM upstream is also steered
-    // and the guard is defensible in both layers. Key new shapes:
-    //   - `ask_pickup_address_without_manual_confirm_signal`
-    //   - `ask_delivery_address_without_manual_confirm_signal`
-    //   - `request_handoff_without_manual_confirm_signal`
-    // These are enforced by the outbound substitution; listing them
-    // makes the intent visible in logs and smoke tests.
-    if (pickupMissing) {
-      return {
-        action: "ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM",
-        field: "pickup.address",
-        forbiddenShapes: [
-          "standalone_ack",
-          "ask_sender_for_manual_confirm",
-          "ask_recipient_for_manual_confirm",
-          "call_create_simple_order_for_manual_confirm",
-          "ask_pickup_address_without_manual_confirm_signal",
-        ],
-      };
-    }
-    if (deliveryMissing) {
-      return {
-        action: "ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM",
-        field: "delivery.address",
-        forbiddenShapes: [
-          "standalone_ack",
-          "ask_sender_for_manual_confirm",
-          "ask_recipient_for_manual_confirm",
-          "call_create_simple_order_for_manual_confirm",
-          "ask_delivery_address_without_manual_confirm_signal",
-        ],
-      };
-    }
-    return {
-      action: "REQUEST_HANDOFF_FOR_MANUAL_CONFIRM",
-      field: null,
-      forbiddenShapes: [
-        "standalone_ack",
-        "route_price_recap",
-        "ask_sender_for_manual_confirm",
-        "ask_recipient_for_manual_confirm",
-        "call_create_simple_order_for_manual_confirm",
-        "write_full_order_summary_for_manual_confirm",
-        "request_handoff_without_manual_confirm_signal",
-      ],
-    };
-  }
+  //   - ASK_PICKUP_ADDRESS_FOR_MANUAL_CONFIRM
+  //   - ASK_DELIVERY_ADDRESS_FOR_MANUAL_CONFIRM
+  //   - REQUEST_HANDOFF_FOR_MANUAL_CONFIRM
+  //
+  // The LLM now handles manual-confirm end-to-end using hard rule 8 in
+  // the system-context block + the `manual_confirmation_required` flag
+  // surfaced on the active route's option catalog. The tool-level
+  // guard (`getDirectChatBookingBlockReason`) still blocks any rogue
+  // `create_simple_order` attempt in this state, so safety is
+  // preserved; only the server-side authoring shortcut is gone.
 
   // Conflict gate: once pricing has happened and we're collecting fields,
   // any unresolved DST conflict must be disambiguated BEFORE we advance
