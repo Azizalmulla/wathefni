@@ -17,6 +17,7 @@ import type {
   CustomerScriptMode,
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
+import type { TurnDisposition } from "../../shared/turn-disposition";
 import type { InterpretedCustomerTurn } from "./interpreter-types";
 import type { StoredQuotedRoute } from "./quoted-options";
 import { buildQuotedRouteContextLines } from "./quoted-options";
@@ -50,6 +51,15 @@ export function formatLiveChannelContext(
      * one-brain) path ignores it.
      */
     currentCustomerText?: string | null;
+    /**
+     * Cut #6 (2026-04-23): pre-LLM heuristic disposition used to
+     * shape the prompt. Forwarded to `formatOneBrainLiveChannelContext`
+     * (one-brain only; legacy path ignores it). `null` /
+     * `"continue_step"` → prompt unchanged; anything else → state
+     * authoring imperatives dropped. See the corresponding docs on
+     * `formatOneBrainLiveChannelContext`.
+     */
+    promptShapingDisposition?: TurnDisposition | null;
   },
 ): string {
   const normalizedReplyTarget = normalizePhone(replyTarget);
@@ -66,6 +76,7 @@ export function formatLiveChannelContext(
       controllerEntry: options?.controllerEntry,
       quotedRoute: options?.quotedRoute,
       currentCustomerText: options?.currentCustomerText ?? null,
+      promptShapingDisposition: options?.promptShapingDisposition ?? null,
     });
   }
 

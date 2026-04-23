@@ -165,12 +165,16 @@ assert.ok(
   "G2: gate must require stage === 'quoted'",
 );
 
-// G3: substitution is skipped when the gate fires.
+// G3: substitution is skipped when the gate fires. Cut #5
+// (2026-04-23) added a third conjunct (`!stateMachineAuthoringSkipped`)
+// so the authoritative turn-disposition authoring gate can also skip
+// the substitution. The gate here still applies; the regex is
+// relaxed to allow one or more additional `&& !<flag>` conjuncts.
 assert.ok(
-  /if\s*\(!customerConfirmedOrder\s*&&\s*!customerAskingInformational\)/.test(
+  /if\s*\(\s*!customerConfirmedOrder\s*&&\s*!customerAskingInformational(?:\s*&&\s*![A-Za-z_][A-Za-z0-9_]*)*\s*\)/.test(
     indexSrc,
   ),
-  "G3: registry dispatch must skip when customerAskingInformational is true",
+  "G3: registry dispatch must skip when customerAskingInformational is true (allows Cut #5 additional conjuncts)",
 );
 
 // G4: skip reason surfaced in the log emitter.

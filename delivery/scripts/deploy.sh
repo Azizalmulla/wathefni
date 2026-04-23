@@ -232,6 +232,97 @@ DEPLOY_CANARY_TURN_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_C
 # first-hit-in-entries order as the one-brain conflict gate; keep them
 # in lockstep.
 DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER='DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER'
+# Cut #5 (2026-04-23, Reloc 5 inversion): turn-disposition AUTHORING gate.
+# `decideTurnDisposition` is called live at the directive callsite BEFORE
+# `directiveActionForRender` is assigned. When the layer classifies the
+# turn as anything other than `continue_step`, the state-machine directive
+# is NOT consumed — the LLM's draft survives through Region A. This
+# inverts the authoring axis from "state authors; meaning vetoes" to
+# "meaning authors; state is a subroutine called only on continue_step".
+# Two markers anchor the cut: the import and the callsite. Absence of
+# EITHER means the deployed build predates the inversion — the
+# `[turn-disposition/authoring]` trace line will not emit, and every
+# non-continue turn will fall through to the state-machine directive
+# exactly as it did pre-Cut-#5. Behaviour-gated: env flag
+# `RIDERS_TURN_DISPOSITION_AUTHOR_LIVE` (default "on", explicit "off"
+# = one-line rollback).
+DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER'
+DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER'
+# Cut #6 (2026-04-23, Reloc 5 input-side): prompt-shaping disposition.
+# Pre-LLM heuristic classifier that decides whether the system prompt
+# carries the state-machine's authoring imperatives this turn. Module
+# exports `computePromptShapingDisposition` (pure function, server-side
+# signals only, no LLM call); callsite computes it just before the
+# prompt builder runs and emits the `[prompt-disposition/shaping]`
+# trace unconditionally; gate inside `formatOneBrainLiveChannelContext`
+# drops `next_required_action` / `forbidden_reply_shapes` /
+# `requested_slot_rule` / `pending_area_rule` / `slot_conflicts_rule`
+# and hard rules 4 and 10 when disposition ≠ `continue_step`. State
+# FACTS stay. Default OFF during bake (env
+# `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE=on` to enable). Three markers
+# anchor the three surfaces: module, callsite, gate. Absence of ANY
+# means the input-side inversion is not deployed and the LLM continues
+# to be prompted as a state machine even on non-`continue_step` turns
+# — exactly the residual Cut #5 left behind.
+DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER'
+DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER'
+DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER'
+DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER='DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER'
+# ---------------------------------------------------------------------------
+# Cut 7b (2026-04-23): A0 / A0a / A0b ARMING disposition gate.
+#
+# Structural authority downgrade for the pre-LLM Region-A substitution
+# branches (clarify-option-before-proceed, manual-confirm address ask,
+# manual-confirm handoff). Before this cut, all three armed purely
+# from mechanical signals (regex + state flags) and stamped their
+# server-rendered text over whatever the LLM drafted. With the gate
+# on, arming is conditional on the pre-LLM disposition being
+# `continue_step` — i.e. the heuristic classifier agrees the turn is
+# actually advancing the booking step. On `answer` / `requote` /
+# `cancel` / `acknowledge` / `idle` turns, A0/A0a/A0b are suppressed
+# and the LLM's draft passes through.
+#
+# Four markers anchor the four surfaces: detector definition, detector
+# import, injection into the prompt-shaping disposition's `answer`
+# rule, callsite gate at Region A, and the trace emit. Absence of ANY
+# means the gate is not deployed and the pre-LLM mechanical branches
+# continue to self-author by default.
+#
+# Default OFF during bake (env
+# `RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE=on` to enable).
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER'
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER'
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER'
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER'
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER'
+DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER='DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER'
+# ---------------------------------------------------------------------------
+# Cut 9.0 (2026-04-23): Turn Router — top-level meaning-first dispatcher.
+#
+# The inversion cut. Before Cut 9, every customer turn ran the state
+# machine unconditionally and three narrow gates (Cut #5 / #6 / 7b)
+# vetoed individual branches when meaning disagreed. Under uncertainty,
+# state won. Cut 9 adds a top-level router that classifies the turn
+# into a MODE before any state-machine subroutine runs, and exposes
+# consumer flags so downstream blocks can ask "should I author this
+# turn?". Scaffold landing: the module + callsite + trace emit + ONE
+# consumer (state-machine authoring gate) are live; the env flag
+# stays at the legacy `advance_form` default so behaviour is
+# unchanged until the flip to `meaning_first`.
+#
+# Four markers anchor the four surfaces: module definition, import at
+# the callsite file, the callsite dispatch block where the router is
+# computed and traced, and the state-machine authoring gate where the
+# one wired consumer lives. Absence of ANY means the router is not
+# deployed and the legacy dispatch order (state authors by default) is
+# unchanged.
+#
+# Default OFF during bake (env
+# `RIDERS_TURN_ROUTER_DEFAULT_MODE=meaning_first` to enable the flip).
+DEPLOY_CANARY_TURN_ROUTER_MODULE_MARKER='DEPLOY_CANARY_TURN_ROUTER_MODULE_MARKER'
+DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER='DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER'
+DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER='DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER'
+DEPLOY_CANARY_TURN_ROUTER_STATE_MACHINE_GATE_MARKER='DEPLOY_CANARY_TURN_ROUTER_STATE_MACHINE_GATE_MARKER'
 RIDERS_PUBLIC_WEBHOOK_HOST="${RIDERS_PUBLIC_WEBHOOK_HOST:-api.riderskw.com}"
 RIDERS_PUBLIC_WEBHOOK_URL="${RIDERS_PUBLIC_WEBHOOK_URL:-https://$RIDERS_PUBLIC_WEBHOOK_HOST/webhook}"
 RIDERS_PUBLIC_WEBHOOK_UPSTREAM="${RIDERS_PUBLIC_WEBHOOK_UPSTREAM:-127.0.0.1:18790}"
@@ -645,6 +736,86 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER',
         'dst conflict-slot pin callsite marker (Cut #4, state coherence)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER',
+        'turn-disposition authoring-gate import marker (Cut #5, Reloc 5 live)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER',
+        'turn-disposition authoring-gate callsite marker (Cut #5, Reloc 5 live)',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),
+        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER',
+        'prompt-shaping disposition module marker (Cut #6, Reloc 5 input-side)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER',
+        'prompt-shaping disposition import marker (Cut #6, Reloc 5 input-side)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER',
+        'prompt-shaping disposition callsite marker (Cut #6, Reloc 5 input-side)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/lib/one-brain-context.ts'),
+        '$DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER',
+        'prompt-shaping disposition gate marker (Cut #6, Reloc 5 input-side)',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/conversation-policy.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER',
+        'A0 arming-gate detector definition marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER',
+        'A0 arming-gate detector import marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER',
+        'A0 arming-gate disposition-injection marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER',
+        'A0 arming-gate unconditional-decision marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER',
+        'A0 arming-gate callsite marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER',
+        'A0 arming-gate trace emit marker (Cut 7b, pre-LLM authority downgrade)',
+    ),
+    (
+        Path('$VPS_SHARED_PLUGIN_DIR/turn-router.ts'),
+        '$DEPLOY_CANARY_TURN_ROUTER_MODULE_MARKER',
+        'turn-router module marker (Cut 9.0, meaning-first dispatcher)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER',
+        'turn-router import marker (Cut 9.0, meaning-first dispatcher)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER',
+        'turn-router callsite + trace emit marker (Cut 9.0, meaning-first dispatcher)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_ROUTER_STATE_MACHINE_GATE_MARKER',
+        'turn-router state-machine gate marker (Cut 9.0, one consumer wired)',
     ),
 ]
 

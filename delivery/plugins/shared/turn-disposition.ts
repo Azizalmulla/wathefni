@@ -494,3 +494,348 @@ export function decideTurnDisposition(
     confidenceFallthrough,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Cut #6 (2026-04-23, Reloc 5 input-side): pre-LLM prompt-shaping
+// disposition.
+//
+// DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_MODULE_MARKER.
+//
+// ## Why this exists
+//
+// Cut #5 inverted the OUTPUT side: `decideTurnDisposition` runs after
+// the LLM returns, using proposer signals (`turn_intent`,
+// `awaiting_confirmation`, `post_order_intent`) to decide whether the
+// state-machine directive is consumed. That fixed the authoring axis
+// on the way OUT of the LLM. But the prompt going IN to the LLM was
+// still state-authored: `next_required_action`, `forbidden_reply_shapes`,
+// `requested_slot_rule`, and hard rules 4 and 10 were injected every
+// turn, biasing the LLM to draft as a state machine. On turns where
+// meaning ≠ `continue_step`, Cut #5 would then suppress the directive
+// substitution and let the (already biased) draft through — yielding
+// step-shaped replies despite the inverted gate.
+//
+// Cut #6 inverts the INPUT side. A pre-LLM heuristic disposition is
+// computed from server-side signals only (no LLM call) and shapes the
+// prompt: on `continue_step` the prompt is identical to today; on
+// anything else, the prompt carries state FACTS but drops state
+// AUTHORING imperatives.
+//
+// ## The chicken-and-egg and how we resolve it
+//
+// `decideTurnDisposition` reads proposer output. Proposer output is the
+// LLM's tool-call. The LLM is invoked with the prompt. So the exact
+// same function can't gate the prompt. Three options on the table were
+// (a) pre-LLM heuristic, (b) two-call turn (cheap classify → main
+// reply), (c) soften the prompt unconditionally. User chose (a): the
+// prompt-shaping disposition is a weaker classifier than the post-LLM
+// disposition, but its default is identity-safe (`continue_step` ≡
+// today), and the four-cell matrix (pre × post) guarantees every
+// combination is ≥ today's behaviour:
+//
+//   pre=continue_step, post=continue_step → prompt imperatives + A0c   (today)
+//   pre=continue_step, post≠continue_step → prompt imperatives + passthrough
+//                                            (Cut #5 alone; robotic draft, ≡ today)
+//   pre≠continue_step, post=continue_step → prompt facts-only + A0c    (≡ today)
+//   pre≠continue_step, post=≠continue_step → prompt facts-only + passthrough
+//                                            (target state)
+//
+// Post-LLM is the authoritative decision; pre-LLM is a hint. Neither
+// reads the other's output. Keeping them decoupled prevents a
+// heuristic false-positive from cascading into an incorrect output
+// decision.
+//
+// ## Coverage (what heuristics can reliably catch)
+//
+// Strong signals (regex-level is enough):
+//   * `acknowledge`  — bare greeting/thanks/filler during active flow
+//   * `cancel_confirmation` — cancel keywords at eligible stage
+//   * `answer` (informational option/price question) — matches the
+//     existing `isInformationalOptionQuestion` heuristic
+//   * `requote`  — two-area/route evidence on an existing quote
+//
+// Weak signals (default to `continue_step` → fall through to Cut #5):
+//   * `edit_field` without an explicit correction token
+//   * `answer` not about informational options
+//   * subtle `requote` in prose without area tokens
+//
+// Those weak cases remain in the "cell 2" bucket of the matrix — same
+// behaviour as today, no regression.
+//
+// ## Not in this file
+//
+//   * The env flag and trace emit live at the callsite in
+//     `octopus-channel/index.ts`.
+//   * The prompt-gating behaviour (which imperatives to drop) lives in
+//     `octopus-channel/lib/one-brain-context.ts`.
+//   * The post-LLM authoritative disposition stays `decideTurnDisposition`.
+// ---------------------------------------------------------------------------
+
+export interface PromptShapingDispositionInputs {
+  // Server-side signals only. All fields must be resolvable BEFORE the
+  // LLM invocation — adding a field that depends on LLM output breaks
+  // the contract.
+  customer_text: string | null;
+  stage_at_turn_start: string | null;
+  has_active_quoted_route: boolean;
+  requested_slot_name: string | null;
+  missing_fields_count: number;
+
+  // Injected detector callbacks so this module stays free of
+  // octopus-channel dependencies (avoids a cycle: conversation-policy
+  // imports from shared, shared can't import back). The callsite in
+  // index.ts supplies the real regex-backed functions from
+  // `conversation-policy.ts` and `quoted-options.ts`.
+  detectors: {
+    isInformationalOptionQuestion: (text: string | null) => boolean;
+    isSimpleGreeting: (text: string) => boolean;
+    isExplicitOrderConfirmation: (text: string | null) => boolean;
+    // Cut 7b (2026-04-23): implicit / contextual clarifying-question
+    // detector. Catches turns like "so i cant order rn if its manual
+    // confirmation" that lack explicit interrogative markers but still
+    // read as a question. Feeds Rule 6 (answer) so the pre-LLM
+    // disposition recognises the turn as `answer`, which the A0/A0a/A0b
+    // arming gate in index.ts uses to skip the legacy Region-A
+    // substitutions.
+    //
+    // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DISPOSITION_INJECTION_MARKER.
+    isContextualClarifyingQuestion: (text: string | null) => boolean;
+  };
+}
+
+// Stages where a cancel keyword is eligible to flag the turn as a
+// pre-LLM cancel_confirmation. Matches `CANCEL_ELIGIBLE_STAGES` above
+// so the two layers don't drift.
+const PROMPT_SHAPING_CANCEL_ELIGIBLE_STAGES: ReadonlySet<string> =
+  CANCEL_ELIGIBLE_STAGES;
+
+// Active-flow stages where `acknowledge` can trigger. Wider than
+// cancel-eligible because `acknowledge` covers the early collection
+// phase too. `idle` is explicitly excluded — an `ok` with no booking
+// context should remain idle and let SKILL.md govern.
+const PROMPT_SHAPING_ACTIVE_FLOW_STAGES: ReadonlySet<string> = new Set<string>([
+  "quoted",
+  "collecting_booking_details",
+  "summary_shown",
+  "awaiting_confirmation",
+  "order_submitted",
+]);
+
+// Narrow regex-only cancel keyword list. Intentionally tight: an
+// option-switch phrase ("nvm, actually sedan") MUST NOT match here;
+// those fall through to `continue_step`. If in doubt, we prefer a
+// false NEGATIVE (cell 2, ≡ today) over a false POSITIVE (cell 3,
+// which would drop imperatives on a real step-advance).
+const PROMPT_SHAPING_CANCEL_REGEX =
+  /(\bcancel(?:\s+the)?\s+(?:booking|order|request)\b|\b(?:never\s+mind|nvm)\s+the\s+whole\s+thing\b|\bstop\s+(?:the|this)\s+(?:booking|order)\b|ألغ[يى]\s*(?:الطلب|الحجز)|إلغاء\s*(?:الطلب|الحجز)|لغاء\s*(?:الطلب|الحجز))/iu;
+
+// Option-switch short-circuit — the "cancel, actually sedan" class
+// must NOT be classified as cancel. Mirrors hard rule 7.
+const PROMPT_SHAPING_OPTION_SWITCH_REGEX =
+  /\b(sedan|van|box|cooled?|refrig(?:erated)?|helper|express|standard|fast|normal|مبرد|مساعد|سريع|عادي|فان|بوكس|سيدان)\b/i;
+
+// Bare-ack list for `acknowledge` during active flow. Intentionally
+// tiny and post-trim; the turn must be ONLY an ack (not a cancel, not
+// a question, not a route-pair, etc.). The calling code handles the
+// active-flow gating; this regex is the surface-shape test.
+const PROMPT_SHAPING_BARE_ACK_REGEX =
+  /^(?:ok(?:ay)?|thanks?(?:\s*you)?|thx|ty|noted|got\s+it|cool|sure|hmm+|lol|alright|awesome|great|perfect|nice|تمام|تمامـ+|تمامــ+|اوك(?:ي|يه)?|شكر(?:ا|ا\s*لك|ا\s*جزيلا)?|مشكور(?:ين)?|مشكور\s+يا\s*معلم|زين|ماشي|يسلمو|يعطيك\s+العافية|ايوه|ايوا|اها|آه|اهم|لحظة|لحظه|ثانية|ثانيه)[!.?\s]*$/iu;
+
+// Requote trigger — a fresh route/area pair on top of an existing
+// quote. Keeps the bar high: requires two capitalised/area-like
+// tokens separated by a "to"/"إلى"/"الى"/"من" connector. This is a
+// coarse shape test; the full `get_price` tool call will
+// disambiguate. False negatives (prose like "change it to salmiya")
+// fall through to continue_step and rely on Cut #5.
+const PROMPT_SHAPING_ROUTE_PAIR_REGEX =
+  /(\b[\p{L}]{2,}\s+(?:to|till|until|>)\s+[\p{L}]{2,}\b|من\s+[\p{L}]{2,}\s+(?:إلى|الى|لـ?)\s+[\p{L}]{2,})/iu;
+
+function buildShapingAuthored(
+  disposition: Exclude<TurnDisposition, "continue_step" | "handoff">,
+  policyRule: string,
+  reason: string,
+): TurnDispositionDecision {
+  return {
+    disposition,
+    authored_directive: null,
+    state_machine_call: {
+      called: false,
+      subroutine: null,
+      result_directive: null,
+    },
+    policy_rule: policyRule,
+    reason,
+    trace_annotations: { fallthrough_reason: null },
+  };
+}
+
+function buildShapingContinue(
+  policyRule: string,
+  reason: string,
+  fallthrough: string | null,
+): TurnDispositionDecision {
+  return {
+    disposition: "continue_step",
+    authored_directive: null,
+    state_machine_call: {
+      called: false,
+      subroutine: null,
+      result_directive: null,
+    },
+    policy_rule: policyRule,
+    reason,
+    trace_annotations: { fallthrough_reason: fallthrough },
+  };
+}
+
+/**
+ * Pre-LLM heuristic disposition used to shape the system prompt.
+ *
+ * Identity-safe default: when no rule matches, returns `continue_step`
+ * and the caller keeps today's prompt unchanged. The function is a
+ * pure transform — no I/O, no env reads, no logger — so it's trivially
+ * testable and never blocks a turn.
+ *
+ * Rule order mirrors `decideTurnDisposition`'s intent (idle →
+ * cancel → requote → answer → acknowledge → continue), but each rule's
+ * signal is regex/structural, not proposer-structured.
+ */
+export function computePromptShapingDisposition(
+  input: PromptShapingDispositionInputs,
+): TurnDispositionDecision {
+  const rawText = (input.customer_text || "").trim();
+
+  // Rule 1: idle — no active booking. Pre-booking chit-chat turns the
+  // prompt-author gate wouldn't help on anyway (SKILL.md governs).
+  const stageIsIdle =
+    input.stage_at_turn_start === null ||
+    input.stage_at_turn_start === "idle";
+  if (stageIsIdle) {
+    return buildShapingAuthored(
+      "idle",
+      "shaping.disposition.idle",
+      "pre_booking_no_active_stage",
+    );
+  }
+
+  // Rule 2: no text — nothing to classify. Default to continue_step so
+  // prompt carries authoring imperatives (identity-safe).
+  if (!rawText) {
+    return buildShapingContinue(
+      "shaping.disposition.continue_step.no_text",
+      "no_customer_text",
+      "no_customer_text",
+    );
+  }
+
+  // Rule 3: explicit order confirmation during summary/awaiting-confirm
+  // is decisively a `continue_step` advance (server places the order).
+  // Short-circuit so a confirmation token like "yes" doesn't look like
+  // a bare ack.
+  if (
+    input.detectors.isExplicitOrderConfirmation(rawText) &&
+    (input.stage_at_turn_start === "summary_shown" ||
+      input.stage_at_turn_start === "awaiting_confirmation")
+  ) {
+    return buildShapingContinue(
+      "shaping.disposition.continue_step.confirmation",
+      "explicit_order_confirmation_at_summary",
+      null,
+    );
+  }
+
+  // Rule 4: cancel_confirmation — cancel keyword at eligible stage,
+  // AND no option-switch token in the same utterance. Option-switch
+  // phrases ("cancel, actually sedan") fall through to continue_step.
+  if (
+    input.stage_at_turn_start !== null &&
+    PROMPT_SHAPING_CANCEL_ELIGIBLE_STAGES.has(input.stage_at_turn_start) &&
+    PROMPT_SHAPING_CANCEL_REGEX.test(rawText) &&
+    !PROMPT_SHAPING_OPTION_SWITCH_REGEX.test(rawText)
+  ) {
+    return buildShapingAuthored(
+      "cancel_confirmation",
+      "shaping.disposition.cancel_confirmation.keyword_at_eligible_stage",
+      `cancel_keyword_at_${input.stage_at_turn_start}`,
+    );
+  }
+
+  // Rule 5: requote — fresh route/area evidence while an active quote
+  // exists. Bar is intentionally high (two-area pair regex); prose
+  // restates fall through.
+  if (
+    input.has_active_quoted_route &&
+    PROMPT_SHAPING_ROUTE_PAIR_REGEX.test(rawText)
+  ) {
+    return buildShapingAuthored(
+      "requote",
+      "shaping.disposition.requote.route_pair_on_active_quote",
+      "route_pair_evidence_on_active_quote",
+    );
+  }
+
+  // Rule 6: answer — informational option/price question on an active
+  // quote. Two paths, first match wins:
+  //
+  //   6a. Explicit interrogative — `isInformationalOptionQuestion`.
+  //       Requires a wh-word, `how much`, `?`, or Arabic analogue
+  //       PAIRED with price/option/vehicle vocab. This is the pre-
+  //       existing path; keep it to ensure prompt-shaping and hard
+  //       rule 5 agree on what "answer-only" means.
+  //
+  //   6b. Implicit / contextual clarifying question (Cut 7b) —
+  //       `isContextualClarifyingQuestion`. Catches indirect forms
+  //       ("so i cant order rn if its manual confirmation", "if its
+  //       manual confirm then i cant continue", "does that mean i
+  //       need to wait") that the explicit detector misses. This is
+  //       the detector that closes the Cut 7b arming-gate loop: the
+  //       same turn that should skip A0/A0a/A0b arming also reads
+  //       as `answer` at the pre-LLM layer.
+  //
+  // Both require an active quoted route so we don't promote
+  // pre-quote banter; the downstream prompt-shape / arming-gate
+  // effects only matter once options exist.
+  if (input.has_active_quoted_route) {
+    if (input.detectors.isInformationalOptionQuestion(rawText)) {
+      return buildShapingAuthored(
+        "answer",
+        "shaping.disposition.answer.informational_option_question",
+        "informational_option_question_on_active_quote",
+      );
+    }
+    if (input.detectors.isContextualClarifyingQuestion(rawText)) {
+      return buildShapingAuthored(
+        "answer",
+        "shaping.disposition.answer.contextual_clarifying_question",
+        "contextual_clarifying_question_on_active_quote",
+      );
+    }
+  }
+
+  // Rule 7: acknowledge — bare greeting / thanks / filler during
+  // active flow. Must NOT be cancel (ruled out by order), NOT an
+  // informational question (ruled out by order), NOT an explicit
+  // confirmation (ruled out by rule 3). Short-text-only, post-trim.
+  if (
+    input.stage_at_turn_start !== null &&
+    PROMPT_SHAPING_ACTIVE_FLOW_STAGES.has(input.stage_at_turn_start) &&
+    (input.detectors.isSimpleGreeting(rawText) ||
+      PROMPT_SHAPING_BARE_ACK_REGEX.test(rawText))
+  ) {
+    return buildShapingAuthored(
+      "acknowledge",
+      "shaping.disposition.acknowledge.bare_filler_in_active_flow",
+      `bare_ack_at_${input.stage_at_turn_start}`,
+    );
+  }
+
+  // Rule 8 (default): continue_step. Identity-safe — caller keeps
+  // today's prompt unchanged. `fallthrough_reason` is null on the
+  // happy path (the customer is actually advancing the flow) and
+  // named when a heuristic sub-matched but didn't promote.
+  return buildShapingContinue(
+    "shaping.disposition.continue_step.default",
+    "default_continue_step",
+    null,
+  );
+}

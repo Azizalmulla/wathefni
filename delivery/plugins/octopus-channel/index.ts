@@ -26,6 +26,13 @@ import {
   isTrackingIntent,
   isExplicitOrderConfirmation,
   isInformationalOptionQuestion,
+  // Cut 7b (2026-04-23): implicit / contextual clarifying-question
+  // detector, wired into `computePromptShapingDisposition` so the
+  // pre-LLM `answer` rule catches indirect forms like "so i cant order
+  // rn if its manual confirmation".
+  //
+  // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_IMPORT_MARKER.
+  isContextualClarifyingQuestion,
   CustomerScriptMode,
   normalizeIntentText,
   PersistedConversationControllerEntry,
@@ -290,6 +297,45 @@ import type {
   A1Derivation,
   DirectiveDispositionDerivation,
 } from "../shared/turn-decision";
+// Cut #5 (2026-04-23): Turn-disposition AUTHORING gate. `decideTurnDisposition`
+// is imported directly from the disposition module (not re-exported by
+// `turn-decision.ts`) so the callsite can invert authority live: when the
+// layer classifies the turn as anything other than `continue_step`, the
+// state-machine directive is NOT consumed this turn, inverting the
+// long-standing "state authors; meaning vetoes" shape into "meaning
+// authors; state is a subroutine called only on continue_step".
+// DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER.
+import { decideTurnDisposition } from "../shared/turn-disposition";
+import type { TurnDispositionDecision } from "../shared/turn-disposition";
+// Cut #6 (2026-04-23): prompt-shaping disposition. Pre-LLM heuristic that
+// decides whether the system prompt carries state-machine authoring
+// imperatives this turn. Input-side counterpart of Cut #5's output-side
+// inversion. Default-off (env `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE=on`
+// to enable). When the pre-LLM disposition is anything other than
+// `continue_step`, the prompt drops `next_required_action`,
+// `forbidden_reply_shapes`, `requested_slot_rule`, `pending_area_rule`,
+// `slot_conflicts_rule`, and hard rules 4 and 10; state FACTS stay.
+// DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_IMPORT_MARKER.
+import { computePromptShapingDisposition } from "../shared/turn-disposition";
+// Cut 9.0 (2026-04-23): Turn Router — top-level meaning-first dispatcher.
+// Runs once per customer turn, BEFORE the state machine, and classifies
+// the turn into a dispatch MODE. Downstream consumers read the decision
+// to answer "should `computeOneBrainNextRequiredAction` author this
+// turn?" / "should the prompt carry state imperatives?" / "should
+// Region-A substitutions arm?". Dark-land scaffold: one consumer
+// (state-machine authoring gate) is wired; the env flag
+// `RIDERS_TURN_ROUTER_DEFAULT_MODE` stays at the legacy "advance_form"
+// default so behaviour is unchanged until the flip. See
+// `plugins/shared/turn-router.ts` for the full rationale.
+// DEPLOY_CANARY_TURN_ROUTER_IMPORT_MARKER.
+import {
+  classifyTurn,
+  parseTurnRouterDefaultModeEnv,
+} from "../shared/turn-router";
+import type {
+  TurnRouterDecision,
+  TurnRouterDefaultMode,
+} from "../shared/turn-router";
 import type { OutboundProvenance } from "../shared/outbound-provenance";
 import {
   provenanceFromDecision,
@@ -4543,6 +4589,227 @@ async function handleInboundMessage(params: {
     }
   }
 
+  // ------------------------------------------------------------------
+  // Cut #6 (2026-04-23, Reloc 5 input-side): pre-LLM prompt-shaping
+  // disposition.
+  //
+  // DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_CALLSITE_MARKER.
+  //
+  // Runs BEFORE the LLM invocation (we're building the system prompt
+  // here). The disposition is computed from server-side signals only —
+  // stage, active quoted route, requested slot, missing-field count,
+  // customer inbound text. Proposer output is NOT available at this
+  // point in the turn (it comes back FROM the LLM call that consumes
+  // this prompt). That's why this layer is distinct from Cut #5's
+  // `decideTurnDisposition`, which runs AFTER the LLM returns on the
+  // output side with the full proposer reading.
+  //
+  // Asymmetry is intentional: the pre-LLM layer is a weaker
+  // classifier (regex-level), and its job is prompt shaping only. The
+  // post-LLM layer stays authoritative for output decisions. Neither
+  // reads the other's output. The four-cell matrix
+  // (pre × post disposition) guarantees every combination is
+  // ≥ today's behaviour; see `turn-disposition.ts` for the proof.
+  //
+  // Default OFF during bake (env `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE`
+  // must be explicitly `on` to enable). The one-line rollback is
+  // unset the var. When off, `promptShapingDisposition` is forced
+  // null and the prompt is identical to today.
+  //
+  // Trace: `[prompt-disposition/shaping]` — one line per customer
+  // turn, emitted UNCONDITIONALLY (even when env-off and even on
+  // `continue_step`), so a triager can grep per-conversation and see
+  // flag, disposition, policy_rule, whether state imperatives were
+  // skipped, whether hard rules were shaped, stage, has_quote.
+  // ------------------------------------------------------------------
+  const promptShapingEnvLive =
+    (process.env.RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE || "off")
+      .trim()
+      .toLowerCase() === "on";
+  // Cut 7b (2026-04-23): the pre-LLM disposition is now consumed by
+  // TWO downstream effects — prompt-shaping (Cut #6) AND the
+  // A0/A0a/A0b arming gate (Cut 7b, downstream at Region A). Each
+  // effect has its own env flag. The DECISION itself must be computed
+  // unconditionally for customer turns so both gates can read the
+  // same disposition value, and the matrix trace stays observable
+  // even when both effects are dark.
+  //
+  // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DECISION_UNCONDITIONAL_MARKER.
+  let promptShapingDecision: TurnDispositionDecision | null = null;
+  if (senderRole === "customer") {
+    try {
+      promptShapingDecision = computePromptShapingDisposition({
+        customer_text: rawBody ?? null,
+        stage_at_turn_start: conversationControllerEntry?.stage ?? null,
+        has_active_quoted_route: !!activeQuotedRoute,
+        requested_slot_name:
+          conversationControllerEntry?.dialogState?.requestedSlot?.name ??
+          null,
+        missing_fields_count:
+          conversationControllerEntry?.bookingDraft
+            ? computeOneBrainMissingFields(
+                conversationControllerEntry.bookingDraft,
+                conversationControllerEntry,
+              ).length
+            : 0,
+        detectors: {
+          isInformationalOptionQuestion,
+          isSimpleGreeting,
+          isExplicitOrderConfirmation,
+          isContextualClarifyingQuestion,
+        },
+      });
+    } catch (promptShapingError) {
+      try {
+        api.logger.warn(
+          `[prompt-disposition/shaping] derive_failed conversation=${conversationId} error=${
+            promptShapingError instanceof Error
+              ? promptShapingError.message
+              : String(promptShapingError)
+          }`,
+        );
+      } catch {
+        // Never block the turn on trace-layer errors.
+      }
+      promptShapingDecision = null;
+    }
+  }
+  // Disposition passed to the prompt builder — `null` when the
+  // Cut #6 env flag is off or when the disposition is `continue_step`
+  // (identity path). The decision itself remains in
+  // `promptShapingDecision` for the trace and the Cut 7b arming gate.
+  const promptShapingDispositionForPrompt =
+    promptShapingEnvLive &&
+    promptShapingDecision &&
+    promptShapingDecision.disposition !== "continue_step"
+      ? promptShapingDecision.disposition
+      : null;
+  const promptShapingStateImperativesSkipped = Boolean(
+    promptShapingDispositionForPrompt,
+  );
+  if (senderRole === "customer") {
+    try {
+      api.logger.info(
+        `[prompt-disposition/shaping] conversation=${conversationId} flag=${
+          promptShapingEnvLive ? "on" : "off"
+        } disposition=${
+          promptShapingDecision?.disposition ?? "-"
+        } policy_rule=${
+          promptShapingDecision?.policy_rule ?? "-"
+        } state_imperatives_skipped=${
+          promptShapingStateImperativesSkipped ? "yes" : "no"
+        } hard_rules_shaped=${
+          promptShapingStateImperativesSkipped ? "yes" : "no"
+        } stage=${conversationControllerEntry?.stage ?? "-"} has_quote=${
+          activeQuotedRoute ? "yes" : "no"
+        } requested_slot=${
+          conversationControllerEntry?.dialogState?.requestedSlot?.name ?? "-"
+        } fallthrough=${
+          promptShapingDecision?.trace_annotations?.fallthrough_reason ?? "-"
+        }`,
+      );
+    } catch {
+      // Never block the turn on trace emit failure.
+    }
+  }
+
+  // --------------------------------------------------------------------
+  // Cut 9.0 (2026-04-23): Turn Router dispatch.
+  //
+  // DEPLOY_CANARY_TURN_ROUTER_CALLSITE_MARKER.
+  //
+  // Top-level meaning-first dispatcher. Runs once per customer turn,
+  // AFTER the pre-LLM heuristic classifier has produced
+  // `promptShapingDecision`, and BEFORE any state-machine authoring or
+  // Region-A substitution arms. Classifies the turn into a router
+  // MODE and exposes three consumer flags (`invoke_state_machine`,
+  // `shape_prompt_imperatives`, `invoke_region_a_substitutions`).
+  //
+  // Scaffold landing: decision is computed unconditionally for customer
+  // turns; trace `[turn-router/dispatch]` emits every turn so a triager
+  // can read the router's would-have decision even with the flag off.
+  // Exactly ONE consumer is wired below (the Cut #5 state-machine
+  // authoring gate at the Region-B author block); that consumer
+  // additionally guards on `default_mode === "meaning_first"` so under
+  // the legacy default the router's flags are inert. See
+  // `plugins/shared/turn-router.ts` for the full rationale.
+  //
+  // Env flag: `RIDERS_TURN_ROUTER_DEFAULT_MODE`
+  //   * unset / "advance_form" (default) — legacy behaviour; zero change.
+  //   * "meaning_first"                   — fallthrough continue_step
+  //                                         routes to `answer`; state
+  //                                         machine authoring is
+  //                                         suppressed on uncertain turns.
+  // --------------------------------------------------------------------
+  const turnRouterDefaultMode: TurnRouterDefaultMode =
+    parseTurnRouterDefaultModeEnv(
+      process.env.RIDERS_TURN_ROUTER_DEFAULT_MODE,
+    );
+  let turnRouterDecision: TurnRouterDecision | null = null;
+  if (senderRole === "customer") {
+    try {
+      turnRouterDecision = classifyTurn({
+        classifier_decision: promptShapingDecision,
+        default_mode: turnRouterDefaultMode,
+      });
+    } catch (turnRouterError) {
+      try {
+        api.logger.warn(
+          `[turn-router/dispatch] derive_failed conversation=${conversationId} error=${
+            turnRouterError instanceof Error
+              ? turnRouterError.message
+              : String(turnRouterError)
+          }`,
+        );
+      } catch {
+        // Never block the turn on trace-layer errors.
+      }
+      turnRouterDecision = null;
+    }
+    try {
+      api.logger.info(
+        `[turn-router/dispatch] conversation=${conversationId} default_mode=${turnRouterDefaultMode} mode=${
+          turnRouterDecision?.mode ?? "-"
+        } reason=${
+          turnRouterDecision?.reason ?? "-"
+        } default_applied=${
+          turnRouterDecision?.default_applied ? "yes" : "no"
+        } positive_evidence=${
+          turnRouterDecision?.positive_evidence ?? "-"
+        } invoke_state_machine=${
+          turnRouterDecision
+            ? turnRouterDecision.invoke_state_machine
+              ? "yes"
+              : "no"
+            : "-"
+        } shape_prompt_imperatives=${
+          turnRouterDecision
+            ? turnRouterDecision.shape_prompt_imperatives
+              ? "yes"
+              : "no"
+            : "-"
+        } invoke_region_a_substitutions=${
+          turnRouterDecision
+            ? turnRouterDecision.invoke_region_a_substitutions
+              ? "yes"
+              : "no"
+            : "-"
+        } classifier_disposition=${
+          turnRouterDecision?.trace_annotations?.classifier_disposition ?? "-"
+        } classifier_policy_rule=${
+          turnRouterDecision?.trace_annotations?.classifier_policy_rule ?? "-"
+        } classifier_fallthrough=${
+          turnRouterDecision?.trace_annotations?.classifier_fallthrough_reason ??
+          "-"
+        } stage=${conversationControllerEntry?.stage ?? "-"} has_quote=${
+          activeQuotedRoute ? "yes" : "no"
+        }`,
+      );
+    } catch {
+      // Never block the turn on trace emit failure.
+    }
+  }
+
   const channelContext = formatLiveChannelContext(senderRole, replyTarget, {
     isOneBrain: true,
     currentIntent: currentCustomerIntent,
@@ -4555,6 +4822,7 @@ async function handleInboundMessage(params: {
     quoteFollowupHint,
     controllerTransitionHint,
     currentCustomerText: rawBody,
+    promptShapingDisposition: promptShapingDispositionForPrompt,
   });
   const customerProfileContext = senderRole === "customer" ? formatCustomerProfileContext(customerProfile) : null;
   const behaviorContext = senderRole === "customer"
@@ -5899,6 +6167,111 @@ async function handleInboundMessage(params: {
           // substitution is visible to the `quotePresentedToCustomer`
           // computation — preserving pre-Step-4 behavior.
           {
+            // ----------------------------------------------------------
+            // Cut 7b (2026-04-23): A0 / A0a / A0b ARMING disposition gate.
+            //
+            // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_CALLSITE_MARKER.
+            //
+            // Structural authority downgrade for the pre-LLM Region-A
+            // substitution branches. Before this cut:
+            //
+            //   * `clarifyOptionBeforeProceed` armed purely from
+            //     `detectVagueProceedSignal` (substring match on the
+            //     raw customer text) + catalog shape. Once armed, A0
+            //     outranks canonical overwrite, empty-fill, price
+            //     whitelist, same-route recap, and A0c — and stamps
+            //     the options menu over whatever the LLM drafted.
+            //   * `manualConfirmAddressAsk` / `manualConfirmHandoff`
+            //     armed from controller state + selected option. Once
+            //     armed, A0a/A0b substitute the server-composed
+            //     address ask / handoff text.
+            //
+            // The 2026-04-23 transcript showed the exact failure mode
+            // this gate targets: customer on a manual-confirm-capable
+            // quote asked "so i cant order rn if its manual
+            // confirmation" (a clarifying question). `detectVagueProceedSignal`
+            // matched `"confirm"` as a substring inside `"confirmation"`,
+            // armed `clarifyOptionBeforeProceed`, and A0 substituted
+            // the options-menu over the LLM's direct answer.
+            //
+            // The underlying asymmetry is that these three branches
+            // read only mechanical signals (state flags + raw-text
+            // regex) before any semantic understanding of the turn
+            // exists. The A1 flip's `pass_on_clarifying` can bypass
+            // them AFTER the LLM returns, but only when the proposer
+            // is present AND labels `turn_intent.kind=clarifying_question`
+            // at high/medium confidence. When the LLM mis-classifies
+            // (or the prompt biases it toward `proceed`), the A1 flip
+            // is silent and A0 wins by default.
+            //
+            // This cut moves the decision forward. `promptShapingDecision`
+            // is computed BEFORE the LLM invocation using server-side
+            // signals + regex detectors (including the new
+            // `isContextualClarifyingQuestion` that catches indirect
+            // interrogatives like "so i cant X if Y"). When the pre-LLM
+            // disposition is NOT `continue_step` — i.e. the heuristic
+            // reads the turn as `answer` / `requote` / `cancel_confirmation`
+            // / `acknowledge` / `idle` — the three arming flags are
+            // forced off. A0/A0a/A0b become subroutines gated by
+            // meaning instead of self-authoring by default.
+            //
+            // Gate scope — A0/A0a/A0b arming only. The corresponding
+            // directive-registry entries (`CLARIFY_OPTION_BEFORE_PROCEED`,
+            // `ASK_*_FOR_MANUAL_CONFIRM`, `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM`)
+            // are marked `server_existing` in the registry, so A0c never
+            // renders them itself — it defers back to A0/A0a/A0b. Gating
+            // the three arming flags here is sufficient to suppress the
+            // substitution end-to-end for these directives; no separate
+            // A0c suppression is needed.
+            //
+            // Live-only safeguards:
+            //   1. Env flag `RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE`
+            //      default "off" during bake; explicit "on" enables.
+            //      The one-line rollback is unset the var.
+            //   2. Only activates for customer turns (agent/operator
+            //      replies never reach this block anyway; guarded by
+            //      the surrounding customer-only code path).
+            //   3. Heuristic false-positive cost is bounded: when the
+            //      gate mis-reads a genuine proceed as a question, the
+            //      LLM composes the reply. The LLM has the full
+            //      catalog / prices / manual-confirm caveat in its
+            //      prompt and produces a contextually appropriate
+            //      response. No safety invariant depends on A0/A0a/A0b
+            //      firing — they are verbosity-smoothing substitutions,
+            //      not guard rails.
+            //
+            // Asymmetry with Cut #5 (post-LLM authoring gate):
+            // Cut #5 gates `directiveActionForRender` (A0c) using the
+            // post-LLM authoritative disposition. Cut 7b gates A0/A0a/A0b
+            // using the pre-LLM heuristic disposition. Both layers
+            // read independent classifier outputs; neither reads the
+            // other. On turns where both agree (continue_step or not),
+            // behavior is identical to one or the other. On turns
+            // where they disagree, the weaker layer loses its branch
+            // and the other layer's decision stands — by design, since
+            // pre-LLM vs post-LLM have different authority scopes.
+            //
+            // Trace: `[a0-arming/disposition]` — one line per customer
+            // turn, emitted UNCONDITIONALLY (even when env-off and
+            // even on `continue_step`). Records the full matrix:
+            // flag, disposition, policy_rule, would-have-armed vs
+            // armed for each of the three branches, gated reason,
+            // stage, has_quote.
+            // ----------------------------------------------------------
+            const a0ArmingGateEnvLive =
+              (process.env.RIDERS_A0_DISPOSITION_ARMING_GATE_LIVE || "off")
+                .trim()
+                .toLowerCase() === "on";
+            const a0ArmingDisposition =
+              promptShapingDecision?.disposition ?? null;
+            const a0ArmingDispositionIsNonContinue = Boolean(
+              a0ArmingDisposition !== null &&
+                a0ArmingDisposition !== "continue_step",
+            );
+            const a0ArmingGateBlocks = Boolean(
+              a0ArmingGateEnvLive && a0ArmingDispositionIsNonContinue,
+            );
+
             // Clarify-before-proceed gate (Bug 1, 2026-04-20 manual-
             // confirm incident). Evaluated at Region-A time so the
             // controller entry reflects any drain-loop updates from this
@@ -5906,8 +6279,9 @@ async function handleInboundMessage(params: {
             // catalog and a vague proceed signal that does not name an
             // option — see `computeOneBrainNextRequiredAction` for the
             // authoritative invariants, kept in sync with the outbound
-            // substitute below.
-            const clarifyOptionBeforeProceed = Boolean(
+            // substitute below. Cut 7b: arming is additionally gated
+            // on pre-LLM disposition being `continue_step`.
+            const clarifyOptionBeforeProceedWouldHaveArmed = Boolean(
               conversationControllerEntry?.stage === "quoted" &&
                 activeQuotedRoute &&
                 rawBody &&
@@ -5915,9 +6289,18 @@ async function handleInboundMessage(params: {
                 detectVagueProceedSignal(rawBody) &&
                 !detectExplicitOptionMention({ text: rawBody, route: activeQuotedRoute }),
             );
+            const clarifyOptionBeforeProceed =
+              !a0ArmingGateBlocks && clarifyOptionBeforeProceedWouldHaveArmed;
             if (clarifyOptionBeforeProceed) {
               api.logger.info(
                 `[one-brain/clarify-option] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
+              );
+            } else if (
+              a0ArmingGateBlocks &&
+              clarifyOptionBeforeProceedWouldHaveArmed
+            ) {
+              api.logger.info(
+                `[one-brain/clarify-option] gate=suppressed_by_disposition conversation=${conversationId} routeKey=${activeQuotedRoute?.routeKey || "na"} disposition=${a0ArmingDisposition ?? "-"} text=${JSON.stringify((rawBody || "").slice(0, 80))}`,
               );
             }
             // Reloc 3 mirror hoist: propagate the flag to outer scope so
@@ -5937,13 +6320,19 @@ async function handleInboundMessage(params: {
             // replicate just the manual-confirm sub-branch here because
             // Region A runs BEFORE the controller-state mutation block
             // and must not depend on the LLM's emitted directive text.
-            let manualConfirmAddressAsk:
+            //
+            // Cut 7b: compute the "would have armed" shadow first so
+            // the gate can suppress the arming AND the trace can
+            // still record what would have happened.
+            let manualConfirmAddressAskWouldHave:
               | {
                   side: "pickup" | "delivery";
                   option: RouteQuoteOption;
                 }
               | null = null;
-            let manualConfirmHandoff: { option: RouteQuoteOption } | null = null;
+            let manualConfirmHandoffWouldHave:
+              | { option: RouteQuoteOption }
+              | null = null;
             if (
               conversationControllerEntry?.stage === "quoted" &&
               activeQuotedRoute &&
@@ -5963,16 +6352,67 @@ async function handleInboundMessage(params: {
                 const pickupSatisfied = hasSatisfiedBookingAddress(draft, "pickup");
                 const deliverySatisfied = hasSatisfiedBookingAddress(draft, "delivery");
                 if (!pickupSatisfied) {
-                  manualConfirmAddressAsk = { side: "pickup", option: selectedOption };
+                  manualConfirmAddressAskWouldHave = {
+                    side: "pickup",
+                    option: selectedOption,
+                  };
                 } else if (!deliverySatisfied) {
-                  manualConfirmAddressAsk = { side: "delivery", option: selectedOption };
+                  manualConfirmAddressAskWouldHave = {
+                    side: "delivery",
+                    option: selectedOption,
+                  };
                 } else {
-                  manualConfirmHandoff = { option: selectedOption };
+                  manualConfirmHandoffWouldHave = { option: selectedOption };
                 }
-                api.logger.info(
-                  `[one-brain/manual-confirm] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} pickupSatisfied=${pickupSatisfied} deliverySatisfied=${deliverySatisfied}`,
-                );
+                if (!a0ArmingGateBlocks) {
+                  api.logger.info(
+                    `[one-brain/manual-confirm] gate=fired conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} pickupSatisfied=${pickupSatisfied} deliverySatisfied=${deliverySatisfied}`,
+                  );
+                } else {
+                  api.logger.info(
+                    `[one-brain/manual-confirm] gate=suppressed_by_disposition conversation=${conversationId} routeKey=${activeQuotedRoute.routeKey} option=${selectedOption.delivery_type} disposition=${a0ArmingDisposition ?? "-"}`,
+                  );
+                }
               }
+            }
+            const manualConfirmAddressAsk = a0ArmingGateBlocks
+              ? null
+              : manualConfirmAddressAskWouldHave;
+            const manualConfirmHandoff = a0ArmingGateBlocks
+              ? null
+              : manualConfirmHandoffWouldHave;
+
+            // DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_TRACE_MARKER.
+            try {
+              api.logger.info(
+                `[a0-arming/disposition] conversation=${conversationId} flag=${
+                  a0ArmingGateEnvLive ? "on" : "off"
+                } disposition=${
+                  a0ArmingDisposition ?? "-"
+                } policy_rule=${
+                  promptShapingDecision?.policy_rule ?? "-"
+                } gated=${
+                  a0ArmingGateBlocks ? "yes" : "no"
+                } clarify_would_have=${
+                  clarifyOptionBeforeProceedWouldHaveArmed ? "yes" : "no"
+                } clarify_armed=${
+                  clarifyOptionBeforeProceed ? "yes" : "no"
+                } mc_ask_would_have=${
+                  manualConfirmAddressAskWouldHave
+                    ? manualConfirmAddressAskWouldHave.side
+                    : "-"
+                } mc_ask_armed=${
+                  manualConfirmAddressAsk ? manualConfirmAddressAsk.side : "-"
+                } mc_handoff_would_have=${
+                  manualConfirmHandoffWouldHave ? "yes" : "no"
+                } mc_handoff_armed=${
+                  manualConfirmHandoff ? "yes" : "no"
+                } stage=${
+                  conversationControllerEntry?.stage ?? "-"
+                } has_quote=${activeQuotedRoute ? "yes" : "no"}`,
+              );
+            } catch {
+              // Never block the turn on trace emit failure.
             }
             // Reloc 3 mirror hoist: compact, transport-only projections
             // of the manual-confirm gate inputs so the trace emit can
@@ -6011,6 +6451,220 @@ async function handleInboundMessage(params: {
                 currentCustomerText: rawBody || null,
                 activeQuotedRoute: activeQuotedRoute || null,
               });
+
+              // ----------------------------------------------------------
+              // Cut #5 (2026-04-23): Turn-disposition AUTHORING gate.
+              //
+              // DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER.
+              //
+              // This is the Reloc 5 inversion going live at the output
+              // side. The four prior cuts (A1 flip, Cut #1/#2/#3 directive
+              // flip) removed state-machine authority one narrow rule at
+              // a time: state still AUTHORED a directive every turn, and
+              // the layer narrowly vetoed for correction / ack / the three
+              // A1 semantic gates. Every other failure mode (side question,
+              // route change mid-flow, cancel mid-collection) kept falling
+              // through to the state machine's ASK_X directive.
+              //
+              // Cut #5 inverts the authoring axis. `decideTurnDisposition`
+              // — already bake-shadowing via `observeTurnDecision` at turn
+              // end — is consulted here, BEFORE `directiveActionForRender`
+              // is assigned. When the layer classifies the turn as anything
+              // other than `continue_step` (i.e. `answer` / `acknowledge` /
+              // `requote` / `edit_field` / `cancel_confirmation` / `handoff`
+              // / `idle`), the state-machine directive is NOT consumed:
+              // `directiveActionForRender` stays null, A0c has nothing to
+              // dispatch, and the LLM's draft survives through Region A.
+              // Only `continue_step` falls through to exactly today's
+              // behaviour (the state machine authors the ASK, A0c renders
+              // it). This collapses the five shadow suppress rules plus
+              // the two live directive-flip rules into one authoring gate
+              // with a uniform trace shape.
+              //
+              // Orthogonal safeguards (the disposition derivation already
+              // encodes most of these internally; we re-check the env flag
+              // at the callsite for one-line rollback):
+              //   1. Env flag `RIDERS_TURN_DISPOSITION_AUTHOR_LIVE` default
+              //      "on"; explicit "off" restores legacy behaviour.
+              //   2. Missing / invalid proposer → Rule 2 falls through to
+              //      `continue_step` with `no_proposer` fallthrough reason.
+              //      State grounds the turn.
+              //   3. Low-confidence classifications that don't match a
+              //      rule fall through to Rule 9's `continue_step`
+              //      default. State grounds the turn.
+              //   4. Hallucination guard fired on a manual-confirm route
+              //      → Rule 3 emits `handoff`, state-machine directive
+              //      is NOT re-emitted (the A0a/A0b manual-confirm
+              //      branches in Region A still fire from their own
+              //      flags). For non-manual-confirm routes with guard
+              //      fired, default `continue_step` applies and the
+              //      existing hallucination-guard repair paths (C1/C2)
+              //      still run.
+              //   5. Switch-option turns → Rule 9's
+              //      `switch_option_skip` → `continue_step`. The A4
+              //      recap path in `outbound-decision.ts` owns those
+              //      as today.
+              //
+              // Trace: `[turn-disposition/authoring]` — one line per turn,
+              // emitted UNCONDITIONALLY (even when env-off and even on
+              // `continue_step`) so a triager can grep per-conversation
+              // and see the full per-turn shape: flag, disposition,
+              // policy_rule, whether state-machine authoring was skipped,
+              // whether the prompt directive injection was skipped (always
+              // `no` for this cut — prompt-side gate is a separate follow-
+              // up since the proposer output isn't available at prompt-
+              // build time), the legacy directive that would have been
+              // authored, and the proposer signals that drove the choice.
+              // ----------------------------------------------------------
+              const dispositionAuthoringEnvOff =
+                (process.env.RIDERS_TURN_DISPOSITION_AUTHOR_LIVE || "on")
+                  .trim()
+                  .toLowerCase() === "off";
+              const dispositionProposerValidation = proposedTurnDecisionRaw
+                ? validateProposedTurnDecision(proposedTurnDecisionRaw)
+                : null;
+              const dispositionProposerValue =
+                dispositionProposerValidation &&
+                dispositionProposerValidation.ok
+                  ? dispositionProposerValidation.value
+                  : null;
+              const dispositionAddressedFields =
+                dispositionProposerValue?.turn_intent?.addressed_fields ?? [];
+              const dispositionMissingSet = new Set(missingForDirective);
+              const dispositionAddressedMissing =
+                dispositionAddressedFields.filter((f) =>
+                  dispositionMissingSet.has(f),
+                );
+              const dispositionAddressedNonMissing =
+                dispositionAddressedFields.filter(
+                  (f) => !dispositionMissingSet.has(f),
+                );
+              const dispositionManualConfirmOption = activeQuotedRoute
+                ? routeHasManualConfirmOption(activeQuotedRoute)
+                : false;
+              let authoringDisposition: TurnDispositionDecision | null = null;
+              try {
+                authoringDisposition = decideTurnDisposition({
+                  proposer: dispositionProposerValue
+                    ? {
+                        turn_kind:
+                          dispositionProposerValue.turn_kind ?? null,
+                        ti_kind:
+                          dispositionProposerValue.turn_intent?.kind ?? null,
+                        ti_confidence:
+                          dispositionProposerValue.turn_intent?.confidence ??
+                          null,
+                        ti_addressed_fields: dispositionAddressedFields,
+                        ac_kind:
+                          dispositionProposerValue.awaiting_confirmation
+                            ?.kind ?? null,
+                        po_kind:
+                          dispositionProposerValue.post_order_intent?.kind ??
+                          null,
+                      }
+                    : null,
+                  addressed_missing_fields: dispositionAddressedMissing,
+                  addressed_non_missing_fields: dispositionAddressedNonMissing,
+                  state: {
+                    stage_at_turn_start: stageAtTurnStart,
+                    has_active_quoted_route: !!activeQuotedRoute,
+                    active_quoted_route_has_manual_confirm_option:
+                      dispositionManualConfirmOption,
+                    has_summary_shown:
+                      conversationControllerEntry?.stage === "summary_shown" ||
+                      conversationControllerEntry?.stage ===
+                        "awaiting_confirmation",
+                    is_post_order:
+                      conversationControllerEntry?.stage ===
+                      "order_submitted",
+                    missing_fields_count: missingForDirective.length,
+                  },
+                  tool_context: {
+                    get_price_ran_this_turn:
+                      turnDrainedOpKinds.has("get_price"),
+                    start_booking_drained_this_turn:
+                      turnDrainedOpKinds.has("start_booking"),
+                    hallucination_guard_fired:
+                      (hallucinationGuardRejections || []).length > 0,
+                  },
+                  hints: {
+                    same_route_switch_option:
+                      sameRouteQuoteAction?.kind === "switch_option",
+                  },
+                  state_machine_candidate_directive:
+                    directive?.action ?? null,
+                });
+              } catch (dispositionDeriveError) {
+                try {
+                  api.logger.warn(
+                    `[turn-disposition/authoring] derive_failed conversation=${conversationId} error=${
+                      dispositionDeriveError instanceof Error
+                        ? dispositionDeriveError.message
+                        : String(dispositionDeriveError)
+                    }`,
+                  );
+                } catch {
+                  // Never block the turn on trace-layer errors.
+                }
+                authoringDisposition = null;
+              }
+              // Cut 9.0 (2026-04-23): Turn Router — state-machine
+              // authoring consumer. The router's `invoke_state_machine`
+              // flag is honoured HERE, but ONLY when the runtime default
+              // is `meaning_first`. Under the legacy default
+              // (`advance_form`), the router's flag is inert — Cut #5's
+              // post-LLM `authoringDisposition` alone continues to gate.
+              // This scaffolds the inversion without changing today's
+              // behaviour: flag off → Cut #5 decides; flag on → EITHER
+              // Cut #5 OR the router can skip.
+              //
+              // DEPLOY_CANARY_TURN_ROUTER_STATE_MACHINE_GATE_MARKER.
+              const routerStateMachineGateFires = Boolean(
+                turnRouterDecision &&
+                  turnRouterDecision.trace_annotations.default_mode ===
+                    "meaning_first" &&
+                  !turnRouterDecision.invoke_state_machine,
+              );
+              const stateMachineAuthoringSkipped = Boolean(
+                (!dispositionAuthoringEnvOff &&
+                  authoringDisposition &&
+                  authoringDisposition.disposition !== "continue_step") ||
+                  routerStateMachineGateFires,
+              );
+              try {
+                api.logger.info(
+                  `[turn-disposition/authoring] conversation=${conversationId} sessionKey=${guardSessionKey} flag=${
+                    dispositionAuthoringEnvOff ? "off" : "on"
+                  } disposition=${
+                    authoringDisposition?.disposition ?? "-"
+                  } policy_rule=${
+                    authoringDisposition?.policy_rule ?? "-"
+                  } sm_skipped=${
+                    stateMachineAuthoringSkipped ? "yes" : "no"
+                  } router_gate_fired=${
+                    routerStateMachineGateFires ? "yes" : "no"
+                  } router_mode=${
+                    turnRouterDecision?.mode ?? "-"
+                  } prompt_skipped=no legacy_would_have=${
+                    directive?.action ?? "-"
+                  } ti_kind=${
+                    dispositionProposerValue?.turn_intent?.kind ?? "-"
+                  } ti_confidence=${
+                    dispositionProposerValue?.turn_intent?.confidence ?? "-"
+                  } ac_kind=${
+                    dispositionProposerValue?.awaiting_confirmation?.kind ??
+                    "-"
+                  } turn_kind=${
+                    dispositionProposerValue?.turn_kind ?? "-"
+                  } stage=${stageAtTurnStart ?? "-"} fallthrough=${
+                    authoringDisposition?.trace_annotations
+                      ?.fallthrough_reason ?? "-"
+                  }`,
+                );
+              } catch {
+                // Never block the turn on trace emit failure.
+              }
+
               if (directive && directiveHasServerRenderer(directive.action)) {
                 // Phase 3 confirm-turn gate: when the active directive
                 // is the summary composer AND the customer's inbound
@@ -6070,7 +6724,11 @@ async function handleInboundMessage(params: {
                   directiveIsCollectionOrSummary &&
                   conversationControllerEntry?.stage === "quoted" &&
                   isInformationalOptionQuestion(rawBody || null);
-                if (!customerConfirmedOrder && !customerAskingInformational) {
+                if (
+                  !customerConfirmedOrder &&
+                  !customerAskingInformational &&
+                  !stateMachineAuthoringSkipped
+                ) {
                   // Surface conflict details so the CONFIRM_SLOT_CONFLICT
                   // renderer can name the conflicting values concretely.
                   let conflictingSlot: string | null = null;
@@ -6272,9 +6930,25 @@ async function handleInboundMessage(params: {
                     }
                   }
                 } else {
-                  const skipReason = customerAskingInformational
-                    ? "skipped_on_informational_option_question"
-                    : "skipped_on_order_confirmation";
+                  // Cut #5: include the disposition-authoring skip as a
+                  // first-class reason token. The pre-existing skip
+                  // reasons (`skipped_on_informational_option_question`,
+                  // `skipped_on_order_confirmation`) are narrow word-list
+                  // heuristics; the new
+                  // `skipped_on_disposition_<kind>` reason is the
+                  // uniform meaning-driven suppress token that will
+                  // eventually absorb both. Ordering: disposition skip
+                  // is reported when it would have fired even if the
+                  // legacy gates also matched, because it reflects the
+                  // higher-level decision (meaning says "not a step
+                  // advance this turn").
+                  const skipReason = stateMachineAuthoringSkipped
+                    ? `skipped_on_disposition_${
+                        authoringDisposition?.disposition ?? "unknown"
+                      }`
+                    : customerAskingInformational
+                      ? "skipped_on_informational_option_question"
+                      : "skipped_on_order_confirmation";
                   api.logger.info(
                     `[one-brain/directive-dispatch] ${skipReason} conversation=${conversationId} action=${directive.action} stage=${conversationControllerEntry?.stage || "-"} text=${JSON.stringify((rawBody || "").slice(0, 60))}`,
                   );

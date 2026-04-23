@@ -633,6 +633,108 @@ export function isInformationalOptionQuestion(text: string | null): boolean {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Implicit / contextual clarifying-question detector (Cut 7b, 2026-04-23).
+//
+// DEPLOY_CANARY_A0_DISPOSITION_ARMING_GATE_DETECTOR_MARKER.
+//
+// Complements `isInformationalOptionQuestion` by catching indirect
+// interrogative shapes that lack explicit `?` / wh-word / `how much`
+// markers but still read as a question or hypothetical probe about
+// the current context. The canonical failure transcript this detector
+// targets (2026-04-23):
+//
+//   customer (post-quote, manual-confirm catalog):
+//     "so i cant order rn if its manual confirmation"
+//
+// The legacy pipeline mis-classified this as a vague proceed signal
+// (the `detectVagueProceedSignal` substring match hit `confirm` inside
+// `confirmation`), armed `clarifyOptionBeforeProceed`, and stamped
+// the options menu over whatever the LLM had drafted. The explicit
+// interrogative detector missed it (no `?`, no `what|which|how|do you`).
+//
+// Consumed by:
+//   * `computePromptShapingDisposition` — promotes the turn's
+//     disposition to `answer` when the detector matches an active
+//     quoted route. Feeds the Cut 7b A0/A0a/A0b arming gate.
+//   * Direct callers that need the implicit-interrogative signal
+//     alongside the explicit one.
+//
+// Rules (both must hold):
+//
+//   1. Uncertainty marker — one of:
+//        a. Modal negation ("can't", "cannot", "wouldn't", ...).
+//        b. Conditional / hypothetical ("if", "unless", "whether", ...).
+//        c. "Mean/means/meaning" shape ("does that mean X").
+//        d. Sentence-initial discourse marker fronting a probe
+//           ("so", "wait", "hmm", "hold on", "then", "ok so", "oh",
+//           "i guess", ...).
+//        e. Modal-interrogative without punctuation ("can i",
+//           "could we", "do i", "is it", "does it", ...).
+//        f. Arabic analogues (ما أقدر / مو ممكن / لو / إذا / يعني).
+//
+//   2. Domain reference — at least one of the booking / option /
+//      price / manual-confirm / service-class vocab tokens.
+//
+// Negative short-circuits: explicit booking-start intents, explicit
+// order confirmations, and simple greetings never qualify.
+//
+// False-positive tolerance: the detector drives a disposition signal
+// that SKIPS pre-LLM A0/A0a/A0b substitutions. A false positive means
+// the LLM composes the reply instead of the server rendering the
+// options menu; the LLM has the full catalog / prices / manual-
+// confirm caveat in its prompt, so the reply stays contextually
+// correct. A false negative keeps today's behaviour, no regression.
+// ---------------------------------------------------------------------------
+const CONTEXTUAL_MODAL_NEGATION_EN =
+  /\b(can'?t|cannot|could'?nt|couldn'?t|would'?nt|wouldn'?t|should'?nt|shouldn'?t|wo'?nt|won'?t|wont|does'?nt|doesn'?t|do'?nt|don'?t|is'?nt|isn'?t|are'?nt|aren'?t|was'?nt|wasn'?t|were'?nt|weren'?t)\b/i;
+const CONTEXTUAL_CONDITIONAL_EN =
+  /\b(if|unless|whether|assuming|suppose|supposing|in\s+case)\b/i;
+const CONTEXTUAL_MEAN_EN = /\b(mean|means|meaning|meant)\b/i;
+const CONTEXTUAL_DISCOURSE_MARKER_EN =
+  /^(?:so|wait|hmm+|hold\s+on|then|ok\s+so|ok\s+but|oh+|right|i\s+guess|just|but)\b/i;
+const CONTEXTUAL_MODAL_INTERROGATIVE_EN =
+  /\b(?:can|could|should|would|do|does|did|am|is|are|was|were|will|shall|may|might|has|have|had)\s+(?:i|we|you|it|that|this|they)\b/i;
+const CONTEXTUAL_UNCERTAINTY_AR =
+  /(ما\s*(?:اقدر|أقدر|يصير|ينفع|يمكن)|مو\s+ممكن|مش\s+ممكن|ما\s+ينفع|يعني|قصدك|معنى)/u;
+const CONTEXTUAL_CONDITIONAL_AR = /(لو|إذا|اذا|ان\s+كان|إن\s+كان|يا\s+ترى)/u;
+
+const CONTEXTUAL_DOMAIN_EN =
+  /\b(order|orders|ordering|book|books|booking|booked|reserv(?:e|ed|ing|ation)|confirm(?:ation|ed|ing|s)?|approv(?:e|ed|ing|al|als)|manual|verif(?:y|ied|ication)|option|options|alternative|alternatives|price|pricing|cost|costs|fee|fees|kwd|kd|sedan|car|van|box|truck|express|fast|standard|normal|cool(?:ed)?|refrig(?:erated)?|helper|proceed|deliver(?:y|ies)?|pickup|send|ship|shipment)\b/i;
+const CONTEXTUAL_DOMAIN_AR =
+  /(طلب|طلبات|احجز|حجز|اطلب|اطلبها|اطلبه|تأكيد|تاكيد|يدوي|يدويه|يدوية|موافقة|موافقه|اعتماد|خيار|خيارات|سعر|اسعار|تكلفة|تكلفه|سيارة|سياره|سيدان|فان|بوكس|مبرد|مساعد|سريع|عادي|بديل|توصيل|ارسال)/u;
+
+export function isContextualClarifyingQuestion(text: string | null): boolean {
+  const trimmed = (text || "").trim();
+  if (!trimmed) return false;
+  // Keep scope narrow. Long messages are rarely pure clarifying
+  // questions at this granularity; defer to LLM on prose-level turns.
+  if (trimmed.length > 280) return false;
+
+  // Negative short-circuits — the act-intent detectors take precedence
+  // so we never reclassify an unambiguous booking start / confirmation /
+  // greeting as an implicit question.
+  if (isBookingStartIntent(trimmed)) return false;
+  if (isExplicitOrderConfirmation(trimmed)) return false;
+  if (isSimpleGreeting(trimmed)) return false;
+
+  const lower = trimmed.toLowerCase();
+
+  const hasUncertainty =
+    CONTEXTUAL_MODAL_NEGATION_EN.test(lower) ||
+    CONTEXTUAL_CONDITIONAL_EN.test(lower) ||
+    CONTEXTUAL_MEAN_EN.test(lower) ||
+    CONTEXTUAL_DISCOURSE_MARKER_EN.test(lower) ||
+    CONTEXTUAL_MODAL_INTERROGATIVE_EN.test(lower) ||
+    CONTEXTUAL_UNCERTAINTY_AR.test(trimmed) ||
+    CONTEXTUAL_CONDITIONAL_AR.test(trimmed);
+  if (!hasUncertainty) return false;
+
+  const hasDomain =
+    CONTEXTUAL_DOMAIN_EN.test(lower) || CONTEXTUAL_DOMAIN_AR.test(trimmed);
+  return hasDomain;
+}
+
 export function isPassengerTransportRequest(text: string): boolean {
   const normalized = normalizeIntentText(text);
   if (!normalized) {

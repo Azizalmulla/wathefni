@@ -17,6 +17,7 @@ import type {
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
+import type { TurnDisposition } from "../../shared/turn-disposition";
 import {
   getEffectiveDeliveryAreaName,
   getEffectivePickupAreaName,
@@ -580,15 +581,56 @@ export function formatOneBrainLiveChannelContext(params: {
    * gate (Bug 1) can fire on vague proceed signals.
    */
   currentCustomerText?: string | null;
+  /**
+   * Cut #6 (2026-04-23, Reloc 5 input-side): pre-LLM heuristic
+   * disposition. Passed in by the caller (who owns the env flag and
+   * detector wiring) so this formatter stays pure.
+   *
+   * DEPLOY_CANARY_PROMPT_SHAPING_DISPOSITION_GATE_MARKER.
+   *
+   * Contract:
+   *   * `null` / `undefined` / `"continue_step"` → prompt is IDENTICAL
+   *     to today (identity-safe default). Caller passes `null` when
+   *     the env flag `RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE` is off.
+   *   * Any other `TurnDisposition` → state-machine FACTS still
+   *     appear in the snapshot, but state-machine AUTHORING
+   *     imperatives are dropped: `next_required_action`,
+   *     `forbidden_reply_shapes`, `requested_slot_rule`,
+   *     `pending_area_rule`, `slot_conflicts_rule`, and hard rules 4
+   *     and 10 in their current "always advance / your draft is
+   *     discarded" form. Rules 4 and 10 are replaced by a single
+   *     meaning-mode rule (rule 4') that tells the LLM to respond to
+   *     the customer's actual meaning this turn. All other hard
+   *     rules (1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14) stay
+   *     unchanged — they are facts or structured-output contracts,
+   *     not authoring imperatives.
+   *
+   * The `prompt_shaping_disposition` marker line is emitted in the
+   * snapshot (always, when non-null) so the turn-snapshot log carries
+   * the shaping decision alongside every other system context line.
+   */
+  promptShapingDisposition?: TurnDisposition | null;
 }): string {
   const entry = params.controllerEntry || null;
   const draft = entry?.bookingDraft || null;
+  // Cut #6: shape the prompt when the caller decided (pre-LLM) that
+  // the turn isn't advancing the booking step. `null` or
+  // `continue_step` → identity; anything else → drop state-authoring
+  // imperatives (facts stay). Keep the gate as a single boolean so
+  // the per-block `if` checks below stay readable.
+  const promptShapingDisposition = params.promptShapingDisposition ?? null;
+  const dropStateAuthoringImperatives =
+    promptShapingDisposition !== null &&
+    promptShapingDisposition !== "continue_step";
   const lines: string[] = [
     "[SYSTEM CONTEXT - LIVE CHANNEL]",
     "Hidden runtime facts. Do not quote, mention, or explain this block to the customer.",
     "current_sender_role: customer",
     `current_customer_whatsapp: ${formatCustomerMemoryValue(params.normalizedReplyTarget)}`,
   ];
+  if (promptShapingDisposition) {
+    lines.push(`prompt_shaping_disposition: ${promptShapingDisposition}`);
+  }
   if (params.preferredReplyLanguage) {
     lines.push(`preferred_reply_language: ${params.preferredReplyLanguage}`);
   }
@@ -647,7 +689,15 @@ export function formatOneBrainLiveChannelContext(params: {
       currentCustomerText: params.currentCustomerText ?? null,
       activeQuotedRoute: params.quotedRoute ?? null,
     });
-    if (directive) {
+    // Cut #6 gate: these three lines are the state-machine's AUTHORING
+    // imperative — they tell the LLM what to do next. When meaning
+    // says the turn isn't advancing (answer / acknowledge / requote /
+    // edit_field / cancel_confirmation / handoff / idle), dropping
+    // them lets the LLM respond to what the customer actually said
+    // without being coerced into the next slot ask. State FACTS
+    // above (`booking_draft`, `missing_fields`) still inform the
+    // LLM's context.
+    if (directive && !dropStateAuthoringImperatives) {
       lines.push(`next_required_action: ${directive.action}`);
       if (directive.field) lines.push(`next_field: ${directive.field}`);
       if (directive.forbiddenShapes.length > 0) {
@@ -671,9 +721,15 @@ export function formatOneBrainLiveChannelContext(params: {
           `requested_slot_options: [${requestedSlot.options.map(formatOneBrainValue).join(", ")}]`,
         );
       }
-      lines.push(
-        `requested_slot_rule: The customer's next reply is answering "${requestedSlot.name}". Apply their value to that slot only. Do NOT route it to any other field, even if the value could plausibly belong elsewhere.`,
-      );
+      // Cut #6 gate: the requested-slot FACT is kept above (it's
+      // context the LLM benefits from knowing); only the imperative
+      // "apply their value to that slot only" is dropped when
+      // meaning says the turn is not a step advance.
+      if (!dropStateAuthoringImperatives) {
+        lines.push(
+          `requested_slot_rule: The customer's next reply is answering "${requestedSlot.name}". Apply their value to that slot only. Do NOT route it to any other field, even if the value could plausibly belong elsewhere.`,
+        );
+      }
     }
 
     // Area-clarification pinning (2026-04-21 regression). When the
@@ -689,9 +745,14 @@ export function formatOneBrainLiveChannelContext(params: {
     if (pinnedPickup || pinnedDropoff) {
       if (pinnedPickup) lines.push(`pending_pickup_area: ${pinnedPickup}`);
       if (pinnedDropoff) lines.push(`pending_dropoff_area: ${pinnedDropoff}`);
-      lines.push(
-        `pending_area_rule: The indicated side(s) are already resolved by the server. The customer's next reply is answering the OTHER side's clarification. When you call \`get_price\`, pass the pinned value for the resolved side EXACTLY as shown above — do NOT echo the customer's new single-area mention on both legs. Symmetric \`get_price(pickup=X, dropoff=X)\` calls are always wrong at this stage.`,
-      );
+      // Cut #6 gate: pending-area FACTS stay; the imperative
+      // "the customer's next reply is answering X" is dropped when
+      // meaning says the turn is not a step advance.
+      if (!dropStateAuthoringImperatives) {
+        lines.push(
+          `pending_area_rule: The indicated side(s) are already resolved by the server. The customer's next reply is answering the OTHER side's clarification. When you call \`get_price\`, pass the pinned value for the resolved side EXACTLY as shown above — do NOT echo the customer's new single-area mention on both legs. Symmetric \`get_price(pickup=X, dropoff=X)\` calls are always wrong at this stage.`,
+        );
+      }
     }
 
     // Surface conflicts for slots that the customer has filled but a later
@@ -708,9 +769,14 @@ export function formatOneBrainLiveChannelContext(params: {
     }
     if (conflicts.length > 0) {
       lines.push(`slot_conflicts: [${conflicts.join("; ")}]`);
-      lines.push(
-        `slot_conflicts_rule: One or more slots have conflicting values. Ask the customer to confirm which is correct before continuing. Do NOT silently overwrite.`,
-      );
+      // Cut #6 gate: slot-conflict FACTS stay; the imperative
+      // "ask the customer to confirm" is dropped when meaning says
+      // the turn is not a step advance.
+      if (!dropStateAuthoringImperatives) {
+        lines.push(
+          `slot_conflicts_rule: One or more slots have conflicting values. Ask the customer to confirm which is correct before continuing. Do NOT silently overwrite.`,
+        );
+      }
     }
   }
 
@@ -718,13 +784,34 @@ export function formatOneBrainLiveChannelContext(params: {
   lines.push("  1. Every price you state must come from a get_price result for the active route this turn or an already-active quoted route above. Never invent, cache, or reuse prices from earlier in the conversation if the route changed.");
   lines.push("  2. The only way to place an order is calling create_simple_order. The server validates the draft, route, service, and price; if it rejects, fix what it asks and try again. Never claim an order was placed without a successful tool result.");
   lines.push("  3. Reply language rule — only two valid reply scripts: (a) if `customer_script_mode` is `arabic`, reply in Arabic script (Kuwaiti White Dialect); (b) if `customer_script_mode` is `english`, reply in English. NEVER reply in Arabizi (Latin letters with digit-for-letter substitutions like 7/9/5/6/3/2) — this is NOT a valid reply style, even if the customer wrote to you in Arabizi. When a customer writes in Arabizi (e.g. `slam 3laikm`, `bkm il tws6eel`, `shlonkm`), understand it and reply in English. If the customer switches between Arabic script and English between turns, switch with them immediately.");
-  lines.push("  4. Every reply must move the conversation forward. Never emit a standalone acknowledgement like 'Sure', 'Noted', 'Understood', or 'We'll proceed' without also taking the next concrete action in the same message (ask for the next missing field, show the summary, confirm, etc.). Rule 5 defines what 'next concrete action' means for informational questions — for those, answering the question IS the concrete action and you must not append the next ASK step.");
+  // Cut #6 gate: rule 4 is the form-authoring imperative ("every
+  // reply must move the conversation forward"). On turns the
+  // pre-LLM shaping disposition classified as non-`continue_step`,
+  // swap it for a meaning-mode rule that tells the LLM to respond
+  // to what the customer actually said. Rule 5 (informational
+  // answer-only) stays in force either way, since it already
+  // handles the ANSWER disposition cleanly.
+  if (dropStateAuthoringImperatives) {
+    lines.push("  4. Meaning-mode turn (shaping). The customer's message this turn is not advancing the booking step — respond to what they actually said. If they asked a question, answer it using the facts above. If they acknowledged, acknowledge back briefly. If they changed the route, call `get_price` with the new route. If they're cancelling, handle the cancellation. If they corrected a prior value, apply the correction via `apply_booking_field` and confirm the update. Do NOT mechanically append the next slot ask on top of your reply; the server will re-enter the collection flow on the next turn if the customer is still booking. Keep replies concise and natural.");
+  } else {
+    lines.push("  4. Every reply must move the conversation forward. Never emit a standalone acknowledgement like 'Sure', 'Noted', 'Understood', or 'We'll proceed' without also taking the next concrete action in the same message (ask for the next missing field, show the summary, confirm, etc.). Rule 5 defines what 'next concrete action' means for informational questions — for those, answering the question IS the concrete action and you must not append the next ASK step.");
+  }
   lines.push("  5. Informational option/price questions (e.g. 'what is the cheapest?', 'most expensive option?', 'do you have a van?', 'is there a faster one?', 'how much for express?', 'شنو أرخص خيار؟', 'عندكم باص؟') are ANSWER-ONLY turns. Reply with the direct answer (option name + price, or a short factual yes/no) and stop. Do NOT append the next slot ask (sender name, phone, recipient, address, etc.), do NOT invite the customer to proceed, do NOT attach a 'if you want to book it, send me…' suffix — even when `next_required_action` is a slot ask. The customer is evaluating options, not proceeding. Only advance to the next slot ask when the customer's NEXT message contains an explicit proceed signal: 'yes', 'go', 'let's do it', 'book it', 'proceed', 'continue', 'confirm', 'اطلب', 'اكمل', 'نعم', 'تمام خلّيها', 'خذ', 'سكّر', etc.");
   lines.push("  6. Edit turns — when the customer explicitly edits already-filled fields (e.g. 'block 3 to block 4', 'change the street to 10', 'no, make it sedan_fast', 'بدّل الشقة إلى 25') after the summary or during confirmation, treat the new values as the sole source of truth. Acknowledge the update briefly and either re-show the updated summary or ask only for the specific field that is still genuinely ambiguous. Do NOT re-offer the old value as an alternative. Do NOT say 'is it A or B?' listing the pre-edit and post-edit values. The server applies the edit; your job is to confirm it, not to re-litigate it.");
   lines.push("  7. Cancel vs option-switch — NEVER call `cancel_booking` when the same customer utterance also names one of the currently quoted options (e.g. 'nvm pls standard sedan', 'cancel, actually fast box van', 'skip the helper, do sedan instead', 'لا بس مبرد', 'مو مساعد، عادي'). 'nvm', 'never mind', 'forget it', 'skip', 'cancel', 'actually', 'no' paired with a vehicle/option name is an OPTION SWITCH, not a cancellation. In that case, emit an `apply_booking_field` or option-selection update for the named option if applicable, answer the customer by naming the switched-to option + its quoted price, and continue the flow. Only call `cancel_booking` when the customer clearly wants to abandon the booking entirely, with no option-switch wording in the same message ('cancel the booking', 'never mind the whole thing', 'ألغي الطلب').");
   lines.push("  8. Manual-confirmation options — some options in the active route's option catalog require manual confirmation by our team and CANNOT be placed via `create_simple_order` directly (typically flagged in `optionCatalog` with a direct-chat-booking status like 'manual_confirmation_required'; Helper service and refrigerated-van variants are canonical cases). The SERVER composes the customer-facing reply on these turns — it always names the option, its price, the 'needs manual confirmation by our team' signal, and the next address ask (or the handoff message once both addresses are collected). On the handoff turn (both addresses satisfied) the server ALSO synthesizes the `request_handoff` op and triggers the Octopus human-agent transfer via the rendered reply — you don't need to emit the op (emitting it is idempotent and fine for audit). What matters on your side is the OP layer: do NOT call `create_simple_order`, do NOT collect sender/recipient identity, apply address ops normally for pickup + delivery. The customer is not booking an instant order; they are handing off to a human for manual scheduling.");
   lines.push("  9. Structured option interpretation — whenever the customer's message in THIS turn names or implies a choice among the currently quoted options (switching, confirming, or asking about a specific one: 'express ref van', 'the cool one', 'helper please', 'خذ المبرد', 'standard sedan بس'), you MUST call the `propose_option_interpretation` tool alongside your reply. Emit the structured reading: `class` ∈ {sedan, van, cooled_van, helper} (null if the customer didn't signal a class), `tier` ∈ {normal, fast} (null if the customer didn't signal a tier), `source_quote` = substring of the customer's inbound text this turn, `confidence` = 'high' when you are confident, 'low' when genuinely ambiguous. This is PROPOSE-ONLY — the server reconciles your structured reading with its own deterministic parse and decides whether to commit or clarify. Do NOT call it on generic booking questions, price asks, or messages that don't name an option. Do NOT mention the tool to the customer.");
-  lines.push("  10. Server-composed directive replies — for collection-flow directives (`ASK_SENDER_NAME_AND_PHONE_DECISION`, `ASK_SENDER_NAME`, `ASK_SENDER_PHONE`, `ASK_RECIPIENT_NAME_AND_PHONE`, `ASK_PICKUP_ADDRESS`, `ASK_DELIVERY_ADDRESS`, `ASK_MISSING_AREAS`, `ASK_PICKUP_AREA`, `ASK_DELIVERY_AREA`, `CONFIRM_SLOT_CONFLICT`, and `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED`) the SERVER composes your outbound reply from state. Your draft reply on these turns is discarded — what matters is the OP layer: call `apply_booking_field` for any values the customer just provided, call the right tools for any other state transitions, and be concise. Do not agonise over phrasing the ask or the summary: the server will render it, and it will use the correct field names / addresses / prices / language. The one exception within `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED` is the CONFIRM turn — when the customer's current message is an explicit order confirmation (\"yes\", \"confirm\", \"go ahead\", \"اكمل\", \"تمام\") the server does NOT re-render the summary; that is YOUR turn to call `create_simple_order` and acknowledge the placed order.");
+  // Cut #6 gate: rule 10 is the "your draft is discarded" signal
+  // that makes the LLM under-invest in its reply on collection turns.
+  // On meaning-mode turns (non-`continue_step` by pre-LLM shaping),
+  // the server is NOT going to substitute the directive on the output
+  // side either (Cut #5 already inverts that), so the LLM should
+  // invest in its reply. Drop rule 10 entirely; rule 4' already tells
+  // it how to behave on these turns. On `continue_step` turns the
+  // rule stays in force as today.
+  if (!dropStateAuthoringImperatives) {
+    lines.push("  10. Server-composed directive replies — for collection-flow directives (`ASK_SENDER_NAME_AND_PHONE_DECISION`, `ASK_SENDER_NAME`, `ASK_SENDER_PHONE`, `ASK_RECIPIENT_NAME_AND_PHONE`, `ASK_PICKUP_ADDRESS`, `ASK_DELIVERY_ADDRESS`, `ASK_MISSING_AREAS`, `ASK_PICKUP_AREA`, `ASK_DELIVERY_AREA`, `CONFIRM_SLOT_CONFLICT`, and `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED`) the SERVER composes your outbound reply from state. Your draft reply on these turns is discarded — what matters is the OP layer: call `apply_booking_field` for any values the customer just provided, call the right tools for any other state transitions, and be concise. Do not agonise over phrasing the ask or the summary: the server will render it, and it will use the correct field names / addresses / prices / language. The one exception within `WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED` is the CONFIRM turn — when the customer's current message is an explicit order confirmation (\"yes\", \"confirm\", \"go ahead\", \"اكمل\", \"تمام\") the server does NOT re-render the summary; that is YOUR turn to call `create_simple_order` and acknowledge the placed order.");
+  }
   lines.push("  11. structured_output_v1 — every customer turn, call `propose_turn_decision` exactly ONCE, BEFORE you emit your final reply. Fields: `schema_version=\"1.2\"` (use \"1.2\" going forward; \"1.1\" and \"1.0\" remain accepted); `turn_kind` ∈ {initial_route, post_clarify_continuation, informational, address_collection, booking_detail_collection, confirmation_or_cancel, post_order_chat, other} — your self-classification of this turn; `pricing_decision.action` ∈ {call_get_price, continue_existing_quote, informational_only, awaiting_state, none} with a one-line `reason`; `planned_tool_calls` is the names of tools you intend to call THIS turn, in order (names only, e.g. [\"get_price\", \"set_pending_area\"]); `customer_reply_draft` is the text you intend to say. Rules: (a) if this turn carries a route intent AND there is no active quoted route, `action` MUST be `call_get_price` AND `\"get_price\"` MUST appear in `planned_tool_calls` AND you MUST actually call `get_price` this turn; (b) on a post_clarify_continuation turn (when `requested_slot` is `pickup_area` or `dropoff_area`, or `pending_pickup_area`/`pending_dropoff_area` is set), `action` MUST be `call_get_price` and `\"get_price\"` MUST appear in `planned_tool_calls`; (c) never call `propose_turn_decision` more than once per turn; (d) the tool is observability-only — it does NOT replace calling `get_price` or any other state tool, and its output is NOT shown to the customer.");
   lines.push("  12. awaiting_confirmation classification (v1.1) — when `current_conversation_stage` is `summary_shown` OR `awaiting_confirmation`, you MUST include `awaiting_confirmation` in your `propose_turn_decision` call. Set `awaiting_confirmation.kind` to EXACTLY ONE of these six, chosen by the MEANING of the customer's turn (not the surface words): `confirm_order` — the customer agrees with the summary and wants the order placed (explicit like \"yes\", \"confirm\", \"نعم\", \"أكد\"; soft like \"ok\", \"okay\", \"تمام\", \"اوكي\", \"ايوه\", \"great\", \"sure\"; and any natural-language variant like \"send it\", \"ارسله\", \"let's do this\", \"go for it\", \"please proceed and place the order\"); `cancel_order` — the customer wants to abandon the booking entirely (\"cancel\", \"ألغي\", \"never mind the whole thing\", \"stop it\"), NOT option switches; `edit_order` — the customer wants to correct or change one or more fields on the summary (option switch like \"actually make it fast box van\", address/identity/route edits, vehicle class change); `informational_question` — the customer is asking a question about the summary/options/prices/timing/service without confirming or editing; `coherence_pleasantry` — brief conversational filler that is not an action (greetings like \"hi\", \"السلام عليكم\"; thanks like \"شكرا\", \"thank you\"; fillers like \"one sec\", \"لحظة\", \"hmm\", \"noted\"; politeness not attached to an action); `unclear` — genuinely ambiguous, off-topic, or too short to classify confidently. Also set `awaiting_confirmation.reason` to a short (≤200 chars) rationale for your choice. Outside of these two stages, OMIT `awaiting_confirmation` (or set it to null). This field is shadow-mode today — the server logs your classification for quality review; the policy map (confirm → place order, cancel → cancel, edit → correction flow, informational → answer + preserve, coherence → brief ack + nudge, unclear → short clarify) will be wired into live behavior in a later PR once your classification quality is measured.");
   // DEPLOY_CANARY_TURN_INTENT_PROMPT_MARKER: rule 13 turn_intent shadow
