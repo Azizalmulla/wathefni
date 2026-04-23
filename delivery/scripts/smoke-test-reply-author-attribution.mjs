@@ -141,53 +141,10 @@ function prePassthrough(replyText) {
   assert.equal(res.replyAuthor, "fallback", "R2 attribution");
 }
 
-// -------------------------------------------------------------------------
-// R3: clarify-before-proceed substitution → replace_authoritative →
-// replyAuthor="server".
-// -------------------------------------------------------------------------
-{
-  const route = {
-    routeKey: "a__b",
-    pickupAreaNameEn: "A",
-    pickupAreaNameAr: "أ",
-    dropoffAreaNameEn: "B",
-    dropoffAreaNameAr: "ب",
-    pricesByType: { sedan_normal: 1.25, helper_standard: 3.25 },
-    optionCatalog: [
-      {
-        delivery_type: "sedan_normal",
-        label_en: "Standard sedan",
-        label_ar: "سيدان عادي",
-        quoted_price: 1.25,
-        formatted_price: "1.250 KWD",
-        visibility: "visible",
-        direct_chat_booking_status: "verified",
-        direct_chat_booking_note: null,
-      },
-      {
-        delivery_type: "helper_standard",
-        label_en: "Helper service",
-        label_ar: "مع مساعد",
-        quoted_price: 3.25,
-        formatted_price: "3.250 KWD",
-        visibility: "visible",
-        direct_chat_booking_status: "manual_confirmation_required",
-        direct_chat_booking_note: null,
-      },
-    ],
-    serviceDiscovery: null,
-  };
-  const res = decidePreStateOutbound({
-    ...prePassthrough("Sure, let me start the booking."),
-    activeQuotedRoute: route,
-    clarifyOptionBeforeProceed: true,
-    buildDeterministicClarifyOptionBeforeProceedReply: ({ language }) =>
-      language === "ar" ? "أي خيار تفضل؟" : "Which option would you like?",
-  });
-  assert.equal(res.reason, "replace_clarify_option_before_proceed", "R3 reason");
-  assert.equal(res.decision, "replace_authoritative", "R3 decision");
-  assert.equal(res.replyAuthor, "server", "R3 attribution");
-}
+// R3 removed in authority-cutover phase 3 (2026-04-23): the
+// clarify-before-proceed substitution branch was deleted from
+// decidePreStateOutbound. The LLM composes option / manual-confirm
+// questions itself from prompt facts.
 
 // -------------------------------------------------------------------------
 // R4: directive-ask substitution (Phase 2) → replace_authoritative →

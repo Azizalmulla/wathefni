@@ -7062,6 +7062,18 @@ async function handleInboundMessage(params: {
                   }
                 : null;
 
+            // Authority cutover phase 3 (2026-04-23): the A0/A0a/A0b
+            // Region-A substitution inputs are no longer passed — their
+            // consumer branches in decidePreStateOutbound were deleted
+            // now that phase 2 forced the arming flags to constants.
+            // `clarifyOptionBeforeProceed`, `manualConfirmAddressAsk`,
+            // `manualConfirmHandoff` and the three matching builders
+            // (`buildDeterministicClarifyOptionBeforeProceedReply`,
+            // `buildDeterministicManualConfirmAddressAskReply`,
+            // `buildDeterministicManualConfirmHandoffReply`) are gone.
+            void clarifyOptionBeforeProceed;
+            void manualConfirmAddressAsk;
+            void manualConfirmHandoff;
             const preDecision = decidePreStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -7074,16 +7086,10 @@ async function handleInboundMessage(params: {
               extractPricesFromText: guardState?.extractPricesFromText || ((_: string) => []),
               activeQuotedRoute,
               sameRouteQuoteAction,
-              clarifyOptionBeforeProceed,
-              manualConfirmAddressAsk,
-              manualConfirmHandoff,
               directiveAction: directiveActionForRender,
               directiveRenderContext: directiveRenderContextForRender,
               renderDirectiveReply,
               buildDeterministicSelectedQuotedOptionReply,
-              buildDeterministicClarifyOptionBeforeProceedReply,
-              buildDeterministicManualConfirmAddressAskReply,
-              buildDeterministicManualConfirmHandoffReply,
               conversationId,
               sessionKeyForLogs: guardSessionKey,
               controllerStage: conversationControllerEntry?.stage || null,
