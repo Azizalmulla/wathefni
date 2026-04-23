@@ -1068,44 +1068,15 @@ export function routeHasManualConfirmOption(route: StoredQuotedRoute | null | un
   );
 }
 
-/**
- * Deterministic clarify-before-proceed reply builder. Used as the
- * server-composed substitute when the customer sends a vague proceed
- * signal on a route that contains a manual-confirm option. Lists the
- * priced options with their labels + prices and asks the customer to
- * name one explicitly. Flags manual-confirm options in-line so the
- * customer knows which require a human handoff.
- *
- * Kept short (one question, bullet list) so it composes cleanly with the
- * same-route-quote-options reply and doesn't re-state the route header
- * the customer already saw.
- */
-export function buildDeterministicClarifyOptionBeforeProceedReply(params: {
-  language: "ar" | "en";
-  route: StoredQuotedRoute;
-}): string {
-  const priced = params.route.optionCatalog.filter((o) => o.quoted_price != null);
-  if (params.language === "ar") {
-    const header = "أي خيار تفضل نكمل فيه؟";
-    const bullets = priced.map((option) => {
-      const label = formatQuotedOptionLabel(option, "ar");
-      const price = formatQuotedOptionPrice(option);
-      const status = String(option.direct_chat_booking_status || "").toLowerCase();
-      const suffix = status === "manual_confirmation_required" ? " (يحتاج تأكيد يدوي)" : "";
-      return `- ${label}: ${price}${suffix}`;
-    });
-    return [header, ...bullets].join("\n");
-  }
-  const header = "Which option would you like to go ahead with?";
-  const bullets = priced.map((option) => {
-    const label = formatQuotedOptionLabel(option, "en");
-    const price = formatQuotedOptionPrice(option);
-    const status = String(option.direct_chat_booking_status || "").toLowerCase();
-    const suffix = status === "manual_confirmation_required" ? " (needs manual confirmation)" : "";
-    return `- ${label}: ${price}${suffix}`;
-  });
-  return [header, ...bullets].join("\n");
-}
+// Authority-cutover Phase 6 (2026-04-23): the deterministic
+// clarify-before-proceed reply builder lived here. It composed the
+// "which option would you like to go ahead with?" bullet list used by
+// the A0 Region-A substitution when the customer sent a vague proceed
+// signal on a route with a manual-confirm option. Both the A0 branch
+// and its upstream directive (CLARIFY_OPTION_BEFORE_PROCEED) were
+// deleted in cutover phases 1-3; this builder has no callers left. The
+// LLM now handles vague-proceed clarifications natively using the
+// option catalog + hard rule 8 in the prompt.
 
 export function resolveSameRouteQuoteFollowupAction(params: {
   visibleText: string;
@@ -1197,78 +1168,19 @@ export function buildDeterministicSelectedQuotedOptionReply(params: {
   return lines.join("\n");
 }
 
-/**
- * Manual-confirm address-ask reply (Bug 4, 2026-04-20 manual-confirm
- * signal drop incident).
- *
- * When the customer has explicitly selected a `manual_confirmation_required`
- * option on a quoted route, the server must compose the address-collection
- * prompt directly so the "needs manual confirmation by our team" signal is
- * never dropped from the outbound text. Previously the LLM generated this
- * reply free-hand — the hard prompt rule held in some turns but drifted in
- * others, making the flow indistinguishable from a direct-booking address
- * ask. This builder makes the signal deterministic.
- *
- * The `side` parameter controls which address the reply requests next:
- *   - `"pickup"`   → used when only `delivery.address` is present
- *   - `"delivery"` → used when only `pickup.address` is present
- *
- * When BOTH addresses are missing we ask for pickup first (matches the
- * existing controller ordering). When BOTH addresses are already present
- * the caller switches to the handoff builder instead.
- */
-export function buildDeterministicManualConfirmAddressAskReply(params: {
-  language: "ar" | "en";
-  route: StoredQuotedRoute;
-  option: RouteQuoteOption;
-  side: "pickup" | "delivery";
-}): string {
-  const label = formatQuotedOptionLabel(params.option, params.language);
-  const price = formatQuotedOptionPrice(params.option);
-  if (params.language === "ar") {
-    const recap = `${label} ${price}. هذا الخيار يحتاج تأكيد يدوي من فريقنا قبل تثبيت الحجز.`;
-    const ask =
-      params.side === "pickup"
-        ? "ممكن ترسل لنا عنوان الاستلام (المنطقة، القطعة، الشارع، والمبنى/الشقة)؟"
-        : "ممكن ترسل لنا عنوان التوصيل (المنطقة، القطعة، الشارع، والمبنى/الشقة)؟";
-    return `${recap}\n${ask}`;
-  }
-  const recap = `${label} is ${price}. This option needs manual confirmation by our team before we can confirm the booking.`;
-  const ask =
-    params.side === "pickup"
-      ? "Could you share the pickup address (area, block, street, and building/apartment)?"
-      : "Could you share the delivery address (area, block, street, and building/apartment)?";
-  return `${recap}\n${ask}`;
-}
-
-/**
- * Manual-confirm handoff reply (Bug 4 companion builder).
- *
- * When the customer has selected a `manual_confirmation_required` option
- * AND both pickup + delivery addresses are already collected, the server
- * emits this deterministic handoff message. The accompanying
- * `REQUEST_HANDOFF_FOR_MANUAL_CONFIRM` directive tells the LLM to also
- * emit a `request_handoff` op; this builder guarantees the customer-
- * facing text is consistent regardless of the op pipeline.
- */
-export function buildDeterministicManualConfirmHandoffReply(params: {
-  language: "ar" | "en";
-  route: StoredQuotedRoute;
-  option: RouteQuoteOption;
-}): string {
-  const label = formatQuotedOptionLabel(params.option, params.language);
-  const price = formatQuotedOptionPrice(params.option);
-  if (params.language === "ar") {
-    return [
-      `${label} ${price}.`,
-      "هذا الخيار يحتاج تأكيد يدوي من فريقنا. استلمنا العناوين، وراح يتواصل معك أحد الموظفين لتأكيد الحجز.",
-    ].join("\n");
-  }
-  return [
-    `${label} is ${price}.`,
-    "This option needs manual confirmation by our team. We have your addresses — one of our agents will reach out shortly to confirm the booking.",
-  ].join("\n");
-}
+// Authority-cutover Phase 6 (2026-04-23): the deterministic
+// manual-confirm address-ask and handoff reply builders lived here.
+// They were used by the A0a / A0b Region-A substitutions (deleted in
+// cutover phases 2-3) to stamp a server-composed address ask or
+// handoff reply over the LLM's draft whenever the selected option was
+// `manual_confirmation_required`. Both the substitutions and the
+// upstream directives (ASK_*_FOR_MANUAL_CONFIRM /
+// REQUEST_HANDOFF_FOR_MANUAL_CONFIRM) are gone; these builders have no
+// callers left. The LLM now composes the manual-confirm asks/handoff
+// natively using hard rule 8 + the option catalog facts in the
+// system-context block. The server-side request_handoff op synthesis
+// in index.ts still fires independently to guarantee the op reaches
+// the tool pipeline even if the LLM omits it.
 
 export function buildQuotedRouteContextLines(
   route: StoredQuotedRoute | null | undefined,

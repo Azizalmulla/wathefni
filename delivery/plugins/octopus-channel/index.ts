@@ -239,9 +239,6 @@ import {
   routeHasManualConfirmOption,
   resolveSameRouteQuoteFollowupAction,
   buildDeterministicSelectedQuotedOptionReply,
-  buildDeterministicClarifyOptionBeforeProceedReply,
-  buildDeterministicManualConfirmAddressAskReply,
-  buildDeterministicManualConfirmHandoffReply,
   buildDeterministicOtherQuotedOptionsReply,
   buildQuotedRouteContextLines,
   matchQuotedOptionDiscriminated,
@@ -5767,7 +5764,8 @@ async function handleInboundMessage(params: {
                 // substitute the handoff reply), we guarantee the op
                 // is accounted for. The Octopus `toagent` trigger is
                 // independently wired via `shouldMoveToHumanAgent`
-                // matching the handoff reply text, so this branch is
+                // matching the LLM-authored handoff reply text, so
+                // this branch is
                 // primarily about audit-trail consistency and the
                 // `handoff=yes` log signal.
                 //

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // ---------------------------------------------------------------------------
-// Smoke test: Phase 4 — server-synthesized request_handoff + toagent
-// escalation for manual-confirm handoff turns (2026-04-20).
+// Smoke test: server-synthesized request_handoff + toagent escalation
+// (2026-04-20, narrowed 2026-04-23).
 //
 // Product rule:
 //   On manual-confirm handoff turns (selected option has
@@ -13,23 +13,27 @@
 //        the tool (so `handoffRequested=true` is guaranteed).
 //     2. The Octopus `toagent` API call fires via
 //        `shouldMoveToHumanAgent` matching distinctive substrings of
-//        the server-rendered handoff reply ("one of our agents will
-//        reach out" / "راح يتواصل معك أحد الموظفين"). These markers
-//        appear ONLY in the handoff reply, not in pickup/delivery ask.
+//        the handoff reply text ("one of our agents will reach out" /
+//        "راح يتواصل معك أحد الموظفين").
+//
+// Authority-cutover Phase 6 (2026-04-23): the deterministic
+// manual-confirm reply builders were deleted together with the A0a /
+// A0b Region-A substitutions. The LLM now composes the handoff +
+// address-ask replies natively (hard rule 8 + option catalog facts).
+// The previous H1/H2/H3 + M1-M4 cases exercised the deleted builders
+// directly and were dropped. What's still load-bearing:
+//   * `shouldMoveToHumanAgent` — still gates the `toagent` call in
+//     `sendOctopusTextReply` and must keep its preservation markers
+//     working (support-tool stub, human-agent phrasing, etc.).
+//   * The server-synthesis drain block in index.ts — still emits
+//     `request_handoff` with a `manual_confirm_*` reason when the LLM
+//     forgets to call the tool on a manual-confirm turn.
 //
 // Cases covered:
-//   M1   shouldMoveToHumanAgent — matches EN handoff reply text
-//   M2   shouldMoveToHumanAgent — matches AR handoff reply text
-//   M3   shouldMoveToHumanAgent — does NOT match pickup-ask reply
-//        (which also mentions manual confirmation, but not "agents will
-//        reach out")
-//   M4   shouldMoveToHumanAgent — does NOT match delivery-ask reply
-//   M5   shouldMoveToHumanAgent — continues to match pre-existing
-//        escalation markers (support-tool stub + "human agent")
-//   H1   Deterministic handoff reply contains the EN marker
-//   H2   Deterministic handoff reply contains the AR marker
-//   H3   Deterministic address-ask replies do NOT contain the handoff
-//        markers (prevents false toagent triggers)
+//   M5   shouldMoveToHumanAgent — pre-existing escalation markers
+//        (support-tool stub + "human agent") keep working.
+//   S1   Source-shape anchor: the server-synthesis drain block in
+//        index.ts still fires on the right conditions.
 // ---------------------------------------------------------------------------
 
 import assert from "node:assert/strict";
@@ -47,151 +51,7 @@ function loadTs(relativePath) {
 }
 
 const intentText = loadTs("plugins/octopus-channel/lib/intent-text.ts");
-const quotedOptions = loadTs("plugins/octopus-channel/lib/quoted-options.ts");
-
 const { shouldMoveToHumanAgent } = intentText;
-const {
-  buildDeterministicManualConfirmAddressAskReply,
-  buildDeterministicManualConfirmHandoffReply,
-} = quotedOptions;
-
-function opt(deliveryType, labelEn, labelAr, price) {
-  return {
-    delivery_type: deliveryType,
-    label_ar: labelAr,
-    label_en: labelEn,
-    quoted_price: price,
-    formatted_price: `${price.toFixed(3)} KWD`,
-    visibility: "visible",
-    direct_chat_booking_status: "manual_confirmation_required",
-    direct_chat_booking_note: null,
-  };
-}
-
-const COOLED_VAN_FAST = opt(
-  "cooled_van_fast",
-  "Express refrigerated van",
-  "سيارة مبردة سريع",
-  2.25,
-);
-const ROUTE = {
-  routeKey: "salmiya__jabriya",
-  pickupAreaNameEn: "Salmiya",
-  pickupAreaNameAr: "السالمية",
-  dropoffAreaNameEn: "Jabriya",
-  dropoffAreaNameAr: "الجابرية",
-  pricesByType: { cooled_van_fast: 2.25 },
-  optionCatalog: [COOLED_VAN_FAST],
-  serviceDiscovery: null,
-};
-
-// -------------------------------------------------------------------------
-// H1 / H2: deterministic handoff reply contains the matching markers.
-// -------------------------------------------------------------------------
-{
-  const en = buildDeterministicManualConfirmHandoffReply({
-    language: "en",
-    route: ROUTE,
-    option: COOLED_VAN_FAST,
-  });
-  assert.ok(
-    en.includes("one of our agents will reach out"),
-    `H1: EN handoff marker missing; got:\n${en}`,
-  );
-  assert.ok(
-    en.includes("Express refrigerated van"),
-    `H1: EN handoff names option; got:\n${en}`,
-  );
-}
-
-{
-  const ar = buildDeterministicManualConfirmHandoffReply({
-    language: "ar",
-    route: ROUTE,
-    option: COOLED_VAN_FAST,
-  });
-  assert.ok(
-    ar.includes("راح يتواصل معك أحد الموظفين"),
-    `H2: AR handoff marker missing; got:\n${ar}`,
-  );
-}
-
-// -------------------------------------------------------------------------
-// H3: address-ask replies (pickup + delivery) do NOT contain the
-// handoff markers. This is the critical scoping property — without it,
-// `shouldMoveToHumanAgent` would fire on every manual-confirm collection
-// turn and Octopus would escalate before addresses are collected.
-// -------------------------------------------------------------------------
-for (const side of ["pickup", "delivery"]) {
-  for (const language of ["en", "ar"]) {
-    const text = buildDeterministicManualConfirmAddressAskReply({
-      language,
-      route: ROUTE,
-      option: COOLED_VAN_FAST,
-      side,
-    });
-    assert.ok(
-      !text.includes("one of our agents will reach out"),
-      `H3: ${language}/${side} ask must not contain EN handoff marker; got:\n${text}`,
-    );
-    assert.ok(
-      !text.includes("راح يتواصل معك أحد الموظفين"),
-      `H3: ${language}/${side} ask must not contain AR handoff marker; got:\n${text}`,
-    );
-  }
-}
-
-// -------------------------------------------------------------------------
-// M1: EN handoff reply triggers toagent
-// -------------------------------------------------------------------------
-{
-  const en = buildDeterministicManualConfirmHandoffReply({
-    language: "en",
-    route: ROUTE,
-    option: COOLED_VAN_FAST,
-  });
-  assert.equal(
-    shouldMoveToHumanAgent(en),
-    true,
-    `M1: EN handoff reply must trigger toagent`,
-  );
-}
-
-// -------------------------------------------------------------------------
-// M2: AR handoff reply triggers toagent
-// -------------------------------------------------------------------------
-{
-  const ar = buildDeterministicManualConfirmHandoffReply({
-    language: "ar",
-    route: ROUTE,
-    option: COOLED_VAN_FAST,
-  });
-  assert.equal(
-    shouldMoveToHumanAgent(ar),
-    true,
-    `M2: AR handoff reply must trigger toagent`,
-  );
-}
-
-// -------------------------------------------------------------------------
-// M3 / M4: address-ask replies do NOT trigger toagent on manual-confirm
-// collection turns (pickup + delivery, EN + AR).
-// -------------------------------------------------------------------------
-for (const side of ["pickup", "delivery"]) {
-  for (const language of ["en", "ar"]) {
-    const text = buildDeterministicManualConfirmAddressAskReply({
-      language,
-      route: ROUTE,
-      option: COOLED_VAN_FAST,
-      side,
-    });
-    assert.equal(
-      shouldMoveToHumanAgent(text),
-      false,
-      `M${side === "pickup" ? "3" : "4"}: ${language}/${side} ask must NOT trigger toagent; got:\n${text}`,
-    );
-  }
-}
 
 // -------------------------------------------------------------------------
 // M5: pre-existing markers still work (regression lock).
@@ -211,7 +71,6 @@ for (const side of ["pickup", "delivery"]) {
     true,
     "M5d: 'moved to a human agent'",
   );
-  // Negatives — unrelated replies stay unmatched.
   assert.equal(
     shouldMoveToHumanAgent("Sure, what's the sender's phone?"),
     false,
@@ -225,10 +84,10 @@ for (const side of ["pickup", "delivery"]) {
 }
 
 // -------------------------------------------------------------------------
-// Source-shape anchor: the server-synthesis drain block in index.ts
-// exists and triggers on the right conditions. We grep the source to
-// anchor the structural contract — if someone deletes or renames the
-// synthesis block this test fails and forces a review.
+// S1: source-shape anchor — the server-synthesis drain block in
+// index.ts still exists and triggers on the right conditions. We grep
+// the source to anchor the structural contract — if someone deletes or
+// renames the synthesis block this test fails and forces a review.
 // -------------------------------------------------------------------------
 {
   const fs = await import("node:fs");
@@ -238,20 +97,12 @@ for (const side of ["pickup", "delivery"]) {
   );
   assert.ok(
     /\[one-brain\/server-handoff\] synthesized/.test(indexSrc),
-    "synthesis audit log line must exist in index.ts",
+    "S1: synthesis audit log line must exist in index.ts",
   );
   assert.ok(
     /request_handoff:server_synthesized\(/.test(indexSrc),
-    "synthesis appliedOps tag must exist in index.ts",
+    "S1: synthesis appliedOps tag must exist in index.ts",
   );
-  // The synthesis block must guard on both pickup AND delivery being
-  // satisfied — this is the same state `computeOneBrainNextRequiredAction`
-  // uses to pick REQUEST_HANDOFF_FOR_MANUAL_CONFIRM. Use a multi-line
-  // regex to verify the adjacent structure.
-  const synthesisBlockMatch = indexSrc.match(
-    /\[one-brain\/server-handoff\] synthesized[\s\S]{0,300}/,
-  );
-  assert.ok(synthesisBlockMatch, "synthesis block anchor present");
   // The block must only act when `!handoffRequested` — prevents double-
   // synthesis when the LLM already emitted the op. Grep for the guard
   // literal above the audit log.
@@ -260,7 +111,7 @@ for (const side of ["pickup", "delivery"]) {
   );
   assert.ok(
     withGuard,
-    "synthesis must guard on !handoffRequested to stay idempotent with LLM-emitted op",
+    "S1: synthesis must guard on !handoffRequested to stay idempotent with LLM-emitted op",
   );
 }
 
