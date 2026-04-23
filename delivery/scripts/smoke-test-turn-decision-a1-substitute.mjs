@@ -587,6 +587,30 @@ async function runSourceLevelChecks(fails) {
       `callsite: layerA1Passthrough injection missing from ${CALLSITE_REL}`,
     );
   }
+  // 2026-04-23 Job-A authority removal — the blanket callsite
+  // `a1FlipConfidenceOk` gate was deleted. `deriveA1Substitute` now
+  // owns per-rule confidence policy as the single source of truth.
+  // The removal marker must be present and no live second-guess check
+  // may reappear at the callsite.
+  if (
+    !callsiteSrc.includes(
+      "DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER",
+    )
+  ) {
+    fails.push(
+      `callsite: DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER missing from ${CALLSITE_REL}`,
+    );
+  }
+  if (/\bconst\s+a1FlipConfidenceOk\s*=/.test(callsiteSrc)) {
+    fails.push(
+      `callsite: a1FlipConfidenceOk declaration must be REMOVED from ${CALLSITE_REL} (Job-A authority removal); the derivation owns per-rule confidence policy`,
+    );
+  }
+  if (/\ba1FlipConfidenceOk\s*&&/.test(callsiteSrc)) {
+    fails.push(
+      `callsite: a1FlipConfidenceOk must NOT participate in a1FlipAllowed in ${CALLSITE_REL} (Job-A authority removal)`,
+    );
+  }
 
   // Expected policy_rule ids — these are string literals in the module.
   const RULE_IDS = [

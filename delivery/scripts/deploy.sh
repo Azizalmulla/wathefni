@@ -160,6 +160,17 @@ DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DECISION
 # the pre-hoist ordering and clarifying questions during a
 # clarify-before-proceed turn will continue to dump the option list.
 DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER'
+# Job-A authority removal (2026-04-23): the blanket callsite
+# `a1FlipConfidenceOk` gate has been deleted. `deriveA1Substitute` is
+# now the single source of truth for per-rule confidence policy
+# (`pass_on_clarifying` and `pass_on_partial_answer` already require
+# high/medium confidence inside the derivation; `pass_on_route_change`
+# uses structural signals by design and must not be vetoed by a
+# ti_confidence check, since fresh `initial_route` turns don't emit a
+# turn_intent). Absence means the deployed build still has the old
+# callsite second-guess gate and fresh-route turns will still be
+# over-gated into the legacy `replace_directive_ask` branch.
+DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER='DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER'
 # Relocation 4 (directive → layer, 2026-04-22): decideDirectiveDisposition
 # export present in the module, and directive_inputs block wired at the
 # trace callsite. Absence means the deployed build predates the
@@ -539,6 +550,11 @@ checks = [
         Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),
         '$DEPLOY_CANARY_TURN_DECISION_A1_SEMANTIC_GATE_HOIST_MARKER',
         'turn-decision A1 semantic-gate hoist marker',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER',
+        'turn-decision A1 flip confidence-gate removal marker (Job-A authority removal)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-decision.ts'),

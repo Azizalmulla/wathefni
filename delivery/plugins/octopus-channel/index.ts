@@ -6249,6 +6249,29 @@ async function handleInboundMessage(params: {
             // LLM's draft survive.
             //
             // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CALLSITE_MARKER.
+            // DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER.
+            //
+            // 2026-04-23 authority removal: the callsite previously held
+            // a BLANKET `ti_confidence ∈ {high, medium}` gate applied to
+            // ALL three passthrough rules. That gate was the wrong shape:
+            //
+            //   * `pass_on_clarifying` and `pass_on_partial_answer` ALREADY
+            //     require trustworthy confidence INSIDE `deriveA1Substitute`
+            //     (see `a1TiConfidenceIsTrustworthy`); the callsite check
+            //     was redundant.
+            //   * `pass_on_route_change` correctly uses STRUCTURAL signals
+            //     (`route_intent_fresh_this_turn`, stage, active quote) —
+            //     it does NOT look at `ti_confidence` because fresh
+            //     `initial_route` turns don't emit a `turn_intent` at all,
+            //     so `ti_confidence` is null on the exact turns the rule
+            //     is meant to catch. The callsite check was vetoing the
+            //     derivation's correct answer on those turns.
+            //
+            // Fix: delete the blanket callsite gate. `deriveA1Substitute`
+            // is now the single source of truth for per-rule confidence
+            // policy. The callsite only retains orthogonal safeguards
+            // (env flag, hallucination guard, switch-option skip, legacy-
+            // branch presence) that are NOT about confidence.
             //
             // Live-only safeguards (ALL must pass for the flip to fire):
             //   1. Env flag: `RIDERS_TURN_DECISION_A1_FLIP !== "off"`.
@@ -6258,12 +6281,10 @@ async function handleInboundMessage(params: {
             //      semantic gates. Legacy-aligned rules (render, no-
             //      renderer passthrough, manual-confirm, clarify-
             //      before-proceed, etc.) are NOT flipped.
-            //   3. Proposer ti_confidence ∈ {high, medium}. Low / null
-            //      classifications never trigger a passthrough — we
-            //      never act on a classifier we can't trust. The gate
-            //      inside `deriveA1Substitute` already enforces this,
-            //      but we re-check at the flip to make the safeguard
-            //      explicit and grep-able.
+            //   3. Per-rule trust requirements live inside
+            //      `deriveA1Substitute` — if the derivation returned
+            //      `allow` with a passthrough rule id, trust is
+            //      already satisfied. No second callsite check.
             //   4. Hallucination guard did NOT reject this turn. If
             //      the guard fired, we keep legacy behaviour — the
             //      substitute is the expected fallback for an
@@ -6341,9 +6362,15 @@ async function handleInboundMessage(params: {
               "layer.a1.directive_ask.pass_on_partial_answer",
               "layer.a1.directive_ask.pass_on_route_change",
             ]);
-            const a1FlipConfidenceOk =
-              a1FlipProposerValue?.turn_intent?.confidence === "high" ||
-              a1FlipProposerValue?.turn_intent?.confidence === "medium";
+            // NOTE (2026-04-23 authority removal): the blanket
+            // `a1FlipConfidenceOk` callsite check previously lived here.
+            // It has been deleted — `deriveA1Substitute` already owns
+            // per-rule confidence policy (`a1TiConfidenceIsTrustworthy`
+            // gates `pass_on_clarifying` / `pass_on_partial_answer`;
+            // `pass_on_route_change` uses structural signals by design).
+            // The second-guess gate was vetoing correct derivations on
+            // fresh-route turns where the proposer emits no turn_intent.
+            // See DEPLOY_CANARY_TURN_DECISION_A1_FLIP_CONFIDENCE_GATE_REMOVAL_MARKER.
             const a1FlipHallucinationGuardFired =
               (hallucinationGuardRejections || []).length > 0;
             // 2026-04-23 hoist — determine which legacy Region-A branch
@@ -6378,7 +6405,6 @@ async function handleInboundMessage(params: {
                 a1FlipDerivation &&
                 a1FlipDerivation.intent === "allow" &&
                 A1_FLIP_PASSTHROUGH_RULES.has(a1FlipDerivation.policy_rule) &&
-                a1FlipConfidenceOk &&
                 !a1FlipHallucinationGuardFired &&
                 !a1FlipSameRouteSwitch &&
                 a1FlipLegacyBranch !== null,
