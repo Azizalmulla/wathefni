@@ -12,7 +12,6 @@ import {
   CustomerIntent,
   detectConversationLanguage,
   detectExplicitLanguageRequest,
-  extractTrackingOrderId,
   hasActiveQuotedBookingAuthority,
   hasVisibleArabic,
   hasVisibleLatin,
@@ -56,12 +55,10 @@ import {
   applyBookingFieldPatch,
   cleanName,
   cleanPhone,
-  createRouteResetDraft,
   type BookingFieldPatch,
 } from "../shared/booking-draft";
 import {
   createEmptyDialogState,
-  createRouteResetDialogState,
   deriveRequestedSlotFromMissing,
   findFirstConflictSlot,
   setRequestedSlot,
@@ -2538,24 +2535,20 @@ function shouldFallbackToDeterministicSummaryReply(params: {
 
 // isSummaryEditRequest moved to ./lib/intent-text.ts (wave 4).
 
-function shouldResetControllerForNewRouteMessage(params: {
-  controllerEntry: PersistedConversationControllerEntry | null;
-  visibleText: string;
-}): boolean {
-  if (!params.controllerEntry || !params.visibleText.trim()) {
-    return false;
-  }
-  if (!hasRouteEvidence(params.visibleText) || extractTrackingOrderId(params.visibleText)) {
-    return false;
-  }
-  return (
-    params.controllerEntry.stage === "collecting_booking_details" ||
-    params.controllerEntry.stage === "summary_shown" ||
-    params.controllerEntry.stage === "awaiting_confirmation" ||
-    params.controllerEntry.stage === "order_submitted" ||
-    params.controllerEntry.bookingStep !== "none"
-  );
-}
+// shouldResetControllerForNewRouteMessage and its callsite were deleted in
+// authority-cutover Cut A2 (2026-04-23). The helper used `hasRouteEvidence`
+// regex matching (e.g. the generic `X to Y` pattern) to infer "the user
+// started a new order" from surface text, and then unilaterally nuked the
+// active flow state (quote, areas, address sub-fields, options, stage,
+// bookingStep) while preserving only identity fields. It was a silent
+// pre-LLM authority that could fire on a real in-flight address like
+// "Block 14 street 9 appartment 11 floor 7 door 12. ( next to Starbucks)"
+// — the "next to Starbucks" substring matched the route regex, wiped the
+// delivery-address step, and left the LLM asking "pickup or delivery?"
+// on a turn where the answer was unambiguous. Under the cutover's final
+// architecture, resets flow through meaning: explicit cancellation uses
+// `cancel_booking`; a genuine mid-conversation re-quote uses `get_price`
+// with the new route. No regex-driven state wipe.
 
 // textContainsUrl moved to ./lib/intent-text.ts (wave 4).
 
@@ -3689,60 +3682,11 @@ async function handleInboundMessage(params: {
         })
       : null;
   let controllerTransitionHint: string | null = null;
-  if (
-    senderRole === "customer" &&
-    turnSignals.workflowInputText &&
-    shouldResetControllerForNewRouteMessage({
-      controllerEntry: conversationControllerEntry,
-      visibleText: turnSignals.workflowInputText,
-    })
-  ) {
-    // Selective route-reset: wipe route-scoped state (quote, areas, address
-    // sub-fields, selected options) but PRESERVE identity fields (sender,
-    // recipient name + phone) on both the booking draft and the dialog state.
-    // Identity travels with the customer across orders — especially when
-    // `carry_over_from_last_order` just filled those fields from their saved
-    // profile. Without this partition, "salwa to massayel" after "same names
-    // and number as last order" silently wipes the carried-over identity and
-    // forces the customer to re-enter everything they just asked to reuse.
-    conversationControllerEntry = conversationControllerEntry
-      ? {
-          ...conversationControllerEntry,
-          stage: "idle",
-          bookingStep: "none",
-          quoteRouteKey: null,
-          quoteTs: null,
-          quotePickupAreaNameEn: null,
-          quotePickupAreaNameAr: null,
-          quoteDropoffAreaNameEn: null,
-          quoteDropoffAreaNameAr: null,
-          pendingPickupAreaNameEn: null,
-          pendingPickupAreaNameAr: null,
-          pendingDropoffAreaNameEn: null,
-          pendingDropoffAreaNameAr: null,
-          selectedQuoteOptionType: null,
-          selectedQuoteOptionLabelAr: null,
-          selectedQuoteOptionLabelEn: null,
-          selectedQuoteOptionPrice: null,
-          selectedQuoteOptionDirectChatBookingStatus: null,
-          selectedDeliveryType: null,
-          quotedPrice: null,
-          bookingDraft: createRouteResetDraft(conversationControllerEntry.bookingDraft),
-          dialogState: createRouteResetDialogState(conversationControllerEntry.dialogState),
-          pendingReplyText: null,
-        }
-      : null;
-    if (conversationControllerEntry) {
-      const preserved: string[] = [];
-      if (conversationControllerEntry.bookingDraft?.senderName) preserved.push("sender_name");
-      if (conversationControllerEntry.bookingDraft?.senderPhone) preserved.push("sender_phone");
-      if (conversationControllerEntry.bookingDraft?.recipientName) preserved.push("recipient_name");
-      if (conversationControllerEntry.bookingDraft?.recipientPhone) preserved.push("recipient_phone");
-      api.logger.info(
-        `[controller] reset active booking flow after new route message conversation=${conversationId} preserved_identity=${preserved.join(",") || "none"} text=${JSON.stringify(turnSignals.workflowInputText.slice(0, 160))}`,
-      );
-    }
-  }
+  // Authority cutover Cut A2 (2026-04-23): the pre-LLM "new route message"
+  // regex-driven controller reset was deleted here. See the deletion
+  // comment above `shouldResetControllerForNewRouteMessage` for the full
+  // rationale. Explicit resets now flow through `cancel_booking`; genuine
+  // re-quotes during an active flow flow through `get_price`.
   const isGreetingTurn = currentCustomerIntent === "greeting";
   const shouldContinueGreetingInActiveFlow =
     senderRole === "customer" &&
@@ -8636,7 +8580,6 @@ export const __testables = {
   clearQuotedRouteContext,
   clearAutomatedConversationContext,
   applyCarryOverOp,
-  shouldResetControllerForNewRouteMessage,
   shouldMoveToHumanAgent,
   shouldPreserveGreetingDuringActiveFlow,
   isGreetingInGraceWindow,

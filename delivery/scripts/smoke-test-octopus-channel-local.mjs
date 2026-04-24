@@ -315,17 +315,23 @@ async function main() {
     "Arabic audio transcript text should stay Arabic instead of being forced back to English",
   );
 
-  // Stage 4 interpreter collapse: the `llmSaysBookingData` predicate and the
-  // LLM-driven handoff trigger were deleted along with the dormant turn
-  // interpreter. The route-reset logic now runs unconditionally on inbound
-  // customer text (no `!llmSaysBookingData` guard), and handoff escalation is
-  // driven by (a) a `request_handoff` responder op from the one-brain tool and
-  // (b) the `shouldMoveToHumanAgent(outboundText)` string match applied by
-  // `sendOctopusTextReply`.
+  // Authority cutover Cut A2 (2026-04-23): the pre-LLM regex-driven
+  // "new route message" controller reset (`shouldResetControllerForNewRouteMessage`)
+  // was deleted. Explicit resets now flow through `cancel_booking`;
+  // genuine mid-conversation re-quotes flow through `get_price`. The
+  // `llmSaysBookingData` predicate had already been removed when the
+  // dormant turn interpreter was collapsed. Handoff escalation is still
+  // driven by (a) a `request_handoff` responder op from the one-brain
+  // tool and (b) the `shouldMoveToHumanAgent(outboundText)` string match
+  // applied by `sendOctopusTextReply`.
   assert(
-    source.includes("shouldResetControllerForNewRouteMessage") &&
+    !source.includes("shouldResetControllerForNewRouteMessage(") &&
       !source.includes("llmSaysBookingData"),
-    "route reset should run unconditionally (llmSaysBookingData predicate removed)",
+    "Cut A2: the regex-driven new-route reset must not run from live code",
+  );
+  assert(
+    !source.includes("reset active booking flow after new route message"),
+    "Cut A2: the new-route reset log line must be gone from live code",
   );
   assert(
     source.includes("shouldMoveToHumanAgent(outboundText)") &&
