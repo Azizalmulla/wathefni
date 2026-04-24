@@ -47,6 +47,82 @@ export type FastPathResult = {
   reasons: string[];
 };
 
+// ---------------------------------------------------------------------------
+// Phase 2 disposition gate (2026-04-24).
+//
+// Pure decision helper: given the pre-LLM disposition and the gate mode,
+// return whether the Phase-3 fast-path should be skipped.
+//
+// The gate's whole purpose is to honour the Phase 2 rule: "no pre-LLM write
+// from state-shape alone; structured/explicit branches can stay, but only
+// with meaning/disposition gating." The Phase-3 extractor writes address
+// and phone fields by shape-matching — so it's gated here.
+//
+// The reuse-intent, pin-role, and declared-role-pin paths are explicit
+// command whitelists (narrow regex / keyword matches) and are NOT routed
+// through this gate; they're callsite-kept by the Phase 2 plan.
+//
+// Contract:
+//   * `disposition` — string value from `computePromptShapingDisposition`.
+//     When it is `null` (computation failed) the gate is fail-open (do not
+//     skip) so the fast-path degrades safely to pre-Phase-2 behaviour.
+//   * `mode` — `"on"` enforces, `"log"` observes only, `"off"` disables
+//     the gate entirely.
+// ---------------------------------------------------------------------------
+export type FastPathDispositionGateMode = "on" | "log" | "off";
+
+export function resolveFastPathDispositionGateMode(
+  raw: string | undefined | null,
+): FastPathDispositionGateMode {
+  const normalized = String(raw ?? "").trim().toLowerCase();
+  if (normalized === "off") return "off";
+  if (normalized === "log") return "log";
+  return "on";
+}
+
+export type FastPathDispositionGateDecision = {
+  action: "run" | "skip" | "run_log_only";
+  blocked_by_disposition: boolean;
+  disposition: string;
+  mode: FastPathDispositionGateMode;
+};
+
+export function decideFastPathDispositionGate(params: {
+  disposition: string | null;
+  mode: FastPathDispositionGateMode;
+}): FastPathDispositionGateDecision {
+  const disposition = params.disposition ?? "-";
+  const mode = params.mode;
+  // Fail-open: if disposition is null (computation failed / not applicable)
+  // we never block. The Phase 2 rule only applies when we have a reliable
+  // classification.
+  const isContinueStep = disposition === "continue_step";
+  const blocked = !isContinueStep && params.disposition !== null;
+
+  if (mode === "off" || !blocked) {
+    return {
+      action: "run",
+      blocked_by_disposition: false,
+      disposition,
+      mode,
+    };
+  }
+  if (mode === "log") {
+    return {
+      action: "run_log_only",
+      blocked_by_disposition: true,
+      disposition,
+      mode,
+    };
+  }
+  return {
+    action: "skip",
+    blocked_by_disposition: true,
+    disposition,
+    mode,
+  };
+}
+
 const ARABIC_DIGIT_MAP: Record<string, string> = {
   "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
   "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",

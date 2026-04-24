@@ -220,6 +220,22 @@ DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_MARKER='DEPLOY_CANARY_DST_CONFLICT_SLOT_PIN_
 # = one-line rollback).
 DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER'
 DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER'
+
+# Authority cutover Phase 2 (2026-04-24): fast-path disposition gate.
+#
+# Phase 1 deleted all free-form name fast-path branches entirely
+# (they wrote pre-LLM `sender_name` on any letters+spaces string).
+# Phase 2 keeps the remaining address + phone extractors but gates
+# them on the pre-LLM disposition so they only apply when the
+# customer is actually continuing the form. Explicit-command
+# whitelists (pin-role, declared-role pin, reuse-intent) are
+# untouched because they were never shape-matching free text.
+#
+# Env flag `RIDERS_FAST_PATH_DISPOSITION_GATE` controls behaviour:
+# default (unset) == "on" (enforce), "log" == observe only, "off"
+# == disabled / pre-Phase-2 behaviour. No explicit env export is
+# needed for the default.
+DEPLOY_CANARY_FAST_PATH_DISPOSITION_GATE_MARKER='DEPLOY_CANARY_FAST_PATH_DISPOSITION_GATE_MARKER'
 # Pre-LLM prompt-shaping disposition (Cut #6). Module + import + callsite
 # anchors. The per-rule GATE marker inside
 # `formatOneBrainLiveChannelContext` was removed in the authority cutover
@@ -617,6 +633,11 @@ checks = [
         Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
         '$DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER',
         'turn-disposition authoring-gate callsite marker (Cut #5, Reloc 5 live)',
+    ),
+    (
+        Path('$VPS_OCTOPUS_PLUGIN_DIR/index.ts'),
+        '$DEPLOY_CANARY_FAST_PATH_DISPOSITION_GATE_MARKER',
+        'fast-path disposition gate callsite marker (Phase 2 authority cut, 2026-04-24)',
     ),
     (
         Path('$VPS_SHARED_PLUGIN_DIR/turn-disposition.ts'),

@@ -84,6 +84,8 @@ import {
 import {
   extractForNextAction,
   type FastPathAction,
+  resolveFastPathDispositionGateMode,
+  decideFastPathDispositionGate,
 } from "../shared/fast-path-extractor";
 import { classifyReuseIntent } from "../shared/reuse-intent";
 import type {
@@ -4275,6 +4277,115 @@ async function handleInboundMessage(params: {
     }
   }
 
+  // ------------------------------------------------------------------
+  // Pre-LLM prompt-shaping disposition (Cut #6, 2026-04-23).
+  //
+  // Runs BEFORE the LLM invocation. The disposition is computed from
+  // server-side signals only — stage, active quoted route, requested
+  // slot, missing-field count, customer inbound text. Distinct from
+  // Cut #5's `decideTurnDisposition`, which runs AFTER the LLM
+  // returns with the proposer reading.
+  //
+  // Authority cutover Phase 2 (2026-04-24): moved UP from below the
+  // turn router to above the Phase-3 fast-path block. The fast-path
+  // disposition gate (`RIDERS_FAST_PATH_DISPOSITION_GATE`) consumes
+  // `promptShapingDecision.disposition` to skip pre-LLM writes when
+  // the turn is not a `continue_step`. See the Phase-3 block below.
+  //
+  // Trace `[prompt-disposition/shaping]` still emits one line per
+  // customer turn here; downstream consumers (turn router, prompt
+  // formatter observability) see the same decision object.
+  // ------------------------------------------------------------------
+  let promptShapingDecision: TurnDispositionDecision | null = null;
+  if (senderRole === "customer") {
+    try {
+      promptShapingDecision = computePromptShapingDisposition({
+        customer_text: rawBody ?? null,
+        stage_at_turn_start: conversationControllerEntry?.stage ?? null,
+        has_active_quoted_route: !!activeQuotedRoute,
+        requested_slot_name:
+          conversationControllerEntry?.dialogState?.requestedSlot?.name ??
+          null,
+        missing_fields_count:
+          conversationControllerEntry?.bookingDraft
+            ? computeOneBrainMissingFields(
+                conversationControllerEntry.bookingDraft,
+                conversationControllerEntry,
+              ).length
+            : 0,
+        detectors: {
+          isInformationalOptionQuestion,
+          isSimpleGreeting,
+          isExplicitOrderConfirmation,
+          isContextualClarifyingQuestion,
+        },
+      });
+    } catch (promptShapingError) {
+      try {
+        api.logger.warn(
+          `[prompt-disposition/shaping] derive_failed conversation=${conversationId} error=${
+            promptShapingError instanceof Error
+              ? promptShapingError.message
+              : String(promptShapingError)
+          }`,
+        );
+      } catch {
+        // Never block the turn on trace-layer errors.
+      }
+      promptShapingDecision = null;
+    }
+  }
+  if (senderRole === "customer") {
+    try {
+      api.logger.info(
+        `[prompt-disposition/shaping] conversation=${conversationId} disposition=${
+          promptShapingDecision?.disposition ?? "-"
+        } policy_rule=${
+          promptShapingDecision?.policy_rule ?? "-"
+        } stage=${conversationControllerEntry?.stage ?? "-"} has_quote=${
+          activeQuotedRoute ? "yes" : "no"
+        } requested_slot=${
+          conversationControllerEntry?.dialogState?.requestedSlot?.name ?? "-"
+        } fallthrough=${
+          promptShapingDecision?.trace_annotations?.fallthrough_reason ?? "-"
+        }`,
+      );
+    } catch {
+      // Never block the turn on trace emit failure.
+    }
+  }
+
+  // Authority cutover Phase 2 (2026-04-24): fast-path disposition gate.
+  //
+  // DEPLOY_CANARY_FAST_PATH_DISPOSITION_GATE_MARKER.
+  //
+  // The Phase-3 extractor below and the reuse-intent extractor further
+  // down only run when the gate says "apply." The gate's decision is
+  // controlled by `RIDERS_FAST_PATH_DISPOSITION_GATE`:
+  //
+  //   * unset / "on"  → enforce: skip pre-LLM writes when the
+  //                     disposition isn't `continue_step` AND the
+  //                     branch is not an explicit-command whitelist
+  //                     (reuse-intent, pin-role, declared-role pin).
+  //   * "log"         → compute + log what would be blocked; don't
+  //                     actually block.
+  //   * "off"         → disabled; pre-Phase-2 behaviour.
+  //
+  // Rationale: before Phase 2 the address and phone extractors would
+  // write controller state on any text that shape-matched, regardless
+  // of whether the customer was continuing the form or doing
+  // something else (asking a question, correcting, acknowledging).
+  // That's the "No the avenues mall → sender_name" class of bug.
+  // Pin-role, declared-role pin, and reuse-intent already gate
+  // themselves on narrow explicit-command whitelists, so they stay
+  // on by default — but their log lines are now annotated with the
+  // live disposition for visibility.
+  const fastPathDispositionGateMode = resolveFastPathDispositionGateMode(
+    process.env.RIDERS_FAST_PATH_DISPOSITION_GATE,
+  );
+  const fastPathDisposition: string =
+    promptShapingDecision?.disposition ?? "-";
+
   // Phase-3 deterministic fast-path extraction (ONE-BRAIN only).
   //
   // When the controller has an unambiguous next_required_action (e.g.
@@ -4288,6 +4399,11 @@ async function handleInboundMessage(params: {
   //
   // The extractor is step-constrained and high-confidence-only: it returns
   // nothing when the parse is ambiguous, so false positives are rare.
+  //
+  // Authority cutover Phase 2 (2026-04-24): gated on the pre-LLM
+  // disposition. If the turn isn't `continue_step`, the fast-path does
+  // not run under enforce mode. Log-only mode still runs the extractor
+  // but emits `blocked_by_disposition_gate_log_only` for visibility.
   let fastPathPreApplied: string[] = [];
   if (
     senderRole === "customer" &&
@@ -4305,7 +4421,25 @@ async function handleInboundMessage(params: {
         activeQuotedRoute,
       });
       if (directive) {
-        const fastResult = extractForNextAction({
+        const gateDecision = decideFastPathDispositionGate({
+          disposition: promptShapingDecision ? fastPathDisposition : null,
+          mode: fastPathDispositionGateMode,
+        });
+        if (gateDecision.action === "skip") {
+          try {
+            api.logger.info(
+              `[one-brain/fast-path] skipped_by_disposition action=${directive.action} disposition=${fastPathDisposition} policy_rule=${promptShapingDecision?.policy_rule ?? "-"} mode=on conversation=${conversationId}`,
+            );
+          } catch {}
+        } else {
+          if (gateDecision.action === "run_log_only") {
+            try {
+              api.logger.info(
+                `[one-brain/fast-path] would_skip_by_disposition action=${directive.action} disposition=${fastPathDisposition} policy_rule=${promptShapingDecision?.policy_rule ?? "-"} mode=log conversation=${conversationId}`,
+              );
+            } catch {}
+          }
+          const fastResult = extractForNextAction({
           text: rawBody,
           action: directive.action as FastPathAction,
           whatsappNumber: replyTarget,
@@ -4388,6 +4522,7 @@ async function handleInboundMessage(params: {
             api.logger.debug?.(line);
           }
         }
+        }
       }
     } catch (fastPathError) {
       // Never let extraction errors break the turn. The LLM will handle the
@@ -4421,6 +4556,12 @@ async function handleInboundMessage(params: {
         hasSavedOrder: Boolean(customerProfile.last_successful_order),
       });
       if (reuse.kind === "carry_over" && reuse.buckets.length > 0) {
+        // Authority cutover Phase 2 (2026-04-24): reuse-intent is kept
+        // on regardless of disposition because `classifyReuseIntent`
+        // is already an explicit narrow-regex whitelist ("same as
+        // last", "نفس الأرقام"). The log is annotated with the live
+        // disposition so we can audit cases where reuse-intent fires
+        // on non-`continue_step` turns.
         pushResponderStateOp(conversationId, {
           op: "carry_over_from_last_order",
           buckets: reuse.buckets,
@@ -4428,7 +4569,7 @@ async function handleInboundMessage(params: {
           turn_id: `fast-path:${conversationId}:${Date.now()}`,
         });
         api.logger.info(
-          `[one-brain/fast-path] reuse-intent matched conversation=${conversationId} buckets=${reuse.buckets.join(",")} reason=${reuse.reason} match=${JSON.stringify(reuse.matchedText)}`,
+          `[one-brain/fast-path] reuse-intent matched conversation=${conversationId} buckets=${reuse.buckets.join(",")} reason=${reuse.reason} match=${JSON.stringify(reuse.matchedText)} disposition=${fastPathDisposition} gate_mode=${fastPathDispositionGateMode}`,
         );
       }
     } catch (reuseError) {
@@ -4437,82 +4578,6 @@ async function handleInboundMessage(params: {
           reuseError instanceof Error ? reuseError.message : String(reuseError)
         }`,
       );
-    }
-  }
-
-  // ------------------------------------------------------------------
-  // Pre-LLM prompt-shaping disposition (Cut #6, 2026-04-23).
-  //
-  // Runs BEFORE the LLM invocation. The disposition is computed from
-  // server-side signals only — stage, active quoted route, requested
-  // slot, missing-field count, customer inbound text. Distinct from
-  // Cut #5's `decideTurnDisposition`, which runs AFTER the LLM
-  // returns with the proposer reading.
-  //
-  // Authority cutover phase 5 (2026-04-23): the Cut #6 env gate
-  // (`RIDERS_PROMPT_DISPOSITION_SHAPE_LIVE`) is gone. The prompt
-  // formatter no longer consumes `promptShapingDisposition` at all
-  // (Phase 1 slimmed the state-authoring imperatives unconditionally),
-  // so this layer is now pure observability + the feed into the
-  // turn router below. Trace `[prompt-disposition/shaping]` still
-  // emits one line per customer turn.
-  // ------------------------------------------------------------------
-  let promptShapingDecision: TurnDispositionDecision | null = null;
-  if (senderRole === "customer") {
-    try {
-      promptShapingDecision = computePromptShapingDisposition({
-        customer_text: rawBody ?? null,
-        stage_at_turn_start: conversationControllerEntry?.stage ?? null,
-        has_active_quoted_route: !!activeQuotedRoute,
-        requested_slot_name:
-          conversationControllerEntry?.dialogState?.requestedSlot?.name ??
-          null,
-        missing_fields_count:
-          conversationControllerEntry?.bookingDraft
-            ? computeOneBrainMissingFields(
-                conversationControllerEntry.bookingDraft,
-                conversationControllerEntry,
-              ).length
-            : 0,
-        detectors: {
-          isInformationalOptionQuestion,
-          isSimpleGreeting,
-          isExplicitOrderConfirmation,
-          isContextualClarifyingQuestion,
-        },
-      });
-    } catch (promptShapingError) {
-      try {
-        api.logger.warn(
-          `[prompt-disposition/shaping] derive_failed conversation=${conversationId} error=${
-            promptShapingError instanceof Error
-              ? promptShapingError.message
-              : String(promptShapingError)
-          }`,
-        );
-      } catch {
-        // Never block the turn on trace-layer errors.
-      }
-      promptShapingDecision = null;
-    }
-  }
-  if (senderRole === "customer") {
-    try {
-      api.logger.info(
-        `[prompt-disposition/shaping] conversation=${conversationId} disposition=${
-          promptShapingDecision?.disposition ?? "-"
-        } policy_rule=${
-          promptShapingDecision?.policy_rule ?? "-"
-        } stage=${conversationControllerEntry?.stage ?? "-"} has_quote=${
-          activeQuotedRoute ? "yes" : "no"
-        } requested_slot=${
-          conversationControllerEntry?.dialogState?.requestedSlot?.name ?? "-"
-        } fallthrough=${
-          promptShapingDecision?.trace_annotations?.fallthrough_reason ?? "-"
-        }`,
-      );
-    } catch {
-      // Never block the turn on trace emit failure.
     }
   }
 
