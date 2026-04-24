@@ -26,8 +26,12 @@
  */
 
 import type { BookingFieldPatch } from "./booking-draft";
-import { validateName } from "./responder-state-ops";
-import { isAcceptableSlotResponse } from "./slot-response-coherence";
+// Phase 1 authority cut (2026-04-24): `validateName` and
+// `isAcceptableSlotResponse` are no longer imported here. The free-form
+// name branches that relied on them (sender-combined residual name,
+// recipient combined name) have been removed — the LLM owns every
+// sender/recipient name write via `apply_booking_field`. Both functions
+// still run on the post-LLM side through `apply-boundary.ts`.
 
 export type FastPathAction =
   | "ASK_SENDER_NAME_AND_PHONE_DECISION"
@@ -248,10 +252,6 @@ const USE_WHATSAPP_RE =
   /\b(?:use\s+(?:my\s+)?whatsapp|same\s+(?:as\s+)?(?:my\s+)?whatsapp|this\s+(?:is\s+)?fine|use\s+this(?:\s+number)?)\b/i;
 const USE_WHATSAPP_AR_RE = /(?:نفس\s*(?:رقم\s*)?(?:الواتس|الواتساب|هذا)|استخدم\s*(?:رقم\s*)?الواتس|هذا\s*الرقم)/i;
 
-function digitsOnly(text: string): string {
-  return normalizeArabicDigits(text).replace(/\D+/g, "");
-}
-
 /**
  * Returns a normalized phone string if the input looks like ONLY a phone
  * number (digits + separators + optional country code), else null.
@@ -298,45 +298,34 @@ export function extractSenderPhone(params: {
 
 // ---------------------------------------------------------------------------
 // Sender combined (ASK_SENDER_NAME_AND_PHONE_DECISION)
+//
+// Phase 1 authority cut (2026-04-24): the NAME branch of this extractor has
+// been removed. Reading free-form letters+spaces as a person-name before the
+// LLM runs is the exact pre-LLM authority pattern that wrote
+// `sender_name = "No the avenues mall"` on 2026-04-24 12:48 (conv 20125).
+// The LLM now owns every sender-name write; the fast-path keeps only the two
+// unambiguous structured / explicit-command signals on this action:
+//
+//   • `use_whatsapp` keyword                     → phone_decision: "use_whatsapp"
+//   • pure digit group 7–15 digits (no letters)  → phone_decision: "different",
+//                                                  sender_phone: <digits>
+//
+// Anything else → `{patch: null, confidence: "none"}` and the LLM handles the
+// turn through its `apply_booking_field` tool call. No name-shape predicate,
+// no coherence gate, no residual name extraction — by design.
 // ---------------------------------------------------------------------------
 
 const DIFFERENT_NUMBER_RE_EN =
   /\b(?:different|new|another|other)\s+(?:phone|number|no\.?|num)\b/i;
 const DIFFERENT_NUMBER_RE_AR = /(?:رقم\s*(?:ثاني|آخر|مختلف|غير|جديد|اخر|ثاني)|(?:رقم|نمبر)\s+(?:ثاني|آخر|مختلف))/i;
 
-const NAME_ONLY_RE = /^[a-z\u0600-\u06ff][a-z\u0600-\u06ff'\s.-]{1,58}$/i;
-
-function stripTrailingPunct(s: string): string {
-  return s.replace(/[\s,،.;:/\-]+$/g, "").replace(/^[\s,،.;:/\-]+/g, "").trim();
-}
-
-function looksLikeValidName(candidate: string): boolean {
-  const trimmed = stripTrailingPunct(candidate);
-  if (!trimmed) return false;
-  // Defer to the apply-boundary `validateName` so the pre-LLM fast-path
-  // and the post-LLM tool-op validator share a single shape policy. This
-  // closes the gap that let "Is this the cheapest option" be written to
-  // sender_name on 2026-04-19 13:42 — the fast-path's old standalone
-  // predicate accepted any letters+spaces string of length 2–60.
-  return validateName(trimmed) === null;
-}
-
 /**
- * Combined sender turn. The model is asked for BOTH the sender's name AND
- * a phone decision (use WhatsApp vs different number). Customers typically
- * pack both into one reply, and the exact shape varies widely. We only
- * emit a high-confidence patch when we can cleanly separate the parts:
+ * Phone / decision only — no name extraction.
  *
- *   "Aziz Almulla, use my whatsapp"           → name + use_whatsapp
- *   "Use whatsapp, Aziz Almulla"              → same
- *   "Aziz Almulla different number 94728472"  → name + different + phone
- *   "94728472, Aziz Almulla"                  → same (order flipped)
- *   "Aziz Almulla"                            → name only (decision unresolved)
- *   "use whatsapp"                            → decision only (name unresolved)
- *
- * Ambiguous cases (bare digit strings that can't be a clear phone, mixed
- * alphanumerics, multiple digit groups) fall through to "none" and the LLM
- * handles them.
+ * See the section header above for rationale. If the message contains an
+ * unambiguous `use_whatsapp` keyword OR a single 7–15 digit phone group
+ * (and no conflicting markers), we emit a phone-only patch. In every other
+ * case we return `none` and the LLM owns the turn.
  */
 export function extractSenderNameAndDecision(params: {
   text: string;
@@ -349,7 +338,6 @@ export function extractSenderNameAndDecision(params: {
   let decision: "use_whatsapp" | "different" | null = null;
   let senderPhone: string | null = null;
 
-  // 1) use_whatsapp marker
   const useWaMatch =
     raw.match(USE_WHATSAPP_RE) || raw.match(USE_WHATSAPP_AR_RE);
   if (useWaMatch) {
@@ -358,12 +346,10 @@ export function extractSenderNameAndDecision(params: {
     reasons.push("use_whatsapp_marker");
   }
 
-  // 2) "different number" marker + digits
   const differentMatch =
     raw.match(DIFFERENT_NUMBER_RE_EN) || raw.match(DIFFERENT_NUMBER_RE_AR);
   if (differentMatch) {
     if (decision === "use_whatsapp") {
-      // Contradictory markers. Let the LLM handle it.
       reasons.push("conflicting_markers");
       return { patch: null, confidence: "none", reasons };
     }
@@ -374,7 +360,6 @@ export function extractSenderNameAndDecision(params: {
     reasons.push("different_marker");
   }
 
-  // 3) Pull out a single phone-shaped digit group.
   const digitMatches: string[] = [];
   const digitRe = /[\d+\-()\s]{7,}/g;
   let m;
@@ -390,60 +375,27 @@ export function extractSenderNameAndDecision(params: {
   }
   if (digitMatches.length === 1) {
     if (decision === "use_whatsapp") {
-      // Phone provided alongside "use whatsapp" → ambiguous intent.
       reasons.push("phone_with_use_whatsapp");
       return { patch: null, confidence: "none", reasons };
     }
     senderPhone = digitMatches[0].replace(/\D+/g, "");
-    residual = residual.replace(digitMatches[0], " ");
     if (!decision) decision = "different";
     reasons.push("phone_digits");
   }
 
-  // 4) Whatever's left after stripping markers and digits is the name.
-  //
-  // Two-layer gate: the residual must (a) pass the same shape rules
-  // the apply-boundary uses (`validateName` via `looksLikeValidName`)
-  // AND (b) be coherent with `sender_name` per the slot-response
-  // coherence policy. The coherence layer catches conversational
-  // fragments that are letter-only but not actually a name (e.g.
-  // questions, topic changes). Without it, the fast-path's own shape
-  // predicate accepts any letters+spaces string of length 2–60 — which
-  // is how "Is this the cheapest option" reached `sender_name` in
-  // production on 2026-04-19 13:42 (live).
-  const nameCandidate = stripTrailingPunct(
-    residual.replace(/[,،;:]+/g, " ").replace(/\s+/g, " "),
-  );
-  let senderName: string | null = null;
-  if (looksLikeValidName(nameCandidate)) {
-    const coherence = isAcceptableSlotResponse({
-      text: nameCandidate,
-      slot: "sender_name",
-    });
-    if (coherence.acceptable) {
-      senderName = nameCandidate;
-      reasons.push("name_residual");
-    } else {
-      reasons.push(`name_rejected_by_coherence:${coherence.decision.kind}:${coherence.decision.reason}`);
-    }
-  }
-
-  // Require at least ONE deterministically-extracted signal. If we got
-  // nothing (no decision, no phone, no name), bail.
-  if (!decision && !senderPhone && !senderName) {
+  // Phase 1 cut: no name extraction. If we did not resolve an unambiguous
+  // phone/decision signal, hand the turn to the LLM.
+  if (!decision && !senderPhone) {
+    reasons.push("no_structured_signal");
     return { patch: null, confidence: "none", reasons };
   }
 
-  // If we got a "different" decision but no phone, reject — incomplete intent
-  // (customer said "different number" but didn't include the number). Let the
-  // LLM clarify.
   if (decision === "different" && !senderPhone) {
     reasons.push("different_without_phone");
     return { patch: null, confidence: "none", reasons };
   }
 
   const patch: BookingFieldPatch = {};
-  if (senderName) patch.sender_name = senderName;
   if (decision) patch.phone_decision = decision;
   if (senderPhone) patch.sender_phone = senderPhone;
 
@@ -452,94 +404,22 @@ export function extractSenderNameAndDecision(params: {
 
 // ---------------------------------------------------------------------------
 // Recipient combined (ASK_RECIPIENT_NAME_AND_PHONE)
+//
+// Phase 1 authority cut (2026-04-24): this extractor is fully disabled.
+// Combined "name + phone" parsing is free-form enough that the LLM should
+// own it end-to-end via `apply_booking_field`. The export is kept as a
+// shim (returning `none`) so existing smoke-test imports do not break.
+// Callers should prefer `extractForNextAction`, which routes
+// `ASK_RECIPIENT_NAME_AND_PHONE` to `none` explicitly.
 // ---------------------------------------------------------------------------
 
-export function extractRecipientNameAndPhone(params: {
+export function extractRecipientNameAndPhone(_params: {
   text: string;
 }): FastPathResult {
-  const reasons: string[] = [];
-  const normalized = normalizeArabicDigits(params.text);
-  // Extract all digit-groups of length >= 7.
-  const digitGroups: Array<{ match: string; start: number; end: number }> = [];
-  const re = /[\d\s+\-()]{7,}/g;
-  let m;
-  while ((m = re.exec(normalized)) !== null) {
-    const clean = m[0].replace(/\D+/g, "");
-    if (clean.length >= 7 && clean.length <= 15) {
-      digitGroups.push({ match: m[0], start: m.index, end: m.index + m[0].length });
-    }
-  }
-  if (digitGroups.length !== 1) {
-    if (digitGroups.length > 1) reasons.push("multiple_phone_candidates");
-    return { patch: null, confidence: "none", reasons };
-  }
-  const { match: phoneMatch, start, end } = digitGroups[0];
-  const rawNamePart = (normalized.slice(0, start) + " " + normalized.slice(end))
-    .replace(/[,،.;:/\-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  // Label detection uses Unicode-aware whole-word lookarounds rather
-  // than `\b` because JavaScript's `\b` is ASCII-only and silently
-  // fails to anchor Arabic tokens (conv 19399 — "اسم احمد باشا رقم
-  // 5207777" passed the old `\b(...|رقم)\b` guard and corrupted
-  // recipient_name). We also accept `اسم`/`الاسم`/`name` so labeled
-  // answers like "اسم احمد باشا رقم 5207777" can be stripped and
-  // re-parsed instead of being dropped into the LLM's lap.
-  const LABEL_RE = /(?<![\p{L}\p{N}])(?:phone|number|tel|no\.?|name|رقم|رقمه|الرقم|اسم|الاسم)(?![\p{L}\p{N}])/iu;
-  let namePart = rawNamePart;
-  if (LABEL_RE.test(rawNamePart)) {
-    // Strip every label occurrence and re-validate. If the stripped
-    // residual still has a reasonable name shape, use it; otherwise
-    // fall back to "too ambiguous, let the LLM try".
-    const LABEL_RE_GLOBAL = new RegExp(LABEL_RE.source, "giu");
-    const stripped = rawNamePart
-      .replace(LABEL_RE_GLOBAL, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (!stripped || stripped.length < 2 || !/[a-z\u0600-\u06ff]/i.test(stripped)) {
-      reasons.push("contains_labels_only");
-      return { patch: null, confidence: "none", reasons };
-    }
-    namePart = stripped;
-    reasons.push("labels_stripped");
-  }
-  const phoneClean = phoneMatch.replace(/\D+/g, "");
-  if (phoneClean.length < 7 || phoneClean.length > 15) {
-    return { patch: null, confidence: "none", reasons };
-  }
-  // Name must have at least one letter (Latin or Arabic).
-  if (!/[a-z\u0600-\u06ff]/i.test(namePart)) {
-    reasons.push("no_letters_in_name_part");
-    return { patch: null, confidence: "none", reasons };
-  }
-  // Name must be reasonable length (2-60 chars) and not start/end with dangling
-  // single letters that are artifacts of partial extraction.
-  if (namePart.length < 2 || namePart.length > 60) {
-    return { patch: null, confidence: "none", reasons };
-  }
-  // Coherence gate against `recipient_name`. Same rationale as the
-  // sender-combined extractor above: shape alone cannot tell a person
-  // name from a conversational fragment. Without this gate, a message
-  // like "Is this cheapest 99118375" would have written the question to
-  // `recipient_name`. With it, the name drops and we bail on the whole
-  // extraction (since phone-only recipient writes aren't supported by
-  // this path — the LLM will re-ask coherently).
-  const nameCoherence = isAcceptableSlotResponse({
-    text: namePart,
-    slot: "recipient_name",
-  });
-  if (!nameCoherence.acceptable) {
-    reasons.push(`name_rejected_by_coherence:${nameCoherence.decision.kind}:${nameCoherence.decision.reason}`);
-    return { patch: null, confidence: "none", reasons };
-  }
-  reasons.push("name_plus_phone");
   return {
-    patch: {
-      recipient_name: namePart,
-      recipient_phone: phoneClean,
-    },
-    confidence: "high",
-    reasons,
+    patch: null,
+    confidence: "none",
+    reasons: ["llm_owned_recipient_combined"],
   };
 }
 
@@ -563,18 +443,28 @@ export function extractForNextAction(params: {
     case "ASK_SENDER_PHONE":
       return extractSenderPhone({ text: params.text, whatsappNumber: params.whatsappNumber });
     case "ASK_SENDER_NAME_AND_PHONE_DECISION":
+      // Phone/decision only after Phase 1 — the combined extractor no
+      // longer writes `sender_name`. See the section header on
+      // `extractSenderNameAndDecision` for rationale.
       return extractSenderNameAndDecision({ text: params.text });
     case "ASK_SENDER_NAME":
-      // Narrow name-only ask. The customer is expected to answer with a
-      // name; occasionally they volunteer the phone too. Reuse the
-      // combined extractor — it already handles "name only" and
-      // "name + phone/decision" cleanly, and the apply-boundary will
-      // drop any stray phone on a name-requested turn unless a valid
-      // name is also in the same patch (see
-      // `apply-boundary.ts::applyRequestedSlotNameScope`).
-      return extractSenderNameAndDecision({ text: params.text });
+      // Phase 1 cut (2026-04-24): free-form name extraction belongs to
+      // the LLM. The combined extractor is phone/decision only, and a
+      // name-only ask has nothing structured to offer the fast-path,
+      // so we bail explicitly.
+      return {
+        patch: null,
+        confidence: "none",
+        reasons: ["llm_owned_name_extraction"],
+      };
     case "ASK_RECIPIENT_NAME_AND_PHONE":
-      return extractRecipientNameAndPhone({ text: params.text });
+      // Phase 1 cut (2026-04-24): combined recipient name+phone belongs
+      // to the LLM. See `extractRecipientNameAndPhone` for rationale.
+      return {
+        patch: null,
+        confidence: "none",
+        reasons: ["llm_owned_recipient_combined"],
+      };
     default:
       return { patch: null, confidence: "none", reasons: ["action_not_handled"] };
   }

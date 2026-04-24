@@ -216,15 +216,23 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // 7. Fast-path integration — coherence refuses name writes
+  // 7. Fast-path integration — names are LLM-owned (Phase 1, 2026-04-24)
+  //
+  // The fast-path used to extract sender/recipient names from
+  // letters+spaces fragments and rely on the coherence gate to catch
+  // non-names. Phase 1 removed that whole branch: the fast-path no
+  // longer writes `sender_name` or `recipient_name` under any
+  // shape. The coherence classifier still runs on the post-LLM
+  // apply-boundary path (see `smoke-test-slot-fill-fixes.mjs` and
+  // `apply-boundary.ts`), which is where the live incident rule
+  // "reject questions written to name slots" now lives.
   // -------------------------------------------------------------------------
   const fastPathPath = path.join(deliveryRoot, "plugins/shared/fast-path-extractor.ts");
   const fastPath = await loadDeliveryTsModule(import.meta.url, fastPathPath);
   const { extractSenderNameAndDecision, extractRecipientNameAndPhone } = fastPath;
 
-  // Sender combined: topic-change messages with name shape must not leak
-  // into sender_name. Covers the exact live-incident input and near
-  // variants.
+  // Question-shaped sender-combined messages: no `sender_name`, no
+  // structured signal → no patch at all.
   for (const text of [
     "Is this the cheapest option",
     "What is the cheaper price",
@@ -235,33 +243,51 @@ async function main() {
     assert.equal(
       r.patch?.sender_name ?? null,
       null,
-      `fast-path must refuse ${JSON.stringify(text)} as sender_name`,
+      `Phase 1: fast-path must never write sender_name; leaked on ${JSON.stringify(text)}`,
+    );
+    assert.equal(
+      r.confidence,
+      "none",
+      `Phase 1: no-phone-no-decision sender-combined input must be confidence=none (${JSON.stringify(text)})`,
     );
   }
 
-  // Recipient combined: question-shaped name-part must be rejected even
-  // when a phone is present in the message.
+  // Recipient combined: fully LLM-owned → always `none`, regardless of
+  // whether a phone is present.
   for (const text of [
     "Is this the cheapest option 99118375",
     "What is the cheaper price 99118375",
+    "Mohammed Hamad 99887766",
+    "Aziz",
   ]) {
     const r = extractRecipientNameAndPhone({ text });
     assert.equal(
-      r.patch?.recipient_name ?? null,
+      r.patch,
       null,
-      `recipient fast-path must refuse ${JSON.stringify(text)}`,
+      `Phase 1: recipient combined fast-path must return null; leaked on ${JSON.stringify(text)}`,
     );
+    assert.equal(r.confidence, "none");
   }
 
-  // Real names continue to extract cleanly — no regression.
+  // Phone-only and use-whatsapp still resolve through the combined
+  // sender extractor — those are structured / explicit-command
+  // signals and remain server-assisted per Phase 1.
   {
-    const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla, use whatsapp" });
-    assert.equal(r.patch?.sender_name, "Aziz Al Mulla");
+    const r = extractSenderNameAndDecision({ text: "use my whatsapp" });
+    assert.equal(
+      r.patch?.sender_name ?? null,
+      null,
+      "use-whatsapp input must not write sender_name",
+    );
+    assert.equal(r.patch?.phone_decision, "use_whatsapp");
+    assert.equal(r.confidence, "high");
   }
   {
-    const r = extractRecipientNameAndPhone({ text: "Mohammed Hamad 99887766" });
-    assert.equal(r.patch?.recipient_name, "Mohammed Hamad");
-    assert.equal(r.patch?.recipient_phone, "99887766");
+    const r = extractSenderNameAndDecision({ text: "94728472" });
+    assert.equal(r.patch?.sender_name ?? null, null);
+    assert.equal(r.patch?.phone_decision, "different");
+    assert.equal(r.patch?.sender_phone, "94728472");
+    assert.equal(r.confidence, "high");
   }
 
   console.log("smoke-test-slot-response-coherence: OK");

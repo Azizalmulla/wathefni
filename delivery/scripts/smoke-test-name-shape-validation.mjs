@@ -259,21 +259,41 @@ async function main() {
       `fast-path must reject interrogative ${JSON.stringify(value)}`,
     );
   }
-  // Real names must still be extracted cleanly by the fast-path so we
-  // don't regress the optimization the fast-path exists for.
+  // Phase 1 authority cut (2026-04-24): the fast-path no longer
+  // writes names at all. The "letters+spaces looks like a name"
+  // predicate is gone; name writes happen exclusively through the
+  // LLM's `apply_booking_field` tool op, which still runs through
+  // the apply-boundary `validateName` we exercised above. These
+  // tests pin the new contract — NO name, for any shape — so a
+  // regression that reintroduces the pre-LLM name branch fails
+  // loudly.
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla" });
-    assert.equal(r.patch?.sender_name, "Aziz Al Mulla", "fast-path must still accept real names");
+    assert.equal(
+      r.patch?.sender_name ?? null,
+      null,
+      "Phase 1: fast-path must not write sender_name for plain name input",
+    );
+    assert.equal(r.confidence, "none");
   }
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla, use my whatsapp" });
-    assert.equal(r.patch?.sender_name, "Aziz Al Mulla");
+    assert.equal(
+      r.patch?.sender_name ?? null,
+      null,
+      "Phase 1: fast-path must not write sender_name alongside use_whatsapp",
+    );
+    // Decision still resolves — that's structured / explicit.
     assert.equal(r.patch?.phone_decision, "use_whatsapp");
   }
   {
     const r = extractRecipientNameAndPhone({ text: "Mohammed Hamad 99887766" });
-    assert.equal(r.patch?.recipient_name, "Mohammed Hamad");
-    assert.equal(r.patch?.recipient_phone, "99887766");
+    assert.equal(
+      r.patch,
+      null,
+      "Phase 1: recipient combined fast-path must be disabled",
+    );
+    assert.equal(r.confidence, "none");
   }
   // Top-level dispatcher exercises the same gating end-to-end (this is
   // what the orchestrator actually calls before the LLM turn).

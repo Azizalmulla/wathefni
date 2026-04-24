@@ -156,63 +156,48 @@ async function main() {
       `"ok Ali" must not be classified as a two-word ack`,
     );
   }
-  // Negative — legitimate names continue to extract cleanly.
+  // Phase 1 authority cut (2026-04-24): legitimate names no longer
+  // extract via the fast-path. `use_whatsapp` still resolves the
+  // phone decision; the name is left for the LLM to author.
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla, use whatsapp" });
-    assert.equal(r.patch?.sender_name, "Aziz Al Mulla");
+    assert.equal(
+      r.patch?.sender_name ?? null,
+      null,
+      "Phase 1: fast-path must not write sender_name from letters+spaces",
+    );
+    assert.equal(r.patch?.phone_decision, "use_whatsapp");
+    assert.equal(r.confidence, "high");
   }
 
   // -------------------------------------------------------------------------
-  // Fix 2 — labeled recipient answers strip labels and re-parse
+  // Fix 2 — labeled recipient answers (historical)
+  //
+  // Phase 1 authority cut (2026-04-24): the entire recipient
+  // combined extractor is now a shim returning `none`. The LLM owns
+  // every recipient-name write via `apply_booking_field`. The
+  // tests below used to assert label-stripping and clean extraction;
+  // we now pin the opposite — the fast-path must NOT write a
+  // `recipient_name` on any of these shapes.
   // -------------------------------------------------------------------------
-  // AR labeled — the exact conv 19399 shape.
-  {
-    const r = extractRecipientNameAndPhone({ text: "اسم احمد باشا رقم 5207777" });
-    assert.equal(r.confidence, "high", `expected high confidence, reasons=${r.reasons?.join(",")}`);
-    assert.equal(r.patch?.recipient_name, "احمد باشا");
-    assert.equal(r.patch?.recipient_phone, "5207777");
-    assert.ok(
-      r.reasons.includes("labels_stripped"),
-      `expected labels_stripped in reasons, got [${r.reasons?.join(",")}]`,
+  const recipientCombinedShapes = [
+    "اسم احمد باشا رقم 5207777",
+    "الاسم احمد باشا الرقم 5207777",
+    "name Ahmed Basha phone 52077777",
+    "رقم 5207777",
+    "Mohammed Hamad 99887766",
+  ];
+  for (const text of recipientCombinedShapes) {
+    const r = extractRecipientNameAndPhone({ text });
+    assert.equal(
+      r.confidence,
+      "none",
+      `Phase 1: recipient combined fast-path must be disabled; ${JSON.stringify(text)} leaked confidence=${r.confidence}`,
     );
-  }
-  // AR with الاسم / الرقم prefixed forms.
-  {
-    const r = extractRecipientNameAndPhone({ text: "الاسم احمد باشا الرقم 5207777" });
-    assert.equal(r.confidence, "high");
-    assert.equal(r.patch?.recipient_name, "احمد باشا");
-    assert.equal(r.patch?.recipient_phone, "5207777");
-  }
-  // EN labeled equivalent.
-  {
-    const r = extractRecipientNameAndPhone({ text: "name Ahmed Basha phone 52077777" });
-    assert.equal(r.confidence, "high");
-    assert.equal(r.patch?.recipient_name, "Ahmed Basha");
-    assert.equal(r.patch?.recipient_phone, "52077777");
-    assert.ok(r.reasons.includes("labels_stripped"));
-  }
-  // Label-only residual must be rejected (no name to extract).
-  {
-    const r = extractRecipientNameAndPhone({ text: "رقم 5207777" });
     assert.equal(
       r.patch,
       null,
-      `label-only residual must refuse extraction, got ${JSON.stringify(r.patch)}`,
-    );
-    assert.ok(
-      r.reasons.includes("contains_labels_only"),
-      `expected contains_labels_only, got [${r.reasons?.join(",")}]`,
-    );
-  }
-  // Regression — unlabeled clean names still extract unchanged (no strip flag).
-  {
-    const r = extractRecipientNameAndPhone({ text: "Mohammed Hamad 99887766" });
-    assert.equal(r.confidence, "high");
-    assert.equal(r.patch?.recipient_name, "Mohammed Hamad");
-    assert.equal(r.patch?.recipient_phone, "99887766");
-    assert.ok(
-      !r.reasons.includes("labels_stripped"),
-      `clean name must not flag labels_stripped, got [${r.reasons?.join(",")}]`,
+      `Phase 1: recipient combined fast-path must return null patch for ${JSON.stringify(text)}`,
     );
   }
 
@@ -359,99 +344,21 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // Recovery — corrupted recipient_name is recoverable end-to-end
-  // (Fix 2 extracts cleanly → apply boundary raises a well-formed
-  // conflict on the pre-corrupted slot → renderer shows both values).
+  // Recovery path notes (Phase 1 — 2026-04-24)
+  //
+  // The previous "fast-path extracts a clean recipient name → apply
+  // boundary raises a well-formed conflict → renderer shows both
+  // values" end-to-end recovery test was removed as part of the
+  // Phase 1 authority cut. The premise — "the fast-path produces a
+  // clean value to conflict against" — no longer holds: combined
+  // recipient name+phone extraction is now LLM-owned. The same
+  // recovery flow still works end-to-end; it's just driven by an
+  // LLM-authored `apply_booking_field` tool op now, and that path
+  // is covered by `smoke-test-slot-response-coherence.mjs` and the
+  // apply-boundary DST tests rather than here.
   // -------------------------------------------------------------------------
-  {
-    // Pre-seed DST with the exact corrupted residual conv 19399 ended
-    // up with, as if Fix 2 had not yet been deployed. Sender identity
-    // is pre-resolved to match the realistic state — the corruption
-    // only happens at the RECIPIENT step, by which point the
-    // ambiguous-pair guard is already satisfied.
-    let state = createEmptyDialogState();
-    state = updateSlot(state, "sender_name", "عبدالعزيز الملا", "customer_fast_path").state;
-    state = updateSlot(state, "sender_phone", "96599338566", "customer_fast_path").state;
-    state = updateSlot(state, "recipient_name", "اسم احمد باشا رقم", "llm_apply").state;
-    assert.equal(state.slots.recipient_name?.status, "filled");
-    assert.equal(state.slots.recipient_name?.value, "اسم احمد باشا رقم");
-
-    // Customer sends the labeled answer again. Fix 2 strips the
-    // labels and returns the clean parse.
-    const extracted = extractRecipientNameAndPhone({
-      text: "اسم احمد باشا رقم 5207777",
-    });
-    assert.equal(extracted.confidence, "high");
-    assert.equal(extracted.patch?.recipient_name, "احمد باشا");
-    assert.equal(extracted.patch?.recipient_phone, "5207777");
-
-    // Drive the clean patch through the apply boundary. The boundary
-    // consults the DST we pre-seeded and raises a conflict (old vs
-    // new). The `conflictCandidate` on the resulting slot record MUST
-    // be the clean value — which is exactly what the dispatch site
-    // now surfaces into `conflictValues.incoming` for the renderer.
-    const draft = {
-      ...createEmptyBookingDraft(),
-      senderName: "عبدالعزيز الملا",
-      senderPhone: "96599338566",
-    };
-    const res = applyProposals(
-      [
-        llmProposal({
-          op: {
-            recipient_name: extracted.patch.recipient_name,
-            recipient_phone: extracted.patch.recipient_phone,
-            source_quote: "اسم احمد باشا رقم 5207777",
-          },
-        }),
-      ],
-      {
-        draft,
-        dialogState: state,
-        whatsappNumber: "96599338566",
-        stage: "collecting_booking_details",
-      },
-    );
-    // The boundary should have raised a conflict on recipient_name
-    // because the pre-seeded corrupted value disagrees with the
-    // clean incoming value.
-    const conflictFields = res.conflicts.map((c) => c.slot);
-    assert.ok(
-      conflictFields.includes("recipient_name"),
-      `expected recipient_name in conflicts, got conflicts=[${JSON.stringify(res.conflicts)}] rejections=[${JSON.stringify(res.rejections)}]`,
-    );
-    const recAfter = res.dialogState.slots.recipient_name;
-    assert.equal(recAfter?.status, "conflict");
-    assert.equal(recAfter?.value, "اسم احمد باشا رقم", "existing stays as the pre-corruption garbage");
-    assert.equal(
-      recAfter?.conflictCandidate,
-      "احمد باشا",
-      "incoming must be the Fix-2-cleaned value",
-    );
-
-    // Finally — feed the real DST-derived values into the renderer.
-    const ctx = {
-      language: "ar",
-      draft,
-      entry: {},
-      conflictingSlot: "recipient_name",
-      conflictValues: {
-        existing: recAfter.value,
-        incoming: recAfter.conflictCandidate,
-      },
-      turnSeed: "recovery-seed",
-    };
-    const render = renderDirectiveReply("CONFIRM_SLOT_CONFLICT", ctx);
-    assert.equal(render.kind, "render");
-    assert.ok(
-      render.text.includes("اسم احمد باشا رقم"),
-      `renderer must surface the corrupted value so the customer sees it, got: ${JSON.stringify(render.text)}`,
-    );
-    assert.ok(
-      render.text.includes("احمد باشا"),
-      `renderer must surface the clean incoming value, got: ${JSON.stringify(render.text)}`,
-    );
-  }
+  // Unused after Phase 1 cut (kept in the loader for brevity).
+  void applyProposals; void llmProposal;
 
   console.log("smoke-test-slot-fill-fixes: OK");
 }
