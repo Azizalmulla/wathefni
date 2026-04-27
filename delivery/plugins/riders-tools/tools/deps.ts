@@ -91,6 +91,8 @@ export interface ToolDeps {
     clearPricingCache: () => void;
     loadPricing: (options?: { skipAutoSync?: boolean }) => Promise<any>;
     loadPricingFallbackData: () => Promise<any>;
+    validatePublishedPricingOrderingMappings: () => Promise<any>;
+    assertPublishedPricingOrderingMappingsValid: () => Promise<any>;
     writePublishedPricing: (data: any) => Promise<void>;
     buildPublishedPricingData: (params: any, fallback: any) => any;
     resolvePublishedAreasInput: (params: any) => unknown[];
@@ -147,6 +149,7 @@ export interface ToolDeps {
     getBidirectionalRoutePrices: (pickup: any, dropoff: any) => any;
     getSpecialDeliveryCapabilities: () => Promise<any>;
     resolveAreaForOrdering: (query: string) => Promise<any>;
+    resolveAreaForOrderingByPricingArea: (pricingArea: any) => Promise<any>;
     getCommonShippingMethods: (pickup: any[], dropoff: any[]) => any[];
       selectShippingMethod: (methods: any[], deliveryType: any) => any;
       summarizeLiveDeliveryOption: (
@@ -207,6 +210,7 @@ export interface ToolDeps {
     ridersRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
     ridersFormDataRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
     normalizeOrder: (order: any) => any;
+    assertPublishedPricingOrderingMappingsValid: () => Promise<any>;
     validateCreateSimpleOrderPreflight: (params: any, ctxArgs: any) => void;
 
     // register()-scope closures

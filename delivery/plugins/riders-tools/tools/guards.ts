@@ -14,6 +14,7 @@
 //   guards.registerHooks(api);
 
 import { createHash } from "node:crypto";
+import type { AreaResolutionProvenance } from "../../shared/area-resolution-provenance";
 import {
   buildConversationControllerKey,
   CONVERSATION_CONTROLLER_QUOTE_WINDOW_MS,
@@ -34,6 +35,7 @@ import {
 } from "../../shared/guard-state";
 
 type BookableDeliveryType = "sedan_normal" | "sedan_fast" | "van_normal" | "van_fast";
+const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;
 
 export interface GuardModuleDeps {
   buildRouteKey: (pickupArea: string | null | undefined, dropoffArea: string | null | undefined) => string | null;
@@ -74,6 +76,7 @@ export interface GuardHelpers {
 
   // raw session map (same reference passed into globalThis.__ridersGuardState)
   sessionState: Map<string, any>;
+  beforeToolCall?: (event: any, ctx: any) => void;
 }
 
 export interface GuardModule {
@@ -102,6 +105,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
     pickupAreaNameEn: string;
     dropoffAreaNameAr: string;
     dropoffAreaNameEn: string;
+    pickupAreaResolution?: AreaResolutionProvenance | null;
+    dropoffAreaResolution?: AreaResolutionProvenance | null;
     pricesByType: Partial<Record<BookableDeliveryType, number>>;
     optionCatalog: Array<{
       delivery_type: string;
@@ -656,6 +661,14 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
             pickupAreaNameEn: data.route.pickup.name_en,
             dropoffAreaNameAr: data.route.dropoff.name_ar,
             dropoffAreaNameEn: data.route.dropoff.name_en,
+            pickupAreaResolution:
+              data.route.pickup.area_resolution && typeof data.route.pickup.area_resolution === "object"
+                ? data.route.pickup.area_resolution
+                : null,
+            dropoffAreaResolution:
+              data.route.dropoff.area_resolution && typeof data.route.dropoff.area_resolution === "object"
+                ? data.route.dropoff.area_resolution
+                : null,
             pricesByType: quoteMap,
             optionCatalog,
             serviceDiscovery,
@@ -751,6 +764,16 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
       const stageHint = bookingAuthority.stage;
       const bookingStepHint = bookingAuthority.bookingStep;
       const toolParams = getToolParams(event);
+      const legacyObserveOnly = RIDERS_SINGLE_LIFECYCLE_ENGINE;
+      const observeLegacyBlock = (scope: string, reason: string) => {
+        if (legacyObserveOnly) {
+          console.log(
+            `[single-lifecycle/legacy-tool-gate] observe_only tool=${toolName} scope=${scope} stage=${stageHint || "unknown"} bookingStep=${bookingStepHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)} reason=${JSON.stringify(reason.slice(0, 180))}`,
+          );
+          return;
+        }
+        blockTool(reason);
+      };
 
       // ----- FSM state gate (post-order) -----
       // Hardest gate: after an order is submitted, the booking-collection
@@ -794,7 +817,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked get_price same_quoted_route_followup session=${sessionKey(ctx).slice(0, 32)} text=${JSON.stringify(visibleText.slice(0, 120))}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "get_price_same_quoted_route_followup",
             "Do not call get_price again when there is already an active quoted route and the customer did not provide a new route in this turn. Answer from the stored quote and service options for that same route instead. Only call get_price again if the customer clearly changes pickup or dropoff.",
           );
         }
@@ -804,7 +828,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked get_price broad_service intent=${intentHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)} text=${JSON.stringify(visibleText.slice(0, 120))}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "get_price_broad_service",
             "Do not call get_price for a broad service overview question. Answer with the available Riders service categories first, and only quote a route if the customer clearly asks for pricing on a specific route.",
           );
         }
@@ -824,7 +849,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked get_price intent=${intentHint} stage=${stageHint || "unknown"} bookingStep=${bookingStepHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)} text=${JSON.stringify(visibleText.slice(0, 120))}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "get_price_active_booking_flow",
             "Do not call get_price during the booking collection or summary-confirmation flow. Continue the current booking step instead.",
           );
         }
@@ -857,7 +883,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked create_simple_order booking_step=${bookingStepHint || "unknown"} stage=${stageHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)} text=${JSON.stringify(visibleText.slice(0, 120))}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "create_simple_order_stage",
             `Do not call create_simple_order during the ${(bookingStepHint || stageHint || "current").replace(/_/g, " ")} booking step. Continue collecting the missing booking details first.`,
           );
         }
@@ -865,7 +892,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked create_simple_order awaiting_confirmation intent=${intentHint || "unknown"} stage=${stageHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)} text=${JSON.stringify(visibleText.slice(0, 120))}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "create_simple_order_confirmation_text",
             "Do not call create_simple_order until the customer explicitly confirms the final order summary you already showed. Ask for confirmation instead.",
           );
         }
@@ -874,7 +902,7 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked create_simple_order direct_chat_unavailable status=${String(bookingAuthority.controller?.selectedQuoteOptionDirectChatBookingStatus || "unknown")} session=${sessionKey(ctx).slice(0, 32)}`,
           );
-          blockTool(directChatBlockReason);
+          observeLegacyBlock("create_simple_order_direct_chat_status", directChatBlockReason);
         }
         const canonicalParams = buildCanonicalCreateOrderParamsFromController(
           bookingAuthority.controller,
@@ -884,7 +912,8 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
           console.log(
             `[intent-gate] blocked create_simple_order incomplete_controller intent=${intentHint || "unknown"} stage=${stageHint || "unknown"} session=${sessionKey(ctx).slice(0, 32)}`,
           );
-          blockTool(
+          observeLegacyBlock(
+            "create_simple_order_canonical_controller",
             "Do not call create_simple_order until the canonical booking controller has the confirmed sender, recipient, address, service, and price fields ready.",
           );
         }
@@ -935,6 +964,40 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
     if (!CRITICAL_TOOLS.has(toolName)) return;
     const { key, aliases, session } = getSessionFromCtx(ctx);
     const { customerMessage, customerMessages, prices, quotedRoute, createdOrderUid } = parseToolResult(result);
+    const bareConversationId = extractConversationIdFromCtx(ctx);
+    const controllerKey = buildControllerStateKeyFromCtx(ctx);
+    const persistSessionAliases = async () => {
+      if (bareConversationId && bareConversationId !== key) {
+        sessionState.set(bareConversationId, session);
+      }
+      if (controllerKey && controllerKey !== key && controllerKey !== bareConversationId) {
+        sessionState.set(controllerKey, session);
+      }
+      const persistAliases = new Set<string>(aliases);
+      if (key) persistAliases.add(key);
+      if (bareConversationId) persistAliases.add(bareConversationId);
+      if (controllerKey) persistAliases.add(controllerKey);
+      await persistGuardSessionAliases([...persistAliases], session);
+    };
+
+    if (toolName === "create_simple_order") {
+      session.pendingOrderSummary = null;
+      session.lastCreatedOrderUid = null;
+      if (!createdOrderUid) {
+        session.lastCustomerMessage = null;
+        session.lastCustomerMessages = { ar: null, en: null };
+        if (session.lastToolName === "create_simple_order") {
+          session.lastToolName = null;
+        }
+        await persistSessionAliases();
+        try {
+          console.log(
+            `[post-order] create_simple_order_not_submitted session=${key.slice(0, 16)}... aliases=[${bareConversationId || ""}, ${controllerKey || ""}]`,
+          );
+        } catch {}
+        return;
+      }
+    }
 
     session.lastToolName = toolName;
     session.lastToolTs = Date.now();
@@ -953,30 +1016,15 @@ export function createGuardModule(moduleDeps: GuardModuleDeps): GuardModule {
     }
 
     if (toolName === "create_simple_order") {
-      session.pendingOrderSummary = null;
-      if (createdOrderUid) {
-        (session as any).lastCreatedOrderUid = createdOrderUid;
-        try {
-          console.log(
-            `[post-order] captured order_uid=${createdOrderUid} session=${key.slice(0, 16)}...`,
-          );
-        } catch {}
-      }
+      session.lastCreatedOrderUid = createdOrderUid;
+      try {
+        console.log(
+          `[post-order] captured order_uid=${createdOrderUid} session=${key.slice(0, 16)}...`,
+        );
+      } catch {}
     }
 
-    const bareConversationId = extractConversationIdFromCtx(ctx);
-    if (bareConversationId && bareConversationId !== key) {
-      sessionState.set(bareConversationId, session);
-    }
-    const controllerKey = buildControllerStateKeyFromCtx(ctx);
-    if (controllerKey && controllerKey !== key && controllerKey !== bareConversationId) {
-      sessionState.set(controllerKey, session);
-    }
-    const persistAliases = new Set<string>(aliases);
-    if (key) persistAliases.add(key);
-    if (bareConversationId) persistAliases.add(bareConversationId);
-    if (controllerKey) persistAliases.add(controllerKey);
-    await persistGuardSessionAliases([...persistAliases], session);
+    await persistSessionAliases();
 
     if (customerMessage) {
       console.log(`[guard] Recorded _customer_message from ${toolName} for session ${key.slice(0, 12)}... aliases=[${bareConversationId || ""}, ${controllerKey || ""}]`);

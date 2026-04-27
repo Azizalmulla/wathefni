@@ -102,8 +102,11 @@ import { registerAdminWorkspaceTools } from "./tools/admin-workspace";
 import { registerAdminSheetsTools } from "./tools/admin-sheets";
 import { registerAdminBehaviorTools } from "./tools/admin-behavior";
 import { registerAdminPricingTools } from "./tools/admin-pricing";
+import { registerAdminOrderTools } from "./tools/admin-orders";
+import { registerAdminComplaintTools } from "./tools/admin-complaints";
 import { registerCustomerSupportTools } from "./tools/support";
 import { registerPricingTools } from "./tools/pricing";
+import { registerCoverageTools } from "./tools/coverage";
 import { registerBookingTools } from "./tools/booking";
 import { registerProposerTools } from "./tools/proposer";
 import { createGuardModule } from "./tools/guards";
@@ -329,10 +332,34 @@ let behaviorPolicyCachePath: string | null = null;
 let pricingGoogleLiveLoadInFlight: Promise<PricingData> | null = null;
 let governoratesCache: GeoGovernorate[] | null = null;
 const geoAreasCache = new Map<number, GeoArea[]>();
+let publishedOrderingMappingValidationInFlight: Promise<OrderingMappingValidationResult> | null = null;
 let ridersGridLiveSettingsCache: {
   value: RidersGridLiveSettingsSummary;
   loadedAtMs: number;
 } | null = null;
+
+type OrderingMappingValidationStage =
+  | "pricing_governorate"
+  | "grid_governorate"
+  | "ordering_area"
+  | "payload_conversion";
+
+type OrderingMappingValidationIssue = {
+  stage: OrderingMappingValidationStage;
+  area_id: number | null;
+  area_name_en: string;
+  area_name_ar: string;
+  pricing_governorate: string;
+  grid_governorate?: string | null;
+  message: string;
+};
+
+type OrderingMappingValidationResult = {
+  ok: boolean;
+  checked_area_count: number;
+  issue_count: number;
+  issues: OrderingMappingValidationIssue[];
+};
 
 const env = (
   (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
@@ -597,6 +624,7 @@ function clearPricingCache() {
   pricingCache = null;
   pricingCachePath = null;
   pricingGoogleLiveLoadInFlight = null;
+  publishedOrderingMappingValidationInFlight = null;
 }
 
 function clearBehaviorPolicyCache() {
@@ -2379,6 +2407,122 @@ type AreaResolutionCandidate = {
 // buildResolverLookupKeys, matchesResolverAlias, buildPricingAreaFromResolverGroup
 // moved to ./lib/pricing-resolver.ts (wave 1b).
 
+function tokenizeResolverOptionText(value: string | null | undefined): string[] {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+}
+
+function findAmbiguityGroupForAreaId(
+  areaId: number | null | undefined,
+  groups: PricingResolverAmbiguityGroup[],
+): PricingResolverAmbiguityGroup | null {
+  if (typeof areaId !== "number") return null;
+  return (
+    groups.find((group) =>
+      (group.options || []).some((option) => Number(option.area_id) === areaId),
+    ) || null
+  );
+}
+
+function ambiguityOptionTokenCounts(
+  group: PricingResolverAmbiguityGroup,
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const option of group.options || []) {
+    const optionTokens = new Set([
+      ...tokenizeResolverOptionText(option.name_en),
+      ...tokenizeResolverOptionText(option.name_ar),
+    ]);
+    for (const token of optionTokens) {
+      counts.set(token, (counts.get(token) || 0) + 1);
+    }
+  }
+  return counts;
+}
+
+function ambiguityOptionsMatchingText(
+  query: string,
+  group: PricingResolverAmbiguityGroup,
+): NonNullable<PricingResolverAmbiguityGroup["options"]> {
+  const queryTokens = new Set(tokenizeResolverOptionText(query));
+  if (queryTokens.size === 0) return group.options || [];
+  const matches = (group.options || []).filter((option) => {
+    const optionTokens = new Set([
+      ...tokenizeResolverOptionText(option.name_en),
+      ...tokenizeResolverOptionText(option.name_ar),
+    ]);
+    return [...queryTokens].some((token) => optionTokens.has(token));
+  });
+  return matches.length > 1 ? matches : group.options || [];
+}
+
+function hasUniqueAmbiguityOptionEvidence(params: {
+  query: string;
+  areaId: number;
+  group: PricingResolverAmbiguityGroup;
+}): boolean {
+  const selectedOption = (params.group.options || []).find(
+    (option) => Number(option.area_id) === params.areaId,
+  );
+  if (!selectedOption) return true;
+  const normalizedQuery = tokenizeResolverOptionText(params.query).join(" ");
+  if (
+    normalizedQuery &&
+    (normalizedQuery === tokenizeResolverOptionText(selectedOption.name_en).join(" ") ||
+      normalizedQuery === tokenizeResolverOptionText(selectedOption.name_ar).join(" "))
+  ) {
+    return true;
+  }
+  const queryTokens = new Set(tokenizeResolverOptionText(params.query));
+  if (queryTokens.size === 0) return false;
+  const selectedTokens = new Set([
+    ...tokenizeResolverOptionText(selectedOption.name_en),
+    ...tokenizeResolverOptionText(selectedOption.name_ar),
+  ]);
+  const counts = ambiguityOptionTokenCounts(params.group);
+  return [...queryTokens].some(
+    (token) => selectedTokens.has(token) && (counts.get(token) || 0) === 1,
+  );
+}
+
+function broadAmbiguityForResolvedArea(params: {
+  query: string;
+  area: PricingArea;
+  groups: PricingResolverAmbiguityGroup[];
+}): Extract<PricingAreaResolution, { status: "ambiguous" }> | null {
+  const normalizedQuery = tokenizeResolverOptionText(params.query).join(" ");
+  if (
+    normalizedQuery &&
+    (normalizedQuery === tokenizeResolverOptionText(params.area.name_en).join(" ") ||
+      normalizedQuery === tokenizeResolverOptionText(params.area.name_ar).join(" "))
+  ) {
+    return null;
+  }
+  const group = findAmbiguityGroupForAreaId(params.area.id, params.groups);
+  if (!group) return null;
+  if (
+    hasUniqueAmbiguityOptionEvidence({
+      query: params.query,
+      areaId: params.area.id,
+      group,
+    })
+  ) {
+    return null;
+  }
+  return {
+    status: "ambiguous",
+    ambiguity_group_id: group.id,
+    prompt_ar: group.prompt_ar,
+    prompt_en: group.prompt_en,
+    options: ambiguityOptionsMatchingText(params.query, group),
+  };
+}
+
 function resolveAreaViaResolverMetadata(
   query: string,
   data: PricingData,
@@ -2450,6 +2594,12 @@ function resolveAreaViaResolverMetadata(
     if (aliasEntry.area_id) {
       const area = data.areas.find((entry) => entry.id === aliasEntry.area_id);
       if (area) {
+        const broadAmbiguity = broadAmbiguityForResolvedArea({
+          query: aliasEntry.alias || query,
+          area,
+          groups: ambiguityGroups,
+        });
+        if (broadAmbiguity) return broadAmbiguity;
         return { status: "resolved", area };
       }
     }
@@ -2643,6 +2793,7 @@ function logAreaResolutionTrace(
 
 function decideAreaResolution(
   query: string,
+  data: PricingData,
   result: {
     ambiguity: Extract<PricingAreaResolution, { status: "ambiguous" }> | null;
     candidates: AreaResolutionCandidate[];
@@ -2669,6 +2820,19 @@ function decideAreaResolution(
   for (const source of resolvePriority) {
     const candidate = candidates.find((entry) => entry.source === source);
     if (candidate) {
+      const broadAmbiguity = broadAmbiguityForResolvedArea({
+        query,
+        area: candidate.area,
+        groups: normalizePricingResolverConfig(data.resolver)?.ambiguity_groups || [],
+      });
+      if (broadAmbiguity) {
+        logAreaResolutionTrace(query, result, {
+          status: "ambiguous",
+          source: "ambiguity_group",
+          ambiguity_group_id: broadAmbiguity.ambiguity_group_id,
+        });
+        return broadAmbiguity;
+      }
       console.log(
         `[area-resolution] resolved "${query}" via ${candidate.source} -> "${candidate.area.name_en}"`,
       );
@@ -2693,6 +2857,19 @@ function decideAreaResolution(
       : 0;
     const isHighConfidence = !hasAlternatives && rawSimilarity >= 0.75;
     if (isHighConfidence) {
+      const broadAmbiguity = broadAmbiguityForResolvedArea({
+        query,
+        area: suggestion.area,
+        groups: normalizePricingResolverConfig(data.resolver)?.ambiguity_groups || [],
+      });
+      if (broadAmbiguity) {
+        logAreaResolutionTrace(query, result, {
+          status: "ambiguous",
+          source: "ambiguity_group",
+          ambiguity_group_id: broadAmbiguity.ambiguity_group_id,
+        });
+        return broadAmbiguity;
+      }
       console.log(
         `[area-resolution] auto-resolved "${query}" via confident typo -> "${suggestion.area.name_en}" similarity=${rawSimilarity.toFixed(4)}`,
       );
@@ -2738,7 +2915,7 @@ async function resolvePricingAreaQuery(
   fingerprint?: string,
 ): Promise<PricingAreaResolution> {
   const result = await collectAreaResolutionCandidates(query, data, fingerprint);
-  return decideAreaResolution(query, result);
+  return decideAreaResolution(query, data, result);
 }
 
 /**
@@ -3369,16 +3546,56 @@ function hasAnyAddressEvidence(params: {
   );
 }
 
-// Bilingual keyword map for Kuwait's 6 governorates.
-// Keys are lowercase English stems; values are Arabic substrings to match.
-const GOVERNORATE_EN_AR_MAP: [string, string][] = [
-  ["capital", "عاصم"],
-  ["hawalli", "حولي"],
-  ["jahra", "جهرا"],
-  ["farwaniya", "فروان"],
-  ["ahmadi", "احمدي"],
-  ["mubarak", "مبارك"],
+// Bilingual alias map for Kuwait's 6 governorates. Pricing, Grid, and local
+// catalogs do not always use the same English rendering.
+const KUWAIT_GOVERNORATE_ALIASES: Array<{
+  key: string;
+  english: string[];
+  arabic: string[];
+}> = [
+  { key: "capital", english: ["capital", "asimah", "al asimah", "asma"], arabic: ["عاصم"] },
+  { key: "hawalli", english: ["hawalli", "hawaly"], arabic: ["حولي"] },
+  { key: "jahra", english: ["jahra", "jahraa"], arabic: ["جهرا"] },
+  { key: "farwaniya", english: ["farwaniya", "farwania"], arabic: ["فروان"] },
+  { key: "ahmadi", english: ["ahmadi", "ahmady"], arabic: ["احمدي"] },
+  { key: "mubarak_al_kabeer", english: ["mubarak", "mubarak kabeer", "mubarak al kabeer"], arabic: ["مبارك"] },
 ];
+
+function governorateAliasKeys(value: string): Set<string> {
+  const keys = new Set<string>();
+  const normalized = normalizeGovernorateName(value);
+  const normalizedAr = normalizeArabic(value.replace(/محافظة/g, "").replace(/governorate/gi, ""));
+  for (const group of KUWAIT_GOVERNORATE_ALIASES) {
+    if (
+      group.english.some((alias) => {
+        const normalizedAlias = normalizeGovernorateName(alias);
+        return (
+          normalized &&
+          normalizedAlias &&
+          (normalized.includes(normalizedAlias) || normalizedAlias.includes(normalized))
+        );
+      }) ||
+      group.arabic.some((alias) => {
+        const normalizedAlias = normalizeArabic(alias);
+        return (
+          normalizedAr &&
+          normalizedAlias &&
+          (normalizedAr.includes(normalizedAlias) || normalizedAlias.includes(normalizedAr))
+        );
+      })
+    ) {
+      keys.add(group.key);
+    }
+  }
+  return keys;
+}
+
+function setsIntersect(left: Set<string>, right: Set<string>): boolean {
+  for (const item of left) {
+    if (right.has(item)) return true;
+  }
+  return false;
+}
 
 function findGovernorateByName(
   governorateName: string,
@@ -3427,14 +3644,12 @@ function findGovernorateByName(
     }
   }
 
-  // 5. Bilingual keyword fallback (English pricing name → Arabic geo name)
-  for (const [enStem, arSubstring] of GOVERNORATE_EN_AR_MAP) {
-    if (normalized.includes(enStem)) {
-      const arNorm = normalizeArabic(arSubstring);
-      for (const governorate of governorates) {
-        if (normalizeArabic(governorate.name).includes(arNorm)) {
-          return governorate;
-        }
+  // 5. Kuwait governorate alias fallback across English/Arabic renderings.
+  const targetAliasKeys = governorateAliasKeys(governorateName);
+  if (targetAliasKeys.size > 0) {
+    for (const governorate of governorates) {
+      if (setsIntersect(targetAliasKeys, governorateAliasKeys(governorate.name))) {
+        return governorate;
       }
     }
   }
@@ -3490,12 +3705,7 @@ function resolveGeoAreaMatch(pricingArea: PricingArea, geoAreas: GeoArea[]): Geo
   return null;
 }
 
-async function resolveAreaForOrdering(query: string) {
-  const pricing = await loadPricing();
-  const pricingAreaResolution = await resolvePricingAreaQuery(query, pricing);
-  if (pricingAreaResolution.status !== "resolved") return null;
-  const pricingArea = pricingAreaResolution.area;
-
+async function resolveAreaForOrderingByPricingArea(pricingArea: PricingArea) {
   const targetGovernorateName = pricingArea.geo?.governorate || pricingArea.governorate;
   const governorates = await loadGovernorates();
   const governorate = findGovernorateByName(targetGovernorateName, governorates);
@@ -3520,6 +3730,13 @@ async function resolveAreaForOrdering(query: string) {
       governorate_name: governorate.name,
     },
   };
+}
+
+async function resolveAreaForOrdering(query: string) {
+  const pricing = await loadPricing();
+  const pricingAreaResolution = await resolvePricingAreaQuery(query, pricing);
+  if (pricingAreaResolution.status !== "resolved") return null;
+  return resolveAreaForOrderingByPricingArea(pricingAreaResolution.area);
 }
 
 function getCommonShippingMethods(pickup: GeoShippingMethod[], dropoff: GeoShippingMethod[]) {
@@ -3612,6 +3829,141 @@ function buildAddressPayload(
     house: options.house ?? null,
     notes: combinedNotes,
   };
+}
+
+function hasPublishedPrice(area: PricingArea): boolean {
+  return PRICING_AREA_PRICE_KEYS.some((key) => typeof area[key] === "number");
+}
+
+function orderingMappingIssue(
+  area: PricingArea,
+  stage: OrderingMappingValidationStage,
+  message: string,
+  gridGovernorate?: GeoGovernorate | null,
+): OrderingMappingValidationIssue {
+  return {
+    stage,
+    area_id: typeof area.id === "number" ? area.id : null,
+    area_name_en: area.name_en || "",
+    area_name_ar: area.name_ar || "",
+    pricing_governorate: area.geo?.governorate || area.governorate || "",
+    grid_governorate: gridGovernorate?.name ?? null,
+    message,
+  };
+}
+
+async function validatePublishedPricingOrderingMappings(): Promise<OrderingMappingValidationResult> {
+  if (publishedOrderingMappingValidationInFlight) {
+    return await publishedOrderingMappingValidationInFlight;
+  }
+
+  const validationPromise = (async () => {
+    const pricing = await loadPricing();
+    const areas = pricing.areas.filter(hasPublishedPrice);
+    const governorates = await loadGovernorates();
+    const issues: OrderingMappingValidationIssue[] = [];
+
+    for (const area of areas) {
+      const targetGovernorateName = area.geo?.governorate || area.governorate;
+      if (!targetGovernorateName.trim()) {
+        issues.push(orderingMappingIssue(area, "pricing_governorate", "Pricing area has no governorate."));
+        continue;
+      }
+
+      const governorate = findGovernorateByName(targetGovernorateName, governorates);
+      if (!governorate) {
+        issues.push(
+          orderingMappingIssue(
+            area,
+            "grid_governorate",
+            `Grid governorate mapping not found for ${targetGovernorateName}.`,
+          ),
+        );
+        continue;
+      }
+
+      const geoAreas = await loadGeoAreas(governorate.id);
+      const geoArea = resolveGeoAreaMatch(area, geoAreas);
+      if (!geoArea) {
+        issues.push(
+          orderingMappingIssue(
+            area,
+            "ordering_area",
+            `Grid ordering area mapping not found for ${area.name_en} (${area.name_ar}).`,
+            governorate,
+          ),
+        );
+        continue;
+      }
+
+      if (!geoArea.objectid) {
+        issues.push(
+          orderingMappingIssue(
+            area,
+            "ordering_area",
+            `Grid ordering area ${geoArea.name} has no objectid.`,
+            governorate,
+          ),
+        );
+        continue;
+      }
+
+      try {
+        buildAddressPayload(
+          {
+            governorate,
+            geoArea: {
+              ...geoArea,
+              governorate_name: governorate.name,
+            },
+          },
+          {
+            block: "1",
+            street: "1",
+            house: "1",
+          },
+        );
+      } catch (err) {
+        issues.push(
+          orderingMappingIssue(
+            area,
+            "payload_conversion",
+            err instanceof Error ? err.message : String(err),
+            governorate,
+          ),
+        );
+      }
+    }
+
+    return {
+      ok: issues.length === 0,
+      checked_area_count: areas.length,
+      issue_count: issues.length,
+      issues,
+    };
+  })();
+
+  publishedOrderingMappingValidationInFlight = validationPromise;
+  try {
+    return await validationPromise;
+  } catch (err) {
+    if (publishedOrderingMappingValidationInFlight === validationPromise) {
+      publishedOrderingMappingValidationInFlight = null;
+    }
+    throw err;
+  }
+}
+
+async function assertPublishedPricingOrderingMappingsValid(): Promise<OrderingMappingValidationResult> {
+  const result = await validatePublishedPricingOrderingMappings();
+  if (result.ok) return result;
+  const preview = result.issues
+    .slice(0, 8)
+    .map((issue) => `${issue.area_name_en || issue.area_name_ar} [${issue.stage}]: ${issue.message}`)
+    .join("; ");
+  throw new Error(
+    `Published pricing ordering mapping preflight failed for ${result.issue_count}/${result.checked_area_count} areas. ${preview}`,
+  );
 }
 
 function unavailableDeliveryTypeMessage(
@@ -4978,6 +5330,17 @@ function validateCreateSimpleOrderPreflight(params: {
 
 const STRIP_AREA_FILLER_RE =
   /^(?:منطقة|ضاحية|مدينة|جزيرة|area|district|block|بلوك)\s+/gi;
+const AREA_TOKEN_BOUNDARY_RE = /[?؟!.,،؛;:]+/u;
+
+function cleanRouteAreaToken(token: string | null | undefined): string {
+  if (!token) return "";
+  const beforeBoundary = String(token).split(AREA_TOKEN_BOUNDARY_RE)[0] ?? "";
+  return beforeBoundary
+    .replace(STRIP_AREA_FILLER_RE, "")
+    .replace(/^[\s"'`“”‘’()[\]{}]+|[\s"'`“”‘’()[\]{}]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function extractAreaTokensFromText(text: string): { pickup: string | null; dropoff: string | null } {
   if (!text || text.length > 300) return { pickup: null, dropoff: null };
@@ -4986,18 +5349,20 @@ function extractAreaTokensFromText(text: string): { pickup: string | null; dropo
 
   s = s.replace(/(?:بكم|بچم|كم|شلون|شنو)\s*(?:سعر\s*)?(?:التوصيل|الديليفري|توصيل|delivery)?\s*/gi, " ");
   s = s.replace(/(?:delivery|price|cost|how\s*much)\s*/gi, " ");
-  s = s.replace(/[?؟!.,:;]+/g, " ");
   s = s.replace(/\s+/g, " ").trim();
   if (!s) return { pickup: null, dropoff: null };
 
-  const separatorRe =
-    /\s+(?:الى|إلى|الي|إلي|لـ|حق|to|->|←|→)\s+|\s+ل(?=\S)|\s+(?:من|from)\s+/i;
+  const routeStart = s.match(/(?:^|\s)(?:من|from)\s+/i);
+  if (routeStart?.index !== undefined) {
+    s = s.slice(routeStart.index + routeStart[0].length).trim();
+  }
 
-  s = s.replace(/^(?:من|from)\s+/i, "");
+  const separatorRe =
+    /\s+(?:الى|إلى|الي|إلي|لي|حق|to|->|←|→)\s+|\s+لـ\s*|\s+لل\s*|\s+ل\s+|\s+ل(?!ي)(?=\S)/i;
 
   const parts = s
     .split(separatorRe)
-    .map((p) => p.replace(STRIP_AREA_FILLER_RE, "").trim())
+    .map(cleanRouteAreaToken)
     .filter((p) => p.length >= 2);
 
   if (parts.length >= 2) {
@@ -5061,7 +5426,7 @@ function collectAreaEvidenceFromText(
   if (!data?.areas?.length) return evidence;
 
   const cleaned = text
-    .replace(/[?؟!.,:;()"'`“”‘’]+/g, " ")
+    .replace(/[?؟!.,،؛;:()"'`“”‘’]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   if (!cleaned) return evidence;
@@ -5086,12 +5451,24 @@ function collectAreaEvidenceFromText(
   const tried = new Set<string>();
 
   const tryResolve = (candidate: string): void => {
-    const key = candidate.toLowerCase();
-    if (tried.has(key)) return;
-    tried.add(key);
-    const res = resolveAreaDeterministicSync(candidate, data);
-    if (res && res.status === "resolved" && res.area) {
-      evidence.add(res.area.id);
+    const trimmed = candidate.trim();
+    const variants = [trimmed];
+    if (/^لل/.test(trimmed)) {
+      variants.push(`ال${trimmed.slice(2)}`, trimmed.slice(2));
+    } else if (/^لـ/.test(trimmed)) {
+      variants.push(trimmed.slice(2));
+    } else if (/^ل(?!ي)/.test(trimmed)) {
+      variants.push(trimmed.slice(1));
+    }
+
+    for (const variant of variants) {
+      const key = variant.toLowerCase();
+      if (!variant || tried.has(key)) continue;
+      tried.add(key);
+      const res = resolveAreaDeterministicSync(variant, data);
+      if (res && res.status === "resolved" && res.area) {
+        evidence.add(res.area.id);
+      }
     }
   };
 
@@ -5271,8 +5648,11 @@ function verifyAreaEvidence(params: {
   if (typeof idOverride === "number") return { action: "keep" };
   if (!rawToken) return { action: "keep" };
 
+  const verifiedRawToken = cleanRouteAreaToken(rawToken);
+  if (!verifiedRawToken) return { action: "keep" };
+
   const modelRes = resolveAreaDeterministicSync(modelValue, data);
-  const rawRes = resolveAreaDeterministicSync(rawToken, data);
+  const rawRes = resolveAreaDeterministicSync(verifiedRawToken, data);
   const modelResolved = modelRes?.status === "resolved" ? modelRes : null;
   const rawResolved = rawRes?.status === "resolved" ? rawRes : null;
 
@@ -5318,7 +5698,7 @@ function verifyAreaEvidence(params: {
   }
 
   if (!rawResolved && modelResolved) {
-    const typoMatch = findAreaNearTypoMatch(rawToken, data.areas, data.resolver);
+    const typoMatch = findAreaNearTypoMatch(verifiedRawToken, data.areas, data.resolver);
     if (typoMatch && typoMatch.area.id === modelResolved.area.id) {
       return { action: "keep" };
     }
@@ -5331,9 +5711,9 @@ function verifyAreaEvidence(params: {
       // Emit needs_clarification with the top candidates so the LLM can
       // self-correct on the next turn (re-call with pickup_area_id or ask
       // the customer to confirm the top candidate).
-      const candidates = collectAreaCandidates(rawToken, data.areas, { topK: 5 });
-      const modelSimilarity = scoreAreaMatchSimilarity(rawToken, modelResolved.area.name_en);
-      const arSimilarity = scoreAreaMatchSimilarity(rawToken, modelResolved.area.name_ar);
+      const candidates = collectAreaCandidates(verifiedRawToken, data.areas, { topK: 5 });
+      const modelSimilarity = scoreAreaMatchSimilarity(verifiedRawToken, modelResolved.area.name_en);
+      const arSimilarity = scoreAreaMatchSimilarity(verifiedRawToken, modelResolved.area.name_ar);
       const bestModelSimilarity = Math.max(modelSimilarity, arSimilarity);
       const topCandidateIsModel =
         candidates.length > 0 && candidates[0].area.id === modelResolved.area.id;
@@ -5347,11 +5727,11 @@ function verifyAreaEvidence(params: {
 
       if (plausibleLink) {
         console.log(
-          `[area-evidence] needs_clarification raw="${rawToken}" model="${modelValue}" modelArea="${modelResolved.area.name_en}" modelSim=${bestModelSimilarity.toFixed(3)} topCandidate="${candidates[0]?.area.name_en ?? "-"}" topSim=${candidates[0]?.similarity.toFixed(3) ?? "0"} modelInCandidates=${modelInCandidates}`,
+          `[area-evidence] needs_clarification raw="${verifiedRawToken}" model="${modelValue}" modelArea="${modelResolved.area.name_en}" modelSim=${bestModelSimilarity.toFixed(3)} topCandidate="${candidates[0]?.area.name_en ?? "-"}" topSim=${candidates[0]?.similarity.toFixed(3) ?? "0"} modelInCandidates=${modelInCandidates}`,
         );
         return {
           action: "needs_clarification",
-          rawToken,
+          rawToken: verifiedRawToken,
           modelCanonical: modelValue,
           modelArea: modelResolved.area,
           modelSimilarity: bestModelSimilarity,
@@ -5365,7 +5745,7 @@ function verifyAreaEvidence(params: {
     return {
       action: "reject",
       reason: typoMatch ? "smuggle_suspected" : "smuggle_not_found",
-      rawToken,
+      rawToken: verifiedRawToken,
       modelCanonical: modelValue,
       modelArea: modelResolved.area,
       suggestedArea: typoMatch?.area ?? null,
@@ -5383,6 +5763,8 @@ export const __resolverTestHooks = {
   normalizePricingResolverConfig,
   resolvePricingAreaQuery,
   resolveGeoAreaMatch,
+  validatePublishedPricingOrderingMappings,
+  assertPublishedPricingOrderingMappingsValid,
   extractAreaTokensFromText,
   alignAreaTokensToRequestedSlot,
   collectAreaEvidenceFromText,
@@ -5443,6 +5825,8 @@ export default function register(api: any) {
       clearPricingCache,
       loadPricing,
       loadPricingFallbackData,
+      validatePublishedPricingOrderingMappings,
+      assertPublishedPricingOrderingMappingsValid,
       writePublishedPricing,
       buildPublishedPricingData,
       resolvePublishedAreasInput,
@@ -5471,6 +5855,7 @@ export default function register(api: any) {
       getBidirectionalRoutePrices,
       getSpecialDeliveryCapabilities,
       resolveAreaForOrdering,
+      resolveAreaForOrderingByPricingArea,
       getCommonShippingMethods,
       selectShippingMethod,
       summarizeLiveDeliveryOption,
@@ -5499,6 +5884,7 @@ export default function register(api: any) {
       ridersRequest,
       ridersFormDataRequest,
       normalizeOrder,
+      assertPublishedPricingOrderingMappingsValid,
       validateCreateSimpleOrderPreflight,
       getDirectChatBookingBlockReason: guardHelpers.getDirectChatBookingBlockReason,
       buildCanonicalCreateOrderParamsFromController:
@@ -5536,6 +5922,25 @@ export default function register(api: any) {
   // Extracted to plugins/riders-tools/tools/pricing.ts.
 
   registerPricingTools(api, deps);
+
+  // =========================================================================
+  // COVERAGE LOOKUP TOOL (check_area_coverage) — 2026-04-24
+  // =========================================================================
+  // Read-only, grounded answer for "do you deliver to X?" single-area
+  // coverage questions. Runs the same resolver `get_price` uses against
+  // the live pricing sheet and returns structured coverage truth
+  // (covered / suggested / ambiguous / not_covered) without writing any
+  // controller state. Exists because (a) `get_price` requires two areas,
+  // so coverage-of-a-single-area questions previously had no grounded
+  // tool path, and (b) prompt-only orchestration of "ask for the other
+  // leg first then call get_price" was letting the LLM confidently
+  // claim coverage for areas NOT in the pricing sheet (Messilah,
+  // Bnaider, etc.) based on general Kuwait knowledge.
+  //
+  // Extracted to plugins/riders-tools/tools/coverage.ts.
+
+  registerCoverageTools(api, deps);
+
   // =========================================================================
   // BOOKING / ORDER TOOLS
   //   track_order, create_simple_order, create_order, pay_order, cancel_order,
@@ -5598,6 +6003,31 @@ export default function register(api: any) {
   // Extracted to plugins/riders-tools/tools/admin-workspace.ts.
 
   registerAdminWorkspaceTools(api, deps);
+
+  // =========================================================================
+  // ADMIN ORDER / CONVERSATION QUERY TOOLS (read-only)
+  // =========================================================================
+  // Extracted to plugins/riders-tools/tools/admin-orders.ts. Four read-only
+  // tools for admin lookups over the on-disk customer-profile memory and
+  // the conversation-controller state snapshot: admin_list_recent_orders,
+  // admin_get_customer_history, admin_order_stats,
+  // admin_list_stuck_conversations. All gated by assertAdminAuthorized.
+
+  registerAdminOrderTools(api, deps);
+
+  // =========================================================================
+  // ADMIN COMPLAINT QUERY TOOLS (read-only)
+  // =========================================================================
+  // Extracted to plugins/riders-tools/tools/admin-complaints.ts. Two
+  // read-only tools backed by the complaint-store daily JSONL log that
+  // the customer bot writes to whenever it calls `complains`:
+  // admin_list_complaints (category/date/phone filter) and
+  // admin_search_complaints (case-insensitive substring over the
+  // verbatim complaint text). Both gated by assertAdminAuthorized.
+  // These answer the class of queries that were structurally
+  // unanswerable while `complains` was a pure stub.
+
+  registerAdminComplaintTools(api, deps);
 
   // =========================================================================
   // GUARD HOOKS + SESSION STATE (before/after_tool_call, globalThis bridge, GC)

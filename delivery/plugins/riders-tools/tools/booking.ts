@@ -17,6 +17,7 @@
 //   - confirm_summary
 //   - cancel_booking
 //   - request_handoff
+//   - set_pending_order_edits
 //   - offers
 
 import {
@@ -29,19 +30,86 @@ import {
   ResponderBookingFieldOp,
   validateApplyBookingFieldOp,
   validateOptionInterpretationOp,
-  sanityCheckBookingDraft,
+  validatePendingOrderEditsOp,
   type CarryOverBucket,
 } from "../../shared/responder-state-ops";
 import {
-  guardCreateSimpleOrder,
-  describeRejection,
-} from "../../shared/order-guard";
+  buildBookingTruthSnapshot,
+  type BookingTruthSnapshot,
+  type BookingTruthRouteSide,
+} from "../../shared/booking-truth-snapshot";
 import { looksLikeInteriorDetail } from "../../shared/booking-draft";
+import type { PricingArea, PricingData } from "../lib/types";
 
 import type { ToolDeps } from "./deps";
 
 type BookableDeliveryType = "sedan_normal" | "sedan_fast" | "van_normal" | "van_fast";
 type RidersGridLiveSettingsSummary = any;
+const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;
+
+type SnapshotOrderParams = {
+  sender_name: string;
+  sender_phone: string;
+  recipient_name: string;
+  recipient_phone: string;
+  payer?: "sender" | "recipient" | null;
+  pickup_area: string;
+  delivery_area: string;
+  delivery_type: BookableDeliveryType;
+  quoted_price: number;
+  payment_method?: "tap" | "card" | "knet" | "apple_pay" | null;
+  pickup_block?: string | null;
+  pickup_street?: string | null;
+  pickup_house?: string | null;
+  pickup_avenue?: string | null;
+  pickup_extra?: string | null;
+  pickup_notes?: string | null;
+  pickup_latitude?: number | null;
+  pickup_longitude?: number | null;
+  delivery_block?: string | null;
+  delivery_street?: string | null;
+  delivery_house?: string | null;
+  delivery_avenue?: string | null;
+  delivery_extra?: string | null;
+  delivery_notes?: string | null;
+  delivery_latitude?: number | null;
+  delivery_longitude?: number | null;
+  schedule_date?: string | null;
+  coupon?: string | null;
+};
+
+function normalizeAreaKey(value: unknown): string {
+  return String(value || "").trim().toLowerCase();
+}
+
+function findSnapshotPricingArea(
+  pricing: PricingData,
+  side: BookingTruthRouteSide,
+): PricingArea | null {
+  const areas = Array.isArray(pricing.areas) ? pricing.areas : [];
+  if (side.areaId != null) {
+    const byId = areas.find((area) => String(area.id) === String(side.areaId));
+    if (byId) return byId;
+  }
+  const names = [side.nameEn, side.nameAr]
+    .map(normalizeAreaKey)
+    .filter(Boolean);
+  if (names.length === 0) return null;
+  return (
+    areas.find((area) => {
+      const areaNames = [area.name_en, area.name_ar].map(normalizeAreaKey);
+      return names.some((name) => areaNames.includes(name));
+    }) ?? null
+  );
+}
+
+function snapshotRouteLocked(snapshot: BookingTruthSnapshot | null): boolean {
+  return Boolean(
+    snapshot &&
+      snapshot.route.lockStatus === "locked" &&
+      !snapshot.pendingRouteAmbiguity,
+  );
+}
 
 export function registerBookingTools(api: any, deps: ToolDeps): void {
   const { intentGates, quoting, recordGuardState } = deps;
@@ -57,6 +125,7 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
   const {
     resolvePricingAreaQuery,
     resolveAreaForOrdering,
+    resolveAreaForOrderingByPricingArea,
     getCommonShippingMethods,
     selectShippingMethod,
     createAreaSuggestionResult,
@@ -84,22 +153,281 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
     ridersFormDataRequest,
     normalizeOrder,
     validateCreateSimpleOrderPreflight,
-    getDirectChatBookingBlockReason,
-    buildCanonicalCreateOrderParamsFromController,
-    buildPendingOrderFingerprint,
-    isExplicitSummaryConfirmation,
     getTrackingProvider,
     getActiveOffers,
-    isRidersOneBrainEnabled,
     RidersApiError,
   } = deps.booking;
   const { createTextResult, errorPayload, isRecord } = deps;
 
+  function snapshotToOrderPayload(snapshot: BookingTruthSnapshot): SnapshotOrderParams {
+    if (snapshot.nextAction.type !== "submit_order") {
+      throw new Error(`snapshot_next_action_not_submit_order:${snapshot.nextAction.type}`);
+    }
+    if (snapshot.missingFields.length > 0) {
+      throw new Error(`snapshot_missing_fields:${snapshot.missingFields.join(",")}`);
+    }
+    if (!snapshotRouteLocked(snapshot)) {
+      throw new Error(`snapshot_route_not_locked:${snapshot.route.lockStatus}`);
+    }
+    if (!snapshot.addressSatisfaction.pickup) {
+      throw new Error("snapshot_pickup_address_not_satisfied");
+    }
+    if (!snapshot.addressSatisfaction.delivery) {
+      throw new Error("snapshot_delivery_address_not_satisfied");
+    }
+    const draft = snapshot.draft;
+    if (!draft) {
+      throw new Error("snapshot_draft_missing");
+    }
+    const pickupArea = snapshot.route.pickup.nameEn || snapshot.route.pickup.nameAr;
+    const deliveryArea = snapshot.route.dropoff.nameEn || snapshot.route.dropoff.nameAr;
+    if (!pickupArea || !deliveryArea) {
+      throw new Error("snapshot_route_names_missing");
+    }
+    const selected = snapshot.quote.selected;
+    const deliveryType = selected.deliveryType || snapshot.quote.selectedService;
+    if (!deliveryType) {
+      throw new Error("snapshot_selected_service_missing");
+    }
+    if (selected.price == null || !Number.isFinite(Number(selected.price))) {
+      throw new Error("snapshot_selected_price_missing");
+    }
+    if (!draft.senderName || !draft.senderPhone || !draft.recipientName || !draft.recipientPhone) {
+      throw new Error("snapshot_identity_missing");
+    }
+    const hydrate = (value: string | null | undefined) =>
+      typeof value === "string" && value.trim() ? value.trim() : null;
+    return {
+      sender_name: draft.senderName,
+      sender_phone: draft.senderPhone,
+      recipient_name: draft.recipientName,
+      recipient_phone: draft.recipientPhone,
+      payer: "sender",
+      pickup_area: pickupArea,
+      delivery_area: deliveryArea,
+      delivery_type: deliveryType as BookableDeliveryType,
+      quoted_price: Number(selected.price),
+      payment_method: "knet",
+      pickup_block: hydrate(draft.pickupBlock),
+      pickup_street: hydrate(draft.pickupStreet),
+      pickup_house: hydrate(draft.pickupHouse),
+      pickup_avenue: hydrate(draft.pickupAvenue),
+      pickup_extra: hydrate(draft.pickupExtra),
+      pickup_latitude: draft.pickupLocation?.latitude ?? null,
+      pickup_longitude: draft.pickupLocation?.longitude ?? null,
+      delivery_block: hydrate(draft.deliveryBlock),
+      delivery_street: hydrate(draft.deliveryStreet),
+      delivery_house: hydrate(draft.deliveryHouse),
+      delivery_avenue: hydrate(draft.deliveryAvenue),
+      delivery_extra: hydrate(draft.deliveryExtra),
+      delivery_latitude: draft.deliveryLocation?.latitude ?? null,
+      delivery_longitude: draft.deliveryLocation?.longitude ?? null,
+    };
+  }
+
+  async function submitOrderFromSnapshot(
+    snapshot: BookingTruthSnapshot,
+    ctx: any,
+  ) {
+    const currentSession = getSessionFromCtx(ctx).session;
+    let params: SnapshotOrderParams;
+    try {
+      params = snapshotToOrderPayload(snapshot);
+    } catch (error) {
+      const cause = error instanceof Error ? error.message : String(error);
+      return createTextResult({
+        status: "rejected",
+        code: "snapshot_submit_not_ready",
+        reason: cause,
+        next_action: snapshot.nextAction.type,
+        message: `Snapshot submit rejected: ${cause}`,
+        _instruction:
+          "The server rejected snapshot submit before any transaction call. Do NOT claim the order was created.",
+      });
+    }
+
+    try {
+      assertWriteActionsEnabled();
+      let liveSettings: RidersGridLiveSettingsSummary | null = null;
+      try {
+        liveSettings = await loadRidersGridLiveSettingsSummary();
+      } catch (settingsError) {
+        console.warn(
+          `[riders-settings] failed to load live settings before snapshot submit: ${settingsError instanceof Error ? settingsError.message : String(settingsError)}`,
+        );
+      }
+      if (liveSettings && isOrderCreationBlockedByLiveMaintenance(liveSettings)) {
+        return buildCreateOrderMaintenanceResult(liveSettings);
+      }
+
+      const pricing = await loadPricing();
+      const pickupPricingArea = findSnapshotPricingArea(pricing, snapshot.route.pickup);
+      const dropoffPricingArea = findSnapshotPricingArea(pricing, snapshot.route.dropoff);
+      if (!pickupPricingArea || !dropoffPricingArea) {
+        return createTextResult({
+          status: "rejected",
+          code: "snapshot_route_not_in_published_pricing",
+          reason: `pickup_id=${snapshot.route.pickup.areaId ?? "-"} dropoff_id=${snapshot.route.dropoff.areaId ?? "-"}`,
+          message:
+            "The snapshot route could not be converted to this order's published pricing areas.",
+          _instruction:
+            "Do NOT claim the order was created. This is a transaction mapping failure for this route only.",
+        });
+      }
+
+      const pickup = await resolveAreaForOrderingByPricingArea(pickupPricingArea);
+      const dropoff = await resolveAreaForOrderingByPricingArea(dropoffPricingArea);
+      if (!pickup?.geoArea?.objectid) {
+        throw new Error(
+          `snapshot_pickup_ordering_area_missing:${pickupPricingArea.name_en}`,
+        );
+      }
+      if (!dropoff?.geoArea?.objectid) {
+        throw new Error(
+          `snapshot_delivery_ordering_area_missing:${dropoffPricingArea.name_en}`,
+        );
+      }
+
+      const expectedSheetPrice = getRouteSheetPrice(
+        pickup.pricingArea,
+        dropoff.pricingArea,
+        params.delivery_type,
+      );
+      if (expectedSheetPrice === null) {
+        throw new Error(
+          `snapshot_selected_service_not_priced:${params.delivery_type}:${pickup.pricingArea.name_en}->${dropoff.pricingArea.name_en}`,
+        );
+      }
+      if (!pricesMatch(params.quoted_price, expectedSheetPrice)) {
+        throw new Error(
+          `snapshot_price_mismatch:accepted=${params.quoted_price}:sheet=${expectedSheetPrice}:service=${params.delivery_type}`,
+        );
+      }
+
+      const commonMethods = getCommonShippingMethods(
+        pickup.geoArea.shipping_methods ?? [],
+        dropoff.geoArea.shipping_methods ?? [],
+      );
+      const selectedMethod = selectShippingMethod(commonMethods, params.delivery_type);
+      const defaultShippingMethodIds: Record<string, number> = {
+        sedan_normal: 6,
+        sedan_fast: 6,
+        van_normal: 3,
+        van_fast: 4,
+      };
+      const resolvedShippingMethodId =
+        selectedMethod?.id ?? defaultShippingMethodIds[params.delivery_type] ?? 6;
+      const senderName = splitFullName(params.sender_name);
+      const recipientName = splitFullName(params.recipient_name);
+      const orderPayload: Record<string, unknown> = {
+        sender_name_first: senderName.first,
+        sender_name_last: senderName.last,
+        sender_phone: params.sender_phone,
+        recipient_name_first: recipientName.first,
+        recipient_name_last: recipientName.last,
+        recipient_phone: params.recipient_phone,
+        payer: params.payer ?? "sender",
+        payment_method: params.payment_method || "knet",
+        terms_accepted: "on",
+        order_type: "normal",
+        shipping_method_id: resolvedShippingMethodId,
+        pickup_address: buildAddressPayload(pickup, {
+          block: params.pickup_block,
+          street: params.pickup_street,
+          house: params.pickup_house,
+          avenue: params.pickup_avenue,
+          extra: params.pickup_extra,
+          notes: params.pickup_notes,
+          latitude: params.pickup_latitude,
+          longitude: params.pickup_longitude,
+        }),
+        delivery_address: buildAddressPayload(dropoff, {
+          block: params.delivery_block,
+          street: params.delivery_street,
+          house: params.delivery_house,
+          avenue: params.delivery_avenue,
+          extra: params.delivery_extra,
+          notes: params.delivery_notes,
+          latitude: params.delivery_latitude,
+          longitude: params.delivery_longitude,
+        }),
+      };
+      if (params.schedule_date) orderPayload.schedule_date = params.schedule_date;
+      if (params.coupon) orderPayload.coupon = params.coupon;
+
+      const createResponse = await ridersFormDataRequest("POST", "/orders", orderPayload);
+      const order = normalizeOrder(createResponse.data?.order ?? createResponse.data);
+      const orderUid = String(order?.uid || order?.id || "").trim();
+      if (!orderUid) {
+        throw new Error("snapshot_submit_missing_order_artifact");
+      }
+      const paymentLink = order?.uid
+        ? `https://order.tryriders.com/payorder/${order.uid}`
+        : null;
+      const orderCustomerMessageAr =
+        `تم إنشاء طلبكم بنجاح.\n` +
+        `رقم الطلب: ${orderUid}\n` +
+        (paymentLink ? `رابط الدفع: ${paymentLink}\n` : "") +
+        `السعر: ${params.quoted_price} KWD`;
+      const orderCustomerMessageEn =
+        `Your order has been created successfully.\n` +
+        `Order ID: ${orderUid}\n` +
+        (paymentLink ? `Payment link: ${paymentLink}\n` : "") +
+        `Price: ${params.quoted_price} KWD`;
+      const toolResult = createTextResult(
+        {
+          status: "ok",
+          message: createResponse.message || "Order created successfully.",
+          selected_delivery_type: params.delivery_type,
+          validated_quoted_price: params.quoted_price,
+          sheet_route_price: expectedSheetPrice,
+          verified_quote_ref: snapshot.quote.activeQuotedRoute?.quoteRef ?? null,
+          shipping_method_id: resolvedShippingMethodId,
+          payment_method: params.payment_method ?? "knet",
+          payment_link: paymentLink,
+          order,
+          _customer_message: orderCustomerMessageEn,
+          _customer_message_ar: orderCustomerMessageAr,
+          _customer_message_en: orderCustomerMessageEn,
+          _instruction:
+            "RELAY the _customer_message to the customer as-is. You may adjust the language to match the conversation but you MUST keep the exact order ID, payment link, and price unchanged. Do NOT fabricate any order details.",
+        },
+        {
+          raw_create: createResponse,
+          order,
+          snapshot_submit: true,
+        },
+      );
+      currentSession.pendingOrderSummary = null;
+      await recordGuardState("create_simple_order", toolResult, ctx);
+      return toolResult;
+    } catch (err) {
+      const isTimeout =
+        (err instanceof RidersApiError && (err.status === 504 || err.status === 502 || err.status === 0)) ||
+        (err instanceof Error && err.name === "AbortError");
+      if (isTimeout) {
+        return createTextResult({
+          status: "error",
+          code: "snapshot_submit_timeout",
+          reason: "upstream_timeout",
+          message:
+            "The order creation request timed out. This is a temporary upstream issue, NOT a problem with the booking details.",
+          retryable: true,
+        });
+      }
+      return createTextResult({
+        status: "error",
+        code: "snapshot_submit_failed",
+        reason: err instanceof Error ? err.message : String(err),
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
   // Local aliases so the re-pasted block sees the register()-scope names it
-  // used originally. These are live getters/values (not copies) so ONE_BRAIN
-  // / tracking-provider / offers updates stay in sync with the parent module.
+  // used originally. These are live getters/values (not copies) so
+  // tracking-provider / offers updates stay in sync with the parent module.
   const trackingProvider = getTrackingProvider();
-  const RIDERS_ONE_BRAIN_ENABLED = isRidersOneBrainEnabled();
   const activeOffers = getActiveOffers();
 
   // =========================================================================
@@ -237,7 +565,7 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
     },
   });
 
-  api.registerTool((ctx: any) => ({
+  const createSimpleOrderToolFactory = (ctx: any) => ({
     name: "create_simple_order",
     label: "Create Simple Order",
     description:
@@ -353,159 +681,26 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
       try {
         assertWriteActionsEnabled();
         const currentSession = getSessionFromCtx(ctx).session;
-        const visibleText = getVisibleCustomerText(ctx);
         const authority = getNormalizedBookingAuthority(ctx);
         if (isCustomerOctopusContext(ctx)) {
-          // ONE_BRAIN path: trust the LLM's passed params; validate via the
-          // order-guard against the live session quote + booking draft. No
-          // stage/step/hint gating — the guard is the single source of truth.
-          if (RIDERS_ONE_BRAIN_ENABLED) {
+          // Customer order creation is transport only. Canonical route,
+          // service, price, and draft facts must come from the fresh snapshot.
+          {
             const draft = authority.controller?.bookingDraft;
             if (!draft) {
               throw new Error(
                 "No booking draft found for this conversation. Collect the sender, recipient, pickup and delivery details via apply_booking_field first.",
               );
             }
-            // Progressive disclosure: deterministic gate that blocks order
-            // placement unless we have evidence the full summary has been
-            // shown to the customer in this session. The output verification
-            // loop flips stage → "summary_shown" whenever it substitutes a
-            // canonical summary, and the legacy "summary_pending" /
-            // "awaiting_summary_confirmation" flags do the same when the LLM
-            // produces a real summary. Without that evidence, a model reply
-            // like "Ready to confirm?" followed by the customer saying "yes"
-            // could satisfy order-guard's confirmation_missing check without
-            // the customer having actually read a summary. This gate closes
-            // that loophole.
-            const summaryShown =
-              authority.stage === "summary_shown" ||
-              authority.stage === "awaiting_confirmation" ||
-              authority.bookingStep === "summary_pending" ||
-              authority.bookingStep === "awaiting_summary_confirmation";
-            if (!summaryShown) {
-              return createTextResult({
-                status: "rejected",
-                code: "summary_not_shown",
-                reason: "summary_not_shown",
-                message:
-                  "You have not shown the customer a full order summary yet. Write the complete summary (pickup + address, delivery + address, sender, recipient, service, price) and ask for confirmation. Only call create_simple_order AFTER the customer confirms that shown summary.",
-                _instruction:
-                  "The create_simple_order call was rejected because no summary has been shown to the customer in this session. Do NOT claim the order was created. Write the full order summary now and wait for the customer's explicit confirmation before retrying.",
-              });
-            }
-            const guardResult = guardCreateSimpleOrder({
-              draft,
-              pickupAreaNameEn: String(params.pickup_area || ""),
-              dropoffAreaNameEn: String(params.delivery_area || ""),
-              deliveryType: String(params.delivery_type || ""),
-              quotedPrice: Number(params.quoted_price),
-              visibleCustomerText: visibleText,
-              lastQuotedRoute: currentSession.lastQuotedRoute || null,
+            const bookingTruthSnapshot = buildBookingTruthSnapshot({
+              timing: "post_drain",
+              controllerState: authority.controller ?? null,
+              sessionGuard: currentSession,
+              dialogState: authority.controller?.dialogState ?? null,
+              confirmationExplicit: true,
+              requireRenderedSummaryHash: RIDERS_SINGLE_LIFECYCLE_ENGINE,
             });
-            if (!guardResult.ok) {
-              const code = describeRejection(guardResult);
-              const humanMessage =
-                "message" in guardResult
-                  ? guardResult.message
-                  : guardResult.code === "draft_incomplete"
-                    ? `The booking draft is missing: ${guardResult.missing.join(", ")}. Collect the missing fields via apply_booking_field before calling create_simple_order.`
-                    : `The booking draft has malformed fields: ${guardResult.invalid.map((i) => `${i.field}:${i.reason}`).join(", ")}. Ask the customer to resend them cleanly and overwrite via apply_booking_field.`;
-              return createTextResult({
-                status: "rejected",
-                code: guardResult.code,
-                reason: code,
-                message: humanMessage,
-                _instruction:
-                  "The create_simple_order call was rejected by the server-side guard. Do NOT claim the order was created. Address the specific issue with the customer and retry only after it is resolved.",
-              });
-            }
-            // Source-of-truth hydration: after the guard has validated the
-            // draft, address fields (block/street/house/avenue/extra) always
-            // come from the draft — not from whatever the LLM happened to
-            // repeat in its tool call. This guarantees nothing the customer
-            // said gets dropped en route to the driver (especially optional
-            // Kuwait extensions like avenue/floor/apt/landmark).
-            const hydrate = (v: string | null | undefined) =>
-              typeof v === "string" && v.trim() ? v.trim() : null;
-            if (draft.pickupLocation) {
-              params.pickup_latitude = draft.pickupLocation.latitude;
-              params.pickup_longitude = draft.pickupLocation.longitude;
-            } else {
-              params.pickup_block = hydrate(draft.pickupBlock) ?? params.pickup_block ?? null;
-              params.pickup_street = hydrate(draft.pickupStreet) ?? params.pickup_street ?? null;
-              params.pickup_house = hydrate(draft.pickupHouse) ?? params.pickup_house ?? null;
-            }
-            params.pickup_avenue = hydrate(draft.pickupAvenue) ?? params.pickup_avenue ?? null;
-            params.pickup_extra = hydrate(draft.pickupExtra) ?? params.pickup_extra ?? null;
-            if (draft.deliveryLocation) {
-              params.delivery_latitude = draft.deliveryLocation.latitude;
-              params.delivery_longitude = draft.deliveryLocation.longitude;
-            } else {
-              params.delivery_block = hydrate(draft.deliveryBlock) ?? params.delivery_block ?? null;
-              params.delivery_street = hydrate(draft.deliveryStreet) ?? params.delivery_street ?? null;
-              params.delivery_house = hydrate(draft.deliveryHouse) ?? params.delivery_house ?? null;
-            }
-            params.delivery_avenue = hydrate(draft.deliveryAvenue) ?? params.delivery_avenue ?? null;
-            params.delivery_extra = hydrate(draft.deliveryExtra) ?? params.delivery_extra ?? null;
-            currentSession.pendingOrderSummary = {
-              fingerprint: buildPendingOrderFingerprint(params as Record<string, unknown>),
-              createdAt: Date.now(),
-            };
-          } else {
-            // LEGACY path: stage + canonicalize from controller + hint checks.
-            const actionHint = getCustomerTurnActionHint(ctx);
-            const awaitingConfirmation =
-              authority.stage === "awaiting_confirmation" ||
-              authority.bookingStep === "awaiting_summary_confirmation";
-            if (!awaitingConfirmation) {
-              const currentStep = authority.bookingStep || authority.stage || "current";
-              throw new Error(
-                `Do not call create_simple_order during the ${currentStep.replace(/_/g, " ")} booking step. Continue collecting the missing booking details first.`,
-              );
-            }
-            if (actionHint !== "confirm summary" && !isExplicitSummaryConfirmation(visibleText)) {
-              throw new Error(
-                "Do not call create_simple_order until the customer explicitly confirms the final order summary you already showed. Ask for confirmation instead.",
-              );
-            }
-            const directChatBlockReason = getDirectChatBookingBlockReason(authority.controller);
-            if (directChatBlockReason) {
-              throw new Error(directChatBlockReason);
-            }
-            const canonicalParams = buildCanonicalCreateOrderParamsFromController(authority.controller, params as Record<string, unknown>);
-            if (!canonicalParams) {
-              throw new Error(
-                "Do not call create_simple_order until the canonical booking controller has the confirmed sender, recipient, address, service, and price fields ready.",
-              );
-            }
-            const draft = authority.controller?.bookingDraft;
-            if (draft) {
-              const draftProblems = sanityCheckBookingDraft({
-                senderName: draft.senderName,
-                senderPhone: draft.senderPhone,
-                recipientName: draft.recipientName,
-                recipientPhone: draft.recipientPhone,
-                pickupAddressBlock: draft.pickupBlock,
-                pickupAddressStreet: draft.pickupStreet,
-                pickupAddressHouse: draft.pickupHouse,
-                deliveryAddressBlock: draft.deliveryBlock,
-                deliveryAddressStreet: draft.deliveryStreet,
-                deliveryAddressHouse: draft.deliveryHouse,
-              }).filter((p) => p.reason !== "missing");
-              if (draftProblems.length > 0) {
-                const desc = draftProblems
-                  .map((p) => `${p.field}:${p.reason}`)
-                  .join(", ");
-                throw new Error(
-                  `Order blocked: the booking draft contains malformed fields (${desc}). Ask the customer to resend the affected fields cleanly and call apply_booking_field to overwrite them BEFORE retrying create_simple_order.`,
-                );
-              }
-            }
-            params = canonicalParams as typeof params;
-            currentSession.pendingOrderSummary = {
-              fingerprint: buildPendingOrderFingerprint(canonicalParams),
-              createdAt: Date.now(),
-            };
+            return submitOrderFromSnapshot(bookingTruthSnapshot, ctx);
           }
         }
 
@@ -766,7 +961,21 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
         return createTextResult(errorPayload(err));
       }
     },
-  }));
+  });
+  api.registerTool(createSimpleOrderToolFactory);
+  (globalThis as any).__ridersSubmitOrderFromSnapshot = async (
+    snapshot: BookingTruthSnapshot,
+    ctx: any,
+  ) => submitOrderFromSnapshot(snapshot, ctx);
+  (globalThis as any).__ridersCreateSimpleOrderFromSnapshot = async (
+    snapshotOrParams: any,
+    ctx: any,
+  ) => {
+    if (snapshotOrParams?.nextAction && snapshotOrParams?.route && snapshotOrParams?.quote) {
+      return submitOrderFromSnapshot(snapshotOrParams as BookingTruthSnapshot, ctx);
+    }
+    return createSimpleOrderToolFactory(ctx).execute("single_lifecycle_engine", snapshotOrParams);
+  };
 
   api.registerTool({
     name: "create_order",
@@ -1111,7 +1320,7 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
         address_street: { type: ["string", "null"] },
         address_house: {
           type: ["string", "null"],
-          description: "Building / villa / tower number only — what a driver reads off the façade (e.g. '17', '23b', 'villa 4'). NEVER put apartment, flat, floor, door, office, gate, or their Arabic equivalents (شقة / دور / باب / طابق / مكتب / بوابة) here — those go into address_extra. The backend will reroute them if you do.",
+          description: "Building / villa / tower number only — what a driver reads off the façade (e.g. '17', '23b', 'villa 4'). NEVER put apartment, flat, floor, door, office, gate, or their Arabic equivalents (شقة / دور / باب / طابق / مكتب / بوابة) here — those go into address_extra. If block + street/avenue + useful apartment/floor/door detail are present, leave address_house null; the server missing_fields will decide whether anything else is needed.",
         },
         address_avenue: {
           type: ["string", "null"],
@@ -1195,8 +1404,8 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
       // `address_house`, we move it into `address_extra` before validation so
       // that (a) no customer data is lost, (b) `address_house` stays reserved
       // for building numbers the driver can read off the façade, and (c) the
-      // LLM sees a clear repair-hint in its tool result and asks for the
-      // missing building number.
+      // server's address-completeness model can decide whether the extra
+      // detail is already enough for this side.
       let rawHouse = safeStr(params?.address_house);
       let rawExtra = safeStr(params?.address_extra);
       let houseRerouted = false;
@@ -1260,7 +1469,7 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
             ? [{ from: "address_house", to: "address_extra", reason: "interior_detail" }]
             : undefined,
           note: houseRerouted
-            ? "Some fields were recorded. The value you put into address_house looked like interior detail (apartment / floor / door / gate) — it has been moved to address_extra where the driver reads it after finding the building. The actual building / villa / tower number is still MISSING. In your next reply, ask the customer for the building number (house number) at that address — do NOT skip to the summary."
+            ? "Some fields were recorded. The value you put into address_house looked like interior detail (apartment / floor / door / gate) — it has been moved to address_extra. Use the post-drain missing_fields/address_satisfaction facts to decide the next reply; do not ask for a building number if the address is satisfied by extra."
             : "Some fields were recorded; the rejected ones were dropped because they failed shape validation. In your next reply, ask the customer to resend ONLY the rejected fields cleanly (digits-only for phones, letters-only for names, short values for address parts). Do not re-ask for the fields that were accepted.",
         });
       }
@@ -1270,7 +1479,7 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
           ? [{ from: "address_house", to: "address_extra", reason: "interior_detail" }]
           : undefined,
         note: houseRerouted
-          ? "Field recorded. Interior detail you put in address_house (apartment / floor / door) was moved to address_extra. The building / villa / tower number is still missing — ask the customer for it in your next reply."
+          ? "Field recorded. Interior detail you put in address_house (apartment / floor / door) was moved to address_extra. Use the post-drain missing_fields/address_satisfaction facts to decide whether another address detail is actually needed."
           : "Field recorded. Continue with the next step in your reply — do NOT just acknowledge.",
       });
     },
@@ -1455,6 +1664,86 @@ export function registerBookingTools(api: any, deps: ToolDeps): void {
           notYetSupported.length > 0
             ? `Intent recorded. Identity buckets (sender_identity / recipient_identity / payer) will be filled at drain time after revalidation. Location buckets (${notYetSupported.join(", ")}) are NOT yet auto-reusable — in your reply, tell the customer you'll keep the same identity details but ask them to re-send the pickup / delivery address fresh for this new order. Never claim a location was reused.`
             : "Intent recorded — the orchestrator will read the saved last order and fill the requested buckets after revalidating every field. In your reply, acknowledge the reused details briefly and ask ONLY for the new pickup / delivery area (and any address sub-fields that were skipped because the saved values were stale). Never claim details were saved before you see this tool's drain result.",
+      });
+    },
+  }));
+
+  api.registerTool((ctx: any) => ({
+    name: "set_pending_order_edits",
+    label: "Track Pending Order Edits",
+    description:
+      "BOOKING STATE TOOL — MANDATORY before you ask the customer to send updated values for one or more existing booking fields at summary/confirmation stage. Use this when the customer asks to change fields but has not yet provided the new values (e.g. 'can I change the sender name and the service'). Set every field you are about to ask for. If you ask for multiple edit values, this tool is required so the controller can accept those multiple values on the next message. Never mention this tool to the customer.",
+    strict: true,
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        fields: {
+          type: "array",
+          minItems: 1,
+          items: {
+            type: "string",
+            enum: [
+              "sender_name",
+              "sender_phone",
+              "recipient_name",
+              "recipient_phone",
+              "pickup_area",
+              "dropoff_area",
+              "pickup_block",
+              "pickup_street",
+              "pickup_house",
+              "pickup_avenue",
+              "pickup_extra",
+              "delivery_block",
+              "delivery_street",
+              "delivery_house",
+              "delivery_avenue",
+              "delivery_extra",
+              "service",
+            ],
+          },
+        },
+        source_quote: { type: ["string", "null"] },
+      },
+      required: ["fields", "source_quote"],
+    },
+    async execute(_toolCallId: string, params: any) {
+      const conversationId = resolveToolConversationId(ctx);
+      const turnId = resolveToolTurnId(ctx);
+      if (!conversationId) {
+        try {
+          console.warn(`[responder-op] set_pending_order_edits dropped_no_conversation ctxKeys=${Object.keys(ctx || {}).join(",")}`);
+        } catch {}
+        return createTextResult({ acknowledged: false, reason: "no_conversation_context" });
+      }
+      const validation = validatePendingOrderEditsOp({
+        ...params,
+        turn_id: turnId,
+      });
+      if (validation.errors.length > 0) {
+        try {
+          console.warn(
+            `[responder-op] set_pending_order_edits rejected conversation=${conversationId} errors=${validation.errors
+              .map((e) => `${e.field}:${e.reason}`)
+              .join(",")}`,
+          );
+        } catch {}
+        return createTextResult({
+          acknowledged: false,
+          reason: "validation_failed",
+          errors: validation.errors,
+        });
+      }
+      pushResponderStateOp(conversationId, validation.cleaned);
+      try {
+        console.log(`[responder-op] set_pending_order_edits conversation=${conversationId} ${JSON.stringify(validation.cleaned)}`);
+      } catch {}
+      return createTextResult({
+        acknowledged: true,
+        fields: validation.cleaned.fields,
+        note:
+          "Pending edits recorded. In your customer reply, ask only for the values listed here. On the next turn, the controller will treat those fields as intentional edits.",
       });
     },
   }));

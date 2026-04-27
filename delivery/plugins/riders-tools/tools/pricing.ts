@@ -21,6 +21,7 @@ import {
   type ResponderSetRequestedSlotOp,
   type ResponderSetPendingAreaOp,
 } from "../../shared/responder-state-ops";
+import type { AreaResolutionProvenance } from "../../shared/area-resolution-provenance";
 import { getStashedBookingAuthority } from "../lib/tool-conversation-ids";
 import {
   isLlmAreaResolverEnabled,
@@ -28,8 +29,173 @@ import {
   type LlmAreaResolverResult,
 } from "../lib/llm-area-resolver";
 import { appendLearnedAlias } from "../lib/learned-aliases-io";
+import {
+  evaluateSymmetricAreaGuard,
+  formatRejectMetric,
+} from "../lib/get-price-validator";
 
 import type { ToolDeps } from "./deps";
+
+type RequestedAreaOptionChoice =
+  | { status: "resolved"; option: string; score: number }
+  | { status: "ambiguous"; options: string[]; score: number }
+  | { status: "no_match" };
+
+function normalizeRequestedOptionText(value: string | null | undefined): string {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function scoreRequestedAreaOption(query: string, option: string): number {
+  const q = normalizeRequestedOptionText(query);
+  const o = normalizeRequestedOptionText(option);
+  if (!q || !o) return 0;
+  if (q === o) return 100;
+
+  const qTokens = q.split(/\s+/).filter(Boolean);
+  const oTokens = o.split(/\s+/).filter(Boolean);
+  if (qTokens.length === 1) {
+    const token = qTokens[0];
+    if (oTokens.some((t) => t === token)) return 90;
+    if (oTokens.some((t) => t.startsWith(token))) return 80;
+    if (o.includes(token)) return 60;
+  }
+
+  if (o.startsWith(q)) return 75;
+  if (o.includes(q)) return 55;
+  return 0;
+}
+
+export function resolveRequestedAreaOptionChoice(
+  query: string | null | undefined,
+  options: string[] | null | undefined,
+): RequestedAreaOptionChoice {
+  const uniqueOptions = [...new Set(
+    (Array.isArray(options) ? options : [])
+      .map((option) => String(option || "").trim())
+      .filter(Boolean),
+  )];
+  if (!query || uniqueOptions.length === 0) return { status: "no_match" };
+
+  const scored = uniqueOptions
+    .map((option) => ({ option, score: scoreRequestedAreaOption(query, option) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score);
+  if (scored.length === 0) return { status: "no_match" };
+
+  const bestScore = scored[0].score;
+  const best = scored.filter((entry) => entry.score === bestScore);
+  if (best.length === 1) {
+    return { status: "resolved", option: best[0].option, score: bestScore };
+  }
+  return {
+    status: "ambiguous",
+    options: best.map((entry) => entry.option),
+    score: bestScore,
+  };
+}
+
+function areaResolutionOptions(
+  options:
+    | Array<{ area_id?: number; id?: number; name_en?: string; name_ar?: string }>
+    | null
+    | undefined,
+): AreaResolutionProvenance["options"] {
+  return (Array.isArray(options) ? options : [])
+    .map((option) => ({
+      areaId:
+        typeof option?.area_id === "number"
+          ? option.area_id
+          : typeof option?.id === "number"
+            ? option.id
+            : null,
+      nameEn: String(option?.name_en || "").trim() || null,
+      nameAr: String(option?.name_ar || "").trim() || null,
+    }))
+    .filter((option) => option.areaId != null || option.nameEn || option.nameAr);
+}
+
+function buildAreaResolutionProvenance(params: {
+  resolution: any;
+  query: string | null | undefined;
+  areaIdOverride?: number | null;
+  resolverSource?: string | null;
+}): AreaResolutionProvenance {
+  const query = String(params.query || "").trim();
+  const existing = params.resolution?.provenance;
+  if (existing && typeof existing === "object") {
+    return {
+      ...(existing as AreaResolutionProvenance),
+      sourceText: (existing as AreaResolutionProvenance).sourceText ?? query,
+      normalizedText:
+        (existing as AreaResolutionProvenance).normalizedText ??
+        normalizeRequestedOptionText(query),
+    };
+  }
+  if (params.resolution?.status === "resolved" && params.resolution.area) {
+    return {
+      status: typeof params.areaIdOverride === "number" ? "exact_confirmed" : "canonical",
+      areaId: params.resolution.area.id ?? null,
+      nameEn: params.resolution.area.name_en ?? null,
+      nameAr: params.resolution.area.name_ar ?? null,
+      sourceText: query || null,
+      normalizedText: normalizeRequestedOptionText(query) || null,
+      resolverSource:
+        params.resolverSource ||
+        (typeof params.areaIdOverride === "number" ? "area_id" : "resolver"),
+      confirmedByUser: typeof params.areaIdOverride === "number",
+      quoteBuiltFromAreaIds: typeof params.areaIdOverride === "number",
+    };
+  }
+  if (params.resolution?.status === "ambiguous") {
+    return {
+      status: "ambiguous",
+      areaId: null,
+      nameEn: null,
+      nameAr: null,
+      ambiguityGroupId: params.resolution.ambiguity_group_id || null,
+      options: areaResolutionOptions(params.resolution.options),
+      sourceText: query || null,
+      normalizedText: normalizeRequestedOptionText(query) || null,
+      resolverSource: "resolver",
+      confirmedByUser: false,
+    };
+  }
+  if (params.resolution?.status === "suggested") {
+    return {
+      status: "suggested_unconfirmed",
+      areaId: params.resolution.area?.id ?? null,
+      nameEn: params.resolution.area?.name_en ?? null,
+      nameAr: params.resolution.area?.name_ar ?? null,
+      options: areaResolutionOptions([
+        params.resolution.area,
+        ...(Array.isArray(params.resolution.alternative_areas)
+          ? params.resolution.alternative_areas
+          : []),
+      ]),
+      sourceText: query || null,
+      normalizedText: normalizeRequestedOptionText(query) || null,
+      resolverSource: "resolver",
+      confirmedByUser: false,
+      promptEn: params.resolution.prompt_en || null,
+      promptAr: params.resolution.prompt_ar || null,
+    };
+  }
+  return {
+    status: query ? "unresolved" : "missing",
+    areaId: null,
+    nameEn: null,
+    nameAr: null,
+    sourceText: query || null,
+    normalizedText: normalizeRequestedOptionText(query) || null,
+    resolverSource: params.resolverSource || "resolver",
+    confirmedByUser: false,
+  };
+}
 
 export function registerPricingTools(api: any, deps: ToolDeps): void {
   const { intentGates, quoting, recordGuardState } = deps;
@@ -146,6 +312,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
     field: "pickup_area" | "dropoff_area",
     nameEn: string | null,
     nameAr: string | null,
+    areaResolution?: AreaResolutionProvenance | null,
   ): void {
     // Class-10 observability: see `markRequestedAreaSlot` above.
     try {
@@ -170,6 +337,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
         field,
         area_name_en: nameEn && nameEn.trim() ? nameEn.trim() : null,
         area_name_ar: nameAr && nameAr.trim() ? nameAr.trim() : null,
+        area_resolution: areaResolution ?? null,
         turn_id: turnId || "",
       };
       pushResponderStateOp(primary, op, aliases);
@@ -480,12 +648,178 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             extractAreaTokensFromText(visibleText),
             requestedSlot?.name,
           );
+          const locallyBoundAreaSlots = new Set<"pickup_area" | "dropoff_area">();
           // Full-text n-gram evidence set: every area the customer could
           // plausibly be referring to, regardless of phrasing or prefixes.
           // Used to suppress false-positive smuggle rejections when the
           // narrow separator-split raw token misses filler-wrapped names
           // like "Ok lets book slwa to slmya".
           const evidenceIds = collectAreaEvidenceFromText(visibleText, data);
+
+          const findAreaByExactName = (name: string): any | null => {
+            const normalized = normalizeRequestedOptionText(name);
+            if (!normalized) return null;
+            return (
+              data.areas.find(
+                (area: any) =>
+                  normalizeRequestedOptionText(area?.name_en) === normalized ||
+                  normalizeRequestedOptionText(area?.name_ar) === normalized,
+              ) || null
+            );
+          };
+
+          const coverageCandidate = (() => {
+            try {
+              const pending = getSessionFromCtx(ctx).session?.coveragePending;
+              if (
+                !pending ||
+                pending.kind !== "covered_area_candidate" ||
+                !pending.area
+              ) {
+                return null;
+              }
+              const name = String(
+                pending.area.canonical_en || pending.area.canonical_ar || "",
+              ).trim();
+              if (!name) return null;
+              return {
+                name,
+                area: findAreaByExactName(name),
+                originalQuery: String(pending.original_query || "").trim(),
+              };
+            } catch {
+              return null;
+            }
+          })();
+
+          if (coverageCandidate) {
+            const pickupRoleInText =
+              /\b(?:pickup|pick\s*up|from)\b/i.test(visibleText) ||
+              /استلام|من\s+/u.test(visibleText);
+            const deliveryRoleInText =
+              /\b(?:delivery|drop\s*off|dropoff)\b/i.test(visibleText) ||
+              /توصيل|تسليم/u.test(visibleText);
+            const confirmsCandidateAsDelivery =
+              /\b(?:that(?:'|’)s|thats|that\s+is|this\s+is)\s+(?:the\s+)?(?:delivery|drop\s*off|dropoff|area)\b/i.test(
+                visibleText,
+              );
+            const pendingPickup =
+              controllerEntry?.pendingPickupAreaNameEn ||
+              controllerEntry?.quotePickupAreaNameEn ||
+              null;
+            const currentDropoff = String(params.dropoff_area || "").trim();
+            const currentPickup = String(params.pickup_area || "").trim();
+            const shouldUseCandidateAsDropoff =
+              (pickupRoleInText && !deliveryRoleInText) ||
+              confirmsCandidateAsDelivery;
+            if (
+              shouldUseCandidateAsDropoff &&
+              (!currentDropoff ||
+                currentDropoff.toLowerCase() === currentPickup.toLowerCase())
+            ) {
+              params = {
+                ...params,
+                dropoff_area:
+                  coverageCandidate.area?.name_en || coverageCandidate.name,
+                dropoff_area_id: coverageCandidate.area?.id,
+              };
+              locallyBoundAreaSlots.add("dropoff_area");
+              if (confirmsCandidateAsDelivery && pendingPickup && !currentPickup) {
+                const pickupArea = findAreaByExactName(pendingPickup);
+                params = {
+                  ...params,
+                  pickup_area: pickupArea?.name_en || pendingPickup,
+                  pickup_area_id: pickupArea?.id,
+                };
+                locallyBoundAreaSlots.add("pickup_area");
+              }
+              console.log(
+                `[coverage-pending/route-bind] candidate=${JSON.stringify(coverageCandidate.name)} as=dropoff reason=${confirmsCandidateAsDelivery ? "confirmed_delivery" : "pickup_side_supplied"}`,
+              );
+            }
+          }
+
+          if (
+            requestedSlot &&
+            (requestedSlot.name === "pickup_area" ||
+              requestedSlot.name === "dropoff_area") &&
+            Array.isArray(requestedSlot.options) &&
+            requestedSlot.options.length > 0
+          ) {
+            const field = requestedSlot.name as "pickup_area" | "dropoff_area";
+            const fieldParam =
+              field === "pickup_area" ? "pickup_area" : "dropoff_area";
+            const fieldIdParam =
+              field === "pickup_area" ? "pickup_area_id" : "dropoff_area_id";
+            const oppositeParam =
+              field === "pickup_area" ? "dropoff_area" : "pickup_area";
+            const oppositeIdParam =
+              field === "pickup_area" ? "dropoff_area_id" : "pickup_area_id";
+            const pendingOpposite =
+              field === "pickup_area"
+                ? controllerEntry?.pendingDropoffAreaNameEn
+                : controllerEntry?.pendingPickupAreaNameEn;
+            const rawToken =
+              field === "pickup_area" ? rawTokens.pickup : rawTokens.dropoff;
+            const requestedSideQuery =
+              String((params as any)[fieldParam] || "").trim() ||
+              String(rawToken || "").trim() ||
+              visibleText;
+            let localChoice = resolveRequestedAreaOptionChoice(
+              requestedSideQuery,
+              requestedSlot.options,
+            );
+            if (
+              localChoice.status === "no_match" &&
+              requestedSideQuery.trim().toLowerCase() !== visibleText.trim().toLowerCase()
+            ) {
+              localChoice = resolveRequestedAreaOptionChoice(
+                visibleText,
+                requestedSlot.options,
+              );
+            }
+
+            if (localChoice.status === "resolved") {
+              const selectedArea = findAreaByExactName(localChoice.option);
+              params = {
+                ...params,
+                [fieldParam]: selectedArea?.name_en || localChoice.option,
+                [fieldIdParam]: selectedArea?.id,
+              };
+              if (pendingOpposite) {
+                const pendingArea = findAreaByExactName(pendingOpposite);
+                params = {
+                  ...params,
+                  [oppositeParam]: pendingArea?.name_en || pendingOpposite,
+                  [oppositeIdParam]: pendingArea?.id,
+                };
+              }
+              locallyBoundAreaSlots.add(field);
+              console.log(
+                `[requested-slot/options] resolved field=${field} query=${JSON.stringify(requestedSideQuery)} option=${JSON.stringify(localChoice.option)} score=${localChoice.score} options=[${requestedSlot.options.join("|")}]`,
+              );
+            } else if (localChoice.status === "ambiguous") {
+              const localOptions = localChoice.options
+                .map((option) => findAreaByExactName(option))
+                .filter(Boolean)
+                .map((area: any) => ({
+                  area_id: area.id,
+                  name_en: area.name_en,
+                  name_ar: area.name_ar,
+                }));
+              markRequestedAreaSlot(ctx, field, localChoice.options);
+              console.log(
+                `[requested-slot/options] ambiguous field=${field} query=${JSON.stringify(requestedSideQuery)} matches=[${localChoice.options.join("|")}] score=${localChoice.score}`,
+              );
+              return createAreaClarificationResult({
+                field,
+                query: requestedSideQuery,
+                prompt_ar: `أي وحدة تقصد: ${localChoice.options.join("، ")}؟`,
+                prompt_en: `Which one did you mean: ${localChoice.options.join(", ")}?`,
+                options: localOptions,
+              });
+            }
+          }
 
           // DST-driven misroute correction: if we asked the customer for a
           // specific area slot last turn (requestedSlot.name === pickup_area
@@ -604,6 +938,71 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             }
           } catch {
             // DST reads are best-effort — never block the tool on a read error
+          }
+
+          // Z1-P0 cold-start symmetric rejection (2026-04-24).
+          //
+          // The mid-flow symmetric-rebind guard inside the try block above
+          // only fires when `requestedSlot` is pinned AND a `pending*`
+          // opposite side is available to rebind to. That covers the
+          // clarification-echo case. It does NOT cover cold-start shape:
+          // customer asks "توصلوون لي الخالدية ؟" / "do you deliver to
+          // Salwa?"; the LLM interprets it as a route request and calls
+          // `get_price(pickup=X, dropoff=X)` with nothing pending. Without
+          // this validator, the tool resolves a zero-distance route,
+          // writes poisoned `pendingPickup === pendingDropoff` controller
+          // state via `set_pending_area` ops below, and the outbound-
+          // verify `route_zero_distance` branch stomps the LLM's reply
+          // with an accusatory recovery message.
+          //
+          // Placement: OUTSIDE the DST-reads try/catch (line 503-668 was
+          // swallowing the throw via `catch {}`) and BEFORE `applyDecision`
+          // and the responder-state ops so an early return skips the
+          // poisoning writes cleanly.
+          //
+          // Return shape: structured tool result (content: text). Must
+          // NOT throw — the outer execute() catch at the bottom of this
+          // function wraps any thrown error in a "خطأ في نظام الأسعار ...
+          // يرجى التحويل لموظف الدعم" envelope that pushes the LLM toward
+          // escalation, which is wrong for this case — we want the LLM
+          // to read the instructional message and answer coverage.
+          //
+          // Pure decision logic + metric shape live in
+          // `../lib/get-price-validator.ts` and are covered by
+          // `../../../scripts/smoke-test-get-price-validator.mjs`.
+          // This is now a permanent invariant, not a soft flag.
+          const z1p0Decision = evaluateSymmetricAreaGuard({
+            pickupArea: params.pickup_area,
+            dropoffArea: params.dropoff_area,
+            requestedSlotName: requestedSlot?.name ?? null,
+            pendingPickupAreaNameEn:
+              controllerEntry?.pendingPickupAreaNameEn ?? null,
+            pendingDropoffAreaNameEn:
+              controllerEntry?.pendingDropoffAreaNameEn ?? null,
+            envValue: (globalThis as any).process?.env
+              ?.RIDERS_TOOL_VALIDATOR_GET_PRICE,
+          });
+          if (z1p0Decision.action === "reject") {
+            try {
+              console.log(
+                formatRejectMetric(z1p0Decision, {
+                  requestedSlotName: requestedSlot?.name ?? null,
+                  pendingPickupPresent:
+                    !!controllerEntry?.pendingPickupAreaNameEn,
+                  pendingDropoffPresent:
+                    !!controllerEntry?.pendingDropoffAreaNameEn,
+                  stage: controllerEntry?.stage ?? null,
+                }),
+              );
+            } catch {}
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: z1p0Decision.message,
+                },
+              ],
+            };
           }
 
           const applyDecision = (
@@ -727,41 +1126,45 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             evidenceController?.quoteDropoffAreaNameAr ||
             null;
 
-          const pickupDecision = verifyAreaEvidence({
-            rawToken: rawTokens.pickup,
-            modelValue: params.pickup_area,
-            idOverride: params.pickup_area_id,
-            data,
-            pendingAreaNameEn: pendingPickupNameEn,
-            pendingAreaNameAr: pendingPickupNameAr,
-          });
-          const pickupApplied = applyDecision(
-            "pickup_area",
-            pickupDecision,
-            rawTokens.pickup,
-            params.pickup_area,
-          );
-          if (pickupApplied.reject) return pickupApplied.reject;
-          if (pickupApplied.override)
-            params = { ...params, pickup_area: pickupApplied.override };
+          if (!locallyBoundAreaSlots.has("pickup_area")) {
+            const pickupDecision = verifyAreaEvidence({
+              rawToken: rawTokens.pickup,
+              modelValue: params.pickup_area,
+              idOverride: params.pickup_area_id,
+              data,
+              pendingAreaNameEn: pendingPickupNameEn,
+              pendingAreaNameAr: pendingPickupNameAr,
+            });
+            const pickupApplied = applyDecision(
+              "pickup_area",
+              pickupDecision,
+              rawTokens.pickup,
+              params.pickup_area,
+            );
+            if (pickupApplied.reject) return pickupApplied.reject;
+            if (pickupApplied.override)
+              params = { ...params, pickup_area: pickupApplied.override };
+          }
 
-          const dropoffDecision = verifyAreaEvidence({
-            rawToken: rawTokens.dropoff,
-            modelValue: params.dropoff_area,
-            idOverride: params.dropoff_area_id,
-            data,
-            pendingAreaNameEn: pendingDropoffNameEn,
-            pendingAreaNameAr: pendingDropoffNameAr,
-          });
-          const dropoffApplied = applyDecision(
-            "dropoff_area",
-            dropoffDecision,
-            rawTokens.dropoff,
-            params.dropoff_area,
-          );
-          if (dropoffApplied.reject) return dropoffApplied.reject;
-          if (dropoffApplied.override)
-            params = { ...params, dropoff_area: dropoffApplied.override };
+          if (!locallyBoundAreaSlots.has("dropoff_area")) {
+            const dropoffDecision = verifyAreaEvidence({
+              rawToken: rawTokens.dropoff,
+              modelValue: params.dropoff_area,
+              idOverride: params.dropoff_area_id,
+              data,
+              pendingAreaNameEn: pendingDropoffNameEn,
+              pendingAreaNameAr: pendingDropoffNameAr,
+            });
+            const dropoffApplied = applyDecision(
+              "dropoff_area",
+              dropoffDecision,
+              rawTokens.dropoff,
+              params.dropoff_area,
+            );
+            if (dropoffApplied.reject) return dropoffApplied.reject;
+            if (dropoffApplied.override)
+              params = { ...params, dropoff_area: dropoffApplied.override };
+          }
         }
 
         const findAreaById = (areaId: number): any => {
@@ -778,6 +1181,18 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
           typeof params.dropoff_area_id === "number"
             ? findAreaById(params.dropoff_area_id)
             : await resolvePricingAreaQuery(params.dropoff_area, data);
+        let pickupResolutionProvenance = buildAreaResolutionProvenance({
+          resolution: pickupResolution,
+          query: params.pickup_area,
+          areaIdOverride:
+            typeof params.pickup_area_id === "number" ? params.pickup_area_id : null,
+        });
+        let dropoffResolutionProvenance = buildAreaResolutionProvenance({
+          resolution: dropoffResolution,
+          query: params.dropoff_area,
+          areaIdOverride:
+            typeof params.dropoff_area_id === "number" ? params.dropoff_area_id : null,
+        });
 
         // Persist any leg that resolved, BEFORE the early-return guards for
         // ambiguous/suggested/not_found on the other leg. This preserves
@@ -792,6 +1207,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             "pickup_area",
             pickupResolution.area.name_en,
             pickupResolution.area.name_ar,
+            pickupResolutionProvenance,
           );
         }
         if (dropoffResolution.status === "resolved" && dropoffResolution.area) {
@@ -800,6 +1216,7 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             "dropoff_area",
             dropoffResolution.area.name_en,
             dropoffResolution.area.name_ar,
+            dropoffResolutionProvenance,
           );
         }
 
@@ -903,11 +1320,22 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             const resolvedArea = data.areas.find((a: any) => a.id === llm.area_id);
             if (resolvedArea) {
               pickup = resolvedArea;
+              pickupResolutionProvenance = {
+                status: "canonical",
+                areaId: resolvedArea.id ?? null,
+                nameEn: resolvedArea.name_en ?? null,
+                nameAr: resolvedArea.name_ar ?? null,
+                sourceText: params.pickup_area || null,
+                normalizedText: normalizeRequestedOptionText(params.pickup_area) || null,
+                resolverSource: "llm_area_resolver",
+                confirmedByUser: false,
+              };
               markPendingArea(
                 ctx,
                 "pickup_area",
                 resolvedArea.name_en,
                 resolvedArea.name_ar,
+                pickupResolutionProvenance,
               );
             }
           } else if (llm && llm.status === "suggested" && llm.area_id !== null) {
@@ -950,11 +1378,22 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
             const resolvedArea = data.areas.find((a: any) => a.id === llm.area_id);
             if (resolvedArea) {
               dropoff = resolvedArea;
+              dropoffResolutionProvenance = {
+                status: "canonical",
+                areaId: resolvedArea.id ?? null,
+                nameEn: resolvedArea.name_en ?? null,
+                nameAr: resolvedArea.name_ar ?? null,
+                sourceText: params.dropoff_area || null,
+                normalizedText: normalizeRequestedOptionText(params.dropoff_area) || null,
+                resolverSource: "llm_area_resolver",
+                confirmedByUser: false,
+              };
               markPendingArea(
                 ctx,
                 "dropoff_area",
                 resolvedArea.name_en,
                 resolvedArea.name_ar,
+                dropoffResolutionProvenance,
               );
             }
           } else if (llm && llm.status === "suggested" && llm.area_id !== null) {
@@ -1165,11 +1604,13 @@ export function registerPricingTools(api: any, deps: ToolDeps): void {
               name_ar: pickup.name_ar,
               name_en: pickup.name_en,
               governorate: pickup.governorate,
+              area_resolution: pickupResolutionProvenance,
             },
             dropoff: {
               name_ar: dropoff.name_ar,
               name_en: dropoff.name_en,
               governorate: dropoff.governorate,
+              area_resolution: dropoffResolutionProvenance,
             },
           },
           recommended_customer_quote: recommendedCustomerQuote,

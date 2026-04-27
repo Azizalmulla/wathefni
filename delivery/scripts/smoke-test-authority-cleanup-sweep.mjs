@@ -48,6 +48,7 @@ for (const [text, expected] of cases) {
 }
 
 const octopusIndex = read("plugins/octopus-channel/index.ts");
+const bookingTool = read("plugins/riders-tools/tools/booking.ts");
 const toolGuards = read("plugins/riders-tools/tools/guards.ts");
 
 assert.match(
@@ -59,6 +60,21 @@ assert.match(
   toolGuards,
   /const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;/,
   "tool guards must always demote legacy booking gates",
+);
+assert.match(
+  bookingTool,
+  /const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;/,
+  "booking tool must always use snapshot submit behavior",
+);
+assert.doesNotMatch(
+  bookingTool,
+  /assertPublishedPricingOrderingMappingsValid\(\)/,
+  "live order creation must not run global published mapping preflight",
+);
+assert.match(
+  bookingTool,
+  /return submitOrderFromSnapshot\(bookingTruthSnapshot, ctx\);/,
+  "customer create_simple_order path must submit from snapshot",
 );
 assert.match(
   octopusIndex,

@@ -2,6 +2,8 @@ declare module "node:fs/promises" {
   const fsPromises: {
     readFile: (path: string | URL, encoding: string) => Promise<string>;
     writeFile: (path: string | URL, data: string, encoding: string) => Promise<void>;
+    appendFile: (path: string | URL, data: string, encoding: string) => Promise<void>;
+    access: (path: string | URL) => Promise<void>;
     stat: (path: string | URL) => Promise<unknown>;
     readdir: (path: string | URL, options?: { withFileTypes?: boolean }) => Promise<{ name: string; isDirectory: () => boolean; isFile: () => boolean }[]>;
     mkdir: (path: string | URL, options?: { recursive?: boolean }) => Promise<string | undefined>;
