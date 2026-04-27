@@ -29,7 +29,6 @@ const outboundVerify = loadTs("plugins/shared/outbound-verify.ts");
 const lifecycle = loadTs("plugins/shared/booking-lifecycle-gate.ts");
 const orderGuard = loadTs("plugins/shared/order-guard.ts");
 const postDrainCoherence = loadTs("plugins/octopus-channel/lib/post-drain-reply-coherence.ts");
-const postDrainReauthor = loadTs("plugins/octopus-channel/lib/post-drain-reply-reauthor.ts");
 
 const { createEmptyBookingDraft } = policy;
 const { createEmptyDialogState } = dialog;
@@ -45,7 +44,6 @@ const { verifySummaryFacts } = outboundVerify;
 const { canAdvanceBookingFlow, buildBookingLifecycleRouteAudit } = lifecycle;
 const { guardCreateSimpleOrder } = orderGuard;
 const { checkPostDrainReplyCoherence } = postDrainCoherence;
-const { reauthorPostDrainReply } = postDrainReauthor;
 
 function option(deliveryType, labelEn, price, status = "verified") {
   return {
@@ -529,23 +527,6 @@ function sessionGuard() {
   });
   assert.equal(coherence.coherent, false);
   assert.equal(coherence.invalidations[0].field, "recipient.phone");
-  let promptPayload = "";
-  const reauthored = await reauthorPostDrainReply({
-    replyText: "Got it. Send me the recipient phone too.",
-    originalCustomerMessage: "Ahamad basha 99227462",
-    appliedOpsSummary: ["apply_booking_field(recipient_name,recipient_phone)"],
-    bookingTruthSnapshot: snapshot,
-    preferredLanguage: "en",
-    generateReply: async (messages) => {
-      promptPayload = messages.user;
-      return "Order summary\nPickup: Sharq, block 1, street 2, house 3\nDelivery: Shuwaikh, block 4, street 5, house 6\nSender: Aziz — 96550000001\nRecipient: Ahamad basha — 99227462\nService: Standard sedan\nPrice: 1.250 KWD\nPlease confirm.";
-    },
-  });
-  assert.equal(reauthored.status, "reauthored");
-  assert(!/recipient\s+(?:phone|number)/i.test(reauthored.replyText));
-  assert(promptPayload.includes("99227462"), "retry prompt should include fresh saved recipient phone");
-  assert(!promptPayload.includes("originalCustomerMessage"), "retry prompt should not use original customer text");
-  assert(!promptPayload.includes("originalReplyText"), "retry prompt should not use stale original reply as context");
 }
 
 // Same invariant for sender name+phone.
@@ -567,17 +548,6 @@ function sessionGuard() {
   });
   assert.equal(coherence.coherent, false);
   assert.equal(coherence.invalidations[0].field, "sender.phone");
-  const reauthored = await reauthorPostDrainReply({
-    replyText: "Thanks Abdulaziz. Please send the sender phone number.",
-    originalCustomerMessage: "abdulaziz almulla 99338566",
-    appliedOpsSummary: ["apply_booking_field(sender_name,sender_phone)"],
-    bookingTruthSnapshot: snapshot,
-    preferredLanguage: "en",
-    generateReply: async () =>
-      "Order summary\nPickup: Sharq, block 1, street 2, house 3\nDelivery: Shuwaikh, block 4, street 5, house 6\nSender: abdulaziz almulla — 99338566\nRecipient: Sara — 96550000002\nService: Standard sedan\nPrice: 1.250 KWD\nPlease confirm.",
-  });
-  assert.equal(reauthored.status, "reauthored");
-  assert(!/sender\s+(?:phone|number)/i.test(reauthored.replyText));
 }
 
 // Apartment/floor/door style address extras satisfy the house/unit requirement.
@@ -601,39 +571,6 @@ function sessionGuard() {
   });
   assert.equal(coherence.coherent, false);
   assert.equal(coherence.invalidations[0].field, "pickup.house_or_unit");
-  const reauthored = await reauthorPostDrainReply({
-    replyText: "Got it. Send me the pickup house or building number.",
-    originalCustomerMessage: "Block 2, street 6, apartment 12 door 12 floor 3",
-    appliedOpsSummary: ["apply_booking_field(address_block,address_street,address_extra)"],
-    bookingTruthSnapshot: snapshot,
-    preferredLanguage: "en",
-    generateReply: async () =>
-      "Order summary\nPickup: Sharq, block 1, street 2, apartment 12 door 12 floor 3\nDelivery: Shuwaikh, block 4, street 5, house 6\nSender: Aziz — 96550000001\nRecipient: Sara — 96550000002\nService: Standard sedan\nPrice: 1.250 KWD\nPlease confirm.",
-  });
-  assert.equal(reauthored.status, "reauthored");
-  assert(!/\b(?:send|share|provide)\b[^.!?\n]{0,40}\b(?:house|building)\b/i.test(reauthored.replyText));
-}
-
-// If the retry still conflicts with the fresh snapshot, use only the minimal
-// safe fallback.
-{
-  const snapshot = buildBookingTruthSnapshot({
-    timing: "post_drain",
-    controllerState: entry(),
-    sessionGuard: sessionGuard(),
-    now,
-  });
-  const fallback = await reauthorPostDrainReply({
-    replyText: "Got it. Send me the recipient phone too.",
-    originalCustomerMessage: "Ahamad basha 99227462",
-    appliedOpsSummary: ["apply_booking_field(recipient_name,recipient_phone)"],
-    bookingTruthSnapshot: snapshot,
-    preferredLanguage: "en",
-    generateReply: async () => "Please send the recipient phone too.",
-  });
-  assert.equal(fallback.status, "fallback");
-  assert.equal(fallback.reason, "retry_conflicted");
-  assert.equal(fallback.replyText, "Sorry, I need to double-check the details before continuing.");
 }
 
 // Selected service is snapshot truth; do not ask the customer to select again.

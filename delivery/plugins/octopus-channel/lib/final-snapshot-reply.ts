@@ -4,10 +4,6 @@ import {
   type ReplyCoherenceInvalidation,
   type ReplyCoherenceResult,
 } from "./post-drain-reply-coherence";
-import {
-  compactSnapshotForReauthor,
-  minimalSafePostDrainFallback,
-} from "./post-drain-reply-reauthor";
 import { buildDeterministicOrderSummaryFromSnapshot } from "../../shared/outbound-verify";
 
 export type FinalSnapshotReplyMessages = {
@@ -57,6 +53,15 @@ export type FinalSnapshotReplyOutcome =
       reason: "generation_empty" | "generation_error" | "validation_failed";
     };
 
+export function minimalSafeFinalReplyFallback(
+  preferredLanguage?: "ar" | "en" | null,
+): string {
+  if (preferredLanguage === "ar") {
+    return "آسف، أحتاج أتأكد من التفاصيل قبل ما أكمل.";
+  }
+  return "Sorry, I need to double-check the details before continuing.";
+}
+
 function compactInvalidations(invalidations: ReplyCoherenceInvalidation[]) {
   return invalidations.map((item) => ({
     kind: item.kind,
@@ -66,7 +71,68 @@ function compactInvalidations(invalidations: ReplyCoherenceInvalidation[]) {
 }
 
 export function compactSnapshotForFinalReply(snapshot: BookingTruthSnapshot) {
-  return compactSnapshotForReauthor(snapshot);
+  const draft = snapshot.draft;
+  const compactRouteSide = (side: BookingTruthSnapshot["route"]["pickup"]) => ({
+    status: side.status,
+    areaId: side.areaId,
+    nameEn: side.nameEn,
+    nameAr: side.nameAr,
+    ambiguityGroupId: side.ambiguityGroupId,
+    options: side.options,
+    sourceText: side.sourceText,
+    confirmedByUser: side.confirmedByUser,
+  });
+  return {
+    stage: snapshot.stage,
+    bookingStep: snapshot.bookingStep,
+    lifecycleState: snapshot.lifecycleState,
+    nextAction: snapshot.nextAction,
+    route: {
+      lockStatus: snapshot.route.lockStatus,
+      pickup: compactRouteSide(snapshot.route.pickup),
+      dropoff: compactRouteSide(snapshot.route.dropoff),
+      pendingRouteAmbiguity: snapshot.pendingRouteAmbiguity,
+    },
+    quote: {
+      selectedService: snapshot.quote.selectedService,
+      selected: snapshot.quote.selected,
+      validQuotedPrices: snapshot.quote.validQuotedPrices,
+      optionCatalog: snapshot.quote.optionCatalog,
+    },
+    missingFields: snapshot.missingFields,
+    nextMissingField: snapshot.nextMissingField,
+    addressSatisfaction: snapshot.addressSatisfaction,
+    requestedSlot: snapshot.requestedSlot
+      ? {
+          name: snapshot.requestedSlot.name,
+          options: snapshot.requestedSlot.options ?? null,
+        }
+      : null,
+    pendingOrderEdits: snapshot.pendingOrderEdits,
+    slotConflicts: snapshot.slotConflicts,
+    currentTurnDisposition: snapshot.currentTurnDisposition,
+    blockedStateActions: snapshot.blockedStateActions,
+    summary: snapshot.summary,
+    order: snapshot.order,
+    savedDraft: draft
+      ? {
+          senderName: draft.senderName,
+          senderPhone: draft.senderPhone,
+          recipientName: draft.recipientName,
+          recipientPhone: draft.recipientPhone,
+          pickupBlock: draft.pickupBlock,
+          pickupStreet: draft.pickupStreet,
+          pickupAvenue: draft.pickupAvenue,
+          pickupHouse: draft.pickupHouse,
+          pickupExtra: draft.pickupExtra,
+          deliveryBlock: draft.deliveryBlock,
+          deliveryStreet: draft.deliveryStreet,
+          deliveryAvenue: draft.deliveryAvenue,
+          deliveryHouse: draft.deliveryHouse,
+          deliveryExtra: draft.deliveryExtra,
+        }
+      : null,
+  };
 }
 
 export function buildFinalReplyContract(
@@ -517,7 +583,7 @@ export async function generateFinalSnapshotReply(params: {
     } catch {
       return {
         status: "fallback",
-        replyText: minimalSafePostDrainFallback(params.preferredLanguage),
+        replyText: minimalSafeFinalReplyFallback(params.preferredLanguage),
         coherence: null,
         markedSummaryShown: false,
         attempts: attempt,
@@ -529,7 +595,7 @@ export async function generateFinalSnapshotReply(params: {
     if (!replyText) {
       return {
         status: "fallback",
-        replyText: minimalSafePostDrainFallback(params.preferredLanguage),
+        replyText: minimalSafeFinalReplyFallback(params.preferredLanguage),
         coherence: null,
         markedSummaryShown: false,
         attempts: attempt,

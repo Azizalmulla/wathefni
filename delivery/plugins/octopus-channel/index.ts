@@ -323,10 +323,6 @@ import {
 } from "../shared/outbound-provenance";
 import { formatLiveChannelContext } from "./lib/live-channel-context";
 import {
-  reauthorPostDrainReply,
-  type PostDrainReauthorMessages,
-} from "./lib/post-drain-reply-reauthor";
-import {
   generateFinalSnapshotReply,
   type FinalSnapshotReplyMessages,
 } from "./lib/final-snapshot-reply";
@@ -347,17 +343,8 @@ const RIDERS_SNAPSHOT_CONTEXT_ONLY =
   String(env.RIDERS_SNAPSHOT_CONTEXT_ONLY || "0").trim() === "1";
 const RIDERS_LIFECYCLE_SNAPSHOT_ONLY =
   String(env.RIDERS_LIFECYCLE_SNAPSHOT_ONLY || "0").trim() === "1";
-const RIDERS_POST_DRAIN_REAUTHOR =
-  String(env.RIDERS_POST_DRAIN_REAUTHOR || "0").trim() === "1";
 const RIDERS_SNAPSHOT_GUARDS_ONLY =
   String(env.RIDERS_SNAPSHOT_GUARDS_ONLY || "0").trim() === "1";
-const RIDERS_POST_DRAIN_REAUTHOR_MODEL = String(
-  env.RIDERS_POST_DRAIN_REAUTHOR_MODEL || "gpt-5.4",
-).trim();
-const RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS = readPositiveIntEnv(
-  "RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS",
-  4500,
-);
 const RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY =
   String(env.RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY || "0").trim() === "1";
 const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;
@@ -3841,53 +3828,6 @@ async function refineTranscriptWithLlm(params: {
     try {
       params.api.logger.warn(
         `[octopus] transcript refine failed error=${error instanceof Error ? error.message : String(error)}`,
-      );
-    } catch {}
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function generatePostDrainReauthorReply(params: {
-  messages: PostDrainReauthorMessages;
-  api: OpenClawPluginApi;
-}): Promise<string | null> {
-  const apiKey = env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS);
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: RIDERS_POST_DRAIN_REAUTHOR_MODEL,
-        temperature: 0,
-        messages: [
-          { role: "system", content: params.messages.system },
-          { role: "user", content: params.messages.user },
-        ],
-      }),
-    });
-    if (!response.ok) {
-      try {
-        params.api.logger.warn(
-          `[post-drain-reply-reauthor] llm_call_failed status=${response.status}`,
-        );
-      } catch {}
-      return null;
-    }
-    const payload = (await response.json()) as any;
-    return asTrimmedString(payload?.choices?.[0]?.message?.content);
-  } catch (error) {
-    try {
-      params.api.logger.warn(
-        `[post-drain-reply-reauthor] llm_call_error error=${error instanceof Error ? error.message : String(error)}`,
       );
     } catch {}
     return null;
@@ -7971,12 +7911,11 @@ async function handleInboundMessage(params: {
               if (
                 RIDERS_LIFECYCLE_SNAPSHOT_ONLY ||
                 RIDERS_SNAPSHOT_GUARDS_ONLY ||
-                RIDERS_POST_DRAIN_REAUTHOR ||
                 RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ||
                 RIDERS_SINGLE_LIFECYCLE_ENGINE
               ) {
                 api.logger.info(
-                  `[booking-truth-snapshot/flags] conversation=${conversationId} context_only=${RIDERS_SNAPSHOT_CONTEXT_ONLY ? "1" : "0"} lifecycle_snapshot_only=${RIDERS_LIFECYCLE_SNAPSHOT_ONLY ? "1" : "0"} post_drain_reauthor=${RIDERS_POST_DRAIN_REAUTHOR ? "1" : "0"} guards_snapshot_only=${RIDERS_SNAPSHOT_GUARDS_ONLY ? "1" : "0"} plan_b_final_reply=${RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ? "1" : "0"} single_lifecycle=${RIDERS_SINGLE_LIFECYCLE_ENGINE ? "1" : "0"} plan_b_log_legacy=${RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY ? "1" : "0"}`,
+                  `[booking-truth-snapshot/flags] conversation=${conversationId} context_only=${RIDERS_SNAPSHOT_CONTEXT_ONLY ? "1" : "0"} lifecycle_snapshot_only=${RIDERS_LIFECYCLE_SNAPSHOT_ONLY ? "1" : "0"} guards_snapshot_only=${RIDERS_SNAPSHOT_GUARDS_ONLY ? "1" : "0"} plan_b_final_reply=${RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ? "1" : "0"} single_lifecycle=${RIDERS_SINGLE_LIFECYCLE_ENGINE ? "1" : "0"} plan_b_log_legacy=${RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY ? "1" : "0"}`,
                 );
               }
             } catch {
@@ -8249,63 +8188,9 @@ async function handleInboundMessage(params: {
               turnReplyAuthor = postDecision.replyAuthor;
               turnReplyReason = postDecision.reason;
             }
-            let postDrainReauthorSubstituted = false;
-            if (
-              RIDERS_POST_DRAIN_REAUTHOR &&
-              !RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY &&
-              !RIDERS_SINGLE_LIFECYCLE_ENGINE
-            ) {
-              try {
-                api.logger.info(
-                  `[post-drain-reply-coherence] conversation=${conversationId} checking=1 missingFields=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] route_lock_status=${postDrainBookingTruthSnapshot.route.lockStatus}`,
-                );
-                const reauthor = await reauthorPostDrainReply({
-                  replyText,
-                  originalCustomerMessage: rawBody,
-                  appliedOpsSummary:
-                    turnAppliedOpsSummary.length > 0
-                      ? turnAppliedOpsSummary
-                      : [...turnDrainedOpKinds].map((kind) => `${kind}:drained`),
-                  bookingTruthSnapshot: postDrainBookingTruthSnapshot,
-                  preferredLanguage: preferredReplyLanguage,
-                  generateReply: (messages) =>
-                    generatePostDrainReauthorReply({ messages, api }),
-                });
-                api.logger.info(
-                  `[post-drain-reply-coherence] conversation=${conversationId} status=${reauthor.initialCoherence.coherent ? "coherent" : "conflict"} invalidations=${reauthor.initialCoherence.invalidations
-                    .map((item) => `${item.kind}:${item.field}`)
-                    .join(",") || "-"} missingFields=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] route_lock_status=${postDrainBookingTruthSnapshot.route.lockStatus}`,
-                );
-                if (reauthor.status !== "not_needed") {
-                  postDrainReauthorSubstituted = true;
-                  replyText = reauthor.replyText;
-                  turnFinalDecision =
-                    reauthor.status === "reauthored"
-                      ? "allow_sanitized"
-                      : "replace_fallback";
-                  turnFinalReason =
-                    reauthor.status === "reauthored"
-                      ? "replace_stale_missing_field_ask"
-                      : "fallback_empty_reply";
-                  turnReplyAuthor =
-                    reauthor.status === "reauthored" ? "llm" : "fallback";
-                  turnReplyReason = turnFinalReason;
-                  api.logger.warn(
-                    `[post-drain-reply-reauthor] conversation=${conversationId} status=${reauthor.status} fallback_only_after_retry_conflict=${reauthor.status === "fallback" && reauthor.reason === "retry_conflicted" ? "yes" : "no"} invalidations=${reauthor.initialCoherence.invalidations
-                      .map((item) => `${item.kind}:${item.field}`)
-                      .join(",")} missing=[${postDrainBookingTruthSnapshot.missingFields.join(",")}]${reauthor.status === "fallback" ? ` fallback_reason=${reauthor.reason}` : ""}`,
-                  );
-                }
-              } catch (error) {
-                api.logger.warn(
-                  `[post-drain-reply-reauthor] conversation=${conversationId} status=error error=${error instanceof Error ? error.message : String(error)}`,
-                );
-              }
-            }
             if (
               (postDecision.markedSummaryShown ||
-                (planBMarkedSummaryShown && postDecision.decision === "allow")) &&
-              !postDrainReauthorSubstituted
+                (planBMarkedSummaryShown && postDecision.decision === "allow"))
             ) {
               // Mark the summary as having been shown so downstream
               // confirmation detection and order-guard "summary_shown" gate
