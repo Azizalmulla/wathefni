@@ -489,14 +489,9 @@ try {
       "old landmark no-tool rule still present",
     );
     assert(
-      "workspace supports landmark_mapped",
-      /landmark_mapped/.test(skill) && /landmark_mapped/.test(tools),
-      "missing landmark_mapped guidance",
-    );
-    assert(
-      "workspace supports Arabic Avenues token",
-      /افنيوز/.test(skill) && /افنيوز/.test(tools),
-      "missing Arabic Avenues guidance",
+      "workspace delegates landmark handling to coverage tool",
+      /landmark/i.test(tools) && /coverage truth/i.test(skill),
+      "concise landmark coverage contract missing",
     );
     assert(
       "reference does not suspend Avenues",

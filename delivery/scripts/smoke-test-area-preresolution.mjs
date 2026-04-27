@@ -10,6 +10,7 @@ async function main() {
   const {
     extractAreaTokensFromText,
     resolveAreaDeterministicSync,
+    verifyAreaEvidence,
     isAreaMismatch,
     buildPublishedPricingData,
   } = mod.__resolverTestHooks;
@@ -55,6 +56,35 @@ async function main() {
   assert.equal(t7.pickup, "9bya");
   assert.equal(t7.dropoff, "hawalli");
   console.log("ok - extractAreaTokensFromText: English how-much with Arabizi");
+
+  const arabicRouteCases = [
+    ["من الزهراء إلى السلام", "الزهراء", "السلام"],
+    ["من الزهراء الى السلام", "الزهراء", "السلام"],
+    ["من الزهراء لي السلام", "الزهراء", "السلام"],
+    ["الزهراء لي السلام", "الزهراء", "السلام"],
+    ["الزهراء للسلام", "الزهراء", "سلام"],
+    ["من الزهراء ل السلام", "الزهراء", "السلام"],
+    ["بكم التوصيل من الرقة لصباح الاحمد السكنية", "الرقة", "صباح الاحمد السكنية"],
+  ];
+  for (const [input, pickup, dropoff] of arabicRouteCases) {
+    const got = extractAreaTokensFromText(input);
+    assert.deepEqual(
+      got,
+      { pickup, dropoff },
+      `Arabic route grammar failed for ${input}: got ${JSON.stringify(got)}`,
+    );
+  }
+  console.log("ok - extractAreaTokensFromText: Arabic route separator grammar");
+
+  const allInOneArabic = extractAreaTokensFromText(
+    "ابي دليفري من الصليبيخات لي الزهراء، اكسبرس سيدان. اسمي عبدالعزيز الملا واستخدم رقم الواتساب.",
+  );
+  assert.deepEqual(
+    allInOneArabic,
+    { pickup: "الصليبيخات", dropoff: "الزهراء" },
+    `expected clean all-in-one Arabic route tokens, got ${JSON.stringify(allInOneArabic)}`,
+  );
+  console.log("ok - extractAreaTokensFromText: Arabic all-in-one route tokens are clean");
 
   // --- resolveAreaDeterministicSync ---
 
@@ -113,6 +143,32 @@ async function main() {
   const mismatch4 = isAreaMismatch(salmiya.area, "Salmiya", data);
   assert.equal(mismatch4, false, "salmya→Salmiya vs model's Salmiya should match");
   console.log("ok - isAreaMismatch: salmya (Salmiya) vs Salmiya = match");
+
+  const dirtyZahraDecision = verifyAreaEvidence({
+    rawToken: "الزهراء، اكسبرس سيدان اسمي عبدالعزيز الملا",
+    modelValue: "Zahra",
+    idOverride: null,
+    data,
+  });
+  assert.equal(
+    dirtyZahraDecision.action,
+    "keep",
+    `expected dirty Arabic Zahra token to verify after cleanup, got ${dirtyZahraDecision.action}`,
+  );
+  console.log("ok - verifyAreaEvidence: cleaned Arabic punctuation token verifies Zahra");
+
+  const sulaibikhatTypoDecision = verifyAreaEvidence({
+    rawToken: "الصليبخات",
+    modelValue: "Sulaibikhat",
+    idOverride: null,
+    data,
+  });
+  assert.equal(
+    sulaibikhatTypoDecision.action,
+    "keep",
+    `expected Arabic Sulaibikhat typo to verify through resolver, got ${sulaibikhatTypoDecision.action}`,
+  );
+  console.log("ok - verifyAreaEvidence: Arabic Sulaibikhat spelling variant verifies");
 
   console.log("\nAll pre-resolution regression tests passed.");
   process.exit(0);

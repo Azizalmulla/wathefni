@@ -367,6 +367,28 @@ function matchByText(text, catalog = FULL_CATALOG) {
     ambiguous === null,
     `M12c: ambiguous must NOT commit; got ${JSON.stringify(ambiguous)}`,
   );
+
+  const rejectedCurrent = resolveSameRouteQuoteFollowupAction({
+    visibleText: "ah i dont want standard sedan",
+    controllerEntry,
+    route,
+  });
+  assert(
+    rejectedCurrent && rejectedCurrent.kind === "show_other_options",
+    `M12d: rejecting current option should show alternatives; got ${JSON.stringify(rejectedCurrent)}`,
+  );
+
+  const positiveCurrent = resolveSameRouteQuoteFollowupAction({
+    visibleText: "standard sedan please",
+    controllerEntry,
+    route,
+  });
+  assert(
+    positiveCurrent &&
+      positiveCurrent.kind === "switch_option" &&
+      positiveCurrent.option.delivery_type === "sedan_normal",
+    `M12e: positive current option mention can still commit; got ${JSON.stringify(positiveCurrent)}`,
+  );
 }
 
 // -----------------------------------------------------------------------

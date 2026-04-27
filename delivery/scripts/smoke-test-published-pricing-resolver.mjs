@@ -298,6 +298,20 @@ async function main() {
   );
   console.log("ok - Arabic Shuwaikh Industrial now clarifies instead of collapsing to one zone");
 
+  const shuwaikhArabiziAmbiguity = await runCase(getPriceTool, {
+    id: "shuwaikh-arabizi-broad-ambiguity",
+    pickup_area: "Hawalli",
+    dropoff_area: "shwuai5",
+  });
+  assert(shuwaikhArabiziAmbiguity.json, "Expected JSON for broad shwuai5 ambiguity");
+  assert.equal(shuwaikhArabiziAmbiguity.json.status, "clarification_required");
+  assert.equal(shuwaikhArabiziAmbiguity.json.field, "dropoff_area");
+  assert.match(
+    shuwaikhArabiziAmbiguity.json.prompt_en,
+    /Shuwaikh|Shuwaikh Industrial|Shuwaikh Educational|Shuwaikh Sanitary/,
+  );
+  console.log("ok - shwuai5 stays broad Shuwaikh ambiguity instead of route-locking");
+
   const sulaibiyaIndustrialAmbiguity = await runCase(getPriceTool, {
     id: "sulaibiya-industrial-family",
     pickup_area: "Hawalli",

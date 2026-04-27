@@ -1,144 +1,181 @@
-# Riders Reference
+# REFERENCE.md - Riders Facts
 
-Static delivery knowledge base for policy and FAQ answers. Use this file when the customer asks about services, coverage, policies, or contact info.
+Static business facts for policy and FAQ answers. Live tool results override this file for prices, coverage, tracking, payment, and order state.
 
-## About Us
+## About Riders
 
-- **Service:** Riders provides on-demand delivery drivers across Kuwait with no minimum order and no mandatory contracts.
-- **Scope:** We deliver prepaid and prepared items (home to home, office to chalet, store to customer). Items include goods from supermarkets, printing shops, clothes, home businesses, etc.
-- **Constraints:** We DO NOT shop or buy items. We only pick up and drop off. No human transportation. No cash handling or collecting item value from customers.
-- **Vehicles:** Standard small sedans (A/C, not refrigerated). Closed box vans and refrigerated box vans are available on request.
-- **Standard Delivery:** Depends on the route; driver may have multiple orders on the same line.
-- **Express Delivery:** Dedicated driver; delivers within ~2 hours from order creation.
+- Riders provides on-demand delivery drivers across Kuwait.
+- No minimum order and no mandatory contract for normal delivery use.
+- Customers can order through WhatsApp when the chat flow supports it, or through the website.
+- Website: https://order.tryriders.com
+- WhatsApp/contact number: 1880999
 
-## What We Deliver
+## Delivery Scope
 
-1. أغراض يمكن للسائق حملها بمفرده وتناسب سيارات الصالون الصغيرة.
-2. في حال وجود طلب خاص يحتاج مساحة أكبر (مثل نقل مكينة آيس كريم أو أغراض استقبال.. الخ) نقدر نوفّر سيارة خاصة (بوكس مقفل).
-3. في حال طلب خاص يحتاج سيارة مبردة (مثل نقل حلويات بارده او ايس كريم.. الخ) نقدر نوفّر سيارة خاصة (بوكس مبرد).
-4. لا ننصح بنقل المأكولات، علماً بان التوصيل حالياً في خلال ساعتين علي الأقل قابلة للزيادة من وقت انشاء الطلب وقريباً هنوفر فريق مخصص لتوصيل المأكولات لتوفير خدمة توصيل اسرع.
-5. يمنع منعا باتا نقل الأموال، لاي سبب من الأسباب ولا يستلم السايق من أي زبون قيمة التوصيل كاش ولا يستلم أموال كثمن للشحنات او لتسليمها لاحد الاطراف.
-6. يمنع منعاً باتاً نقل الأشخاص، ترخيصنا لنقل الطلبات الاستهلاكية فقط.
+Riders delivers prepared and prepaid items:
+
+- home to home
+- office to chalet
+- store to customer
+- supermarkets
+- printing shops
+- clothes
+- home businesses
+- prepared food that is already ready for pickup
+
+Riders does not:
+
+- shop or buy items
+- place restaurant orders
+- pay merchants for customers
+- collect item value, deposits, or cash
+- transport people
+- assemble or dismantle furniture
+
+## Food Delivery Distinction
+
+Riders is a courier service, not a restaurant ordering platform.
+
+We can deliver food if it is already prepared and ready for pickup. We do not choose, buy, or order food on the customer's behalf.
+
+## Vehicles And Services
+
+- Standard sedan: small sedan, standard/shared route style.
+- Express sedan: dedicated/faster delivery.
+- Closed box van: for bulky or larger items.
+- Refrigerated van: for temperature-sensitive items.
+- Helper service: driver plus assistant when available/quoted.
+
+Exact service availability and price are route-specific and must come from `get_price` or active quoted route context.
 
 ## Delivery Time Estimates
 
-- **Internal Areas:** Standard (2-5 hours once order is created) | Express (within 2 hours once order is created).
-- **External Areas:** Standard (3-6 hours once order is created) | Express (within 3 hours once order is created).
+- Internal areas: standard usually 2-5 hours after order creation; express within around 2 hours.
+- External areas: standard usually 3-6 hours after order creation; express within around 3 hours.
+
+These are estimates, not guarantees.
 
 ## Working Hours
 
-- Pickup in **internal areas:** 6:00 AM – 12:00 AM (midnight).
-- Pickup in **external areas:** 6:00 AM – 9:00 PM.
+- Pickup in internal areas: 6:00 AM to 12:00 AM.
+- Pickup in external areas: 6:00 AM to 9:00 PM.
 
-## Key Policies / FAQs
+## Payment
 
-### App & Website
+- Payment is prepaid through cards, in-app wallet, coupons, or tool-confirmed payment links.
+- Pay by Receiver, when available through the website, is for the delivery fee only.
+- Riders does not collect the value of goods/items from receivers.
 
-- Riders app is available for Android via Play Store: https://play.google.com/store/apps/details?id=app.riders.android&pcampaignid=web_share
-- The iOS (App Store) version is in final preparation and will be available very soon.
-- Customers can always order via the website: https://order.tryriders.com
-
-### Cancellation & Refund
+## Cancellation And Refund
 
 - Full refund if the order is canceled before the driver arrives at pickup.
 - 50% deduction if the driver has reached the pickup area.
-- No refund once the item is picked up (returning it counts as a completed trip back to pickup).
+- No refund once the item is picked up.
+- Returning an item counts as a completed trip back to pickup.
 
-### Payment
+## Tables
 
-- Prepaid only via cards, in-app wallet, or coupons.
-- "Pay by Receiver" feature: available if the sender chooses it when creating the order on the website. It is **for the DELIVERY FEE ONLY** — nothing to do with the item's value or price.
-- It is STRICTLY PROHIBITED to collect the value of goods, items, or deposits from the receiver on behalf of the sender. We are solely a delivery company.
-- The in-app / website wallet is used exclusively to pay for delivery services.
+All table deliveries require a closed box van. Standard cars cannot be used for tables.
 
-### Tables Delivery (نقل الطاولات)
+Approximate closed box dimensions:
 
-ALL tables, regardless of size or the customer's description, absolutely REQUIRE a Closed Box (سيارة بوكس مقفل). Standard cars cannot be used for tables. Closed box dimensions are approximately L: 180cm, W: 150cm, H: 120cm.
+- Length: 180 cm
+- Width: 150 cm
+- Height: 120 cm
 
-### Tracking / Driver Number
+## Tracking And Driver Number
 
-Tracking via website shows the driver's number immediately once assigned.
+Tracking through the website shows the driver's number once assigned.
 
-### Sender Privacy
+Tracking facts must come from `track_order` or live order state.
 
-Sender details (name, phone, address) are permanently hidden from the receiver.
+## Sender Privacy
 
-### Multiple Orders
+Sender details are hidden from the receiver:
 
-Supported via the website. When customers create an account on the website, they can save addresses and use the multiple-orders feature (entering their address only once). Sign up: https://order.tryriders.com
+- sender name
+- sender phone
+- sender address
 
-### Furniture Assembling
+## Multiple Orders And Saved Addresses
 
-We strictly do not provide assembling/dismantling services.
+Multiple orders and saved addresses are supported through the website after account creation.
 
-### Suspended Areas
+Signup/order website: https://order.tryriders.com
 
-خدمة الاستلام والتوصيل من وإلى مجمع "الأفنيوز" (The Avenues) متوقفة مؤقتاً. يُمنع إنشاء أي طلب أو تسعير لهذه المنطقة.
+## Suspended Areas
 
-Reply when asked for a suspended area: `نعتذر منكم، الخدمة متوقفة مؤقتاً في منطقة [Area Name].`
+No areas are currently listed here as temporarily suspended.
 
-### Drivers
+If an area is later listed as suspended, answer from that live/static suspension fact. Do not infer suspension from general knowledge.
 
-- جنسيات مختلفة: عرب، آسيويين، وأفريقيين. أقرب سائق إلى منطقتكم يجيكم.
-- **Company shirt / car logo:** بعض السيارات عليها لوجو الشركة والبعض الآخر جاري وضعه.
+## Drivers
 
-### Company Contracts (Required Documents)
+- Drivers can be from different nationalities.
+- The closest suitable driver is assigned.
+- Some cars have Riders branding/logo and some may not yet.
 
-الأوراق المطلوبة لتجهيز عقد شركات توصيل الطلبات:
+## Company Contracts
 
-- عقد التأسيس
-- آخر عقد تعديل
-- الرخصة التجارية
-- اعتماد توقيع القوى العاملة
-- مستخرج حديث (لا يزيد عن 5 أيام)
-- سجل تجاري
-- بطاقة المدير المدنية
-- شهادة إيبان للحساب البنكي
-- مدنية وتوكيل في حال وجود وكيل للتوقيع
+Required documents for company delivery contracts:
 
-نحتاج هذه الأوراق بصيغة PDF ويرجى إرسالها على: contract@tryriders.com
+- articles of association
+- latest amendment contract
+- commercial license
+- authorized signatory from manpower
+- recent extract, not older than 5 days
+- commercial registry
+- manager civil ID
+- bank IBAN certificate
+- civil ID and power of attorney if an agent signs
 
-## Coop Contracts & Apps (الجمعيات)
+Documents should be sent as PDF to: contract@tryriders.com
 
-- If the customer asks about "Coop" / الجمعيات / التعاونيات, reply exactly:
-  - Arabic: `يمكنك التواصل مع خدمة عملاء تعاونيات ديليفري عبر واتساب من خلال الرابط المباشر: https://wa.me/9651800242`
-  - English: `You can contact Coop's Delivery customer service via WhatsApp through this direct link: https://wa.me/9651800242`
+## Coop Contracts And Apps
 
-## Late Delivery Apologies (pick one)
+For Coop / الجمعيات / التعاونيات requests, use this fixed contact fact:
 
-1. `نعتذر منك على التأخير في توصيل طلبك هذا بسبب ضغط الطلبات والازدحام المروري وهالشي خارج عن الإرادة.`
-2. `نتفهم تماماً إنك منتظر وتأكد احنا قاعدين نتابع ونبذل قصار جهدنا لوصول السايق لك.`
-3. `نقدر صبركم ونعرف إنكم منتظرين، وودنا نخدمكم بأسرع وقت.`
+- Arabic: `يمكنك التواصل مع خدمة عملاء تعاونيات ديليفري عبر واتساب من خلال الرابط المباشر: https://wa.me/9651800242`
+- English: `You can contact Coop's Delivery customer service via WhatsApp through this direct link: https://wa.me/9651800242`
 
-## System Error / Payment Fail (standard reply)
+This is intentionally fixed contact wording because it points to a separate support channel.
 
-If the customer reports: "الموقع معلق" / "ما يفتح" / "الموقع طايح" / "ما قدرت سوي طلب في الموقع" / "رابط الدفع ما يشتغل" / "مو راضي يدفع" / "payment error", or sends a screenshot resembling a 404 or server error page:
+## System Or Payment Error
 
-Call `assign_agent` / `request_handoff` and reply:
+If the customer reports website/payment failure or sends an error screenshot, use the human-support path. The standard fact to convey is that there is a technical issue and support will help.
 
-`نعتذر منكم، عندنا خلل تقني بسيط بالموقع. ثواني ونحولكم للدعم الفني للمساعدة.`
+Do not claim the issue is fixed unless a tool or human confirms it.
 
-## Contact & Info
+## Official Links
 
-- **Location:** Kuwait City, Al Nassar Tower.
-- **WhatsApp:** 1880999
-- **Website:** https://order.tryriders.com
-- **Instagram:** https://www.instagram.com/try.riders?igsh=MXB2NDY1ZmUza3Zicg==
-- **Snapchat:** https://snapchat.com/t/hoqwyuZh
-- **TikTok:** https://www.tiktok.com/@tryriders
+- Website: https://order.tryriders.com
+- Android app: https://play.google.com/store/apps/details?id=app.riders.android&pcampaignid=web_share
+- Instagram: https://www.instagram.com/try.riders?igsh=MXB2NDY1ZmUza3Zicg==
+- Snapchat: https://snapchat.com/t/hoqwyuZh
+- TikTok: https://www.tiktok.com/@tryriders
 
-## Area matching
+## Area Matching Notes
 
-Customer-facing area names are resolved internally by `get_price` (deterministic resolver over `pricing.json`, 222 areas). Interpret the customer's text (Arabizi, shorthand, typos) into a recognisable Kuwait area name and pass it to `get_price`; the resolver verifies and corrects. There is no need for a manual area list in this workspace — the code holds the source of truth.
+Area pricing and coverage truth lives in the resolver and pricing sheet, not in this file.
 
-Arabizi digit conventions you can use when interpreting customer input:
+Arabizi hints that may help interpret customer input before sending it to tools:
 
-- `7` = ح (e.g. 7awalli = Hawalli, 7atan = Hitteen)
-- `9` = ص (e.g. 9bya = Subiya, 9ortoba = Qortuba)
-- `5` = خ (e.g. 5ai6an = Khaitan, 5aldiya = Khaldiya)
-- `6` = ط (e.g. 6aima = Taima)
-- `3` = ع (e.g. 3daan = Al-Adan)
-- `2` = ء/أ (e.g. 2shbilya = Ashbeliah)
-- `8` = ق (when used)
+- `7` often maps to ح, e.g. `7awalli` = Hawalli.
+- `9` often maps to ص, e.g. `9bya` = Subiya.
+- `5` often maps to خ, e.g. `5aldiya` = Khaldiya.
+- `6` often maps to ط, e.g. `6aima` = Taima.
+- `3` often maps to ع.
+- `2` often maps to ء / أ.
+- `8` may map to ق.
 
-Common shorthand: `frwnya/frwaniya` = Farwaniya, `salmya` = Salmiya, `7wly` = Hawalli, `slwa` = Salwa, `mshrf` = Mishrif, `mngf` = Mangaf, `fntas` = Al-Fintas, `mhboula` = Mahboula, `fhaheel` = Fahaheel.
+Common shorthand examples:
+
+- `frwnya`, `frwaniya` = Farwaniya
+- `salmya` = Salmiya
+- `7wly` = Hawalli
+- `slwa` = Salwa
+- `mshrf` = Mishrif
+- `mngf` = Mangaf
+- `fntas` = Al-Fintas
+- `mhboula` = Mahboula
+- `fhaheel` = Fahaheel

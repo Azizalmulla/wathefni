@@ -218,11 +218,11 @@ async function main() {
   // -------------------------------------------------------------------------
   // 7. Fast-path integration — names are LLM-owned (Phase 1, 2026-04-24)
   //
-  // The fast-path used to extract sender/recipient names from
-  // letters+spaces fragments and rely on the coherence gate to catch
-  // non-names. Phase 1 removed that whole branch: the fast-path no
-  // longer writes `sender_name` or `recipient_name` under any
-  // shape. The coherence classifier still runs on the post-LLM
+  // The fast-path used to extract sender/recipient names and phones from
+  // identity-shaped fragments. The identity cut removed that whole branch:
+  // the fast-path no longer writes `sender_name`, `sender_phone`,
+  // `recipient_name`, or `recipient_phone` under any shape. The coherence
+  // classifier still runs on the post-LLM
   // apply-boundary path (see `smoke-test-slot-fill-fixes.mjs` and
   // `apply-boundary.ts`), which is where the live incident rule
   // "reject questions written to name slots" now lives.
@@ -248,7 +248,7 @@ async function main() {
     assert.equal(
       r.confidence,
       "none",
-      `Phase 1: no-phone-no-decision sender-combined input must be confidence=none (${JSON.stringify(text)})`,
+      `identity cut: sender-combined input must be confidence=none (${JSON.stringify(text)})`,
     );
   }
 
@@ -269,9 +269,8 @@ async function main() {
     assert.equal(r.confidence, "none");
   }
 
-  // Phone-only and use-whatsapp still resolve through the combined
-  // sender extractor — those are structured / explicit-command
-  // signals and remain server-assisted per Phase 1.
+  // Phone-only and use-whatsapp are also LLM/tool-owned. A phone number is
+  // structured, but assigning sender vs recipient is semantic.
   {
     const r = extractSenderNameAndDecision({ text: "use my whatsapp" });
     assert.equal(
@@ -279,15 +278,14 @@ async function main() {
       null,
       "use-whatsapp input must not write sender_name",
     );
-    assert.equal(r.patch?.phone_decision, "use_whatsapp");
-    assert.equal(r.confidence, "high");
+    assert.equal(r.patch, null);
+    assert.equal(r.confidence, "none");
   }
   {
     const r = extractSenderNameAndDecision({ text: "94728472" });
     assert.equal(r.patch?.sender_name ?? null, null);
-    assert.equal(r.patch?.phone_decision, "different");
-    assert.equal(r.patch?.sender_phone, "94728472");
-    assert.equal(r.confidence, "high");
+    assert.equal(r.patch, null);
+    assert.equal(r.confidence, "none");
   }
 
   console.log("smoke-test-slot-response-coherence: OK");

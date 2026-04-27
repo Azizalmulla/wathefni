@@ -1,20 +1,47 @@
 #!/usr/bin/env python3
 """
 Re-apply narration suppression patches to OpenClaw gateway bundles.
-Run this after every `openclaw update`.
+Run this after every `openclaw update` (local dev AND VPS).
 
 Usage:
-    python3 scripts/patch-openclaw.py
+    python3 scripts/patch-openclaw.py              # auto-detect dist path
+    OPENCLAW_DIST=/custom/path python3 ...         # override dist path
 
 What it does:
     Patches handleMessageEnd, onPartialReply, and fallbackAnswerText
     in both auth-profiles gateway bundles to suppress internal narration
     (e.g. "Now uploading CV to Drive") from reaching WhatsApp candidates.
+
+Why auto-detect:
+    Local dev installs OpenClaw into `~/.npm-global/lib/node_modules/...`
+    (user-prefix npm), while the Riders VPS installs it system-wide into
+    `/usr/lib/node_modules/...`. The prior hardcoded `~/.npm-global` path
+    silently skipped the VPS entirely. The env override is the escape
+    hatch if the default search order is ever wrong.
 """
-import subprocess, sys
+import os
+import subprocess
+import sys
 from pathlib import Path
 
-DIST = Path.home() / '.npm-global/lib/node_modules/openclaw/dist'
+
+def resolve_dist() -> Path:
+    override = os.environ.get("OPENCLAW_DIST", "").strip()
+    if override:
+        return Path(override)
+    candidates = [
+        Path("/usr/lib/node_modules/openclaw/dist"),
+        Path.home() / ".npm-global/lib/node_modules/openclaw/dist",
+        Path("/usr/local/lib/node_modules/openclaw/dist"),
+    ]
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    # Fall back to the original default so the error message below is helpful.
+    return candidates[1]
+
+
+DIST = resolve_dist()
 
 def find_auth_profiles():
     """Find auth-profiles JS files (filenames change per version)."""

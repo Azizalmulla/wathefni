@@ -23,6 +23,7 @@
 //   8. Matching price (reply says 1.250 KWD, quote is 1.250) passes.
 //   9. Granular missing sub-fields produce a targeted substitute.
 //  10. Env-flag off disables the whole guard.
+//  11. State-write claims ("noted/saved/selected") require controller proof.
 // ---------------------------------------------------------------------------
 
 import path from "node:path";
@@ -636,4 +637,270 @@ function buildEntry(draft, overrides = {}) {
   );
 }
 
-console.log("ok: all 21 hallucination-guard smoke cases passed");
+// -----------------------------------------------------------------------
+// Case 22: LLM claims pickup area was noted, but server state has no pickup.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(createEmptyBookingDraft(), {
+    stage: "idle",
+    bookingStep: "none",
+    quotePickupAreaNameEn: null,
+    quotePickupAreaNameAr: null,
+    pendingPickupAreaNameEn: null,
+    pendingPickupAreaNameAr: null,
+    quoteDropoffAreaNameEn: null,
+    quoteDropoffAreaNameAr: null,
+    pendingDropoffAreaNameEn: null,
+    pendingDropoffAreaNameAr: null,
+    selectedDeliveryType: null,
+    quotedPrice: null,
+  });
+  const decision = runHallucinationGuard({
+    replyText:
+      "Yes, Sulaibikhat is covered. Pickup area noted as Zahra — send me the delivery area and I’ll quote it.",
+    entry,
+    missingFields: ["pickup.area", "delivery.area"],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "idle",
+    language: "en",
+    nextRequiredAction: "ASK_MISSING_AREAS",
+  });
+  assert(decision.blocked, "case22: unsupported pickup noted claim must be blocked");
+  assert(
+    decision.claims.includes("state_write_hallucination"),
+    "case22: must detect state_write_hallucination",
+  );
+  assert(
+    !/pickup area noted as Zahra/i.test(decision.replyText),
+    `case22: false state claim must not be sent, got ${decision.replyText}`,
+  );
+  assert(
+    decision.substitutedFrom === "state_truth_repair" ||
+      decision.substitutedFrom === "next_required_action",
+    `case22: state write hallucination should use a specific repair or real next step, got ${decision.substitutedFrom}`,
+  );
+  assert(
+    !/that detail/i.test(decision.replyText),
+    `case22: state-truth repair must not be a vague "that detail" dead end, got ${decision.replyText}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 23: same pickup-area wording is allowed when pending pickup exists.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(createEmptyBookingDraft(), {
+    pendingPickupAreaNameEn: "Zahra",
+    pendingPickupAreaNameAr: "الزهراء",
+    quotePickupAreaNameEn: null,
+    quotePickupAreaNameAr: null,
+    quoteDropoffAreaNameEn: null,
+    quoteDropoffAreaNameAr: null,
+    selectedDeliveryType: null,
+    quotedPrice: null,
+  });
+  const decision = runHallucinationGuard({
+    replyText: "Pickup area noted as Zahra. Please send the delivery area.",
+    entry,
+    missingFields: ["delivery.area"],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "idle",
+    language: "en",
+    nextRequiredAction: "ASK_DELIVERY_AREA",
+  });
+  assert(!decision.blocked, "case23: grounded pickup noted claim must pass");
+}
+
+// -----------------------------------------------------------------------
+// Case 24: sender-name state claim requires draft.senderName.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(createEmptyBookingDraft(), {
+    quotePickupAreaNameEn: "Zahra",
+    quoteDropoffAreaNameEn: "Sulaibikhat",
+  });
+  const decision = runHallucinationGuard({
+    replyText: "Got it, sender name is Ahmed. Please send the sender phone.",
+    entry,
+    missingFields: ["sender.name", "sender.phone"],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+  });
+  assert(decision.blocked, "case24: unsupported sender-name claim must block");
+  assert(
+    decision.claims.includes("state_write_hallucination"),
+    "case24: sender-name claim must be state_write_hallucination",
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 25: pickup location pin claim requires draft.pickupLocation.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(createEmptyBookingDraft());
+  const decision = runHallucinationGuard({
+    replyText: "I’ve got the pickup location pin. Please send the delivery address.",
+    entry,
+    missingFields: ["pickup.address"],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "collecting_booking_details",
+    language: "en",
+    nextRequiredAction: "ASK_PICKUP_ADDRESS",
+  });
+  assert(decision.blocked, "case25: unsupported pickup pin claim must block");
+}
+
+// -----------------------------------------------------------------------
+// Case 26: selected option claim requires selectedDeliveryType/label.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft(), {
+    selectedDeliveryType: null,
+    selectedQuoteOptionLabelEn: null,
+    selectedQuoteOptionLabelAr: null,
+  });
+  const decision = runHallucinationGuard({
+    replyText: "Selected standard sedan. Please send the sender name.",
+    entry,
+    missingFields: ["sender.name"],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    activeQuotedPrices: [1.25],
+  });
+  assert(decision.blocked, "case26: unsupported selected-option claim must block");
+}
+
+// -----------------------------------------------------------------------
+// Case 27: selected option proof understands canonical delivery-type IDs.
+//
+// Live all-in-one regression: server selected `sedan_fast`, LLM said
+// "Express sedan is selected", and the state-truth guard falsely blocked
+// because it compared raw `sedan_fast` text instead of canonical option
+// identity.
+// -----------------------------------------------------------------------
+{
+  const draft = buildCompleteDraft();
+  draft.senderName = "Abdulaziz Almulla";
+  draft.senderPhone = "96599338566";
+  draft.recipientName = "Ahmad Basha";
+  draft.recipientPhone = "99278765";
+  draft.pickupBlock = "2";
+  draft.pickupStreet = "7";
+  draft.pickupHouse = "19";
+  draft.deliveryBlock = "2";
+  draft.deliveryStreet = "9";
+  draft.deliveryHouse = null;
+  draft.deliveryExtra = "Apartment 11, floor 4, door 2";
+  const entry = buildEntry(draft, {
+    stage: "summary_shown",
+    bookingStep: "summary_pending",
+    quotePickupAreaNameEn: "Sulaibikhat",
+    quoteDropoffAreaNameEn: "Zahra",
+    selectedDeliveryType: "sedan_fast",
+    selectedQuoteOptionLabelEn: null,
+    selectedQuoteOptionLabelAr: null,
+    quotedPrice: 1.75,
+  });
+  const reply = [
+    "Got it. Express sedan is selected for Sulaibikhat to Zahra at 1.750 KWD.",
+    "",
+    "Summary:",
+    "Sender, Abdulaziz Almulla, 96599338566.",
+    "Recipient, Ahmad Basha, 99278765.",
+    "Pickup, block 2, street 7, house 19.",
+    "Delivery, block 2, street 9, apartment 11, floor 4, door 2.",
+  ].join("\n");
+  const decision = runHallucinationGuard({
+    replyText: reply,
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "idle",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    activeQuotedPrices: [1.25, 1.75],
+  });
+  assert(
+    !decision.blocked,
+    `case27: express sedan must prove selectedDeliveryType=sedan_fast; got blocked=${decision.blocked} claims=${decision.claims.join(",")} reason=${decision.reason}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 28: canonical summaries with address lines are not stale address asks.
+// -----------------------------------------------------------------------
+{
+  const entry = buildEntry(buildCompleteDraft());
+  const reply = [
+    "*Order summary*",
+    "Pickup: Hawalli — Block 6, Street 9, House 17",
+    "Delivery: Salmiya — Block 2, Street 9, apartment 19, floor 8, door 11",
+    "Sender: Aziz — 96597485757",
+    "Recipient: Ahmed — 96562844738",
+    "Service: Standard sedan",
+    "Price: 1.250 KWD",
+    "",
+    "Shall I confirm this order?",
+  ].join("\n");
+  const decision = runHallucinationGuard({
+    replyText: reply,
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "awaiting_confirmation",
+    language: "en",
+    nextRequiredAction: "WRITE_FULL_ORDER_SUMMARY_OR_PLACE_ORDER_IF_CONFIRMED",
+    activeQuotedPrices: [1.25],
+  });
+  assert(
+    !decision.claims.includes("stale_missing_field_ask"),
+    `case28: canonical summary must not look like stale address ask; got ${decision.claims.join(",")}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// Case 29: guard repair carries conflict values into CONFIRM_SLOT_CONFLICT.
+// -----------------------------------------------------------------------
+{
+  const draft = buildCompleteDraft();
+  const entry = buildEntry(draft, {
+    dialogState: {
+      version: 1,
+      requestedSlot: { name: "sender_name", options: null, askedTs: Date.now() },
+      slots: {
+        sender_name: {
+          value: "Abdulaziz almulla",
+          status: "conflict",
+          lastSetTs: Date.now(),
+          lastSource: "llm_apply",
+          conflictCandidate: "Rawan al ajmi",
+        },
+      },
+    },
+  });
+  const decision = runHallucinationGuard({
+    replyText: "I still need the pickup block.",
+    entry,
+    missingFields: [],
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "awaiting_confirmation",
+    language: "en",
+    nextRequiredAction: "CONFIRM_SLOT_CONFLICT",
+    activeQuotedPrices: [1.25],
+  });
+  assert(decision.blocked, "case29: stale pickup block ask should be blocked");
+  assert(
+    /Abdulaziz almulla/.test(decision.replyText) && /Rawan al ajmi/.test(decision.replyText),
+    `case29: conflict repair must include both values, got ${decision.replyText}`,
+  );
+  assert(
+    !/that field/i.test(decision.replyText),
+    `case29: conflict repair must not use vague fallback, got ${decision.replyText}`,
+  );
+}
+
+console.log("ok: all 29 hallucination-guard smoke cases passed");

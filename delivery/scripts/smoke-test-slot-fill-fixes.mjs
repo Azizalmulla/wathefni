@@ -18,11 +18,10 @@
  *      `\b(...|رقم)\b` guard does not anchor on Arabic (ASCII `\b`).
  *      The full corrupted residual was accepted as `recipient_name`.
  *
- *   C) When the fast-path pre-applied `sender_phone` on this turn, the
- *      LLM's next `apply_booking_field` also wrote the same digit
- *      group to `recipient_phone`. The slot was empty, the boundary
- *      accepted the write, and the recipient side silently ended up
- *      with the sender's WhatsApp number.
+ *   C) Historical guard: when a same-turn pre-apply has genuinely committed
+ *      one side's phone, the LLM must not mirror the same digit group into
+ *      the counterpart side. Identity phone fast-path is now removed, but the
+ *      guard remains pinned so only committed writes can ever trigger it.
  *
  *   D) `CONFIRM_SLOT_CONFLICT` dispatch read `rec.conflictValue` off
  *      the DST slot record, but the actual field is
@@ -89,10 +88,10 @@ async function main() {
   );
 
   const { classifyResponseForSlot, isAcceptableSlotResponse } = coherence;
-  const { extractSenderNameAndDecision, extractRecipientNameAndPhone } = fastPath;
+  const { extractForNextAction, extractSenderNameAndDecision, extractRecipientNameAndPhone } = fastPath;
   const { applyCrossSidePhoneGuard } = crossSide;
   const { createEmptyDialogState, updateSlot } = dialogState;
-  const { applyProposals, llmProposal } = applyBoundary;
+  const { applyProposals, fastPathProposal, llmProposal } = applyBoundary;
   const { renderDirectiveReply } = registry;
   const { createEmptyBookingDraft } = bookingDraft;
 
@@ -156,9 +155,9 @@ async function main() {
       `"ok Ali" must not be classified as a two-word ack`,
     );
   }
-  // Phase 1 authority cut (2026-04-24): legitimate names no longer
-  // extract via the fast-path. `use_whatsapp` still resolves the
-  // phone decision; the name is left for the LLM to author.
+  // Identity cut (2026-04-26): legitimate names and phone decisions no
+  // longer extract via the fast-path. The LLM/tool path owns the whole
+  // sender identity tuple.
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Al Mulla, use whatsapp" });
     assert.equal(
@@ -166,8 +165,8 @@ async function main() {
       null,
       "Phase 1: fast-path must not write sender_name from letters+spaces",
     );
-    assert.equal(r.patch?.phone_decision, "use_whatsapp");
-    assert.equal(r.confidence, "high");
+    assert.equal(r.patch, null);
+    assert.equal(r.confidence, "none");
   }
 
   // -------------------------------------------------------------------------
@@ -202,10 +201,149 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
+  // Identity cut — no pre-LLM name/phone writes; LLM/tool proposals commit.
+  // -------------------------------------------------------------------------
+  {
+    const pre = extractForNextAction({
+      text: "حمد الملا 97485758",
+      action: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+      whatsappNumber: "96599338566",
+    });
+    assert.equal(pre.patch, null, "recipient name+phone must not trigger sender phone fast-path");
+    assert.equal(pre.confidence, "none");
+
+    const draft = {
+      ...createEmptyBookingDraft(),
+      senderName: "aziz almulla",
+      senderPhone: "96599338566",
+    };
+    let state = createEmptyDialogState();
+    state = updateSlot(state, "sender_name", "aziz almulla", "llm_apply").state;
+    state = updateSlot(state, "sender_phone", "96599338566", "llm_apply").state;
+    const res = applyProposals([
+      llmProposal({
+        op: {
+          recipient_name: "حمد الملا",
+          recipient_phone: "97485758",
+          source_quote: "حمد الملا 97485758",
+        },
+      }),
+    ], {
+      draft,
+      dialogState: state,
+      whatsappNumber: "96599338566",
+      stage: "collecting_booking_details",
+    });
+    assert.equal(res.draft.recipientName, "حمد الملا");
+    assert.equal(res.draft.recipientPhone, "97485758");
+    assert.ok(res.applied.includes("recipient_name"));
+    assert.ok(res.applied.includes("recipient_phone"));
+    assert.equal(res.rejections.length, 0);
+  }
+
+  {
+    const pre = extractForNextAction({
+      text: "99383746",
+      action: "ASK_SENDER_PHONE",
+      whatsappNumber: "96599338566",
+    });
+    assert.equal(pre.patch, null, "sender phone digits must be LLM/tool-owned");
+    assert.equal(pre.confidence, "none");
+
+    const res = applyProposals([
+      llmProposal({
+        op: {
+          sender_phone: "99383746",
+          phone_decision: "different",
+          source_quote: "99383746",
+        },
+      }),
+    ], {
+      draft: createEmptyBookingDraft(),
+      dialogState: createEmptyDialogState(),
+      whatsappNumber: "96599338566",
+      stage: "collecting_booking_details",
+    });
+    assert.equal(res.draft.senderPhone, "99383746");
+    assert.ok(res.applied.includes("sender_phone"));
+    assert.equal(res.rejections.length, 0);
+  }
+
+  {
+    const pre = extractForNextAction({
+      text: "Abdulaziz almulla same number as whatsapp",
+      action: "ASK_SENDER_NAME_AND_PHONE_DECISION",
+      whatsappNumber: "96599338566",
+    });
+    assert.equal(pre.patch, null, "sender name + WhatsApp decision must be LLM/tool-owned");
+    assert.equal(pre.confidence, "none");
+
+    const res = applyProposals([
+      llmProposal({
+        op: {
+          sender_name: "Abdulaziz almulla",
+          phone_decision: "use_whatsapp",
+          source_quote: "Abdulaziz almulla same number as whatsapp",
+        },
+      }),
+    ], {
+      draft: createEmptyBookingDraft(),
+      dialogState: createEmptyDialogState(),
+      whatsappNumber: "96599338566",
+      stage: "collecting_booking_details",
+    });
+    assert.equal(res.draft.senderName, "Abdulaziz almulla");
+    assert.equal(res.draft.senderPhone, "96599338566");
+    assert.ok(res.applied.includes("sender_name"));
+    assert.ok(res.applied.includes("phone_decision"));
+    assert.equal(res.rejections.length, 0);
+  }
+
+  {
+    const draft = {
+      ...createEmptyBookingDraft(),
+      senderPhone: "96599338566",
+    };
+    let state = createEmptyDialogState();
+    state = updateSlot(state, "sender_phone", "96599338566", "llm_apply").state;
+    const conflicted = applyProposals([
+      fastPathProposal({
+        patch: {
+          sender_phone: "97485758",
+          phone_decision: "different",
+        },
+        sourceQuote: "97485758",
+      }),
+    ], {
+      draft,
+      dialogState: state,
+      whatsappNumber: "96599338566",
+      stage: "collecting_booking_details",
+    });
+    assert.equal(conflicted.draft.senderPhone, "96599338566");
+    assert.equal(conflicted.conflicts.length, 1);
+    assert.ok(
+      conflicted.rejections.some((r) => r.field === "sender_phone" && r.reason === "slot_conflict_with_filled_value"),
+      `expected sender_phone conflict rejection, got ${JSON.stringify(conflicted.rejections)}`,
+    );
+    assert.ok(
+      !conflicted.applied.includes("sender_phone") && !conflicted.applied.includes("phone_decision"),
+      `conflicted fast-path write must not count as applied: ${JSON.stringify(conflicted.applied)}`,
+    );
+    const out = applyCrossSidePhoneGuard({
+      fastPathPreApplied: conflicted.applied,
+      senderPhone: null,
+      recipientPhone: "97485758",
+    });
+    assert.equal(out.recipientPhone, "97485758");
+    assert.equal(out.drops.length, 0, "conflicted fast-path attempt must not mask LLM recipient_phone");
+  }
+
+  // -------------------------------------------------------------------------
   // Fix 3 — cross-side phone guard
   // -------------------------------------------------------------------------
-  // Fast-path already pre-applied sender_phone this turn → recipient
-  // side must be dropped.
+  // Historical guard: if a committed same-turn pre-apply says sender_phone,
+  // a mirrored recipient side must be dropped.
   {
     const out = applyCrossSidePhoneGuard({
       fastPathPreApplied: ["sender_phone", "phone_decision"],
@@ -222,7 +360,7 @@ async function main() {
       reason: "cross_side_phone_write_same_turn",
     });
   }
-  // Symmetric case — fast-path had already written recipient_phone.
+  // Symmetric case — a committed same-turn recipient_phone pre-apply.
   {
     const out = applyCrossSidePhoneGuard({
       fastPathPreApplied: ["recipient_phone", "recipient_name"],

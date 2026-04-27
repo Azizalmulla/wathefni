@@ -50,9 +50,15 @@ function loadTs(relativePath) {
 const policy = loadTs("plugins/shared/conversation-policy.ts");
 const oneBrain = loadTs("plugins/octopus-channel/lib/one-brain-context.ts");
 const bookingFlow = loadTs("plugins/octopus-channel/lib/booking-flow.ts");
+const hallucinationGuard = loadTs("plugins/shared/reply-hallucination-guard.ts");
 const { createEmptyBookingDraft } = policy;
-const { computeOneBrainNextRequiredAction, computeOneBrainMissingFields } = oneBrain;
+const {
+  computeOneBrainNextRequiredAction,
+  computeOneBrainMissingFields,
+  formatOneBrainLiveChannelContext,
+} = oneBrain;
 const { hasSatisfiedBookingAddress } = bookingFlow;
+const { runHallucinationGuard } = hallucinationGuard;
 
 function makeEntry(overrides = {}) {
   return {
@@ -150,6 +156,16 @@ function makeEntry(overrides = {}) {
     `T2: forbidden shapes include delivery-house-when-extra-completes; got ${JSON.stringify(
       directive.forbiddenShapes,
     )}`,
+  );
+  const context = formatOneBrainLiveChannelContext({
+    normalizedReplyTarget: "96599338566",
+    preferredReplyLanguage: "en",
+    customerScriptMode: "english",
+    controllerEntry: entry,
+  });
+  assert(
+    /delivery_address_satisfied=true delivery_address_satisfied_by=extra delivery_missing_subfields=\[\]/.test(context),
+    `T2: context must expose delivery satisfaction by extra; got ${context}`,
   );
 }
 
@@ -267,6 +283,55 @@ function makeEntry(overrides = {}) {
     `T5: no per-side satisfied shape when nothing satisfied; got ${JSON.stringify(
       directive.forbiddenShapes,
     )}`,
+  );
+}
+
+// -----------------------------------------------------------------------
+// T6: stale LLM ask after same-turn apartment-style delivery write. Server
+// missing_fields does NOT require delivery.house_or_unit, so a reply asking
+// for delivery house/building is replaced with the real next missing step.
+// -----------------------------------------------------------------------
+{
+  const draft = {
+    ...createEmptyBookingDraft(),
+    pickupBlock: "2",
+    pickupStreet: "7",
+    pickupHouse: "19",
+    deliveryBlock: "2",
+    deliveryStreet: "9",
+    deliveryHouse: null,
+    deliveryExtra: "Apartment 11, floor 4, door 2",
+  };
+  const entry = makeEntry({ bookingDraft: draft });
+  const missing = computeOneBrainMissingFields(draft, entry);
+  assert(
+    !missing.includes("delivery.address") &&
+      !missing.includes("delivery.house_or_unit"),
+    `T6: delivery must be complete via extra; got ${JSON.stringify(missing)}`,
+  );
+  const directive = computeOneBrainNextRequiredAction({ draft, entry, missing });
+  assert(
+    directive.action === "ASK_SENDER_NAME_AND_PHONE_DECISION",
+    `T6: real next action should be sender details; got ${JSON.stringify(directive)}`,
+  );
+  const decision = runHallucinationGuard({
+    replyText:
+      "Express sedan is selected. Pickup is noted. I still need the delivery house or building number.",
+    entry,
+    missingFields: missing,
+    rejectionsThisTurn: [],
+    stageAtTurnStart: "quoted",
+    language: "en",
+    nextRequiredAction: directive.action,
+  });
+  assert(decision.blocked, `T6: stale delivery-house ask must be blocked`);
+  assert(
+    decision.claims.includes("stale_missing_field_ask"),
+    `T6: stale_missing_field_ask claim expected; got ${JSON.stringify(decision.claims)}`,
+  );
+  assert(
+    /sender/i.test(decision.replyText) && !/delivery house|delivery building/i.test(decision.replyText),
+    `T6: substitute should ask the real next step, not delivery house; got ${decision.replyText}`,
   );
 }
 

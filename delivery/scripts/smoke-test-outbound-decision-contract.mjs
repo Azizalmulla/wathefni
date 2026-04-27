@@ -12,7 +12,7 @@
 //   1. The 5-decision vocabulary (`allow`, `allow_sanitized`,
 //      `replace_authoritative`, `replace_fallback`, `block_retry`) is the
 //      complete set of top-level outcomes.
-//   2. The 14 reason codes are the complete set of reason codes exported.
+//   2. The reason codes are the complete set exported.
 //      (10 before Bug 1; + `replace_clarify_option_before_proceed` (Bug 1);
 //       + `replace_manual_confirm_address_ask` +
 //       `replace_manual_confirm_handoff` (Bug 4);
@@ -111,6 +111,44 @@ function buildCompleteEntry() {
   };
 }
 
+function buildSummarySnapshot(entry) {
+  return {
+    nextAction: { type: "show_summary", reason: "summary_ready" },
+    draft: entry.bookingDraft,
+    route: {
+      pickup: {
+        nameEn: entry.quotePickupAreaNameEn,
+        nameAr: entry.quotePickupAreaNameAr,
+      },
+      dropoff: {
+        nameEn: entry.quoteDropoffAreaNameEn,
+        nameAr: entry.quoteDropoffAreaNameAr,
+      },
+    },
+    quote: {
+      selected: {
+        deliveryType: entry.selectedDeliveryType,
+        labelEn: entry.selectedQuoteOptionLabelEn,
+        labelAr: entry.selectedQuoteOptionLabelAr,
+        price: entry.quotedPrice,
+        formattedPrice: `${Number(entry.quotedPrice).toFixed(3)} KWD`,
+      },
+      selectedService: entry.selectedDeliveryType,
+      optionCatalog: [],
+      validQuotedPrices: [entry.quotedPrice],
+    },
+  };
+}
+
+function buildPostOrderEntry() {
+  return {
+    ...buildCompleteEntry(),
+    stage: "order_submitted",
+    bookingStep: "none",
+    submittedOrderUid: "ORDER-abc-123",
+  };
+}
+
 const noopBuilders = {
   buildDeterministicSelectedQuotedOptionReply: ({ language }) =>
     language === "ar" ? "خيار موثق" : "Verified option reply",
@@ -166,10 +204,14 @@ const moduleSrc = fs.readFileSync(
       "replace_manual_confirm_handoff",
       "replace_order_placed_hallucination",
       "replace_price_mismatch",
+      "replace_stale_missing_field_ask",
+      "replace_state_write_hallucination",
+      "replace_summary_completion_checkpoint",
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
+      "replace_untracked_multi_edit_ask",
     ],
-    "Reason codes must be exactly the fixed enum (15 entries after Class-15 bypass repair)",
+    "Reason codes must be exactly the fixed enum (19 entries after multi-edit ask guard)",
   );
 }
 
@@ -278,6 +320,33 @@ const moduleSrc = fs.readFileSync(
   assert.equal(res.decision, "replace_authoritative");
   assert.equal(res.reason, "replace_transaction_artifact_missing");
   assert.ok(/https:\/\//.test(res.replyText), "canonical with URL restored");
+}
+
+// A-txartifact-post-quote: transactional artifacts are safety-critical and
+// must not be blocked by the normal post-quote canonical-overwrite gate.
+{
+  const res = decidePreStateOutbound({
+    replyText: "Do you mean Sulaibikhat, Northwest Sulaibikhat, or Sulaibikhat Cemetery?",
+    preferredLanguage: "en",
+    sessionGuard: fakeSessionGuard({ lastToolName: "create_simple_order", allValidPrices: new Set() }),
+    sessionIsRecent: true,
+    preferredCanonicalText:
+      "Your order has been created successfully.\nOrder ID: ORDER-abc-123\nPayment link: https://riders.example/pay/abc\nPrice: 1.250 KWD",
+    guardToolAgeMs: 2000,
+    canonicalOverwriteAllowed: false,
+    canonicalOverwriteSkipReason: "post_quote_stage:awaiting_confirmation",
+    extractPricesFromText: priceExtractor,
+    activeQuotedRoute: null,
+    sameRouteQuoteAction: null,
+    ...noopBuilders,
+    conversationId: "c1",
+    sessionKeyForLogs: "s1",
+    controllerStage: "awaiting_confirmation",
+  });
+  assert.equal(res.decision, "replace_authoritative");
+  assert.equal(res.reason, "replace_transaction_artifact_missing");
+  assert.match(res.replyText, /ORDER-abc-123/);
+  assert.match(res.replyText, /https:\/\/riders\.example\/pay\/abc/);
 }
 
 // A-empty-fill: empty LLM reply + recent canonical → replace_authoritative
@@ -415,6 +484,87 @@ const moduleSrc = fs.readFileSync(
   assert.equal(res.detectedShape, "clarifying_question");
 }
 
+// C-post-order-tx-canonical: once create_simple_order submitted the order,
+// stale clarifications must be replaced by the canonical transaction result.
+{
+  const entry = buildPostOrderEntry();
+  const res = decidePostStateOutbound({
+    replyText: "Which Sulaibikhat do you mean, Sulaibikhat, Northwest Sulaibikhat, or Sulaibikhat Cemetery?",
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "awaiting_confirmation",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    transactionResultRequired: true,
+    canonicalTransactionText:
+      "Your order has been created successfully.\nOrder ID: ORDER-abc-123\nPayment link: https://riders.example/pay/abc\nPrice: 1.250 KWD",
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_authoritative");
+  assert.equal(res.reason, "replace_transaction_artifact_missing");
+  assert.match(res.replyText, /ORDER-abc-123/);
+  assert.match(res.replyText, /https:\/\/riders\.example\/pay\/abc/);
+  assert.doesNotMatch(res.replyText, /Which Sulaibikhat/i);
+}
+
+// C-post-order-tx-fallback: if the same-turn order artifact is not parseable
+// yet, still block stale booking/area clarification and use a transaction-safe
+// fallback grounded in submitted-order state.
+{
+  const entry = buildPostOrderEntry();
+  const res = decidePostStateOutbound({
+    replyText: "Which Sulaibikhat do you mean, Sulaibikhat, Northwest Sulaibikhat, or Sulaibikhat Cemetery?",
+    preferredLanguage: "ar",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "awaiting_confirmation",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    transactionResultRequired: true,
+    canonicalTransactionText: "Order created successfully.",
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "replace_authoritative");
+  assert.equal(res.reason, "replace_transaction_artifact_missing");
+  assert.match(res.replyText, /تم إنشاء الطلب/);
+  assert.doesNotMatch(res.replyText, /Sulaibikhat/i);
+}
+
+// C-post-order-normal-chat: post-order chat is not globally templated; the
+// invariant only fires on the same turn that requires a transaction result.
+{
+  const entry = buildPostOrderEntry();
+  const reply = "Your order was placed earlier. Want me to track it?";
+  const res = decidePostStateOutbound({
+    replyText: reply,
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "order_submitted",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    transactionResultRequired: false,
+    canonicalTransactionText:
+      "Your order has been created successfully.\nOrder ID: ORDER-abc-123\nPayment link: https://riders.example/pay/abc\nPrice: 1.250 KWD",
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "allow");
+  assert.equal(res.replyText, reply);
+}
+
 // C-stub-log-only: stub_summary on complete draft → allow / allow (log-only)
 // This is the Step-3 relaxation — anchored here to prove Step-4 did NOT
 // accidentally re-introduce the substitute.
@@ -440,19 +590,83 @@ const moduleSrc = fs.readFileSync(
   assert.equal(res.detectedShape, "stub_summary");
 }
 
+// C-summary-checkpoint-stale-ask: when the post-state transition proves the
+// booking reached summary with no missing fields, a stale next-step ask is
+// replaced by the canonical summary instead of reaching the customer.
+{
+  const entry = buildCompleteEntry();
+  const res = decidePostStateOutbound({
+    replyText: "Delivery noted. Send me the delivery area name as well, then we can continue.",
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    bookingTruthSnapshot: buildSummarySnapshot(entry),
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "collecting_booking_details",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(
+    res.decision,
+    "replace_authoritative",
+    "C-summary-checkpoint-stale-ask: snapshot authority substitutes before checkpoint",
+  );
+  assert.equal(res.reason, "replace_directive_ask");
+  assert.equal(res.markedSummaryShown, true);
+  assert.equal(res.detectedShape, null);
+  assert.ok(/Order summary/i.test(res.replyText), "C-summary-checkpoint-stale-ask: summary rendered");
+  assert.ok(/Hawalli/i.test(res.replyText), "C-summary-checkpoint-stale-ask: pickup area included");
+  assert.ok(/Salmiya/i.test(res.replyText), "C-summary-checkpoint-stale-ask: dropoff area included");
+}
+
+// C-summary-checkpoint-valid-summary: a correct full LLM summary at the
+// checkpoint is preserved; the guard only replaces bad compact shapes.
+{
+  const entry = buildCompleteEntry();
+  const validFullSummary = [
+    "Sender: Aziz (5757)",
+    "Recipient: Ahmed (4738)",
+    "Pickup: Hawalli block 6, street 9, house 17",
+    "Delivery: Salmiya block 2, street 9, apartment 19",
+    "Service: sedan",
+    "Total: 1.250 KWD",
+    "Confirm?",
+  ].join("\n");
+  const res = decidePostStateOutbound({
+    replyText: validFullSummary,
+    preferredLanguage: "en",
+    conversationControllerEntry: entry,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "collecting_booking_details",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    conversationId: "c1",
+  });
+  assert.equal(res.decision, "allow", "C-summary-checkpoint-valid-summary: valid summary allowed");
+  assert.equal(res.reason, "allow");
+  assert.equal(res.markedSummaryShown, false);
+  assert.equal(res.replyText, validFullSummary);
+  assert.equal(res.detectedShape, "ok");
+}
+
 // ---------------------------------------------------------------------------
-// (3.5) Class-15 bypass repair (2026-04-21)
+// (3.5) Class-15 bypass observation (demoted 2026-04-25)
 //
-// Invariant under test: on a route-intent turn where no active quoted
-// route exists AND `get_price` was NOT called this turn, if the LLM
-// free-composed an area clarification the post-state decision MUST
-// substitute it with the deterministic repair reply and tag the
-// attribution as `server` via `replace_get_price_bypass`.
+// Invariant under test: Class-15 no longer authors customer-facing text.
+// Tool omission is observed and logged, but a state-shape heuristic must
+// not replace the LLM's normal wording with the old send-both-areas
+// recovery template.
 // ---------------------------------------------------------------------------
 
-// C15-trigger-en: classic forward-path bypass. LLM replies "What's the
-// delivery area?" on a `stage=idle` turn with route evidence in the
-// inbound and no tool call → substitute + attribute as server.
+// C15-trigger-en: classic forward-path bypass shape is now observe-only.
 {
   const res = decidePostStateOutbound({
     replyText: "Pickup from Salmiya. What's the delivery area?",
@@ -471,27 +685,65 @@ const moduleSrc = fs.readFileSync(
   });
   assert.equal(
     res.decision,
-    "replace_authoritative",
-    "C15-trigger-en: free-composed area ask without get_price must be substituted",
+    "allow",
+    "C15-trigger-en: Class-15 must not substitute customer text",
   );
-  assert.equal(res.reason, "replace_get_price_bypass");
-  assert.equal(res.replyAuthor, "server");
-  assert.ok(
-    /pickup area and the delivery area together/i.test(res.replyText),
-    `C15-trigger-en: repair reply should ask for both areas together, got ${JSON.stringify(res.replyText)}`,
-  );
+  assert.equal(res.reason, "allow");
+  assert.equal(res.replyAuthor, "llm");
+  assert.equal(res.replyText, "Pickup from Salmiya. What's the delivery area?");
   assert.ok(
     res.logEntries.some(
       (e) =>
         e.level === "warn" &&
         /class-15\/bypass/.test(e.message) &&
+        /observe_only/.test(e.message) &&
         /free_composed_area_clarification/.test(e.message),
     ),
     "C15-trigger-en: must emit class-15 warn log line",
   );
 }
 
-// C15-trigger-ar: Arabic variant of the same bypass.
+// C15-coverage-observe-only: single-area coverage questions intentionally
+// use check_area_coverage, not get_price. Even if the old route-evidence
+// bypass flag is true and the reply contains "pickup area", Class-15 must
+// not author customer-facing text. This locks the live Salam regression:
+// "Alrighty do u deliver to salam" should keep the grounded LLM reply.
+{
+  const reply =
+    "Yes, we do cover Salam. Send me the pickup area and I’ll quote it.";
+  const res = decidePostStateOutbound({
+    replyText: reply,
+    preferredLanguage: "en",
+    conversationControllerEntry: null,
+    missingFields: [],
+    hallucinationGuardRejections: [],
+    stageAtTurnStart: "idle",
+    hallucinationGuardEnabled: false,
+    nextRequiredAction: null,
+    controllerTransitionHint: null,
+    buildDeterministicGraceWindowReply: noopBuilders.buildDeterministicGraceWindowReply,
+    buildProviderIssueFallbackReply: noopBuilders.buildProviderIssueFallbackReply,
+    classFifteenBypass: true,
+    classFifteenCoverageInformationalOnly: true,
+    conversationId: "c-salam",
+  });
+  assert.equal(res.decision, "allow", "C15-coverage-observe-only: must not substitute");
+  assert.equal(res.reason, "allow");
+  assert.equal(res.replyAuthor, "llm");
+  assert.equal(res.replyText, reply);
+  assert.ok(
+    res.logEntries.some(
+      (e) =>
+        e.level === "info" &&
+        /class-15\/bypass/.test(e.message) &&
+        /observe_only/.test(e.message) &&
+        /coverage_informational=yes/.test(e.message),
+    ),
+    "C15-coverage-observe-only: must emit observe-only class-15 log line",
+  );
+}
+
+// C15-trigger-ar: Arabic variant is also observe-only.
 {
   const res = decidePostStateOutbound({
     replyText: "استلام من السالمية. شنو منطقة التوصيل بالضبط؟",
@@ -508,12 +760,9 @@ const moduleSrc = fs.readFileSync(
     classFifteenBypass: true,
     conversationId: "c1",
   });
-  assert.equal(res.decision, "replace_authoritative", "C15-trigger-ar: Arabic area ask substituted");
-  assert.equal(res.reason, "replace_get_price_bypass");
-  assert.ok(
-    /منطقة التوصيل/.test(res.replyText),
-    "C15-trigger-ar: repair reply must be Arabic and reference both areas",
-  );
+  assert.equal(res.decision, "allow", "C15-trigger-ar: Arabic area ask must pass through");
+  assert.equal(res.reason, "allow");
+  assert.equal(res.replyText, "استلام من السالمية. شنو منطقة التوصيل بالضبط؟");
 }
 
 // C15-bypass-off: same LLM reply, but the caller says get_price fired
@@ -568,7 +817,7 @@ const moduleSrc = fs.readFileSync(
   );
 }
 
-// C15-whichpart: "Which part of Kuwait City?" shape also caught.
+// C15-whichpart: "Which part of Kuwait City?" shape is logged only.
 {
   const res = decidePostStateOutbound({
     replyText: "Which part of Kuwait City?",
@@ -585,8 +834,9 @@ const moduleSrc = fs.readFileSync(
     classFifteenBypass: true,
     conversationId: "c1",
   });
-  assert.equal(res.decision, "replace_authoritative");
-  assert.equal(res.reason, "replace_get_price_bypass");
+  assert.equal(res.decision, "allow");
+  assert.equal(res.reason, "allow");
+  assert.equal(res.replyText, "Which part of Kuwait City?");
 }
 
 // C15-price-reply-ignored: a price-bearing reply ("1.250 KWD ...") must
@@ -673,6 +923,10 @@ assert.ok(
 assert.ok(
   /classFifteenBypass\s*,/.test(indexSrc),
   "index.ts must forward classFifteenBypass into decidePostStateOutbound",
+);
+assert.ok(
+  /classFifteenCoverageInformationalOnly\s*,/.test(indexSrc),
+  "index.ts must forward coverage informational carveout into decidePostStateOutbound",
 );
 assert.ok(
   /getPriceFiredThisTurn\s*=\s*[\s\S]*?sessionGuard\.lastToolTs\s*>=\s*turnStartMs/.test(

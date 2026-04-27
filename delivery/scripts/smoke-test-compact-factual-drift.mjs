@@ -352,12 +352,8 @@ const moduleSrc = fs.readFileSync(
   );
 }
 
-// The reason code union must be the tight fixed enum. Step 4
-// consolidation shipped 10 entries; Step 5 did not widen it. The Bug 1
-// (2026-04-20) clarify-before-proceed substitution adds one entry; the
-// Bug 4 (2026-04-20) manual-confirm substitutions add two more; Phase 2
-// directive-to-reply registry adds one more — each kept tight by
-// carrying its own reason code rather than overloading an existing one.
+// The reason code union must be the tight fixed enum. Each new guard keeps
+// its own reason code rather than overloading an existing one.
 {
   const reasonMatch = moduleSrc.match(
     /export type OutboundDecisionReason =\s*([\s\S]*?);/,
@@ -380,10 +376,14 @@ const moduleSrc = fs.readFileSync(
       "replace_manual_confirm_handoff",
       "replace_order_placed_hallucination",
       "replace_price_mismatch",
+      "replace_stale_missing_field_ask",
+      "replace_state_write_hallucination",
+      "replace_summary_completion_checkpoint",
       "replace_summary_fact_drift",
       "replace_transaction_artifact_missing",
+      "replace_untracked_multi_edit_ask",
     ],
-    "Reason codes must be exactly the fixed enum (15 entries after Class-15 replace_get_price_bypass)",
+    "Reason codes must be exactly the fixed enum (19 entries after multi-edit ask guard)",
   );
 }
 

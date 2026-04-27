@@ -29,8 +29,7 @@
  *      write sender_name via the fast-path — the LLM owns that
  *      extraction. The phone alone does not create a combined write
  *      signal on this step.
- *   4. Pure phone digits on ASK_SENDER_PHONE still write phone (the
- *      structured/low-ambiguity path we intentionally kept).
+ *   4. Pure phone digits on ASK_SENDER_PHONE must NOT write phone.
  *   5. Location pin → delivery role: `extractForNextAction` on
  *      ASK_DELIVERY_ADDRESS still applies a labeled address. The pin
  *      role assignment path lives in `applyPendingLocationRoleSelection`
@@ -42,7 +41,7 @@
  * Also pinned:
  *   • ASK_SENDER_NAME returns `none` always (no fast-path).
  *   • ASK_RECIPIENT_NAME_AND_PHONE returns `none` always.
- *   • The `use_whatsapp` keyword still resolves phone_decision.
+ *   • The `use_whatsapp` keyword is also LLM/tool-owned.
  */
 
 import assert from "node:assert/strict";
@@ -102,12 +101,8 @@ async function main() {
   // -------------------------------------------------------------------------
   // Case 3 — "Ahmed 99887766" must not pre-write Ahmed as sender_name.
   //
-  // The phone is structured, but on the combined sender step we do NOT
-  // want to partially pre-apply a phone without the LLM also having the
-  // decision + name — the apply-boundary would drop it anyway. Phase 1
-  // keeps this conservative: the sender combined fast-path stays
-  // high-confidence only on `use_whatsapp` or a pure phone-only
-  // message; a name + phone message is left entirely to the LLM.
+  // The phone is structured, but sender-vs-recipient attribution is semantic.
+  // A name + phone message is left entirely to the LLM/tool path.
   // -------------------------------------------------------------------------
   {
     const r = extractSenderNameAndDecision({ text: "Ahmed 99887766" });
@@ -119,7 +114,7 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // Case 4 — pure phone digits on ASK_SENDER_PHONE still writes phone.
+  // Case 4 — pure phone digits on ASK_SENDER_PHONE no longer write pre-LLM.
   // -------------------------------------------------------------------------
   {
     const r = extractForNextAction({
@@ -127,19 +122,20 @@ async function main() {
       action: "ASK_SENDER_PHONE",
       whatsappNumber: "96599338566",
     });
-    assert.equal(r.confidence, "high");
-    assert.equal(r.patch?.phone_decision, "different");
-    assert.equal(r.patch?.sender_phone, "99887766");
+    assert.equal(r.confidence, "none");
+    assert.equal(r.patch, null);
+    assert.ok(r.reasons.includes("llm_owned_sender_phone"));
   }
-  // `use whatsapp` on ASK_SENDER_PHONE still resolves the decision.
+  // `use whatsapp` on ASK_SENDER_PHONE is also LLM/tool-owned.
   {
     const r = extractForNextAction({
       text: "use my whatsapp",
       action: "ASK_SENDER_PHONE",
       whatsappNumber: "96599338566",
     });
-    assert.equal(r.confidence, "high");
-    assert.equal(r.patch?.phone_decision, "use_whatsapp");
+    assert.equal(r.confidence, "none");
+    assert.equal(r.patch, null);
+    assert.ok(r.reasons.includes("llm_owned_sender_phone"));
   }
 
   // -------------------------------------------------------------------------

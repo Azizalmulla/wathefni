@@ -4,19 +4,20 @@
  *
  * Context
  * -------
- * Phase 1 deleted the free-form name extractors. Phase 2 tightens the
- * remaining Phase-3 fast-path (address + phone) so it only runs when
+ * Phase 1 deleted the free-form name extractors. The identity-phone cut
+ * later removed phone writes too, leaving address as the remaining Phase-3
+ * fast-path. Phase 2 tightens that remaining fast-path so it only runs when
  * the pre-LLM turn disposition is `continue_step`. If the customer is
  * asking a question, changing route, correcting, acknowledging, or
- * cancelling, the shape-matched address/phone fields no longer write
+ * cancelling, the shape-matched address fields no longer write
  * to controller state pre-LLM.
  *
  * Rule (per user plan):
  *   "remaining fast paths only run when disposition === continue_step
  *    OR the branch is an explicit command."
  *
- * The address and phone extractors are NOT explicit commands — they
- * shape-match free-form text — so this gate fires for them. The
+ * The address extractor is NOT an explicit command — it shape-matches
+ * free-form text — so this gate fires for it. The
  * reuse-intent, pin-role, and declared-role-pin branches ARE explicit
  * command whitelists (narrow regex / keyword lists) and stay gated
  * by their own callsite whitelists; they are NOT routed through this
@@ -31,8 +32,8 @@
  *      AND the decision is flagged blocked (for log-only observability).
  *   5. Mode=off → fast-path always runs regardless of disposition
  *      (clean rollback).
- *   6. Null disposition (computation failed) → fail-open: fast-path runs.
- *   7. Phase-1 extractor contract is intact (address + phone + no-name).
+ *   6. Null disposition (computation failed) → fail-closed when enabled.
+ *   7. Identity fields are LLM-owned; address extraction remains intact.
  *   8. End-to-end simulation of the callsite behaviour under each mode.
  */
 
@@ -129,15 +130,21 @@ async function main() {
   console.log("");
 
   // -----------------------------------------------------------------------
-  // Section 6 — null disposition fails open.
+  // Section 6 — null disposition fails closed when gate is enabled.
   // -----------------------------------------------------------------------
-  console.log("Section 6: null disposition fails open");
-  for (const mode of ["on", "log", "off"]) {
-    const d = decideFastPathDispositionGate({ disposition: null, mode });
-    assert.equal(d.action, "run", `mode=${mode} + null → run (fail-open)`);
-    assert.equal(d.blocked_by_disposition, false, `mode=${mode} + null → not blocked`);
+  console.log("Section 6: null disposition fails closed when enabled");
+  {
+    const on = decideFastPathDispositionGate({ disposition: null, mode: "on" });
+    assert.equal(on.action, "skip", "mode=on + null → skip");
+    assert.equal(on.blocked_by_disposition, true, "mode=on + null → blocked");
+    const log = decideFastPathDispositionGate({ disposition: null, mode: "log" });
+    assert.equal(log.action, "run_log_only", "mode=log + null → run_log_only");
+    assert.equal(log.blocked_by_disposition, true, "mode=log + null → blocked");
+    const off = decideFastPathDispositionGate({ disposition: null, mode: "off" });
+    assert.equal(off.action, "run", "mode=off + null → run");
+    assert.equal(off.blocked_by_disposition, false, "mode=off + null → not blocked");
   }
-  console.log("  ok: null disposition never skips");
+  console.log("  ok: null disposition no longer writes state when enabled");
   console.log("");
 
   // -----------------------------------------------------------------------
@@ -150,8 +157,8 @@ async function main() {
       action: "ASK_SENDER_PHONE",
       whatsappNumber: "+96500000000",
     });
-    assert.equal(phoneOnly.confidence, "high", "ASK_SENDER_PHONE digits → high confidence");
-    assert.equal(phoneOnly.patch?.sender_phone, "99887766", "phone captured");
+    assert.equal(phoneOnly.confidence, "none", "ASK_SENDER_PHONE digits → LLM-owned");
+    assert.equal(phoneOnly.patch, null, "phone not captured pre-LLM");
 
     const labeled = extractForNextAction({
       text: "block 5 street 2 house 10",
@@ -169,11 +176,10 @@ async function main() {
       action: "ASK_SENDER_NAME_AND_PHONE_DECISION",
       whatsappNumber: "+96500000000",
     });
-    // Phase 1 contract: combined sender ask no longer writes sender_name.
     assert.equal(
-      senderCombined.patch?.sender_name ?? null,
+      senderCombined.patch,
       null,
-      "ASK_SENDER_NAME_AND_PHONE_DECISION never writes sender_name (Phase 1 regression guard)",
+      "ASK_SENDER_NAME_AND_PHONE_DECISION writes no identity fields pre-LLM",
     );
 
     // "No the avenues mall" still fails closed (Phase 1).
@@ -223,7 +229,8 @@ async function main() {
   assert.equal(legit.result.confidence, "high");
   assert.equal(legit.result.patch?.address_block, "5");
 
-  // log mode — runs AND flags blocked.
+  // log mode — runs AND flags blocked; identity phone extraction still
+  // returns none because phones are LLM/tool-owned.
   const logged = simulatedCallsite({
     text: "99887766",
     action: "ASK_SENDER_PHONE",
@@ -233,6 +240,8 @@ async function main() {
   });
   assert.equal(logged.called, true, "mode=log + answer → extractor called (observe only)");
   assert.equal(logged.gate.blocked_by_disposition, true, "mode=log + answer → flagged blocked");
+  assert.equal(logged.result.confidence, "none");
+  assert.equal(logged.result.patch, null);
 
   // off-mode rollback.
   const off = simulatedCallsite({
@@ -244,6 +253,8 @@ async function main() {
   });
   assert.equal(off.called, true, "mode=off + answer → extractor called (rollback)");
   assert.equal(off.gate.action, "run");
+  assert.equal(off.result.confidence, "none", "off-mode does not restore phone fast-path");
+  assert.equal(off.result.patch, null);
 
   // cancel and requote — both skipped under mode=on.
   const cancel = simulatedCallsite({

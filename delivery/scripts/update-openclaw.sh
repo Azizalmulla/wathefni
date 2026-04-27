@@ -206,6 +206,33 @@ NEW_VERSION=$(ssh "$VPS_HOST" 'openclaw --version 2>/dev/null' | head -1)
 echo "    New version: $NEW_VERSION"
 
 echo ""
+echo "==> Step 6b: Re-applying narration-suppression patches"
+# OpenClaw updates replace the gateway bundle files in dist/, which wipes
+# the three narration-suppression monkey-patches (handleMessageEnd,
+# onPartialReply, fallbackAnswerText). Without this step, internal
+# framework narration (e.g. "Now uploading CV to Drive") can leak to
+# WhatsApp customers on the very next turn after an update. The patch
+# script is idempotent — running it on an already-patched bundle is a
+# no-op. Source-of-truth lives in repo-root `scripts/patch-openclaw.py`;
+# we scp it to /tmp on the VPS (not under $PROJECT_ROOT) so step 10's
+# project-tree content manifest keeps clean — the patch only mutates
+# files inside the npm module tree, which is outside the verified set.
+REPO_ROOT="${PROJECT_DIR:h}"
+LOCAL_PATCH_SCRIPT="$REPO_ROOT/scripts/patch-openclaw.py"
+if [[ ! -f "$LOCAL_PATCH_SCRIPT" ]]; then
+  echo "Missing narration-suppression patch script at $LOCAL_PATCH_SCRIPT" >&2
+  print_rollback_instructions
+  exit 1
+fi
+REMOTE_PATCH_SCRIPT="/tmp/patch-openclaw-$BACKUP_TAG.py"
+scp "$LOCAL_PATCH_SCRIPT" "$VPS_HOST:$REMOTE_PATCH_SCRIPT"
+if ! ssh "$VPS_HOST" "python3 $REMOTE_PATCH_SCRIPT && rm -f $REMOTE_PATCH_SCRIPT"; then
+  echo "patch-openclaw.py failed; gateway bundle may still carry framework narration." >&2
+  print_rollback_instructions
+  exit 1
+fi
+
+echo ""
 echo "==> Step 7: Running OpenClaw doctor"
 if ! ssh "$VPS_HOST" "OPENCLAW_PROFILE=$PROFILE_NAME openclaw doctor"; then
   echo "openclaw doctor failed." >&2

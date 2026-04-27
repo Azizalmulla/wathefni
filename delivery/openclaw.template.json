@@ -13,12 +13,21 @@
         "apiKey": "${OPENAI_API_KEY}",
         "models": [
           {
+            "id": "gpt-5.4",
+            "name": "GPT-5.4",
+            "api": "openai-responses",
+            "reasoning": true,
+            "input": ["image", "text"],
+            "contextWindow": 400000,
+            "maxTokens": 16384
+          },
+          {
             "id": "gpt-5.4-mini",
             "name": "GPT-5.4 mini",
             "api": "openai-responses",
             "reasoning": true,
             "input": ["image", "text"],
-            "contextWindow": 128000,
+            "contextWindow": 400000,
             "maxTokens": 16384
           }
         ]
@@ -28,9 +37,18 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "openai/gpt-5.4-mini"
+        "primary": "openai/gpt-5.4"
       },
       "models": {
+        "openai/gpt-5.4": {
+          "params": {
+            "transport": "auto",
+            "openaiWsWarmup": true,
+            "responsesServerCompaction": true,
+            "reasoning": { "effort": "medium" },
+            "text": { "verbosity": "low" }
+          }
+        },
         "openai/gpt-5.4-mini": {
           "params": {
             "transport": "auto",
@@ -44,7 +62,41 @@
       "workspace": "/opt/riders-delivery/workspaces/riders",
       "bootstrapMaxChars": 50000,
       "bootstrapTotalMaxChars": 180000,
-      "compaction": { "mode": "safeguard" },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 290000,
+        "maxHistoryShare": 0.5,
+        "recentTurnsPreserve": 5,
+        "identifierPolicy": "strict",
+        "postCompactionSections": [
+          "Session Start",
+          "Runtime Contract",
+          "Execution Contract",
+          "Default Follow-Through",
+          "Stateful Short-Followup Interpretation",
+          "Done Criteria",
+          "Messaging Rules",
+          "Hard Separation"
+        ],
+        "customInstructions": "This is a Riders delivery conversation. The server injects structured facts (booking_draft, active_quoted_route, missing_fields, stage, quoted_price, pending_shared_location) into the system context on every turn. Do NOT re-preserve those values in your summary — they are already carried forward structurally, and duplicating them in prose just burns tokens. Instead, preserve with high fidelity what is NOT in structured state: open questions the customer asked that have not yet been answered; pending clarifications still awaiting customer input (pickup-vs-delivery role of a shared location pin, area disambiguation, option-class ambiguity); the customer's last explicit intent (booking, pricing, tracking, complaint, cancel, handoff) and any stated constraints (timing, special instructions, recipient unavailable, etc.); any correction the customer made that a later turn depends on. You may compress or omit: repeated acknowledgements, greetings, pleasantries; already-answered informational questions (coverage, hours, FAQ); intermediate tool call echoes whose results are already committed to state; verbatim option lists and prices (those live in active_quoted_route). Do NOT invent values — if something was never captured, leave it absent.",
+        "memoryFlush": {
+          "enabled": true,
+          "softThresholdTokens": 10000,
+          "forceFlushTranscriptBytes": "2mb"
+        }
+      },
+      "memorySearch": {
+        "provider": "openai",
+        "model": "text-embedding-3-small",
+        "query": {
+          "hybrid": {
+            "enabled": true,
+            "vectorWeight": 0.7,
+            "textWeight": 0.3,
+            "candidateMultiplier": 4
+          }
+        }
+      },
       "maxConcurrent": 4,
       "subagents": { "maxConcurrent": 8 },
       "thinkingDefault": "medium"
@@ -53,7 +105,7 @@
       {
         "id": "riders",
         "workspace": "/opt/riders-delivery/workspaces/riders",
-        "model": { "primary": "openai/gpt-5.4-mini" },
+        "model": { "primary": "openai/gpt-5.4" },
         "tools": { "deny": ["message"] },
         "thinkingDefault": "medium"
       },
@@ -77,7 +129,7 @@
   "messages": {
     "responsePrefix": "",
     "ackReactionScope": "group-mentions",
-    "inbound": { "debounceMs": 5000 }
+    "inbound": { "debounceMs": 1000 }
   },
   "commands": {
     "native": "auto",
@@ -186,6 +238,7 @@
     }
   },
   "env": {
+    "RIDERS_SINGLE_LIFECYCLE_ENGINE": "1",
     "RIDERS_TRACKING_PROVIDER": "fleetrunnr",
     "FLEETRUNNR_API_BASE_URL": "https://api.fleetrunnr.net/rest/v1",
     "FLEETRUNNR_BEARER_TOKEN": "${FLEETRUNNR_BEARER_TOKEN}"

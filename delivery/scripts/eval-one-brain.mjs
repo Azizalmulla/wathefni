@@ -1078,19 +1078,19 @@ async function main() {
     assertEqual("fast.five_numbers.no_confidence", r.confidence, "none");
   }
 
-  // Phone: pure 11-digit Kuwait number.
+  // Phone identity is LLM/tool-owned. The pre-LLM fast-path must never assign
+  // sender vs recipient from digits, even when the digits are structured.
   {
     const r = extractSenderPhone({ text: "96594728472", whatsappNumber: null });
-    assertEqual("fast.phone.pure11.conf", r.confidence, "high");
-    assertEqual("fast.phone.pure11.value", r.patch.sender_phone, "96594728472");
-    assertEqual("fast.phone.pure11.decision", r.patch.phone_decision, "different");
+    assertEqual("fast.phone.pure11.conf", r.confidence, "none");
+    assertEqual("fast.phone.pure11.patch", r.patch, null);
   }
 
   // Phone: formatted "+965 9472 8472".
   {
     const r = extractSenderPhone({ text: "+965 9472 8472", whatsappNumber: null });
-    assertEqual("fast.phone.formatted.conf", r.confidence, "high");
-    assertEqual("fast.phone.formatted.value", r.patch.sender_phone, "96594728472");
+    assertEqual("fast.phone.formatted.conf", r.confidence, "none");
+    assertEqual("fast.phone.formatted.patch", r.patch, null);
   }
 
   // Phone: "use my whatsapp" shortcut.
@@ -1099,8 +1099,8 @@ async function main() {
       text: "use my whatsapp",
       whatsappNumber: "96599338566",
     });
-    assertEqual("fast.phone.whatsapp_en.conf", r.confidence, "high");
-    assertEqual("fast.phone.whatsapp_en.decision", r.patch.phone_decision, "use_whatsapp");
+    assertEqual("fast.phone.whatsapp_en.conf", r.confidence, "none");
+    assertEqual("fast.phone.whatsapp_en.patch", r.patch, null);
   }
 
   // Phone: Arabic "نفس رقم الواتس".
@@ -1109,15 +1109,15 @@ async function main() {
       text: "نفس رقم الواتس",
       whatsappNumber: "96599338566",
     });
-    assertEqual("fast.phone.whatsapp_ar.conf", r.confidence, "high");
-    assertEqual("fast.phone.whatsapp_ar.decision", r.patch.phone_decision, "use_whatsapp");
+    assertEqual("fast.phone.whatsapp_ar.conf", r.confidence, "none");
+    assertEqual("fast.phone.whatsapp_ar.patch", r.patch, null);
   }
 
   // Phone: bare-digits-with-label "phone: 9472 8472".
   {
     const r = extractSenderPhone({ text: "phone: 9472 8472", whatsappNumber: null });
-    assertEqual("fast.phone.label_prefix.conf", r.confidence, "high");
-    assertEqual("fast.phone.label_prefix.value", r.patch.sender_phone, "94728472");
+    assertEqual("fast.phone.label_prefix.conf", r.confidence, "none");
+    assertEqual("fast.phone.label_prefix.patch", r.patch, null);
   }
 
   // Phone: free-form chatter rejected.
@@ -1184,50 +1184,34 @@ async function main() {
 
   // --- Phase-3b: Sender combined extractor ----------------------------------
   //
-  // Phase 1 authority cut (2026-04-24): the NAME branch is removed.
-  // The combined extractor now returns phone/decision only, never
-  // `sender_name`. All cases below that used to assert a parsed name
-  // now assert (a) no sender_name in the patch, and (b) the remaining
-  // structured signal (phone_decision / sender_phone) where it applies.
-  // Cases that used to bail (empty / bareword / embedded-digits / two
-  // phones / different-without-phone) still bail — their reasons just
-  // no longer include "name_residual".
+  // Identity authority cut (2026-04-26): the combined sender extractor is a
+  // shim returning `none`. Sender name, phone, and WhatsApp decisions are all
+  // proposed by the LLM/tool path and validated by the apply boundary.
 
-  // "Aziz Almulla, use my whatsapp" → use_whatsapp decision, no name.
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Almulla, use my whatsapp" });
-    assertEqual("fast.sender.name_plus_whatsapp.conf", r.confidence, "high");
-    assertEqual("fast.sender.name_plus_whatsapp.no_name", r.patch.sender_name, undefined);
-    assertEqual("fast.sender.name_plus_whatsapp.decision", r.patch.phone_decision, "use_whatsapp");
-    assertEqual("fast.sender.name_plus_whatsapp.no_phone", r.patch.sender_phone, undefined);
+    assertEqual("fast.sender.name_plus_whatsapp.conf", r.confidence, "none");
+    assertEqual("fast.sender.name_plus_whatsapp.patch", r.patch, null);
   }
 
-  // "use whatsapp, Aziz Almulla" → same as above — decision only.
   {
     const r = extractSenderNameAndDecision({ text: "use whatsapp, Aziz Almulla" });
-    assertEqual("fast.sender.marker_first.conf", r.confidence, "high");
-    assertEqual("fast.sender.marker_first.no_name", r.patch.sender_name, undefined);
-    assertEqual("fast.sender.marker_first.decision", r.patch.phone_decision, "use_whatsapp");
+    assertEqual("fast.sender.marker_first.conf", r.confidence, "none");
+    assertEqual("fast.sender.marker_first.patch", r.patch, null);
   }
 
-  // "Aziz Almulla different number 9472 8472" → different + phone, no name.
   {
     const r = extractSenderNameAndDecision({
       text: "Aziz Almulla different number 9472 8472",
     });
-    assertEqual("fast.sender.name_plus_different.conf", r.confidence, "high");
-    assertEqual("fast.sender.name_plus_different.no_name", r.patch.sender_name, undefined);
-    assertEqual("fast.sender.name_plus_different.decision", r.patch.phone_decision, "different");
-    assertEqual("fast.sender.name_plus_different.phone", r.patch.sender_phone, "94728472");
+    assertEqual("fast.sender.name_plus_different.conf", r.confidence, "none");
+    assertEqual("fast.sender.name_plus_different.patch", r.patch, null);
   }
 
-  // "Aziz Almulla 94728472" → bare phone → different + phone, no name.
   {
     const r = extractSenderNameAndDecision({ text: "Aziz Almulla 94728472" });
-    assertEqual("fast.sender.name_plus_bare_phone.conf", r.confidence, "high");
-    assertEqual("fast.sender.name_plus_bare_phone.no_name", r.patch.sender_name, undefined);
-    assertEqual("fast.sender.name_plus_bare_phone.decision", r.patch.phone_decision, "different");
-    assertEqual("fast.sender.name_plus_bare_phone.phone", r.patch.sender_phone, "94728472");
+    assertEqual("fast.sender.name_plus_bare_phone.conf", r.confidence, "none");
+    assertEqual("fast.sender.name_plus_bare_phone.patch", r.patch, null);
   }
 
   // "Aziz Almulla" alone → LLM-owned, no patch.
@@ -1237,20 +1221,17 @@ async function main() {
     assertEqual("fast.sender.name_only.patch", r.patch, null);
   }
 
-  // "use my whatsapp" → decision only (unchanged).
   {
     const r = extractSenderNameAndDecision({ text: "use my whatsapp" });
-    assertEqual("fast.sender.whatsapp_only.conf", r.confidence, "high");
-    assertEqual("fast.sender.whatsapp_only.decision", r.patch.phone_decision, "use_whatsapp");
-    assertEqual("fast.sender.whatsapp_only.no_name", r.patch.sender_name, undefined);
+    assertEqual("fast.sender.whatsapp_only.conf", r.confidence, "none");
+    assertEqual("fast.sender.whatsapp_only.patch", r.patch, null);
   }
 
   // Arabic "نفس رقم الواتس" + Arabic name → decision only, no Arabic name write.
   {
     const r = extractSenderNameAndDecision({ text: "عبدالعزيز الملا، نفس رقم الواتس" });
-    assertEqual("fast.sender.arabic_whatsapp.conf", r.confidence, "high");
-    assertEqual("fast.sender.arabic_whatsapp.decision", r.patch.phone_decision, "use_whatsapp");
-    assertEqual("fast.sender.arabic_whatsapp.no_name", r.patch.sender_name, undefined);
+    assertEqual("fast.sender.arabic_whatsapp.conf", r.confidence, "none");
+    assertEqual("fast.sender.arabic_whatsapp.patch", r.patch, null);
   }
 
   // "different number" without a phone → bail (unchanged).
@@ -1289,16 +1270,14 @@ async function main() {
     assertEqual("fast.sender.name_with_digits.none", r.confidence, "none");
   }
 
-  // Phase 1 regression pins — the exact shapes from the live bugs:
+  // Identity regression pins — the exact shapes from the live bugs:
   //   • "No the avenues mall" (conv 20125 on 2026-04-24 12:48) must
   //     NEVER write sender_name through the fast-path again.
   //   • "Messilah" (same conversation family) must not be written
   //     either — coverage claims belong to `check_area_coverage`,
   //     not the name slot.
   //   • "Ahmed 99887766" is a structured "name + phone" shape the
-  //     LLM must author; the fast-path sees a phone but refuses to
-  //     pre-write it because this is the sender combined step (and
-  //     on that step the LLM needs both the name AND the decision).
+  //     LLM must author end-to-end.
   for (const text of [
     "No the avenues mall",
     "Messilah",
@@ -1306,19 +1285,19 @@ async function main() {
     "Aziz Al Mulla",
   ]) {
     const r = extractSenderNameAndDecision({ text });
-    assertEqual(`fast.sender.phase1.${JSON.stringify(text)}.no_name`, r.patch?.sender_name ?? undefined, undefined);
+    assertEqual(`fast.sender.identity.${JSON.stringify(text)}.conf`, r.confidence, "none");
+    assertEqual(`fast.sender.identity.${JSON.stringify(text)}.patch`, r.patch, null);
   }
 
-  // Dispatch integration: name+decision input yields decision only.
+  // Dispatch integration: name+decision input is fully LLM-owned.
   {
     const r = extractForNextAction({
       text: "Aziz Almulla, use my whatsapp",
       action: "ASK_SENDER_NAME_AND_PHONE_DECISION",
       whatsappNumber: "96599338566",
     });
-    assertEqual("fast.dispatch.sender_combined.conf", r.confidence, "high");
-    assertEqual("fast.dispatch.sender_combined.no_name", r.patch.sender_name, undefined);
-    assertEqual("fast.dispatch.sender_combined.decision", r.patch.phone_decision, "use_whatsapp");
+    assertEqual("fast.dispatch.sender_combined.conf", r.confidence, "none");
+    assertEqual("fast.dispatch.sender_combined.patch", r.patch, null);
   }
 
   // Dispatch integration: ASK_SENDER_NAME (name-only ask) is fully

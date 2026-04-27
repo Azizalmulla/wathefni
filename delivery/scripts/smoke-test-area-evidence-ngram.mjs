@@ -43,6 +43,9 @@ async function main() {
   const salmiya = idFor("Salmiya");
   const hawalli = idFor("Hawalli");
   const jahra = idFor("Jahra");
+  const sulaibikhat = idFor("Sulaibikhat");
+  const zahra = idFor("Zahra");
+  const salam = idFor("Salam");
 
   const run = (label, text, expected) => {
     const got = collectAreaEvidenceFromText(text, data);
@@ -79,6 +82,21 @@ async function main() {
     "Arabic prefix (abi ahjiz)",
     "أبي أحجز من السالمية إلى حولي",
     [salmiya, hawalli],
+  );
+  run(
+    "Arabic route with لي and Arabic comma",
+    "ابي دليفري من الصليبيخات لي الزهراء، اكسبرس سيدان",
+    [sulaibikhat, zahra],
+  );
+  run(
+    "Arabic route with الى variant",
+    "من الزهراء الى السلام",
+    [zahra, salam],
+  );
+  run(
+    "Arabic route with لل attached destination",
+    "الزهراء للسلام",
+    [zahra, salam],
   );
   run(
     "Arabizi + English mix",

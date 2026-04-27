@@ -225,11 +225,11 @@ DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_CALLSITE_MARKER='DEPLOY_CANARY_TUR
 #
 # Phase 1 deleted all free-form name fast-path branches entirely
 # (they wrote pre-LLM `sender_name` on any letters+spaces string).
-# Phase 2 keeps the remaining address + phone extractors but gates
-# them on the pre-LLM disposition so they only apply when the
-# customer is actually continuing the form. Explicit-command
-# whitelists (pin-role, declared-role pin, reuse-intent) are
-# untouched because they were never shape-matching free text.
+# Phase 2 gated the remaining fast paths on pre-LLM disposition. The later
+# identity cut removed phone writes too; address is now the only slot-writing
+# extractor in this module. Explicit-command whitelists (pin-role,
+# declared-role pin, reuse-intent) are untouched because they were never
+# shape-matching free text.
 #
 # Env flag `RIDERS_FAST_PATH_DISPOSITION_GATE` controls behaviour:
 # default (unset) == "on" (enforce), "log" == observe only, "off"
@@ -686,7 +686,7 @@ echo "==> Fixing ownership on delivery project files..."
 ssh "$VPS_HOST" "chown -R root:root /opt/riders-delivery"
 
 echo "==> Updating live delivery env vars..."
-ssh "$VPS_HOST" "VPS_ENV_PATH='$VPS_ENV_PATH' RIDERS_PRICING_SOURCE_MODE='${RIDERS_PRICING_SOURCE_MODE:-published_preferred}' RIDERS_PRICING_PUBLISHED_PATH='$VPS_PRICING_PUBLISHED_PATH' RIDERS_PRICING_RESOLVER_OVERLAY_PATH='$VPS_PRICING_RESOLVER_OVERLAY_PATH' RIDERS_PRICING_SHEET_ID='${RIDERS_PRICING_SHEET_ID:-}' RIDERS_PRICING_SHEET_NAME='${RIDERS_PRICING_SHEET_NAME:-}' RIDERS_PRICING_SHEET_HEADER_ROW='${RIDERS_PRICING_SHEET_HEADER_ROW:-}' RIDERS_PRICING_ADMIN_ALLOWLIST='${RIDERS_PRICING_ADMIN_ALLOWLIST}' RIDERS_BEHAVIOR_ADMIN_ALLOWLIST='${RIDERS_BEHAVIOR_ADMIN_ALLOWLIST}' AI_OCTOPUS_ADMIN_ALLOWLIST='${AI_OCTOPUS_ADMIN_ALLOWLIST:-}' RIDERS_TRACKING_PROVIDER='${RIDERS_TRACKING_PROVIDER:-}' FLEETRUNNR_API_BASE_URL='${FLEETRUNNR_API_BASE_URL:-}' FLEETRUNNR_BEARER_TOKEN='${FLEETRUNNR_BEARER_TOKEN:-}' RIDERS_GRID_API_BASE_URL='${RIDERS_GRID_API_BASE_URL:-}' RIDERS_GRID_API_KEY='${RIDERS_GRID_API_KEY:-}' VOYAGE_API_KEY='${VOYAGE_API_KEY:-}' python3 - <<'PY'
+ssh "$VPS_HOST" "VPS_ENV_PATH='$VPS_ENV_PATH' RIDERS_PRICING_SOURCE_MODE='${RIDERS_PRICING_SOURCE_MODE:-published_preferred}' RIDERS_PRICING_PUBLISHED_PATH='$VPS_PRICING_PUBLISHED_PATH' RIDERS_PRICING_RESOLVER_OVERLAY_PATH='$VPS_PRICING_RESOLVER_OVERLAY_PATH' RIDERS_PRICING_SHEET_ID='${RIDERS_PRICING_SHEET_ID:-}' RIDERS_PRICING_SHEET_NAME='${RIDERS_PRICING_SHEET_NAME:-}' RIDERS_PRICING_SHEET_HEADER_ROW='${RIDERS_PRICING_SHEET_HEADER_ROW:-}' RIDERS_PRICING_ADMIN_ALLOWLIST='${RIDERS_PRICING_ADMIN_ALLOWLIST}' RIDERS_BEHAVIOR_ADMIN_ALLOWLIST='${RIDERS_BEHAVIOR_ADMIN_ALLOWLIST}' AI_OCTOPUS_ADMIN_ALLOWLIST='${AI_OCTOPUS_ADMIN_ALLOWLIST:-}' RIDERS_TRACKING_PROVIDER='${RIDERS_TRACKING_PROVIDER:-}' FLEETRUNNR_API_BASE_URL='${FLEETRUNNR_API_BASE_URL:-}' FLEETRUNNR_BEARER_TOKEN='${FLEETRUNNR_BEARER_TOKEN:-}' RIDERS_GRID_API_BASE_URL='${RIDERS_GRID_API_BASE_URL:-}' RIDERS_GRID_API_KEY='${RIDERS_GRID_API_KEY:-}' VOYAGE_API_KEY='${VOYAGE_API_KEY:-}' RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY='${RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY:-}' RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY='${RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY:-}' RIDERS_SINGLE_LIFECYCLE_ENGINE='${RIDERS_SINGLE_LIFECYCLE_ENGINE:-1}' python3 - <<'PY'
 import os
 from pathlib import Path
 
@@ -720,7 +720,17 @@ for key in ['RIDERS_TRACKING_PROVIDER', 'FLEETRUNNR_API_BASE_URL', 'FLEETRUNNR_B
     if val:
         current[key] = val
 
+for key in ['RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY', 'RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY']:
+    val = os.environ.get(key, '').strip()
+    if val in {'0', '1'}:
+        current[key] = val
+
+single_lifecycle = os.environ.get('RIDERS_SINGLE_LIFECYCLE_ENGINE', '').strip() or '1'
+if single_lifecycle in {'0', '1'}:
+    current['RIDERS_SINGLE_LIFECYCLE_ENGINE'] = single_lifecycle
+
 ordered_keys = [
+    'RIDERS_SINGLE_LIFECYCLE_ENGINE',
     'RIDERS_PRICING_SOURCE_MODE',
     'RIDERS_PRICING_PUBLISHED_PATH',
     'RIDERS_PRICING_RESOLVER_OVERLAY_PATH',
@@ -736,6 +746,8 @@ ordered_keys = [
     'RIDERS_GRID_API_BASE_URL',
     'RIDERS_GRID_API_KEY',
     'VOYAGE_API_KEY',
+    'RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY',
+    'RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY',
 ]
 existing_keys = [key for key in current.keys() if key not in ordered_keys]
 lines = [f'{key}={current[key]}' for key in existing_keys]
@@ -758,11 +770,19 @@ config = json.loads(config_path.read_text())
 agents_section = config.setdefault('agents', {})
 agents = agents_section.setdefault('list', [])
 defaults = agents_section.setdefault('defaults', {})
-default_model = ((defaults.get('model') or {}).get('primary')) or 'openai/gpt-5.4-mini'
+default_model = 'openai/gpt-5.4'
+defaults['model'] = {'primary': default_model}
 defaults['bootstrapMaxChars'] = int(defaults.get('bootstrapMaxChars') or 50000)
 defaults['bootstrapTotalMaxChars'] = int(defaults.get('bootstrapTotalMaxChars') or 180000)
 defaults['thinkingDefault'] = str(defaults.get('thinkingDefault') or 'medium')
 defaults_models = defaults.setdefault('models', {})
+full_model_entry = defaults_models.setdefault('openai/gpt-5.4', {})
+full_params = full_model_entry.setdefault('params', {})
+full_params['reasoning'] = {'effort': 'medium'}
+full_params['text'] = {'verbosity': 'low'}
+full_params['transport'] = 'auto'
+full_params['openaiWsWarmup'] = True
+full_params['responsesServerCompaction'] = True
 mini_model_entry = defaults_models.setdefault('openai/gpt-5.4-mini', {})
 mini_params = mini_model_entry.setdefault('params', {})
 mini_params['reasoning'] = {'effort': 'medium'}
@@ -770,7 +790,34 @@ mini_params['text'] = {'verbosity': 'low'}
 mini_params['transport'] = 'auto'
 mini_params['openaiWsWarmup'] = True
 mini_params['responsesServerCompaction'] = True
-defaults_models.pop('openai/gpt-5.4', None)
+
+models = config.setdefault('models', {})
+providers = models.setdefault('providers', {})
+openai_provider = providers.setdefault('openai', {})
+openai_provider.setdefault('baseUrl', 'https://api.openai.com/v1')
+openai_provider.setdefault('apiKey', '${OPENAI_API_KEY}')
+provider_models = openai_provider.setdefault('models', [])
+def ensure_provider_model(model_id, name):
+    for model in provider_models:
+        if model.get('id') == model_id:
+            model['name'] = name
+            model['api'] = 'openai-responses'
+            model['reasoning'] = True
+            model['input'] = ['image', 'text']
+            model['contextWindow'] = 400000
+            model['maxTokens'] = 16384
+            return
+    provider_models.append({
+        'id': model_id,
+        'name': name,
+        'api': 'openai-responses',
+        'reasoning': True,
+        'input': ['image', 'text'],
+        'contextWindow': 400000,
+        'maxTokens': 16384,
+    })
+ensure_provider_model('gpt-5.4', 'GPT-5.4')
+ensure_provider_model('gpt-5.4-mini', 'GPT-5.4 mini')
 
 def ensure_agent(agent_id, workspace, primary_model):
     for agent in agents:
@@ -802,7 +849,7 @@ riders = ensure_agent('riders', '$VPS_RIDERS_WORKSPACE_DIR', default_model)
 ensure_denied_tools(riders, 'message')
 configure_agent_runtime(riders, 'medium')
 
-riders_admin = ensure_agent('riders-admin', '$VPS_RIDERS_ADMIN_WORKSPACE_DIR', default_model)
+riders_admin = ensure_agent('riders-admin', '$VPS_RIDERS_ADMIN_WORKSPACE_DIR', 'openai/gpt-5.4-mini')
 ensure_denied_tools(riders_admin, 'exec')
 configure_agent_runtime(riders_admin, 'medium')
 
@@ -882,6 +929,7 @@ audio_tools['models'] = [
 ]
 
 env_section = config.setdefault('env', {})
+env_section['RIDERS_SINGLE_LIFECYCLE_ENGINE'] = '1'
 tracking_provider = os.environ.get('RIDERS_TRACKING_PROVIDER', '')
 fleetrunnr_base = os.environ.get('FLEETRUNNR_API_BASE_URL', '')
 fleetrunnr_token = os.environ.get('FLEETRUNNR_BEARER_TOKEN', '')

@@ -277,8 +277,8 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
 }
 
 // ---------------------------------------------------------------------------
-// V2: verifyAndRepairOutbound substitutes the zero-distance reply
-// with the recovery ask, sets `replaced=true`, and shape survives.
+// V2: zero-distance detection is now observe-only. The old recovery
+// substitute was demoted so this path cannot author customer-facing text.
 // ---------------------------------------------------------------------------
 {
   const entry = makeEntry({
@@ -293,17 +293,18 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
     missingFields: ["sender.name", "sender.phone"],
     language: "en",
   });
-  assert.equal(result.replaced, true, "V2: must replace zero-distance reply");
+  assert.equal(result.replaced, false, "V2: zero-distance must be log-only");
   assert.equal(result.shape, "route_zero_distance");
-  assert.equal(result.reason, "substituted_zero_distance_route_recovery");
-  assert.ok(
-    /pickup and delivery areas got mixed up/i.test(result.replyText),
-    `V2: substitute must be recovery ask, got ${JSON.stringify(result.replyText)}`,
+  assert.equal(result.reason, "detected_route_zero_distance_log_only");
+  assert.equal(
+    result.replyText,
+    "Delivery from Mirqab to Mirqab. Price: 1.250 KWD (standard sedan)",
+    `V2: observe-only path must preserve the LLM reply, got ${JSON.stringify(result.replyText)}`,
   );
 }
 
 // ---------------------------------------------------------------------------
-// V3: Arabic zero-distance recovery.
+// V3: Arabic zero-distance detection is also observe-only.
 // ---------------------------------------------------------------------------
 {
   const entry = makeEntry({
@@ -318,10 +319,11 @@ function makeDialogStateWithRequestedSlot(slotName, options) {
     missingFields: [],
     language: "ar",
   });
-  assert.equal(result.replaced, true);
-  assert.ok(
-    /التباس في المناطق/.test(result.replyText),
-    `V3: Arabic recovery text expected, got ${JSON.stringify(result.replyText)}`,
+  assert.equal(result.replaced, false);
+  assert.equal(
+    result.reason,
+    "detected_route_zero_distance_log_only",
+    `V3: Arabic zero-distance should log only, got ${JSON.stringify(result)}`,
   );
 }
 

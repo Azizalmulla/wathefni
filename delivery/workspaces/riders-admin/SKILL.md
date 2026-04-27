@@ -80,6 +80,29 @@ Authorized admin senders can access the capability areas below, subject to the t
 - Use `pay_order` for payment-link continuation when needed.
 - Use `assign_agent` for escalation.
 
+### Order & Conversation Queries
+
+- Use `admin_list_recent_orders` for questions like "how many orders today?", "what did we deliver this week?", or "show me the latest orders". Accepts `since_days` and `limit`.
+- Use `admin_get_customer_history` when the admin names a specific phone number. Returns that customer's most recent saved order (pickup/delivery areas, names, phones, addresses, order UID, saved timestamp). The system stores only ONE successful order per customer today; do not claim a full history exists.
+- Use `admin_order_stats` for aggregates: totals, breakdown by pickup area, delivery area, or delivery type. Accepts `since_days` and `top_n`.
+- Use `admin_list_stuck_conversations` to find customers who dropped mid-booking (quoted without confirming, missing fields, pending pin role). Returns phone tails, stage, booking step, minutes idle, what the draft is missing. Default window: idle >=10 minutes, age <=24h.
+- These tools redact phone numbers to the last 4 digits (`***1234`). Do NOT try to reconstruct the full phone from redacted output. If the admin needs to contact the customer, they already have the full number from the WhatsApp conversation thread.
+- All four tools are read-only.
+
+### Complaint Queries
+
+- Use `admin_list_complaints` for structured complaint lookups by category, date window, or customer. Typical questions: "how many pricing complaints this week?", "show me all late-delivery complaints from the last 30 days", "has this customer complained before?". Accepts `category` (one of: late_delivery, wrong_item, pricing, rude_driver, coverage, service_quality, damaged_item, order_not_received, other), `since_days` (default 30, cap 365), `phone` (full or trailing digits), `limit` (default 50, cap 500).
+- Use `admin_search_complaints` for free-text lookups over complaint bodies ("complaints mentioning Salmiya", "search for driver name X", "complaints about cash on delivery"). Substring match, case-insensitive, works for Arabic and English. Accepts `query` (required), optional `category`, `since_days` (default 90, cap 365), `limit`.
+- Prefer `admin_list_complaints` when the question maps to a category/date/customer filter; reach for `admin_search_complaints` only for keywords or phrases the category enum does not cover.
+- Both tools return complaint text verbatim and the phone is redacted to the last 4 digits (`***1234`). Complaint records are written to disk every time the customer bot calls the `complains` tool; newly ingested complaints are queryable immediately.
+- These tools are read-only. To act on a complaint (refund, follow up, internal escalation) use the normal behavior-policy or workspace tools — complaint queries do not change customer-facing state.
+
+### Memory Search & Recall
+
+- Use `memory_search` to look up past notes, decisions, or ops events by meaning. The query is semantic: "when did we last change Salwa pricing?", "did we have a coverage complaint recently?", "notes on the peak-time debounce tuning". Returns ranked snippets from `MEMORY.md` and daily `memory/YYYY-MM-DD.md` files.
+- Use `memory_get` to read a specific memory file by path when you already know which day or section to look at (e.g. after `memory_search` returned a hit).
+- When the admin asks the bot to remember something durable ("remember we're switching the live number next week", "note that Khiran is now covered"), write it to `memory/YYYY-MM-DD.md` using `admin_write_workspace_file` — mental notes do not survive session restarts. `MEMORY.md` is for distilled, long-term ops knowledge; daily files are the raw log.
+
 ## Hard Boundaries
 
 - You do NOT have shell/exec access. Do not attempt to run shell commands.
