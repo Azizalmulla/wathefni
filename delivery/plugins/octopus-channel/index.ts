@@ -35,6 +35,7 @@ import {
   CustomerScriptMode,
   normalizeIntentText,
   PersistedConversationControllerEntry,
+  type PendingOrderEditField,
   resolveCustomerReplyLanguage,
   resolveCustomerScriptMode,
   resolveSessionIdentityKey,
@@ -66,10 +67,8 @@ import {
   type SlotName,
   type DialogState,
 } from "../shared/dialog-state";
-import { isHallucinationGuardEnabled } from "../shared/reply-hallucination-guard";
 import {
   applyProposals,
-  fastPathProposal,
   llmProposal,
   type Proposal,
 } from "../shared/apply-boundary";
@@ -82,11 +81,9 @@ import {
   type OutboundDecisionReason,
 } from "./lib/outbound-decision";
 import {
-  extractForNextAction,
-  type FastPathAction,
-  resolveFastPathDispositionGateMode,
-  decideFastPathDispositionGate,
-} from "../shared/fast-path-extractor";
+  resolveAdaptiveInboundDebounce,
+  type InboundDebounceDecision,
+} from "./lib/inbound-debounce";
 import { classifyReuseIntent } from "../shared/reuse-intent";
 import type {
   ChannelPlugin,
@@ -205,6 +202,7 @@ import {
   hasStructuredBookingLocation,
   hasCompleteTextAddress,
   hasSatisfiedBookingAddress,
+  bindNativeLocationToAddressStep,
   resolveNextBookingStepFromDraft,
   getLocationRoleSelection,
   formatPersistedBookingLocationLabel,
@@ -243,8 +241,6 @@ import {
   matchQuotedOptionDiscriminated,
   matchLlmOptionInterpretation,
   resolveOptionFromProposals,
-  selectGuardQuotedRoute,
-  collectActiveQuotedPrices,
 } from "./lib/quoted-options";
 import {
   shouldIncludeQuotedRouteContext,
@@ -285,6 +281,21 @@ import type {
 // DEPLOY_CANARY_TURN_DISPOSITION_AUTHORING_GATE_IMPORT_MARKER.
 import { decideTurnDisposition } from "../shared/turn-disposition";
 import type { TurnDispositionDecision } from "../shared/turn-disposition";
+import {
+  canAdvanceBookingFlow,
+  bookingLifecycleDecisionSummary,
+  buildBookingLifecycleLogPayload,
+  buildBookingLifecycleRouteAudit,
+  shouldPreserveDraftOnQuotePromotion,
+  type BookingLifecycleTargetStage,
+  type BookingLifecycleDecision,
+  type CanAdvanceBookingFlowInput,
+} from "../shared/booking-lifecycle-gate";
+import {
+  buildBookingTruthSnapshot,
+  type BookingTruthCurrentTurnDisposition,
+  type BookingTruthSnapshot,
+} from "../shared/booking-truth-snapshot";
 // Pre-LLM prompt-shaping disposition heuristic (Cut #6). The prompt
 // formatter no longer consumes this value — the state-machine authoring
 // imperatives were removed unconditionally in the authority cutover —
@@ -312,6 +323,14 @@ import {
 } from "../shared/outbound-provenance";
 import { formatLiveChannelContext } from "./lib/live-channel-context";
 import {
+  reauthorPostDrainReply,
+  type PostDrainReauthorMessages,
+} from "./lib/post-drain-reply-reauthor";
+import {
+  generateFinalSnapshotReply,
+  type FinalSnapshotReplyMessages,
+} from "./lib/final-snapshot-reply";
+import {
   formatCustomerProfileContext,
   formatBehaviorPolicyContext,
 } from "./lib/context-blocks";
@@ -322,6 +341,112 @@ const env = nodeProcess?.env ?? {};
 const nodeBuffer = (globalThis as { Buffer?: any }).Buffer;
 const webFormData = (globalThis as { FormData?: any }).FormData;
 const webBlob = (globalThis as { Blob?: any }).Blob;
+const BOOKING_LIFECYCLE_GATE_ENABLED =
+  String(env.RIDERS_BOOKING_LIFECYCLE_GATE_ENABLED || "1").trim() !== "0";
+const RIDERS_SNAPSHOT_CONTEXT_ONLY =
+  String(env.RIDERS_SNAPSHOT_CONTEXT_ONLY || "0").trim() === "1";
+const RIDERS_LIFECYCLE_SNAPSHOT_ONLY =
+  String(env.RIDERS_LIFECYCLE_SNAPSHOT_ONLY || "0").trim() === "1";
+const RIDERS_POST_DRAIN_REAUTHOR =
+  String(env.RIDERS_POST_DRAIN_REAUTHOR || "0").trim() === "1";
+const RIDERS_SNAPSHOT_GUARDS_ONLY =
+  String(env.RIDERS_SNAPSHOT_GUARDS_ONLY || "0").trim() === "1";
+const RIDERS_POST_DRAIN_REAUTHOR_MODEL = String(
+  env.RIDERS_POST_DRAIN_REAUTHOR_MODEL || "gpt-5.4",
+).trim();
+const RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS = readPositiveIntEnv(
+  "RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS",
+  4500,
+);
+const RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY =
+  String(env.RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY || "0").trim() === "1";
+const RIDERS_SINGLE_LIFECYCLE_ENGINE = true;
+const RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY =
+  String(env.RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY || "0").trim() === "1";
+const RIDERS_PLAN_B_FINAL_REPLY_MODEL = String(
+  env.RIDERS_PLAN_B_FINAL_REPLY_MODEL || "gpt-5.4",
+).trim();
+const RIDERS_PLAN_B_FINAL_REPLY_TIMEOUT_MS = readPositiveIntEnv(
+  "RIDERS_PLAN_B_FINAL_REPLY_TIMEOUT_MS",
+  8000,
+);
+
+function decideBookingLifecycleAdvance(
+  targetStage: BookingLifecycleTargetStage,
+  input: CanAdvanceBookingFlowInput,
+) {
+  const bookingTruthSnapshot =
+    input.bookingTruthSnapshot ??
+    (input.controllerState
+      ? buildBookingTruthSnapshot({
+          timing: "post_drain",
+          controllerState: input.controllerState,
+          sessionGuard: input.sessionGuard,
+          dialogState: input.dialogState ?? input.controllerState.dialogState ?? null,
+          missingFields:
+            input.currentTurnToolResults?.missingFields ??
+            computeOneBrainMissingFields(
+              input.controllerState.bookingDraft,
+              input.controllerState,
+            ),
+          orderCreatedUid: input.currentTurnToolResults?.orderCreatedUid ?? null,
+          confirmationExplicit:
+            input.currentTurnToolResults?.confirmationExplicit ?? null,
+          requireRenderedSummaryHash: RIDERS_SINGLE_LIFECYCLE_ENGINE,
+          now: input.now ?? Date.now(),
+        })
+      : null);
+  const enrichedInput =
+    RIDERS_SINGLE_LIFECYCLE_ENGINE || input.routeAudit || !input.controllerState
+      ? { ...input, bookingTruthSnapshot, routeAudit: input.routeAudit ?? null }
+      : {
+          ...input,
+          bookingTruthSnapshot,
+          routeAudit: buildBookingLifecycleRouteAudit({
+            controllerState: input.controllerState,
+            sessionGuard: input.sessionGuard,
+            bookingTruthSnapshot,
+          }),
+        };
+  const decision = RIDERS_SINGLE_LIFECYCLE_ENGINE
+    ? targetStage === "order_submitted" &&
+      !input.currentTurnToolResults?.orderCreatedUid
+      ? {
+          decision: "block" as const,
+          targetStage,
+          blockingReason: "transaction_artifact_missing" as const,
+          requiredNextAction: {
+            type: "prepare_transaction_artifact" as const,
+          },
+          preserveDraft: true as const,
+        }
+      : {
+          decision: "allow" as const,
+          targetStage,
+          preserveDraft: true as const,
+        }
+    : BOOKING_LIFECYCLE_GATE_ENABLED
+      ? canAdvanceBookingFlow(targetStage, enrichedInput)
+      : {
+          decision: "allow" as const,
+          targetStage,
+          preserveDraft: true as const,
+        };
+  try {
+    console.log(
+      `[booking-lifecycle-gate] ${JSON.stringify(
+        buildBookingLifecycleLogPayload({
+          decision,
+          gateInput: enrichedInput,
+          enabled: BOOKING_LIFECYCLE_GATE_ENABLED,
+        }),
+      )}`,
+    );
+  } catch {
+    // Observability only. Lifecycle decisions must never fail a turn because logging failed.
+  }
+  return decision;
+}
 
 // =========================================================================
 // Riders geo area auto-resolution (Haversine nearest-area lookup)
@@ -376,40 +501,59 @@ const ADMIN_ALLOWLIST = Array.from(
   ),
 );
 
-// Debounce window waits for possible follow-up messages before processing a
-// turn. 3s is the sweet spot: long enough to coalesce a burst of short
-// messages ("hi", "I need a driver", "from Salmiya"), short enough that
-// single-message turns don't feel sluggish. Override via
-// RIDERS_INBOUND_DEBOUNCE_MS (text) / RIDERS_INBOUND_MEDIA_DEBOUNCE_MS (media).
+// Adaptive inbound debounce waits only for likely human typing fragments,
+// while letting deterministic actions ("confirm", "delivery", buttons-as-text)
+// proceed almost immediately. This keeps WhatsApp batching without making every
+// single customer turn pay the old fixed 3-5s delay.
 function readPositiveIntEnv(name: string, fallback: number): number {
   const raw = process.env[name];
   if (!raw) return fallback;
   const n = Number.parseInt(String(raw).trim(), 10);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
-const INBOUND_DEBOUNCE_MS = readPositiveIntEnv("RIDERS_INBOUND_DEBOUNCE_MS", 3000);
+const INBOUND_DEBOUNCE_MS = readPositiveIntEnv("RIDERS_INBOUND_DEBOUNCE_MS", 1000);
 const INBOUND_MEDIA_DEBOUNCE_MS = readPositiveIntEnv(
   "RIDERS_INBOUND_MEDIA_DEBOUNCE_MS",
-  INBOUND_DEBOUNCE_MS,
+  2500,
+);
+const INBOUND_EXPLICIT_ACTION_DEBOUNCE_MS = readPositiveIntEnv(
+  "RIDERS_INBOUND_EXPLICIT_ACTION_DEBOUNCE_MS",
+  0,
+);
+const INBOUND_CLEAR_ROUTE_DEBOUNCE_MS = readPositiveIntEnv(
+  "RIDERS_INBOUND_CLEAR_ROUTE_DEBOUNCE_MS",
+  500,
+);
+const INBOUND_SHORT_FRAGMENT_DEBOUNCE_MS = readPositiveIntEnv(
+  "RIDERS_INBOUND_SHORT_FRAGMENT_DEBOUNCE_MS",
+  1500,
+);
+const INBOUND_MAX_TEXT_DEBOUNCE_MS = readPositiveIntEnv(
+  "RIDERS_INBOUND_MAX_TEXT_DEBOUNCE_MS",
+  2000,
 );
 
 // DebouncedMessage + DebounceBucket types moved to ./lib/types.ts (wave 2a).
 
 const inboundDebounceMap = new Map<string, DebounceBucket>();
 
-function hasInboundMedia(msg: Pick<DebouncedMessage, "audioMessage" | "imageMessage" | "locationMessage">): boolean {
-  return Boolean(msg.audioMessage || msg.imageMessage || msg.locationMessage);
-}
-
-function resolveInboundDebounceMs(messages: DebouncedMessage[]): number {
-  return messages.some((msg) => hasInboundMedia(msg))
-    ? INBOUND_MEDIA_DEBOUNCE_MS
-    : INBOUND_DEBOUNCE_MS;
+function resolveInboundDebounceDecision(
+  messages: DebouncedMessage[],
+  elapsedMs: number,
+): InboundDebounceDecision {
+  return resolveAdaptiveInboundDebounce(messages, {
+    defaultTextMs: INBOUND_DEBOUNCE_MS,
+    mediaMs: INBOUND_MEDIA_DEBOUNCE_MS,
+    explicitActionMs: INBOUND_EXPLICIT_ACTION_DEBOUNCE_MS,
+    clearRouteMs: INBOUND_CLEAR_ROUTE_DEBOUNCE_MS,
+    shortFragmentMs: INBOUND_SHORT_FRAGMENT_DEBOUNCE_MS,
+    maxTextMs: INBOUND_MAX_TEXT_DEBOUNCE_MS,
+  }, elapsedMs);
 }
 
 // ---------------------------------------------------------------------------
 // Inactivity timeout — restart-resilient, language-aware
-// Two-step: nudge after 10 min, close after 25 min
+// Two-step: nudge after 10 min, close 25 min after that successful nudge.
 // State is persisted to disk so timers survive service restarts.
 // A periodic sweep (every 30 s) checks timestamps and sends messages.
 // ---------------------------------------------------------------------------
@@ -418,7 +562,7 @@ const INACTIVITY_NUDGE_MS = Math.max(
   60_000,
   Number(env.INACTIVITY_NUDGE_MINUTES || "10") * 60_000,
 );
-const INACTIVITY_CLOSE_MS = Math.max(
+const INACTIVITY_CLOSE_AFTER_NUDGE_MS = Math.max(
   60_000,
   Number(env.INACTIVITY_CLOSE_MINUTES || "25") * 60_000,
 );
@@ -596,23 +740,23 @@ async function sweepInactivity(): Promise<void> {
         continue;
       }
 
-      const pastClose = elapsed >= INACTIVITY_CLOSE_MS;
       const pastNudge = elapsed >= INACTIVITY_NUDGE_MS;
-      const nudgeAlreadySent = entry.nudgeSentTs !== null;
+      const nudgeAlreadySent = typeof entry.nudgeSentTs === "number";
+      const closeElapsed = nudgeAlreadySent ? now - entry.nudgeSentTs : 0;
+      const closeElapsedMin = Math.round(closeElapsed / 60_000);
+      const pastClose = nudgeAlreadySent && closeElapsed >= INACTIVITY_CLOSE_AFTER_NUDGE_MS;
 
-      // Close threshold — fires if (a) nudge already succeeded, or (b) we're
-      // past the close threshold with no nudge ever sent (covers the case
-      // where a prior nudge attempt silently never recorded). In both cases
-      // we try to close so entries don't get stranded until gc.
-      if (pastClose && (nudgeAlreadySent || pastNudge)) {
+      // Close threshold is measured from the successful first nudge, not from
+      // last customer activity. Default timing is 10 min to nudge + 25 min to close.
+      if (pastClose) {
         const closeLang = entry.language;
         const closeConvId = entry.conversationId;
         const closeReplyTarget = entry.replyTarget;
         const closeAccountId = entry.accountId;
-        const closeReason = nudgeAlreadySent ? "after_nudge" : "nudge_missed";
+        const closeReason = "after_nudge";
         inactivityInFlight.add(key);
         api.logger.info(
-          `[octopus] inactivity sweep action=close conversation=${closeConvId} elapsedMin=${elapsedMin} reason=${closeReason}`,
+          `[octopus] inactivity sweep action=close conversation=${closeConvId} elapsedMin=${elapsedMin} closeElapsedMin=${closeElapsedMin} reason=${closeReason}`,
         );
         try {
           const text =
@@ -714,14 +858,13 @@ async function sweepInactivity(): Promise<void> {
             );
           }
           // For any other error: leave nudgeSentTs === null so the next
-          // sweep retries. The close fallback (above) also covers the case
-          // where retries keep failing past CLOSE_MS.
+          // sweep retries. Close only happens after a successful first nudge.
         } finally {
           inactivityInFlight.delete(key);
         }
       } else {
         api.logger.debug?.(
-          `[octopus] inactivity sweep skip conversation=${entry.conversationId} elapsedMin=${elapsedMin} nudgeSent=${nudgeAlreadySent} pastNudge=${pastNudge} pastClose=${pastClose}`,
+          `[octopus] inactivity sweep skip conversation=${entry.conversationId} elapsedMin=${elapsedMin} closeElapsedMin=${closeElapsedMin} nudgeSent=${nudgeAlreadySent} pastNudge=${pastNudge} pastClose=${pastClose}`,
         );
       }
     }
@@ -744,7 +887,7 @@ function startInactivitySweep(api: OpenClawPluginApi): void {
   }, INACTIVITY_SWEEP_MS);
   void sweepInactivity();
   api.logger.info(
-    `[octopus] inactivity sweep started interval=${INACTIVITY_SWEEP_MS}ms nudge=${INACTIVITY_NUDGE_MS}ms close=${INACTIVITY_CLOSE_MS}ms`,
+    `[octopus] inactivity sweep started interval=${INACTIVITY_SWEEP_MS}ms nudge=${INACTIVITY_NUDGE_MS}ms closeAfterNudge=${INACTIVITY_CLOSE_AFTER_NUDGE_MS}ms`,
   );
 }
 
@@ -844,17 +987,24 @@ function enqueueInboundMessage(msg: DebouncedMessage) {
   if (existing) {
     clearTimeout(existing.timer);
     existing.messages.push(msg);
-    const debounceMs = resolveInboundDebounceMs(existing.messages);
-    existing.timer = setTimeout(() => flushDebounceBucket(key), debounceMs);
+    const elapsedMs = Date.now() - existing.firstEnqueuedAtMs;
+    const decision = resolveInboundDebounceDecision(existing.messages, elapsedMs);
+    existing.timer = setTimeout(() => flushDebounceBucket(key), decision.delayMs);
     msg.api.logger.info(
-      `[octopus] debounce buffered key=${key} depth=${existing.messages.length} windowMs=${debounceMs}`,
+      `[octopus] debounce buffered key=${key} depth=${existing.messages.length} windowMs=${decision.delayMs} reason=${decision.reason} uncappedMs=${decision.uncappedDelayMs} elapsedMs=${Math.max(0, Math.floor(elapsedMs))}`,
     );
   } else {
-    const debounceMs = resolveInboundDebounceMs([msg]);
-    const timer = setTimeout(() => flushDebounceBucket(key), debounceMs);
-    inboundDebounceMap.set(key, { timer, messages: [msg] });
+    const firstEnqueuedAtMs = Date.now();
+    const decision = resolveInboundDebounceDecision([msg], 0);
+    const timer = setTimeout(() => flushDebounceBucket(key), decision.delayMs);
+    inboundDebounceMap.set(key, {
+      timer,
+      messages: [msg],
+      firstEnqueuedAtMs,
+      typingLoop: null,
+    });
     msg.api.logger.info(
-      `[octopus] debounce started key=${key} windowMs=${debounceMs}`,
+      `[octopus] debounce started key=${key} windowMs=${decision.delayMs} reason=${decision.reason} uncappedMs=${decision.uncappedDelayMs}`,
     );
   }
   const enqueuedAt = new Date().toISOString();
@@ -1830,6 +1980,7 @@ async function findSessionGuardEntryWithPersistence(
 // hasStructuredBookingLocation, hasCompleteTextAddress, hasSatisfiedBookingAddress
 // moved to ./lib/booking-flow.ts (wave 4).
 
+// DEPLOY_CANARY_CUT_A_PIN_CONTINUITY_MARKER
 // getStandaloneLocationAutoAssignmentRole and its call site were deleted in
 // authority-cutover Cut A (2026-04-23). The helper silently auto-assigned
 // an incoming pin to the opposite side (if pickup was filled, it filled
@@ -1914,10 +2065,14 @@ function clearQuotedRouteContext(
     quotePickupAreaNameAr: null,
     quoteDropoffAreaNameEn: null,
     quoteDropoffAreaNameAr: null,
+    quotePickupAreaResolution: null,
+    quoteDropoffAreaResolution: null,
     pendingPickupAreaNameEn: null,
     pendingPickupAreaNameAr: null,
     pendingDropoffAreaNameEn: null,
     pendingDropoffAreaNameAr: null,
+    pendingPickupAreaResolution: null,
+    pendingDropoffAreaResolution: null,
     selectedQuoteOptionType: null,
     selectedQuoteOptionLabelAr: null,
     selectedQuoteOptionLabelEn: null,
@@ -1926,6 +2081,9 @@ function clearQuotedRouteContext(
     selectedDeliveryType: null,
     quotedPrice: null,
     quotePresentedToCustomer: false,
+    lastRenderedSummaryHash: null,
+    lastRenderedSummaryAt: null,
+    pendingOrderEdits: null,
   };
 }
 
@@ -1939,7 +2097,89 @@ function clearAutomatedConversationContext(
     bookingDraft: createEmptyBookingDraft(),
     pendingReplyText: null,
     submittedOrderUid: null,
+    lastRenderedSummaryHash: null,
+    lastRenderedSummaryAt: null,
+    pendingOrderEdits: null,
   };
+}
+
+const PENDING_ORDER_EDIT_TTL_MS = 15 * 60 * 1000;
+
+function getActivePendingOrderEdits(
+  entry: PersistedConversationControllerEntry | null | undefined,
+) {
+  const pending = entry?.pendingOrderEdits ?? null;
+  if (!pending || !Array.isArray(pending.fields) || pending.fields.length === 0) {
+    return null;
+  }
+  if (Date.now() - Number(pending.askedTs || 0) > PENDING_ORDER_EDIT_TTL_MS) {
+    return null;
+  }
+  return pending;
+}
+
+function pendingOrderEditSlots(
+  entry: PersistedConversationControllerEntry | null | undefined,
+): SlotName[] {
+  const pending = getActivePendingOrderEdits(entry);
+  if (!pending) return [];
+  return pending.fields.filter((field): field is SlotName => field !== "service");
+}
+
+function hasPendingOrderEditField(
+  entry: PersistedConversationControllerEntry | null | undefined,
+  field: PendingOrderEditField,
+): boolean {
+  return Boolean(getActivePendingOrderEdits(entry)?.fields.includes(field));
+}
+
+function clearSatisfiedPendingOrderEdits(
+  entry: PersistedConversationControllerEntry,
+  satisfied: Set<PendingOrderEditField>,
+): PersistedConversationControllerEntry {
+  const pending = getActivePendingOrderEdits(entry);
+  if (!pending || satisfied.size === 0) return entry;
+  const fields = pending.fields.filter((field) => !satisfied.has(field));
+  return {
+    ...entry,
+    pendingOrderEdits:
+      fields.length > 0
+        ? { ...pending, fields }
+        : null,
+  };
+}
+
+function clearExpiredPendingOrderEdits(
+  entry: PersistedConversationControllerEntry,
+): PersistedConversationControllerEntry {
+  if (!entry.pendingOrderEdits) return entry;
+  return getActivePendingOrderEdits(entry) ? entry : { ...entry, pendingOrderEdits: null };
+}
+
+function satisfiedPendingFieldsFromApply(
+  op: ResponderBookingFieldOp,
+  applied: Array<keyof BookingFieldPatch>,
+): PendingOrderEditField[] {
+  const out: PendingOrderEditField[] = [];
+  const has = (field: keyof BookingFieldPatch) => applied.includes(field);
+  if (has("sender_name")) out.push("sender_name");
+  if (has("sender_phone") || has("phone_decision")) out.push("sender_phone");
+  if (has("recipient_name")) out.push("recipient_name");
+  if (has("recipient_phone")) out.push("recipient_phone");
+  if (op.address_role === "pickup") {
+    if (has("address_block")) out.push("pickup_block");
+    if (has("address_street")) out.push("pickup_street");
+    if (has("address_house")) out.push("pickup_house");
+    if (has("address_avenue")) out.push("pickup_avenue");
+    if (has("address_extra")) out.push("pickup_extra");
+  } else if (op.address_role === "delivery") {
+    if (has("address_block")) out.push("delivery_block");
+    if (has("address_street")) out.push("delivery_street");
+    if (has("address_house")) out.push("delivery_house");
+    if (has("address_avenue")) out.push("delivery_avenue");
+    if (has("address_extra")) out.push("delivery_extra");
+  }
+  return out;
 }
 
 function resolveAddressCorrectionRole(params: {
@@ -1978,12 +2218,256 @@ function resolveAddressCorrectionRole(params: {
 // suite exercise for carry-over behavior.
 // resolveNextBookingStepFromDraft moved to ./lib/booking-flow.ts (wave 4).
 
-function applyBookingDraftProgress(entry: PersistedConversationControllerEntry): PersistedConversationControllerEntry {
+function applyBookingDraftProgress(
+  entry: PersistedConversationControllerEntry,
+  params: {
+    lifecycle?: Omit<CanAdvanceBookingFlowInput, "controllerState" | "dialogState"> & {
+      dialogState?: DialogState | null;
+    };
+    onBlocked?: (decision: BookingLifecycleDecision) => void;
+    deferSummaryPromotion?: boolean;
+  } = {},
+): PersistedConversationControllerEntry {
   const nextStep = resolveNextBookingStepFromDraft(entry.bookingDraft);
+  const targetStage: BookingLifecycleTargetStage =
+    nextStep === "summary_pending" && !params.deferSummaryPromotion
+      ? "summary_shown"
+      : "collecting_booking_details";
+  if (!params.lifecycle) {
+    return {
+      ...entry,
+      stage: targetStage,
+      bookingStep: nextStep,
+    };
+  }
+  const lifecycleDecision = decideBookingLifecycleAdvance(targetStage, {
+    ...(params.lifecycle ?? {}),
+    controllerState: entry,
+    dialogState: params.lifecycle?.dialogState ?? entry.dialogState ?? null,
+    currentTurnToolResults: {
+      ...(params.lifecycle?.currentTurnToolResults ?? {}),
+      missingFields:
+        params.lifecycle?.currentTurnToolResults?.missingFields ??
+        computeOneBrainMissingFields(entry.bookingDraft, entry),
+    },
+    now: params.lifecycle?.now ?? Date.now(),
+  });
+  if (lifecycleDecision.decision === "block") {
+    params.onBlocked?.(lifecycleDecision);
+    return {
+      ...entry,
+      stage:
+        entry.stage === "idle"
+          ? "collecting_booking_details"
+          : entry.stage,
+      bookingStep:
+        targetStage === "summary_shown" ? entry.bookingStep : nextStep,
+    };
+  }
   return {
     ...entry,
-    stage: nextStep === "summary_pending" ? "summary_shown" : "collecting_booking_details",
+    stage: targetStage,
     bookingStep: nextStep,
+  };
+}
+
+type SameTurnOptionInterpretation = {
+  class: "sedan" | "van" | "cooled_van" | "helper" | null;
+  tier: "normal" | "fast" | null;
+  source_quote: string;
+  confidence: "high" | "low";
+  turn_id?: string | null;
+};
+
+function optionInterpretationDeliveryType(
+  interpretation: SameTurnOptionInterpretation | null | undefined,
+): string | null {
+  if (!interpretation || interpretation.confidence !== "high") {
+    return null;
+  }
+  if (interpretation.class === "helper") {
+    return "helper_standard";
+  }
+  if (!interpretation.class || !interpretation.tier) {
+    return null;
+  }
+  return `${interpretation.class}_${interpretation.tier}`;
+}
+
+function isOptionInterpretationGroundedInText(
+  interpretation: SameTurnOptionInterpretation | null | undefined,
+  visibleText: string | null | undefined,
+): boolean {
+  const quote = String(interpretation?.source_quote || "").trim();
+  const visible = String(visibleText || "").trim();
+  return Boolean(quote && visible && visible.toLowerCase().includes(quote.toLowerCase()));
+}
+
+function resolveSameTurnOptionForPromotedQuote(params: {
+  route: StoredQuotedRoute | null | undefined;
+  visibleText: string;
+  interpretation: SameTurnOptionInterpretation | null | undefined;
+}): { option: RouteQuoteOption; source: string } | null {
+  const route = params.route;
+  const interpretation = params.interpretation;
+  if (!route || !interpretation) {
+    return null;
+  }
+  const visible = String(params.visibleText || "").trim();
+  const quote = String(interpretation.source_quote || "").trim();
+  if (!visible || !quote || !visible.toLowerCase().includes(quote.toLowerCase())) {
+    return null;
+  }
+  const pricedOptions = route.optionCatalog.filter((option) => option.quoted_price != null);
+  const rawTextOutcome = matchQuotedOptionDiscriminated({
+    normalizedText: normalizeIntentText(visible),
+    options: pricedOptions,
+  });
+  const llmOutcome = matchLlmOptionInterpretation({
+    interpretation: {
+      class: interpretation.class,
+      tier: interpretation.tier,
+      source_quote: interpretation.source_quote,
+      confidence: interpretation.confidence,
+    },
+    options: pricedOptions,
+  });
+  const reconciled = resolveOptionFromProposals({
+    rawTextOutcome,
+    llmOutcome,
+  });
+  return reconciled.kind === "commit"
+    ? { option: reconciled.option, source: reconciled.source }
+    : null;
+}
+
+function promoteQuotedRouteState(params: {
+  controllerEntry: PersistedConversationControllerEntry;
+  route: StoredQuotedRoute;
+  quoteTs: number;
+  language: "ar" | "en";
+  quotePresentedToCustomer: boolean;
+  preserveBookingDraft: boolean;
+  visibleText: string;
+  sameTurnOptionInterpretation?: SameTurnOptionInterpretation | null;
+  sessionGuard?: CanAdvanceBookingFlowInput["sessionGuard"];
+  onBlocked?: (decision: BookingLifecycleDecision) => void;
+}): {
+  entry: PersistedConversationControllerEntry;
+  selectedOption: RouteQuoteOption | null;
+  selectedOptionSource: "same_turn_option_intent" | "pending_service_intent" | "default";
+  promoted: boolean;
+} {
+  const selectedFromSameTurn = resolveSameTurnOptionForPromotedQuote({
+    route: params.route,
+    visibleText: params.visibleText,
+    interpretation: params.sameTurnOptionInterpretation,
+  });
+  const pendingSelectedType =
+    params.controllerEntry.selectedQuoteOptionType ||
+    params.controllerEntry.selectedDeliveryType ||
+    null;
+  const selectedFromPendingIntent =
+    !selectedFromSameTurn && pendingSelectedType
+      ? getQuotedRouteOption(params.route, pendingSelectedType)
+      : null;
+  const selectedOption =
+    selectedFromSameTurn?.option ||
+    selectedFromPendingIntent ||
+    (pendingSelectedType ? null : getQuotedRouteDefaultOption(params.route));
+  const selectedOptionSource = selectedFromSameTurn
+    ? "same_turn_option_intent"
+    : selectedFromPendingIntent
+      ? "pending_service_intent"
+      : pendingSelectedType
+        ? "pending_service_intent"
+        : "default";
+  const quotedProposalBase: PersistedConversationControllerEntry = {
+    ...params.controllerEntry,
+    stage: "quoted",
+    bookingStep: "none",
+    language: params.language,
+    quoteTs: params.quoteTs,
+    quoteRouteKey: params.route.routeKey,
+    quotePickupAreaNameEn: params.route.pickupAreaNameEn,
+    quotePickupAreaNameAr: params.route.pickupAreaNameAr,
+    quoteDropoffAreaNameEn: params.route.dropoffAreaNameEn,
+    quoteDropoffAreaNameAr: params.route.dropoffAreaNameAr,
+    quotePickupAreaResolution: params.route.pickupAreaResolution ?? null,
+    quoteDropoffAreaResolution: params.route.dropoffAreaResolution ?? null,
+    quotePresentedToCustomer: params.quotePresentedToCustomer,
+    submittedOrderUid: null,
+  };
+  const proposedEntry = selectedOption
+    ? applySelectedQuotedOptionToController(quotedProposalBase, selectedOption)
+    : quotedProposalBase;
+  const lifecycleDecision = decideBookingLifecycleAdvance("quoted", {
+    controllerState: proposedEntry,
+    sessionGuard: params.sessionGuard,
+    dialogState: params.controllerEntry.dialogState ?? null,
+    currentCustomerText: params.visibleText,
+  });
+  if (lifecycleDecision.decision === "block") {
+    params.onBlocked?.(lifecycleDecision);
+    return {
+      entry: params.controllerEntry,
+      selectedOption,
+      selectedOptionSource,
+      promoted: false,
+    };
+  }
+  const quotedStateEntry: PersistedConversationControllerEntry = {
+    ...params.controllerEntry,
+    stage: "quoted",
+    bookingStep: "none",
+    language: params.language,
+    quoteTs: params.quoteTs,
+    quoteRouteKey: params.route.routeKey,
+    quotePickupAreaNameEn: params.route.pickupAreaNameEn,
+    quotePickupAreaNameAr: params.route.pickupAreaNameAr,
+    quoteDropoffAreaNameEn: params.route.dropoffAreaNameEn,
+    quoteDropoffAreaNameAr: params.route.dropoffAreaNameAr,
+    quotePickupAreaResolution: params.route.pickupAreaResolution ?? null,
+    quoteDropoffAreaResolution: params.route.dropoffAreaResolution ?? null,
+    // Pending areas were just promoted to quote* — clear them so a later turn
+    // does not carry forward a stale resolution.
+    pendingPickupAreaNameEn: null,
+    pendingPickupAreaNameAr: null,
+    pendingDropoffAreaNameEn: null,
+    pendingDropoffAreaNameAr: null,
+    pendingPickupAreaResolution: null,
+    pendingDropoffAreaResolution: null,
+    dialogState: params.controllerEntry.dialogState
+      ? {
+          ...params.controllerEntry.dialogState,
+          requestedSlot: null,
+        }
+      : params.controllerEntry.dialogState,
+    bookingDraft: params.preserveBookingDraft
+      ? params.controllerEntry.bookingDraft
+      : createEmptyBookingDraft(),
+    quotePresentedToCustomer: params.quotePresentedToCustomer,
+    submittedOrderUid: null,
+    pendingOrderEdits: null,
+  };
+  let entry = selectedOption
+    ? applySelectedQuotedOptionToController(quotedStateEntry, selectedOption)
+    : quotedStateEntry;
+  if (params.preserveBookingDraft) {
+    entry = applyBookingDraftProgress(entry, {
+      lifecycle: {
+        sessionGuard: params.sessionGuard,
+        currentCustomerText: params.visibleText,
+      },
+      onBlocked: params.onBlocked,
+      deferSummaryPromotion: RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+    });
+  }
+  return {
+    entry,
+    selectedOption,
+    selectedOptionSource,
+    promoted: true,
   };
 }
 
@@ -2119,6 +2603,61 @@ function slotWasCarriedOver(
 
 function carryOverMarker(language: "ar" | "en"): string {
   return language === "ar" ? " (من طلبك السابق)" : " (from your last order)";
+}
+
+function detectFreshAllInOneRebindTurn(params: {
+  text: string;
+  drained: ResponderStateOp[];
+  entry: PersistedConversationControllerEntry | null;
+}): boolean {
+  if (!hasRouteEvidence(params.text)) return false;
+  if (params.entry?.stage === "order_submitted") return false;
+  const applyOps = params.drained.filter(
+    (op): op is ResponderBookingFieldOp => op.op === "apply_booking_field",
+  );
+  if (applyOps.length === 0) return false;
+
+  let senderName = false;
+  let senderPhone = false;
+  let recipientName = false;
+  let recipientPhone = false;
+  const pickup = { block: false, street: false, houseOrExtra: false };
+  const delivery = { block: false, street: false, houseOrExtra: false };
+
+  for (const op of applyOps) {
+    senderName ||= Boolean(String(op.sender_name || "").trim());
+    senderPhone ||=
+      Boolean(String(op.sender_phone || "").trim()) ||
+      op.phone_decision === "use_whatsapp";
+    recipientName ||= Boolean(String(op.recipient_name || "").trim());
+    recipientPhone ||= Boolean(String(op.recipient_phone || "").trim());
+    const target =
+      op.address_role === "pickup"
+        ? pickup
+        : op.address_role === "delivery"
+          ? delivery
+          : null;
+    if (target) {
+      target.block ||= Boolean(String(op.address_block || "").trim());
+      target.street ||= Boolean(String(op.address_street || "").trim());
+      target.houseOrExtra ||=
+        Boolean(String(op.address_house || "").trim()) ||
+        Boolean(String(op.address_extra || "").trim());
+    }
+  }
+
+  return (
+    senderName &&
+    senderPhone &&
+    recipientName &&
+    recipientPhone &&
+    pickup.block &&
+    pickup.street &&
+    pickup.houseOrExtra &&
+    delivery.block &&
+    delivery.street &&
+    delivery.houseOrExtra
+  );
 }
 
 function buildDeterministicOrderSummaryReply(
@@ -2344,10 +2883,6 @@ function shouldReissueBookingDetailsForLanguageSwitch(params: {
     "summary_shown",
     "awaiting_confirmation",
   ].includes(String(params.controllerEntry?.stage || ""));
-}
-
-function isStoredQuotedRouteFresh(route: ({ quotedAt: number } & StoredQuotedRoute) | null | undefined): boolean {
-  return !!route?.quotedAt && (Date.now() - route.quotedAt) <= CONVERSATION_CONTROLLER_QUOTE_WINDOW_MS;
 }
 
 function isActiveBookingControllerFlow(entry: PersistedConversationControllerEntry | null): boolean {
@@ -2580,6 +3115,138 @@ function emitOutboundDecisionLogs(
       api.logger.info(entry.message);
     }
   }
+}
+
+function parseToolTextPayload(result: any): Record<string, any> | null {
+  const text = Array.isArray(result?.content)
+    ? result.content
+        .map((item: any) => (item?.type === "text" ? String(item.text || "") : ""))
+        .join("\n")
+        .trim()
+    : "";
+  if (!text) return null;
+  try {
+    const parsed = JSON.parse(text);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+const BOOKING_TRUTH_AC_KINDS = new Set([
+  "confirm_order",
+  "cancel_order",
+  "edit_order",
+  "informational_question",
+  "coherence_pleasantry",
+  "unclear",
+]);
+
+const BOOKING_TRUTH_TURN_INTENT_KINDS = new Set([
+  "answered_full",
+  "answered_partial",
+  "answered_unasked",
+  "corrected_prior",
+  "clarifying_question",
+  "acknowledgement",
+  "refused_or_stuck",
+  "unclear",
+]);
+
+const BOOKING_TRUTH_TURN_KINDS = new Set([
+  "initial_route",
+  "post_clarify_continuation",
+  "informational",
+  "address_collection",
+  "booking_detail_collection",
+  "confirmation_or_cancel",
+  "post_order_chat",
+  "other",
+]);
+
+const BOOKING_TRUTH_PRICING_ACTIONS = new Set([
+  "call_get_price",
+  "continue_existing_quote",
+  "informational_only",
+  "awaiting_state",
+  "none",
+]);
+
+function deriveCurrentTurnDispositionForSnapshot(params: {
+  proposedTurnDecisionRaw: unknown;
+  getPriceFired: boolean;
+  hasConcreteMutation: boolean;
+  stateResetApplied: boolean;
+}): BookingTruthCurrentTurnDisposition | null {
+  const validation = params.proposedTurnDecisionRaw
+    ? validateProposedTurnDecision(params.proposedTurnDecisionRaw)
+    : null;
+  if (!validation || !validation.ok) return null;
+  const turnKind = validation.value.turn_kind ?? null;
+  const pricingAction = validation.value.pricing_decision?.action ?? null;
+  const awaitingKind = validation.value.awaiting_confirmation?.kind ?? null;
+  const turnIntentKind = validation.value.turn_intent?.kind ?? null;
+  return {
+    turnKind:
+      turnKind && BOOKING_TRUTH_TURN_KINDS.has(turnKind)
+        ? (turnKind as BookingTruthCurrentTurnDisposition["turnKind"])
+        : null,
+    pricingAction:
+      pricingAction && BOOKING_TRUTH_PRICING_ACTIONS.has(pricingAction)
+        ? (pricingAction as BookingTruthCurrentTurnDisposition["pricingAction"])
+        : null,
+    awaitingConfirmationKind:
+      awaitingKind && BOOKING_TRUTH_AC_KINDS.has(awaitingKind)
+        ? (awaitingKind as BookingTruthCurrentTurnDisposition["awaitingConfirmationKind"])
+        : null,
+    turnIntentKind:
+      turnIntentKind && BOOKING_TRUTH_TURN_INTENT_KINDS.has(turnIntentKind)
+        ? (turnIntentKind as BookingTruthCurrentTurnDisposition["turnIntentKind"])
+        : null,
+    turnIntentConfidence: validation.value.turn_intent?.confidence ?? null,
+    getPriceFired: params.getPriceFired,
+    hasConcreteMutation: params.hasConcreteMutation,
+    stateResetApplied: params.stateResetApplied,
+    source: "proposed_turn_decision",
+  };
+}
+
+function buildCreateSimpleOrderParamsFromSnapshot(
+  snapshot: BookingTruthSnapshot,
+): Record<string, unknown> | null {
+  const draft = snapshot.draft;
+  const selected = snapshot.quote.selected;
+  if (!draft || !selected.deliveryType || selected.price == null) return null;
+  const pickupArea = snapshot.route.pickup.nameEn || snapshot.route.pickup.nameAr;
+  const deliveryArea = snapshot.route.dropoff.nameEn || snapshot.route.dropoff.nameAr;
+  if (!pickupArea || !deliveryArea) return null;
+  if (!draft.senderName || !draft.senderPhone || !draft.recipientName || !draft.recipientPhone) {
+    return null;
+  }
+  return {
+    sender_name: draft.senderName,
+    sender_phone: draft.senderPhone,
+    recipient_name: draft.recipientName,
+    recipient_phone: draft.recipientPhone,
+    pickup_area: pickupArea,
+    delivery_area: deliveryArea,
+    delivery_type: selected.deliveryType,
+    quoted_price: selected.price,
+    pickup_block: draft.pickupBlock,
+    pickup_street: draft.pickupStreet,
+    pickup_house: draft.pickupHouse,
+    pickup_avenue: draft.pickupAvenue,
+    pickup_extra: draft.pickupExtra,
+    pickup_latitude: draft.pickupLocation?.latitude ?? null,
+    pickup_longitude: draft.pickupLocation?.longitude ?? null,
+    delivery_block: draft.deliveryBlock,
+    delivery_street: draft.deliveryStreet,
+    delivery_house: draft.deliveryHouse,
+    delivery_avenue: draft.deliveryAvenue,
+    delivery_extra: draft.deliveryExtra,
+    delivery_latitude: draft.deliveryLocation?.latitude ?? null,
+    delivery_longitude: draft.deliveryLocation?.longitude ?? null,
+  };
 }
 
 function isAllowedInbound(account: ResolvedOctopusAccount, conversationId: string, replyTarget: string | null): boolean {
@@ -3182,6 +3849,100 @@ async function refineTranscriptWithLlm(params: {
   }
 }
 
+async function generatePostDrainReauthorReply(params: {
+  messages: PostDrainReauthorMessages;
+  api: OpenClawPluginApi;
+}): Promise<string | null> {
+  const apiKey = env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), RIDERS_POST_DRAIN_REAUTHOR_TIMEOUT_MS);
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: RIDERS_POST_DRAIN_REAUTHOR_MODEL,
+        temperature: 0,
+        messages: [
+          { role: "system", content: params.messages.system },
+          { role: "user", content: params.messages.user },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      try {
+        params.api.logger.warn(
+          `[post-drain-reply-reauthor] llm_call_failed status=${response.status}`,
+        );
+      } catch {}
+      return null;
+    }
+    const payload = (await response.json()) as any;
+    return asTrimmedString(payload?.choices?.[0]?.message?.content);
+  } catch (error) {
+    try {
+      params.api.logger.warn(
+        `[post-drain-reply-reauthor] llm_call_error error=${error instanceof Error ? error.message : String(error)}`,
+      );
+    } catch {}
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function generatePlanBFinalSnapshotReply(params: {
+  messages: FinalSnapshotReplyMessages;
+  api: OpenClawPluginApi;
+}): Promise<string | null> {
+  const apiKey = env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), RIDERS_PLAN_B_FINAL_REPLY_TIMEOUT_MS);
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: RIDERS_PLAN_B_FINAL_REPLY_MODEL,
+        temperature: 0,
+        messages: [
+          { role: "system", content: params.messages.system },
+          { role: "user", content: params.messages.user },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      try {
+        params.api.logger.warn(
+          `[plan-b/final-reply] llm_call_failed status=${response.status} model=${RIDERS_PLAN_B_FINAL_REPLY_MODEL}`,
+        );
+      } catch {}
+      return null;
+    }
+    const payload = (await response.json()) as any;
+    return asTrimmedString(payload?.choices?.[0]?.message?.content);
+  } catch (error) {
+    try {
+      params.api.logger.warn(
+        `[plan-b/final-reply] llm_call_error error=${error instanceof Error ? error.message : String(error)} model=${RIDERS_PLAN_B_FINAL_REPLY_MODEL}`,
+      );
+    } catch {}
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function transcribeAudioMessage(params: {
   api: OpenClawPluginApi;
   account: ResolvedOctopusAccount;
@@ -3538,10 +4299,14 @@ async function handleInboundMessage(params: {
       quotePickupAreaNameAr: null,
       quoteDropoffAreaNameEn: null,
       quoteDropoffAreaNameAr: null,
+      quotePickupAreaResolution: null,
+      quoteDropoffAreaResolution: null,
       pendingPickupAreaNameEn: null,
       pendingPickupAreaNameAr: null,
       pendingDropoffAreaNameEn: null,
       pendingDropoffAreaNameAr: null,
+      pendingPickupAreaResolution: null,
+      pendingDropoffAreaResolution: null,
       selectedQuoteOptionType: null,
       selectedQuoteOptionLabelAr: null,
       selectedQuoteOptionLabelEn: null,
@@ -3597,16 +4362,29 @@ async function handleInboundMessage(params: {
     | { sessionState: Map<string, any> }
     | undefined;
   const preDispatchGuardEntry =
-    senderRole === "customer" && conversationControllerEntry?.stage === "quoted"
+    senderRole === "customer"
       ? await findSessionGuardEntryWithPersistence(preDispatchGuardState?.sessionState, {
           activeSessionKey: sessionKey,
           conversationId,
           replyTarget,
         })
       : { key: sessionKey, session: null };
-  const activeQuotedRoute = isStoredQuotedRouteFresh(preDispatchGuardEntry.session?.lastQuotedRoute)
-    ? preDispatchGuardEntry.session?.lastQuotedRoute ?? null
-    : null;
+  const turnStartBookingTruthSnapshot = buildBookingTruthSnapshot({
+    timing: "turn_start",
+    controllerState: conversationControllerEntry,
+    sessionGuard: preDispatchGuardEntry.session,
+    dialogState: conversationControllerEntry?.dialogState ?? null,
+    missingFields: conversationControllerEntry?.bookingDraft
+      ? computeOneBrainMissingFields(
+          conversationControllerEntry.bookingDraft,
+          conversationControllerEntry,
+        )
+      : null,
+    coveragePending: (preDispatchGuardEntry.session as any)?.coveragePending ?? null,
+    requireRenderedSummaryHash: RIDERS_SINGLE_LIFECYCLE_ENGINE,
+    now: Date.now(),
+  });
+  const activeQuotedRoute = turnStartBookingTruthSnapshot.quote.activeQuotedRoute as StoredQuotedRoute | null;
   // Clear any stale responder-state ops from the previous turn so this
   // turn's tool calls start with an empty queue. Mirror the same alias
   // set the drain loop uses so stale ops under secondary keys
@@ -3733,10 +4511,14 @@ async function handleInboundMessage(params: {
         quotePickupAreaNameAr: null,
         quoteDropoffAreaNameEn: null,
         quoteDropoffAreaNameAr: null,
+        quotePickupAreaResolution: null,
+        quoteDropoffAreaResolution: null,
         pendingPickupAreaNameEn: null,
         pendingPickupAreaNameAr: null,
         pendingDropoffAreaNameEn: null,
         pendingDropoffAreaNameAr: null,
+        pendingPickupAreaResolution: null,
+        pendingDropoffAreaResolution: null,
         selectedQuoteOptionType: null,
         selectedQuoteOptionLabelAr: null,
         selectedQuoteOptionLabelEn: null,
@@ -3745,7 +4527,12 @@ async function handleInboundMessage(params: {
         selectedDeliveryType: null,
         quotedPrice: null,
         bookingDraft: createEmptyBookingDraft(),
+        dialogState: conversationControllerEntry.dialogState
+          ? createEmptyDialogState()
+          : null,
         pendingReplyText: null,
+        submittedOrderUid: null,
+        pendingOrderEdits: null,
       };
       await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
       mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
@@ -3953,6 +4740,35 @@ async function handleInboundMessage(params: {
     senderRole === "customer" &&
     replyTarget &&
     conversationControllerEntry &&
+    locationMessage &&
+    persistedResolvedLocation &&
+    hasStructuredBookingLocation(persistedResolvedLocation)
+  ) {
+    const nativeAddressBinding = bindNativeLocationToAddressStep({
+      entry: conversationControllerEntry,
+      location: persistedResolvedLocation,
+    });
+    if (nativeAddressBinding) {
+      conversationControllerEntry = {
+        ...nativeAddressBinding.entry,
+        language: preferredReplyLanguage,
+        explicitLanguage: explicitLanguageRequest || nativeAddressBinding.entry.explicitLanguage,
+        conversationId,
+        replyTarget,
+        accountId: account.accountId,
+      };
+      await upsertConversationControllerEntry(controllerStateKey, conversationControllerEntry);
+      mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
+      controllerTransitionHint = `location_saved:${nativeAddressBinding.role}`;
+      api.logger.info(
+        `[controller] native location bound to active address step conversation=${conversationId} role=${nativeAddressBinding.role} next_step=${conversationControllerEntry.bookingStep}`,
+      );
+    }
+  }
+  if (
+    senderRole === "customer" &&
+    replyTarget &&
+    conversationControllerEntry &&
     persistedResolvedLocation &&
     hasStructuredBookingLocation(persistedResolvedLocation)
   ) {
@@ -4119,10 +4935,14 @@ async function handleInboundMessage(params: {
               quotePickupAreaNameAr: null,
               quoteDropoffAreaNameEn: null,
               quoteDropoffAreaNameAr: null,
+              quotePickupAreaResolution: null,
+              quoteDropoffAreaResolution: null,
               pendingPickupAreaNameEn: null,
               pendingPickupAreaNameAr: null,
               pendingDropoffAreaNameEn: null,
               pendingDropoffAreaNameAr: null,
+              pendingPickupAreaResolution: null,
+              pendingDropoffAreaResolution: null,
               selectedQuoteOptionType: null,
               selectedQuoteOptionLabelAr: null,
               selectedQuoteOptionLabelEn: null,
@@ -4242,13 +5062,28 @@ async function handleInboundMessage(params: {
     );
   }
   if (quotedStagePreDispatch && safetyNetMatched) {
+    const lifecycleDecision = decideBookingLifecycleAdvance("collecting_booking_details", {
+      controllerState: conversationControllerEntry,
+      sessionGuard: preDispatchGuardEntry.session,
+      dialogState: conversationControllerEntry.dialogState ?? null,
+      currentCustomerText: rawBody,
+      now: Date.now(),
+    });
+    if (lifecycleDecision.decision === "block") {
+      api.logger.warn(
+        `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
+      );
+    }
     const selectedQuotedOption =
       getQuotedRouteOption(activeQuotedRoute, conversationControllerEntry.selectedQuoteOptionType) ||
       getQuotedRouteOption(activeQuotedRoute, conversationControllerEntry.selectedDeliveryType) ||
       getActiveSelectedQuotedOption(activeQuotedRoute, conversationControllerEntry);
     if (
-      !selectedQuotedOption?.direct_chat_booking_status ||
-      selectedQuotedOption.direct_chat_booking_status === "verified"
+      lifecycleDecision.decision === "allow" &&
+      (
+        !selectedQuotedOption?.direct_chat_booking_status ||
+        selectedQuotedOption.direct_chat_booking_status === "verified"
+      )
     ) {
       const selectedQuotedPrice =
         selectedQuotedOption && typeof selectedQuotedOption.quoted_price === "number"
@@ -4269,7 +5104,17 @@ async function handleInboundMessage(params: {
       conversationControllerEntry = selectedQuotedOption
         ? applySelectedQuotedOptionToController(bookingStateEntry, selectedQuotedOption)
         : bookingStateEntry;
-      conversationControllerEntry = applyBookingDraftProgress(conversationControllerEntry);
+      conversationControllerEntry = applyBookingDraftProgress(conversationControllerEntry, {
+        lifecycle: {
+          sessionGuard: preDispatchGuardEntry.session,
+          currentCustomerText: rawBody,
+        },
+        onBlocked: (decision) =>
+          api.logger.warn(
+            `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(decision)} conversation=${conversationId}`,
+          ),
+        deferSummaryPromotion: RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+      });
       controllerTransitionHint = `booking_started:${conversationControllerEntry.bookingStep}`;
       api.logger.info(
         `[controller] pre-dispatch quoted conversation transitioned to booking-details stage language=${preferredReplyLanguage} conversation=${conversationId}`,
@@ -4355,186 +5200,9 @@ async function handleInboundMessage(params: {
     }
   }
 
-  // Authority cutover Phase 2 (2026-04-24): fast-path disposition gate.
-  //
-  // DEPLOY_CANARY_FAST_PATH_DISPOSITION_GATE_MARKER.
-  //
-  // The Phase-3 extractor below and the reuse-intent extractor further
-  // down only run when the gate says "apply." The gate's decision is
-  // controlled by `RIDERS_FAST_PATH_DISPOSITION_GATE`:
-  //
-  //   * unset / "on"  → enforce: skip pre-LLM writes when the
-  //                     disposition isn't `continue_step` AND the
-  //                     branch is not an explicit-command whitelist
-  //                     (reuse-intent, pin-role, declared-role pin).
-  //   * "log"         → compute + log what would be blocked; don't
-  //                     actually block.
-  //   * "off"         → disabled; pre-Phase-2 behaviour.
-  //
-  // Rationale: before Phase 2 the address and phone extractors would
-  // write controller state on any text that shape-matched, regardless
-  // of whether the customer was continuing the form or doing
-  // something else (asking a question, correcting, acknowledging).
-  // That's the "No the avenues mall → sender_name" class of bug.
-  // Pin-role, declared-role pin, and reuse-intent already gate
-  // themselves on narrow explicit-command whitelists, so they stay
-  // on by default — but their log lines are now annotated with the
-  // live disposition for visibility.
-  const fastPathDispositionGateMode = resolveFastPathDispositionGateMode(
-    process.env.RIDERS_FAST_PATH_DISPOSITION_GATE,
-  );
-  const fastPathDisposition: string =
-    promptShapingDecision?.disposition ?? "-";
-
-  // Phase-3 deterministic fast-path extraction (ONE-BRAIN only).
-  //
-  // When the controller has an unambiguous next_required_action (e.g.
-  // ASK_PICKUP_ADDRESS) and the customer's message has a clean deterministic
-  // parse (e.g. "5, 7, 19" → block/street/house), we apply the patch to the
-  // draft BEFORE the LLM runs. The system snapshot below will then reflect
-  // the updated draft, the next_required_action advances naturally, and the
-  // LLM's job collapses to writing a natural reply asking for the next
-  // missing field. This kills "digit transposition", "wrong address_role",
-  // and "lost leading 9" classes of LLM extraction drift.
-  //
-  // The extractor is step-constrained and high-confidence-only: it returns
-  // nothing when the parse is ambiguous, so false positives are rare.
-  //
-  // Authority cutover Phase 2 (2026-04-24): gated on the pre-LLM
-  // disposition. If the turn isn't `continue_step`, the fast-path does
-  // not run under enforce mode. Log-only mode still runs the extractor
-  // but emits `blocked_by_disposition_gate_log_only` for visibility.
+  // Legacy directive-keyed fast-path writes are disabled in the single
+  // lifecycle path. GPT semantic proposals plus apply-boundary now own writes.
   let fastPathPreApplied: string[] = [];
-  if (
-    senderRole === "customer" &&
-    conversationControllerEntry &&
-    rawBody
-  ) {
-    try {
-      const draft = conversationControllerEntry.bookingDraft;
-      const missing = computeOneBrainMissingFields(draft, conversationControllerEntry);
-      const directive = computeOneBrainNextRequiredAction({
-        draft,
-        entry: conversationControllerEntry,
-        missing,
-        currentCustomerText: rawBody,
-        activeQuotedRoute,
-      });
-      if (directive) {
-        const gateDecision = decideFastPathDispositionGate({
-          disposition: promptShapingDecision ? fastPathDisposition : null,
-          mode: fastPathDispositionGateMode,
-        });
-        if (gateDecision.action === "skip") {
-          try {
-            api.logger.info(
-              `[one-brain/fast-path] skipped_by_disposition action=${directive.action} disposition=${fastPathDisposition} policy_rule=${promptShapingDecision?.policy_rule ?? "-"} mode=on conversation=${conversationId}`,
-            );
-          } catch {}
-        } else {
-          if (gateDecision.action === "run_log_only") {
-            try {
-              api.logger.info(
-                `[one-brain/fast-path] would_skip_by_disposition action=${directive.action} disposition=${fastPathDisposition} policy_rule=${promptShapingDecision?.policy_rule ?? "-"} mode=log conversation=${conversationId}`,
-              );
-            } catch {}
-          }
-          const fastResult = extractForNextAction({
-          text: rawBody,
-          action: directive.action as FastPathAction,
-          whatsappNumber: replyTarget,
-        });
-        if (fastResult.confidence === "high" && fastResult.patch) {
-          // Route the fast-path patch through the one apply boundary.
-          // The boundary re-runs the evidence contract (source-quote,
-          // ambiguous-pair, coherence, shape) on every proposal
-          // regardless of source — so LLM-emitted and fast-path-emitted
-          // writes are held to the same standard. See
-          // `plugins/shared/apply-boundary.ts` and `ARCHITECTURE.md`.
-          const proposal = fastPathProposal({
-            patch: fastResult.patch,
-            sourceQuote: rawBody,
-          });
-          const boundaryRes = applyProposals([proposal], {
-            draft,
-            dialogState: conversationControllerEntry.dialogState ?? null,
-            whatsappNumber: replyTarget,
-            stage: conversationControllerEntry.stage ?? null,
-          });
-          if (boundaryRes.applied.length > 0) {
-            conversationControllerEntry = {
-              ...conversationControllerEntry,
-              bookingDraft: boundaryRes.draft,
-              dialogState:
-                boundaryRes.dialogState ?? conversationControllerEntry.dialogState,
-            };
-            conversationControllerEntry = applyBookingDraftProgress(conversationControllerEntry);
-            // Persist the pre-applied fields immediately so a retry / race
-            // can't clobber them. The upsert at the end of the turn will
-            // re-persist with any further LLM-driven updates on top.
-            await upsertConversationControllerEntry(
-              controllerStateKey,
-              conversationControllerEntry,
-            ).catch(() => {});
-            mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
-            fastPathPreApplied = boundaryRes.applied;
-            api.logger.info(
-              `[one-brain/fast-path] pre-applied action=${directive.action} fields=${boundaryRes.applied.join(",")} reasons=${fastResult.reasons.join(",")} rejected=${boundaryRes.rejections.length} conversation=${conversationId}`,
-            );
-          }
-          if (boundaryRes.rejections.length > 0) {
-            for (const r of boundaryRes.rejections) {
-              api.logger.warn(
-                `[one-brain/boundary] rejected source=${r.source} field=${r.field} reason=${r.reason} received=${JSON.stringify(r.received)} conversation=${conversationId}`,
-              );
-            }
-          }
-          if (boundaryRes.normalizations.length > 0) {
-            for (const n of boundaryRes.normalizations) {
-              try {
-                api.logger.info(
-                  `[one-brain/boundary/normalize] kind=${n.kind} field=${n.field} incoming=${JSON.stringify(n.incoming)} mapped_to=${JSON.stringify(n.mappedTo)} source=${n.source} conversation=${conversationId}`,
-                );
-              } catch {}
-            }
-          }
-        } else if (fastResult.confidence === "none" && fastResult.reasons.length > 0) {
-          // Coverage telemetry. For address actions we emit at `info`
-          // so prod aggregation shows us which shape-classes the
-          // extractor is missing (apartment / avenue / tower / Arabic
-          // variants / glued punctuation). Other actions stay at
-          // `debug` to avoid noise on combined sender-turns that are
-          // expected to fall through to the LLM on the free-form side.
-          const isAddressAction =
-            directive.action === "ASK_PICKUP_ADDRESS" ||
-            directive.action === "ASK_DELIVERY_ADDRESS";
-          // Truncated + sanitized sample of the text. We don't log the
-          // full body (PII hygiene, log volume). A 120-char cap +
-          // newline-stripped shape is enough to recognize address
-          // patterns while keeping long free-form notes out.
-          const textSample = rawBody
-            .replace(/\s+/g, " ")
-            .slice(0, 120);
-          const line = `[one-brain/fast-path] skip action=${directive.action} reasons=${fastResult.reasons.join(",")} text_sample=${JSON.stringify(textSample)} conversation=${conversationId}`;
-          if (isAddressAction) {
-            api.logger.info(line);
-          } else {
-            api.logger.debug?.(line);
-          }
-        }
-        }
-      }
-    } catch (fastPathError) {
-      // Never let extraction errors break the turn. The LLM will handle the
-      // message normally and whatever drift we'd have caught gets caught by
-      // later guards instead.
-      api.logger.warn(
-        `[one-brain/fast-path] extraction failed conversation=${conversationId} error=${
-          fastPathError instanceof Error ? fastPathError.message : String(fastPathError)
-        }`,
-      );
-    }
-  }
 
   // Reuse-intent fast-path. When the customer explicitly asks to reuse their
   // previous order's identity fields ("same names and number as last order",
@@ -4683,6 +5351,9 @@ async function handleInboundMessage(params: {
     bookingStep: conversationControllerEntry?.bookingStep ?? null,
     controllerEntry: conversationControllerEntry,
     quotedRoute: activeQuotedRoute,
+    bookingTruthSnapshot: turnStartBookingTruthSnapshot,
+    snapshotContextOnly: RIDERS_SNAPSHOT_CONTEXT_ONLY,
+    coveragePending: preDispatchGuardEntry.session?.coveragePending ?? null,
     quoteFollowupHint,
     controllerTransitionHint,
     currentCustomerText: rawBody,
@@ -4919,38 +5590,13 @@ async function handleInboundMessage(params: {
           // substitute a disambiguating re-ask in place of any
           // hallucinated "we've cancelled" text.
           let cancelContradicted: { optionLabel: string } | null = null;
-          // Class-level guard (2026-04-21): `stale_guard_state_clobbers_clarification_turn`.
-          //
-          // The quoted-state promotion block further down inherits
-          // `stage=quoted` + `quote*AreaNameEn` from `sessionGuard.lastQuotedRoute`
-          // whenever `lastToolName === "get_price"` and `lastToolTs !==
-          // controllerEntry.quoteTs`. This is the correct behaviour on a turn
-          // where `get_price` actually produced a fresh priced route, but the
-          // gate is SIGN-BLIND: a persisted `lastQuotedRoute` left over from
-          // a prior session (persisted to
-          // `~/.openclaw-<profile>/riders-guard-state.json`) survives service
-          // restart and still satisfies the test on the very next turn —
-          // even when that turn's `get_price` returned AREA_AMBIGUOUS and
-          // therefore set `set_requested_slot(pickup_area|dropoff_area)`.
-          // The false promotion then clears `pendingPickupAreaNameEn` /
-          // `pendingDropoffAreaNameEn` ("just promoted to quote*") and
-          // overwrites the fresh clarification with a stale route —
-          // breaking the invariant that the controller state must reflect
-          // THIS turn's tool results.
-          //
-          // `turnDrainedRouteSideClarification` is set inside the drain loop
-          // whenever a `set_requested_slot` for a route-side slot is applied.
-          // Its presence proves that the current turn is mid-clarification,
-          // and the quoted-state promotion block uses it as a hard veto.
-          let turnDrainedRouteSideClarification = false;
           // Phase A shadow (2026-04-21): captures the raw decision payload
           // from the `proposed_turn_decision` responder-op so the
           // post-decision `[structured-output/proposer]` emit can run
           // `validateProposedTurnDecision` once and cross-reference
           // `planned_tool_calls` / `pricing_decision.action` against this
-          // turn's actual tool invocations. Hoisted outside the drain
-          // block for the same reason as `turnDrainedRouteSideClarification`
-          // — observation must survive beyond the drain scope.
+          // turn's actual tool invocations. Hoisted outside the drain so
+          // observation survives to the emit site.
           let proposedTurnDecisionRaw: unknown = null;
           let proposedTurnDecisionCount = 0;
           let proposedTurnDecisionTurnId: string | null = null;
@@ -4959,6 +5605,10 @@ async function handleInboundMessage(params: {
           // compare against the LLM's `planned_tool_calls`. Observation
           // only — populated alongside the main drain loop.
           const turnDrainedOpKinds = new Set<string>();
+          let turnAppliedOpsSummary: string[] = [];
+          let turnAppliedBookingProgress = false;
+          let turnConfirmationExplicit = false;
+          let sameTurnOptionInterpretation: SameTurnOptionInterpretation | null = null;
           // v1.1 (2026-04-22): stage the LLM was observing when it decided
           // whether to include `awaiting_confirmation` in its proposer
           // payload. Captured BEFORE drain-driven stage promotions so the
@@ -5012,12 +5662,25 @@ async function handleInboundMessage(params: {
               } catch {}
               const drained = drainResponderStateOps(conversationId, drainAliases);
               if (drained.length > 0) {
+                const freshAllInOneRebind = detectFreshAllInOneRebindTurn({
+                  text: turnSignals.workflowInputText || rawBody || "",
+                  drained,
+                  entry: conversationControllerEntry,
+                });
+                if (freshAllInOneRebind) {
+                  try {
+                    api.logger.info(
+                      `[one-brain/fresh-all-in-one-rebind] conversation=${conversationId} stage=${conversationControllerEntry?.stage || "-"} ops=${drained.length}`,
+                    );
+                  } catch {}
+                }
                 let nextDraft = conversationControllerEntry?.bookingDraft || createEmptyBookingDraft();
                 let nextDialogState = conversationControllerEntry?.dialogState ?? null;
                 let cancelled = false;
                 let handoffRequested = false;
                 const rejections = hallucinationGuardRejections;
                 const appliedOps: string[] = [];
+                const pendingEditsSatisfiedThisTurn = new Set<PendingOrderEditField>();
                 for (const op of drained) {
                   // Phase A shadow observation: accumulate the distinct
                   // responder-op kinds seen this turn. The
@@ -5099,6 +5762,8 @@ async function handleInboundMessage(params: {
                       dialogState: nextDialogState,
                       whatsappNumber: replyTarget,
                       stage: conversationControllerEntry.stage ?? null,
+                      pendingEditSlots: pendingOrderEditSlots(conversationControllerEntry),
+                      freshAllInOneRebind,
                     });
                     nextDraft = boundaryRes.draft;
                     if (boundaryRes.dialogState) {
@@ -5135,6 +5800,12 @@ async function handleInboundMessage(params: {
                           );
                         } catch {}
                       }
+                    }
+                    for (const field of satisfiedPendingFieldsFromApply(op, boundaryRes.applied)) {
+                      pendingEditsSatisfiedThisTurn.add(field);
+                    }
+                    if (boundaryRes.applied.length > 0) {
+                      turnAppliedBookingProgress = true;
                     }
                     appliedOps.push(`apply_booking_field(${boundaryRes.applied.join(",")})`);
                   } else if (op.op === "cancel_booking") {
@@ -5207,6 +5878,11 @@ async function handleInboundMessage(params: {
                     appliedOps.push(
                       `set_pending_area(${op.field}=${op.area_name_en || "-"})`,
                     );
+                  } else if (op.op === "set_pending_order_edits") {
+                    // Handled below when the controller entry is materialized.
+                    appliedOps.push(
+                      `set_pending_order_edits(${(op.fields || []).join(",")})`,
+                    );
                   } else if (op.op === "carry_over_from_last_order") {
                     // Reuse-intent carry-over. Sourced either from the
                     // fast-path reuse-intent classifier or from the LLM when
@@ -5249,6 +5925,9 @@ async function handleInboundMessage(params: {
                     } else {
                       nextDraft = carry.draft;
                       nextDialogState = carry.dialogState;
+                      if (carry.appliedFields.length > 0) {
+                        turnAppliedBookingProgress = true;
+                      }
                       for (const r of carry.rejected) {
                         rejections.push({
                           field: r.field,
@@ -5266,10 +5945,17 @@ async function handleInboundMessage(params: {
                       } catch {}
                     }
                   } else if (op.op === "propose_option_interpretation") {
-                    // Phase 1 (2026-04-20) — LLM's structured option
-                    // interpretation. Stored for the post-drain
-                    // reconciliation block below. Emitting the op does
-                    // NOT mutate controller state by itself.
+                    // LLM's structured option interpretation. Reconciled
+                    // after drain; when no quote exists yet, a grounded
+                    // high-confidence interpretation is preserved as pending
+                    // service intent so route clarification cannot discard it.
+                    sameTurnOptionInterpretation = {
+                      class: op.class,
+                      tier: op.tier,
+                      source_quote: op.source_quote,
+                      confidence: op.confidence,
+                      turn_id: op.turn_id,
+                    };
                     appliedOps.push(
                       `propose_option_interpretation(${op.class ?? "-"}/${op.tier ?? "-"}/${op.confidence})`,
                     );
@@ -5294,10 +5980,14 @@ async function handleInboundMessage(params: {
                     appliedOps.push(
                       `proposed_turn_decision:shadow${proposedTurnDecisionCount > 1 ? `(dup=${proposedTurnDecisionCount})` : ""}`,
                     );
-                  } else if (op.op === "start_booking" || op.op === "confirm_summary") {
-                    // One-brain ignores these — `apply_booking_field` and
-                    // `create_simple_order` are the only signals we care about.
-                    appliedOps.push(`${op.op}:ignored`);
+                  } else if (op.op === "confirm_summary") {
+                    // Semantic confirmation signal. It does not mutate
+                    // draft fields, but the post-drain truth snapshot needs
+                    // it to advance `wait_for_confirmation` -> `submit_order`.
+                    turnConfirmationExplicit = true;
+                    appliedOps.push("confirm_summary:confirmed");
+                  } else if (op.op === "start_booking") {
+                    appliedOps.push("start_booking:ignored");
                   } else {
                     // Phase 5 (2026-04-20): unknown responder op kinds.
                     // The discriminated-union `ResponderStateOp` covers
@@ -5344,11 +6034,54 @@ async function handleInboundMessage(params: {
                         turn_id: string;
                       }
                     | undefined;
+                  if (interpretOp && conversationControllerEntry && !activeQuotedRoute) {
+                    const pendingDeliveryType = optionInterpretationDeliveryType(interpretOp);
+                    const quoteGrounded = isOptionInterpretationGroundedInText(
+                      interpretOp,
+                      turnSignals.workflowInputText,
+                    );
+                    const currentSelectedType =
+                      conversationControllerEntry.selectedQuoteOptionType ||
+                      conversationControllerEntry.selectedDeliveryType ||
+                      null;
+                    if (pendingDeliveryType && quoteGrounded) {
+                      pendingEditsSatisfiedThisTurn.add("service");
+                      if (pendingDeliveryType !== currentSelectedType) {
+                        conversationControllerEntry = {
+                          ...conversationControllerEntry,
+                          selectedQuoteOptionType: null,
+                          selectedQuoteOptionLabelAr: null,
+                          selectedQuoteOptionLabelEn: null,
+                          selectedQuoteOptionPrice: null,
+                          selectedQuoteOptionDirectChatBookingStatus: null,
+                          selectedDeliveryType: pendingDeliveryType,
+                          quotedPrice: null,
+                        };
+                        mirrorConversationControllerEntry(
+                          controllerStateKey,
+                          conversationControllerEntry,
+                        );
+                        appliedOps.push(`pending_service_intent(${pendingDeliveryType})`);
+                        api.logger.info(
+                          `[option-resolve] preserved_pending_intent conversation=${conversationId} option=${pendingDeliveryType} quote=${JSON.stringify(String(interpretOp.source_quote || "").slice(0, 80))}`,
+                        );
+                      } else {
+                        api.logger.info(
+                          `[option-resolve] reaffirmed_pending_intent conversation=${conversationId} option=${pendingDeliveryType}`,
+                        );
+                      }
+                    } else if (pendingDeliveryType && !quoteGrounded) {
+                      api.logger.warn(
+                        `[option-resolve] pending_intent dropped reason=source_quote_not_in_visible conversation=${conversationId} quote=${JSON.stringify(String(interpretOp.source_quote || "").slice(0, 80))}`,
+                      );
+                    }
+                  }
                   if (
                     interpretOp &&
                     conversationControllerEntry &&
                     activeQuotedRoute &&
-                    hasActiveQuotedBookingAuthority(conversationControllerEntry)
+                    (turnStartBookingTruthSnapshot.quote.routeAuthorityActive ||
+                      hasPendingOrderEditField(conversationControllerEntry, "service"))
                   ) {
                     // Source-quote evidence gate — mirrors the
                     // `apply_booking_field` contract. The LLM must quote a
@@ -5390,6 +6123,7 @@ async function handleInboundMessage(params: {
                         null;
                       if (reconciled.kind === "commit") {
                         const target = reconciled.option;
+                        pendingEditsSatisfiedThisTurn.add("service");
                         if (target.delivery_type !== currentSelectedType) {
                           conversationControllerEntry = applySelectedQuotedOptionToController(
                             conversationControllerEntry,
@@ -5434,16 +6168,7 @@ async function handleInboundMessage(params: {
                     (op) => op.op === "carry_over_from_last_order",
                   );
                   let nextEntry: PersistedConversationControllerEntry = cancelled
-                    ? {
-                        ...conversationControllerEntry,
-                        bookingDraft: createEmptyBookingDraft(),
-                        pendingReplyText: null,
-                        stage: "idle",
-                        bookingStep: "none",
-                        dialogState: conversationControllerEntry.dialogState
-                          ? createEmptyDialogState()
-                          : null,
-                      }
+                    ? clearAutomatedConversationContext(conversationControllerEntry)
                     : {
                         ...conversationControllerEntry,
                         bookingDraft: nextDraft,
@@ -5456,7 +6181,23 @@ async function handleInboundMessage(params: {
                   // (e.g. "all fields confirmed → write summary") instead of
                   // a frozen earlier step.
                   if (!cancelled && (appliedBookingPatch || appliedCarryOver)) {
-                    nextEntry = applyBookingDraftProgress(nextEntry);
+                    nextEntry = preDispatchGuardEntry.session
+                      ? applyBookingDraftProgress(nextEntry, {
+                          lifecycle: {
+                            sessionGuard: preDispatchGuardEntry.session,
+                            currentCustomerText: rawBody,
+                          },
+                          onBlocked: (decision) =>
+                            api.logger.warn(
+                              `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(decision)} conversation=${conversationId}`,
+                            ),
+                          deferSummaryPromotion:
+                            RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+                        })
+                      : applyBookingDraftProgress(nextEntry, {
+                          deferSummaryPromotion:
+                            RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+                        });
                   }
                   // Apply set_pending_area ops onto the controller entry so
                   // the next turn's smuggle guard sees the resolved area
@@ -5491,18 +6232,28 @@ async function handleInboundMessage(params: {
                   if (!cancelled) {
                     for (const op of drained) {
                       if (op.op !== "set_pending_area") continue;
+                      if (!op.area_name_en || !String(op.area_name_en).trim()) {
+                        try {
+                          api.logger.warn(
+                            `[one-brain/drain] skipped set_pending_area with empty area conversation=${conversationId} field=${op.field} turn_id=${op.turn_id || "-"}`,
+                          );
+                        } catch {}
+                        continue;
+                      }
                       appliedPendingArea = true;
                       if (op.field === "pickup_area") {
                         nextEntry = {
                           ...nextEntry,
                           pendingPickupAreaNameEn: op.area_name_en,
                           pendingPickupAreaNameAr: op.area_name_ar,
+                          pendingPickupAreaResolution: op.area_resolution ?? null,
                         };
                       } else if (op.field === "dropoff_area") {
                         nextEntry = {
                           ...nextEntry,
                           pendingDropoffAreaNameEn: op.area_name_en,
                           pendingDropoffAreaNameAr: op.area_name_ar,
+                          pendingDropoffAreaResolution: op.area_resolution ?? null,
                         };
                       }
                     }
@@ -5512,18 +6263,23 @@ async function handleInboundMessage(params: {
                         slot: op.slot as SlotName,
                         options: op.options ?? null,
                       };
-                      // Lift the class-level veto flag (see the declaration
-                      // of `turnDrainedRouteSideClarification` above). Only
-                      // route-side slot asks can be confused with a fresh
-                      // priced route; slot asks for name / phone / address
-                      // are orthogonal to the quoted-state promotion.
-                      if (
-                        op.slot === "pickup_area" ||
-                        op.slot === "dropoff_area"
-                      ) {
-                        turnDrainedRouteSideClarification = true;
-                      }
                     }
+                    for (const op of drained) {
+                      if (op.op !== "set_pending_order_edits") continue;
+                      nextEntry = {
+                        ...nextEntry,
+                        pendingOrderEdits: {
+                          fields: op.fields,
+                          askedTs: Date.now(),
+                          sourceQuote: op.source_quote ?? null,
+                        },
+                      };
+                    }
+                    nextEntry = clearExpiredPendingOrderEdits(nextEntry);
+                    nextEntry = clearSatisfiedPendingOrderEdits(
+                      nextEntry,
+                      pendingEditsSatisfiedThisTurn,
+                    );
                     // First-turn clarify hydration (category fix, 2026-04-21).
                     //
                     // Whenever the drain saw ANY of:
@@ -5660,41 +6416,31 @@ async function handleInboundMessage(params: {
                           nextEntry.bookingDraft,
                           nextEntry,
                         );
-                        const directive = computeOneBrainNextRequiredAction({
-                          draft: nextEntry.bookingDraft,
-                          entry: nextEntry,
-                          missing: nextMissing,
-                        });
-                        if (directive) {
-                          const derivedSlot = deriveRequestedSlotFromMissing(nextMissing);
-                          if (derivedSlot) {
-                            // Only update if changed, to avoid spurious
-                            // askedTs resets that would make log diffs noisy.
-                            if (
-                              !existingRequested ||
-                              existingRequested.name !== derivedSlot
-                            ) {
-                              nextEntry = {
-                                ...nextEntry,
-                                dialogState: setRequestedSlot(
-                                  nextEntry.dialogState,
-                                  {
-                                    name: derivedSlot,
-                                    options: null,
-                                    askedTs: Date.now(),
-                                  },
-                                ),
-                              };
-                            }
-                          } else if (existingRequested) {
-                            // No specific slot required → clear the old one
-                            // (e.g. we moved past the sender-phone ask to the
-                            // address step).
+                        const derivedSlot = deriveRequestedSlotFromMissing(nextMissing);
+                        if (derivedSlot) {
+                          // Only update if changed, to avoid spurious
+                          // askedTs resets that would make log diffs noisy.
+                          if (
+                            !existingRequested ||
+                            existingRequested.name !== derivedSlot
+                          ) {
                             nextEntry = {
                               ...nextEntry,
-                              dialogState: clearRequestedSlot(nextEntry.dialogState),
+                              dialogState: setRequestedSlot(
+                                nextEntry.dialogState,
+                                {
+                                  name: derivedSlot,
+                                  options: null,
+                                  askedTs: Date.now(),
+                                },
+                              ),
                             };
                           }
+                        } else if (existingRequested) {
+                          nextEntry = {
+                            ...nextEntry,
+                            dialogState: clearRequestedSlot(nextEntry.dialogState),
+                          };
                         }
                       }
                     }
@@ -5792,6 +6538,7 @@ async function handleInboundMessage(params: {
                   }
                 }
                 try {
+                  turnAppliedOpsSummary = [...appliedOps];
                   api.logger.info(
                     `[one-brain] drained conversation=${conversationId} ops=${drained.length} applied=${appliedOps.join("|")} cancelled=${cancelled ? "yes" : "no"} handoff=${handoffRequested ? "yes" : "no"} rejections=${rejections.length}`,
                   );
@@ -5856,6 +6603,15 @@ async function handleInboundMessage(params: {
             });
             guardSessionKey = guardEntry.key || activeSessionKey;
             sessionGuard = guardEntry.session || null;
+            if (turnDrainedOpKinds.has("cancel_booking") && sessionGuard) {
+              sessionGuard.lastQuotedRoute = null;
+              sessionGuard.pendingOrderSummary = null;
+              sessionGuard.lastCreatedOrderUid = null;
+              sessionGuard.lastToolName = null;
+              sessionGuard.allValidPrices = new Set();
+              guardState?.sessionState.set(guardSessionKey, sessionGuard);
+              guardState?.sessionState.set(activeSessionKey, sessionGuard);
+            }
             sessionIsRecent = !!sessionGuard && (Date.now() - sessionGuard.lastToolTs) < 300_000;
             if (!sessionGuard) {
               api.logger.info(
@@ -5935,6 +6691,9 @@ async function handleInboundMessage(params: {
           let turnPostStateWasLightweight = false;
           let turnFinalDecision: OutboundDecisionKind = "allow";
           let turnFinalReason: OutboundDecisionReason = "allow";
+          let turnRenderedSummaryHash: string | null = null;
+          let directiveActionForRender: string | null = null;
+          let directiveRenderContextForRender: DirectiveReplyRendererContext | null = null;
           // Step-4 consolidation: Region A of the former inline decision
           // pipeline (canonical overwrite, empty-fill, price whitelist,
           // same-route quote correction) is now a single pure call. It runs
@@ -5985,8 +6744,8 @@ async function handleInboundMessage(params: {
             // manual-confirm substitutions above), or an llm_owned
             // marker (pass through). The substitute fires at Region A
             // block (A0c) below; see outbound-decision.ts.
-            let directiveActionForRender: string | null = null;
-            let directiveRenderContextForRender: DirectiveReplyRendererContext | null = null;
+            directiveActionForRender = null;
+            directiveRenderContextForRender = null;
             if (conversationControllerEntry) {
               const missingForDirective = computeOneBrainMissingFields(
                 conversationControllerEntry.bookingDraft,
@@ -6311,6 +7070,15 @@ async function handleInboundMessage(params: {
                         conversationId,
                     ),
                   };
+                  try {
+                    api.logger.info(
+                      `[booking-next-action/legacy-directive-shadow] conversation=${conversationId} action=${directive.action} stage=${conversationControllerEntry.stage || "-"} reason=snapshot_next_action_authority`,
+                    );
+                  } catch {
+                    // Shadow logging must never affect reply delivery.
+                  }
+                  directiveActionForRender = null;
+                  directiveRenderContextForRender = null;
 
                   // ----------------------------------------------------------
                   // Cut #2 (2026-04-23): Correction/edit authority removal.
@@ -6689,6 +7457,7 @@ async function handleInboundMessage(params: {
             void clarifyOptionBeforeProceed;
             void manualConfirmAddressAsk;
             void manualConfirmHandoff;
+            if (!RIDERS_SINGLE_LIFECYCLE_ENGINE) {
             const preDecision = decidePreStateOutbound({
               replyText,
               preferredLanguage: preferredReplyLanguage,
@@ -6704,6 +7473,8 @@ async function handleInboundMessage(params: {
               directiveAction: directiveActionForRender,
               directiveRenderContext: directiveRenderContextForRender,
               renderDirectiveReply,
+              planBSnapshotFinalReply: RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+              planBLogLegacyAuthority: RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY,
               buildDeterministicSelectedQuotedOptionReply,
               conversationId,
               sessionKeyForLogs: guardSessionKey,
@@ -6742,147 +7513,191 @@ async function handleInboundMessage(params: {
             // detection and the order-guard summary gate fire off the
             // real event, not a stale `collecting_booking_details` stage.
             if (preDecision.markedSummaryShown && conversationControllerEntry) {
-              conversationControllerEntry = {
-                ...conversationControllerEntry,
-                stage: "summary_shown" as ConversationFlowStage,
-                bookingStep: "summary_pending" as BookingCollectionStep,
-              };
+              const lifecycleDecision = decideBookingLifecycleAdvance("summary_shown", {
+                controllerState: conversationControllerEntry,
+                sessionGuard,
+                dialogState: conversationControllerEntry.dialogState ?? null,
+                currentCustomerText: rawBody,
+                currentTurnToolResults: {
+                  missingFields: computeOneBrainMissingFields(
+                    conversationControllerEntry.bookingDraft,
+                    conversationControllerEntry,
+                  ),
+                },
+                now: Date.now(),
+              });
+              if (lifecycleDecision.decision === "allow") {
+                conversationControllerEntry = {
+                  ...conversationControllerEntry,
+                  stage: "summary_shown" as ConversationFlowStage,
+                  bookingStep: "summary_pending" as BookingCollectionStep,
+                };
+                await upsertConversationControllerEntry(controllerStateKey, {
+                  ...conversationControllerEntry,
+                  lastActivityTs: Date.now(),
+                  conversationId,
+                  replyTarget,
+                  accountId: account.accountId,
+                });
+                mirrorConversationControllerEntry(controllerStateKey, {
+                  ...conversationControllerEntry,
+                  lastActivityTs: Date.now(),
+                  conversationId,
+                  replyTarget,
+                  accountId: account.accountId,
+                });
+              } else {
+                api.logger.warn(
+                  `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
+                );
+              }
+            }
+            } else {
+              turnFinalDecision = "allow";
+              turnFinalReason = "allow";
+              turnReplyAuthor = "llm";
+              turnReplyReason = "single_lifecycle_pre_state_bypass";
+              api.logger.info(
+                `[single-lifecycle] bypassed legacy pre-state outbound decision conversation=${conversationId}`,
+              );
             }
           }
           if (conversationControllerEntry && sessionGuard && sessionIsRecent) {
             if (
               sessionGuard.lastToolName === "get_price" &&
               sessionGuard.lastQuotedRoute &&
-              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs &&
-              // Class-level veto (2026-04-21):
-              // `stale_guard_state_clobbers_clarification_turn`. A turn that
-              // drained a `set_requested_slot(pickup_area|dropoff_area)` is
-              // mid-clarification — the pricing tool returned AREA_AMBIGUOUS,
-              // did NOT produce a fresh priced route, and is asking the
-              // customer to disambiguate one leg. Inheriting
-              // `sessionGuard.lastQuotedRoute` on this turn can only come
-              // from a stale/persisted prior session, never from this
-              // turn's work. Skip the promotion and preserve the
-              // pending-area + requested-slot state the drain just committed.
-              // Regression: `smoke-test-clarification-turn-not-promoted.mjs`.
-              !turnDrainedRouteSideClarification
+              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs
             ) {
               const replyContainsPrice = replyText
                 ? (guardState?.extractPricesFromText(replyText) || []).some((p) =>
                     sessionGuard.allValidPrices.has(p),
                   )
                 : false;
-              const quotedStateEntry: PersistedConversationControllerEntry = {
-                ...conversationControllerEntry,
-                stage: "quoted",
-                bookingStep: "none",
-                language: preferredReplyLanguage,
+              const promotedQuote = promoteQuotedRouteState({
+                controllerEntry: conversationControllerEntry,
+                route: sessionGuard.lastQuotedRoute,
                 quoteTs: sessionGuard.lastToolTs,
-                quoteRouteKey: sessionGuard.lastQuotedRoute.routeKey,
-                quotePickupAreaNameEn: sessionGuard.lastQuotedRoute.pickupAreaNameEn,
-                quotePickupAreaNameAr: sessionGuard.lastQuotedRoute.pickupAreaNameAr,
-                quoteDropoffAreaNameEn: sessionGuard.lastQuotedRoute.dropoffAreaNameEn,
-                quoteDropoffAreaNameAr: sessionGuard.lastQuotedRoute.dropoffAreaNameAr,
-                // Pending areas were just promoted to quote* — clear them so
-                // a later turn doesn't carry forward a stale resolution.
-                pendingPickupAreaNameEn: null,
-                pendingPickupAreaNameAr: null,
-                pendingDropoffAreaNameEn: null,
-                pendingDropoffAreaNameAr: null,
-                bookingDraft: createEmptyBookingDraft(),
+                language: preferredReplyLanguage,
                 quotePresentedToCustomer: replyContainsPrice,
-                submittedOrderUid: null,
-              };
-              conversationControllerEntry = applySelectedQuotedOptionToController(
-                quotedStateEntry,
-                getQuotedRouteDefaultOption(sessionGuard.lastQuotedRoute),
-              );
-              if (!replyContainsPrice) {
+                preserveBookingDraft: shouldPreserveDraftOnQuotePromotion({
+                  controllerState: conversationControllerEntry,
+                  turnAppliedBookingProgress,
+                }),
+                visibleText: turnSignals.workflowInputText || rawBody || "",
+                sameTurnOptionInterpretation,
+                sessionGuard,
+                onBlocked: (decision) =>
+                  api.logger.warn(
+                    `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(decision)} conversation=${conversationId}`,
+                  ),
+                deferSummaryPromotion: RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY,
+              });
+              conversationControllerEntry = promotedQuote.entry;
+              if (
+                promotedQuote.promoted &&
+                promotedQuote.selectedOptionSource !== "default"
+              ) {
+                api.logger.info(
+                  `[option-resolve] committed_on_quote_promotion conversation=${conversationId} source=${promotedQuote.selectedOptionSource} option=${promotedQuote.selectedOption?.delivery_type || "-"} price=${formatQuotedOptionPrice(promotedQuote.selectedOption)} preserve_draft=${turnAppliedBookingProgress ? "yes" : "no"}`,
+                );
+              }
+              if (promotedQuote.promoted && !replyContainsPrice) {
                 api.logger.info(
                   `[controller] quote not yet presented to customer (clarification pending) conversation=${conversationId}`,
                 );
               }
-            } else if (sessionGuard.lastToolName === "create_simple_order") {
+            } else if (
+              sessionGuard.lastToolName === "create_simple_order" &&
+              String(sessionGuard.lastCreatedOrderUid || "").trim()
+            ) {
               const submittedOrderUid =
-                (sessionGuard.lastCreatedOrderUid && String(sessionGuard.lastCreatedOrderUid).trim()) ||
-                conversationControllerEntry.submittedOrderUid ||
-                null;
-              conversationControllerEntry = {
-                ...conversationControllerEntry,
-                stage: "order_submitted",
-                bookingStep: "none",
-                quoteTs: null,
-                quoteRouteKey: null,
-                quotePickupAreaNameEn: null,
-                quotePickupAreaNameAr: null,
-                quoteDropoffAreaNameEn: null,
-                quoteDropoffAreaNameAr: null,
-                pendingPickupAreaNameEn: null,
-                pendingPickupAreaNameAr: null,
-                pendingDropoffAreaNameEn: null,
-                pendingDropoffAreaNameAr: null,
-                selectedQuoteOptionType: null,
-                selectedQuoteOptionLabelAr: null,
-                selectedQuoteOptionLabelEn: null,
-                selectedQuoteOptionPrice: null,
-                selectedQuoteOptionDirectChatBookingStatus: null,
-                selectedDeliveryType: null,
-                quotedPrice: null,
-                bookingDraft: createEmptyBookingDraft(),
-                // Reset the dialog-state slot map alongside the booking
-                // draft on successful order placement. Without this,
-                // `slots.sender_name = {status:"filled", value:"…"}`
-                // (and the rest of the identity + address slot records)
-                // survive from the just-placed order into the NEXT
-                // booking in the same conversation, so the boundary
-                // flags any new value for an already-"filled" slot as
-                // `slot_conflict_with_filled_value` even though the
-                // customer is starting a fresh order. Empirically
-                // observed on conv 19294 (2026-04-22): Flow 1 placed
-                // EN order with `sender_name="Abdulaziz almulla"`, then
-                // Flow 2 voice note carried `sender_name="عبدالعزيز"`
-                // was rejected twice (fast_path + llm) with
-                // `slot_conflict_with_filled_value`, triggering a
-                // spurious CONFIRM_SLOT_CONFLICT whose AR renderer then
-                // leaked the raw slot key (Defect 2). The draft is
-                // already reset above, so DST must follow to stay in
-                // lockstep. Pattern mirrors the cancellation branch
-                // (see createEmptyDialogState / createRouteResetDialogState
-                // earlier in this file) — when DST is disabled via
-                // feature flag (`conversationControllerEntry.dialogState`
-                // is already null) we preserve null rather than
-                // materialising a state record.
-                dialogState: conversationControllerEntry.dialogState
-                  ? createEmptyDialogState()
-                  : null,
-                pendingReplyText: null,
-                submittedOrderUid,
-              };
-              if (submittedOrderUid) {
-                api.logger.info(
-                  `[post-order] stage=order_submitted uid=${submittedOrderUid} conversation=${conversationId} dialog_state_reset=${conversationControllerEntry.dialogState ? "yes" : "na"}`,
+                String(sessionGuard.lastCreatedOrderUid).trim() || null;
+              const lifecycleDecision = decideBookingLifecycleAdvance("order_submitted", {
+                controllerState: conversationControllerEntry,
+                sessionGuard,
+                dialogState: conversationControllerEntry.dialogState ?? null,
+                currentCustomerText: rawBody,
+                currentTurnToolResults: {
+                  orderCreatedUid: submittedOrderUid,
+                },
+                orderGuardResult: { ok: true },
+                now: Date.now(),
+              });
+              if (lifecycleDecision.decision === "allow") {
+                conversationControllerEntry = {
+                  ...conversationControllerEntry,
+                  stage: "order_submitted",
+                  bookingStep: "none",
+                  quoteTs: null,
+                  quoteRouteKey: null,
+                  quotePickupAreaNameEn: null,
+                  quotePickupAreaNameAr: null,
+                  quoteDropoffAreaNameEn: null,
+                  quoteDropoffAreaNameAr: null,
+                  quotePickupAreaResolution: null,
+                  quoteDropoffAreaResolution: null,
+                  pendingPickupAreaNameEn: null,
+                  pendingPickupAreaNameAr: null,
+                  pendingDropoffAreaNameEn: null,
+                  pendingDropoffAreaNameAr: null,
+                  pendingPickupAreaResolution: null,
+                  pendingDropoffAreaResolution: null,
+                  selectedQuoteOptionType: null,
+                  selectedQuoteOptionLabelAr: null,
+                  selectedQuoteOptionLabelEn: null,
+                  selectedQuoteOptionPrice: null,
+                  selectedQuoteOptionDirectChatBookingStatus: null,
+                  selectedDeliveryType: null,
+                  quotedPrice: null,
+                  bookingDraft: createEmptyBookingDraft(),
+                  // Reset the dialog-state slot map alongside the booking
+                  // draft on successful order placement. Without this,
+                  // `slots.sender_name = {status:"filled", value:"…"}`
+                  // (and the rest of the identity + address slot records)
+                  // survive from the just-placed order into the NEXT
+                  // booking in the same conversation, so the boundary
+                  // flags any new value for an already-"filled" slot as
+                  // `slot_conflict_with_filled_value` even though the
+                  // customer is starting a fresh order. Empirically
+                  // observed on conv 19294 (2026-04-22): Flow 1 placed
+                  // EN order with `sender_name="Abdulaziz almulla"`, then
+                  // Flow 2 voice note carried `sender_name="عبدالعزيز"`
+                  // was rejected twice (fast_path + llm) with
+                  // `slot_conflict_with_filled_value`, triggering a
+                  // spurious CONFIRM_SLOT_CONFLICT whose AR renderer then
+                  // leaked the raw slot key (Defect 2). The draft is
+                  // already reset above, so DST must follow to stay in
+                  // lockstep. Pattern mirrors the cancellation branch
+                  // (see createEmptyDialogState / createRouteResetDialogState
+                  // earlier in this file) — when DST is disabled via
+                  // feature flag (`conversationControllerEntry.dialogState`
+                  // is already null) we preserve null rather than
+                  // materialising a state record.
+                  dialogState: conversationControllerEntry.dialogState
+                    ? createEmptyDialogState()
+                    : null,
+                  pendingReplyText: null,
+                  submittedOrderUid,
+                  pendingOrderEdits: null,
+                };
+                if (submittedOrderUid) {
+                  api.logger.info(
+                    `[post-order] stage=order_submitted uid=${submittedOrderUid} conversation=${conversationId} dialog_state_reset=${conversationControllerEntry.dialogState ? "yes" : "na"}`,
+                  );
+                }
+              } else {
+                api.logger.warn(
+                  `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
                 );
               }
+            } else if (sessionGuard.lastToolName === "create_simple_order") {
+              api.logger.warn(
+                `[post-order] skipped_order_submitted_without_uid conversation=${conversationId}`,
+              );
             } else if (sessionGuard.lastToolName === "track_order") {
               conversationControllerEntry = clearAutomatedConversationContext({
                 ...conversationControllerEntry,
               });
-            } else if (
-              sessionGuard.lastToolName === "get_price" &&
-              sessionGuard.lastQuotedRoute &&
-              sessionGuard.lastToolTs !== conversationControllerEntry.quoteTs &&
-              turnDrainedRouteSideClarification
-            ) {
-              // Class-level veto fired. Emit an explicit observability log
-              // so the regression is easy to correlate in journalctl —
-              // mirror the shape of the clarify-commit log so dashboards
-              // can track both. See
-              // `smoke-test-clarification-turn-not-promoted.mjs`.
-              try {
-                api.logger.info(
-                  `[one-brain/clarify-preserved] skipped_quoted_promotion conversation=${conversationId} stale_route=${sessionGuard.lastQuotedRoute.pickupAreaNameEn || "-"}_to_${sessionGuard.lastQuotedRoute.dropoffAreaNameEn || "-"} requested_slot=${conversationControllerEntry.dialogState?.requestedSlot?.name || "-"} pending_pickup=${conversationControllerEntry.pendingPickupAreaNameEn || "-"} pending_dropoff=${conversationControllerEntry.pendingDropoffAreaNameEn || "-"}`,
-                );
-              } catch {}
             }
           }
           if (
@@ -6913,6 +7728,19 @@ async function handleInboundMessage(params: {
             turnSignals.workflowInputText &&
             isBookingStartIntent(turnSignals.workflowInputText)
           ) {
+            const lifecycleDecision = decideBookingLifecycleAdvance("collecting_booking_details", {
+              controllerState: conversationControllerEntry,
+              sessionGuard,
+              dialogState: conversationControllerEntry.dialogState ?? null,
+              currentCustomerText: rawBody,
+              now: Date.now(),
+            });
+            if (lifecycleDecision.decision === "block") {
+              api.logger.warn(
+                `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
+              );
+              handledByConversationController = true;
+            }
             const latestQuotedRoute =
               sessionGuard?.lastToolName === "get_price" && sessionGuard.lastQuotedRoute
                 ? sessionGuard.lastQuotedRoute
@@ -6923,6 +7751,7 @@ async function handleInboundMessage(params: {
               getQuotedRouteOption(effectiveQuotedRoute, conversationControllerEntry.selectedDeliveryType) ||
               getActiveSelectedQuotedOption(effectiveQuotedRoute, conversationControllerEntry);
             if (
+              lifecycleDecision.decision === "allow" &&
               effectiveQuotedRoute &&
               selectedQuotedOption?.direct_chat_booking_status &&
               selectedQuotedOption.direct_chat_booking_status !== "verified"
@@ -6941,7 +7770,7 @@ async function handleInboundMessage(params: {
                 `[controller] blocked booking transition for non-direct-bookable option conversation=${conversationId} deliveryType=${selectedQuotedOption.delivery_type} status=${selectedQuotedOption.direct_chat_booking_status}`,
               );
             }
-            if (!handledByConversationController) {
+            if (!handledByConversationController && lifecycleDecision.decision === "allow") {
               api.logger.info(
                 `[controller] Transitioned quoted conversation to booking-details stage language=${preferredReplyLanguage} conversation=${conversationId}`,
               );
@@ -6959,6 +7788,8 @@ async function handleInboundMessage(params: {
                 quotePickupAreaNameAr: latestQuotedRoute?.pickupAreaNameAr || conversationControllerEntry.quotePickupAreaNameAr,
                 quoteDropoffAreaNameEn: latestQuotedRoute?.dropoffAreaNameEn || conversationControllerEntry.quoteDropoffAreaNameEn,
                 quoteDropoffAreaNameAr: latestQuotedRoute?.dropoffAreaNameAr || conversationControllerEntry.quoteDropoffAreaNameAr,
+                quotePickupAreaResolution: latestQuotedRoute?.pickupAreaResolution ?? conversationControllerEntry.quotePickupAreaResolution ?? null,
+                quoteDropoffAreaResolution: latestQuotedRoute?.dropoffAreaResolution ?? conversationControllerEntry.quoteDropoffAreaResolution ?? null,
                 selectedDeliveryType: conversationControllerEntry.selectedDeliveryType,
                 quotedPrice: selectedQuotedPrice,
                 bookingDraft: {
@@ -6970,7 +7801,16 @@ async function handleInboundMessage(params: {
               conversationControllerEntry = selectedQuotedOption
                 ? applySelectedQuotedOptionToController(bookingStateEntry, selectedQuotedOption)
                 : bookingStateEntry;
-              conversationControllerEntry = applyBookingDraftProgress(conversationControllerEntry);
+              conversationControllerEntry = applyBookingDraftProgress(conversationControllerEntry, {
+                lifecycle: {
+                  sessionGuard,
+                  currentCustomerText: rawBody,
+                },
+                onBlocked: (decision) =>
+                  api.logger.warn(
+                    `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(decision)} conversation=${conversationId}`,
+                  ),
+              });
               controllerReplyLogKind = "booking_details";
               controllerTransitionHint = `booking_started:${conversationControllerEntry.bookingStep}`;
             }
@@ -6994,15 +7834,36 @@ async function handleInboundMessage(params: {
           // Step-4 consolidation. They now run together with the verify +
           // hallucination-guard pass below.
           if (conversationControllerEntry) {
-            const persistedEntry =
+            let persistedEntry = conversationControllerEntry;
+            if (
               conversationControllerEntry.stage === "summary_shown" ||
-                conversationControllerEntry.bookingStep === "summary_pending"
-                ? {
-                    ...conversationControllerEntry,
-                    stage: "awaiting_confirmation" as ConversationFlowStage,
-                    bookingStep: "awaiting_summary_confirmation" as BookingCollectionStep,
-                  }
-                : conversationControllerEntry;
+              conversationControllerEntry.bookingStep === "summary_pending"
+            ) {
+              const lifecycleDecision = decideBookingLifecycleAdvance("awaiting_confirmation", {
+                controllerState: conversationControllerEntry,
+                sessionGuard,
+                dialogState: conversationControllerEntry.dialogState ?? null,
+                currentCustomerText: rawBody,
+                currentTurnToolResults: {
+                  missingFields: computeOneBrainMissingFields(
+                    conversationControllerEntry.bookingDraft,
+                    conversationControllerEntry,
+                  ),
+                },
+                now: Date.now(),
+              });
+              if (lifecycleDecision.decision === "allow") {
+                persistedEntry = {
+                  ...conversationControllerEntry,
+                  stage: "awaiting_confirmation" as ConversationFlowStage,
+                  bookingStep: "awaiting_summary_confirmation" as BookingCollectionStep,
+                };
+              } else {
+                api.logger.warn(
+                  `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
+                );
+              }
+            }
             if (guardState && conversationControllerEntry.bookingStep === "summary_pending") {
               const fingerprint = buildPendingOrderSummaryFingerprint(conversationControllerEntry);
               if (fingerprint) {
@@ -7050,73 +7911,77 @@ async function handleInboundMessage(params: {
               conversationControllerEntry.bookingDraft,
               conversationControllerEntry,
             );
-            const hallucinationGuardEnabled = isHallucinationGuardEnabled();
-            const nextRequiredAction = hallucinationGuardEnabled
-              ? (computeOneBrainNextRequiredAction({
-                  draft: conversationControllerEntry.bookingDraft,
-                  entry: conversationControllerEntry,
-                  missing: missingForVerify,
-                })?.action ?? null)
-              : null;
-            // Full valid price set for the active quoted route — feeds
-            // the hallucination guard so it can accept legitimate replies
-            // that mention other options' prices (e.g. answering
-            // "is there other options?") without flagging them as a
-            // price_mismatch. See the `activeQuotedPrices` note on
-            // `HallucinationGuardInputs` for the incident reference.
-            //
-            // The set is the UNION of:
-            //   (a) `pricesByType` — the bookable vehicle types
-            //       (sedan_normal/fast, van_normal/fast). These are the
-            //       options the customer can actually place an order for
-            //       via `create_simple_order`.
-            //   (b) `optionCatalog[*].quoted_price` — every option the
-            //       customer is ALLOWED TO HEAR A PRICE FOR, even if it
-            //       requires manual confirmation (e.g. Helper service).
-            //       These are surfaced to the LLM in the quote payload
-            //       as `other_options_if_customer_asks`, so a reply that
-            //       mentions their price is legitimately grounded.
-            //
-            // Pre-fix (2026-04-19 second incident): the set was only (a),
-            // so a truthful reply naming "Helper service at 3.250 KWD"
-            // — manual-confirm option, not in `pricesByType` — registered
-            // as a price_mismatch and was substituted with the neutral
-            // price_repair. The LLM's answer was correct; the guard was
-            // under-informed.
-            //
-            // Source selection (2026-04-22): the outer `activeQuotedRoute`
-            // binding is a TURN-START snapshot taken at line ~3606 from
-            // `preDispatchGuardEntry.session?.lastQuotedRoute`. On an
-            // initial-route turn (no prior quote on session), that
-            // snapshot is `null` for the entire handler even when THIS
-            // turn's `get_price` materialised a fresh catalog inside the
-            // responder drain. Reading it here therefore leaves
-            // `activeQuotedPrices=[]`, and the guard falls back to the
-            // scalar `entry.quotedPrice` (the default option, e.g.
-            // standard sedan). A truthful reply naming a non-default
-            // option's price — "Express sedan at 1.750 KWD" on a first
-            // quote — then registers as a `price_mismatch
-            // mentioned=1.75 valid=1.25` and is replaced by the neutral
-            // price-repair template (live incident, conv 19400, 2026-04-22).
-            //
-            // Fix: prefer the POST-DRAIN snapshot on
-            // `sessionGuard.lastQuotedRoute` when THIS turn actually ran
-            // `get_price` (same gate `getPriceFiredThisTurn` uses below
-            // for the Class-15 bypass). That snapshot carries the full
-            // `pricesByType` + `optionCatalog` the tool just produced.
-            // Fall back to the turn-start `activeQuotedRoute` otherwise,
-            // which preserves prior-turn behaviour on follow-up turns
-            // where no new pricing call fired. Strictly a guard-input
-            // population fix — no schema change, no policy change, and
-            // no new quote-stage handling. See `selectGuardQuotedRoute`
-            // + `collectActiveQuotedPrices` in
-            // `lib/quoted-options.ts`.
-            const guardQuotedRoute = selectGuardQuotedRoute({
-              turnStartSnapshot: activeQuotedRoute,
+            const getPriceFiredThisTurn =
+              sessionGuard?.lastToolName === "get_price" &&
+              typeof sessionGuard?.lastToolTs === "number" &&
+              sessionGuard.lastToolTs >= turnStartMs;
+            const currentTurnDispositionForSnapshot =
+              RIDERS_SINGLE_LIFECYCLE_ENGINE
+                ? deriveCurrentTurnDispositionForSnapshot({
+                    proposedTurnDecisionRaw,
+                    getPriceFired: getPriceFiredThisTurn,
+                    hasConcreteMutation: turnAppliedBookingProgress,
+                    stateResetApplied: turnDrainedOpKinds.has("cancel_booking"),
+                  })
+                : null;
+            const currentTurnConfirmationExplicit =
+              turnConfirmationExplicit ||
+              currentTurnDispositionForSnapshot?.awaitingConfirmationKind ===
+                "confirm_order";
+            let postDrainBookingTruthSnapshot = buildBookingTruthSnapshot({
+              timing: "post_drain",
+              controllerState: conversationControllerEntry,
               sessionGuard,
-              turnStartMs,
+              dialogState: conversationControllerEntry.dialogState ?? null,
+              missingFields: missingForVerify,
+              coveragePending: (sessionGuard as any)?.coveragePending ?? null,
+              confirmationExplicit: currentTurnConfirmationExplicit,
+              currentTurnDisposition: currentTurnDispositionForSnapshot,
+              requireRenderedSummaryHash: RIDERS_SINGLE_LIFECYCLE_ENGINE,
+              now: Date.now(),
             });
-            const activeQuotedPrices = collectActiveQuotedPrices(guardQuotedRoute);
+            try {
+              const legacyMissing = Array.isArray(missingForVerify)
+                ? [...missingForVerify].sort()
+                : [];
+              const snapshotMissing = [
+                ...postDrainBookingTruthSnapshot.missingFields,
+              ].sort();
+              if (legacyMissing.join("|") !== snapshotMissing.join("|")) {
+                api.logger.warn(
+                  `[booking-truth-snapshot/compare] conversation=${conversationId} kind=missing_fields legacy=[${legacyMissing.join(",")}] snapshot=[${snapshotMissing.join(",")}] next=${postDrainBookingTruthSnapshot.nextMissingField || "-"} route_lock=${postDrainBookingTruthSnapshot.route.lockStatus}`,
+                );
+              }
+              if (
+                postDrainBookingTruthSnapshot.summary.ready &&
+                postDrainBookingTruthSnapshot.missingFields.length > 0
+              ) {
+                api.logger.warn(
+                  `[booking-truth-snapshot/compare] conversation=${conversationId} kind=summary_ready_with_missing missing=[${postDrainBookingTruthSnapshot.missingFields.join(",")}]`,
+                );
+              }
+              if (
+                postDrainBookingTruthSnapshot.order.ready &&
+                !postDrainBookingTruthSnapshot.summary.ready
+              ) {
+                api.logger.warn(
+                  `[booking-truth-snapshot/compare] conversation=${conversationId} kind=order_ready_without_summary_ready order_blockers=[${postDrainBookingTruthSnapshot.order.blockers.join(",")}] summary_blockers=[${postDrainBookingTruthSnapshot.summary.blockers.join(",")}]`,
+                );
+              }
+              if (
+                RIDERS_LIFECYCLE_SNAPSHOT_ONLY ||
+                RIDERS_SNAPSHOT_GUARDS_ONLY ||
+                RIDERS_POST_DRAIN_REAUTHOR ||
+                RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ||
+                RIDERS_SINGLE_LIFECYCLE_ENGINE
+              ) {
+                api.logger.info(
+                  `[booking-truth-snapshot/flags] conversation=${conversationId} context_only=${RIDERS_SNAPSHOT_CONTEXT_ONLY ? "1" : "0"} lifecycle_snapshot_only=${RIDERS_LIFECYCLE_SNAPSHOT_ONLY ? "1" : "0"} post_drain_reauthor=${RIDERS_POST_DRAIN_REAUTHOR ? "1" : "0"} guards_snapshot_only=${RIDERS_SNAPSHOT_GUARDS_ONLY ? "1" : "0"} plan_b_final_reply=${RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ? "1" : "0"} single_lifecycle=${RIDERS_SINGLE_LIFECYCLE_ENGINE ? "1" : "0"} plan_b_log_legacy=${RIDERS_PLAN_B_LOG_LEGACY_AUTHORITY ? "1" : "0"}`,
+                );
+              }
+            } catch {
+              // Comparison telemetry must never affect reply delivery.
+            }
             // Class-15 bypass detection (2026-04-21).
             //
             // Precondition tuple: this turn's inbound carried route
@@ -7138,32 +8003,222 @@ async function handleInboundMessage(params: {
             // a previous turn / session — fails the check, which is
             // what we want: the invariant is "this turn went through
             // the tool", not "some turn at some point did".
-            const getPriceFiredThisTurn =
-              sessionGuard?.lastToolName === "get_price" &&
+            const createSimpleOrderFiredThisTurn =
+              sessionGuard?.lastToolName === "create_simple_order" &&
+              !!String(sessionGuard?.lastCreatedOrderUid || "").trim() &&
               typeof sessionGuard?.lastToolTs === "number" &&
               sessionGuard.lastToolTs >= turnStartMs;
-            const classFifteenBypass =
-              hasRouteEvidence(rawBody) &&
-              (stageAtTurnStart === null || stageAtTurnStart === "idle") &&
-              !activeQuotedRoute &&
-              !getPriceFiredThisTurn;
-            const postDecision = decidePostStateOutbound({
+            if (
+              RIDERS_SINGLE_LIFECYCLE_ENGINE &&
+              postDrainBookingTruthSnapshot.nextAction.type === "submit_order" &&
+              !createSimpleOrderFiredThisTurn
+            ) {
+              const executor = (globalThis as any).__ridersSubmitOrderFromSnapshot;
+              if (typeof executor === "function") {
+                try {
+                  const submitResult = await executor(
+                    postDrainBookingTruthSnapshot,
+                    ctxPayload,
+                  );
+                  const submitPayload = parseToolTextPayload(submitResult);
+                  const submittedOrderUid =
+                    String(
+                      submitPayload?.order?.uid ||
+                        submitPayload?.order?.id ||
+                        submitPayload?.order_uid ||
+                        "",
+                    ).trim() || null;
+                  if (submitPayload?.status === "ok" && submittedOrderUid) {
+                    conversationControllerEntry = {
+                      ...conversationControllerEntry,
+                      stage: "order_submitted" as ConversationFlowStage,
+                      bookingStep: "none" as BookingCollectionStep,
+                      quoteTs: null,
+                      quoteRouteKey: null,
+                      quotePickupAreaNameEn: null,
+                      quotePickupAreaNameAr: null,
+                      quoteDropoffAreaNameEn: null,
+                      quoteDropoffAreaNameAr: null,
+                      quotePickupAreaResolution: null,
+                      quoteDropoffAreaResolution: null,
+                      pendingPickupAreaNameEn: null,
+                      pendingPickupAreaNameAr: null,
+                      pendingDropoffAreaNameEn: null,
+                      pendingDropoffAreaNameAr: null,
+                      pendingPickupAreaResolution: null,
+                      pendingDropoffAreaResolution: null,
+                      selectedQuoteOptionType: null,
+                      selectedQuoteOptionLabelAr: null,
+                      selectedQuoteOptionLabelEn: null,
+                      selectedQuoteOptionPrice: null,
+                      selectedQuoteOptionDirectChatBookingStatus: null,
+                      selectedDeliveryType: null,
+                      quotedPrice: null,
+                      bookingDraft: createEmptyBookingDraft(),
+                      dialogState: conversationControllerEntry.dialogState
+                        ? createEmptyDialogState()
+                        : null,
+                      pendingReplyText: null,
+                      submittedOrderUid,
+                      pendingOrderEdits: null,
+                    };
+                    await upsertConversationControllerEntry(controllerStateKey, {
+                      ...conversationControllerEntry,
+                      lastActivityTs: Date.now(),
+                      conversationId,
+                      replyTarget,
+                      accountId: account.accountId,
+                    });
+                    mirrorConversationControllerEntry(controllerStateKey, {
+                      ...conversationControllerEntry,
+                      lastActivityTs: Date.now(),
+                      conversationId,
+                      replyTarget,
+                      accountId: account.accountId,
+                    });
+                    postDrainBookingTruthSnapshot = buildBookingTruthSnapshot({
+                      timing: "post_drain",
+                      controllerState: conversationControllerEntry,
+                      sessionGuard: sessionGuard as any,
+                      dialogState: conversationControllerEntry.dialogState ?? null,
+                      missingFields: [],
+                      coveragePending: (sessionGuard as any)?.coveragePending ?? null,
+                      orderCreatedUid: submittedOrderUid,
+                      confirmationExplicit: true,
+                      requireRenderedSummaryHash: RIDERS_SINGLE_LIFECYCLE_ENGINE,
+                      now: Date.now(),
+                    });
+                    api.logger.info(
+                      `[single-lifecycle] submit_order executed before final reply conversation=${conversationId} order_uid=${submittedOrderUid}`,
+                    );
+                  } else {
+                    api.logger.warn(
+                      `[single-lifecycle] submit_order returned non-ok before final reply conversation=${conversationId} status=${String(submitPayload?.status || "unknown")} cause=${String(submitPayload?.reason || submitPayload?.message || "unknown")}`,
+                    );
+                  }
+                } catch (error) {
+                  api.logger.warn(
+                    `[single-lifecycle] submit_order failed before final reply conversation=${conversationId} cause=${error instanceof Error ? error.message : String(error)}`,
+                  );
+                }
+              } else {
+                api.logger.warn(
+                  `[single-lifecycle] submit_order executor unavailable before final reply conversation=${conversationId} has_executor=0`,
+                );
+              }
+            }
+            const canonicalTransactionText =
+              preferredReplyLanguage === "ar"
+                ? (sessionGuard?.lastCustomerMessages?.ar ||
+                    sessionGuard?.lastCustomerMessage ||
+                    null)
+                : (sessionGuard?.lastCustomerMessages?.en ||
+                    sessionGuard?.lastCustomerMessage ||
+                    null);
+            let planBMarkedSummaryShown = false;
+            if (RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY || RIDERS_SINGLE_LIFECYCLE_ENGINE) {
+              const appliedOpsForFinal =
+                turnAppliedOpsSummary.length > 0
+                  ? turnAppliedOpsSummary
+                  : [...turnDrainedOpKinds].map((kind) => `${kind}:drained`);
+              const rejectedOpsForFinal = (hallucinationGuardRejections || []).map(
+                (rejection) => {
+                  const field = String((rejection as any).field || "unknown");
+                  const reason = String((rejection as any).reason || "rejected");
+                  return `${field}:${reason}`;
+                },
+              );
+              try {
+                const finalReply = await generateFinalSnapshotReply({
+                  originalCustomerMessage: rawBody,
+                  appliedOpsSummary: appliedOpsForFinal,
+                  rejectedOpsSummary: rejectedOpsForFinal,
+                  bookingTruthSnapshot: postDrainBookingTruthSnapshot,
+                  preferredLanguage: preferredReplyLanguage,
+                  canonicalTransactionText,
+                  generateReply: (messages) =>
+                    generatePlanBFinalSnapshotReply({ messages, api }),
+                });
+                replyText = finalReply.replyText;
+                planBMarkedSummaryShown = finalReply.markedSummaryShown;
+                if (finalReply.status === "generated") {
+                  turnFinalDecision = "allow_sanitized";
+                  turnFinalReason = "allow_sanitized";
+                  turnReplyAuthor = "llm";
+                  turnReplyReason = "plan_b_final_snapshot_reply";
+                } else if (finalReply.status === "server_transaction_result") {
+                  turnFinalDecision = "replace_authoritative";
+                  turnFinalReason = "replace_transaction_artifact_missing";
+                  turnReplyAuthor = "server";
+                  turnReplyReason = finalReply.reason;
+                } else {
+                  turnFinalDecision = "replace_fallback";
+                  turnFinalReason = "fallback_empty_reply";
+                  turnReplyAuthor = "fallback";
+                  turnReplyReason = finalReply.reason;
+                }
+                api.logger[finalReply.status === "fallback" ? "warn" : "info"](
+                  `[plan-b/final-reply] conversation=${conversationId} status=${finalReply.status} model=${RIDERS_PLAN_B_FINAL_REPLY_MODEL} attempts=${finalReply.attempts} next_action=${postDrainBookingTruthSnapshot.nextAction.type} lifecycle_state=${postDrainBookingTruthSnapshot.lifecycleState} summary_hash_current=${postDrainBookingTruthSnapshot.summary.currentHash || "-"} summary_hash_last=${postDrainBookingTruthSnapshot.summary.lastRenderedHash || "-"} summary_hash_match=${postDrainBookingTruthSnapshot.summary.hashMatchesLastRendered ? "1" : "0"} single_lifecycle=${RIDERS_SINGLE_LIFECYCLE_ENGINE ? "1" : "0"} missing=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] address_satisfaction=pickup:${postDrainBookingTruthSnapshot.addressSatisfaction.pickup ? "1" : "0"},delivery:${postDrainBookingTruthSnapshot.addressSatisfaction.delivery ? "1" : "0"} coherent=${finalReply.coherence?.coherent === false ? "0" : "1"}`,
+                );
+              } catch (error) {
+                replyText = buildProviderIssueFallbackReply(preferredReplyLanguage);
+                turnFinalDecision = "replace_fallback";
+                turnFinalReason = "fallback_empty_reply";
+                turnReplyAuthor = "fallback";
+                turnReplyReason = "plan_b_final_reply_error";
+                api.logger.warn(
+                  `[plan-b/final-reply] conversation=${conversationId} status=error error=${error instanceof Error ? error.message : String(error)}`,
+                );
+              }
+            }
+            const postDecision = {
+              decision: "allow" as const,
+              reason: "allow" as const,
               replyText,
-              preferredLanguage: preferredReplyLanguage,
-              conversationControllerEntry,
-              missingFields: missingForVerify,
-              hallucinationGuardRejections,
-              stageAtTurnStart,
-              hallucinationGuardEnabled,
-              nextRequiredAction,
-              activeQuotedPrices,
-              cancelContradicted,
-              controllerTransitionHint,
-              buildDeterministicGraceWindowReply,
-              buildProviderIssueFallbackReply,
-              classFifteenBypass,
-              conversationId,
-            });
+              detectedShape: null,
+              markedSummaryShown: false,
+              replyAuthor: "llm" as const,
+              logEntries: [
+                {
+                  level: "info" as const,
+                  message: `[single-lifecycle] final snapshot reply owns outbound decision conversation=${conversationId} next_action=${postDrainBookingTruthSnapshot.nextAction.type}`,
+                  detail: {
+                    conversationId,
+                    nextAction: postDrainBookingTruthSnapshot.nextAction.type,
+                  },
+                },
+              ],
+            };
+            try {
+              const snapshotNext = postDrainBookingTruthSnapshot.nextAction;
+              const legacyDirective = "-";
+              const legacyNextRequiredAction = "-";
+              const outboundReason = postDecision.reason || "-";
+              const mismatch =
+                snapshotNext.type === "resolve_route_ambiguity"
+                  ? legacyDirective !== "ASK_PICKUP_AREA" &&
+                    legacyDirective !== "ASK_DELIVERY_AREA" &&
+                    !String(legacyNextRequiredAction).startsWith("ASK_")
+                  : snapshotNext.type === "collect_missing_field"
+                    ? !String(legacyNextRequiredAction).includes(
+                        snapshotNext.field,
+                      )
+                    : snapshotNext.type === "submit_order"
+                      ? /ASK_|AREA|FIELD|MISSING/i.test(
+                          `${legacyDirective} ${legacyNextRequiredAction} ${outboundReason}`,
+                        )
+                      : false;
+              api.logger[mismatch ? "warn" : "info"](
+                `[booking-truth-snapshot/next-action] conversation=${conversationId} type=${snapshotNext.type} reason=${snapshotNext.reason} field=${"field" in snapshotNext ? snapshotNext.field || "-" : "-"} route_lock=${postDrainBookingTruthSnapshot.route.lockStatus} missing=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] address_satisfaction=pickup:${postDrainBookingTruthSnapshot.addressSatisfaction.pickup ? "1" : "0"},delivery:${postDrainBookingTruthSnapshot.addressSatisfaction.delivery ? "1" : "0"} confirmationExplicit=${currentTurnConfirmationExplicit ? "1" : "0"} ac_kind=${postDrainBookingTruthSnapshot.currentTurnDisposition?.awaitingConfirmationKind || "-"} ti_kind=${postDrainBookingTruthSnapshot.currentTurnDisposition?.turnIntentKind || "-"} concrete_mutation=${postDrainBookingTruthSnapshot.currentTurnDisposition?.hasConcreteMutation ? "1" : "0"} legacy_directive=${legacyDirective} legacy_next=${legacyNextRequiredAction} outbound_decision=${postDecision.decision} outbound_reason=${outboundReason} mismatch=${mismatch ? "1" : "0"} plan_b=${RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY ? "1" : "0"}`,
+              );
+              if (postDrainBookingTruthSnapshot.blockedStateActions.length > 0) {
+                api.logger.warn(
+                  `[single-lifecycle/state-blocked] conversation=${conversationId} blocks=${postDrainBookingTruthSnapshot.blockedStateActions.map((item) => `${item.action}:${item.reason}`).join("|")} next_action=${snapshotNext.type} turn_kind=${postDrainBookingTruthSnapshot.currentTurnDisposition?.turnKind || "-"} pricing_action=${postDrainBookingTruthSnapshot.currentTurnDisposition?.pricingAction || "-"} ac_kind=${postDrainBookingTruthSnapshot.currentTurnDisposition?.awaitingConfirmationKind || "-"} ti_kind=${postDrainBookingTruthSnapshot.currentTurnDisposition?.turnIntentKind || "-"}`,
+                );
+              }
+            } catch {
+              // Shadow next-action telemetry must never affect reply delivery.
+            }
             replyText = postDecision.replyText;
             emitOutboundDecisionLogs(api, postDecision.logEntries);
             // Provenance derivation: this branch always runs C1 + C2
@@ -7194,15 +8249,96 @@ async function handleInboundMessage(params: {
               turnReplyAuthor = postDecision.replyAuthor;
               turnReplyReason = postDecision.reason;
             }
-            if (postDecision.markedSummaryShown) {
+            let postDrainReauthorSubstituted = false;
+            if (
+              RIDERS_POST_DRAIN_REAUTHOR &&
+              !RIDERS_PLAN_B_SNAPSHOT_FINAL_REPLY &&
+              !RIDERS_SINGLE_LIFECYCLE_ENGINE
+            ) {
+              try {
+                api.logger.info(
+                  `[post-drain-reply-coherence] conversation=${conversationId} checking=1 missingFields=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] route_lock_status=${postDrainBookingTruthSnapshot.route.lockStatus}`,
+                );
+                const reauthor = await reauthorPostDrainReply({
+                  replyText,
+                  originalCustomerMessage: rawBody,
+                  appliedOpsSummary:
+                    turnAppliedOpsSummary.length > 0
+                      ? turnAppliedOpsSummary
+                      : [...turnDrainedOpKinds].map((kind) => `${kind}:drained`),
+                  bookingTruthSnapshot: postDrainBookingTruthSnapshot,
+                  preferredLanguage: preferredReplyLanguage,
+                  generateReply: (messages) =>
+                    generatePostDrainReauthorReply({ messages, api }),
+                });
+                api.logger.info(
+                  `[post-drain-reply-coherence] conversation=${conversationId} status=${reauthor.initialCoherence.coherent ? "coherent" : "conflict"} invalidations=${reauthor.initialCoherence.invalidations
+                    .map((item) => `${item.kind}:${item.field}`)
+                    .join(",") || "-"} missingFields=[${postDrainBookingTruthSnapshot.missingFields.join(",")}] route_lock_status=${postDrainBookingTruthSnapshot.route.lockStatus}`,
+                );
+                if (reauthor.status !== "not_needed") {
+                  postDrainReauthorSubstituted = true;
+                  replyText = reauthor.replyText;
+                  turnFinalDecision =
+                    reauthor.status === "reauthored"
+                      ? "allow_sanitized"
+                      : "replace_fallback";
+                  turnFinalReason =
+                    reauthor.status === "reauthored"
+                      ? "replace_stale_missing_field_ask"
+                      : "fallback_empty_reply";
+                  turnReplyAuthor =
+                    reauthor.status === "reauthored" ? "llm" : "fallback";
+                  turnReplyReason = turnFinalReason;
+                  api.logger.warn(
+                    `[post-drain-reply-reauthor] conversation=${conversationId} status=${reauthor.status} fallback_only_after_retry_conflict=${reauthor.status === "fallback" && reauthor.reason === "retry_conflicted" ? "yes" : "no"} invalidations=${reauthor.initialCoherence.invalidations
+                      .map((item) => `${item.kind}:${item.field}`)
+                      .join(",")} missing=[${postDrainBookingTruthSnapshot.missingFields.join(",")}]${reauthor.status === "fallback" ? ` fallback_reason=${reauthor.reason}` : ""}`,
+                  );
+                }
+              } catch (error) {
+                api.logger.warn(
+                  `[post-drain-reply-reauthor] conversation=${conversationId} status=error error=${error instanceof Error ? error.message : String(error)}`,
+                );
+              }
+            }
+            if (
+              (postDecision.markedSummaryShown ||
+                (planBMarkedSummaryShown && postDecision.decision === "allow")) &&
+              !postDrainReauthorSubstituted
+            ) {
               // Mark the summary as having been shown so downstream
               // confirmation detection and order-guard "summary_shown" gate
               // both work off the real event, not the stub.
-              conversationControllerEntry = {
-                ...conversationControllerEntry,
-                stage: "summary_shown" as ConversationFlowStage,
-                bookingStep: "summary_pending" as BookingCollectionStep,
-              };
+              const lifecycleDecision = decideBookingLifecycleAdvance("summary_shown", {
+                controllerState: conversationControllerEntry,
+                sessionGuard,
+                dialogState: conversationControllerEntry.dialogState ?? null,
+                currentCustomerText: rawBody,
+                currentTurnToolResults: {
+                  missingFields: computeOneBrainMissingFields(
+                    conversationControllerEntry.bookingDraft,
+                    conversationControllerEntry,
+                  ),
+                },
+                now: Date.now(),
+              });
+              if (lifecycleDecision.decision === "allow") {
+                const renderedSummaryHash =
+                  postDrainBookingTruthSnapshot.summary.currentHash || null;
+                conversationControllerEntry = {
+                  ...conversationControllerEntry,
+                  stage: "summary_shown" as ConversationFlowStage,
+                  bookingStep: "summary_pending" as BookingCollectionStep,
+                  lastRenderedSummaryHash: renderedSummaryHash,
+                  lastRenderedSummaryAt: renderedSummaryHash ? Date.now() : null,
+                };
+                turnRenderedSummaryHash = renderedSummaryHash;
+              } else {
+                api.logger.warn(
+                  `[booking-lifecycle-gate-block] transition=${bookingLifecycleDecisionSummary(lifecycleDecision)} conversation=${conversationId}`,
+                );
+              }
             }
             // [drift/get-price-bypass] Phase D baseline counter (2026-04-21).
             //
@@ -7296,7 +8432,7 @@ async function handleInboundMessage(params: {
                 `[drift/get-price-bypass] conversation=${conversationId} ` +
                   `turn_kind=${turnKind} outcome=${outcome} ` +
                   `get_price_fired=${getPriceFiredThisTurn ? "true" : "false"} ` +
-                  `class15_bypass_flag=${classFifteenBypass ? "true" : "false"} ` +
+                  `class15_bypass_flag=false ` +
                   `class15_repair_fired=${class15RepairFired ? "true" : "false"} ` +
                   `stage_at_turn_start=${stageAtTurnStart || "-"} ` +
                   `had_active_quoted_route=${hadActiveQuotedRouteAtTurnStart ? "true" : "false"} ` +
@@ -7628,45 +8764,15 @@ async function handleInboundMessage(params: {
               } catch {}
             }
           } else {
-            // No controller entry — handle the bare empty-reply fallbacks
-            // inline. `decidePostStateOutbound` is a no-op for the
-            // non-controller case beyond these three lines (the verify +
-            // hallucination-guard passes both require an entry), so we
-            // skip the call and do the minimum here for clarity.
-            const postDecision = decidePostStateOutbound({
-              replyText,
-              preferredLanguage: preferredReplyLanguage,
-              conversationControllerEntry: null,
-              missingFields: [],
-              hallucinationGuardRejections: [],
-              stageAtTurnStart: null,
-              hallucinationGuardEnabled: false,
-              nextRequiredAction: null,
-              controllerTransitionHint,
-              buildDeterministicGraceWindowReply,
-              buildProviderIssueFallbackReply,
-              conversationId,
-            });
-            replyText = postDecision.replyText;
-            emitOutboundDecisionLogs(api, postDecision.logEntries);
-            // In the no-controller branch, `decidePostStateOutbound`
-            // runs only the empty-reply fallbacks (B1/B2) — C1 + C2
-            // both require an entry and are skipped. That means an
-            // `allow` outcome here represents LLM text that never went
-            // through the verify / hallucination-guard gates, so
-            // `verifiedByPostDecision` stays false and the derived
-            // provenance is `llm_unverified`. Keeping the flag
-            // conservative here is what lets the eval-corpus distinguish
-            // genuinely unverified main-path turns from the routine
-            // passthrough case (which always has a controller entry).
+            if (!replyText || !replyText.trim()) {
+              replyText = buildProviderIssueFallbackReply(preferredReplyLanguage);
+              turnFinalDecision = "replace_fallback";
+              turnFinalReason = "fallback_empty_reply";
+              turnReplyAuthor = "fallback";
+              turnReplyReason = "fallback_empty_reply";
+            }
             turnPostStateRan = true;
             turnPostStateWasLightweight = true;
-            if (postDecision.decision !== "allow") {
-              turnFinalDecision = postDecision.decision;
-              turnFinalReason = postDecision.reason;
-              turnReplyAuthor = postDecision.replyAuthor;
-              turnReplyReason = postDecision.reason;
-            }
           }
           // Phase 5 attribution — emit ONE canonical line per turn so
           // per-conversation / per-directive aggregation is a grep away.
@@ -8012,6 +9118,35 @@ async function handleInboundMessage(params: {
               mirrorConversationControllerEntry(controllerStateKey, conversationControllerEntry);
               api.logger.info(
                 `[controller] pending reply flushed with current reply conversation=${conversationId}`,
+              );
+            }
+            if (
+              RIDERS_SINGLE_LIFECYCLE_ENGINE &&
+              turnRenderedSummaryHash &&
+              conversationControllerEntry
+            ) {
+              await upsertConversationControllerEntry(controllerStateKey, {
+                ...conversationControllerEntry,
+                lastRenderedSummaryHash: turnRenderedSummaryHash,
+                lastRenderedSummaryAt:
+                  conversationControllerEntry.lastRenderedSummaryAt ?? Date.now(),
+                lastActivityTs: Date.now(),
+                conversationId,
+                replyTarget,
+                accountId: account.accountId,
+              }).catch(() => {});
+              mirrorConversationControllerEntry(controllerStateKey, {
+                ...conversationControllerEntry,
+                lastRenderedSummaryHash: turnRenderedSummaryHash,
+                lastRenderedSummaryAt:
+                  conversationControllerEntry.lastRenderedSummaryAt ?? Date.now(),
+                lastActivityTs: Date.now(),
+                conversationId,
+                replyTarget,
+                accountId: account.accountId,
+              });
+              api.logger.info(
+                `[single-lifecycle] recorded rendered summary hash conversation=${conversationId} hash=${turnRenderedSummaryHash}`,
               );
             }
             // Legacy interpreter-driven handoff removed; one-brain emits a
@@ -8645,6 +9780,9 @@ export const __testables = {
   clearQuotedRouteContext,
   clearAutomatedConversationContext,
   applyCarryOverOp,
+  promoteQuotedRouteState,
+  optionInterpretationDeliveryType,
+  resolveSameTurnOptionForPromotedQuote,
   shouldMoveToHumanAgent,
   shouldPreserveGreetingDuringActiveFlow,
   isGreetingInGraceWindow,

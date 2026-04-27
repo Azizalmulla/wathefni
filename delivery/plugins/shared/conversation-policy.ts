@@ -1,4 +1,5 @@
-import type { DialogState } from "./dialog-state.js";
+import type { AreaResolutionProvenance } from "./area-resolution-provenance.js";
+import type { DialogState, SlotName } from "./dialog-state.js";
 
 export type ConversationFlowStage =
   | "idle"
@@ -63,6 +64,14 @@ export type CustomerIntent =
   | "tracking"
   | "general_support";
 
+export type PendingOrderEditField = SlotName | "service";
+
+export type PendingOrderEdits = {
+  fields: PendingOrderEditField[];
+  askedTs: number;
+  sourceQuote?: string | null;
+};
+
 export type PersistedConversationControllerEntry = {
   lastActivityTs: number;
   language: "ar" | "en";
@@ -78,6 +87,8 @@ export type PersistedConversationControllerEntry = {
   quotePickupAreaNameAr: string | null;
   quoteDropoffAreaNameEn: string | null;
   quoteDropoffAreaNameAr: string | null;
+  quotePickupAreaResolution?: AreaResolutionProvenance | null;
+  quoteDropoffAreaResolution?: AreaResolutionProvenance | null;
   // Pending (in-progress) area resolutions. Populated by get_price as soon as
   // an area resolves deterministically, BEFORE a full quote is produced.
   // Used to preserve mid-conversation progress when one leg resolved but the
@@ -93,6 +104,8 @@ export type PersistedConversationControllerEntry = {
   pendingPickupAreaNameAr?: string | null;
   pendingDropoffAreaNameEn?: string | null;
   pendingDropoffAreaNameAr?: string | null;
+  pendingPickupAreaResolution?: AreaResolutionProvenance | null;
+  pendingDropoffAreaResolution?: AreaResolutionProvenance | null;
   selectedQuoteOptionType: string | null;
   selectedQuoteOptionLabelAr: string | null;
   selectedQuoteOptionLabelEn: string | null;
@@ -107,10 +120,20 @@ export type PersistedConversationControllerEntry = {
   // correction flow can reference the order the customer just placed.
   // Cleared whenever stage moves away from "order_submitted".
   submittedOrderUid?: string | null;
+  // Hash of the complete operational summary most recently sent to the
+  // customer. Confirmation is valid only when this equals the fresh summary
+  // hash computed from current server truth.
+  lastRenderedSummaryHash?: string | null;
+  lastRenderedSummaryAt?: number | null;
   // Dialog State Tracking layer — typed slot register with requested_slot and
   // conflict detection. Optional for backwards compat with pre-DST persisted
   // entries; the controller seeds an empty state on first read.
   dialogState?: DialogState;
+  // Controller-owned expectation for summary-stage edit collection. Set only
+  // when the assistant asks the customer to provide one or more new values,
+  // so the next turn can treat those writes as intentional edits rather than
+  // ordinary filled-slot conflicts.
+  pendingOrderEdits?: PendingOrderEdits | null;
 };
 
 export function createEmptyBookingDraft(): PersistedBookingDraft {
@@ -491,15 +514,86 @@ export function hasRouteEvidence(text: string): boolean {
   if (!normalized) {
     return false;
   }
+  if (looksLikePlainEnglishAreaRoute(normalized)) {
+    return true;
+  }
   const routePatterns = [
     /\bfrom\b.+\bto\b/i,
     /\b(?:price|how much|quote|cost)\b.+\bto\b/i,
-    /\b[a-z][a-z\s]{2,}\b\s+to\s+\b[a-z][a-z\s]{2,}\b/i,
-    /\bمن\b.+\b(?:الى|إلى|ل)\b/u,
-    /\b(?:سعر|كم|تكلفة)\b.+\b(?:الى|إلى)\b/u,
+    /(?:^|\s)من\s+.+\s+(?:الى|إلى|ل)\s*.+/u,
+    /(?:سعر|كم|تكلفة).+(?:الى|إلى|ل)\s*.+/u,
     /nearest riders area:/i,
   ];
   return routePatterns.some((pattern) => pattern.test(normalized));
+}
+
+const ROUTE_SIDE_FILLERS = new Set([
+  "a",
+  "an",
+  "area",
+  "delivery",
+  "deliver",
+  "drop",
+  "dropoff",
+  "from",
+  "i",
+  "me",
+  "my",
+  "pickup",
+  "pick",
+  "please",
+  "pls",
+  "the",
+  "to",
+  "up",
+]);
+
+const ROUTE_SIDE_BLOCKERS = new Set([
+  "book",
+  "bring",
+  "can",
+  "could",
+  "food",
+  "hello",
+  "hi",
+  "like",
+  "need",
+  "order",
+  "want",
+  "wanna",
+  "would",
+]);
+
+function normalizePlainRouteSide(side: string): string[] {
+  return side
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .filter((token) => !ROUTE_SIDE_FILLERS.has(token));
+}
+
+function looksLikePlainEnglishAreaRoute(normalized: string): boolean {
+  if (!/^[a-z0-9\s']+$/.test(normalized)) return false;
+  const parts = normalized.split(/\bto\b/);
+  if (parts.length < 2) return false;
+
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    const leftTokens = normalizePlainRouteSide(parts[i]).slice(-3);
+    const rightTokens = normalizePlainRouteSide(parts[i + 1]).slice(0, 4);
+    if (leftTokens.length === 0 || rightTokens.length === 0) continue;
+    if (
+      leftTokens.some((token) => ROUTE_SIDE_BLOCKERS.has(token)) ||
+      rightTokens.some((token) => ROUTE_SIDE_BLOCKERS.has(token))
+    ) {
+      continue;
+    }
+    const left = leftTokens.join(" ");
+    const right = rightTokens.join(" ");
+    if (left.length >= 3 && right.length >= 3) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function isGeneralServiceInquiry(text: string): boolean {

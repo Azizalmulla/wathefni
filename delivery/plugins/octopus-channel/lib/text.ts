@@ -1,13 +1,23 @@
 // ---------------------------------------------------------------------------
 // Wave 2a extraction: pure text / language / reply sanitization helpers.
 // These are deterministic string transforms used by the inbound flow to
-// classify reply shape, scrub provider error strings, and build short
-// deterministic Arabic/English replies. No I/O, no module-scope state.
+// scrub provider error strings and render the two safety-critical
+// deterministic fallback replies (grace-window offer, provider-issue
+// fallback). No I/O, no module-scope state.
+//
+// Scope note (2026-04-24 dead-code sweep): four greeting/service-style
+// deterministic reply builders were deleted here because they had zero
+// callers — greeting and related flows are fully LLM-authored now.
+// The remaining deterministic builders (grace-window, provider-issue)
+// stay because they fire on hard failure paths where the LLM is either
+// unavailable or not trusted to author.
 // ---------------------------------------------------------------------------
 
 import { asTrimmedString } from "./normalize";
 
-export function isProviderErrorText(value: unknown): boolean {
+// Module-internal: used only by `sanitizeAgentReplyText` below. Demoted
+// from `export` in the 2026-04-24 sweep when no external caller was found.
+function isProviderErrorText(value: unknown): boolean {
   const text = asTrimmedString(value);
   if (!text) return false;
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -42,10 +52,6 @@ export function sanitizeAgentReplyText(replyText: unknown): {
     return { replyText: "", providerErrorSuppressed: true };
   }
   return { replyText: text, providerErrorSuppressed: false };
-}
-
-export function normalizeReplyTextForComparison(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -99,30 +105,6 @@ export function isCanonicalOverwriteAllowed(params: {
 // and `get_price` "lossy" rewriters) which were both retired. Factual
 // price correctness is enforced by the outbound price whitelist in
 // `index.ts`, not by a phrasing-based substitute.
-
-export function buildDeterministicGreetingReply(language: "ar" | "en"): string {
-  return language === "ar"
-    ? "يا هلا حياكم الله في رايدرز، شلون نقدر نخدمكم؟"
-    : "Welcome to Riders, How can we help you?";
-}
-
-export function buildDeterministicPassengerTransportReply(language: "ar" | "en"): string {
-  return language === "ar"
-    ? "نعتذر منكم، إحنا نوصل الطلبات والشحنات فقط وما نوفر خدمة نقل أشخاص."
-    : "We only deliver items and packages. We do not transport people.";
-}
-
-export function buildDeterministicLanguageSwitchReply(language: "ar" | "en"): string {
-  return language === "ar"
-    ? "حياكم الله في رايدرز، نكمل بالعربي. شلون نقدر نخدمكم؟"
-    : "Sure, we can continue in English. How can we help you?";
-}
-
-export function buildDeterministicServiceOverviewReply(language: "ar" | "en"): string {
-  return language === "ar"
-    ? "نوفر خدمة سيارة عادية، وسيارة سريعة، وبوكس، وبوكس سريع، وسيارة مبردة، وخدمة مساعد. إذا تبون، أرسلوا منطقتي الاستلام والتوصيل ونحسب لكم السعر الدقيق."
-    : "We offer standard sedan, express sedan, box van, express box van, refrigerated van, and helper service. If you want, send the pickup and dropoff areas and we'll quote the exact price.";
-}
 
 export function buildDeterministicGraceWindowReply(language: "ar" | "en"): string {
   return language === "ar"

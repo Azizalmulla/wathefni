@@ -127,7 +127,8 @@ export type BoundaryRejectionReason =
  * for provenance / observability.
  */
 export type BoundaryNormalizationKind =
-  | "whatsapp_equivalence_sender_phone";
+  | "whatsapp_equivalence_sender_phone"
+  | "interior_detail_house_to_extra";
 
 export type BoundaryNormalization = {
   kind: BoundaryNormalizationKind;
@@ -177,6 +178,14 @@ export type BoundaryContext = {
    *  don't have stage information degrade safely to the pre-existing
    *  conflict behavior. */
   stage?: string | null;
+  /** Field-scoped edit override from controller-owned pending edit state.
+   *  Unlike `sourceQuoteLooksLikeEdit`, this does not rely on the customer's
+   *  next value containing edit verbs; it only applies to listed DST slots. */
+  pendingEditSlots?: readonly SlotName[] | null;
+  /** Semantic new-booking rebind: the caller saw a fresh route plus enough
+   *  customer-provided booking details on this turn, so stale filled slots
+   *  from an older draft must not beat the new values as conflicts. */
+  freshAllInOneRebind?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -303,6 +312,76 @@ function normalizeWhatsappEquivalence(
       field: "sender_phone",
       incoming,
       mappedTo,
+      source: "llm",
+    },
+  };
+}
+
+function normalizeWesternDigits(value: string | null | undefined): string {
+  return String(value || "").replace(/[٠-٩۰-۹]/g, (digit) => {
+    const map: Record<string, string> = {
+      "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+      "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",
+      "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+      "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+    };
+    return map[digit] || digit;
+  });
+}
+
+function extractInteriorDetailFromSource(params: {
+  sourceQuote: string | null | undefined;
+  house: string | null | undefined;
+}): string | null {
+  const house = normalizeWesternDigits(params.house).trim().toLowerCase();
+  const quote = params.sourceQuote || "";
+  if (!house || !quote.trim()) return null;
+  const patterns = [
+    /\b(?:apt|appt|apartment|flat|unit|suite|office|room)\s*[:#-]?\s*([a-z0-9٠-٩۰-۹]{1,10})\b/gi,
+    /(?:شقة|شقه|فلات|وحدة|وحده|مكتب|غرفة)\s*[:#-]?\s*([a-z0-9٠-٩۰-۹]{1,10})/gi,
+  ];
+  for (const pattern of patterns) {
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(quote)) !== null) {
+      const number = normalizeWesternDigits(match[1]).trim().toLowerCase();
+      if (number === house) return match[0].trim();
+    }
+  }
+  return null;
+}
+
+function normalizeInteriorHouseToExtra(
+  patch: BookingFieldPatch,
+  sourceQuote: string | null | undefined,
+): { patch: BookingFieldPatch; normalized: BoundaryNormalization | null } {
+  if (!fieldHasValue(patch.address_house)) {
+    return { patch, normalized: null };
+  }
+  const interiorDetail = extractInteriorDetailFromSource({
+    sourceQuote,
+    house: patch.address_house,
+  });
+  if (!interiorDetail) return { patch, normalized: null };
+
+  const next: BookingFieldPatch = { ...patch };
+  const incoming = next.address_house as string;
+  const existingExtra = fieldHasValue(next.address_extra) ? next.address_extra.trim() : "";
+  next.address_house = null;
+  if (!existingExtra) {
+    next.address_extra = interiorDetail;
+  } else if (!normalizeWesternDigits(existingExtra).toLowerCase().includes(
+    normalizeWesternDigits(interiorDetail).toLowerCase(),
+  )) {
+    next.address_extra = `${existingExtra}, ${interiorDetail}`;
+  }
+
+  return {
+    patch: next,
+    normalized: {
+      kind: "interior_detail_house_to_extra",
+      field: "address_house",
+      incoming,
+      mappedTo: String(next.address_extra || ""),
       source: "llm",
     },
   };
@@ -555,6 +634,14 @@ export function applyProposals(
           source: proposal.source,
         });
       }
+      const addressNorm = normalizeInteriorHouseToExtra(patch, sourceQuote);
+      if (addressNorm.normalized) {
+        patch = addressNorm.patch;
+        normalizations.push({
+          ...addressNorm.normalized,
+          source: proposal.source,
+        });
+      }
     }
 
     // ---------------------------------------------------------------
@@ -672,8 +759,12 @@ export function applyProposals(
     // ---------------------------------------------------------------
     const editIntent =
       (proposal.source === "llm" || proposal.source === "fast_path") &&
-      stageAllowsEdit(ctx.stage) &&
-      sourceQuoteLooksLikeEdit(sourceQuote);
+      ((stageAllowsEdit(ctx.stage) && sourceQuoteLooksLikeEdit(sourceQuote)) ||
+        ctx.freshAllInOneRebind === true);
+    const editSlots =
+      proposal.source === "llm" || proposal.source === "fast_path"
+        ? ctx.pendingEditSlots ?? null
+        : null;
 
     // ---------------------------------------------------------------
     // 5. Shape + apply (existing `applyBookingFieldPatch` pipeline)
@@ -689,6 +780,7 @@ export function applyProposals(
       dialogState,
       dstSource: mapSourceToDstSource(proposal.source),
       editIntent,
+      editSlots,
     });
     draft = applyRes.draft;
     if (applyRes.dialogState !== undefined && applyRes.dialogState !== null) {

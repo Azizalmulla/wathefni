@@ -31,6 +31,9 @@ import {
   diagnoseBookingAddressMissing,
 } from "./booking-flow";
 import type { DirectiveAction } from "../../shared/directive-reply-registry";
+import type { BookingTruthSnapshot } from "../../shared/booking-truth-snapshot";
+
+const PENDING_ORDER_EDIT_TTL_MS = 15 * 60 * 1000;
 
 type InterpretedCustomerTurnLike = {
   action?: string | null;
@@ -139,6 +142,30 @@ export function computeOneBrainMissingFields(
   if (!entry?.selectedDeliveryType) missing.push("service_type");
   if (entry?.quotedPrice == null) missing.push("quoted_price");
   return missing;
+}
+
+function addressSatisfiedBy(
+  draft: PersistedBookingDraft,
+  kind: "pickup" | "delivery",
+): "pin" | "house" | "extra" | null {
+  const pin = kind === "pickup" ? draft.pickupLocation : draft.deliveryLocation;
+  if (formatPersistedBookingLocationLabel(pin)) return "pin";
+  if (!hasSatisfiedBookingAddress(draft, kind)) return null;
+  const house = kind === "pickup" ? draft.pickupHouse : draft.deliveryHouse;
+  if (house) return "house";
+  const extra = kind === "pickup" ? draft.pickupExtra : draft.deliveryExtra;
+  if (extra) return "extra";
+  return null;
+}
+
+function formatAddressSatisfactionLine(
+  draft: PersistedBookingDraft,
+  kind: "pickup" | "delivery",
+): string {
+  const satisfied = hasSatisfiedBookingAddress(draft, kind);
+  const satisfiedBy = addressSatisfiedBy(draft, kind);
+  const missing = diagnoseBookingAddressMissing(draft, kind);
+  return `${kind}_address_satisfied=${satisfied ? "true" : "false"} ${kind}_address_satisfied_by=${satisfiedBy ?? "null"} ${kind}_missing_subfields=[${missing.join(", ")}]`;
 }
 
 // Re-export the registry action union as the authoritative type for
@@ -471,6 +498,9 @@ export function formatOneBrainLiveChannelContext(params: {
   customerScriptMode?: CustomerScriptMode | null;
   controllerEntry?: PersistedConversationControllerEntry | null;
   quotedRoute?: StoredQuotedRoute | null;
+  bookingTruthSnapshot?: BookingTruthSnapshot | null;
+  coveragePending?: any | null;
+  snapshotContextOnly?: boolean;
   // Accepted for compatibility with legacy callers; no longer consumed.
   // The clarify-before-proceed gate was deleted from
   // `computeOneBrainNextRequiredAction` and the pre-LLM shaping
@@ -479,8 +509,13 @@ export function formatOneBrainLiveChannelContext(params: {
   currentCustomerText?: string | null;
   promptShapingDisposition?: TurnDisposition | null;
 }): string {
-  const entry = params.controllerEntry || null;
-  const draft = entry?.bookingDraft || null;
+  const truth = params.bookingTruthSnapshot ?? null;
+  const snapshotOnly = Boolean(params.snapshotContextOnly && truth);
+  const entry = snapshotOnly ? truth?.controllerState ?? null : params.controllerEntry || null;
+  const draft = snapshotOnly ? truth?.draft ?? null : entry?.bookingDraft || null;
+  const quotedRoute = snapshotOnly
+    ? ((truth?.quote.activeQuotedRoute as StoredQuotedRoute | null) ?? null)
+    : ((truth?.quote.activeQuotedRoute as StoredQuotedRoute | null) ?? params.quotedRoute ?? null);
   const lines: string[] = [
     "[SYSTEM CONTEXT - LIVE CHANNEL]",
     "Hidden runtime facts. Do not quote, mention, or explain this block to the customer.",
@@ -494,14 +529,111 @@ export function formatOneBrainLiveChannelContext(params: {
     lines.push(`customer_script_mode: ${params.customerScriptMode}`);
   }
 
-  if (params.quotedRoute) {
-    lines.push(...buildQuotedRouteContextLines(params.quotedRoute, entry));
+  if (quotedRoute) {
+    lines.push(...buildQuotedRouteContextLines(quotedRoute, entry));
   }
 
-  if (entry?.stage) {
-    lines.push(`current_conversation_stage: ${entry.stage}`);
+  const coveragePending = snapshotOnly
+    ? truth?.coveragePending ?? null
+    : truth?.coveragePending ?? params.coveragePending ?? null;
+  if (coveragePending && typeof coveragePending === "object") {
+    const pending = coveragePending as any;
+    const pendingKind = String(pending.kind || "").trim();
+    if (pendingKind) {
+      lines.push(`coverage_pending_kind: ${pendingKind}`);
+      if (pendingKind === "covered_area_candidate") {
+        const candidateArea =
+          pending.area?.canonical_en ||
+          pending.area?.canonical_ar ||
+          pending.original_query ||
+          null;
+        lines.push(`coverage_pending_area_candidate: ${formatOneBrainValue(candidateArea)}`);
+        lines.push(`coverage_pending_original_query: ${formatOneBrainValue(pending.original_query || null)}`);
+        lines.push(
+          "Coverage pending fact: the previous coverage check resolved this area. If the customer confirms it as pickup/delivery or gives the other route leg, treat this as the local route candidate and call `get_price` with the two distinct areas instead of asking broadly or doing a global search.",
+        );
+      } else if (pendingKind === "needs_area_for_place") {
+        lines.push(`coverage_pending_place: ${formatOneBrainValue(pending.place_canonical_en || pending.place_query || null)}`);
+        lines.push(
+          "Coverage pending fact: the previous coverage result needed the area for this place/landmark. If this customer message is an area answer, call `check_area_coverage` with the customer's current message so the tool can resolve the pending place context.",
+        );
+      } else if (pendingKind === "ambiguous_area") {
+        const options = Array.isArray(pending.options)
+          ? pending.options
+              .map((option: any) => option?.canonical_en)
+              .filter(Boolean)
+              .map(formatOneBrainValue)
+              .join(", ")
+          : "";
+        lines.push(`coverage_pending_original_query: ${formatOneBrainValue(pending.original_query || null)}`);
+        if (options) lines.push(`coverage_pending_options: [${options}]`);
+        lines.push(
+          "Coverage pending fact: the previous coverage result was ambiguous. If this customer message is a short option answer, call `check_area_coverage` with the customer's current message so the tool can resolve it against those options.",
+        );
+      } else if (pendingKind === "unsupported_area") {
+        const nearby = Array.isArray(pending.nearby_covered)
+          ? pending.nearby_covered
+              .map((option: any) => option?.canonical_en)
+              .filter(Boolean)
+              .map(formatOneBrainValue)
+              .join(", ")
+          : "";
+        lines.push(`coverage_pending_unsupported_query: ${formatOneBrainValue(pending.original_query || null)}`);
+        lines.push(`coverage_pending_nearby_covered: [${nearby}]`);
+        lines.push(
+          "Coverage pending fact: the previous area was not covered. Only offer nearby covered areas if `coverage_pending_nearby_covered` is non-empty. If it is empty, say you do not have a nearby covered suggestion instead of inventing one.",
+        );
+      }
+    }
   }
-  if (entry?.stage === "order_submitted" && entry.submittedOrderUid) {
+
+  const currentStage = snapshotOnly ? truth?.stage ?? null : entry?.stage ?? truth?.stage ?? null;
+  if (currentStage) {
+    lines.push(`current_conversation_stage: ${currentStage}`);
+  }
+  if (truth) {
+    lines.push(`route_lock_status: ${truth.route.lockStatus}`);
+    lines.push(
+      `route_pickup_resolution: status=${truth.route.pickup.status} area=${formatOneBrainValue(truth.route.pickup.nameEn)} area_id=${formatOneBrainValue(truth.route.pickup.areaId == null ? null : String(truth.route.pickup.areaId))}`,
+    );
+    lines.push(
+      `route_dropoff_resolution: status=${truth.route.dropoff.status} area=${formatOneBrainValue(truth.route.dropoff.nameEn)} area_id=${formatOneBrainValue(truth.route.dropoff.areaId == null ? null : String(truth.route.dropoff.areaId))}`,
+    );
+    const pendingRouteOptions = [
+      ...truth.route.pickup.options.map((option) => option.nameEn || option.nameAr).filter(Boolean),
+      ...truth.route.dropoff.options.map((option) => option.nameEn || option.nameAr).filter(Boolean),
+    ];
+    if (pendingRouteOptions.length > 0) {
+      lines.push(
+        `route_pending_options: [${pendingRouteOptions.map(formatOneBrainValue).join(", ")}]`,
+      );
+    }
+    if (truth.pendingRouteAmbiguity) {
+      const pending = truth.pendingRouteAmbiguity;
+      lines.push(
+        `pending_route_ambiguity: side=${pending.side} status=${pending.status} field=${pending.field}`,
+      );
+    }
+    lines.push(`summary_ready: ${truth.summary.ready ? "true" : "false"}`);
+    lines.push(`order_ready: ${truth.order.ready ? "true" : "false"}`);
+    lines.push(`next_action: ${truth.nextAction.type}`);
+    lines.push(`next_action_reason: ${truth.nextAction.reason}`);
+    if (truth.nextAction.type === "collect_missing_field") {
+      lines.push(`next_action_field: ${truth.nextAction.field}`);
+    } else if (truth.nextAction.type === "resolve_route_ambiguity") {
+      lines.push(`next_action_field: ${truth.nextAction.field}`);
+      lines.push(
+        `next_action_options: [${truth.nextAction.options
+          .map((option) => option.nameEn || option.nameAr)
+          .filter(Boolean)
+          .map(formatOneBrainValue)
+          .join(", ")}]`,
+      );
+    }
+  }
+  if (truth?.order.submitted && truth.order.submittedOrderUid) {
+    lines.push(`submitted_order_uid: ${formatOneBrainValue(truth.order.submittedOrderUid)}`);
+  } else if (!snapshotOnly && entry?.stage === "order_submitted" && entry.submittedOrderUid) {
     lines.push(`submitted_order_uid: ${formatOneBrainValue(entry.submittedOrderUid)}`);
   }
 
@@ -512,8 +644,12 @@ export function formatOneBrainLiveChannelContext(params: {
     const deliveryPin = formatPersistedBookingLocationLabel(draft.deliveryLocation);
     // Effective-area resolver (quote → pending → pin-resolved) so the
     // context block agrees with `missing_fields`.
-    const effectivePickupArea = getEffectivePickupAreaName(draft, entry);
-    const effectiveDeliveryArea = getEffectiveDeliveryAreaName(draft, entry);
+    const effectivePickupArea = snapshotOnly
+      ? truth?.route.pickup.nameEn ?? null
+      : getEffectivePickupAreaName(draft, entry);
+    const effectiveDeliveryArea = snapshotOnly
+      ? truth?.route.dropoff.nameEn ?? null
+      : getEffectiveDeliveryAreaName(draft, entry);
     const pickup = `pickup: { area: ${formatOneBrainValue(effectivePickupArea)}, block: ${formatOneBrainValue(draft.pickupBlock)}, street: ${formatOneBrainValue(draft.pickupStreet)}, avenue: ${formatOneBrainValue(draft.pickupAvenue)}, house: ${formatOneBrainValue(draft.pickupHouse)}, extra: ${formatOneBrainValue(draft.pickupExtra)}, pin: ${formatOneBrainValue(pickupPin)} }`;
     const delivery = `delivery: { area: ${formatOneBrainValue(effectiveDeliveryArea)}, block: ${formatOneBrainValue(draft.deliveryBlock)}, street: ${formatOneBrainValue(draft.deliveryStreet)}, avenue: ${formatOneBrainValue(draft.deliveryAvenue)}, house: ${formatOneBrainValue(draft.deliveryHouse)}, extra: ${formatOneBrainValue(draft.deliveryExtra)}, pin: ${formatOneBrainValue(deliveryPin)} }`;
     lines.push("booking_draft:");
@@ -521,18 +657,36 @@ export function formatOneBrainLiveChannelContext(params: {
     lines.push(`  ${recipient}`);
     lines.push(`  ${pickup}`);
     lines.push(`  ${delivery}`);
+    lines.push("address_satisfaction:");
+    if (snapshotOnly && truth) {
+      lines.push(`  pickup_address_satisfied=${truth.addressSatisfaction.pickup ? "true" : "false"}`);
+      lines.push(`  delivery_address_satisfied=${truth.addressSatisfaction.delivery ? "true" : "false"}`);
+    } else {
+      lines.push(`  ${formatAddressSatisfactionLine(draft, "pickup")}`);
+      lines.push(`  ${formatAddressSatisfactionLine(draft, "delivery")}`);
+    }
     const pendingPin = formatPersistedBookingLocationLabel(draft.pendingLocation);
     if (pendingPin) {
       lines.push(`pending_shared_location: ${pendingPin}`);
     }
-    const selectedType = entry?.selectedDeliveryType || null;
-    const selectedPrice = entry?.quotedPrice != null ? `${entry.quotedPrice.toFixed(3)} KWD` : null;
+    const selectedType =
+      truth?.quote.selected.deliveryType ||
+      (snapshotOnly ? null : entry?.selectedDeliveryType) ||
+      null;
+    const selectedPrice =
+      truth?.quote.selected.formattedPrice ||
+      (!snapshotOnly && entry?.quotedPrice != null ? `${entry.quotedPrice.toFixed(3)} KWD` : null);
     if (selectedType || selectedPrice) {
       lines.push(`selected_service: ${formatOneBrainValue(selectedType)}`);
       lines.push(`selected_price: ${formatOneBrainValue(selectedPrice)}`);
     }
-    const missing = computeOneBrainMissingFields(draft, entry);
+    const missing = snapshotOnly
+      ? truth?.missingFields ?? []
+      : computeOneBrainMissingFields(draft, entry);
     lines.push(`missing_fields: [${missing.join(", ")}]`);
+    if (truth?.nextMissingField) {
+      lines.push(`next_missing_field: ${truth.nextMissingField}`);
+    }
 
     // Dialog State Tracking: surface the requested_slot FACT so the LLM
     // knows which slot the customer is currently answering. This closes
@@ -540,12 +694,36 @@ export function formatOneBrainLiveChannelContext(params: {
     // written to the wrong slot). The deterministic `apply_booking_field`
     // boundary guards still enforce correct routing; the fact is here so
     // the LLM's baseline accuracy is higher and the guards fire less.
-    const requestedSlot = entry?.dialogState?.requestedSlot ?? null;
+    const requestedSlot = snapshotOnly
+      ? truth?.nextAction.type === "resolve_route_ambiguity" ||
+        truth?.nextAction.type === "resolve_slot_conflict"
+        ? truth?.requestedSlot ?? null
+        : null
+      : truth?.requestedSlot ?? entry?.dialogState?.requestedSlot ?? null;
     if (requestedSlot) {
       lines.push(`requested_slot: ${requestedSlot.name}`);
       if (requestedSlot.options && requestedSlot.options.length > 0) {
         lines.push(
           `requested_slot_options: [${requestedSlot.options.map(formatOneBrainValue).join(", ")}]`,
+        );
+      }
+    }
+    const rawPendingOrderEdits = snapshotOnly ? null : entry?.pendingOrderEdits ?? null;
+    const pendingOrderEdits = snapshotOnly
+      ? truth?.pendingOrderEdits ?? null
+      : rawPendingOrderEdits &&
+          Date.now() - Number(rawPendingOrderEdits.askedTs || 0) <= PENDING_ORDER_EDIT_TTL_MS
+        ? rawPendingOrderEdits
+        : null;
+    if (
+      pendingOrderEdits &&
+      Array.isArray(pendingOrderEdits.fields) &&
+      pendingOrderEdits.fields.length > 0
+    ) {
+      lines.push(`pending_order_edits: [${pendingOrderEdits.fields.join(", ")}]`);
+      if (pendingOrderEdits.sourceQuote) {
+        lines.push(
+          `pending_order_edits_source: ${formatOneBrainValue(pendingOrderEdits.sourceQuote)}`,
         );
       }
     }
@@ -555,10 +733,12 @@ export function formatOneBrainLiveChannelContext(params: {
     // while asking about the other. The symmetric-rebind guard on
     // `get_price` still catches any attempt to echo the other side;
     // surfacing the pinned value here keeps tool calls clean.
-    const pinnedPickup = entry?.pendingPickupAreaNameEn || null;
-    const pinnedDropoff = entry?.pendingDropoffAreaNameEn || null;
-    if (pinnedPickup) lines.push(`pending_pickup_area: ${pinnedPickup}`);
-    if (pinnedDropoff) lines.push(`pending_dropoff_area: ${pinnedDropoff}`);
+    if (!snapshotOnly) {
+      const pinnedPickup = entry?.pendingPickupAreaNameEn || null;
+      const pinnedDropoff = entry?.pendingDropoffAreaNameEn || null;
+      if (pinnedPickup) lines.push(`pending_pickup_area: ${pinnedPickup}`);
+      if (pinnedDropoff) lines.push(`pending_dropoff_area: ${pinnedDropoff}`);
+    }
 
     // Slot-conflict FACTS. A prior turn's write tried to overwrite a
     // confirmed value with something different; the CONFIRM_SLOT_CONFLICT
@@ -566,32 +746,48 @@ export function formatOneBrainLiveChannelContext(params: {
     // to disambiguate when a directive dispatch runs for this case. The
     // facts here give the LLM the context to answer naturally if the
     // customer asks about the conflict first.
-    const slots = entry?.dialogState?.slots ?? {};
-    const conflicts: string[] = [];
-    for (const [name, record] of Object.entries(slots)) {
-      if (record && record.status === "conflict") {
-        conflicts.push(
-          `${name}: kept="${record.value}" proposed="${record.conflictCandidate ?? ""}"`,
-        );
-      }
-    }
+    const conflicts = snapshotOnly
+      ? (truth?.slotConflicts ?? []).map(
+          (record) =>
+            `${record.field}: kept="${record.value ?? ""}" proposed="${record.conflictCandidate ?? ""}"`,
+        )
+      : (() => {
+          const slots = entry?.dialogState?.slots ?? {};
+          const out: string[] = [];
+          for (const [name, record] of Object.entries(slots)) {
+            if (record && record.status === "conflict") {
+              out.push(
+                `${name}: kept="${record.value}" proposed="${record.conflictCandidate ?? ""}"`,
+              );
+            }
+          }
+          return out;
+        })();
     if (conflicts.length > 0) {
       lines.push(`slot_conflicts: [${conflicts.join("; ")}]`);
     }
   }
 
+  // 2026-04-23 rule-budget audit: hard_rules block was ~6.4K chars (~1.8K
+  // tokens) per turn, dominated by duplication with tool schemas and
+  // long example lists. Trimmed to ~3.8K chars (~1.1K tokens). Safety-
+  // critical rules (price integrity, order placement, cancel-vs-switch,
+  // manual-confirm) are preserved; tool-protocol rules (9/10/11) delegate
+  // to the tool `description` / schema which the LLM already sees. Canary
+  // anchors `structured_output_v1` and `propose_turn_decision` preserved.
   lines.push("hard_rules:");
-  lines.push("  1. Every price you state must come from a get_price result for the active route this turn or an already-active quoted route above. Never invent, cache, or reuse prices from earlier in the conversation if the route changed.");
-  lines.push("  2. The only way to place an order is calling create_simple_order. The server validates the draft, route, service, and price; if it rejects, fix what it asks and try again. Never claim an order was placed without a successful tool result.");
-  lines.push("  3. Reply language rule — only two valid reply scripts: (a) if `customer_script_mode` is `arabic`, reply in Arabic script (Kuwaiti White Dialect); (b) if `customer_script_mode` is `english`, reply in English. NEVER reply in Arabizi (Latin letters with digit-for-letter substitutions like 7/9/5/6/3/2) — this is NOT a valid reply style, even if the customer wrote to you in Arabizi. When a customer writes in Arabizi (e.g. `slam 3laikm`, `bkm il tws6eel`, `shlonkm`), understand it and reply in English. If the customer switches between Arabic script and English between turns, switch with them immediately.");
-  lines.push("  4. Respond to what the customer means on this turn. Use the facts above as ground truth — prices come only from `get_price` results for the active route, draft values are already written, and the fields still needed appear in `missing_fields`. When the customer advances the booking, call the relevant tools (`apply_booking_field`, `get_price`, `create_simple_order`, `cancel_booking`, `request_handoff`) and ask naturally for whatever's still needed. When they ask a question, answer it. When they correct a prior value, apply the correction via `apply_booking_field` and confirm. When they change the route, call `get_price` with the new route. When they acknowledge, acknowledge back briefly. Keep replies concise and natural. Never state a price that doesn't come from a tool result; never claim an order was placed without a successful `create_simple_order` response.");
-  lines.push("  5. Informational option/price questions (e.g. 'what is the cheapest?', 'most expensive option?', 'do you have a van?', 'is there a faster one?', 'how much for express?', 'شنو أرخص خيار؟', 'عندكم باص؟') are ANSWER-ONLY turns. Reply with the direct answer (option name + price, or a short factual yes/no) and stop. Do NOT append the next slot ask (sender name, phone, recipient, address, etc.), do NOT invite the customer to proceed, do NOT attach a 'if you want to book it, send me…' suffix. The customer is evaluating options, not proceeding. Only advance to the next slot ask when the customer's NEXT message contains an explicit proceed signal: 'yes', 'go', 'let's do it', 'book it', 'proceed', 'continue', 'confirm', 'اطلب', 'اكمل', 'نعم', 'تمام خلّيها', 'خذ', 'سكّر', etc.");
-  lines.push("  6. Edit turns — when the customer explicitly edits already-filled fields (e.g. 'block 3 to block 4', 'change the street to 10', 'no, make it sedan_fast', 'بدّل الشقة إلى 25') after the summary or during confirmation, treat the new values as the sole source of truth. Acknowledge the update briefly and either re-show the updated summary or ask only for the specific field that is still genuinely ambiguous. Do NOT re-offer the old value as an alternative. Do NOT say 'is it A or B?' listing the pre-edit and post-edit values. The server applies the edit; your job is to confirm it, not to re-litigate it.");
-  lines.push("  7. Cancel vs option-switch — NEVER call `cancel_booking` when the same customer utterance also names one of the currently quoted options (e.g. 'nvm pls standard sedan', 'cancel, actually fast box van', 'skip the helper, do sedan instead', 'لا بس مبرد', 'مو مساعد، عادي'). 'nvm', 'never mind', 'forget it', 'skip', 'cancel', 'actually', 'no' paired with a vehicle/option name is an OPTION SWITCH, not a cancellation. In that case, emit an `apply_booking_field` or option-selection update for the named option if applicable, answer the customer by naming the switched-to option + its quoted price, and continue the flow. Only call `cancel_booking` when the customer clearly wants to abandon the booking entirely, with no option-switch wording in the same message ('cancel the booking', 'never mind the whole thing', 'ألغي الطلب').");
-  lines.push("  8. Manual-confirmation options — some options in the active route's option catalog require manual confirmation by our team and CANNOT be placed via `create_simple_order` (typically flagged in `optionCatalog` with a direct-chat-booking status like 'manual_confirmation_required'; Helper service and refrigerated-van variants are canonical cases). When the customer selects one of these options: do NOT call `create_simple_order`, do NOT collect sender/recipient identity. Apply address ops normally for pickup + delivery, then call `request_handoff` with a short manual-confirm reason so the Octopus layer transfers the conversation to a human agent. The customer is not booking an instant order; they are handing off to a human for manual scheduling.");
-  lines.push("  9. Structured option interpretation — whenever the customer's message in THIS turn names or implies a choice among the currently quoted options (switching, confirming, or asking about a specific one: 'express ref van', 'the cool one', 'helper please', 'خذ المبرد', 'standard sedan بس'), you MUST call the `propose_option_interpretation` tool alongside your reply. Emit the structured reading: `class` ∈ {sedan, van, cooled_van, helper} (null if the customer didn't signal a class), `tier` ∈ {normal, fast} (null if the customer didn't signal a tier), `source_quote` = substring of the customer's inbound text this turn, `confidence` = 'high' when you are confident, 'low' when genuinely ambiguous. This is PROPOSE-ONLY — the server reconciles your structured reading with its own deterministic parse and decides whether to commit or clarify. Do NOT call it on generic booking questions, price asks, or messages that don't name an option. Do NOT mention the tool to the customer.");
-  lines.push("  10. structured_output_v1 — every customer turn, call `propose_turn_decision` exactly ONCE, BEFORE you emit your final reply. Fields: `schema_version=\"1.2\"`; `turn_kind` ∈ {initial_route, post_clarify_continuation, informational, address_collection, booking_detail_collection, confirmation_or_cancel, post_order_chat, other}; `pricing_decision.action` ∈ {call_get_price, continue_existing_quote, informational_only, awaiting_state, none} with a one-line `reason`; `planned_tool_calls` is the names of tools you intend to call THIS turn, in order (names only, e.g. [\"get_price\", \"set_pending_area\"]); `customer_reply_draft` is the text you intend to say. Rules: (a) if this turn carries a route intent AND there is no active quoted route, `action` MUST be `call_get_price` AND `\"get_price\"` MUST appear in `planned_tool_calls` AND you MUST actually call `get_price` this turn; (b) on a post_clarify_continuation turn (when `requested_slot` is `pickup_area` or `dropoff_area`, or `pending_pickup_area`/`pending_dropoff_area` is set), `action` MUST be `call_get_price` and `\"get_price\"` MUST appear in `planned_tool_calls`; (c) never call `propose_turn_decision` more than once per turn; (d) the tool is observability-only — it does NOT replace calling `get_price` or any other state tool, and its output is NOT shown to the customer.");
-  lines.push("  11. turn_intent classification (v1.2) — when `current_conversation_stage` is `collecting_booking_details`, `summary_shown`, or `awaiting_confirmation`, OR when `requested_slot` is non-null, you MUST include `turn_intent` in your `propose_turn_decision` call. Fields: `turn_intent.kind` ∈ {answered_full, answered_partial, answered_unasked, corrected_prior, clarifying_question, acknowledgement, refused_or_stuck, unclear}, chosen by MEANING not surface words. `turn_intent.addressed_fields` is a CLOSED SET from {sender_name, sender_phone, recipient_name, recipient_phone, pickup_area, dropoff_area, pickup_address, delivery_address, route, option}. Empty array is valid for acknowledgements, pure questions, and refused/unclear turns. `turn_intent.confidence` ∈ {high, medium, low}. `turn_intent.reason` is a ≤200 char rationale. Outside of these stages, OMIT `turn_intent` (or set it to null).");
+  lines.push("  1. Every price you state must come from a `get_price` tool result for the active route this turn, or from an already-active quoted route shown above. Every specific coverage answer ('do you deliver to X?' / 'توصلون لي X؟'), including landmarks/malls like The Avenues / افنيوز / 360 and short coverage follow-ups to a pending coverage clarification, must come from `check_area_coverage` before you answer. Never invent, cache, or reuse prices or coverage from memory.");
+  lines.push("  2. Only `create_simple_order` can place an order. Never claim an order was placed without a successful tool result. If the server rejects, fix what it asks and retry.");
+  lines.push("  3. Language: reply in Arabic script (Kuwaiti White Dialect) when `customer_script_mode` is `arabic`, and in English when it is `english`. NEVER reply in Arabizi (Latin + digits like 7/9/6/3) — if the customer writes Arabizi (e.g. `shlonkm`), understand it but reply in English. Switch scripts when the customer switches.");
+  lines.push("  4. Respond to what the customer means this turn. The facts above are ground truth — prices come only from `get_price`, draft values are already written, and `missing_fields` is authoritative for what's left. Address satisfaction facts override raw null fields: if `pickup_address_satisfied=true` or `delivery_address_satisfied=true`, do not ask for any more sub-fields on that side even if `house` is null. Call tools when action is needed; otherwise answer, acknowledge, or ask naturally. Keep replies concise.");
+  lines.push("  5. Short customer questions are MEANING questions — answer the likely intent, not the literal surface. 'only standard?' on a multi-option quote = 'is standard my only choice?' → name the real other options + prices, don't just repeat the standard price. 'do u deliver to zoor?' with no active route = 'do you cover Zoor, what's the cost?' → direct yes/no tied to that specific place (not a generic 'we cover Kuwait' blurb), then one helpful next step (e.g. 'what's the pickup area so I can quote?'). Shape: direct yes/no or the specific fact, one short useful detail, and ONE helpful next-step offer ONLY when it advances the customer's goal. Don't robotically advance the slot ladder mid-flow — if the customer asks a side question while a booking is being collected, answer the question and stop; don't append the next missing-field ask just because the field is missing. Advance booking slots only when the customer's NEXT message proceeds explicitly ('yes', 'book it', 'اطلب', 'اكمل').");
+  lines.push("  6. Edits after the summary or during confirmation ('block 3 to block 4', 'make it sedan_fast', 'بدّل الشقة إلى 25') are the new source of truth. Acknowledge the update and re-show the updated summary or ask only for a field that is still genuinely ambiguous. If you ask the customer to send updated values for more than one field, first call `set_pending_order_edits` with exactly those fields. Do NOT create an expectation the controller cannot track.");
+  lines.push("  7. Cancel vs option-switch: 'nvm' / 'cancel' / 'actually' / 'no' paired with a named option ('nvm standard sedan', 'cancel, actually fast van', 'لا بس مبرد') is an OPTION SWITCH, not a cancellation. Switch the option and continue — do NOT call `cancel_booking`. Only call `cancel_booking` when the customer clearly wants to abandon the whole booking ('cancel the booking', 'ألغي الطلب').");
+  lines.push("  8. Manual-confirmation options in the route's `optionCatalog` (Helper, refrigerated-van variants, anything flagged `manual_confirmation_required`) cannot be placed via `create_simple_order`. When the customer selects one: apply the pickup/delivery addresses normally, skip sender/recipient identity collection, and call `request_handoff` with a short manual-confirm reason so Octopus transfers to a human.");
+  lines.push("  9. When the customer's message names or implies one of the currently quoted options, call `propose_option_interpretation` alongside your reply (the tool description defines its fields). Don't call it on generic booking/price questions, and don't mention it to the customer.");
+  lines.push("  10. structured_output_v1 — call `propose_turn_decision` exactly ONCE per customer turn, BEFORE your reply (the tool schema defines the fields). Additional prompt-level obligation: if this turn carries a route intent with no active quoted route, OR it is a post-clarify continuation (`requested_slot` is `pickup_area`/`dropoff_area`, or `pending_pickup_area`/`pending_dropoff_area` is set), then `planned_tool_calls` MUST include `get_price` AND you MUST actually call `get_price` this turn. The tool is observability-only — its output is not shown to the customer.");
+  lines.push("  11. Include `turn_intent` in your `propose_turn_decision` call whenever `current_conversation_stage` is `collecting_booking_details` / `summary_shown` / `awaiting_confirmation`, or `requested_slot` is non-null. The tool schema defines its fields; classify by MEANING, not surface words. Otherwise omit it.");
+  lines.push("  12. Riders-scope boundary: you are NOT a general chatbot. If the customer asks an unrelated public-world/general-knowledge question (politics, celebrities, sports, news, weather, medical/legal advice, homework, trivia, or web/current-events facts), do not answer the factual question and do not cite sources or external links. Briefly say you can help with Riders deliveries, prices, coverage, tracking, complaints, and order support, then ask what delivery help they need. External links are allowed only when they are official Riders links or tool-confirmed order/payment/tracking links.");
   lines.push("[/SYSTEM CONTEXT - LIVE CHANNEL]");
   return lines.join("\n");
 }

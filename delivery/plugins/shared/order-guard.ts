@@ -22,12 +22,15 @@ import {
   type DraftValidationProblem,
 } from "./booking-draft.js";
 import { type PersistedGuardSessionState, type PersistedQuotedRouteState } from "./guard-state.js";
+import type { BookingTruthSnapshot } from "./booking-truth-snapshot.js";
+import { isCanonicalAreaResolutionStatus } from "./area-resolution-provenance.js";
 
 export type OrderGuardRejection =
   | { ok: false; code: "draft_incomplete"; missing: string[] }
   | { ok: false; code: "draft_invalid"; invalid: DraftValidationProblem[] }
   | { ok: false; code: "no_live_quote"; message: string }
   | { ok: false; code: "route_mismatch"; message: string; expected: string; actual: string }
+  | { ok: false; code: "route_not_canonical"; message: string; side: "pickup" | "dropoff"; status: string }
   | { ok: false; code: "service_not_quoted"; message: string; available: string[] }
   | { ok: false; code: "price_mismatch"; message: string; expected: number; actual: number }
   | { ok: false; code: "confirmation_missing"; message: string };
@@ -42,6 +45,7 @@ export type GuardedOrderRequest = {
   quotedPrice: number;
   visibleCustomerText: string | null;
   lastQuotedRoute: PersistedQuotedRouteState | null;
+  bookingTruthSnapshot?: BookingTruthSnapshot | null;
   /**
    * If true, skip the confirmation-text sniff. Use when the orchestrator
    * already established confirmation out of band (e.g. structured signal).
@@ -50,9 +54,9 @@ export type GuardedOrderRequest = {
 };
 
 const CONFIRMATION_PATTERNS: RegExp[] = [
-  /^\s*(yes|yeah|yep|sure|ok|okay|k|confirm(ed)?|proceed|go\s*ahead|do\s*it|place\s*it|book(ed)?|send\s*it|ship\s*it|yalla|yallah)\b.*$/i,
+  /^\s*(yes|yeah|yep|sure|ok|okay|k|confirm(ed)?|proceed|go\s*ahead|do\s*it|place\s*it|book(ed)?|send\s*it|ship\s*it|yala|yalla|yallah|tamam)\b.*$/i,
   /^\s*(confirmed|please\s*proceed|go)\b.*$/i,
-  /^(نعم|اي|ايي|أكيد|اكيد|أكده|اكده|مؤكد|أكد|اكد|تمام|اكمل|كمل|احجز|أرسل|ارسل|ابعث|سوها|نفذ|يلا|يالله|اوكي|اوكيه|طيب)\s*.*$/,
+  /^(نعم|اي|ايي|تم|أكيد|اكيد|أكده|اكده|مؤكد|أكد|اكد|تمام|اكمل|كمل|احجز|أرسل|ارسل|ابعث|سوها|نفذ|يلا|يالله|اوكي|اوكيه|طيب)\s*.*$/,
 ];
 
 export function looksLikeConfirmation(text: string | null | undefined): boolean {
@@ -95,10 +99,13 @@ function areaMatches(actual: string | null | undefined, expected: string | null 
 export function guardCreateSimpleOrder(req: GuardedOrderRequest): OrderGuardResult {
   const draftCheck = validateDraftForOrder(req.draft);
   if (!draftCheck.ok) {
+    if (draftCheck.invalid.length > 0) {
+      return { ok: false, code: "draft_invalid", invalid: draftCheck.invalid };
+    }
     if (draftCheck.missing.length > 0) {
       return { ok: false, code: "draft_incomplete", missing: draftCheck.missing };
     }
-    return { ok: false, code: "draft_invalid", invalid: draftCheck.invalid };
+    return { ok: false, code: "draft_invalid", invalid: [] };
   }
 
   if (!req.skipConfirmationCheck && !looksLikeConfirmation(req.visibleCustomerText)) {
@@ -107,6 +114,29 @@ export function guardCreateSimpleOrder(req: GuardedOrderRequest): OrderGuardResu
       code: "confirmation_missing",
       message:
         "The customer has not explicitly confirmed the order summary in their latest message. Show them the full summary and wait for a clear confirmation before calling create_simple_order.",
+    };
+  }
+
+  const pickupStatus = req.bookingTruthSnapshot?.route.pickup.status ?? null;
+  if (pickupStatus && !isCanonicalAreaResolutionStatus(pickupStatus)) {
+    return {
+      ok: false,
+      code: "route_not_canonical",
+      side: "pickup",
+      status: pickupStatus,
+      message:
+        "The pickup area is not resolver-confirmed as an exact canonical area. Resolve the pickup area ambiguity before calling create_simple_order.",
+    };
+  }
+  const dropoffStatus = req.bookingTruthSnapshot?.route.dropoff.status ?? null;
+  if (dropoffStatus && !isCanonicalAreaResolutionStatus(dropoffStatus)) {
+    return {
+      ok: false,
+      code: "route_not_canonical",
+      side: "dropoff",
+      status: dropoffStatus,
+      message:
+        "The delivery area is not resolver-confirmed as an exact canonical area. Resolve the delivery area ambiguity before calling create_simple_order.",
     };
   }
 
@@ -176,6 +206,8 @@ export function describeRejection(reject: OrderGuardRejection): string {
       return "no_live_quote";
     case "route_mismatch":
       return `route_mismatch:expected=${reject.expected}|actual=${reject.actual}`;
+    case "route_not_canonical":
+      return `route_not_canonical:${reject.side}:${reject.status}`;
     case "service_not_quoted":
       return `service_not_quoted:available=${reject.available.join(",")}`;
     case "price_mismatch":

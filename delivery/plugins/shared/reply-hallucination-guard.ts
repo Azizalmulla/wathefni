@@ -38,6 +38,10 @@ import type {
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
 } from "./conversation-policy";
+import {
+  getEffectiveDeliveryAreaName,
+  getEffectivePickupAreaName,
+} from "./conversation-policy";
 import type { DialogState, SlotName } from "./dialog-state";
 import { buildDeterministicOrderSummary } from "./outbound-verify";
 import {
@@ -116,7 +120,9 @@ export type HallucinationKind =
   | "field_rejection_hallucination"
   | "price_mismatch"
   | "order_placed_hallucination"
-  | "cancel_misclassification";
+  | "cancel_misclassification"
+  | "state_write_hallucination"
+  | "stale_missing_field_ask";
 
 export type HallucinationGuardDecision = {
   replyText: string;
@@ -139,7 +145,8 @@ export type HallucinationGuardDecision = {
     | "order_summary"
     | "generic_nudge"
     | "price_repair"
-    | "cancel_repair";
+    | "cancel_repair"
+    | "state_truth_repair";
 };
 
 // ---------------------------------------------------------------------------
@@ -329,6 +336,354 @@ export function looksLikeCancellationClaim(reply: string): boolean {
   return false;
 }
 
+type StateWriteClaimKind =
+  | "pickup_area"
+  | "delivery_area"
+  | "sender_name"
+  | "sender_phone"
+  | "recipient_name"
+  | "recipient_phone"
+  | "pickup_pin"
+  | "delivery_pin"
+  | "delivery_option";
+
+type StateWriteClaim = {
+  kind: StateWriteClaimKind;
+  value: string | null;
+};
+
+function normalizeStateClaimValue(value: string | null | undefined): string {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function trimClaimValue(raw: string | null | undefined): string | null {
+  const value = String(raw || "")
+    .split(/\b(?:send|share|please|pls|then|next|and\s+i(?:'|’)ll|so\s+i(?:'|’)ll)\b/i)[0]
+    .replace(/^[\s:,-]+|[\s:,-]+$/g, "")
+    .trim();
+  return value.length >= 2 ? value : null;
+}
+
+function valueMatchesStoredClaim(
+  claimed: string | null,
+  stored: string | null | undefined,
+): boolean {
+  const storedNorm = normalizeStateClaimValue(stored);
+  if (!storedNorm) return false;
+  const claimedNorm = normalizeStateClaimValue(claimed);
+  if (!claimedNorm) return true;
+  return (
+    storedNorm === claimedNorm ||
+    storedNorm.includes(claimedNorm) ||
+    claimedNorm.includes(storedNorm)
+  );
+}
+
+function phoneClaimMatchesStored(
+  claimed: string | null,
+  stored: string | null | undefined,
+): boolean {
+  const storedDigits = String(stored || "").replace(/\D/g, "");
+  if (!storedDigits) return false;
+  const claimedDigits = String(claimed || "").replace(/\D/g, "");
+  if (!claimedDigits) return true;
+  return (
+    storedDigits === claimedDigits ||
+    storedDigits.endsWith(claimedDigits) ||
+    claimedDigits.endsWith(storedDigits)
+  );
+}
+
+const DELIVERY_OPTION_PROOF_ALIASES: Record<string, string[]> = {
+  sedan_normal: [
+    "standard sedan",
+    "normal sedan",
+    "regular sedan",
+    "sedan normal",
+    "standard car",
+    "normal car",
+  ],
+  sedan_fast: [
+    "express sedan",
+    "fast sedan",
+    "urgent sedan",
+    "sedan fast",
+    "express car",
+    "fast car",
+  ],
+  van_normal: [
+    "standard box van",
+    "normal box van",
+    "standard van",
+    "normal van",
+    "van normal",
+  ],
+  van_fast: [
+    "express box van",
+    "fast box van",
+    "box van express",
+    "box van fast",
+    "express van",
+    "fast van",
+    "van fast",
+  ],
+  van_box_normal: [
+    "standard box van",
+    "normal box van",
+    "standard van",
+    "normal van",
+    "box van normal",
+  ],
+  van_box_fast: [
+    "express box van",
+    "fast box van",
+    "box van express",
+    "box van fast",
+    "express van",
+    "fast van",
+  ],
+  cooled_van_normal: [
+    "standard refrigerated van",
+    "normal refrigerated van",
+    "standard cooled van",
+    "normal cooled van",
+    "standard cold van",
+    "normal cold van",
+    "refrigerated van normal",
+    "cooled van normal",
+  ],
+  cooled_van_fast: [
+    "express refrigerated van",
+    "fast refrigerated van",
+    "express cooled van",
+    "fast cooled van",
+    "express cold van",
+    "fast cold van",
+    "refrigerated van fast",
+    "cooled van fast",
+  ],
+  helper_standard: [
+    "helper",
+    "helper option",
+    "with helper",
+    "standard helper",
+  ],
+};
+
+function deliveryOptionProofAliases(
+  entry: PersistedConversationControllerEntry,
+): string[] {
+  const rawValues = [
+    entry.selectedDeliveryType,
+    entry.selectedQuoteOptionLabelEn,
+    entry.selectedQuoteOptionLabelAr,
+  ];
+  const aliases = new Set<string>();
+  for (const raw of rawValues) {
+    const normalized = normalizeStateClaimValue(raw);
+    if (normalized) aliases.add(normalized);
+  }
+  const typeKey = String(entry.selectedDeliveryType || "").trim();
+  const fromType = DELIVERY_OPTION_PROOF_ALIASES[typeKey] || [];
+  for (const alias of fromType) {
+    const normalized = normalizeStateClaimValue(alias);
+    if (normalized) aliases.add(normalized);
+  }
+  return [...aliases];
+}
+
+const DELIVERY_OPTION_PHRASE =
+  "(?:(?:standard|normal|regular|express|fast|urgent)\\s+(?:sedan|car|box\\s+van|van|refrigerated\\s+van|cooled\\s+van|cold\\s+van)|(?:sedan|box\\s+van|van|refrigerated\\s+van|cooled\\s+van|cold\\s+van)\\s+(?:standard|normal|regular|express|fast|urgent)|helper)";
+
+function extractClaimedDeliveryOption(reply: string): string | null {
+  const patterns = [
+    new RegExp(
+      `\\b(?:selected|chosen|set|confirmed|marked)\\b[^.!?؟،\\n]{0,30}\\b(${DELIVERY_OPTION_PHRASE})\\b`,
+      "i",
+    ),
+    new RegExp(
+      `\\b(${DELIVERY_OPTION_PHRASE})\\b[^.!?؟،\\n]{0,40}\\b(?:selected|chosen|set|confirmed|marked)\\b`,
+      "i",
+    ),
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(reply);
+    const value = trimClaimValue(match?.[1] || null);
+    if (value) return value;
+  }
+  return null;
+}
+
+function collectStateWriteClaims(reply: string): StateWriteClaim[] {
+  const claims: StateWriteClaim[] = [];
+  const text = reply.trim();
+  if (!text) return claims;
+
+  const add = (kind: StateWriteClaimKind, value?: string | null) => {
+    claims.push({ kind, value: trimClaimValue(value) });
+  };
+
+  const areaPatterns: Array<[StateWriteClaimKind, RegExp[]]> = [
+    [
+      "pickup_area",
+      [
+        /\b(?:pickup|pick\s*up)\s+(?:area|location)?\s*(?:is\s+)?(?:noted|saved|set|marked|confirmed)\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+        /\b(?:noted|saved|set|marked|confirmed)\s+(?:the\s+)?(?:pickup|pick\s*up)\s+(?:area|location)?\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+      ],
+    ],
+    [
+      "delivery_area",
+      [
+        /\b(?:delivery|drop\s*off|dropoff)\s+(?:area|location)?\s*(?:is\s+)?(?:noted|saved|set|marked|confirmed)\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+        /\b(?:noted|saved|set|marked|confirmed)\s+(?:the\s+)?(?:delivery|drop\s*off|dropoff)\s+(?:area|location)?\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+      ],
+    ],
+  ];
+  for (const [kind, patterns] of areaPatterns) {
+    for (const pattern of patterns) {
+      const match = pattern.exec(text);
+      if (match) {
+        add(kind, match[1] || null);
+        break;
+      }
+    }
+  }
+
+  const identityPatterns: Array<[StateWriteClaimKind, RegExp[]]> = [
+    [
+      "sender_name",
+      [
+        /\bsender(?:'s)?\s+name\s+(?:is\s+|(?:noted|saved|set|confirmed|marked)\s*(?:as|to)?\s*)([^.!?؟،,\n—]*)/i,
+        /\b(?:noted|saved|set|confirmed|marked)\s+(?:sender(?:'s)?\s+)?name\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+      ],
+    ],
+    [
+      "recipient_name",
+      [
+        /\brecipient(?:'s)?\s+name\s+(?:is\s+|(?:noted|saved|set|confirmed|marked)\s*(?:as|to)?\s*)([^.!?؟،,\n—]*)/i,
+        /\b(?:noted|saved|set|confirmed|marked)\s+(?:recipient(?:'s)?\s+)?name\s*(?:as|to)?\s*([^.!?؟،,\n—]*)/i,
+      ],
+    ],
+    [
+      "sender_phone",
+      [
+        /\bsender(?:'s)?\s+(?:phone|number)\s+(?:is\s+|(?:noted|saved|set|confirmed|marked)\s*(?:as|to)?\s*)([\d\s+().-]{4,})?/i,
+        /\b(?:noted|saved|set|confirmed|marked)\s+(?:sender(?:'s)?\s+)?(?:phone|number)\s*(?:as|to)?\s*([\d\s+().-]{4,})?/i,
+      ],
+    ],
+    [
+      "recipient_phone",
+      [
+        /\brecipient(?:'s)?\s+(?:phone|number)\s+(?:is\s+|(?:noted|saved|set|confirmed|marked)\s*(?:as|to)?\s*)([\d\s+().-]{4,})?/i,
+        /\b(?:noted|saved|set|confirmed|marked)\s+(?:recipient(?:'s)?\s+)?(?:phone|number)\s*(?:as|to)?\s*([\d\s+().-]{4,})?/i,
+      ],
+    ],
+  ];
+  for (const [kind, patterns] of identityPatterns) {
+    for (const pattern of patterns) {
+      const match = pattern.exec(text);
+      if (match) {
+        add(kind, match[1] || null);
+        break;
+      }
+    }
+  }
+
+  if (
+    /\b(?:got|saved|received|have|marked|noted)\b[^.!?]{0,60}\b(?:pickup|pick\s*up)\b[^.!?]{0,30}\b(?:pin|location)\b/i.test(
+      text,
+    )
+  ) {
+    add("pickup_pin", null);
+  }
+  if (
+    /\b(?:got|saved|received|have|marked|noted)\b[^.!?]{0,60}\b(?:delivery|drop\s*off|dropoff)\b[^.!?]{0,30}\b(?:pin|location)\b/i.test(
+      text,
+    )
+  ) {
+    add("delivery_pin", null);
+  }
+  if (
+    /\b(?:selected|chosen|set|confirmed|marked)\b[^.!?]{0,50}\b(?:standard|express|sedan|van|box|helper)\b/i.test(
+      text,
+    ) ||
+    /\b(?:standard|express|sedan|van|box|helper)\b[^.!?]{0,50}\b(?:selected|chosen|set|confirmed)\b/i.test(
+      text,
+    )
+  ) {
+    add("delivery_option", extractClaimedDeliveryOption(text));
+  }
+
+  return claims;
+}
+
+function deliveryOptionHasProof(
+  claimed: string | null,
+  entry: PersistedConversationControllerEntry | null,
+): boolean {
+  if (!entry) return false;
+  const selected = deliveryOptionProofAliases(entry);
+  if (selected.length === 0) return false;
+  const claimNorm = normalizeStateClaimValue(claimed);
+  if (!claimNorm) return true;
+  return selected.some(
+    (value) => claimNorm.includes(value) || value.includes(claimNorm),
+  );
+}
+
+function stateWriteClaimHasProof(
+  claim: StateWriteClaim,
+  entry: PersistedConversationControllerEntry | null,
+): boolean {
+  const draft = entry?.bookingDraft || null;
+  switch (claim.kind) {
+    case "pickup_area":
+      return valueMatchesStoredClaim(
+        claim.value,
+        getEffectivePickupAreaName(draft, entry),
+      );
+    case "delivery_area":
+      return valueMatchesStoredClaim(
+        claim.value,
+        getEffectiveDeliveryAreaName(draft, entry),
+      );
+    case "sender_name":
+      return valueMatchesStoredClaim(claim.value, draft?.senderName);
+    case "recipient_name":
+      return valueMatchesStoredClaim(claim.value, draft?.recipientName);
+    case "sender_phone":
+      return phoneClaimMatchesStored(claim.value, draft?.senderPhone);
+    case "recipient_phone":
+      return phoneClaimMatchesStored(claim.value, draft?.recipientPhone);
+    case "pickup_pin":
+      return !!draft?.pickupLocation;
+    case "delivery_pin":
+      return !!draft?.deliveryLocation;
+    case "delivery_option":
+      return deliveryOptionHasProof(claim.value, entry);
+    default:
+      return false;
+  }
+}
+
+function findUnsupportedStateWriteClaim(
+  reply: string,
+  entry: PersistedConversationControllerEntry | null,
+): StateWriteClaim | null {
+  const claims = collectStateWriteClaims(reply);
+  for (const claim of claims) {
+    if (!stateWriteClaimHasProof(claim, entry)) {
+      return claim;
+    }
+  }
+  return null;
+}
+
 /**
  * Extract mentioned KWD-like prices from the reply. Returns numbers,
  * normalized. Very tolerant of KWD / KD / د.ك / دينار suffixes.
@@ -472,6 +827,88 @@ const PRICE_REPAIR_TEMPLATE: NextStepTemplate = {
   ar: "عذراً، دعني أتأكد من ذلك — عن أي خيار تسأل تحديداً؟",
 };
 
+const STATE_TRUTH_REPAIR_TEMPLATE: NextStepTemplate = {
+  en: "Sorry, I don’t have that saved yet. Please send that detail again and I’ll continue.",
+  ar: "عذراً، ما انحفظت عندي للحين. ارسل المعلومة مرة ثانية ونكمل.",
+};
+
+const STATE_WRITE_CLAIM_LABELS: Record<StateWriteClaimKind, NextStepTemplate> = {
+  pickup_area: { en: "pickup area", ar: "منطقة الاستلام" },
+  delivery_area: { en: "delivery area", ar: "منطقة التوصيل" },
+  sender_name: { en: "sender name", ar: "اسم المرسل" },
+  sender_phone: { en: "sender phone", ar: "رقم المرسل" },
+  recipient_name: { en: "recipient name", ar: "اسم المستلم" },
+  recipient_phone: { en: "recipient phone", ar: "رقم المستلم" },
+  pickup_pin: { en: "pickup location pin", ar: "لوكيشن الاستلام" },
+  delivery_pin: { en: "delivery location pin", ar: "لوكيشن التوصيل" },
+  delivery_option: { en: "delivery option", ar: "خيار التوصيل" },
+};
+
+function stateTruthRepairText(
+  claim: StateWriteClaim | null,
+  language: HallucinationGuardLanguage,
+): string {
+  if (!claim) return STATE_TRUTH_REPAIR_TEMPLATE[language];
+  const label = STATE_WRITE_CLAIM_LABELS[claim.kind]?.[language];
+  if (!label) return STATE_TRUTH_REPAIR_TEMPLATE[language];
+  if (language === "ar") {
+    return `عذراً، ما قدرت أتأكد من ${label}. ارسله مرة ثانية ونكمل.`;
+  }
+  return `Sorry, I couldn't verify the ${label}. Please send that detail again and I’ll continue.`;
+}
+
+type AddressSubfieldAsk = {
+  side: "pickup" | "delivery";
+  subfield: "address" | "block" | "street_or_avenue" | "house_or_unit";
+};
+
+const ADDRESS_REQUEST_RE =
+  /\b(?:still\s+need|need|missing|send|provide|give|what(?:'s|\s+is)|please|pls)\b|[?؟]|(?:ارسل|أرسل|نحتاج|احتاج|شنو|ما هو|ماهي)/i;
+
+const ADDRESS_SIDE_RE: Record<AddressSubfieldAsk["side"], RegExp> = {
+  pickup: /\b(?:pickup|pick\s*up|sender)\b|(?:استلام|المرسل)/i,
+  delivery: /\b(?:delivery|drop\s*off|dropoff|recipient)\b|(?:توصيل|تسليم|المستلم)/i,
+};
+
+const ADDRESS_SUBFIELD_RE: Record<AddressSubfieldAsk["subfield"], RegExp> = {
+  address: /\b(?:address|details?)\b|(?:عنوان|تفاصيل)/i,
+  block: /\bblock\b|(?:قطعة|قطعه|بلوك)/i,
+  street_or_avenue: /\b(?:street|avenue|jadda|jedda)\b|(?:شارع|جادة|جاده)/i,
+  house_or_unit:
+    /\b(?:house|building|bldg|tower|villa|apartment|apartement|apt|appt|flat|floor|door|unit|office|gate)\b|(?:بيت|منزل|بناية|بنايه|عمارة|عماره|برج|فيلا|شقة|شقه|دور|طابق|باب|وحدة|وحده|مكتب|بوابة|بوابه)/i,
+};
+
+function findStaleAddressSubfieldAsk(
+  reply: string,
+  missingFields: string[],
+): AddressSubfieldAsk | null {
+  const askClauses = reply
+    .split(/(?:[.!؟\n]+|[?]+)/)
+    .map((part) => part.trim())
+    .filter((part) => part && ADDRESS_REQUEST_RE.test(part));
+  if (askClauses.length === 0) return null;
+  for (const side of ["pickup", "delivery"] as const) {
+    if (missingFields.includes(`${side}.address`)) continue;
+    for (const clause of askClauses) {
+      if (!ADDRESS_SIDE_RE[side].test(clause)) continue;
+      for (const subfield of [
+        "block",
+        "street_or_avenue",
+        "house_or_unit",
+        "address",
+      ] as const) {
+        if (!ADDRESS_SUBFIELD_RE[subfield].test(clause)) continue;
+        const marker =
+          subfield === "address" ? `${side}.address` : `${side}.${subfield}`;
+        if (!missingFields.includes(marker)) {
+          return { side, subfield };
+        }
+      }
+    }
+  }
+  return null;
+}
+
 // -----------------------------------------------------------------------
 // Cancel-vs-switch repair.
 //
@@ -498,6 +935,25 @@ function cancelRepairText(
     return `تكرماً، للتوضيح — تبي تبدل إلى "${safeLabel}" لنفس المسار، أو إلغاء الطلب كلياً؟`;
   }
   return `Just to confirm — would you like to switch to "${safeLabel}" for this route, or cancel the booking entirely?`;
+}
+
+function getConflictDirectiveContext(
+  entry: PersistedConversationControllerEntry | null,
+): {
+  conflictingSlot: string | null;
+  conflictValues: { incoming: string; existing: string } | null;
+} {
+  const slots = entry?.dialogState?.slots || {};
+  for (const [slot, rec] of Object.entries(slots)) {
+    if (!rec || rec.status !== "conflict") continue;
+    const incoming = rec.conflictCandidate || null;
+    const existing = rec.value || null;
+    return {
+      conflictingSlot: slot,
+      conflictValues: incoming && existing ? { incoming, existing } : null,
+    };
+  }
+  return { conflictingSlot: null, conflictValues: null };
 }
 
 /**
@@ -550,12 +1006,16 @@ function deterministicSubstitute(params: {
   // Registry delegation. Single source of truth: the same text the
   // directive-render path would produce for this state.
   if (nextRequiredAction && entry && isRegisteredDirectiveAction(nextRequiredAction)) {
+    const conflictCtx =
+      nextRequiredAction === "CONFIRM_SLOT_CONFLICT"
+        ? getConflictDirectiveContext(entry)
+        : { conflictingSlot: null, conflictValues: null };
     const ctx: DirectiveReplyRendererContext = {
       language,
       draft: entry.bookingDraft,
       entry,
-      conflictingSlot: null,
-      conflictValues: null,
+      conflictingSlot: conflictCtx.conflictingSlot,
+      conflictValues: conflictCtx.conflictValues,
       // Seed is irrelevant post-Phase-B-trim for all ASK_* directives
       // (single phrasing each), but the registry still accepts it.
       // Stable per-entry so that any future reintroduction of a pool
@@ -629,6 +1089,37 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
   if (inputs.cancelContradicted && looksLikeCancellationClaim(reply)) {
     claims.push("cancel_misclassification");
     reasons.push("cancel_claim_with_server_contradicted_intent");
+  }
+
+  // ----- Claim 2c: state-write hallucination -----
+  //
+  // The LLM can word the reply, but it cannot claim a transactional fact was
+  // saved unless the post-drain controller state proves that fact exists.
+  // This catches replies like "Pickup area noted as Zahra" when get_price /
+  // set_pending_area never fired and the controller is still idle.
+  let unsupportedStateClaim: StateWriteClaim | null = findUnsupportedStateWriteClaim(reply, inputs.entry);
+  if (unsupportedStateClaim) {
+    claims.push("state_write_hallucination");
+    reasons.push(
+      `state_write_claim_without_evidence kind=${unsupportedStateClaim.kind}` +
+        (unsupportedStateClaim.value
+          ? ` value=${unsupportedStateClaim.value}`
+          : ""),
+    );
+  }
+
+  // ----- Claim 2d: stale missing-field ask -----
+  //
+  // `missingFields` is the server-computed truth after this turn's writes.
+  // If the reply asks for an address subfield on a side whose address is no
+  // longer missing, the LLM is reasoning from raw nulls (e.g. house=null)
+  // instead of the satisfaction predicate (e.g. extra=Apartment/Floor/Door).
+  const staleAddressAsk = findStaleAddressSubfieldAsk(reply, inputs.missingFields);
+  if (staleAddressAsk) {
+    claims.unshift("stale_missing_field_ask");
+    reasons.unshift(
+      `address_subfield_ask_without_missing side=${staleAddressAsk.side} subfield=${staleAddressAsk.subfield}`,
+    );
   }
 
   // ----- Claim 2: order-placed hallucination -----
@@ -756,6 +1247,64 @@ export function runHallucinationGuard(inputs: HallucinationGuardInputs): Halluci
       claims,
       reason: reasons.join("|"),
       substitutedFrom: "price_repair",
+    };
+  }
+
+  if (primary === "state_write_hallucination") {
+    const entry = inputs.entry;
+    if (
+      entry &&
+      inputs.missingFields.length === 0 &&
+      entry.quotedPrice != null &&
+      entry.selectedDeliveryType
+    ) {
+      return {
+        replyText: buildDeterministicOrderSummary({ entry, language: inputs.language }),
+        blocked: true,
+        claims,
+        reason: reasons.join("|"),
+        substitutedFrom: "order_summary",
+      };
+    }
+    if (inputs.nextRequiredAction) {
+      const sub = deterministicSubstitute({
+        nextRequiredAction: inputs.nextRequiredAction,
+        missingFields: inputs.missingFields,
+        entry: inputs.entry,
+        language: inputs.language,
+      });
+      if (sub.source !== "generic_nudge") {
+        return {
+          replyText: sub.text,
+          blocked: true,
+          claims,
+          reason: reasons.join("|"),
+          substitutedFrom: sub.source,
+        };
+      }
+    }
+    return {
+      replyText: stateTruthRepairText(unsupportedStateClaim, inputs.language),
+      blocked: true,
+      claims,
+      reason: reasons.join("|"),
+      substitutedFrom: "state_truth_repair",
+    };
+  }
+
+  if (primary === "stale_missing_field_ask") {
+    const sub = deterministicSubstitute({
+      nextRequiredAction: inputs.nextRequiredAction ?? null,
+      missingFields: inputs.missingFields,
+      entry: inputs.entry,
+      language: inputs.language,
+    });
+    return {
+      replyText: sub.text,
+      blocked: true,
+      claims,
+      reason: reasons.join("|"),
+      substitutedFrom: sub.source,
     };
   }
 

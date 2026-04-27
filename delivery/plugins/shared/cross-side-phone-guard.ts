@@ -17,10 +17,9 @@
  * and has to correct it, or worse — misses it and the order ships with
  * garbage.
  *
- * Rule: once the fast-path has resolved one side's phone in the current
- * turn, drop any counterpart-side phone the LLM tries to write in the
- * same turn. Same-side writes pass through unchanged (they're either
- * idempotent duplicates or a genuine correction the LLM is offering).
+ * Rule: only a phone write that actually committed earlier in the current
+ * turn may block a counterpart-side phone. Attempted, rejected, or conflicted
+ * writes must never reach `fastPathPreApplied`.
  *
  * This guard is symmetric (sender↔recipient) so a future
  * ASK_RECIPIENT_NAME_AND_PHONE / sender-mirror variant is covered too.
@@ -33,10 +32,9 @@
 import type { BookingFieldPatch } from "./booking-draft";
 
 export type CrossSidePhoneGuardInput = {
-  /** Names of fields the fast-path pre-apply successfully wrote THIS
-   *  turn (comes from `boundaryRes.applied` in the pre-LLM pass). The
-   *  caller should pass the raw list — this helper only reacts to
-   *  `sender_phone` / `recipient_phone` entries. */
+  /** Names of fields the fast-path pre-apply successfully committed THIS
+   *  turn. The caller must pass committed writes only; this helper only
+   *  reacts to `sender_phone` / `recipient_phone` entries. */
   fastPathPreApplied: ReadonlyArray<keyof BookingFieldPatch | string>;
   /** LLM's proposed sender_phone on this turn's apply_booking_field op
    *  (or null/undefined if not set). */

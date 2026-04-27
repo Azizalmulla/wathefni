@@ -63,7 +63,7 @@ import type {
   VerifyOutboundResult,
 } from "../../shared/outbound-verify";
 import {
-  buildClass15BypassRepairReply,
+  buildDeterministicOrderSummaryFromSnapshot,
   looksLikeFreeComposedAreaClarification,
   verifyAndRepairOutbound,
   verifyCompactFactualClaims,
@@ -77,6 +77,7 @@ import type {
   DirectiveReplyRendererContext as DirectiveReplyRenderContext,
   DirectiveReplyRenderResult,
 } from "../../shared/directive-reply-registry";
+import type { BookingTruthSnapshot } from "../../shared/booking-truth-snapshot";
 
 /**
  * Top-level decision kinds — the 5-way contract from the Step-4 spec.
@@ -178,18 +179,21 @@ export type OutboundDecisionReason =
   | "allow"
   | "allow_sanitized"
   | "replace_summary_fact_drift"
+  | "replace_summary_completion_checkpoint"
   | "replace_transaction_artifact_missing"
   | "replace_price_mismatch"
   | "replace_field_rejection_hallucination"
   | "replace_order_placed_hallucination"
+  | "replace_state_write_hallucination"
+  | "replace_stale_missing_field_ask"
+  | "replace_untracked_multi_edit_ask"
   | "replace_clarify_option_before_proceed"
   | "replace_manual_confirm_address_ask"
   | "replace_manual_confirm_handoff"
   | "replace_directive_ask"
-  // Class 15 (2026-04-21): on a route-intent turn where the LLM
-  // free-composed an area clarification WITHOUT calling get_price,
-  // substitute with a deterministic send-both-areas repair reply.
-  // See `classFifteenBypass` input + (B3) below.
+  // Class 15 (2026-04-21): legacy get_price-bypass replacement. This
+  // reason remains in the enum for log compatibility, but the live
+  // customer-facing replacement path is demoted to observe-only.
   | "replace_get_price_bypass"
   | "block_provider_error"
   | "fallback_empty_reply"
@@ -369,6 +373,10 @@ export type PreStateOutboundInput = {
     action: string,
     ctx: DirectiveReplyRenderContext,
   ) => DirectiveReplyRenderResult;
+  /** Plan B: GPT final snapshot pass owns normal booking wording. */
+  planBSnapshotFinalReply?: boolean;
+  /** Optional bake trace for legacy authors demoted by Plan B. */
+  planBLogLegacyAuthority?: boolean;
 
   /** Short identifiers for log-entry detail (no effect on the decision). */
   conversationId: string;
@@ -384,6 +392,7 @@ export type PostStateOutboundInput = {
 
   conversationControllerEntry: PersistedConversationControllerEntry | null;
   missingFields: string[];
+  bookingTruthSnapshot?: BookingTruthSnapshot | null;
 
   hallucinationGuardRejections: FieldRejection[];
   stageAtTurnStart: string | null;
@@ -424,6 +433,14 @@ export type PostStateOutboundInput = {
   /** Controller transition hint that can trigger an empty-reply fallback. */
   controllerTransitionHint: string | null;
 
+  /**
+   * Transaction checkpoint for the same turn that successfully submitted an
+   * order. When true, `order_submitted` is server-owned transaction truth:
+   * normal LLM wording, stale slot asks, and clarifications must not pass.
+   */
+  transactionResultRequired?: boolean;
+  canonicalTransactionText?: string | null;
+
   /** Plugin-local deterministic builders, injected to keep this module free
    *  of circular plugin imports. */
   buildDeterministicGraceWindowReply: (language: "ar" | "en") => string;
@@ -455,6 +472,26 @@ export type PostStateOutboundInput = {
    * healthy turns. */
   classFifteenBypass?: boolean;
 
+  /**
+   * Authority cutover (2026-04-25): coverage questions intentionally do
+   * NOT call `get_price`. The grounded path is:
+   *
+   *   LLM meaning -> check_area_coverage -> LLM wording
+   *
+   * When the proposer declared `pricing_action=informational_only` and
+   * planned `check_area_coverage`, Class-15 may still observe a
+   * route-evidence/no-get_price shape, but it must not author customer
+   * text. The branch logs observe-only instead.
+   */
+  classFifteenCoverageInformationalOnly?: boolean;
+
+  /** Plan B: final reply already came from the post-drain snapshot pass, so
+   *  old normal reply authors become observe-only while factual and
+   *  transaction validators remain active. */
+  planBSnapshotFinalReply?: boolean;
+  /** Optional bake trace for legacy authors demoted by Plan B. */
+  planBLogLegacyAuthority?: boolean;
+
   conversationId: string;
 };
 
@@ -467,6 +504,7 @@ const SUMMARY_EDIT_REQUEST_AR =
   "أكيد. شنو الجزء اللي تبون نغيره بالضبط: المرسل، المستلم، الاستلام، التوصيل، الرقم، أو الخدمة؟";
 const SUMMARY_EDIT_REQUEST_EN =
   "Sure. Which part should I change exactly: sender, recipient, pickup, delivery, phone, or service?";
+const PENDING_ORDER_EDIT_TTL_MS = 15 * 60 * 1000;
 
 function normalize(s: string): string {
   return s.replace(/\s+/g, " ").trim();
@@ -474,6 +512,183 @@ function normalize(s: string): string {
 
 function textContainsUrl(text: string): boolean {
   return /\bhttps?:\/\/\S+/i.test(text);
+}
+
+function textContainsOrderId(text: string): boolean {
+  return /\bORDER-[A-Za-z0-9-]+\b/i.test(text);
+}
+
+function transactionSafeOrderSubmittedFallback(language: "ar" | "en"): string {
+  return language === "ar"
+    ? "تم إنشاء الطلب، لحظة أجهز لك تفاصيل الطلب ورابط الدفع."
+    : "Your order has been created. Give me a moment to prepare the order details and payment link.";
+}
+
+function transactionSafeSubmitFailure(language: "ar" | "en"): string {
+  return language === "ar"
+    ? "آسف، ما أقدر أأكد إنشاء الطلب من غير نتيجة آمنة من النظام. بحوله للدعم يتأكدون من الطلب."
+    : "Sorry, I can't safely confirm that the order was created without a system result. I'll pass it to support to verify the booking.";
+}
+
+function waitForConfirmationReply(language: "ar" | "en"): string {
+  return language === "ar" ? "تبي تأكد الطلب؟" : "Shall I confirm this order?";
+}
+
+function slotLabel(language: "ar" | "en", field: string | null | undefined): string {
+  const key = String(field || "").trim();
+  const en: Record<string, string> = {
+    sender_name: "sender name",
+    recipient_name: "recipient name",
+    sender_phone: "sender phone",
+    recipient_phone: "recipient phone",
+    pickup_area: "pickup area",
+    dropoff_area: "delivery area",
+    pickup_block: "pickup block",
+    pickup_street: "pickup street",
+    pickup_house: "pickup house/building",
+    pickup_extra: "pickup address details",
+    delivery_block: "delivery block",
+    delivery_street: "delivery street",
+    delivery_house: "delivery house/building",
+    delivery_extra: "delivery address details",
+  };
+  const ar: Record<string, string> = {
+    sender_name: "اسم المرسل",
+    recipient_name: "اسم المستلم",
+    sender_phone: "رقم المرسل",
+    recipient_phone: "رقم المستلم",
+    pickup_area: "منطقة الاستلام",
+    dropoff_area: "منطقة التوصيل",
+    pickup_block: "قطعة الاستلام",
+    pickup_street: "شارع الاستلام",
+    pickup_house: "منزل/مبنى الاستلام",
+    pickup_extra: "تفاصيل الاستلام",
+    delivery_block: "قطعة التوصيل",
+    delivery_street: "شارع التوصيل",
+    delivery_house: "منزل/مبنى التوصيل",
+    delivery_extra: "تفاصيل التوصيل",
+  };
+  return (language === "ar" ? ar[key] : en[key]) || key.replace(/_/g, " ") || "this field";
+}
+
+function renderSlotConflictReply(
+  snapshot: BookingTruthSnapshot,
+  language: "ar" | "en",
+): string {
+  const action = snapshot.nextAction;
+  const field = action.type === "resolve_slot_conflict" ? action.field : snapshot.conflictSlot;
+  const conflict = snapshot.slotConflicts.find((item) => item.field === field);
+  const label = slotLabel(language, field);
+  const current = String(conflict?.value || "").trim();
+  const incoming = String(conflict?.conflictCandidate || "").trim();
+  if (language === "ar") {
+    if (current && incoming) return `${label}: «${current}» أو «${incoming}»؟`;
+    return `ممكن تأكد ${label}؟`;
+  }
+  if (current && incoming) return `${label}: "${current}" or "${incoming}"?`;
+  return `Please confirm the ${label}.`;
+}
+
+function renderPendingEditReply(snapshot: BookingTruthSnapshot, language: "ar" | "en"): string {
+  const fields = snapshot.pendingOrderEdits?.fields || [];
+  const labels = fields.map((field) => slotLabel(language, field)).join(", ");
+  if (language === "ar") return labels ? `أرسل القيم الجديدة لـ ${labels}.` : "أرسل التعديل المطلوب.";
+  return labels ? `Send the updated value for: ${labels}.` : "Send the update you want to make.";
+}
+
+function renderSnapshotNextActionReply(params: {
+  snapshot: BookingTruthSnapshot;
+  language: "ar" | "en";
+  canonicalTransactionText?: string | null;
+}): { text: string; markSummaryShown: boolean } | null {
+  const { snapshot, language } = params;
+  switch (snapshot.nextAction.type) {
+    case "show_summary":
+      return {
+        text: buildDeterministicOrderSummaryFromSnapshot({ snapshot, language }),
+        markSummaryShown: true,
+      };
+    case "wait_for_confirmation":
+      return { text: waitForConfirmationReply(language), markSummaryShown: false };
+    case "show_quote": {
+      const pickup = snapshot.route.pickup.nameEn || snapshot.route.pickup.nameAr || "pickup";
+      const dropoff = snapshot.route.dropoff.nameEn || snapshot.route.dropoff.nameAr || "delivery";
+      const options = (snapshot.quote.optionCatalog || [])
+        .filter((option: any) => option.quoted_price != null)
+        .slice(0, 6)
+        .map((option: any) => {
+          const label =
+            language === "ar"
+              ? option.label_ar || option.label_en || option.delivery_type
+              : option.label_en || option.label_ar || option.delivery_type;
+          const price =
+            option.formatted_price ||
+            `${Number(option.quoted_price).toFixed(3)} KWD`;
+          return `- ${label}: ${price}`;
+        });
+      return {
+        text:
+          language === "ar"
+            ? [`سعر التوصيل من ${pickup} إلى ${dropoff}:`, ...options].join("\n")
+            : [`Delivery quote from ${pickup} to ${dropoff}:`, ...options].join("\n"),
+        markSummaryShown: false,
+      };
+    }
+    case "ask_edit_target":
+      return {
+        text:
+          language === "ar"
+            ? "أكيد، شنو التعديل اللي تبونه؟"
+            : "Sure, what would you like to change?",
+        markSummaryShown: false,
+      };
+    case "answer_question_then_wait_for_confirmation":
+      return {
+        text:
+          language === "ar"
+            ? "أكيد، شنو حابين تعرفون قبل ما نكمل؟"
+            : "Sure, what would you like to know before we continue?",
+        markSummaryShown: false,
+      };
+    case "pause_confirmation":
+      return {
+        text: language === "ar" ? "أكيد، خذوا وقتكم." : "Sure, take your time.",
+        markSummaryShown: false,
+      };
+    case "cancel_or_confirm_cancel":
+      return {
+        text:
+          language === "ar"
+            ? "تبون ألغي مسودة الطلب؟"
+            : "Would you like me to cancel this draft booking?",
+        markSummaryShown: false,
+      };
+    case "ask_clarification_about_confirmation":
+      return {
+        text:
+          language === "ar"
+            ? "تبون تأكدون الطلب، تعدلون شي، توقفون شوي، أو تلغونه؟"
+            : "Would you like to confirm, change something, pause, or cancel?",
+        markSummaryShown: false,
+      };
+    case "resolve_slot_conflict":
+      return { text: renderSlotConflictReply(snapshot, language), markSummaryShown: false };
+    case "resolve_pending_edit":
+      return { text: renderPendingEditReply(snapshot, language), markSummaryShown: false };
+    case "submit_order":
+      return { text: transactionSafeSubmitFailure(language), markSummaryShown: false };
+    case "show_order_result": {
+      const canonical = String(params.canonicalTransactionText || "").trim();
+      return {
+        text: canonical || transactionSafeOrderSubmittedFallback(language),
+        markSummaryShown: false,
+      };
+    }
+    case "handoff_or_transaction_failure":
+      return { text: transactionSafeSubmitFailure(language), markSummaryShown: false };
+    default:
+      return null;
+  }
 }
 
 /**
@@ -496,8 +711,8 @@ function needsCanonicalOverwriteForTxArtifacts(args: {
   const canonicalHasUrl = textContainsUrl(canonical);
   const replyHasUrl = textContainsUrl(reply);
   if (canonicalHasUrl && !replyHasUrl) return true;
-  const canonicalHasOrderId = /\bORDER-[A-Za-z0-9-]+\b/i.test(canonical);
-  const replyHasOrderId = /\bORDER-[A-Za-z0-9-]+\b/i.test(reply);
+  const canonicalHasOrderId = textContainsOrderId(canonical);
+  const replyHasOrderId = textContainsOrderId(reply);
   if (canonicalHasOrderId && !replyHasOrderId) return true;
   return false;
 }
@@ -519,9 +734,51 @@ function reasonForHallucinationClaim(
       return "replace_field_rejection_hallucination";
     case "order_placed_hallucination":
       return "replace_order_placed_hallucination";
+    case "state_write_hallucination":
+      return "replace_state_write_hallucination";
+    case "stale_missing_field_ask":
+      return "replace_stale_missing_field_ask";
     default:
       return "allow";
   }
+}
+
+function detectMultiEditAsk(reply: string): string[] {
+  const text = String(reply || "").toLowerCase();
+  if (!/\b(?:send|share|provide|give|tell)\b/.test(text)) return [];
+  if (!/\b(?:new|updated?|change|edit|correct|replacement)\b/.test(text)) return [];
+  const fields: string[] = [];
+  const add = (field: string, re: RegExp) => {
+    if (re.test(text)) fields.push(field);
+  };
+  add("sender name", /\bsender(?:'s)?\s+name\b/);
+  add("sender phone", /\bsender(?:'s)?\s+(?:phone|number)\b/);
+  add("recipient name", /\brecipient(?:'s)?\s+name\b/);
+  add("recipient phone", /\brecipient(?:'s)?\s+(?:phone|number)\b/);
+  add("service", /\b(?:service|option|delivery\s+type)\b/);
+  add("pickup address", /\bpick\s*up\s+address\b|\bpickup\s+address\b/);
+  add("delivery address", /\bdelivery\s+address\b|\bdrop\s*off\s+address\b|\bdropoff\s+address\b/);
+  return fields;
+}
+
+function untrackedMultiEditFallback(
+  fields: string[],
+  language: "ar" | "en",
+): string {
+  if (language === "ar") {
+    return "أي تعديل نبدأ فيه؟ ارسل اسم الحقل والقيمة الجديدة.";
+  }
+  const firstTwo = fields.slice(0, 2);
+  if (firstTwo.length === 2) {
+    return `Which should we change first: ${firstTwo[0]} or ${firstTwo[1]}?`;
+  }
+  return "Which field should we change first?";
+}
+
+function hasActivePendingOrderEdits(entry: PersistedConversationControllerEntry | null): boolean {
+  const pending = entry?.pendingOrderEdits ?? null;
+  if (!pending || !Array.isArray(pending.fields) || pending.fields.length === 0) return false;
+  return Date.now() - Number(pending.askedTs || 0) <= PENDING_ORDER_EDIT_TTL_MS;
 }
 
 /**
@@ -534,8 +791,9 @@ function reasonForHallucinationClaim(
  * Ordering (preserved exactly from the pre-Step-4 inline code):
  *
  *   (A1) Canonical overwrite for lost tx artifacts (order/tracking URL or
- *        ORDER- id), gated by `canonicalOverwriteAllowed` + the static
- *        transactional-artifact check.
+ *        ORDER- id), gated by the static transactional-artifact check. This
+ *        intentionally survives post-quote stages because payment/tracking
+ *        artifacts are safety-critical business truth, not stylistic wording.
  *   (A2) Empty-reply canonical fill (when the LLM returned nothing and a
  *        recent canonical tool message is available).
  *   (A3) Outbound price whitelist: any KWD token in the reply must be in
@@ -660,6 +918,18 @@ function decidePreStateOutboundImpl(
       input.directiveRenderContext,
     );
     if (outcome.kind === "render") {
+      if (input.planBSnapshotFinalReply) {
+        if (input.planBLogLegacyAuthority) {
+          logEntries.push({
+            level: "info",
+            message: `[plan-b/legacy-authority] observe_only phase=pre directive=${input.directiveAction} conversation=${input.conversationId}`,
+            detail: {
+              action: input.directiveAction,
+              wouldRenderChars: outcome.text.length,
+            },
+          });
+        }
+      } else {
       logEntries.push({
         level: "info",
         message: `[guard] Substituted directive-driven reply conversation=${input.conversationId} sessionKey=${input.sessionKeyForLogs} action=${input.directiveAction}`,
@@ -739,6 +1009,7 @@ function decidePreStateOutboundImpl(
         markedSummaryShown: summaryWasSubstituted,
         logEntries,
       };
+      }
     }
     // `existing` / `llm_owned` / `unknown_action` — fall through and let
     // downstream substitutions or the LLM draft survive.
@@ -753,14 +1024,12 @@ function decidePreStateOutboundImpl(
   // (A1) Canonical overwrite for lost transactional artifacts
   // ------------------------------------------------------------------
   const sameRouteQuoteSkip = Boolean(input.activeQuotedRoute && input.sameRouteQuoteAction);
-  const canonicalOverwriteCandidateBlocked =
-    sameRouteQuoteSkip || !input.canonicalOverwriteAllowed;
   if (
     reply &&
     sg &&
     input.sessionIsRecent &&
     canonical &&
-    !canonicalOverwriteCandidateBlocked &&
+    !sameRouteQuoteSkip &&
     needsCanonicalOverwriteForTxArtifacts({
       toolName: sg.lastToolName,
       reply: normalize(reply),
@@ -949,6 +1218,39 @@ function decidePostStateOutboundImpl(
   }
 
   // ------------------------------------------------------------------
+  // (B1.5) Post-order transaction invariant
+  // ------------------------------------------------------------------
+  if (
+    input.transactionResultRequired === true &&
+    input.conversationControllerEntry?.stage === "order_submitted"
+  ) {
+    const canonical = String(input.canonicalTransactionText || "").trim();
+    const canonicalHasTransactionArtifact =
+      !!canonical && (textContainsUrl(canonical) || textContainsOrderId(canonical));
+    const replacement = canonicalHasTransactionArtifact
+      ? canonical
+      : transactionSafeOrderSubmittedFallback(input.preferredLanguage);
+    logEntries.push({
+      level: canonicalHasTransactionArtifact ? "info" : "warn",
+      message:
+        `[post-order/invariant] replaced non-transaction reply conversation=${input.conversationId} ` +
+        `canonical_artifact=${canonicalHasTransactionArtifact ? "yes" : "no"} original=${JSON.stringify(reply).slice(0, 240)}`,
+      detail: {
+        canonicalArtifact: canonicalHasTransactionArtifact,
+        originalLen: reply ? reply.length : 0,
+      },
+    });
+    return {
+      decision: "replace_authoritative",
+      reason: "replace_transaction_artifact_missing",
+      replyText: replacement,
+      detectedShape: null,
+      markedSummaryShown: false,
+      logEntries,
+    };
+  }
+
+  // ------------------------------------------------------------------
   // (B2) Generic provider-issue fallback
   // ------------------------------------------------------------------
   if (!reply) {
@@ -962,62 +1264,134 @@ function decidePostStateOutboundImpl(
   }
 
   // ------------------------------------------------------------------
-  // (B3) Class-15 bypass repair (2026-04-21).
+  // (B2.2) Snapshot next-action authority
+  // ------------------------------------------------------------------
+  const snapshotAuthorityReply = input.bookingTruthSnapshot
+    && !input.planBSnapshotFinalReply
+    ? renderSnapshotNextActionReply({
+        snapshot: input.bookingTruthSnapshot,
+        language: input.preferredLanguage,
+        canonicalTransactionText: input.canonicalTransactionText,
+      })
+    : null;
+  if (snapshotAuthorityReply) {
+    logEntries.push({
+      level: "info",
+      message:
+        `[booking-truth-snapshot/authority] conversation=${input.conversationId} ` +
+        `next_action=${input.bookingTruthSnapshot?.nextAction.type || "-"} ` +
+        `replaced=${snapshotAuthorityReply.text === reply ? "no" : "yes"}`,
+      detail: {
+        nextAction: input.bookingTruthSnapshot?.nextAction.type || null,
+        previousDecision: decision,
+      },
+    });
+    return {
+      decision:
+        snapshotAuthorityReply.text === reply ? decision : "replace_authoritative",
+      reason:
+        snapshotAuthorityReply.text === reply ? reason : "replace_directive_ask",
+      replyText: snapshotAuthorityReply.text,
+      detectedShape: null,
+      markedSummaryShown: snapshotAuthorityReply.markSummaryShown,
+      logEntries,
+    };
+  }
+
+  // ------------------------------------------------------------------
+  // (B2.5) Multi-edit asks must be backed by controller state
+  // ------------------------------------------------------------------
+  if (
+    !input.planBSnapshotFinalReply &&
+    reply &&
+    input.conversationControllerEntry &&
+    !hasActivePendingOrderEdits(input.conversationControllerEntry) &&
+    input.conversationControllerEntry.stage !== "idle"
+  ) {
+    const editFields = detectMultiEditAsk(reply);
+    if (editFields.length >= 2) {
+      logEntries.push({
+        level: "warn",
+        message: `[guard] Replaced untracked multi-edit ask conversation=${input.conversationId} fields=${editFields.join(",")}`,
+        detail: {
+          fields: editFields.join(","),
+        },
+      });
+      reply = untrackedMultiEditFallback(editFields, input.preferredLanguage);
+      decision = "replace_authoritative";
+      reason = "replace_untracked_multi_edit_ask";
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // (B3) Class-15 get_price-bypass observation (2026-04-25).
   //
-  // Invariant: a route-intent turn with no active quoted route MUST
-  // have gone through `get_price`. If the LLM instead free-composed
-  // an area clarification ("What's the delivery area?", "Which part
-  // of Kuwait City?") without calling the tool, downstream turns
-  // end up with no server-owned `pendingPickupAreaNameEn` /
-  // `requestedSlot`, which is the exact state shape that collapses
-  // the next single-token reply into a symmetric route.
+  // This branch used to replace any tool-less area ask on an idle
+  // route-evidence turn with a deterministic "send pickup and delivery
+  // together" template. That was old state-first authority: normal
+  // booking starts like "Hello I want to order food" could be treated as
+  // error recovery and the LLM's natural reply was stomped.
   //
-  // This branch detects the shape on the CURRENT turn and substitutes
-  // a short deterministic "send both areas together" reply so the
-  // next turn carries a full route back into the tool-owned path.
-  // It is a last-line defense: the prompt-side STRICT rule plus the
-  // directive-registry / `CustomerIntentHint=pricing_request` hint
-  // should already be pushing the LLM to call `get_price`, and this
-  // substitution is only expected to fire when the LLM skips the
-  // tool entirely.
-  //
-  // The gate is AND of three preconditions (all precomputed by the
-  // caller) so it never fires on healthy turns:
-  //
-  //   - `classFifteenBypass === true` (caller saw route-evidence
-  //     inbound + no active quoted route + get_price NOT called).
-  //   - `reply` matches the narrow free-composed area-ask shape.
-  //   - The decision is still `allow` (we haven't already replaced
-  //     with a higher-priority substitution).
+  // It is now observe-only. Tool omission is a signal for metrics and
+  // prompt/tool-boundary work, not permission to author customer-facing
+  // text from a state-shape heuristic.
   // ------------------------------------------------------------------
   if (
     input.classFifteenBypass === true &&
     decision === "allow" &&
     looksLikeFreeComposedAreaClarification(reply)
   ) {
-    const repaired = buildClass15BypassRepairReply(input.preferredLanguage);
     logEntries.push({
-      level: "warn",
-      message: `[class-15/bypass] route_intent_turn_bypassed_get_price conversation=${input.conversationId} shape=free_composed_area_clarification original=${JSON.stringify(reply).slice(0, 240)}`,
+      level: input.classFifteenCoverageInformationalOnly === true ? "info" : "warn",
+      message: `[class-15/bypass] observe_only conversation=${input.conversationId} coverage_informational=${input.classFifteenCoverageInformationalOnly === true ? "yes" : "no"} shape=free_composed_area_clarification original=${JSON.stringify(reply).slice(0, 240)}`,
       detail: {
         shape: "free_composed_area_clarification",
         bypass: true,
+        observe_only: true,
+        coverage_informational:
+          input.classFifteenCoverageInformationalOnly === true,
       },
     });
-    reply = repaired;
-    decision = "replace_authoritative";
-    reason = "replace_get_price_bypass";
   }
 
   // ------------------------------------------------------------------
   // (C1) verifyAndRepairOutbound (Step-3 factual-only policy)
   // ------------------------------------------------------------------
   if (input.conversationControllerEntry) {
+    const entry = input.conversationControllerEntry;
+    const stageAtTurnEnd = (entry as any).stage ?? null;
+    const bookingStepAtTurnEnd = (entry as any).bookingStep ?? null;
+    const stageStartedAtSummary =
+      input.stageAtTurnStart === "summary_shown" ||
+      input.stageAtTurnStart === "awaiting_confirmation";
+    const summaryStageReached =
+      stageAtTurnEnd === "summary_shown" ||
+      stageAtTurnEnd === "awaiting_confirmation" ||
+      bookingStepAtTurnEnd === "summary_pending" ||
+      bookingStepAtTurnEnd === "awaiting_summary_confirmation";
+    const hasAuthoritativeQuoteFacts =
+      input.missingFields.length === 0 &&
+      Boolean(entry.quotePickupAreaNameEn || entry.quotePickupAreaNameAr) &&
+      Boolean(entry.quoteDropoffAreaNameEn || entry.quoteDropoffAreaNameAr) &&
+      Boolean(entry.selectedDeliveryType) &&
+      entry.quotedPrice != null;
+    const snapshotAllowsSummaryCheckpoint =
+      !input.planBSnapshotFinalReply &&
+      input.bookingTruthSnapshot?.nextAction.type === "show_summary";
+    const summaryCompletionCheckpoint =
+      snapshotAllowsSummaryCheckpoint &&
+      input.stageAtTurnStart !== null &&
+      summaryStageReached &&
+      !stageStartedAtSummary &&
+      hasAuthoritativeQuoteFacts;
+
     const verification: VerifyOutboundResult = verifyAndRepairOutbound({
       replyText: reply,
-      entry: input.conversationControllerEntry,
+      entry,
       missingFields: input.missingFields,
       language: input.preferredLanguage,
+      summaryCompletionCheckpoint,
+      bookingTruthSnapshot: input.bookingTruthSnapshot ?? null,
     });
     detectedShape = verification.shape;
     if (verification.shape !== "ok" && verification.shape !== "empty") {
@@ -1028,14 +1402,30 @@ function decidePostStateOutboundImpl(
           shape: verification.shape,
           replaced: verification.replaced,
           verifyReason: verification.reason,
+          summaryCompletionCheckpoint,
         },
       });
     }
-    if (verification.replaced) {
+    if (verification.replaced && !input.planBSnapshotFinalReply) {
       reply = verification.replyText;
       decision = "replace_authoritative";
-      reason = "replace_summary_fact_drift";
+      reason =
+        verification.reason === "substituted_summary_completion_checkpoint"
+          ? "replace_summary_completion_checkpoint"
+          : "replace_summary_fact_drift";
       markedSummaryShown = true;
+    } else if (verification.replaced && input.planBSnapshotFinalReply) {
+      if (input.planBLogLegacyAuthority) {
+        logEntries.push({
+          level: "warn",
+          message: `[plan-b/legacy-authority] observe_only phase=verify reason=${verification.reason} conversation=${input.conversationId}`,
+          detail: {
+            shape: verification.shape,
+            verifyReason: verification.reason,
+            wouldReplace: true,
+          },
+        });
+      }
     } else if (verification.shape === "clarifying_question") {
       // The LLM is doing repair work (clarifying a persisted-value conflict).
       // Surface this outcome explicitly so downstream metrics can separate
@@ -1115,7 +1505,10 @@ function decidePostStateOutboundImpl(
         stageAtTurnStart: input.stageAtTurnStart,
         language: input.preferredLanguage,
         nextRequiredAction: input.nextRequiredAction,
-        activeQuotedPrices: input.activeQuotedPrices ?? undefined,
+        activeQuotedPrices:
+          input.activeQuotedPrices ??
+          input.bookingTruthSnapshot?.quote.validQuotedPrices ??
+          undefined,
         cancelContradicted: input.cancelContradicted ?? null,
       });
       if (guardDecision.claims.length > 0) {

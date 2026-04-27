@@ -4,14 +4,13 @@
  * The LLM is excellent at understanding intent and writing replies, but it is
  * a probabilistic component when it comes to *extracting* structured fields
  * from a short customer message. Even with strict tool schemas, the model can
- * occasionally transpose digits, drop the leading 9 of a Kuwait phone, or
- * pick the wrong `address_role`.
+ * occasionally miss address parts or pick the wrong `address_role`.
  *
- * When the controller is in a specific collection step (`ASK_PICKUP_ADDRESS`,
- * `ASK_SENDER_PHONE`, etc.) and the customer's message has an unambiguous
- * deterministic parse, we should NOT gamble on the LLM — we should parse in
- * code, apply the patch, and let the LLM focus on generating the natural
- * language reply against an already-updated state.
+ * When the controller is in a specific address collection step
+ * (`ASK_PICKUP_ADDRESS` / `ASK_DELIVERY_ADDRESS`) and the customer's message
+ * has an unambiguous deterministic parse, we parse the address in code, apply
+ * the patch, and let the LLM focus on generating the natural language reply
+ * against an already-updated state.
  *
  * This module never interferes when the parse is ambiguous. It returns
  * `confidence: "none"` and the LLM runs as usual.
@@ -26,12 +25,9 @@
  */
 
 import type { BookingFieldPatch } from "./booking-draft";
-// Phase 1 authority cut (2026-04-24): `validateName` and
-// `isAcceptableSlotResponse` are no longer imported here. The free-form
-// name branches that relied on them (sender-combined residual name,
-// recipient combined name) have been removed — the LLM owns every
-// sender/recipient name write via `apply_booking_field`. Both functions
-// still run on the post-LLM side through `apply-boundary.ts`.
+// Authority cut (2026-04-26): identity fields are semantic even when the
+// surface value is structured. Names and phones are therefore LLM/tool-owned;
+// this pre-LLM module only writes address fields.
 
 export type FastPathAction =
   | "ASK_SENDER_NAME_AND_PHONE_DECISION"
@@ -55,8 +51,8 @@ export type FastPathResult = {
 //
 // The gate's whole purpose is to honour the Phase 2 rule: "no pre-LLM write
 // from state-shape alone; structured/explicit branches can stay, but only
-// with meaning/disposition gating." The Phase-3 extractor writes address
-// and phone fields by shape-matching — so it's gated here.
+// with meaning/disposition gating." The remaining Phase-3 extractor writes
+// address fields by shape-matching — so it's gated here.
 //
 // The reuse-intent, pin-role, and declared-role-pin paths are explicit
 // command whitelists (narrow regex / keyword matches) and are NOT routed
@@ -93,11 +89,11 @@ export function decideFastPathDispositionGate(params: {
 }): FastPathDispositionGateDecision {
   const disposition = params.disposition ?? "-";
   const mode = params.mode;
-  // Fail-open: if disposition is null (computation failed / not applicable)
-  // we never block. The Phase 2 rule only applies when we have a reliable
-  // classification.
+  // Fail-closed for unknown disposition when the gate is enabled. A missing
+  // semantic classification is not proof that the customer is continuing the
+  // current slot, so free-form fast paths must not write state from shape alone.
   const isContinueStep = disposition === "continue_step";
-  const blocked = !isContinueStep && params.disposition !== null;
+  const blocked = !isContinueStep;
 
   if (mode === "off" || !blocked) {
     return {
@@ -321,172 +317,36 @@ export function extractAddressForRole(params: {
 }
 
 // ---------------------------------------------------------------------------
-// Phone-only (ASK_SENDER_PHONE)
+// Identity fields (ASK_SENDER_PHONE / ASK_SENDER_NAME_AND_PHONE_DECISION)
 // ---------------------------------------------------------------------------
 
-const USE_WHATSAPP_RE =
-  /\b(?:use\s+(?:my\s+)?whatsapp|same\s+(?:as\s+)?(?:my\s+)?whatsapp|this\s+(?:is\s+)?fine|use\s+this(?:\s+number)?)\b/i;
-const USE_WHATSAPP_AR_RE = /(?:نفس\s*(?:رقم\s*)?(?:الواتس|الواتساب|هذا)|استخدم\s*(?:رقم\s*)?الواتس|هذا\s*الرقم)/i;
-
-/**
- * Returns a normalized phone string if the input looks like ONLY a phone
- * number (digits + separators + optional country code), else null.
- */
-function extractIfPurePhone(text: string): string | null {
-  const s = normalizeArabicDigits(text).trim();
-  // Only allow digits, spaces, +, -, parentheses, and up to one label prefix
-  // like "number:" / "phone:" / "my phone is ".
-  const labelStripped = s.replace(
-    /^\s*(?:my\s+(?:phone|number|no\.?)\s+is\s+|phone\s*[:#]?\s*|number\s*[:#]?\s*|tel\s*[:#]?\s*|رقم[يي]?\s*[:#]?\s*)/i,
-    "",
-  );
-  if (!/^[\d+\-()\s]+$/.test(labelStripped)) return null;
-  const digits = labelStripped.replace(/\D+/g, "");
-  if (digits.length < 7 || digits.length > 15) return null;
-  return digits;
-}
-
-export function extractSenderPhone(params: {
+export function extractSenderPhone(_params: {
   text: string;
   whatsappNumber: string | null;
 }): FastPathResult {
-  const reasons: string[] = [];
-  const s = squash(params.text);
-  if (USE_WHATSAPP_RE.test(s) || USE_WHATSAPP_AR_RE.test(s)) {
-    reasons.push("use_whatsapp_shortcut");
-    return {
-      patch: { phone_decision: "use_whatsapp" },
-      confidence: "high",
-      reasons,
-    };
-  }
-  const phone = extractIfPurePhone(params.text);
-  if (phone) {
-    reasons.push("pure_phone");
-    return {
-      patch: { phone_decision: "different", sender_phone: phone },
-      confidence: "high",
-      reasons,
-    };
-  }
-  return { patch: null, confidence: "none", reasons };
+  return {
+    patch: null,
+    confidence: "none",
+    reasons: ["llm_owned_sender_phone"],
+  };
 }
 
-// ---------------------------------------------------------------------------
-// Sender combined (ASK_SENDER_NAME_AND_PHONE_DECISION)
-//
-// Phase 1 authority cut (2026-04-24): the NAME branch of this extractor has
-// been removed. Reading free-form letters+spaces as a person-name before the
-// LLM runs is the exact pre-LLM authority pattern that wrote
-// `sender_name = "No the avenues mall"` on 2026-04-24 12:48 (conv 20125).
-// The LLM now owns every sender-name write; the fast-path keeps only the two
-// unambiguous structured / explicit-command signals on this action:
-//
-//   • `use_whatsapp` keyword                     → phone_decision: "use_whatsapp"
-//   • pure digit group 7–15 digits (no letters)  → phone_decision: "different",
-//                                                  sender_phone: <digits>
-//
-// Anything else → `{patch: null, confidence: "none"}` and the LLM handles the
-// turn through its `apply_booking_field` tool call. No name-shape predicate,
-// no coherence gate, no residual name extraction — by design.
-// ---------------------------------------------------------------------------
-
-const DIFFERENT_NUMBER_RE_EN =
-  /\b(?:different|new|another|other)\s+(?:phone|number|no\.?|num)\b/i;
-const DIFFERENT_NUMBER_RE_AR = /(?:رقم\s*(?:ثاني|آخر|مختلف|غير|جديد|اخر|ثاني)|(?:رقم|نمبر)\s+(?:ثاني|آخر|مختلف))/i;
-
-/**
- * Phone / decision only — no name extraction.
- *
- * See the section header above for rationale. If the message contains an
- * unambiguous `use_whatsapp` keyword OR a single 7–15 digit phone group
- * (and no conflicting markers), we emit a phone-only patch. In every other
- * case we return `none` and the LLM owns the turn.
- */
-export function extractSenderNameAndDecision(params: {
+export function extractSenderNameAndDecision(_params: {
   text: string;
 }): FastPathResult {
-  const reasons: string[] = [];
-  const raw = normalizeArabicDigits(params.text).trim();
-  if (!raw) return { patch: null, confidence: "none", reasons };
-
-  let residual = raw;
-  let decision: "use_whatsapp" | "different" | null = null;
-  let senderPhone: string | null = null;
-
-  const useWaMatch =
-    raw.match(USE_WHATSAPP_RE) || raw.match(USE_WHATSAPP_AR_RE);
-  if (useWaMatch) {
-    decision = "use_whatsapp";
-    residual = residual.replace(USE_WHATSAPP_RE, " ").replace(USE_WHATSAPP_AR_RE, " ");
-    reasons.push("use_whatsapp_marker");
-  }
-
-  const differentMatch =
-    raw.match(DIFFERENT_NUMBER_RE_EN) || raw.match(DIFFERENT_NUMBER_RE_AR);
-  if (differentMatch) {
-    if (decision === "use_whatsapp") {
-      reasons.push("conflicting_markers");
-      return { patch: null, confidence: "none", reasons };
-    }
-    decision = "different";
-    residual = residual
-      .replace(DIFFERENT_NUMBER_RE_EN, " ")
-      .replace(DIFFERENT_NUMBER_RE_AR, " ");
-    reasons.push("different_marker");
-  }
-
-  const digitMatches: string[] = [];
-  const digitRe = /[\d+\-()\s]{7,}/g;
-  let m;
-  while ((m = digitRe.exec(residual)) !== null) {
-    const clean = m[0].replace(/\D+/g, "");
-    if (clean.length >= 7 && clean.length <= 15) {
-      digitMatches.push(m[0]);
-    }
-  }
-  if (digitMatches.length > 1) {
-    reasons.push("multiple_phone_candidates");
-    return { patch: null, confidence: "none", reasons };
-  }
-  if (digitMatches.length === 1) {
-    if (decision === "use_whatsapp") {
-      reasons.push("phone_with_use_whatsapp");
-      return { patch: null, confidence: "none", reasons };
-    }
-    senderPhone = digitMatches[0].replace(/\D+/g, "");
-    if (!decision) decision = "different";
-    reasons.push("phone_digits");
-  }
-
-  // Phase 1 cut: no name extraction. If we did not resolve an unambiguous
-  // phone/decision signal, hand the turn to the LLM.
-  if (!decision && !senderPhone) {
-    reasons.push("no_structured_signal");
-    return { patch: null, confidence: "none", reasons };
-  }
-
-  if (decision === "different" && !senderPhone) {
-    reasons.push("different_without_phone");
-    return { patch: null, confidence: "none", reasons };
-  }
-
-  const patch: BookingFieldPatch = {};
-  if (decision) patch.phone_decision = decision;
-  if (senderPhone) patch.sender_phone = senderPhone;
-
-  return { patch, confidence: "high", reasons };
+  return {
+    patch: null,
+    confidence: "none",
+    reasons: ["llm_owned_sender_identity"],
+  };
 }
 
 // ---------------------------------------------------------------------------
 // Recipient combined (ASK_RECIPIENT_NAME_AND_PHONE)
 //
-// Phase 1 authority cut (2026-04-24): this extractor is fully disabled.
-// Combined "name + phone" parsing is free-form enough that the LLM should
-// own it end-to-end via `apply_booking_field`. The export is kept as a
-// shim (returning `none`) so existing smoke-test imports do not break.
-// Callers should prefer `extractForNextAction`, which routes
-// `ASK_RECIPIENT_NAME_AND_PHONE` to `none` explicitly.
+// Combined "name + phone" parsing is semantic. The LLM owns it end-to-end via
+// `apply_booking_field`. The export is kept as a shim so existing smoke-test
+// imports do not break.
 // ---------------------------------------------------------------------------
 
 export function extractRecipientNameAndPhone(_params: {
@@ -519,23 +379,14 @@ export function extractForNextAction(params: {
     case "ASK_SENDER_PHONE":
       return extractSenderPhone({ text: params.text, whatsappNumber: params.whatsappNumber });
     case "ASK_SENDER_NAME_AND_PHONE_DECISION":
-      // Phone/decision only after Phase 1 — the combined extractor no
-      // longer writes `sender_name`. See the section header on
-      // `extractSenderNameAndDecision` for rationale.
       return extractSenderNameAndDecision({ text: params.text });
     case "ASK_SENDER_NAME":
-      // Phase 1 cut (2026-04-24): free-form name extraction belongs to
-      // the LLM. The combined extractor is phone/decision only, and a
-      // name-only ask has nothing structured to offer the fast-path,
-      // so we bail explicitly.
       return {
         patch: null,
         confidence: "none",
         reasons: ["llm_owned_name_extraction"],
       };
     case "ASK_RECIPIENT_NAME_AND_PHONE":
-      // Phase 1 cut (2026-04-24): combined recipient name+phone belongs
-      // to the LLM. See `extractRecipientNameAndPhone` for rationale.
       return {
         patch: null,
         confidence: "none",

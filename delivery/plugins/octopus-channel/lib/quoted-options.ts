@@ -7,6 +7,7 @@
 // `plugins/octopus-channel/index.ts`.
 // ---------------------------------------------------------------------------
 
+import type { AreaResolutionProvenance } from "../../shared/area-resolution-provenance";
 import type { PersistedConversationControllerEntry } from "../../shared/conversation-policy";
 import {
   extractTrackingOrderId,
@@ -36,6 +37,8 @@ export type StoredQuotedRoute = {
   pickupAreaNameEn: string;
   dropoffAreaNameAr: string;
   dropoffAreaNameEn: string;
+  pickupAreaResolution?: AreaResolutionProvenance | null;
+  dropoffAreaResolution?: AreaResolutionProvenance | null;
   pricesByType: Record<string, number>;
   optionCatalog: RouteQuoteOption[];
   serviceDiscovery?: {
@@ -1053,6 +1056,17 @@ export function detectExplicitOptionMention(params: {
   return null;
 }
 
+function looksLikeRejectingMentionedOption(normalizedText: string): boolean {
+  if (!normalizedText) return false;
+  return (
+    /\b(?:dont|do not|don't)\s+want\b/i.test(normalizedText) ||
+    /\bnot\s+(?:the\s+)?(?:standard|normal|express|fast|sedan|van|box|refrigerated|cooled|helper)\b/i.test(normalizedText) ||
+    /\bno\s+(?:standard|normal|express|fast|sedan|van|box|refrigerated|cooled|helper)\b/i.test(normalizedText) ||
+    /\banything\s+but\b/i.test(normalizedText) ||
+    /(?:ما\s*(?:ابي|أبي)|مو|غير|لا)\s+/.test(normalizedText)
+  );
+}
+
 /**
  * True when the active route has at least one option flagged as
  * `manual_confirmation_required` in its option catalog AND at least one
@@ -1119,6 +1133,14 @@ export function resolveSameRouteQuoteFollowupAction(params: {
     options,
   });
   if (outcome.kind === "match") {
+    const currentOption = getActiveSelectedQuotedOption(params.route, params.controllerEntry);
+    if (
+      currentOption &&
+      outcome.option.delivery_type === currentOption.delivery_type &&
+      looksLikeRejectingMentionedOption(normalizedText)
+    ) {
+      return { kind: "show_other_options" };
+    }
     return {
       kind: "switch_option",
       option: outcome.option,

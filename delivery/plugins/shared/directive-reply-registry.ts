@@ -533,6 +533,11 @@ function renderConfirmSlotConflict(ctx: DirectiveReplyRendererContext): string {
   // `Record<SlotName, string>` shape on the label maps enforces that
   // every new slot added to the DST gets both EN and AR labels.
   const rawSlot = ctx.conflictingSlot || null;
+  if (!rawSlot) {
+    return ctx.language === "ar"
+      ? "ارسل اسم الحقل والقيمة الصحيحة للتعديل."
+      : "Please send the field name and the correct value for the edit.";
+  }
   const label = rawSlot
     ? slotLabel(ctx.language, rawSlot)
     : ctx.language === "ar"

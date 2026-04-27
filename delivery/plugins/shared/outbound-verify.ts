@@ -25,6 +25,7 @@ import type {
   PersistedBookingDraft,
   PersistedConversationControllerEntry,
 } from "./conversation-policy";
+import type { BookingTruthSnapshot } from "./booking-truth-snapshot";
 
 export type OutboundReplyShape =
   | "ok"
@@ -41,6 +42,8 @@ export type VerifyOutboundParams = {
   entry: PersistedConversationControllerEntry | null;
   missingFields: string[];
   language: "ar" | "en";
+  summaryCompletionCheckpoint?: boolean;
+  bookingTruthSnapshot?: BookingTruthSnapshot | null;
 };
 
 export type VerifyOutboundResult = {
@@ -574,20 +577,40 @@ export function verifyCompactFactualClaims(
 export function verifySummaryFacts(
   reply: string,
   entry: PersistedConversationControllerEntry,
+  bookingTruthSnapshot?: BookingTruthSnapshot | null,
 ): SummaryFactCheckResult {
   const mismatches: SummaryFactMismatch[] = [];
   const draft = entry.bookingDraft;
 
   // 1. Price verification (only when a price is actually mentioned).
   const mentionedPrices = extractKwdPrices(reply);
-  if (entry.quotedPrice != null && mentionedPrices.length > 0) {
-    const quoted = entry.quotedPrice;
-    const anyMatch = mentionedPrices.some((p) => Math.abs(p - quoted) <= 0.05);
-    if (!anyMatch) {
+  if (mentionedPrices.length > 0) {
+    const selectedPrice =
+      bookingTruthSnapshot?.quote.selected.price ?? entry.quotedPrice ?? null;
+    const lowerReply = reply.toLowerCase();
+    const mentionsCatalogOption = Boolean(
+      bookingTruthSnapshot?.quote.optionCatalog.some((option) => {
+        const labels = [option.label_en, option.label_ar, option.delivery_type]
+          .map((value) => String(value || "").trim().toLowerCase())
+          .filter(Boolean);
+        return labels.some((label) => lowerReply.includes(label));
+      }),
+    );
+    const acceptedPrices =
+      mentionsCatalogOption &&
+      (bookingTruthSnapshot?.quote.validQuotedPrices.length || 0) > 0
+        ? bookingTruthSnapshot?.quote.validQuotedPrices ?? []
+        : selectedPrice != null
+          ? [selectedPrice]
+          : [];
+    const anyMatch = mentionedPrices.some((p) =>
+      acceptedPrices.some((quoted) => Math.abs(p - quoted) <= 0.05),
+    );
+    if (acceptedPrices.length > 0 && !anyMatch) {
       mismatches.push({
         field: "price",
         mentioned: mentionedPrices.join(","),
-        expected: quoted.toFixed(3),
+        expected: acceptedPrices.map((price) => price.toFixed(3)).join("|"),
       });
     }
   }
@@ -614,7 +637,7 @@ export function verifySummaryFacts(
   // to appear in a full summary. If a name is missing AND we're in a
   // summary-shape reply (checked by caller), that's drift.
   const lowerReply = reply.toLowerCase();
-  for (const [label, name] of [
+  for (const [, name] of [
     ["sender_name", draft.senderName],
     ["recipient_name", draft.recipientName],
   ] as const) {
@@ -641,7 +664,7 @@ export function verifySummaryFacts(
   const hasAreaRow =
     /(^|\n)[\*\-•\s>]*(?:pickup|delivery|from|to|الاستلام|التسليم|من|الى|إلى)\b/i.test(reply);
   if (hasAreaRow) {
-    for (const [label, en, ar] of [
+    for (const [, en, ar] of [
       ["pickup_area", entry.quotePickupAreaNameEn, entry.quotePickupAreaNameAr],
       ["delivery_area", entry.quoteDropoffAreaNameEn, entry.quoteDropoffAreaNameAr],
     ] as const) {
@@ -788,7 +811,7 @@ export function classifyOutboundReplyShape(params: VerifyOutboundParams): Outbou
     // stored name. Yesterday's incident had this pattern as a contributing
     // factor: LLM's earlier summary presented the apartment address as
     // complete when the server (pre-fix) had it as incomplete.
-    const factCheck = verifySummaryFacts(reply, entry);
+    const factCheck = verifySummaryFacts(reply, entry, params.bookingTruthSnapshot);
     if (!factCheck.consistent) return "summary_fact_drift";
     return "ok";
   }
@@ -804,6 +827,62 @@ function formatPhoneForSummary(phone: string | null): string {
   return phone;
 }
 
+function normalizeWesternDigits(value: string | null | undefined): string {
+  return String(value || "").replace(/[٠-٩۰-۹]/g, (digit) => {
+    const map: Record<string, string> = {
+      "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+      "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",
+      "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+      "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+    };
+    return map[digit] || digit;
+  });
+}
+
+function interiorUnitNumbers(extra: string | null | undefined): Set<string> {
+  const found = new Set<string>();
+  const text = normalizeWesternDigits(extra);
+  if (!text.trim()) return found;
+  const patterns = [
+    /\b(?:apt|appt|apartment|flat|unit|suite|office|room)\s*[:#-]?\s*([a-z0-9]{1,10})\b/gi,
+    /(?:شقة|شقه|فلات|وحدة|وحده|مكتب|غرفة)\s*[:#-]?\s*([a-z0-9]{1,10})/gi,
+  ];
+  for (const pattern of patterns) {
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text)) !== null) {
+      if (match[1]) found.add(match[1].trim().toLowerCase());
+    }
+  }
+  return found;
+}
+
+function shouldRenderHouse(parts: { house: string | null; extra: string | null }): boolean {
+  const house = normalizeWesternDigits(parts.house).trim().toLowerCase();
+  if (!house) return false;
+  return !interiorUnitNumbers(parts.extra).has(house);
+}
+
+function normalizeAddressExtraEn(extra: string | null): string | null {
+  if (!extra) return null;
+  return extra
+    .split(",")
+    .map((part) => {
+      const trimmed = part.trim();
+      if (!trimmed) return "";
+      return trimmed
+        .replace(/^(apt|appt|apartment)\b/i, "Apartment")
+        .replace(/^flat\b/i, "Flat")
+        .replace(/^floor\b/i, "Floor")
+        .replace(/^door\b/i, "Door")
+        .replace(/^unit\b/i, "Unit")
+        .replace(/^office\b/i, "Office")
+        .replace(/^gate\b/i, "Gate")
+        .replace(/^suite\b/i, "Suite");
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
 function joinAddressPartsEn(parts: {
   block: string | null;
   street: string | null;
@@ -815,8 +894,9 @@ function joinAddressPartsEn(parts: {
   if (parts.block) pieces.push(`Block ${parts.block}`);
   if (parts.street) pieces.push(`Street ${parts.street}`);
   if (parts.avenue) pieces.push(`Jedda ${parts.avenue}`);
-  if (parts.house) pieces.push(`House ${parts.house}`);
-  if (parts.extra) pieces.push(parts.extra);
+  if (shouldRenderHouse(parts)) pieces.push(`House ${parts.house}`);
+  const extra = normalizeAddressExtraEn(parts.extra);
+  if (extra) pieces.push(extra);
   return pieces.length > 0 ? pieces.join(", ") : "—";
 }
 
@@ -831,7 +911,7 @@ function joinAddressPartsAr(parts: {
   if (parts.block) pieces.push(`قطعة ${parts.block}`);
   if (parts.street) pieces.push(`شارع ${parts.street}`);
   if (parts.avenue) pieces.push(`جادة ${parts.avenue}`);
-  if (parts.house) pieces.push(`منزل ${parts.house}`);
+  if (shouldRenderHouse(parts)) pieces.push(`منزل ${parts.house}`);
   if (parts.extra) pieces.push(parts.extra);
   return pieces.length > 0 ? pieces.join("، ") : "—";
 }
@@ -956,7 +1036,7 @@ export function buildDeterministicOrderSummary(params: {
       `الخدمة: ${service}`,
       `السعر: ${priceStr} د.ك`,
       ``,
-      `أأكد الطلب؟`,
+      `تبي تأكد الطلب؟`,
     ];
     return lines.join("\n");
   }
@@ -989,6 +1069,97 @@ export function buildDeterministicOrderSummary(params: {
     `Shall I confirm this order?`,
   ];
   return lines.join("\n");
+}
+
+export function buildDeterministicOrderSummaryFromSnapshot(params: {
+  snapshot: BookingTruthSnapshot;
+  language: "ar" | "en";
+}): string {
+  const { snapshot, language } = params;
+  const draft = snapshot.draft;
+  const selected = snapshot.quote.selected;
+  const serviceKey = snapshot.quote.selectedService || selected.deliveryType || "";
+  const price =
+    selected.price != null && Number.isFinite(Number(selected.price))
+      ? Number(selected.price).toFixed(3)
+      : selected.formattedPrice || "—";
+
+  const service =
+    language === "ar"
+      ? selected.labelAr ||
+        SERVICE_LABELS_AR[serviceKey] ||
+        selected.labelEn ||
+        serviceKey ||
+        "—"
+      : selected.labelEn ||
+        SERVICE_LABELS_EN[serviceKey] ||
+        selected.labelAr ||
+        serviceKey ||
+        "—";
+
+  const pickupArea =
+    (language === "ar"
+      ? snapshot.route.pickup.nameAr || snapshot.route.pickup.nameEn
+      : snapshot.route.pickup.nameEn || snapshot.route.pickup.nameAr) || "—";
+  const deliveryArea =
+    (language === "ar"
+      ? snapshot.route.dropoff.nameAr || snapshot.route.dropoff.nameEn
+      : snapshot.route.dropoff.nameEn || snapshot.route.dropoff.nameAr) || "—";
+
+  if (language === "ar") {
+    const pickupAddr = joinAddressPartsAr({
+      block: draft?.pickupBlock ?? null,
+      street: draft?.pickupStreet ?? null,
+      avenue: draft?.pickupAvenue ?? null,
+      house: draft?.pickupHouse ?? null,
+      extra: draft?.pickupExtra ?? null,
+    });
+    const deliveryAddr = joinAddressPartsAr({
+      block: draft?.deliveryBlock ?? null,
+      street: draft?.deliveryStreet ?? null,
+      avenue: draft?.deliveryAvenue ?? null,
+      house: draft?.deliveryHouse ?? null,
+      extra: draft?.deliveryExtra ?? null,
+    });
+    return [
+      `*ملخص الطلب*`,
+      `الاستلام: ${pickupArea} — ${pickupAddr}`,
+      `التسليم: ${deliveryArea} — ${deliveryAddr}`,
+      `المرسل: ${draft?.senderName || "—"} — ${formatPhoneForSummary(draft?.senderPhone ?? null)}`,
+      `المستلم: ${draft?.recipientName || "—"} — ${formatPhoneForSummary(draft?.recipientPhone ?? null)}`,
+      `الخدمة: ${service}`,
+      `السعر: ${price} د.ك`,
+      ``,
+      `تبي تأكد الطلب؟`,
+    ].join("\n");
+  }
+
+  const pickupAddr = joinAddressPartsEn({
+    block: draft?.pickupBlock ?? null,
+    street: draft?.pickupStreet ?? null,
+    avenue: draft?.pickupAvenue ?? null,
+    house: draft?.pickupHouse ?? null,
+    extra: draft?.pickupExtra ?? null,
+  });
+  const deliveryAddr = joinAddressPartsEn({
+    block: draft?.deliveryBlock ?? null,
+    street: draft?.deliveryStreet ?? null,
+    avenue: draft?.deliveryAvenue ?? null,
+    house: draft?.deliveryHouse ?? null,
+    extra: draft?.deliveryExtra ?? null,
+  });
+
+  return [
+    `*Order summary*`,
+    `Pickup: ${pickupArea} — ${pickupAddr}`,
+    `Delivery: ${deliveryArea} — ${deliveryAddr}`,
+    `Sender: ${draft?.senderName || "—"} — ${formatPhoneForSummary(draft?.senderPhone ?? null)}`,
+    `Recipient: ${draft?.recipientName || "—"} — ${formatPhoneForSummary(draft?.recipientPhone ?? null)}`,
+    `Service: ${service}`,
+    `Price: ${price} KWD`,
+    ``,
+    `Shall I confirm this order?`,
+  ].join("\n");
 }
 
 /**
@@ -1040,23 +1211,88 @@ export function verifyAndRepairOutbound(params: VerifyOutboundParams): VerifyOut
   const entry = params.entry;
   const draftComplete = params.missingFields.length === 0;
 
-  // Active reject for zero-distance route (2026-04-21). The controller
-  // has `quotePickupAreaNameEn == quoteDropoffAreaNameEn`, which means
-  // the quote itself is poisoned upstream. Dropping the LLM's reply and
-  // substituting a recovery ask is the safe path — we can't trust the
-  // symmetric route as the source of truth, and we can't render a
-  // coherent summary from it either. The ask re-requests both areas
-  // and keeps the customer in control of the next turn.
+  // Zero-distance route detection — Z2-V1 demotion (2026-04-24).
+  //
+  // History: this path used to substitute the LLM's reply with a canned
+  // "صار التباس في المناطق" ask whenever the controller had
+  // `quotePickupAreaNameEn === quoteDropoffAreaNameEn`. The intent was
+  // to catch state that was poisoned upstream by a bad tool call.
+  //
+  // Why demote: Z1-P0 closed the main poisoning path at the source —
+  // `get_price` now rejects cold-start symmetric calls and returns an
+  // instructional error instead of writing `set_pending_area` ops. With
+  // that in place, this substitution path is (a) mostly unreachable in
+  // the intended cases and (b) actively harmful when it DOES fire,
+  // because it stomps the LLM's (usually correct) coverage-question
+  // reply with an accusatory recovery ask that blames the customer
+  // ("resend pickup and delivery areas"). Observed on 2026-04-24 with
+  // "توصلون لي فروانية؟" / Farwaniya, where the LLM correctly replied
+  // "نوصل لفروانية، بس عطنا منطقة الاستلام" but got overwritten.
+  //
+  // Behaviour change: keep the detection (valuable observability — if
+  // this shape fires post-Z1-P0, something else is still poisoning
+  // state and we want the log), but stop authoring customer-facing
+  // text. The LLM's reply goes out as-authored.
+  //
+  // Flag: `RIDERS_OUTBOUND_ZERO_DISTANCE_SUBSTITUTE=on` re-enables the
+  // old substitute path for emergency rollback. Default OFF = demoted.
   if (entry && shape === "route_zero_distance") {
-    const substitute = buildZeroDistanceRouteRecovery({
-      entry,
-      language: params.language,
-    });
+    const rollbackRaw = (globalThis as any).process?.env
+      ?.RIDERS_OUTBOUND_ZERO_DISTANCE_SUBSTITUTE;
+    const rollbackEnabled =
+      typeof rollbackRaw === "string" &&
+      ["on", "1", "true", "yes", "enabled"].includes(
+        rollbackRaw.trim().toLowerCase(),
+      );
+    try {
+      console.log(
+        `[metric] outbound_verify.zero_distance_detected` +
+          ` quotePickup="${entry.quotePickupAreaNameEn ?? ""}"` +
+          ` quoteDropoff="${entry.quoteDropoffAreaNameEn ?? ""}"` +
+          ` stage=${(entry as any).stage ?? "unknown"}` +
+          ` action=${rollbackEnabled ? "substitute_rollback" : "log_only"}`,
+      );
+    } catch {}
+    if (rollbackEnabled) {
+      const substitute = buildZeroDistanceRouteRecovery({
+        entry,
+        language: params.language,
+      });
+      return {
+        replyText: substitute,
+        replaced: true,
+        shape,
+        reason: "substituted_zero_distance_route_recovery",
+      };
+    }
+    return {
+      replyText: params.replyText,
+      replaced: false,
+      shape,
+      reason: "detected_route_zero_distance_log_only",
+    };
+  }
+
+  // Summary checkpoint guard: when server state proves the booking just
+  // reached the summary step, a compact ack/stub must not ask for another
+  // missing field. Outside this narrow checkpoint these shapes stay log-only
+  // so normal LLM phrasing remains free.
+  if (
+    entry &&
+    params.summaryCompletionCheckpoint === true &&
+    draftComplete &&
+    entry.quotedPrice != null &&
+    entry.selectedDeliveryType &&
+    (shape === "stub_summary" ||
+      shape === "standalone_ack" ||
+      shape === "route_price_recap")
+  ) {
+    const substitute = buildDeterministicOrderSummary({ entry, language: params.language });
     return {
       replyText: substitute,
       replaced: true,
       shape,
-      reason: "substituted_zero_distance_route_recovery",
+      reason: "substituted_summary_completion_checkpoint",
     };
   }
 

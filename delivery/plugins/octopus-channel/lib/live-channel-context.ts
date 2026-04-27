@@ -18,6 +18,7 @@ import type {
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
 import type { TurnDisposition } from "../../shared/turn-disposition";
+import type { BookingTruthSnapshot } from "../../shared/booking-truth-snapshot";
 import type { InterpretedCustomerTurn } from "./interpreter-types";
 import type { StoredQuotedRoute } from "./quoted-options";
 import { buildQuotedRouteContextLines } from "./quoted-options";
@@ -42,6 +43,9 @@ export function formatLiveChannelContext(
     bookingStep?: BookingCollectionStep | null;
     controllerEntry?: PersistedConversationControllerEntry | null;
     quotedRoute?: StoredQuotedRoute | null;
+    bookingTruthSnapshot?: BookingTruthSnapshot | null;
+    snapshotContextOnly?: boolean;
+    coveragePending?: any | null;
     quoteFollowupHint?: string | null;
     controllerTransitionHint?: string | null;
     /**
@@ -75,6 +79,9 @@ export function formatLiveChannelContext(
       customerScriptMode: options?.customerScriptMode,
       controllerEntry: options?.controllerEntry,
       quotedRoute: options?.quotedRoute,
+      bookingTruthSnapshot: options?.bookingTruthSnapshot ?? null,
+      snapshotContextOnly: options?.snapshotContextOnly ?? false,
+      coveragePending: options?.coveragePending ?? null,
       currentCustomerText: options?.currentCustomerText ?? null,
       promptShapingDisposition: options?.promptShapingDisposition ?? null,
     });

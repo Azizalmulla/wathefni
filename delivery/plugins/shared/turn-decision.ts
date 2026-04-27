@@ -165,6 +165,7 @@ export const REPLY_SOURCES: readonly ReplySource[] = [
 export type A1SubstituteIntent =
   | "replace_directive_ask"
   | "replace_summary_fact_drift"
+  | "replace_summary_completion_checkpoint"
   | "replace_clarify_option_before_proceed"
   | "replace_manual_confirm_address_ask"
   | "replace_manual_confirm_handoff"
@@ -172,6 +173,8 @@ export type A1SubstituteIntent =
   | "replace_price_mismatch"
   | "replace_field_rejection_hallucination"
   | "replace_order_placed_hallucination"
+  | "replace_stale_missing_field_ask"
+  | "replace_untracked_multi_edit_ask"
   | "replace_get_price_bypass"
   | "block_provider_error"
   | "fallback_empty_reply"
@@ -194,10 +197,12 @@ export function classifyReplySource(
     case "replace_directive_ask":
       return { source: "server_rendered_directive", llm_authored_reason: null };
 
-    // Summary-fact-drift delegates to the same canonical summary
-    // builder the directive registry uses on `WRITE_FULL_ORDER_SUMMARY_*`
-    // turns. It's a rendered directive, not a recovery template.
+    // Summary-fact-drift and the completion checkpoint delegate to the
+    // same canonical summary builder the directive registry uses on
+    // `WRITE_FULL_ORDER_SUMMARY_*` turns. They are rendered directives,
+    // not recovery templates.
     case "replace_summary_fact_drift":
+    case "replace_summary_completion_checkpoint":
       return { source: "server_rendered_directive", llm_authored_reason: null };
 
     case "replace_clarify_option_before_proceed":
@@ -212,6 +217,9 @@ export function classifyReplySource(
     case "replace_price_mismatch":
     case "replace_field_rejection_hallucination":
     case "replace_order_placed_hallucination":
+    case "replace_state_write_hallucination":
+    case "replace_stale_missing_field_ask":
+    case "replace_untracked_multi_edit_ask":
     case "replace_get_price_bypass":
     case "block_provider_error":
     case "fallback_empty_reply":
@@ -1177,6 +1185,8 @@ const A1_RECOVERY_INTENTS: ReadonlySet<A1SubstituteIntent> = new Set<A1Substitut
   "replace_price_mismatch",
   "replace_field_rejection_hallucination",
   "replace_order_placed_hallucination",
+  "replace_stale_missing_field_ask",
+  "replace_untracked_multi_edit_ask",
   "replace_get_price_bypass",
   "block_provider_error",
   "fallback_empty_reply",
@@ -1213,12 +1223,15 @@ export function deriveDispatch(input: A4DispatchInputs): A4DispatchDerivation {
     };
   }
 
-  // Rule 3: summary fact drift — canonical summary renderer.
-  if (input.a1_substitute_intent === "replace_summary_fact_drift") {
+  // Rule 3: summary fact drift / checkpoint — canonical summary renderer.
+  if (
+    input.a1_substitute_intent === "replace_summary_fact_drift" ||
+    input.a1_substitute_intent === "replace_summary_completion_checkpoint"
+  ) {
     return {
       source: "server_rendered_directive",
-      reason: "replace_summary_fact_drift",
-      policy_rule: "layer.a1_summary_fact_drift",
+      reason: input.a1_substitute_intent,
+      policy_rule: `layer.a1_summary_renderer.${input.a1_substitute_intent}`,
     };
   }
 

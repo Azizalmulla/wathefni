@@ -1,3 +1,6 @@
+import type { PendingOrderEditField } from "./conversation-policy.js";
+import type { AreaResolutionProvenance } from "./area-resolution-provenance.js";
+
 /**
  * Shared per-turn buffer where responder tool calls push state operations
  * that the octopus-channel orchestrator drains after the LLM turn completes.
@@ -94,6 +97,14 @@ export type ResponderSetPendingAreaOp = {
   field: "pickup_area" | "dropoff_area";
   area_name_en: string | null;
   area_name_ar: string | null;
+  area_resolution?: AreaResolutionProvenance | null;
+  turn_id: string;
+};
+
+export type ResponderSetPendingOrderEditsOp = {
+  op: "set_pending_order_edits";
+  fields: PendingOrderEditField[];
+  source_quote?: string | null;
   turn_id: string;
 };
 
@@ -240,6 +251,7 @@ export type ResponderStateOp =
   | ResponderHandoffOp
   | ResponderSetRequestedSlotOp
   | ResponderSetPendingAreaOp
+  | ResponderSetPendingOrderEditsOp
   | ResponderCarryOverFromLastOrderOp
   | ResponderOptionInterpretationOp
   | ResponderProposedTurnDecisionOp;
@@ -342,6 +354,8 @@ function opDedupKey(op: ResponderStateOp): string {
       return `${base}|${op.field}|${op.area_name_en || ""}`;
     case "set_requested_slot":
       return `${base}|${op.slot}|${(op.options || []).join(",")}`;
+    case "set_pending_order_edits":
+      return `${base}|${(op.fields || []).join(",")}`;
     case "carry_over_from_last_order":
       return `${base}|${(op.buckets || []).join(",")}`;
     case "propose_option_interpretation":
@@ -624,6 +638,70 @@ export function validateApplyBookingFieldOp(
   );
 
   return { cleaned, errors, hasAnyValidField };
+}
+
+const PENDING_ORDER_EDIT_VALID_FIELDS = new Set<PendingOrderEditField>([
+  "sender_name",
+  "sender_phone",
+  "recipient_name",
+  "recipient_phone",
+  "pickup_area",
+  "dropoff_area",
+  "pickup_block",
+  "pickup_street",
+  "pickup_house",
+  "pickup_avenue",
+  "pickup_extra",
+  "delivery_block",
+  "delivery_street",
+  "delivery_house",
+  "delivery_avenue",
+  "delivery_extra",
+  "service",
+]);
+
+export type PendingOrderEditsValidationError = {
+  field: "fields" | "source_quote";
+  reason: string;
+  received?: string;
+};
+
+export function validatePendingOrderEditsOp(input: any): {
+  cleaned: ResponderSetPendingOrderEditsOp;
+  errors: PendingOrderEditsValidationError[];
+} {
+  const errors: PendingOrderEditsValidationError[] = [];
+  const rawFields = Array.isArray(input?.fields) ? input.fields : [];
+  const fields: PendingOrderEditField[] = [];
+  const seen = new Set<string>();
+  for (const raw of rawFields) {
+    if (typeof raw !== "string") continue;
+    const normalized = raw.trim().toLowerCase();
+    if (!PENDING_ORDER_EDIT_VALID_FIELDS.has(normalized as PendingOrderEditField)) {
+      errors.push({ field: "fields", reason: "unknown_field", received: raw });
+      continue;
+    }
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    fields.push(normalized as PendingOrderEditField);
+  }
+  if (fields.length === 0) {
+    errors.push({ field: "fields", reason: "empty" });
+  }
+  const sourceQuote =
+    typeof input?.source_quote === "string" && input.source_quote.trim()
+      ? input.source_quote.trim().slice(0, 200)
+      : null;
+  const turnId = typeof input?.turn_id === "string" ? input.turn_id : "";
+  return {
+    cleaned: {
+      op: "set_pending_order_edits",
+      fields,
+      source_quote: sourceQuote,
+      turn_id: turnId,
+    },
+    errors,
+  };
 }
 
 /**

@@ -113,13 +113,24 @@ export function createCustomerProfileStore(
     if (!profilePath) {
       return null;
     }
+    // Hashed phone id for metric correlation without leaking raw numbers
+    // into logs. Last 4 digits of the normalized reply target — enough to
+    // spot "same customer hitting repeatedly" without PII exposure.
+    const phoneTail = (replyTarget || "").replace(/[^\d]/g, "").slice(-4) || "unknown";
     try {
       const raw = await fs.readFile(profilePath, "utf-8");
       const parsed = safeJsonParse(raw);
       if (!parsed || typeof parsed !== "object") {
+        try {
+          console.log(`[metric] memory.profile_load hit=false reason=unparseable phone_tail=${phoneTail}`);
+        } catch {}
         return null;
       }
       const profile = parsed as CustomerProfile;
+      try {
+        const hasLastOrder = profile.last_successful_order ? "true" : "false";
+        console.log(`[metric] memory.profile_load hit=true has_last_order=${hasLastOrder} phone_tail=${phoneTail}`);
+      } catch {}
       // (1) Coarse legacy sanitizer — wipes the WHOLE saved order when it's
       // structurally junk (both names look like phones, etc.). Kept for
       // backwards compatibility.
@@ -160,6 +171,9 @@ export function createCustomerProfileStore(
           ? String((error as { code?: unknown }).code || "")
           : "";
       if (code === "ENOENT") {
+        try {
+          console.log(`[metric] memory.profile_load hit=false reason=no_file phone_tail=${phoneTail}`);
+        } catch {}
         return null;
       }
       throw error;

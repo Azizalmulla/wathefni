@@ -136,6 +136,13 @@ export type DebouncedMessage = {
 export type DebounceBucket = {
   timer: ReturnType<typeof setTimeout>;
   messages: DebouncedMessage[];
+  firstEnqueuedAtMs: number;
+  // Typing indicator loop started when the bucket is created so the customer
+  // sees WhatsApp "typing…" during the debounce wait instead of dead air.
+  // Ownership transfers to handleInboundMessage at flush time and is then
+  // stopped when the reply is sent. May be null if typing is disabled on the
+  // account or messageId is unavailable.
+  typingLoop: { stop: () => Promise<void> } | null;
 };
 
 export type PersistedInactivityEntry = {

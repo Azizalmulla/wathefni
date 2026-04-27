@@ -341,6 +341,9 @@ export function applyBookingFieldPatch(params: {
    *  so we can audit firing rates. See
    *  `apply-boundary.ts` → `sourceQuoteLooksLikeEdit`. */
   editIntent?: boolean;
+  /** Field-scoped edit override from tracked pending edit state. Only the
+   *  listed DST slots bypass filled-value conflict detection. */
+  editSlots?: readonly SlotName[] | null;
 }): ApplyPatchResult {
   const next: BookingDraft = { ...params.draft };
   const applied: Array<keyof BookingFieldPatch> = [];
@@ -416,6 +419,16 @@ export function applyBookingFieldPatch(params: {
   }
 
   const role = p.address_role === "pickup" || p.address_role === "delivery" ? p.address_role : null;
+  const rejectMissingAddressRole = (
+    field: BookingFieldValidationError["field"],
+    value: string | null,
+  ) => {
+    rejected.push({
+      field,
+      reason: "address_role_required",
+      received: String(value ?? ""),
+    });
+  };
 
   if (p.address_block != null) {
     const r = cleanAddressPart(p.address_block);
@@ -428,8 +441,9 @@ export function applyBookingFieldPatch(params: {
         next.deliveryBlock = r.value;
         applied.push("address_block");
         dstWrites.push({ patchField: "address_block", role: "delivery", value: r.value });
+      } else {
+        rejectMissingAddressRole("address_block", r.value);
       }
-      // If role is null we leave it alone — the LLM should ask
     } else if (r.reason) {
       rejected.push({ field: "address_block", reason: r.reason, received: String(p.address_block) });
     }
@@ -446,6 +460,8 @@ export function applyBookingFieldPatch(params: {
         next.deliveryStreet = r.value;
         applied.push("address_street");
         dstWrites.push({ patchField: "address_street", role: "delivery", value: r.value });
+      } else {
+        rejectMissingAddressRole("address_street", r.value);
       }
     } else if (r.reason) {
       rejected.push({ field: "address_street", reason: r.reason, received: String(p.address_street) });
@@ -490,6 +506,8 @@ export function applyBookingFieldPatch(params: {
         next.deliveryHouse = r.value;
         applied.push("address_house");
         dstWrites.push({ patchField: "address_house", role: "delivery", value: r.value });
+      } else {
+        rejectMissingAddressRole("address_house", r.value);
       }
     } else if (r.reason) {
       rejected.push({ field: "address_house", reason: r.reason, received: String(p.address_house) });
@@ -507,6 +525,8 @@ export function applyBookingFieldPatch(params: {
         next.deliveryAvenue = r.value;
         applied.push("address_avenue");
         dstWrites.push({ patchField: "address_avenue", role: "delivery", value: r.value });
+      } else {
+        rejectMissingAddressRole("address_avenue", r.value);
       }
     } else if (r.reason) {
       rejected.push({ field: "address_avenue", reason: r.reason, received: String(p.address_avenue) });
@@ -532,6 +552,8 @@ export function applyBookingFieldPatch(params: {
         next.deliveryExtra = r.value;
         applied.push("address_extra");
         dstWrites.push({ patchField: "address_extra", role: "delivery", value: r.value });
+      } else {
+        rejectMissingAddressRole("address_extra", r.value);
       }
     } else if (r.reason) {
       rejected.push({
@@ -560,6 +582,7 @@ export function applyBookingFieldPatch(params: {
   }
   if (nextDialogState) {
     const source: SlotSource = params.dstSource ?? "llm_apply";
+    const editSlotSet = new Set(params.editSlots ?? []);
 
     // Tuple-atomic source-precedence override.
     //
@@ -608,7 +631,7 @@ export function applyBookingFieldPatch(params: {
       const res = updateSlot(nextDialogState, slotName, w.value, source, {
         routeToRequested: params.routeToRequested === true,
         overrideIfSourceWas: eligibleForOverride ? "carryover" : undefined,
-        forceOverwrite: params.editIntent === true,
+        forceOverwrite: params.editIntent === true || editSlotSet.has(slotName),
       });
       nextDialogState = res.state;
       if (res.decision.action === "conflict") {
@@ -623,8 +646,17 @@ export function applyBookingFieldPatch(params: {
         // `params.draft` per-slot since the applied-list might have been
         // affected earlier in the same patch; use the DST mirror as the
         // single source of truth.
-        // (applied.push was already called for this field; keep it as-is
-        // since the patch was validated — but surface the rejection.)
+        // A conflict is not a committed write. The shape validator accepted
+        // the value, but DST kept the incumbent as canonical, so callers must
+        // not treat this field as applied for downstream guard/masking logic.
+        for (let i = applied.length - 1; i >= 0; i--) {
+          if (
+            applied[i] === w.patchField ||
+            (w.patchField === "sender_phone" && applied[i] === "phone_decision")
+          ) {
+            applied.splice(i, 1);
+          }
+        }
         rejected.push({
           field: patchFieldToRejectionField(w.patchField),
           reason: "slot_conflict_with_filled_value",

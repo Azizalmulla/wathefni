@@ -1,6 +1,8 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { AreaResolutionProvenance } from "./area-resolution-provenance.js";
+import { cloneAreaResolutionProvenance } from "./area-resolution-provenance.js";
 
 export interface PersistedQuotedRouteState {
   routeKey: string;
@@ -8,6 +10,8 @@ export interface PersistedQuotedRouteState {
   pickupAreaNameEn: string;
   dropoffAreaNameAr: string;
   dropoffAreaNameEn: string;
+  pickupAreaResolution?: AreaResolutionProvenance | null;
+  dropoffAreaResolution?: AreaResolutionProvenance | null;
   pricesByType: Record<string, number>;
   optionCatalog: Array<{
     delivery_type: string;
@@ -72,6 +76,12 @@ function serializeGuardSession(session: PersistedGuardSessionState): SerializedG
     lastQuotedRoute: session.lastQuotedRoute
       ? {
           ...session.lastQuotedRoute,
+          pickupAreaResolution: cloneAreaResolutionProvenance(
+            session.lastQuotedRoute.pickupAreaResolution,
+          ),
+          dropoffAreaResolution: cloneAreaResolutionProvenance(
+            session.lastQuotedRoute.dropoffAreaResolution,
+          ),
           pricesByType: { ...(session.lastQuotedRoute.pricesByType || {}) },
           optionCatalog: Array.isArray(session.lastQuotedRoute.optionCatalog)
             ? session.lastQuotedRoute.optionCatalog.map((option) => ({ ...option }))
@@ -104,6 +114,12 @@ function deserializeGuardSession(
     lastQuotedRoute: session.lastQuotedRoute
       ? {
           ...session.lastQuotedRoute,
+          pickupAreaResolution: cloneAreaResolutionProvenance(
+            session.lastQuotedRoute.pickupAreaResolution,
+          ),
+          dropoffAreaResolution: cloneAreaResolutionProvenance(
+            session.lastQuotedRoute.dropoffAreaResolution,
+          ),
           pricesByType: { ...(session.lastQuotedRoute.pricesByType || {}) },
           optionCatalog: Array.isArray(session.lastQuotedRoute.optionCatalog)
             ? session.lastQuotedRoute.optionCatalog.map((option) => ({ ...option }))

@@ -15,6 +15,10 @@ import type {
   PersistedConversationControllerEntry,
 } from "../../shared/conversation-policy";
 import { normalizeIntentText } from "../../shared/conversation-policy";
+import {
+  clearRequestedSlot,
+  type SlotName,
+} from "../../shared/dialog-state";
 import { pickCurrentWhatsappPhone } from "./booking-parse";
 
 export function hasStructuredBookingLocation(
@@ -107,15 +111,30 @@ export type AddressCompletenessParams = {
 
 export type AddressMissingField = "block" | "street_or_avenue" | "house_or_unit";
 
+function hasBlockEvidence(extra: string | null | undefined): boolean {
+  const text = String(extra || "").toLowerCase();
+  return /\bblock\s*[\d\u0660-\u0669]+/i.test(text) || /(?:قطعة|قطعه)\s*[\d\u0660-\u0669]+/.test(text);
+}
+
+function hasStreetOrAvenueEvidence(extra: string | null | undefined): boolean {
+  const text = String(extra || "").toLowerCase();
+  return (
+    /\b(?:street|st|avenue|ave|road|rd)\b\s*[\w\d\u0660-\u0669-]*/i.test(text) ||
+    /(?:شارع|جادة|جاده)\s*[\w\d\u0660-\u0669-]*/.test(text)
+  );
+}
+
 export function diagnoseTextAddress(params: AddressCompletenessParams): {
   complete: boolean;
   missing: AddressMissingField[];
 } {
   const missing: AddressMissingField[] = [];
-  if (!params.block) missing.push("block");
+  if (!params.block && !hasBlockEvidence(params.extra)) missing.push("block");
   const hasStreet = Boolean(params.street);
   const hasAvenue = Boolean(params.avenue);
-  if (!hasStreet && !hasAvenue) missing.push("street_or_avenue");
+  if (!hasStreet && !hasAvenue && !hasStreetOrAvenueEvidence(params.extra)) {
+    missing.push("street_or_avenue");
+  }
   const hasHouse = Boolean(params.house);
   const hasSubstantiveExtra = hasSubstantiveAddressExtra(params.extra);
   if (!hasHouse && !hasSubstantiveExtra) missing.push("house_or_unit");
@@ -180,6 +199,104 @@ export function resolveNextBookingStepFromDraft(draft: PersistedBookingDraft): B
     return "delivery_address";
   }
   return "summary_pending";
+}
+
+const PICKUP_ADDRESS_SLOT_NAMES = new Set<SlotName>([
+  "pickup_block",
+  "pickup_street",
+  "pickup_house",
+  "pickup_avenue",
+  "pickup_extra",
+]);
+
+const DELIVERY_ADDRESS_SLOT_NAMES = new Set<SlotName>([
+  "delivery_block",
+  "delivery_street",
+  "delivery_house",
+  "delivery_avenue",
+  "delivery_extra",
+]);
+
+export function resolveNativeLocationAddressRole(
+  entry: PersistedConversationControllerEntry | null | undefined,
+): "pickup" | "delivery" | null {
+  if (!entry || entry.stage !== "collecting_booking_details") {
+    return null;
+  }
+  if (entry.bookingStep === "pickup_address") {
+    return "pickup";
+  }
+  if (entry.bookingStep === "delivery_address") {
+    return "delivery";
+  }
+
+  const requestedSlotName = entry.dialogState?.requestedSlot?.name || null;
+  if (requestedSlotName && PICKUP_ADDRESS_SLOT_NAMES.has(requestedSlotName)) {
+    return "pickup";
+  }
+  if (requestedSlotName && DELIVERY_ADDRESS_SLOT_NAMES.has(requestedSlotName)) {
+    return "delivery";
+  }
+  return null;
+}
+
+export function bindNativeLocationToAddressStep(params: {
+  entry: PersistedConversationControllerEntry;
+  location: PersistedBookingLocation;
+  now?: number;
+}): { entry: PersistedConversationControllerEntry; role: "pickup" | "delivery" } | null {
+  const role = resolveNativeLocationAddressRole(params.entry);
+  if (!role) {
+    return null;
+  }
+
+  const now = params.now ?? Date.now();
+  const location = params.location;
+  const nextDraft: PersistedBookingDraft =
+    role === "pickup"
+      ? {
+          ...params.entry.bookingDraft,
+          pickupLocation: location,
+          // A structured pin becomes the primary address truth. Keep optional
+          // house/extra details, but stop treating block/street/avenue text as
+          // the address contract for this side.
+          pickupBlock: null,
+          pickupStreet: null,
+          pickupAvenue: null,
+          pendingLocation: null,
+        }
+      : {
+          ...params.entry.bookingDraft,
+          deliveryLocation: location,
+          deliveryBlock: null,
+          deliveryStreet: null,
+          deliveryAvenue: null,
+          pendingLocation: null,
+        };
+
+  let nextEntry: PersistedConversationControllerEntry = {
+    ...params.entry,
+    lastActivityTs: now,
+    bookingDraft: nextDraft,
+    bookingStep: resolveNextBookingStepFromDraft(nextDraft),
+    dialogState: params.entry.dialogState
+      ? clearRequestedSlot(params.entry.dialogState)
+      : params.entry.dialogState,
+  };
+
+  const resolvedAreaFromPin =
+    typeof location.resolvedAreaName === "string" && location.resolvedAreaName.trim()
+      ? location.resolvedAreaName.trim()
+      : null;
+  if (resolvedAreaFromPin) {
+    if (role === "pickup" && !nextEntry.quotePickupAreaNameEn && !nextEntry.pendingPickupAreaNameEn) {
+      nextEntry = { ...nextEntry, pendingPickupAreaNameEn: resolvedAreaFromPin };
+    } else if (role === "delivery" && !nextEntry.quoteDropoffAreaNameEn && !nextEntry.pendingDropoffAreaNameEn) {
+      nextEntry = { ...nextEntry, pendingDropoffAreaNameEn: resolvedAreaFromPin };
+    }
+  }
+
+  return { entry: nextEntry, role };
 }
 
 export function getLocationRoleSelection(text: string): "pickup" | "delivery" | null {
