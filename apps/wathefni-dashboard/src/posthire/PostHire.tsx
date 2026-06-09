@@ -46,7 +46,6 @@ import {
 import { cn } from '@/lib/utils'
 import type {
   ComplianceBucket,
-  ComplianceDocument,
   DashboardAccess,
   HrTask,
   HrTasksResponse,
@@ -520,17 +519,39 @@ function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAcc
 
 // --- Employee 360 ----------------------------------------------------------
 
+function tenureLabel(hiredAt?: string | null): string | null {
+  if (!hiredAt) return null
+  const hired = new Date(hiredAt)
+  if (Number.isNaN(hired.getTime())) return null
+  const months = Math.max(0, Math.floor((Date.now() - hired.getTime()) / (1000 * 60 * 60 * 24 * 30.44)))
+  if (months < 1) return 'joined this month'
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'}`
+  const years = Math.floor(months / 12)
+  const rem = months % 12
+  return rem ? `${years}y ${rem}m` : `${years} year${years === 1 ? '' : 's'}`
+}
+
 function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: (message: string) => void }) {
   const loader = useCallback(() => getEmployeeProfile(access, employeeKey), [access, employeeKey])
   const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader)
+  const action = usePosthireAction(access, reload, onNotice)
+  const confirm = useConfirm()
   const canUpload = can(permissions, 'onboarding.manage') && Boolean(data?.doc_upload_enabled)
+  // Same gates the module pages use, so behaviour matches wherever HR acts from.
+  const canOnboardingManage = can(permissions, 'onboarding.manage')
+  const canOnboardingMutate = canOnboardingManage && Boolean(data?.hr_mutate_enabled)
+  const canComplianceManage = can(permissions, 'compliance.manage')
+  const canLeaveDecide = can(permissions, 'leave.decide')
+  const canPayrollManage = can(permissions, 'payroll.manage')
 
   const emp = data?.employee
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
+  const tenure = tenureLabel(emp?.hired_at)
 
   return (
     <div className="space-y-6">
+      {action.dialog}
       <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
           ← Back to directory
@@ -556,6 +577,12 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                   {emp.phone || 'No phone'}
                   {emp.email ? ` · ${emp.email}` : ''}
                 </p>
+                {emp.hired_at ? (
+                  <p className="mt-1 text-[12.5px] text-subtle/80">
+                    Hired {formatDate(emp.hired_at)}
+                    {tenure ? ` · ${tenure} with the company` : ''}
+                  </p>
+                ) : null}
               </div>
               <StatusBadge status={emp.onboarding_status} />
             </CardContent>
@@ -589,19 +616,60 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                     {sections.onboarding.outstanding_count} outstanding · {sections.onboarding.complete_count} complete
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
                   {sections.onboarding.outstanding.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">All required documents are in.</p>
                   ) : (
                     <ul className="space-y-1.5 text-[13px]">
                       {sections.onboarding.outstanding.map((it, idx) => (
-                        <li key={idx} className="flex items-center justify-between gap-2">
+                        <li key={it.item_id || idx} className="flex flex-wrap items-center justify-between gap-2">
                           <span className="text-text">{it.label}</span>
-                          <Badge tone="warning">{it.status}</Badge>
+                          <span className="flex items-center gap-1.5">
+                            <Badge tone="warning">{it.status}</Badge>
+                            {canOnboardingMutate && it.item_id ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={action.busy}
+                                  onClick={() => action.run('onboarding_mark_item', { employee_key: employeeKey, item_id: it.item_id, item_status: 'received' }, { key: `mark:received:${it.item_id}` })}
+                                >
+                                  {action.runningKey === `mark:received:${it.item_id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark received'}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={action.busy}
+                                  onClick={() => action.run('onboarding_mark_item', { employee_key: employeeKey, item_id: it.item_id, item_status: 'waived' }, { destructive: true, key: `mark:waived:${it.item_id}` })}
+                                >
+                                  {action.runningKey === `mark:waived:${it.item_id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Waive'}
+                                </Button>
+                              </>
+                            ) : null}
+                          </span>
                         </li>
                       ))}
                     </ul>
                   )}
+                  {canOnboardingManage && sections.onboarding.outstanding_count > 0 ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={action.busy}
+                      onClick={async () => {
+                        if (!(await confirm({ title: 'Send onboarding reminder?', body: `${emp.name} will receive an onboarding reminder message now.`, confirmLabel: 'Send reminder' }))) return
+                        await action.run('send_onboarding_reminder', employeeRef(emp), { key: 'profile-onboarding-reminder' })
+                      }}
+                    >
+                      {action.runningKey === 'profile-onboarding-reminder' ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                        </>
+                      ) : (
+                        'Send reminder'
+                      )}
+                    </Button>
+                  ) : null}
                 </CardContent>
               </Card>
             ) : null}
@@ -620,13 +688,44 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                   {sections.compliance.documents.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No documents are expired, expiring, or missing.</p>
                   ) : (
-                    <ul className="space-y-1.5 text-[13px]">
-                      {sections.compliance.documents.map((doc, idx) => (
-                        <li key={idx} className="flex items-center justify-between gap-2">
-                          <span className="text-text">{doc.document_label}</span>
-                          <Badge tone={doc.tone}>{doc.status_label}</Badge>
-                        </li>
-                      ))}
+                    <ul className="space-y-2 text-[13px]">
+                      {sections.compliance.documents.map((doc, idx) => {
+                        const remindKey = `profile-remind:${doc.document_type || idx}`
+                        const reviewKey = `profile-review:${doc.document_type || idx}`
+                        const args = { employee_name: emp.name, document_type: doc.document_type }
+                        return (
+                          <li key={doc.document_type || idx} className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="min-w-0">
+                              <span className="block text-text">{doc.document_label}</span>
+                              <span className="block text-[11.5px] text-subtle/80">
+                                {doc.expiry_date ? `Expires ${formatDate(doc.expiry_date)} · ${complianceDaysLabel(doc)}` : 'No expiry on file'}
+                                {` · Reminded: ${complianceReminderLabel(doc)}`}
+                              </span>
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Badge tone={doc.tone}>{doc.status_label}</Badge>
+                              {canComplianceManage && doc.status === 'needs_review' ? (
+                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey })}>
+                                  {action.runningKey === reviewKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark reviewed'}
+                                </Button>
+                              ) : null}
+                              {canComplianceManage ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={action.busy}
+                                  onClick={async () => {
+                                    if (!(await confirm({ title: 'Send document reminder?', body: `${emp.name} will receive a reminder about their ${doc.document_label}.`, confirmLabel: 'Send reminder' }))) return
+                                    await action.run('compliance_send_reminder', args, { key: remindKey })
+                                  }}
+                                >
+                                  {action.runningKey === remindKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send reminder'}
+                                </Button>
+                              ) : null}
+                            </span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </CardContent>
@@ -685,13 +784,30 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                   {sections.leave.items.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No pending or upcoming leave.</p>
                   ) : (
-                    <ul className="space-y-1.5 text-[13px]">
-                      {sections.leave.items.map((it, idx) => (
-                        <li key={idx} className="flex items-center justify-between gap-2">
-                          <span className="text-text capitalize">{(it.leave_type || 'leave').replace('_', ' ')} · {formatDate(it.start_date)}–{formatDate(it.end_date)}</span>
-                          <Badge tone={it.status === 'requested' ? 'warning' : 'success'}>{it.status}</Badge>
-                        </li>
-                      ))}
+                    <ul className="space-y-2 text-[13px]">
+                      {sections.leave.items.map((it, idx) => {
+                        const leaveArgs = { employee_name: emp.name, employee_phone: emp.phone, start_date: it.start_date, end_date: it.end_date }
+                        const approveKey = `profile-approve-leave:${idx}`
+                        const rejectKey = `profile-reject-leave:${idx}`
+                        return (
+                          <li key={idx} className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-text capitalize">{(it.leave_type || 'leave').replace('_', ' ')} · {formatDate(it.start_date)}–{formatDate(it.end_date)}</span>
+                            {it.status === 'requested' && canLeaveDecide ? (
+                              <span className="flex items-center gap-1.5">
+                                <Badge tone="warning">{it.status}</Badge>
+                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_leave_request', leaveArgs, { destructive: true, key: rejectKey })}>
+                                  {action.runningKey === rejectKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Decline'}
+                                </Button>
+                                <Button size="sm" disabled={action.busy} onClick={() => action.run('approve_leave_request', leaveArgs, { key: approveKey })}>
+                                  {action.runningKey === approveKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Approve'}
+                                </Button>
+                              </span>
+                            ) : (
+                              <Badge tone={it.status === 'requested' ? 'warning' : 'success'}>{it.status}</Badge>
+                            )}
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </CardContent>
@@ -731,13 +847,31 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                   {sections.payroll.items.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No timesheets yet.</p>
                   ) : (
-                    <ul className="space-y-1.5 text-[13px]">
-                      {sections.payroll.items.map((it, idx) => (
-                        <li key={idx} className="flex items-center justify-between gap-2">
-                          <span className="text-text">{formatDate(it.period_start)}–{formatDate(it.period_end)}</span>
-                          <span className="text-subtle/90">{it.worked_hours}h{it.overtime_hours ? ` · OT ${it.overtime_hours}h` : ''} · {it.status}</span>
-                        </li>
-                      ))}
+                    <ul className="space-y-2 text-[13px]">
+                      {sections.payroll.items.map((it, idx) => {
+                        const needsDecision = canPayrollManage && it.timesheet_id && String(it.status || '').toLowerCase() === 'draft'
+                        const tsArgs = { timesheet_id: it.timesheet_id, employee_name: emp.name }
+                        const approveKey = `profile-approve-ts:${it.timesheet_id || idx}`
+                        const rejectKey = `profile-reject-ts:${it.timesheet_id || idx}`
+                        return (
+                          <li key={it.timesheet_id || idx} className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-text">{formatDate(it.period_start)}–{formatDate(it.period_end)}</span>
+                            <span className="flex items-center gap-1.5 text-subtle/90">
+                              <span>{it.worked_hours}h{it.overtime_hours ? ` · OT ${it.overtime_hours}h` : ''} · {it.status}</span>
+                              {needsDecision ? (
+                                <>
+                                  <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', tsArgs, { destructive: true, key: rejectKey })}>
+                                    {action.runningKey === rejectKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
+                                  </Button>
+                                  <Button size="sm" disabled={action.busy} onClick={() => action.run('approve_timesheet', tsArgs, { key: approveKey })}>
+                                    {action.runningKey === approveKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Approve'}
+                                  </Button>
+                                </>
+                              ) : null}
+                            </span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </CardContent>
@@ -749,7 +883,10 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</CardTitle>
                   <CardDescription>
-                    {sections.documents.count} file{sections.documents.count === 1 ? '' : 's'} submitted by this employee
+                    {sections.documents.count} file{sections.documents.count === 1 ? '' : 's'} submitted
+                    {sections.onboarding && sections.onboarding.outstanding_count > 0
+                      ? ` · ${sections.onboarding.outstanding_count} required document${sections.onboarding.outstanding_count === 1 ? '' : 's'} still missing`
+                      : ' · nothing missing'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -2331,7 +2468,7 @@ const COMPLIANCE_FILTERS: Array<{ key: 'all' | ComplianceBucket; label: string }
   { key: 'valid', label: 'Valid' },
 ]
 
-function complianceDaysLabel(doc: ComplianceDocument): string {
+function complianceDaysLabel(doc: { days_until_expiry?: number | null }): string {
   const days = doc.days_until_expiry
   if (days == null) return '—'
   if (days < 0) return `${Math.abs(days)}d overdue`
@@ -2339,10 +2476,10 @@ function complianceDaysLabel(doc: ComplianceDocument): string {
   return `${days}d left`
 }
 
-function complianceReminderLabel(doc: ComplianceDocument): string {
+function complianceReminderLabel(doc: { last_reminded_at?: string | null; reminder_count?: number }): string {
   if (!doc.last_reminded_at) return 'Never'
   const when = formatDate(doc.last_reminded_at)
-  return doc.reminder_count > 0 ? `${when} · ${doc.reminder_count} sent` : when
+  return (doc.reminder_count ?? 0) > 0 ? `${when} · ${doc.reminder_count} sent` : when
 }
 
 function CompliancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (message: string) => void }) {

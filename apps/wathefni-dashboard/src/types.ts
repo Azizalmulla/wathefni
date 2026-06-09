@@ -865,7 +865,7 @@ export type EmployeeProfileSections = {
     status: string
     outstanding_count: number
     complete_count: number
-    outstanding: { label: string; status: string }[]
+    outstanding: { item_id?: string | null; label: string; status: string }[]
   }
   compliance?: {
     expired: number
@@ -882,6 +882,9 @@ export type EmployeeProfileSections = {
       status_label: string
       tone: 'danger' | 'warning' | 'success'
       expiry_date?: string | null
+      days_until_expiry?: number | null
+      last_reminded_at?: string | null
+      reminder_count?: number
     }[]
   }
   attendance?: {
@@ -902,7 +905,7 @@ export type EmployeeProfileSections = {
     items: { date?: string | null; start_time: string; end_time: string; role: string; location: string; status?: string }[]
   }
   payroll?: {
-    items: { period_start?: string | null; period_end?: string | null; status?: string; worked_hours: number; overtime_hours: number }[]
+    items: { timesheet_id?: string | null; period_start?: string | null; period_end?: string | null; status?: string; worked_hours: number; overtime_hours: number }[]
   }
   documents?: {
     count: number
@@ -940,6 +943,7 @@ export type EmployeeProfileResponse = {
   sections: EmployeeProfileSections
   next_actions: EmployeeProfileNextAction[]
   doc_upload_enabled?: boolean
+  hr_mutate_enabled?: boolean
 }
 
 export type PosthireOnboardingResponse = {

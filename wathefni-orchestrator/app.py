@@ -30249,6 +30249,9 @@ def compliance_outstanding_docs(employee_key: str, document_type: str | None = N
         classification = classify_compliance_row(row)
         row["_bucket"] = compliance_bucket_for(classification.get("status"))
         row["_label"] = compliance_document_friendly_label(row.get("document_type"), row.get("label"))
+        # Fresh days-until-expiry from the classifier (the stored column can be
+        # stale); same definition the compliance dashboard uses.
+        row["_days_until_expiry"] = classification.get("days_until_expiry")
         tagged.append(row)
     return tagged
 
@@ -41558,7 +41561,8 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
             if "onboarding" in modules:
                 cur.execute(
                     """
-                    SELECT COALESCE(NULLIF(label,''), NULLIF(document_type,''), item_id) AS label,
+                    SELECT item_id,
+                           COALESCE(NULLIF(label,''), NULLIF(document_type,''), item_id) AS label,
                            status, required
                     FROM onboarding_items
                     WHERE employee_key=%s
@@ -41569,7 +41573,11 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                 items = [dict(r) for r in cur.fetchall()]
                 done_states = {"received", "complete", "completed", "verified"}
                 outstanding = [
-                    {"label": item_display_label({"document_type": it.get("label"), "label": it.get("label")}), "status": it.get("status")}
+                    {
+                        "item_id": it.get("item_id"),
+                        "label": item_display_label({"document_type": it.get("label"), "label": it.get("label")}),
+                        "status": it.get("status"),
+                    }
                     for it in items
                     if it.get("required") and str(it.get("status") or "").lower() not in done_states
                 ]
@@ -41602,6 +41610,11 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                             "status_label": COMPLIANCE_STATUS_LABELS.get(bucket, bucket),
                             "tone": COMPLIANCE_STATUS_TONE.get(bucket, "warning"),
                             "expiry_date": expiry.isoformat() if hasattr(expiry, "isoformat") else (str(expiry) if expiry else None),
+                            # "Why" context so HR can act without leaving the page:
+                            # how urgent (days) and whether we already nudged.
+                            "days_until_expiry": doc.get("_days_until_expiry"),
+                            "last_reminded_at": doc.get("last_alerted_at") or doc.get("last_reminded"),
+                            "reminder_count": int(doc.get("reminder_count") or 0),
                         })
                 needs_attention = sum(counts.get(b, 0) for b in COMPLIANCE_OUTSTANDING_BUCKETS)
                 sections["compliance"] = {
@@ -41725,7 +41738,7 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
             if "payroll" in modules:
                 cur.execute(
                     """
-                    SELECT period_start, period_end, status, worked_minutes, scheduled_minutes, overtime_minutes
+                    SELECT timesheet_id, period_start, period_end, status, worked_minutes, scheduled_minutes, overtime_minutes
                     FROM payroll_timesheets
                     WHERE company_code=%s AND employee_key=%s
                     ORDER BY period_start DESC
@@ -41737,6 +41750,7 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                 sections["payroll"] = {
                     "items": [
                         {
+                            "timesheet_id": str(r.get("timesheet_id") or "") or None,
                             "period_start": (r.get("period_start").isoformat() if hasattr(r.get("period_start"), "isoformat") else r.get("period_start")),
                             "period_end": (r.get("period_end").isoformat() if hasattr(r.get("period_end"), "isoformat") else r.get("period_end")),
                             "status": r.get("status"),
@@ -41765,6 +41779,8 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
         "sections": sections,
         "next_actions": next_actions,
         "doc_upload_enabled": doc_upload_enabled(),
+        # Same gate the Onboarding page uses for mark-received/waive controls.
+        "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
     })
 
 

@@ -97,6 +97,33 @@ def main() -> int:
     # The documents composite, when present, must be backed by an available module.
     check("documents section implies onboarding/compliance access", "documents" not in sections or bool(available & {"onboarding", "compliance"}))
 
+    # 1b) quick-slice payload contract — the fields the Employee 360 inline
+    # actions and "why" context need. Gates mirror the module pages; row ids
+    # let the page run registry actions without a second lookup.
+    check("payload carries hr_mutate_enabled gate", isinstance(profile.get("hr_mutate_enabled"), bool))
+    check("payload carries doc_upload_enabled gate", isinstance(profile.get("doc_upload_enabled"), bool))
+    onboarding = sections.get("onboarding")
+    if isinstance(onboarding, dict):
+        check(
+            "onboarding outstanding rows carry item_id",
+            all("item_id" in it for it in onboarding.get("outstanding") or []),
+        )
+    compliance = sections.get("compliance")
+    if isinstance(compliance, dict):
+        check(
+            "compliance rows carry why-context (days/reminded/count)",
+            all(
+                {"days_until_expiry", "last_reminded_at", "reminder_count"} <= set(d.keys())
+                for d in compliance.get("documents") or []
+            ),
+        )
+    payroll = sections.get("payroll")
+    if isinstance(payroll, dict):
+        check(
+            "payroll timesheet rows carry timesheet_id",
+            all("timesheet_id" in it for it in payroll.get("items") or []),
+        )
+
     # 2) tenant isolation — same key under a different company does not resolve
     try:
         app.dashboard_employee_profile(ctx("ZZ_NOT_A_TENANT", owner_perms), key)
