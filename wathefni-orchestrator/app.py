@@ -14716,6 +14716,33 @@ def payroll_policy_for_company(company_code: str | None) -> dict[str, Any]:
 
 def payroll_policy_updates_from_action(action: dict[str, Any]) -> dict[str, Any]:
     updates: dict[str, Any] = {}
+    # Structured path (dashboard policy editor): take explicit fields directly,
+    # without requiring the free-text NLP triggers the WhatsApp path relies on.
+    # Values are still validated/clamped by clean_payroll_policy downstream.
+    if action.get("structured_policy"):
+        for key in ("employee_pay_type", "leave_policy", "overtime_policy"):
+            value = normalized_policy_value(action.get(key))
+            if value:
+                updates[key] = value
+        cap_hours = action.get("overtime_cap_hours")
+        if cap_hours not in (None, ""):
+            try:
+                updates["overtime_cap_minutes"] = max(0, int(float(cap_hours) * 60))
+            except Exception:
+                pass
+        for key in ("absence_deduction_enabled", "late_deduction_enabled", "early_leave_deduction_enabled"):
+            coerced = coerce_policy_bool(action.get(key))
+            if coerced is not None:
+                updates[key] = coerced
+        rate = action.get("default_hourly_rate_kwd")
+        if rate not in (None, ""):
+            try:
+                updates["default_hourly_rate_kwd"] = max(0.0, float(rate))
+            except Exception:
+                pass
+        if action.get("currency"):
+            updates["currency"] = str(action.get("currency")).upper()[:8]
+        return updates
     text = normalize_text(action.get("prompt_text") or action.get("query") or "")
     employee_pay_type = normalized_policy_value(action.get("employee_pay_type"))
     if employee_pay_type in {"monthly", "hourly", "mixed"} and re.search(r"\b(pay type|payroll type|employee type|hourly|monthly)\b", text):
@@ -40745,9 +40772,17 @@ def dashboard_posthire_payroll(context: dict[str, Any] = Depends(dashboard_conte
     timesheets = list_timesheets({"company_code": company, "start_date": start_iso, "end_date": end_iso}, company_code=company)
     policy = show_payroll_policy({"company_code": company}, company_code=company)
     exports = list_payroll_exports({"company_code": company}, company_code=company)
+    # The dashboard renders decimal hours, but timesheet rows store raw minutes.
+    # Derive display-friendly hour fields (keeping the raw minutes for callers).
+    timesheet_rows = timesheets.get("timesheets") or []
+    for row in timesheet_rows:
+        if not isinstance(row, dict):
+            continue
+        row["total_hours"] = round(float(row.get("worked_minutes") or 0) / 60.0, 1)
+        row["overtime_hours"] = round(float(row.get("overtime_minutes") or 0) / 60.0, 1)
     return json_safe({
         "company_code": company,
-        "timesheets": timesheets.get("timesheets") or [],
+        "timesheets": timesheet_rows,
         "period": {"start_date": timesheets.get("start_date"), "end_date": timesheets.get("end_date")},
         "policy": policy.get("policy") or policy,
         "exports": exports.get("exports") or exports.get("payroll_exports") or [],
