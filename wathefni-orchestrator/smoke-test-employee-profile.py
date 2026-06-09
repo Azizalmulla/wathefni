@@ -144,6 +144,114 @@ def main() -> int:
     except app.HTTPException as exc:
         check("empty key raises 404", exc.status_code == 404)
 
+    # 5) Next Actions engine — test the pure builder directly with synthetic,
+    # fully-populated sections so ranking/contract/no-leak are deterministic
+    # regardless of this DB's data or the live flag state.
+    card = {"employee_key": "emp-x", "name": "Aziz Tester", "phone": "+96599999999"}
+    synth_sections = {
+        "compliance": {"documents": [
+            {"document_type": "civil_id", "document_label": "Civil ID", "status": "expired", "days_until_expiry": -12, "expiry_date": "2026-05-29"},
+            {"document_type": "passport", "document_label": "Passport", "status": "missing", "days_until_expiry": None},
+            {"document_type": "health_card", "document_label": "Health Card", "status": "expiring_soon", "days_until_expiry": 5, "expiry_date": "2026-06-15"},
+            {"document_type": "contract", "document_label": "Contract", "status": "expiring_soon", "days_until_expiry": 20, "expiry_date": "2026-06-30"},
+            {"document_type": "visa", "document_label": "Visa", "status": "needs_review", "days_until_expiry": None},
+        ]},
+        "onboarding": {"outstanding_count": 2, "outstanding": [
+            {"item_id": "i1", "label": "Bank details", "status": "pending"},
+            {"item_id": "i2", "label": "Signed contract", "status": "pending"},
+        ]},
+        "leave": {
+            "items": [{"leave_type": "annual", "start_date": "2026-06-20", "end_date": "2026-06-25", "status": "requested"}],
+            "balances": [{"leave_type": "annual", "current_balance": -3.0}],
+        },
+        "payroll": {"items": [{"timesheet_id": "ts-1", "period_start": "2026-05-01", "period_end": "2026-05-31", "status": "draft"}]},
+        "attendance": {"window_days": 14, "present": 5, "late": 4, "absent": 3},
+    }
+    actions, summary = app.build_employee_next_actions(card, synth_sections)
+    sev_set = {"critical", "high", "medium", "low"}
+    module_set = {"onboarding", "compliance", "attendance", "leave", "payroll", "shifts"}
+    by_id = {a["id"]: a for a in actions}
+
+    check("engine returns a non-empty ranked list", isinstance(actions, list) and len(actions) > 0)
+    check("every action has a valid severity", all(a.get("severity") in sev_set for a in actions))
+    check("every action has a valid module", all(a.get("module") in module_set for a in actions))
+    check("every action has title + reason + target", all(a.get("title") and a.get("reason") and isinstance(a.get("target"), dict) for a in actions))
+    check(
+        "executable rows carry action_type+args; nav rows omit action_type",
+        all(
+            ((isinstance(a.get("action_type"), str) and bool(a["action_type"]) and isinstance(a.get("args"), dict))
+             if a.get("executable") else ("action_type" not in a))
+            for a in actions
+        ),
+    )
+
+    weight = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    sev_seq = [weight[a["severity"]] for a in actions]
+    check("list is ordered severity-first (critical -> low)", sev_seq == sorted(sev_seq))
+    check("the critical item is ranked first", actions and actions[0]["severity"] == "critical")
+
+    check("expired document is critical", by_id.get("compliance:expired:civil_id", {}).get("severity") == "critical")
+    check("missing required document is high", by_id.get("compliance:missing:passport", {}).get("severity") == "high")
+    check("expiring <=7d is high", by_id.get("compliance:expiring:health_card", {}).get("severity") == "high")
+    check("expiring 8-30d is medium", by_id.get("compliance:expiring:contract", {}).get("severity") == "medium")
+    check("needs_review is high", by_id.get("compliance:review:visa", {}).get("severity") == "high")
+    check("pending leave is high", any(a["module"] == "leave" and a["severity"] == "high" for a in actions))
+    check("draft timesheet is high", by_id.get("payroll:review:ts-1", {}).get("severity") == "high")
+    check("incomplete onboarding is medium", by_id.get("onboarding:incomplete", {}).get("severity") == "medium")
+    check("attendance pattern surfaces", any(a["module"] == "attendance" for a in actions))
+    check("negative leave balance is observe-only low", by_id.get("leave:balance:annual", {}).get("severity") == "low")
+
+    comp_ids = [a["id"] for a in actions if a["module"] == "compliance"]
+    check(
+        "expired ranks before expiring within compliance",
+        "compliance:expired:civil_id" in comp_ids and "compliance:expiring:health_card" in comp_ids
+        and comp_ids.index("compliance:expired:civil_id") < comp_ids.index("compliance:expiring:health_card"),
+    )
+
+    # executable actions reuse ONLY whitelisted actions, with the expected permission
+    import tool_call_orchestrator as tco
+    expected_perm = {
+        "compliance_send_reminder": "compliance.manage",
+        "compliance_mark_reviewed": "compliance.manage",
+        "send_onboarding_reminder": "onboarding.manage",
+    }
+    exec_types = {a["action_type"] for a in actions if a.get("executable")}
+    check("executable action_types are all whitelisted", all(t in tco.TOOL_PERMISSION_MAP for t in exec_types))
+    check("executable action_types map to the expected permission", all(tco.TOOL_PERMISSION_MAP.get(t) == expected_perm.get(t) for t in exec_types))
+    check("leave decisions are navigation-only", all(not a.get("executable") for a in actions if a["module"] == "leave"))
+    check("payroll decisions are navigation-only", all(not a.get("executable") for a in actions if a["module"] == "payroll"))
+    check("attendance items are navigation-only", all(not a.get("executable") for a in actions if a["module"] == "attendance"))
+
+    # no raw document data / storage details may leak into the engine output
+    import json as _json
+    blob = _json.dumps(actions)
+    leak_markers = ("file_registry", "file_id", "storage", "http://", "https://", "/files/", "s3://")
+    check("no file ids / urls / storage paths leak", not any(m in blob for m in leak_markers))
+
+    check("summary total equals action count", summary.get("total") == len(actions))
+    check("summary severity counts sum to total", sum(summary.get("by_severity", {}).values()) == len(actions))
+    check("summary advertises the visible cap (5)", summary.get("visible_cap") == 5)
+
+    # 6) flag gate — the profile only emits the enriched engine when the flag is on
+    import os as _os
+    prev_flag = _os.environ.get("WATHEFNI_EMPLOYEE_NEXT_ACTIONS")
+    try:
+        _os.environ["WATHEFNI_EMPLOYEE_NEXT_ACTIONS"] = "off"
+        check("flag OFF -> engine disabled", app.employee_next_actions_enabled() is False)
+        off_profile = app.dashboard_employee_profile(ctx(company, owner_perms), key)
+        check("flag OFF -> profile reports next_actions_enabled false", off_profile.get("next_actions_enabled") is False)
+        check("flag OFF -> no next_actions_summary", off_profile.get("next_actions_summary") is None)
+        _os.environ["WATHEFNI_EMPLOYEE_NEXT_ACTIONS"] = "on"
+        check("flag ON -> engine enabled", app.employee_next_actions_enabled() is True)
+        on_profile = app.dashboard_employee_profile(ctx(company, owner_perms), key)
+        check("flag ON -> profile reports next_actions_enabled true", on_profile.get("next_actions_enabled") is True)
+        check("flag ON -> next_actions_summary present", isinstance(on_profile.get("next_actions_summary"), dict))
+    finally:
+        if prev_flag is None:
+            _os.environ.pop("WATHEFNI_EMPLOYEE_NEXT_ACTIONS", None)
+        else:
+            _os.environ["WATHEFNI_EMPLOYEE_NEXT_ACTIONS"] = prev_flag
+
     print(f"\n    {PASS} passed, {FAIL} failed")
     if FAIL:
         print("    EMPLOYEE 360: FAILURES")

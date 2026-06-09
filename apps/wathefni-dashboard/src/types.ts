@@ -854,10 +854,33 @@ export type PosthireEmployeesResponse = {
   employees: PosthireEmployee[]
 }
 
+export type NextActionSeverity = 'critical' | 'high' | 'medium' | 'low'
+
 export type EmployeeProfileNextAction = {
+  // Legacy flat shape (flag OFF) — kept optional for backward compatibility.
+  label?: string
+  page?: string
+  // Ranked-engine shape (flag ON).
+  id?: string
+  severity?: NextActionSeverity
   module: string
-  label: string
-  page: string
+  title?: string
+  reason?: string
+  executable?: boolean
+  action_type?: string
+  args?: Record<string, unknown>
+  action_label?: string
+  requires_confirmation?: boolean
+  destructive?: boolean
+  target?: { page: string; section: string }
+  source_at?: string | null
+  meta?: Record<string, unknown>
+}
+
+export type EmployeeProfileNextActionsSummary = {
+  total: number
+  by_severity: Record<NextActionSeverity, number>
+  visible_cap: number
 }
 
 export type EmployeeProfileSections = {
@@ -942,6 +965,8 @@ export type EmployeeProfileResponse = {
   available_modules: string[]
   sections: EmployeeProfileSections
   next_actions: EmployeeProfileNextAction[]
+  next_actions_summary?: EmployeeProfileNextActionsSummary | null
+  next_actions_enabled?: boolean
   doc_upload_enabled?: boolean
   hr_mutate_enabled?: boolean
 }

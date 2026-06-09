@@ -297,6 +297,16 @@ def assistant_hr_reads_enabled() -> bool:
     return (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
+def employee_next_actions_enabled() -> bool:
+    """Dark-launch gate for the Employee 360 ranked Next Actions engine — the
+    'what should HR do next for this employee, and why?' panel. Defaults OFF so
+    the enriched/ranked list and its panel stay inert (the profile falls back to
+    the legacy flat list) until explicitly enabled. Pure read: every signal is
+    derived from rows already loaded for the profile, and every executable action
+    reuses an existing whitelisted action — no new data model, no new mutation."""
+    return (os.environ.get("WATHEFNI_EMPLOYEE_NEXT_ACTIONS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
 def leave_balances_enabled() -> bool:
     """Dark-launch gate for leave-balance tracking (P1: accrual + observe-only
     consumption + read-only balance surfacing). Defaults OFF so accrual, the
@@ -41523,6 +41533,215 @@ def employee_document_local_path(doc: dict[str, Any]) -> Path | None:
     return None
 
 
+_NEXT_ACTION_SEVERITY_WEIGHT = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+# Within an equal-severity tier, surface the more serious-by-nature module first.
+# Severity (not module) is always the primary sort, so this only breaks ties.
+_NEXT_ACTION_MODULE_PRIORITY = {
+    "compliance": 0, "onboarding": 1, "leave": 2, "payroll": 3, "attendance": 4, "shifts": 5,
+}
+_NEXT_ACTIONS_VISIBLE_CAP = 5
+# Minimum 14-day count before an attendance pattern is worth flagging (anti-noise).
+_ATTENDANCE_PATTERN_MIN = 3
+
+
+def _next_action_expiry_phrase(days: Any) -> str | None:
+    """HR-friendly 'why' for a document by days-until-expiry (negative = overdue)."""
+    try:
+        d = int(days)
+    except (TypeError, ValueError):
+        return None
+    if d < 0:
+        n = abs(d)
+        return f"Expired {n} day{'s' if n != 1 else ''} ago"
+    if d == 0:
+        return "Expires today"
+    return f"Expires in {d} day{'s' if d != 1 else ''}"
+
+
+def _next_action_date_ordinal(value: Any) -> float:
+    """Days-since-epoch for an ISO date so older items sort first within a tier.
+    Unparseable/empty dates sort last (large sentinel)."""
+    s = str(value or "")[:10]
+    try:
+        y, m, d = (int(x) for x in s.split("-"))
+        return float(date(y, m, d).toordinal())
+    except Exception:
+        return 9_999_999.0
+
+
+def build_employee_next_actions(
+    card: dict[str, Any], sections: dict[str, Any]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Derive a ranked "what should HR do next for this employee, and why?" list
+    purely from the per-module reads already loaded for the profile — no extra
+    queries, no new data model.
+
+    Ordering is severity-first (critical → low); ties break by module priority
+    then a per-signal urgency key. Executable rows reuse ONLY existing whitelisted
+    actions, and only for safe one-click nudges (compliance reminder / mark
+    reviewed, onboarding reminder). Two-sided decisions (leave & payroll
+    approvals) and judgment calls (attendance patterns, observe-only leave
+    balances) are navigation-only — they point at the module card where the
+    existing approve/reject controls already live. No file ids, URLs, storage
+    paths, or raw document bytes ever appear here.
+    """
+    name = card.get("name") or "This employee"
+    phone = card.get("phone") or ""
+    emp_key = card.get("employee_key") or ""
+    items: list[dict[str, Any]] = []
+
+    def add(
+        *, id: str, severity: str, module: str, title: str, reason: str,
+        target_section: str, executable: bool = False, action_type: str | None = None,
+        args: dict[str, Any] | None = None, action_label: str | None = None,
+        requires_confirmation: bool = False, destructive: bool = False,
+        source_at: Any = None, urgency: float = 0.0, meta: dict[str, Any] | None = None,
+    ) -> None:
+        entry: dict[str, Any] = {
+            "id": id,
+            "severity": severity,
+            "module": module,
+            "title": title,
+            "reason": reason,
+            "executable": bool(executable),
+            "target": {"page": target_section, "section": target_section},
+            "_sort": (
+                _NEXT_ACTION_SEVERITY_WEIGHT.get(severity, 9),
+                _NEXT_ACTION_MODULE_PRIORITY.get(module, 9),
+                float(urgency),
+            ),
+        }
+        if source_at is not None:
+            entry["source_at"] = source_at
+        if meta:
+            entry["meta"] = meta
+        if executable and action_type:
+            entry["action_type"] = action_type
+            entry["args"] = args or {}
+            entry["action_label"] = action_label or "Run"
+            entry["requires_confirmation"] = bool(requires_confirmation)
+            entry["destructive"] = bool(destructive)
+        items.append(entry)
+
+    # ---- Compliance: expired / missing / expiring soon / needs review ----
+    comp = sections.get("compliance")
+    if isinstance(comp, dict):
+        for doc in comp.get("documents") or []:
+            bucket = doc.get("status")
+            dtype = doc.get("document_type")
+            dlabel = doc.get("document_label") or dtype or "document"
+            days = doc.get("days_until_expiry")
+            reminder_args = {"employee_name": name, "document_type": dtype}
+            meta = {"document_type": dtype, "days_until_expiry": days}
+            day_urgency = float(days) if isinstance(days, (int, float)) else 0.0
+            if bucket == "expired":
+                add(id=f"compliance:expired:{dtype}", severity="critical", module="compliance",
+                    title=f"{dlabel} expired", reason=_next_action_expiry_phrase(days) or "Document has expired",
+                    target_section="compliance", executable=True, action_type="compliance_send_reminder",
+                    args=reminder_args, action_label="Send reminder", requires_confirmation=True,
+                    source_at=doc.get("expiry_date"), urgency=day_urgency, meta=meta)
+            elif bucket == "missing":
+                add(id=f"compliance:missing:{dtype}", severity="high", module="compliance",
+                    title=f"{dlabel} missing", reason="Required document not on file",
+                    target_section="compliance", executable=True, action_type="compliance_send_reminder",
+                    args=reminder_args, action_label="Send reminder", requires_confirmation=True,
+                    urgency=-1.0, meta=meta)
+            elif bucket == "expiring_soon":
+                soon = isinstance(days, (int, float)) and int(days) <= 7
+                add(id=f"compliance:expiring:{dtype}", severity="high" if soon else "medium", module="compliance",
+                    title=f"{dlabel} expiring soon", reason=_next_action_expiry_phrase(days) or "Document is expiring soon",
+                    target_section="compliance", executable=True, action_type="compliance_send_reminder",
+                    args=reminder_args, action_label="Send reminder", requires_confirmation=True,
+                    source_at=doc.get("expiry_date"), urgency=day_urgency, meta=meta)
+            elif bucket == "needs_review":
+                add(id=f"compliance:review:{dtype}", severity="high", module="compliance",
+                    title=f"{dlabel} needs review", reason="Submitted document is waiting for HR review",
+                    target_section="compliance", executable=True, action_type="compliance_mark_reviewed",
+                    args=reminder_args, action_label="Mark reviewed", requires_confirmation=False,
+                    urgency=0.0, meta=meta)
+
+    # ---- Onboarding: incomplete (aggregate; safe one-click reminder) ----
+    onb = sections.get("onboarding")
+    if isinstance(onb, dict):
+        outstanding = onb.get("outstanding") or []
+        n = int(onb.get("outstanding_count") or 0)
+        if n > 0:
+            labels = [str(it.get("label")) for it in outstanding if it.get("label")][:3]
+            preview = ", ".join(labels)
+            reason = f"{n} required item{'s' if n != 1 else ''} still open"
+            if preview:
+                reason += f": {preview}"
+            add(id="onboarding:incomplete", severity="medium", module="onboarding",
+                title="Onboarding incomplete", reason=reason, target_section="onboarding",
+                executable=True, action_type="send_onboarding_reminder",
+                args={"employee_key": emp_key, "employee_name": name, "employee_phone": phone},
+                action_label="Send reminder", requires_confirmation=True,
+                urgency=float(-n), meta={"outstanding_count": n})
+
+    # ---- Leave: pending decision (navigation) + observe-only negative balance ----
+    lv = sections.get("leave")
+    if isinstance(lv, dict):
+        for r in lv.get("items") or []:
+            if r.get("status") != "requested":
+                continue
+            sd, ed = r.get("start_date"), r.get("end_date")
+            ltype = str(r.get("leave_type") or "leave").replace("_", " ").title()
+            add(id=f"leave:pending:{sd}:{ed}", severity="high", module="leave",
+                title="Leave request awaiting your decision", reason=f"{ltype} · {sd} → {ed}",
+                target_section="leave", source_at=sd, urgency=_next_action_date_ordinal(sd),
+                meta={"start_date": sd, "end_date": ed})
+        for b in lv.get("balances") or []:
+            try:
+                bal = float(b.get("current_balance"))
+            except (TypeError, ValueError):
+                continue
+            if bal < 0:
+                bt = str(b.get("leave_type") or "leave").replace("_", " ")
+                add(id=f"leave:balance:{b.get('leave_type')}", severity="low", module="leave",
+                    title=f"Negative {bt} balance", reason=f"Balance is {bal:g} days — observe-only, not enforced",
+                    target_section="leave", urgency=bal,
+                    meta={"leave_type": b.get("leave_type"), "current_balance": bal})
+
+    # ---- Payroll: timesheet in review/draft (navigation; two-sided decision) ----
+    pay = sections.get("payroll")
+    if isinstance(pay, dict):
+        for ts in pay.get("items") or []:
+            if str(ts.get("status") or "").lower() not in {"draft", "review", "in_review"}:
+                continue
+            ps, pe = ts.get("period_start"), ts.get("period_end")
+            add(id=f"payroll:review:{ts.get('timesheet_id')}", severity="high", module="payroll",
+                title="Timesheet awaiting approval", reason=f"Pay period {ps} → {pe}",
+                target_section="payroll", source_at=ps, urgency=_next_action_date_ordinal(ps),
+                meta={"timesheet_id": ts.get("timesheet_id"), "period_start": ps})
+
+    # ---- Attendance: 14-day pattern (navigation; HR judgment) ----
+    att = sections.get("attendance")
+    if isinstance(att, dict):
+        absent = int(att.get("absent") or 0)
+        late = int(att.get("late") or 0)
+        window = int(att.get("window_days") or 14)
+        if absent >= _ATTENDANCE_PATTERN_MIN:
+            add(id="attendance:absences", severity="medium", module="attendance",
+                title="Repeated absences", reason=f"{absent} absences in the last {window} days",
+                target_section="attendance", urgency=float(-absent), meta={"absent": absent, "window_days": window})
+        if late >= _ATTENDANCE_PATTERN_MIN:
+            add(id="attendance:lateness", severity="medium", module="attendance",
+                title="Repeated lateness", reason=f"{late} late arrivals in the last {window} days",
+                target_section="attendance", urgency=float(-late), meta={"late": late, "window_days": window})
+
+    items.sort(key=lambda a: a["_sort"])
+    by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    for a in items:
+        by_severity[a["severity"]] = by_severity.get(a["severity"], 0) + 1
+        a.pop("_sort", None)
+    summary = {
+        "total": len(items),
+        "by_severity": by_severity,
+        "visible_cap": _NEXT_ACTIONS_VISIBLE_CAP,
+    }
+    return items, summary
+
+
 def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> dict[str, Any]:
     """Unified, read-only employee profile (Employee 360).
 
@@ -41767,6 +41986,15 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
         documents = employee_documents_for(company, key)
         sections["documents"] = {"count": len(documents), "items": documents}
 
+    # Ranked Next Actions engine (dark-launched). When ON, replace the legacy
+    # flat list with the severity-ranked, actionable list derived from the same
+    # sections above; when OFF, the profile keeps the legacy flat list so the
+    # page stays fully backward-compatible.
+    next_actions_enabled = employee_next_actions_enabled()
+    next_actions_summary: dict[str, Any] | None = None
+    if next_actions_enabled:
+        next_actions, next_actions_summary = build_employee_next_actions(card, sections)
+
     return json_safe({
         "company_code": company,
         "employee": {
@@ -41778,6 +42006,8 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
         "available_modules": modules,
         "sections": sections,
         "next_actions": next_actions,
+        "next_actions_summary": next_actions_summary,
+        "next_actions_enabled": next_actions_enabled,
         "doc_upload_enabled": doc_upload_enabled(),
         # Same gate the Onboarding page uses for mark-received/waive controls.
         "hr_mutate_enabled": onboarding_hr_mutate_enabled(),

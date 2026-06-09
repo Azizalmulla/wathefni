@@ -53,6 +53,9 @@ import type {
   PosthireAttendanceResponse,
   PosthireAttendanceRow,
   EmployeeProfileResponse,
+  EmployeeProfileNextAction,
+  EmployeeProfileNextActionsSummary,
+  NextActionSeverity,
   PosthireComplianceResponse,
   PosthireEmployeesResponse,
   PosthireEmployee,
@@ -531,6 +534,100 @@ function tenureLabel(hiredAt?: string | null): string | null {
   return rem ? `${years}y ${rem}m` : `${years} year${years === 1 ? '' : 's'}`
 }
 
+const NEXT_ACTION_SEVERITY: Record<NextActionSeverity, { label: string; dot: string; badge: 'danger' | 'warning' | 'muted' }> = {
+  critical: { label: 'Critical', dot: 'bg-rose-500', badge: 'danger' },
+  high: { label: 'High', dot: 'bg-amber-500', badge: 'warning' },
+  medium: { label: 'Medium', dot: 'bg-amber-300', badge: 'warning' },
+  low: { label: 'Low', dot: 'bg-slate-300', badge: 'muted' },
+}
+const NEXT_ACTION_SEVERITY_ORDER: NextActionSeverity[] = ['critical', 'high', 'medium', 'low']
+
+function NextActionsSummary({ summary }: { summary: EmployeeProfileNextActionsSummary }) {
+  const parts = NEXT_ACTION_SEVERITY_ORDER
+    .filter((s) => (summary.by_severity?.[s] || 0) > 0)
+    .map((s) => `${summary.by_severity[s]} ${s}`)
+  if (!parts.length) return null
+  return <span className="shrink-0 text-[12px] font-medium text-subtle/85">{parts.join(' · ')}</span>
+}
+
+// Ranked "what to do next" panel (flag ON). Severity-first order comes from the
+// backend; the panel only renders an action button for rows the backend marked
+// executable AND the viewer is permitted to run — everything else falls back to
+// a "View" link that scrolls to the relevant module card (where the existing
+// approve/reject controls live). No new actions, no client-side ranking.
+function NextActionsPanel({
+  actions,
+  summary,
+  canRun,
+  onRun,
+  onNavigate,
+  busy,
+  runningKey,
+}: {
+  actions: EmployeeProfileNextAction[]
+  summary?: EmployeeProfileNextActionsSummary | null
+  canRun: (a: EmployeeProfileNextAction) => boolean
+  onRun: (a: EmployeeProfileNextAction) => void
+  onNavigate: (section: string) => void
+  busy: boolean
+  runningKey: string | null
+}) {
+  const [showAll, setShowAll] = useState(false)
+  const cap = summary?.visible_cap ?? 5
+  const visible = showAll ? actions : actions.slice(0, cap)
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle>What to do next</CardTitle>
+            <CardDescription>Ranked by seriousness — the most urgent items first.</CardDescription>
+          </div>
+          {summary ? <NextActionsSummary summary={summary} /> : null}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {visible.map((a) => {
+          const sev = NEXT_ACTION_SEVERITY[a.severity ?? 'low'] ?? NEXT_ACTION_SEVERITY.low
+          const runnable = canRun(a)
+          const runKey = `next:${a.id}`
+          return (
+            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[1rem] border border-line/45 bg-panel-muted/30 px-3 py-2.5">
+              <div className="flex min-w-0 items-start gap-2.5">
+                <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${sev.dot}`} />
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-text">
+                    {a.title}
+                    <Badge tone={sev.badge} className="ml-2 align-middle">{sev.label}</Badge>
+                  </p>
+                  {a.reason ? <p className="mt-0.5 text-[12px] text-subtle/85">{a.reason}</p> : null}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5">
+                {runnable && a.action_type ? (
+                  <Button size="sm" disabled={busy} onClick={() => onRun(a)}>
+                    {runningKey === runKey ? <Loader2 className="h-4 w-4 animate-spin" /> : (a.action_label || 'Run')}
+                  </Button>
+                ) : null}
+                <Button variant="ghost" size="sm" onClick={() => onNavigate(a.target?.section || a.module)}>
+                  View
+                </Button>
+              </div>
+            </div>
+          )
+        })}
+        {actions.length > cap ? (
+          <div className="pt-1">
+            <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? 'Show fewer' : `View all (${actions.length})`}
+            </Button>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  )
+}
+
 function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: (message: string) => void }) {
   const loader = useCallback(() => getEmployeeProfile(access, employeeKey), [access, employeeKey])
   const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader)
@@ -547,7 +644,44 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
   const emp = data?.employee
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
+  const nextActionsEnabled = Boolean(data?.next_actions_enabled)
   const tenure = tenureLabel(emp?.hired_at)
+
+  // Only safe one-click nudges are executable from the panel, and only when the
+  // viewer holds the same permission the module page requires. Everything else
+  // (two-sided decisions, judgment calls) stays navigation-only.
+  const canRunNextAction = useCallback(
+    (a: EmployeeProfileNextAction) => {
+      if (!a.executable || !a.action_type) return false
+      if (a.module === 'compliance') return canComplianceManage
+      if (a.module === 'onboarding') return canOnboardingManage
+      return false
+    },
+    [canComplianceManage, canOnboardingManage],
+  )
+
+  const runNextAction = useCallback(
+    async (a: EmployeeProfileNextAction) => {
+      if (!a.action_type) return
+      if (a.requires_confirmation) {
+        const ok = await confirm({
+          title: a.action_label ? `${a.action_label}?` : 'Please confirm',
+          body: a.reason ? `${a.title} — ${a.reason}` : a.title || 'Run this action?',
+          confirmLabel: a.action_label || 'Confirm',
+          destructive: Boolean(a.destructive),
+        })
+        if (!ok) return
+      }
+      await action.run(a.action_type, a.args || {}, { destructive: Boolean(a.destructive), key: `next:${a.id}` })
+    },
+    [action, confirm],
+  )
+
+  const goToSection = useCallback((section: string) => {
+    if (typeof document === 'undefined') return
+    const el = document.getElementById(`emp360-section-${section}`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -588,7 +722,19 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             </CardContent>
           </Card>
 
-          {nextActions.length > 0 ? (
+          {nextActions.length === 0 ? (
+            <NextAction tone="success" icon={<CheckCircle2 className="h-5 w-5" />} title="Nothing needs attention" detail={`${emp.name} has no open items across the enabled modules.`} />
+          ) : nextActionsEnabled ? (
+            <NextActionsPanel
+              actions={nextActions}
+              summary={data?.next_actions_summary}
+              canRun={canRunNextAction}
+              onRun={runNextAction}
+              onNavigate={goToSection}
+              busy={action.busy}
+              runningKey={action.runningKey}
+            />
+          ) : (
             <Card>
               <CardHeader>
                 <CardTitle>What to do next</CardTitle>
@@ -603,13 +749,11 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                 ))}
               </CardContent>
             </Card>
-          ) : (
-            <NextAction tone="success" icon={<CheckCircle2 className="h-5 w-5" />} title="Nothing needs attention" detail="This employee has no open items across the enabled modules." />
           )}
 
           <div className="grid gap-4 lg:grid-cols-2">
             {sections?.onboarding ? (
-              <Card>
+              <Card id="emp360-section-onboarding">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Onboarding</CardTitle>
                   <CardDescription>
@@ -675,7 +819,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             ) : null}
 
             {sections?.compliance ? (
-              <Card>
+              <Card id="emp360-section-compliance">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Compliance</CardTitle>
                   <CardDescription>
@@ -733,7 +877,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             ) : null}
 
             {sections?.attendance ? (
-              <Card>
+              <Card id="emp360-section-attendance">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Clock className="h-4 w-4" /> Attendance</CardTitle>
                   <CardDescription>Last {sections.attendance.window_days} days</CardDescription>
@@ -759,7 +903,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             ) : null}
 
             {sections?.leave ? (
-              <Card>
+              <Card id="emp360-section-leave">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><CalendarDays className="h-4 w-4" /> Leave</CardTitle>
                   <CardDescription>
@@ -815,7 +959,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             ) : null}
 
             {sections?.shifts ? (
-              <Card>
+              <Card id="emp360-section-shifts">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Upcoming shifts</CardTitle>
                   <CardDescription>{sections.shifts.upcoming_count} scheduled</CardDescription>
@@ -838,7 +982,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
             ) : null}
 
             {sections?.payroll ? (
-              <Card>
+              <Card id="emp360-section-payroll">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Payroll</CardTitle>
                   <CardDescription>Recent timesheets</CardDescription>
