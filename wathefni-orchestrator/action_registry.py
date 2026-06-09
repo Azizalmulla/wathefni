@@ -225,6 +225,15 @@ def _properties_for_field(name: str, catalog: dict[str, Any] | None) -> dict[str
     return descriptions.get(name, {"type": "string", "description": f"{name} value"})
 
 
+# Tools that are only exposed to the LLM when their dark-launch flag (a no-arg
+# predicate on the app/legacy module) returns True. Default behaviour without a
+# flag entry is "always exposed".
+_FLAG_GATED_TOOLS: dict[str, str] = {
+    "list_onboarding_status": "assistant_hr_reads_enabled",
+    "list_compliance_documents": "assistant_hr_reads_enabled",
+}
+
+
 def build_tool_schemas(legacy: Any, request: Any) -> list[dict[str, Any]]:
     """Generate OpenAI-style tool schemas from the registry.
 
@@ -238,6 +247,14 @@ def build_tool_schemas(legacy: Any, request: Any) -> list[dict[str, Any]]:
     for name, spec in REGISTRY.items():
         if not spec.executor:
             continue
+        # Dark-launch gate: some tools are only offered to the LLM when their
+        # feature flag is on (default OFF). Keeps the catalog inert in production
+        # until the flag is enabled, so tool-selection behaviour is unchanged.
+        gate = _FLAG_GATED_TOOLS.get(name)
+        if gate is not None:
+            checker = getattr(legacy, gate, None)
+            if not (callable(checker) and checker()):
+                continue
         catalog: dict[str, Any] | None = None
         if spec.parameters_catalog_loader is not None:
             try:
@@ -4288,6 +4305,22 @@ register(ActionSpec(
 # === Onboarding =============================================================
 
 register(ActionSpec(
+    name="list_onboarding_status",
+    description=(
+        "List onboarding status for the company. Read-only. Answers 'who hasn't completed onboarding', "
+        "'which employees have pending onboarding items', and 'who is missing/has not uploaded a specific "
+        "document' (e.g. Civil ID, passport). Optional filters: document_type (e.g. civil_id, passport), "
+        "status (not_started|in_progress|complete), pending_only, employee_name/employee_phone. "
+        "Same source of truth as the dashboard Onboarding page."
+    ),
+    required_fields=(), optional_fields=("document_type", "item", "status", "pending_only", "employee_name", "employee_phone"),
+    module="onboarding", requires_confirmation=False,
+    executor=_posthire_executor("list_onboarding_status", "list_onboarding_status", reply_fn="format_list_onboarding_status_reply"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=False,
+    notes="Wraps app.list_onboarding_status (read-only, manager-scoped, metadata only). Dark-launched behind WATHEFNI_ASSISTANT_HR_READS.",
+))
+
+register(ActionSpec(
     name="send_onboarding_reminder",
     description="Send an onboarding reminder to a new hire over WhatsApp. Provide the employee name or phone. Use for 'remind the new hire about their documents'.",
     required_fields=(), optional_fields=("employee_name", "employee_phone"),
@@ -4321,6 +4354,22 @@ register(ActionSpec(
 
 
 # === Compliance =============================================================
+
+register(ActionSpec(
+    name="list_compliance_documents",
+    description=(
+        "List employee compliance documents by status. Read-only. Answers 'who has expired documents', "
+        "'who has documents expiring this month', 'which documents need HR review', and 'who is missing a "
+        "specific document'. Optional filters: status (expired|expiring_soon|missing|needs_review|valid), "
+        "document_type (e.g. civil_id, passport), timeframe ('this_month'), employee_name/employee_phone. "
+        "Same source of truth as the dashboard Compliance page."
+    ),
+    required_fields=(), optional_fields=("status", "document_type", "item", "timeframe", "employee_name", "employee_phone"),
+    module="compliance", requires_confirmation=False,
+    executor=_posthire_executor("list_compliance_documents", "list_compliance_documents", reply_fn="format_list_compliance_documents_reply"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=False,
+    notes="Wraps app.list_compliance_documents (read-only, manager-scoped, metadata only). Dark-launched behind WATHEFNI_ASSISTANT_HR_READS.",
+))
 
 register(ActionSpec(
     name="compliance_send_reminder",

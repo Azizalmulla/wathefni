@@ -289,6 +289,14 @@ def doc_upload_enabled() -> bool:
     return (os.environ.get("WATHEFNI_DOC_UPLOAD") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
+def assistant_hr_reads_enabled() -> bool:
+    """Dark-launch gate for the Assistant's onboarding/compliance/document read
+    tools (list_onboarding_status, list_compliance_documents). Defaults OFF so the
+    tools are NOT offered to the LLM on either WhatsApp or the dashboard assistant
+    until enabled. Read-only; reuses the dashboard's own data sources."""
+    return (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
 def leave_balances_enabled() -> bool:
     """Dark-launch gate for leave-balance tracking (P1: accrual + observe-only
     consumption + read-only balance surfacing). Defaults OFF so accrual, the
@@ -29879,6 +29887,334 @@ def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) 
         "documents": documents,
         "doc_upload_enabled": doc_upload_enabled(),
     }
+
+
+# === Assistant HR read tools (onboarding / compliance / documents) ===========
+# Read-only query power for the Wathefni Assistant (WhatsApp + dashboard). These
+# reuse the EXACT dashboard data sources so the Assistant and the dashboard pages
+# always agree, are manager-scoped via viewer_phone, and return METADATA ONLY —
+# never file ids, storage urls, local paths, or document bytes. Dark-launched
+# behind assistant_hr_reads_enabled() (the tools aren't even offered to the LLM
+# until the flag is on).
+
+_ASSISTANT_DOC_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
+    "civil_id": ("civil id", "civilid", "civil card", "cid"),
+    "passport": ("passport",),
+    "medical": ("medical", "medical fitness", "health certificate", "fitness"),
+    "education_cert": ("education", "educational", "certificate", "certificates", "degree", "diploma", "qualification"),
+    "bank_details": ("bank", "iban", "bank account", "bank details"),
+    "personal_photo": ("personal photo", "photo", "picture"),
+    "residency": ("residency", "iqama", "work permit", "residence permit"),
+}
+
+
+def _normalize_document_type_filter(text: str | None) -> str | None:
+    raw = normalize_text(str(text or ""))
+    if not raw:
+        return None
+    slug = re.sub(r"[\s-]+", "_", raw)
+    if slug in _ASSISTANT_DOC_TYPE_ALIASES:
+        return slug
+    for canonical, aliases in _ASSISTANT_DOC_TYPE_ALIASES.items():
+        if any(alias in raw for alias in aliases):
+            return canonical
+    return None
+
+
+def _normalize_compliance_status_filter(value: str | None) -> str | None:
+    raw = normalize_text(str(value or ""))
+    if not raw:
+        return None
+    if "expired" in raw:
+        return "expired"
+    if "expiring" in raw or "expire" in raw or "expiry" in raw or "soon" in raw:
+        return "expiring_soon"
+    if "review" in raw:
+        return "needs_review"
+    if "missing" in raw or "not uploaded" in raw or ("no " in raw and "upload" in raw) or "without" in raw:
+        return "missing"
+    if "valid" in raw or "up to date" in raw:
+        return "valid"
+    slug = re.sub(r"[\s-]+", "_", raw)
+    if slug in COMPLIANCE_BUCKETS:
+        return slug
+    return None
+
+
+def _normalize_onboarding_status_filter(value: str | None) -> str | None:
+    raw = normalize_text(str(value or ""))
+    if not raw:
+        return None
+    if "in progress" in raw or "in_progress" in raw or "ongoing" in raw:
+        return "in_progress"
+    if "not started" in raw or "not_started" in raw or "nothing started" in raw:
+        return "not_started"
+    if ("complete" in raw or "completed" in raw or "finished" in raw or "done" in raw):
+        if "not " in raw or "haven" in raw or "incomplete" in raw or "still" in raw or "yet" in raw:
+            return None
+        return "complete"
+    return None
+
+
+def _assistant_expiry_in_current_month(expiry: Any) -> bool:
+    if not expiry:
+        return False
+    try:
+        parsed = datetime.strptime(str(expiry)[:10], "%Y-%m-%d").date()
+    except Exception:
+        return False
+    today = now_utc().date()
+    return parsed.year == today.year and parsed.month == today.month
+
+
+def list_compliance_documents(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
+    """Assistant read: compliance documents (expired / expiring / missing / needs
+    review), optionally filtered by document type, timeframe, or one employee.
+    Reuses dashboard_compliance_payload (same source of truth, manager-scoped via
+    viewer_phone). Metadata only — no file ids/urls/paths."""
+    company = (company_code or "WATHEFNI").upper()
+    viewer_phone = action.get("viewer_phone")
+    payload = dashboard_compliance_payload(company, viewer_phone=viewer_phone)
+    documents = payload.get("documents") or []
+
+    text = normalize_text(action.get("prompt_text") or action.get("query") or "")
+    status_filter = _normalize_compliance_status_filter(action.get("status") or action.get("bucket") or text)
+    doc_filter = _normalize_document_type_filter(action.get("document_type") or action.get("item") or text)
+    timeframe_raw = normalize_text(action.get("timeframe") or "")
+    this_month = ("month" in timeframe_raw) or ("this month" in text)
+
+    employee = None
+    if any(action.get(k) for k in ("employee_name", "employee_phone", "subject_name", "subject_phone", "employee_key")):
+        employee = resolve_employee_for_direct_action({**action, "company_code": company}, allow_latest=False)
+        if employee and viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+            return {"ok": False, "error": "employee_outside_manager_scope", "safe_user_message": "That employee is outside your manager scope."}
+
+    rows: list[dict[str, Any]] = []
+    for d in documents:
+        if status_filter and d.get("status") != status_filter:
+            continue
+        if doc_filter and _normalize_document_type_filter(d.get("document_type")) != doc_filter:
+            continue
+        if employee and str(d.get("employee_key")) != str(employee.get("employee_key")):
+            continue
+        if this_month and not _assistant_expiry_in_current_month(d.get("expiry_date")):
+            continue
+        rows.append({
+            "employee_name": d.get("employee_name"),
+            "department": d.get("department"),
+            "document_type": d.get("document_type"),
+            "document_label": d.get("document_label"),
+            "status": d.get("status"),
+            "status_label": d.get("status_label"),
+            "expiry_date": d.get("expiry_date"),
+            "days_until_expiry": d.get("days_until_expiry"),
+        })
+
+    return {
+        "ok": True,
+        "data": {
+            "count": len(rows),
+            "rows": rows,
+            "filters": {
+                "status": status_filter,
+                "document_type": doc_filter,
+                "this_month": this_month,
+                "employee": (employee or {}).get("name"),
+            },
+        },
+        "count": len(rows),
+        "rows": rows,
+    }
+
+
+def list_onboarding_status(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
+    """Assistant read: onboarding completion + outstanding items. Modes:
+    - missing_document: employees missing a specific item (e.g. civil_id, passport)
+    - pending_items: employees with any pending onboarding item
+    - completion: employees by onboarding status (default: not yet complete)
+    Manager-scoped via viewer_phone; metadata only."""
+    company = (company_code or "WATHEFNI").upper()
+    viewer_phone = action.get("viewer_phone")
+    allowed_keys = manager_scope_employee_keys(company, viewer_phone)  # None => unrestricted
+
+    text = normalize_text(action.get("prompt_text") or action.get("query") or "")
+    doc_filter = _normalize_document_type_filter(action.get("document_type") or action.get("item") or text)
+    status_filter = _normalize_onboarding_status_filter(action.get("status") or text)
+    pending_only = bool(action.get("pending_only")) or "pending item" in text or "pending onboarding item" in text or "outstanding item" in text
+
+    employees = company_employees(company)
+    if allowed_keys is not None:
+        employees = [e for e in employees if str(e.get("employee_key")) in allowed_keys]
+    cards = {str(e.get("employee_key")): posthire_employee_card(e) for e in employees}
+    keys = list(cards.keys())
+    done_states = {"received", "complete", "completed", "verified"}
+
+    rows: list[dict[str, Any]] = []
+
+    if doc_filter:
+        mode = "missing_document"
+        have_item: set[str] = set()
+        submitted: set[str] = set()
+        if keys:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT employee_key, status FROM onboarding_items "
+                        "WHERE employee_key = ANY(%s) AND (item_id=%s OR document_type=%s)",
+                        (keys, doc_filter, doc_filter),
+                    )
+                    for r in cur.fetchall():
+                        k = str(r["employee_key"])
+                        have_item.add(k)
+                        if str(r.get("status") or "").lower() in done_states:
+                            submitted.add(k)
+        for k in keys:
+            if k in have_item and k not in submitted:
+                c = cards[k]
+                rows.append({"employee_name": c["name"], "department": c["department"], "onboarding_status": c["onboarding_status"]})
+    elif pending_only:
+        mode = "pending_items"
+        pending_map: dict[str, list[str]] = {}
+        if keys:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT employee_key, COALESCE(NULLIF(label,''), NULLIF(document_type,''), item_id) AS label "
+                        "FROM onboarding_items WHERE employee_key = ANY(%s) AND lower(status)='pending' "
+                        "ORDER BY employee_key, required DESC NULLS LAST",
+                        (keys,),
+                    )
+                    for r in cur.fetchall():
+                        pending_map.setdefault(str(r["employee_key"]), []).append(str(r.get("label") or ""))
+        for k, items in pending_map.items():
+            c = cards.get(k) or {}
+            rows.append({"employee_name": c.get("name"), "department": c.get("department"), "pending_items": items, "pending_count": len(items)})
+    else:
+        mode = "completion"
+        complete_states = {"complete", "completed", "done"}
+        for k in keys:
+            c = cards[k]
+            st = normalize_text(c["onboarding_status"]) or "not_started"
+            is_complete = st in complete_states
+            if status_filter == "complete" and not is_complete:
+                continue
+            if status_filter == "in_progress" and st != "in_progress":
+                continue
+            if status_filter == "not_started" and st != "not_started":
+                continue
+            if status_filter is None and is_complete:
+                continue
+            rows.append({"employee_name": c["name"], "department": c["department"], "onboarding_status": c["onboarding_status"]})
+
+    return {
+        "ok": True,
+        "mode": mode,
+        "data": {
+            "count": len(rows),
+            "rows": rows,
+            "mode": mode,
+            "filters": {"document_type": doc_filter, "status": status_filter, "pending_only": pending_only},
+        },
+        "count": len(rows),
+        "rows": rows,
+    }
+
+
+def format_list_compliance_documents_reply(result: dict[str, Any]) -> str:
+    if not result.get("ok"):
+        if result.get("error") == "employee_outside_manager_scope":
+            return "That employee is outside your manager scope."
+        return result.get("safe_user_message") or "I could not read compliance documents safely."
+    data = result.get("data") or {}
+    rows = data.get("rows") or []
+    filters = data.get("filters") or {}
+    status = filters.get("status")
+    noun = {
+        "expired": "expired document",
+        "expiring_soon": "document expiring soon",
+        "missing": "missing document",
+        "needs_review": "document needing HR review",
+        "valid": "valid document",
+    }.get(status, "compliance document")
+    if filters.get("this_month") and status in (None, "expiring_soon"):
+        noun = "document expiring this month"
+    if not rows:
+        doc = filters.get("document_type")
+        if doc and status == "missing":
+            return f"No employees are missing {compliance_document_friendly_label(doc)}."
+        if filters.get("this_month") and status in (None, "expiring_soon"):
+            return "No documents are expiring this month."
+        empty = {
+            "expired": "No expired documents found.",
+            "expiring_soon": "No documents are expiring soon.",
+            "missing": "No missing documents found.",
+            "needs_review": "No documents need HR review.",
+            "valid": "No valid documents found.",
+        }
+        return empty.get(status, "No compliance documents found.")
+    n = len(rows)
+    lines = [f"{n} {noun}{'s' if n != 1 else ''}:"]
+    for r in rows[:10]:
+        label = r.get("document_label") or compliance_document_friendly_label(r.get("document_type"))
+        piece = f"• {r.get('employee_name') or 'Employee'} — {label}"
+        if r.get("status") in ("expired", "expiring_soon") and r.get("expiry_date"):
+            piece += f" ({(r.get('status_label') or '').strip()} {str(r.get('expiry_date'))[:10]})".replace("  ", " ")
+        elif status is None and r.get("status_label"):
+            piece += f" ({r.get('status_label')})"
+        lines.append(piece)
+    if n > 10:
+        lines.append(f"+{n - 10} more")
+    return "\n".join(lines)
+
+
+def format_list_onboarding_status_reply(result: dict[str, Any]) -> str:
+    if not result.get("ok"):
+        if result.get("error") == "employee_outside_manager_scope":
+            return "That employee is outside your manager scope."
+        return result.get("safe_user_message") or "I could not read onboarding status safely."
+    data = result.get("data") or {}
+    rows = data.get("rows") or []
+    mode = data.get("mode")
+    filters = data.get("filters") or {}
+    n = len(rows)
+    if mode == "missing_document":
+        doc_label = compliance_document_friendly_label(filters.get("document_type"))
+        if not rows:
+            return f"Everyone has submitted {doc_label}."
+        lines = [f"{n} employee{'s' if n != 1 else ''} missing {doc_label}:"]
+        for r in rows[:10]:
+            dept = f" — {r.get('department')}" if r.get("department") else ""
+            lines.append(f"• {r.get('employee_name') or 'Employee'}{dept}")
+        if n > 10:
+            lines.append(f"+{n - 10} more")
+        return "\n".join(lines)
+    if mode == "pending_items":
+        if not rows:
+            return "No employees have pending onboarding items."
+        lines = [f"{n} employee{'s' if n != 1 else ''} with pending onboarding items:"]
+        for r in rows[:10]:
+            items = list(r.get("pending_items") or [])
+            shown = ", ".join(items[:4]) + ("…" if len(items) > 4 else "")
+            lines.append(f"• {r.get('employee_name') or 'Employee'} — {shown}")
+        if n > 10:
+            lines.append(f"+{n - 10} more")
+        return "\n".join(lines)
+    # completion
+    if not rows:
+        return "Everyone has completed onboarding."
+    sf = filters.get("status")
+    if sf == "complete":
+        header = f"{n} employee{'s' if n != 1 else ''} have completed onboarding:"
+    elif sf in ("in_progress", "not_started"):
+        header = f"{n} employee{'s' if n != 1 else ''} are {sf.replace('_', ' ')}:"
+    else:
+        header = f"{n} employee{'s' if n != 1 else ''} have not completed onboarding:"
+    lines = [header]
+    for r in rows[:10]:
+        lines.append(f"• {r.get('employee_name') or 'Employee'} — {r.get('onboarding_status')}")
+    if n > 10:
+        lines.append(f"+{n - 10} more")
+    return "\n".join(lines)
 
 
 # --- Compliance V1.1 actions (send reminder / mark reviewed) ----------------

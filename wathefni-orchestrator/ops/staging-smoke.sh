@@ -114,6 +114,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-manager-read-isolation.py |
 log "HR document upload (flag gate + RBAC + scope + validation + reuse ingestion bundle + downloadable, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-document-upload.py | sed 's/^/    /'
 
+log "assistant HR reads (list_onboarding_status / list_compliance_documents: flag gate + RBAC + tenant + manager scope + dashboard parity + no leakage, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assistant-hr-reads.py | sed 's/^/    /'
+
 log "pre-hire registry migration (WATHEFNI_PREHIRE_VIA_REGISTRY: flag/parity/harness, hire->transition_hire, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-prehire-registry-parity.py | sed 's/^/    /'
 

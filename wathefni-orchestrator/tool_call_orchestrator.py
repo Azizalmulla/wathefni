@@ -123,10 +123,12 @@ TOOL_PERMISSION_MAP = {
     "approve_shift_swap": "shifts.manage",
     "reject_shift_swap": "shifts.manage",
     # Onboarding
+    "list_onboarding_status": "onboarding.read",
     "send_onboarding_reminder": "onboarding.manage",
     "start_onboarding": "onboarding.manage",
     "onboarding_mark_item": "onboarding.manage",
     # Compliance
+    "list_compliance_documents": "compliance.read",
     "compliance_send_reminder": "compliance.manage",
     "compliance_mark_reviewed": "compliance.manage",
     # Payroll (sensitive money domain; export is separately gated)
