@@ -5685,6 +5685,30 @@ def manager_scope_allows_employee(employee: dict[str, Any] | None, *, company_co
             return bool(cur.fetchone())
 
 
+def manager_scope_employee_keys(company_code: str | None, viewer_phone: str | None) -> set[str] | None:
+    """In-scope employee_keys for a manager, or None when unrestricted.
+
+    Returns None when the viewer has no manager scope (owners/HR managers see
+    everyone). Otherwise resolves the exact set of employee_keys the manager may
+    see via the same `employee_scope_sql` clause the list reads use, so directory
+    reads (employees/onboarding/compliance) that build off `company_employees`
+    can be filtered identically to the SQL-scoped list endpoints."""
+    company = (company_code or "WATHEFNI").upper()
+    scope = manager_scope_context(viewer_phone, company)
+    if not scope.get("restricted"):
+        return None
+    clause, params = employee_scope_sql("e", scope)
+    if clause == "AND FALSE":
+        return set()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT employee_key FROM employees e WHERE e.company_code=%s {clause}",
+                (company, *params),
+            )
+            return {str(r["employee_key"]) for r in cur.fetchall() if r.get("employee_key")}
+
+
 # --- Org & Managers admin (V1a) --------------------------------------------
 # Client-facing CRUD over the org/manager-scope tables. Reuses the same Postgres
 # tables the analytics/scope engine already reads, so a manager defined here is
@@ -29752,15 +29776,20 @@ def compliance_next_action(bucket: str, name: str, expiry_label: str | None) -> 
     return "No action needed."
 
 
-def dashboard_compliance_payload(company: str) -> dict[str, Any]:
+def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) -> dict[str, Any]:
     """Company-scoped compliance read for the dashboard.
 
     Reuses the worker's classifier (classify_compliance_row) so status/severity
     definitions stay identical to the background scan, then maps everything into
     HR-friendly labels and the five buckets HR works through. Company scoping is
     enforced by only looking at compliance documents for this company's employees.
+    When viewer_phone is a scoped manager, the employee set is further narrowed to
+    their branch/team/direct scope (inert for unscoped owners/HR).
     """
     employees = company_employees(company)
+    allowed_keys = manager_scope_employee_keys(company, viewer_phone)
+    if allowed_keys is not None:
+        employees = [e for e in employees if str(e.get("employee_key")) in allowed_keys]
     cards: dict[str, dict[str, Any]] = {}
     for row in employees:
         card = posthire_employee_card(row)
@@ -29786,6 +29815,20 @@ def dashboard_compliance_payload(company: str) -> dict[str, Any]:
                     (employee_keys,),
                 )
                 rows = [dict(r) for r in cur.fetchall()]
+                # Bulk-resolve the stored file (file_registry) per (employee, type)
+                # so each compliance row can carry a View/Download file_id without
+                # an N+1 fan-out. Latest stored file wins.
+                cur.execute(
+                    """
+                    SELECT DISTINCT ON (subject_key, document_type) subject_key, document_type, file_id
+                    FROM file_registry
+                    WHERE company_code=%s AND subject_type='employee' AND subject_key = ANY(%s)
+                      AND file_kind = ANY(%s) AND storage_status IN ('stored','stored_with_fallback')
+                    ORDER BY subject_key, document_type, updated_at DESC NULLS LAST
+                    """,
+                    (company, employee_keys, list(_EMPLOYEE_DOCUMENT_FILE_KINDS)),
+                )
+                file_ids = {(str(r["subject_key"]), str(r["document_type"] or "")): str(r["file_id"]) for r in cur.fetchall()}
         for row in rows:
             card = cards.get(str(row.get("employee_key") or ""), {})
             classification = classify_compliance_row(row)
@@ -29813,6 +29856,7 @@ def dashboard_compliance_payload(company: str) -> dict[str, Any]:
                 "reminder_count": int(row.get("reminder_count") or 0),
                 "confidence": round(float(confidence), 2) if confidence is not None else None,
                 "next_action": compliance_next_action(bucket, card.get("name") or "the employee", expiry_label),
+                "file_id": file_ids.get((str(row.get("employee_key") or ""), str(row.get("document_type") or ""))),
             })
     needs_attention = counts["expired"] + counts["expiring_soon"] + counts["missing"] + counts["needs_review"]
     summary = {
@@ -41024,6 +41068,114 @@ def employee_profile_accessible_modules(context: dict[str, Any], company: str) -
     ]
 
 
+# --- Employee Document Hub (read-only view/download) ------------------------
+# HR can view/download the documents employees submitted (via WhatsApp onboarding
+# uploads). The unified index is `file_registry` (subject_type='employee'); we
+# never expose raw storage URLs for local files — they are proxied byte-for-byte
+# through a tenant + RBAC + manager-scope gated endpoint. Additive: ingestion is
+# unchanged.
+
+# Document file_kinds that belong to an employee and are safe to surface to HR.
+_EMPLOYEE_DOCUMENT_FILE_KINDS = ("onboarding_document", "compliance_document", "employee_document")
+
+
+def employee_documents_for(company_code: str, employee_key: str) -> list[dict[str, Any]]:
+    """Metadata list (never bytes) of an employee's stored documents, newest first."""
+    company = (company_code or "WATHEFNI").upper()
+    out: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT file_id, document_type, file_kind, original_filename, mime_type,
+                       size_bytes, storage_provider, storage_status, stored_at, updated_at,
+                       metadata
+                FROM file_registry
+                WHERE company_code=%s AND subject_type='employee' AND subject_key=%s
+                  AND file_kind = ANY(%s)
+                ORDER BY updated_at DESC NULLS LAST
+                """,
+                (company, employee_key, list(_EMPLOYEE_DOCUMENT_FILE_KINDS)),
+            )
+            for r in cur.fetchall():
+                row = dict(r)
+                meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+                stored = row.get("stored_at") or row.get("updated_at")
+                out.append({
+                    "file_id": str(row.get("file_id")),
+                    "document_type": row.get("document_type"),
+                    "label": meta.get("label") or compliance_document_friendly_label(row.get("document_type"), None),
+                    "item_id": meta.get("item_id"),
+                    "filename": row.get("original_filename"),
+                    "mime_type": row.get("mime_type"),
+                    "size_bytes": int(row.get("size_bytes")) if row.get("size_bytes") is not None else None,
+                    "stored_at": stored.isoformat() if hasattr(stored, "isoformat") else stored,
+                    "has_file": str(row.get("storage_status") or "") in {"stored", "stored_with_fallback"},
+                })
+    return out
+
+
+def employee_document_index(company_code: str, employee_key: str) -> dict[str, str]:
+    """Map of {item_id|document_type} -> file_id for an employee's stored docs
+    (latest wins). Lets the onboarding checklist and compliance rows attach a
+    View/Download link by either key without an extra round-trip per row."""
+    index: dict[str, str] = {}
+    for doc in employee_documents_for(company_code, employee_key):
+        if not doc.get("has_file"):
+            continue
+        for key in (doc.get("item_id"), doc.get("document_type")):
+            k = str(key or "").strip()
+            if k and k not in index:
+                index[k] = doc["file_id"]
+    return index
+
+
+def resolve_employee_document_file(company_code: str, file_id: str) -> dict[str, Any] | None:
+    """Tenant-scoped fetch of one employee document row by file_id. Returns None
+    when it does not exist for this company (callers must 404, never disclose
+    cross-tenant existence)."""
+    company = (company_code or "WATHEFNI").upper()
+    try:
+        uuid.UUID(str(file_id))
+    except (ValueError, TypeError):
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT file_id, company_code, subject_key, document_type, file_kind,
+                       original_filename, mime_type, storage_provider, storage_object_key,
+                       storage_url, local_path, source_path, storage_status
+                FROM file_registry
+                WHERE file_id=%s AND company_code=%s AND subject_type='employee'
+                  AND file_kind = ANY(%s)
+                LIMIT 1
+                """,
+                (str(file_id), company, list(_EMPLOYEE_DOCUMENT_FILE_KINDS)),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+
+
+def employee_document_local_path(doc: dict[str, Any]) -> Path | None:
+    """Resolve a stored employee document to an on-disk file, refusing any path
+    that escapes the workspace root (path-traversal guard)."""
+    workspace_root = Path(WORKSPACE).resolve()
+    for key in ("local_path", "source_path"):
+        raw = str(doc.get(key) or "").strip()
+        if not raw:
+            continue
+        try:
+            candidate = Path(raw).resolve()
+        except (OSError, RuntimeError):
+            continue
+        if not candidate.is_relative_to(workspace_root):
+            continue
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
 def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> dict[str, Any]:
     """Unified, read-only employee profile (Employee 360).
 
@@ -41047,6 +41199,11 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
     if not row:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     employee = dict(row)
+    # Manager scoping: a scoped manager may only open a profile for an employee in
+    # their branch/team/direct scope. Inert for unscoped users (owners/HR).
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     card = posthire_employee_card(employee)
     modules = employee_profile_accessible_modules(context, company)
     sections: dict[str, Any] = {}
@@ -41246,6 +41403,12 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                     ],
                 }
 
+    # Documents tab (read-only): submitted files HR can view/download. Visible
+    # when the user can read onboarding or compliance for the company.
+    if "onboarding" in modules or "compliance" in modules:
+        documents = employee_documents_for(company, key)
+        sections["documents"] = {"count": len(documents), "items": documents}
+
     return json_safe({
         "company_code": company,
         "employee": {
@@ -41268,6 +41431,68 @@ def dashboard_posthire_employee_detail(employee_key: str, context: dict[str, Any
     return dashboard_employee_profile(context, employee_key)
 
 
+def _document_hub_read_context(context: dict[str, Any]) -> str:
+    """Gate document-hub reads on the company having onboarding OR compliance and
+    the user holding the matching read permission. Returns the company code."""
+    company = context["company_code"]
+    can_onboarding = company_has_module(company, "onboarding") and dashboard_context_has_permission(context, "onboarding.read")
+    can_compliance = company_has_module(company, "compliance") and dashboard_context_has_permission(context, "compliance.read")
+    if not (can_onboarding or can_compliance):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
+    return company
+
+
+@app.get("/dashboard/posthire/employees/{employee_key}/documents")
+def dashboard_posthire_employee_documents(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _document_hub_read_context(context)
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    documents = employee_documents_for(company, str(employee.get("employee_key")))
+    return json_safe({"company_code": company, "employee_key": employee.get("employee_key"), "count": len(documents), "documents": documents})
+
+
+@app.get("/dashboard/posthire/documents/{file_id}")
+def dashboard_posthire_document_file(file_id: str, disposition: str = "inline", context: dict[str, Any] = Depends(dashboard_context)):
+    company = _document_hub_read_context(context)
+    doc = resolve_employee_document_file(company, file_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "We couldn't find that document."})
+    employee = find_employee_by_key(str(doc.get("subject_key")), company_code=company)
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and employee and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "We couldn't find that document."})
+
+    filename = str(doc.get("original_filename") or f"{doc.get('document_type') or 'document'}").strip()
+    mime_type = str(doc.get("mime_type") or mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    mode = "attachment" if str(disposition).lower() == "attachment" else "inline"
+
+    # Audit the access (metadata only — never the bytes, local path, or content).
+    record_admin_audit(
+        context,
+        "document_downloaded" if mode == "attachment" else "document_viewed",
+        summary=f"Accessed employee document {doc.get('document_type') or 'document'}.",
+        target_type="employee",
+        target=str(doc.get("subject_key")),
+        details={"file_id": str(doc.get("file_id")), "document_type": doc.get("document_type"), "disposition": mode},
+    )
+
+    storage_url = str(doc.get("storage_url") or "").strip()
+    if storage_url and not storage_url.startswith("local://"):
+        # Non-local provider (e.g. Google Drive): hand back the access-controlled
+        # link rather than a raw byte stream. No local path is ever exposed.
+        return {"type": "external_url", "url": storage_url, "filename": filename, "mime_type": mime_type, "storage_provider": doc.get("storage_provider")}
+
+    path = employee_document_local_path(doc)
+    if not path:
+        raise HTTPException(status_code=404, detail={"error": "document_file_unavailable", "message": "This document's file is not available."})
+    headers = {"Cache-Control": "no-store"}
+    return FileResponse(path, media_type=mime_type, filename=filename, content_disposition_type=mode, headers=headers)
+
+
 @app.get("/dashboard/posthire/employees")
 def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_context)):
     # Employees directory is the shared people view; visible when the company has
@@ -41277,6 +41502,9 @@ def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_con
     if not readable:
         raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
     rows = company_employees(company)
+    allowed_keys = manager_scope_employee_keys(company, context.get("hr_phone"))
+    if allowed_keys is not None:
+        rows = [r for r in rows if str(r.get("employee_key")) in allowed_keys]
     employees = [posthire_employee_card(row) for row in rows]
     return {"company_code": company, "count": len(employees), "employees": employees}
 
@@ -41311,6 +41539,9 @@ def onboarding_counts_by_employee(company_code: str | None) -> dict[str, dict[st
 def dashboard_posthire_onboarding(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "onboarding")
     rows = company_employees(company)
+    allowed_keys = manager_scope_employee_keys(company, context.get("hr_phone"))
+    if allowed_keys is not None:
+        rows = [r for r in rows if str(r.get("employee_key")) in allowed_keys]
     cards = [posthire_employee_card(row) for row in rows]
     counts = onboarding_counts_by_employee(company)
     for card in cards:
@@ -41334,10 +41565,15 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
     employee = find_employee_by_key(employee_key, company_code=company)
     if not employee:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     summary = employee_onboarding_summary(employee)
+    document_index = employee_document_index(company, str(employee.get("employee_key")))
     return json_safe({
         "company_code": company,
         "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
+        "document_index": document_index,
         **summary,
     })
 
@@ -41346,7 +41582,7 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
 def dashboard_posthire_attendance(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "attendance")
     today = kuwait_today().isoformat()
-    result = list_attendance({"company_code": company, "start_date": today, "end_date": today, "query": "today"}, company_code=company)
+    result = list_attendance({"company_code": company, "start_date": today, "end_date": today, "query": "today", "viewer_phone": context.get("hr_phone")}, company_code=company)
     return json_safe({"company_code": company, "date": today, **result})
 
 
@@ -41354,8 +41590,9 @@ def dashboard_posthire_attendance(context: dict[str, Any] = Depends(dashboard_co
 def dashboard_posthire_leave(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "leave")
     start, end = _posthire_window(7, 60)
-    pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end}, company_code=company)
-    upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end}, company_code=company)
+    viewer_phone = context.get("hr_phone")
+    pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
+    upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
     pending_rows = pending.get("leave_requests") or []
     upcoming_rows = upcoming.get("leave_requests") or []
     payload = {
@@ -41377,8 +41614,9 @@ def dashboard_posthire_leave(context: dict[str, Any] = Depends(dashboard_context
 def dashboard_posthire_shifts(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "shifts")
     start, end = _posthire_window(0, 7)
-    shifts = list_shifts({"company_code": company, "start_date": start, "end_date": end, "query": "this week"}, company_code=company)
-    swaps = list_shift_swaps({"company_code": company, "status": "requested"}, company_code=company)
+    viewer_phone = context.get("hr_phone")
+    shifts = list_shifts({"company_code": company, "start_date": start, "end_date": end, "query": "this week", "viewer_phone": viewer_phone}, company_code=company)
+    swaps = list_shift_swaps({"company_code": company, "status": "requested", "viewer_phone": viewer_phone}, company_code=company)
     return json_safe({
         "company_code": company,
         "shifts": shifts.get("shifts") or [],
@@ -41398,7 +41636,7 @@ def dashboard_posthire_payroll(context: dict[str, Any] = Depends(dashboard_conte
         start_iso, end_iso = period[0].isoformat(), period[1].isoformat()
     else:
         start_iso, end_iso = _posthire_month_window()
-    timesheets = list_timesheets({"company_code": company, "start_date": start_iso, "end_date": end_iso}, company_code=company)
+    timesheets = list_timesheets({"company_code": company, "start_date": start_iso, "end_date": end_iso, "viewer_phone": context.get("hr_phone")}, company_code=company)
     policy = show_payroll_policy({"company_code": company}, company_code=company)
     exports = list_payroll_exports({"company_code": company}, company_code=company)
     # The dashboard renders decimal hours, but timesheet rows store raw minutes.
@@ -41426,7 +41664,7 @@ def dashboard_posthire_analytics(context: dict[str, Any] = Depends(dashboard_con
     # Dashboard reads must not write to Google Sheets; the Sheets export is owned
     # by the WhatsApp/tool path. Skipping it here removes a ~2s round-trip.
     result = workforce_analytics(
-        {"company_code": company, "start_date": start_iso, "end_date": end_iso, "query": "workforce overview"},
+        {"company_code": company, "start_date": start_iso, "end_date": end_iso, "query": "workforce overview", "viewer_phone": context.get("hr_phone")},
         company_code=company,
         sync_sheet=False,
     )
@@ -41436,7 +41674,7 @@ def dashboard_posthire_analytics(context: dict[str, Any] = Depends(dashboard_con
 @app.get("/dashboard/posthire/compliance")
 def dashboard_posthire_compliance(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "compliance")
-    return json_safe(dashboard_compliance_payload(company))
+    return json_safe(dashboard_compliance_payload(company, viewer_phone=context.get("hr_phone")))
 
 
 @app.post("/orchestrator/whatsapp-turn", response_model=OrchestratorResponse)

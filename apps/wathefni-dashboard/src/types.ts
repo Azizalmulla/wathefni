@@ -904,6 +904,29 @@ export type EmployeeProfileSections = {
   payroll?: {
     items: { period_start?: string | null; period_end?: string | null; status?: string; worked_hours: number; overtime_hours: number }[]
   }
+  documents?: {
+    count: number
+    items: EmployeeDocument[]
+  }
+}
+
+export type EmployeeDocument = {
+  file_id: string
+  document_type?: string | null
+  label?: string | null
+  item_id?: string | null
+  filename?: string | null
+  mime_type?: string | null
+  size_bytes?: number | null
+  stored_at?: string | null
+  has_file: boolean
+}
+
+export type EmployeeDocumentsResponse = {
+  company_code: string
+  employee_key: string
+  count: number
+  documents: EmployeeDocument[]
 }
 
 export type EmployeeProfileResponse = {
@@ -947,6 +970,7 @@ export type OnboardingItem = {
 export type OnboardingDetailResponse = {
   company_code: string
   hr_mutate_enabled?: boolean
+  document_index?: Record<string, string>
   employee_key: string
   name?: string | null
   phone?: string | null
@@ -1126,6 +1150,7 @@ export type ComplianceDocument = {
   reminder_count: number
   confidence?: number | null
   next_action: string
+  file_id?: string | null
 }
 
 export type ComplianceSummary = {

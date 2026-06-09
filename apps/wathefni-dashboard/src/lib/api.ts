@@ -10,6 +10,7 @@ import type {
   DashboardChatStoredMessage,
   DashboardTeamResponse,
   DashboardTeamUser,
+  EmployeeDocumentsResponse,
   ImportBatchesResponse,
   ImportBulkActionResponse,
   ImportIntakeResponse,
@@ -607,6 +608,56 @@ export function getPosthireAnalytics(access: DashboardAccess) {
 
 export function getPosthireCompliance(access: DashboardAccess) {
   return request<PosthireComplianceResponse>('/dashboard/posthire/compliance', access)
+}
+
+export function getEmployeeDocuments(access: DashboardAccess, employeeKey: string) {
+  return request<EmployeeDocumentsResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents`, access)
+}
+
+// Open or download an employee document. Auth is header-based, so we fetch the
+// proxied file with credentials and hand the browser a blob URL (local files) or
+// follow the access-controlled external URL (e.g. Google Drive). No raw storage
+// URL is ever exposed in the DOM.
+export async function openEmployeeDocument(
+  access: DashboardAccess,
+  fileId: string,
+  options: { disposition?: 'inline' | 'attachment'; filename?: string } = {},
+) {
+  const disposition = options.disposition || 'inline'
+  const previewWindow = disposition === 'inline' ? window.open('about:blank', '_blank') : null
+  previewWindow?.document.write(
+    '<!doctype html><title>Opening document...</title><body style="font-family: system-ui, sans-serif; padding: 24px;">Opening document...</body>',
+  )
+  const response = await fetch(`/dashboard/posthire/documents/${encodeURIComponent(fileId)}?disposition=${disposition}`, {
+    headers: dashboardHeaders(access),
+  })
+  const contentType = response.headers.get('Content-Type') || ''
+  if (!response.ok) {
+    previewWindow?.close()
+    const payload = await response.json().catch(() => ({}))
+    const detail = payload?.detail || payload
+    throw new DashboardApiError(response.status, detail, 'Could not open the document.')
+  }
+  if (contentType.includes('application/json')) {
+    const payload = (await response.json()) as { url?: string }
+    if (!payload.url) {
+      previewWindow?.close()
+      throw new Error('Document URL was not returned.')
+    }
+    openPreviewUrl(payload.url, previewWindow)
+    return
+  }
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  if (disposition === 'attachment') {
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = options.filename || 'document'
+    anchor.click()
+  } else {
+    openPreviewUrl(url, previewWindow)
+  }
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 // --- HR tasks & delivery follow-up (outbound layer, Phase B) --------------

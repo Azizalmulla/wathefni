@@ -105,6 +105,12 @@ log "employee 360 profile (read-only, tenant + entitlement scoped, staging DB)"
 log "leave balances P1 (chargeable days + flag gate + accrual + observe-only consumption, staging DB)"
 "$VENV_PY" smoke-test-leave-balances.py | sed 's/^/    /'
 
+log "employee document hub (tenant isolation + RBAC gate + path-traversal guard + missing/external handling, staging DB)"
+"$VENV_PY" smoke-test-document-hub.py | sed 's/^/    /'
+
+log "manager-scoped read isolation (employees/onboarding/compliance/360 reads honor manager scope, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-manager-read-isolation.py | sed 's/^/    /'
+
 log "pre-hire registry migration (WATHEFNI_PREHIRE_VIA_REGISTRY: flag/parity/harness, hire->transition_hire, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-prehire-registry-parity.py | sed 's/^/    /'
 

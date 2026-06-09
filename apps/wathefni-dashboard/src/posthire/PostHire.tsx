@@ -8,6 +8,7 @@ import {
   Clock,
   DollarSign,
   Download,
+  Eye,
   FileText,
   Loader2,
   RefreshCw,
@@ -36,6 +37,7 @@ import {
   getPosthireOnboarding,
   getPosthirePayroll,
   getPosthireShifts,
+  openEmployeeDocument,
   resolveHrTask,
   runPosthireAction,
 } from '@/lib/api'
@@ -738,6 +740,37 @@ function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAcc
                 </CardContent>
               </Card>
             ) : null}
+
+            {sections?.documents && sections.documents.items.length > 0 ? (
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</CardTitle>
+                  <CardDescription>
+                    {sections.documents.count} file{sections.documents.count === 1 ? '' : 's'} submitted by this employee
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="divide-y divide-line/45">
+                    {sections.documents.items.map((doc) => (
+                      <li key={doc.file_id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-text">{doc.label || doc.document_type || doc.filename || 'Document'}</p>
+                          <p className="text-[11.5px] text-subtle/80">
+                            {doc.filename ? `${doc.filename}` : doc.document_type || ''}
+                            {doc.stored_at ? ` · ${formatDate(doc.stored_at)}` : ''}
+                          </p>
+                        </div>
+                        {doc.has_file ? (
+                          <DocumentActions access={access} fileId={doc.file_id} filename={doc.filename || doc.label || undefined} />
+                        ) : (
+                          <span className="text-[11.5px] text-subtle/70">File unavailable</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ) : null}
           </div>
         </>
       )}
@@ -747,14 +780,57 @@ function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAcc
 
 // --- Onboarding ------------------------------------------------------------
 
+function DocumentActions({
+  access,
+  fileId,
+  filename,
+  compact,
+}: {
+  access: DashboardAccess
+  fileId?: string | null
+  filename?: string | null
+  compact?: boolean
+}) {
+  const [busy, setBusy] = useState<'inline' | 'attachment' | null>(null)
+  if (!fileId) return null
+  const open = async (disposition: 'inline' | 'attachment') => {
+    setBusy(disposition)
+    try {
+      await openEmployeeDocument(access, fileId, { disposition, filename: filename || undefined })
+    } catch (err) {
+      // Surface nothing intrusive — the file simply fails to open. The fetch
+      // itself logs via the network layer; we avoid leaking detail to the DOM.
+      console.error('Could not open document', err)
+    } finally {
+      setBusy(null)
+    }
+  }
+  return (
+    <div className="flex items-center gap-1.5">
+      <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('inline')} title="View document">
+        {busy === 'inline' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+        {compact ? null : <span className="ml-1.5">View</span>}
+      </Button>
+      <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('attachment')} title="Download document">
+        {busy === 'attachment' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        {compact ? null : <span className="ml-1.5">Download</span>}
+      </Button>
+    </div>
+  )
+}
+
 function OnboardingChecklistItem({
+  access,
   item,
+  fileId,
   canMutate,
   busy,
   runningKey,
   onMark,
 }: {
+  access: DashboardAccess
   item: OnboardingItem
+  fileId?: string | null
   canMutate: boolean
   busy: boolean
   runningKey: string | null
@@ -778,6 +854,7 @@ function OnboardingChecklistItem({
       </div>
       <div className="flex items-center gap-2">
         <StatusBadge status={item.status} />
+        <DocumentActions access={access} fileId={fileId} filename={item.label || item.document_type || undefined} compact />
         {canMutate ? (
           <>
             <Button
@@ -804,6 +881,7 @@ function OnboardingChecklistItem({
 }
 
 function OnboardingDetailPanel({
+  access,
   detail,
   loading,
   canMutate,
@@ -811,6 +889,7 @@ function OnboardingDetailPanel({
   runningKey,
   onMark,
 }: {
+  access: DashboardAccess
   detail: OnboardingDetailResponse | null
   loading: boolean
   canMutate: boolean
@@ -824,6 +903,9 @@ function OnboardingDetailPanel({
   if (!detail) return null
   const pending = detail.pending ?? []
   const received = detail.received ?? []
+  const documentIndex = detail.document_index ?? {}
+  const fileIdFor = (item: OnboardingItem) =>
+    documentIndex[item.item_id || ''] || documentIndex[item.document_type || ''] || null
   return (
     <div className="space-y-4 border-t border-line/45 bg-panel-muted/30 px-4 py-4">
       {pending.length === 0 && received.length === 0 ? (
@@ -835,7 +917,9 @@ function OnboardingDetailPanel({
           {pending.map((item) => (
             <OnboardingChecklistItem
               key={`p-${item.item_id || item.document_type || item.label}`}
+              access={access}
               item={item}
+              fileId={fileIdFor(item)}
               canMutate={canMutate}
               busy={busy}
               runningKey={runningKey}
@@ -850,7 +934,9 @@ function OnboardingDetailPanel({
           {received.map((item) => (
             <OnboardingChecklistItem
               key={`r-${item.item_id || item.document_type || item.label}`}
+              access={access}
               item={item}
+              fileId={fileIdFor(item)}
               canMutate={false}
               busy={busy}
               runningKey={runningKey}
@@ -1019,6 +1105,7 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                         </div>
                         {isOpen ? (
                           <OnboardingDetailPanel
+                            access={access}
                             detail={detail}
                             loading={detailLoading}
                             canMutate={canMutate}
@@ -2307,7 +2394,12 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
                               <p className="font-semibold text-text">{doc.employee_name}</p>
                               {doc.department ? <p className="text-[12px] text-subtle/85">{doc.department}</p> : null}
                             </td>
-                            <td className="px-4 py-3 text-subtle/90">{doc.document_label}</td>
+                            <td className="px-4 py-3 text-subtle/90">
+                              <div className="flex items-center gap-2">
+                                <span>{doc.document_label}</span>
+                                <DocumentActions access={access} fileId={doc.file_id} filename={doc.document_label} compact />
+                              </div>
+                            </td>
                             <td className="px-4 py-3">
                               <Badge tone={doc.tone}>{doc.status_label}</Badge>
                             </td>
