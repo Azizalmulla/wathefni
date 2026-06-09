@@ -28,6 +28,7 @@ import urllib.error
 import urllib.parse
 import zipfile
 from datetime import date, datetime, time, timedelta, timezone
+from decimal import Decimal
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, TypedDict
@@ -279,6 +280,16 @@ def onboarding_hr_mutate_enabled() -> bool:
     (start/restart onboarding, mark/waive a checklist item). Defaults OFF so the
     new controls stay hidden and inert in production until explicitly enabled."""
     return (os.environ.get("WATHEFNI_ONBOARDING_HR_MUTATE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def leave_balances_enabled() -> bool:
+    """Dark-launch gate for leave-balance tracking (P1: accrual + observe-only
+    consumption + read-only balance surfacing). Defaults OFF so accrual, the
+    observe-only consumption hook, and balance read fields stay fully inert in
+    production until explicitly enabled. P1 NEVER blocks approvals; the seeded
+    Kuwait private-sector figures are configurable presets that require legal
+    review before any enforcement is switched on (a later phase)."""
+    return (os.environ.get("WATHEFNI_LEAVE_BALANCES") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
 def outbound_templates_enabled() -> bool:
@@ -1503,6 +1514,92 @@ def _ensure_schema_impl() -> None:
       payload jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_by_phone text,
       created_at timestamptz NOT NULL DEFAULT now()
+    );
+    -- Leave balances P1 (dark-launched behind WATHEFNI_LEAVE_BALANCES).
+    -- All legal figures live in these rows (NEVER hardcoded) and are seeded as
+    -- configurable presets marked legal_reviewed=false / enforced=false. P1 is
+    -- observe-only: nothing here blocks an approval.
+    CREATE TABLE IF NOT EXISTS leave_policy_presets (
+      preset_key text NOT NULL,
+      leave_type text NOT NULL,
+      country text,
+      days_per_year numeric(6,2) NOT NULL DEFAULT 0,
+      accrual_method text NOT NULL DEFAULT 'monthly_accrual',
+      eligibility_months int NOT NULL DEFAULT 0,
+      weekend_days text[] NOT NULL DEFAULT ARRAY['fri','sat'],
+      exclude_public_holidays boolean NOT NULL DEFAULT true,
+      allow_negative boolean NOT NULL DEFAULT false,
+      tiers jsonb NOT NULL DEFAULT '[]'::jsonb,
+      legal_reviewed boolean NOT NULL DEFAULT false,
+      notes text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (preset_key, leave_type)
+    );
+    CREATE TABLE IF NOT EXISTS leave_policies (
+      policy_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      leave_type text NOT NULL,
+      preset_key text,
+      days_per_year numeric(6,2) NOT NULL DEFAULT 0,
+      accrual_method text NOT NULL DEFAULT 'monthly_accrual',
+      eligibility_months int NOT NULL DEFAULT 0,
+      weekend_days text[] NOT NULL DEFAULT ARRAY['fri','sat'],
+      exclude_public_holidays boolean NOT NULL DEFAULT true,
+      allow_negative boolean NOT NULL DEFAULT false,
+      tiers jsonb NOT NULL DEFAULT '[]'::jsonb,
+      version int NOT NULL DEFAULT 1,
+      effective_from date NOT NULL DEFAULT CURRENT_DATE,
+      enforced boolean NOT NULL DEFAULT false,
+      legal_reviewed boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, leave_type, version)
+    );
+    CREATE TABLE IF NOT EXISTS public_holidays (
+      holiday_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      holiday_date date NOT NULL,
+      name text,
+      year int NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, holiday_date)
+    );
+    CREATE TABLE IF NOT EXISTS leave_ledger (
+      entry_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      leave_type text NOT NULL,
+      entry_kind text NOT NULL,
+      days numeric(6,2) NOT NULL DEFAULT 0,
+      period text,
+      leave_id uuid REFERENCES leave_requests(leave_id) ON DELETE SET NULL,
+      observe_only boolean NOT NULL DEFAULT true,
+      tier_breakdown jsonb NOT NULL DEFAULT '[]'::jsonb,
+      actor_phone text,
+      reason text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_leave_ledger_accrual_idem
+      ON leave_ledger (company_code, employee_key, leave_type, period)
+      WHERE entry_kind = 'accrual';
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_leave_ledger_consume_idem
+      ON leave_ledger (leave_id, entry_kind)
+      WHERE leave_id IS NOT NULL AND entry_kind IN ('consume','reversal');
+    CREATE INDEX IF NOT EXISTS idx_leave_ledger_emp ON leave_ledger (company_code, employee_key, leave_type, created_at DESC);
+    CREATE TABLE IF NOT EXISTS leave_balances (
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      leave_type text NOT NULL,
+      period_year int NOT NULL,
+      entitlement_days numeric(6,2) NOT NULL DEFAULT 0,
+      accrued_to_date numeric(6,2) NOT NULL DEFAULT 0,
+      consumed numeric(6,2) NOT NULL DEFAULT 0,
+      adjusted numeric(6,2) NOT NULL DEFAULT 0,
+      carried_in numeric(6,2) NOT NULL DEFAULT 0,
+      current_balance numeric(6,2) NOT NULL DEFAULT 0,
+      can_take_from date,
+      as_of timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (company_code, employee_key, leave_type, period_year)
     );
     CREATE TABLE IF NOT EXISTS payroll_timesheets (
       timesheet_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -15249,6 +15346,367 @@ def request_leave(action: dict[str, Any], *, company_code: str | None, created_b
     return {"ok": True, "leave": json_safe(leave), "employee": json_safe(employee), "shift_conflicts": json_safe(conflicts), "sheet_sync": json_safe(sheet_sync)}
 
 
+# --- Leave balances P1 (dark-launched behind WATHEFNI_LEAVE_BALANCES) ---------
+#
+# Observe-only: accrual + consumption are tracked so we can validate the math
+# against reality, but NOTHING here blocks or alters a leave approval. Every
+# legal figure lives in the leave_policies rows (seeded once from the editable
+# preset below); the runtime logic reads policies only — no legal number is
+# baked into behaviour. Enforcement stays OFF until reviewed with legal.
+
+# Seed-only source of default figures. Used solely to populate the editable
+# leave_policy_presets / leave_policies tables; NEVER read by runtime accrual or
+# consumption logic. legal_reviewed=false; enforcement deferred to a later phase.
+_KUWAIT_PRESET_KEY = "kuwait_private_2010"
+_LEAVE_P1_TYPES = ("annual", "sick")
+_LEAVE_WEEKDAY_NAMES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]  # Python date.weekday(): Mon=0..Sun=6
+_KUWAIT_LEAVE_PRESETS = [
+    {
+        "leave_type": "annual",
+        "days_per_year": 30,
+        "accrual_method": "monthly_accrual",
+        "eligibility_months": 6,
+        "weekend_days": ["fri", "sat"],
+        "exclude_public_holidays": True,
+        "allow_negative": False,
+        "tiers": [],
+        "notes": "Kuwait Law 6/2010 default: 30 paid working days/year, monthly accrual. Configurable preset — requires legal review before enforcement.",
+    },
+    {
+        "leave_type": "sick",
+        # Sick leave is tier-based (graduated pay), not a flat annual grant. The
+        # tier structure is supported but the exact day-bands/pay-rates are left
+        # empty as a configurable preset pending legal review.
+        "days_per_year": 0,
+        "accrual_method": "none",
+        "eligibility_months": 0,
+        "weekend_days": ["fri", "sat"],
+        "exclude_public_holidays": True,
+        "allow_negative": False,
+        "tiers": [],
+        "notes": "Kuwait Law 6/2010 graduated sick leave. Tier structure supported; exact bands/rates empty pending legal review. Not enforced.",
+    },
+]
+
+
+def seed_leave_policy_presets() -> int:
+    """Idempotently seed the reference catalog of leave-policy presets. Inert."""
+    inserted = 0
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            for p in _KUWAIT_LEAVE_PRESETS:
+                cur.execute(
+                    """
+                    INSERT INTO leave_policy_presets
+                      (preset_key, leave_type, country, days_per_year, accrual_method, eligibility_months,
+                       weekend_days, exclude_public_holidays, allow_negative, tiers, legal_reviewed, notes)
+                    VALUES (%s,%s,'KW',%s,%s,%s,%s,%s,%s,%s,false,%s)
+                    ON CONFLICT (preset_key, leave_type) DO NOTHING
+                    """,
+                    (_KUWAIT_PRESET_KEY, p["leave_type"], p["days_per_year"], p["accrual_method"], p["eligibility_months"],
+                     p["weekend_days"], p["exclude_public_holidays"], p["allow_negative"], Json(p["tiers"]), p["notes"]),
+                )
+                inserted += cur.rowcount or 0
+        conn.commit()
+    return inserted
+
+
+def seed_company_leave_policies(company_code: str) -> int:
+    """Clone the preset into per-company leave_policies for the P1 leave types,
+    idempotently. enforced=false / legal_reviewed=false — seeded but inert."""
+    company = (company_code or "WATHEFNI").upper()
+    seeded = 0
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            for p in _KUWAIT_LEAVE_PRESETS:
+                if p["leave_type"] not in _LEAVE_P1_TYPES:
+                    continue
+                cur.execute("SELECT 1 FROM leave_policies WHERE company_code=%s AND leave_type=%s LIMIT 1", (company, p["leave_type"]))
+                if cur.fetchone():
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO leave_policies
+                      (company_code, leave_type, preset_key, days_per_year, accrual_method, eligibility_months,
+                       weekend_days, exclude_public_holidays, allow_negative, tiers, version, enforced, legal_reviewed)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,1,false,false)
+                    """,
+                    (company, p["leave_type"], _KUWAIT_PRESET_KEY, p["days_per_year"], p["accrual_method"], p["eligibility_months"],
+                     p["weekend_days"], p["exclude_public_holidays"], p["allow_negative"], Json(p["tiers"])),
+                )
+                seeded += cur.rowcount or 0
+        conn.commit()
+    return seeded
+
+
+def get_leave_policy(company_code: str, leave_type: str) -> dict[str, Any] | None:
+    company = (company_code or "WATHEFNI").upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM leave_policies WHERE company_code=%s AND leave_type=%s ORDER BY version DESC LIMIT 1",
+                (company, leave_type),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+
+
+def chargeable_leave_days(start_date: Any, end_date: Any, *, weekend_days: Any, holiday_dates: Any) -> Decimal:
+    """Pure: chargeable days in [start,end] inclusive, excluding configured weekend
+    rest days and public holidays. No DB. No half-day support in P1."""
+    if isinstance(start_date, str):
+        start_date = date.fromisoformat(start_date)
+    if isinstance(end_date, str):
+        end_date = date.fromisoformat(end_date)
+    if not start_date or not end_date or end_date < start_date:
+        return Decimal("0")
+    weekend = {str(w).lower() for w in (weekend_days or [])}
+    holidays = set(holiday_dates or set())
+    total = Decimal("0")
+    cur_d = start_date
+    while cur_d <= end_date:
+        if _LEAVE_WEEKDAY_NAMES[cur_d.weekday()] not in weekend and cur_d not in holidays:
+            total += Decimal("1")
+        cur_d = cur_d + timedelta(days=1)
+    return total
+
+
+def recompute_leave_balance(cur: Any, *, company_code: str, employee_key: str, leave_type: str,
+                            period_year: int, entitlement_days: Decimal | None = None,
+                            can_take_from: Any = None) -> dict[str, Any]:
+    """Rebuild the leave_balances rollup for one (employee, type, year) from the
+    append-only ledger. Ledger is the source of truth; balances is materialized."""
+    cur.execute(
+        """
+        SELECT
+          COALESCE(SUM(days) FILTER (WHERE entry_kind='accrual'),0)   AS accrued,
+          COALESCE(SUM(days) FILTER (WHERE entry_kind='consume'),0)   AS consumed,
+          COALESCE(SUM(days) FILTER (WHERE entry_kind='reversal'),0)  AS reversed,
+          COALESCE(SUM(days) FILTER (WHERE entry_kind='adjustment'),0) AS adjusted,
+          COALESCE(SUM(days) FILTER (WHERE entry_kind='carryover'),0) AS carried_in
+        FROM leave_ledger
+        WHERE company_code=%s AND employee_key=%s AND leave_type=%s
+          AND (period IS NULL OR left(period,4)=%s)
+        """,
+        (company_code, employee_key, leave_type, str(period_year)),
+    )
+    agg = dict(cur.fetchone() or {})
+    accrued = Decimal(str(agg.get("accrued") or 0))
+    consumed = Decimal(str(agg.get("consumed") or 0))
+    reversed_ = Decimal(str(agg.get("reversed") or 0))
+    adjusted = Decimal(str(agg.get("adjusted") or 0))
+    carried_in = Decimal(str(agg.get("carried_in") or 0))
+    net_consumed = consumed - reversed_
+    if entitlement_days is None:
+        policy = get_leave_policy(company_code, leave_type) or {}
+        entitlement_days = Decimal(str(policy.get("days_per_year") or 0))
+    current_balance = carried_in + accrued + adjusted - net_consumed
+    cur.execute(
+        """
+        INSERT INTO leave_balances
+          (company_code, employee_key, leave_type, period_year, entitlement_days,
+           accrued_to_date, consumed, adjusted, carried_in, current_balance, can_take_from, as_of)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, now())
+        ON CONFLICT (company_code, employee_key, leave_type, period_year) DO UPDATE SET
+          entitlement_days=EXCLUDED.entitlement_days,
+          accrued_to_date=EXCLUDED.accrued_to_date,
+          consumed=EXCLUDED.consumed,
+          adjusted=EXCLUDED.adjusted,
+          carried_in=EXCLUDED.carried_in,
+          current_balance=EXCLUDED.current_balance,
+          can_take_from=COALESCE(EXCLUDED.can_take_from, leave_balances.can_take_from),
+          as_of=now()
+        """,
+        (company_code, employee_key, leave_type, period_year, entitlement_days,
+         accrued, net_consumed, adjusted, carried_in, current_balance, can_take_from),
+    )
+    return {
+        "leave_type": leave_type,
+        "period_year": period_year,
+        "entitlement_days": float(entitlement_days),
+        "accrued_to_date": float(accrued),
+        "consumed": float(net_consumed),
+        "current_balance": float(current_balance),
+    }
+
+
+def _leave_eligibility_date(hired_at: Any, eligibility_months: int):
+    if not hired_at:
+        return None
+    base = hired_at.date() if hasattr(hired_at, "date") else hired_at
+    if isinstance(base, str):
+        try:
+            base = date.fromisoformat(base[:10])
+        except ValueError:
+            return None
+    months = int(eligibility_months or 0)
+    y = base.year + (base.month - 1 + months) // 12
+    m = (base.month - 1 + months) % 12 + 1
+    d = min(base.day, 28)
+    return date(y, m, d)
+
+
+def post_leave_accrual_catchup(cur: Any, *, company_code: str, employee: dict[str, Any], policy: dict[str, Any], as_of: date | None = None) -> int:
+    """Idempotently post monthly accrual ledger entries for the current calendar
+    year, from max(year-start, hire month) through the current month. Pro-rata for
+    the hire month. Calendar-year accrual period; 2-decimal day precision."""
+    if str(policy.get("accrual_method")) != "monthly_accrual":
+        return 0
+    days_per_year = Decimal(str(policy.get("days_per_year") or 0))
+    if days_per_year <= 0:
+        return 0
+    today = as_of or date.today()
+    employee_key = str(employee.get("employee_key") or "")
+    leave_type = str(policy.get("leave_type"))
+    monthly = (days_per_year / Decimal("12")).quantize(Decimal("0.01"))
+    hired_at = employee.get("hired_at")
+    if isinstance(hired_at, str):
+        try:
+            hired_at = date.fromisoformat(hired_at[:10])
+        except ValueError:
+            hired_at = None
+    elif hasattr(hired_at, "date"):
+        hired_at = hired_at.date()
+    posted = 0
+    for month in range(1, today.month + 1):
+        period = f"{today.year}-{month:02d}"
+        month_start = date(today.year, month, 1)
+        next_month = date(today.year + (1 if month == 12 else 0), 1 if month == 12 else month + 1, 1)
+        days_in_month = (next_month - month_start).days
+        days_accrued = monthly
+        # Pro-rata if hired during this month; skip months entirely before hire.
+        if hired_at:
+            if hired_at >= next_month:
+                continue
+            if month_start <= hired_at < next_month:
+                worked = (next_month - hired_at).days
+                days_accrued = (monthly * Decimal(worked) / Decimal(days_in_month)).quantize(Decimal("0.01"))
+        if days_accrued <= 0:
+            continue
+        cur.execute(
+            """
+            INSERT INTO leave_ledger (company_code, employee_key, leave_type, entry_kind, days, period, observe_only, reason)
+            VALUES (%s,%s,%s,'accrual',%s,%s,true,'monthly accrual')
+            ON CONFLICT (company_code, employee_key, leave_type, period) WHERE entry_kind='accrual' DO NOTHING
+            """,
+            (company_code, employee_key, leave_type, days_accrued, period),
+        )
+        posted += cur.rowcount or 0
+    can_take = _leave_eligibility_date(hired_at, int(policy.get("eligibility_months") or 0))
+    recompute_leave_balance(cur, company_code=company_code, employee_key=employee_key, leave_type=leave_type,
+                            period_year=today.year, entitlement_days=days_per_year, can_take_from=can_take)
+    return posted
+
+
+def observe_leave_consumption(cur: Any, *, company_code: str, leave: dict[str, Any], kind: str, actor_phone: str | None = None) -> None:
+    """Observe-only: post a consume/reversal ledger entry for an approved (or
+    undone) leave and recompute the balance. NEVER blocks; wrapped by callers."""
+    leave_type = str(leave.get("leave_type") or "time_off")
+    if leave_type not in _LEAVE_P1_TYPES:
+        return
+    policy = get_leave_policy(company_code, leave_type)
+    if not policy:
+        return
+    start_date = leave.get("start_date")
+    end_date = leave.get("end_date")
+    holidays = company_public_holiday_dates(cur, company_code, start_date, end_date) if policy.get("exclude_public_holidays") else set()
+    days = chargeable_leave_days(start_date, end_date, weekend_days=policy.get("weekend_days"), holiday_dates=holidays)
+    if days <= 0:
+        return
+    start_d = start_date if isinstance(start_date, date) else date.fromisoformat(str(start_date)[:10])
+    period = f"{start_d.year}-{start_d.month:02d}"
+    cur.execute(
+        """
+        INSERT INTO leave_ledger (company_code, employee_key, leave_type, entry_kind, days, period, leave_id, observe_only, reason)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,true,%s)
+        ON CONFLICT (leave_id, entry_kind) WHERE leave_id IS NOT NULL AND entry_kind IN ('consume','reversal') DO NOTHING
+        """,
+        (company_code, str(leave.get("employee_key") or ""), leave_type, kind, days, period, leave.get("leave_id"), f"observe-only {kind}"),
+    )
+    recompute_leave_balance(cur, company_code=company_code, employee_key=str(leave.get("employee_key") or ""),
+                            leave_type=leave_type, period_year=start_d.year)
+
+
+def company_public_holiday_dates(cur: Any, company_code: str, start_date: Any, end_date: Any) -> set:
+    cur.execute(
+        "SELECT holiday_date FROM public_holidays WHERE company_code=%s AND holiday_date BETWEEN %s AND %s",
+        (company_code, start_date, end_date),
+    )
+    return {r["holiday_date"] for r in cur.fetchall()}
+
+
+def leave_balances_for_employee(company_code: str, employee_key: str, period_year: int | None = None) -> list[dict[str, Any]]:
+    """Read-only balance rows for the P1 leave types (flag-gated by callers)."""
+    company = (company_code or "WATHEFNI").upper()
+    year = period_year or date.today().year
+    out: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT lb.leave_type, lb.entitlement_days, lb.accrued_to_date, lb.consumed,
+                       lb.current_balance, lb.can_take_from, lp.enforced, lp.legal_reviewed
+                FROM leave_balances lb
+                LEFT JOIN leave_policies lp ON lp.company_code=lb.company_code AND lp.leave_type=lb.leave_type
+                WHERE lb.company_code=%s AND lb.employee_key=%s AND lb.period_year=%s
+                ORDER BY lb.leave_type
+                """,
+                (company, employee_key, year),
+            )
+            for r in cur.fetchall():
+                d = dict(r)
+                out.append({
+                    "leave_type": d.get("leave_type"),
+                    "entitlement_days": float(d.get("entitlement_days") or 0),
+                    "accrued_to_date": float(d.get("accrued_to_date") or 0),
+                    "consumed": float(d.get("consumed") or 0),
+                    "current_balance": float(d.get("current_balance") or 0),
+                    "can_take_from": (d.get("can_take_from").isoformat() if hasattr(d.get("can_take_from"), "isoformat") else d.get("can_take_from")),
+                    "enforced": bool(d.get("enforced")),
+                    "legal_reviewed": bool(d.get("legal_reviewed")),
+                })
+    return out
+
+
+def run_leave_accrual_sweep(*, company_code: str | None = None, as_of: date | None = None) -> dict[str, Any]:
+    """Post monthly accrual for the current calendar year across employees.
+    No-op unless WATHEFNI_LEAVE_BALANCES is on. Idempotent and observe-only —
+    accrues into the ledger and recomputes balances; touches nothing user-facing.
+    Optionally scoped to one company (used by tests)."""
+    if not leave_balances_enabled():
+        return {"ok": True, "skipped": True, "reason": "flag_off"}
+    today = as_of or date.today()
+    companies: list[str] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            if company_code:
+                companies = [(company_code or "").upper()]
+            else:
+                cur.execute("SELECT company_code FROM companies ORDER BY company_code")
+                companies = [str(dict(r)["company_code"]) for r in cur.fetchall()]
+    summary = {"ok": True, "companies": 0, "employees": 0, "accrual_entries": 0}
+    for company in companies:
+        if not company_has_module(company, "leave"):
+            continue
+        policies = [get_leave_policy(company, lt) for lt in _LEAVE_P1_TYPES]
+        policies = [p for p in policies if p and str(p.get("accrual_method")) == "monthly_accrual"]
+        if not policies:
+            continue
+        summary["companies"] += 1
+        employees = company_employees(company)
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                for emp in employees:
+                    summary["employees"] += 1
+                    for policy in policies:
+                        try:
+                            summary["accrual_entries"] += post_leave_accrual_catchup(cur, company_code=company, employee=emp, policy=policy, as_of=today)
+                        except Exception:
+                            logger.warning("leave accrual failed for %s/%s", emp.get("employee_key"), policy.get("leave_type"), exc_info=True)
+            conn.commit()
+    return summary
+
+
 def approve_leave_request(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None, account_id: str | None = None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     leave = resolve_leave_request(action, company_code=company, statuses=("requested",))
@@ -15292,6 +15750,14 @@ def approve_leave_request(action: dict[str, Any], *, company_code: str | None, c
                 (company, updated.get("employee_key"), updated.get("start_date"), updated.get("end_date")),
             )
             attendance_updates = [dict(row) for row in cur.fetchall()]
+            # Observe-only leave-balance consumption (dark-launched). Tracks the
+            # charge against the balance for validation but NEVER blocks/changes
+            # the approval. Fully wrapped so a balance failure cannot break it.
+            if leave_balances_enabled():
+                try:
+                    observe_leave_consumption(cur, company_code=company, leave=updated, kind="consume", actor_phone=created_by_phone)
+                except Exception:
+                    logger.warning("observe-only leave consumption failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
     sheet_sync = sync_leave_sheet_rows(company, [updated])
     attendance_sync = sync_attendance_sheet_rows(company, attendance_updates) if attendance_updates else {"ok": True, "skipped": True, "reason": "no_attendance_updates"}
@@ -15349,6 +15815,13 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
             )
             updated = dict(cur.fetchone())
             record_leave_event(cur, leave=updated, company_code=company, event_type="cancelled", payload={"action": action, "leave": updated}, created_by_phone=created_by_phone)
+            # Observe-only: reverse a previously-consumed charge if this leave was
+            # approved before cancellation. Never blocks; fully wrapped.
+            if leave_balances_enabled() and str(leave.get("status")) == "approved":
+                try:
+                    observe_leave_consumption(cur, company_code=company, leave=updated, kind="reversal", actor_phone=created_by_phone)
+                except Exception:
+                    logger.warning("observe-only leave reversal failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
     sheet_sync = sync_leave_sheet_rows(company, [updated])
     employee = find_employee_by_phone(updated.get("employee_phone"))
@@ -40709,6 +41182,11 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                         for r in leave_rows
                     ],
                 }
+                # Read-only leave balances (dark-launched, observe-only, preset
+                # figures pending legal review — not enforced).
+                if leave_balances_enabled():
+                    sections["leave"]["balances_enabled"] = True
+                    sections["leave"]["balances"] = leave_balances_for_employee(company, key)
                 if pending:
                     next_actions.append({
                         "module": "leave",
@@ -40878,11 +41356,21 @@ def dashboard_posthire_leave(context: dict[str, Any] = Depends(dashboard_context
     start, end = _posthire_window(7, 60)
     pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end}, company_code=company)
     upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end}, company_code=company)
-    return json_safe({
+    pending_rows = pending.get("leave_requests") or []
+    upcoming_rows = upcoming.get("leave_requests") or []
+    payload = {
         "company_code": company,
-        "pending": pending.get("leave_requests") or [],
-        "upcoming": upcoming.get("leave_requests") or [],
-    })
+        "pending": pending_rows,
+        "upcoming": upcoming_rows,
+        "balances_enabled": leave_balances_enabled(),
+    }
+    # Read-only leave balances (dark-launched). Attach per-employee balances for
+    # the employees shown so the UI can render remaining days. Observe-only data;
+    # figures are configurable presets pending legal review (not enforced).
+    if leave_balances_enabled():
+        keys = {str(r.get("employee_key")) for r in (pending_rows + upcoming_rows) if r.get("employee_key")}
+        payload["balances"] = {k: leave_balances_for_employee(company, k) for k in keys}
+    return json_safe(payload)
 
 
 @app.get("/dashboard/posthire/shifts")

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Wathefni leave-accrual sweep daily (idempotent monthly accrual catch-up)
+
+[Timer]
+OnBootSec=5min
+OnCalendar=*-*-* 02:30
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

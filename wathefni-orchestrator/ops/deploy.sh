@@ -18,7 +18,7 @@ ORCH_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"          # wathefni-orchestrator/
 REPO_ROOT="$(cd "$ORCH_SRC/.." && pwd)"
 DASH_SRC="$REPO_ROOT/apps/wathefni-dashboard"
 
-CODE_FILES=(app.py tool_call_orchestrator.py action_registry.py outbound_delivery.py delivery-sweep-worker.py video-interview-worker.py)
+CODE_FILES=(app.py tool_call_orchestrator.py action_registry.py outbound_delivery.py delivery-sweep-worker.py video-interview-worker.py leave-accrual-worker.py)
 
 PROD_ORCH=/opt/wathefni/orchestrator
 PROD_DASH_DIST=/opt/wathefni/apps/wathefni-dashboard/dist

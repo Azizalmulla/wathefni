@@ -1,0 +1,21 @@
+[Unit]
+Description=Wathefni monthly leave-accrual sweep (calendar-year accrual -> leave ledger/balances)
+After=network-online.target postgresql.service wathefni-orchestrator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
+EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+# Dark-launch gate. Enabling the feature means setting WATHEFNI_LEAVE_BALANCES=on
+# for BOTH the orchestrator (drop-in) and this worker (the optional file below).
+# Until then run_leave_accrual_sweep() is a no-op and each pass does nothing.
+EnvironmentFile=-/root/.openclaw/secrets/leave-balances.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python leave-accrual-worker.py
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

@@ -894,6 +894,8 @@ export type EmployeeProfileSections = {
   leave?: {
     pending_count: number
     items: { leave_type?: string; start_date?: string | null; end_date?: string | null; status?: string }[]
+    balances_enabled?: boolean
+    balances?: LeaveBalance[]
   }
   shifts?: {
     upcoming_count: number
@@ -979,6 +981,7 @@ export type PosthireAttendanceResponse = {
 
 export type PosthireLeaveRow = {
   leave_id?: string
+  employee_key?: string
   employee_name?: string
   employee_phone?: string
   leave_type?: string
@@ -987,10 +990,23 @@ export type PosthireLeaveRow = {
   end_date?: string
 }
 
+export type LeaveBalance = {
+  leave_type: string
+  entitlement_days: number
+  accrued_to_date: number
+  consumed: number
+  current_balance: number
+  can_take_from?: string | null
+  enforced?: boolean
+  legal_reviewed?: boolean
+}
+
 export type PosthireLeaveResponse = {
   company_code: string
   pending: PosthireLeaveRow[]
   upcoming: PosthireLeaveRow[]
+  balances_enabled?: boolean
+  balances?: Record<string, LeaveBalance[]>
 }
 
 export type PosthireShiftRow = {

@@ -54,6 +54,7 @@ import type {
   PosthireEmployeesResponse,
   PosthireEmployee,
   PosthireLeaveResponse,
+  PosthireLeaveRow,
   OnboardingDetailResponse,
   OnboardingItem,
   PosthireOnboardingResponse,
@@ -662,6 +663,20 @@ function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAcc
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  {sections.leave.balances_enabled && (sections.leave.balances?.length ?? 0) > 0 ? (
+                    <div className="mb-3 space-y-1.5">
+                      {sections.leave.balances!.map((b, idx) => (
+                        <div key={idx} className="flex items-center justify-between gap-2 rounded-[0.9rem] border border-line/45 bg-panel/55 px-3 py-2 text-[12px]">
+                          <span className="capitalize text-subtle/90">{b.leave_type} balance</span>
+                          <span className="font-medium text-text">
+                            {Math.round(b.current_balance * 10) / 10}
+                            {b.entitlement_days ? ` / ${Math.round(b.entitlement_days * 10) / 10} days` : ' days'}
+                          </span>
+                        </div>
+                      ))}
+                      <p className="text-[11px] text-subtle/70">Preset figures, not enforced — for reference only.</p>
+                    </div>
+                  ) : null}
                   {sections.leave.items.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No pending or upcoming leave.</p>
                   ) : (
@@ -1259,6 +1274,20 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
 
   const pending = data?.pending ?? []
   const upcoming = data?.upcoming ?? []
+  const balancesEnabled = Boolean(data?.balances_enabled)
+
+  const annualChip = (row: PosthireLeaveRow) => {
+    if (!balancesEnabled || !row.employee_key) return null
+    const annual = (data?.balances?.[row.employee_key] ?? []).find((b) => b.leave_type === 'annual')
+    if (!annual) return null
+    const remaining = Math.round(annual.current_balance * 10) / 10
+    const entitlement = Math.round(annual.entitlement_days * 10) / 10
+    return (
+      <span className="rounded-full border border-line/50 bg-panel/70 px-2 py-0.5 text-[11px] font-medium text-subtle/90">
+        Annual: {remaining}/{entitlement} days left
+      </span>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -1276,6 +1305,11 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
             title={pending.length ? `${pending.length} leave request${pending.length === 1 ? '' : 's'} awaiting your decision` : 'No leave requests waiting'}
             detail={pending.length ? 'Approve or decline below — each decision is confirmed before it applies.' : `${upcoming.length} upcoming approved leave`}
           />
+          {balancesEnabled ? (
+            <p className="rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-2.5 text-[12px] text-subtle/85">
+              Leave balances shown are tracked from configurable policy presets and are <span className="font-medium text-text">not enforced</span> — they never block an approval. Figures require legal review before enforcement.
+            </p>
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle>Pending requests</CardTitle>
@@ -1289,7 +1323,10 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
                   {pending.map((row, idx) => (
                     <div key={row.leave_id || idx} className="flex flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-line/50 bg-panel/70 px-4 py-3">
                       <div className="min-w-0">
-                        <p className="font-semibold text-text">{row.employee_name || 'Employee'}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold text-text">{row.employee_name || 'Employee'}</p>
+                          {annualChip(row)}
+                        </div>
                         <p className="text-[12px] text-subtle/85">
                           {titleCase(row.leave_type || 'leave')} · {formatDate(row.start_date)} → {formatDate(row.end_date)}
                         </p>
@@ -1356,8 +1393,11 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
               ) : (
                 <div className="space-y-2">
                   {upcoming.map((row, idx) => (
-                    <div key={row.leave_id || idx} className="flex items-center justify-between gap-3 rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-2.5 text-[13px]">
-                      <span className="font-medium text-text">{row.employee_name || 'Employee'}</span>
+                    <div key={row.leave_id || idx} className="flex flex-wrap items-center justify-between gap-3 rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-2.5 text-[13px]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-text">{row.employee_name || 'Employee'}</span>
+                        {annualChip(row)}
+                      </div>
                       <span className="text-subtle/90">{formatDate(row.start_date)} → {formatDate(row.end_date)}</span>
                     </div>
                   ))}

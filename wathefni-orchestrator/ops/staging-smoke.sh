@@ -102,6 +102,9 @@ log "onboarding dashboard upgrade (start/restart + mark item: registry + RBAC + 
 log "employee 360 profile (read-only, tenant + entitlement scoped, staging DB)"
 "$VENV_PY" smoke-test-employee-profile.py | sed 's/^/    /'
 
+log "leave balances P1 (chargeable days + flag gate + accrual + observe-only consumption, staging DB)"
+"$VENV_PY" smoke-test-leave-balances.py | sed 's/^/    /'
+
 log "pre-hire registry migration (WATHEFNI_PREHIRE_VIA_REGISTRY: flag/parity/harness, hire->transition_hire, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-prehire-registry-parity.py | sed 's/^/    /'
 
