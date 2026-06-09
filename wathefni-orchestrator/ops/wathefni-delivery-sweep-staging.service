@@ -1,0 +1,21 @@
+[Unit]
+Description=Wathefni STAGING outbound delivery retry sweep (employee messages -> WhatsApp/template/email/HR task)
+After=network-online.target postgresql.service wathefni-orchestrator-staging.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/staging/orchestrator
+Environment=WATHEFNI_WORKSPACE=/opt/wathefni/staging/workspace
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.staging.env
+# Staging stays dry_run so retries never send anything real during the soak.
+Environment=WATHEFNI_DELIVERY_MODE=dry_run
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
+EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+# The sweep processes existing pending rows regardless of the layer flag; with no
+# pending rows each pass is a harmless no-op.
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python delivery-sweep-worker.py --limit 50
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

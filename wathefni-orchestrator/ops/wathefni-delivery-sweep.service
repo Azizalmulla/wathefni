@@ -1,0 +1,21 @@
+[Unit]
+Description=Wathefni outbound delivery retry sweep (employee messages -> WhatsApp/template/email/HR task)
+After=network-online.target postgresql.service wathefni-orchestrator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/orchestrator
+# Mirror the production orchestrator's workspace/DB so a retry sends exactly like
+# the live API process would (no dry_run override -> real send when a flow is on).
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
+EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+# Honour the same outbound-layer flags as the API process. Until a flow is wired,
+# there are no pending rows and the pass is a no-op.
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python delivery-sweep-worker.py --limit 50
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
