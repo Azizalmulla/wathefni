@@ -614,6 +614,26 @@ export function getEmployeeDocuments(access: DashboardAccess, employeeKey: strin
   return request<EmployeeDocumentsResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents`, access)
 }
 
+// Upload (or replace) an employee onboarding document for a checklist item. The
+// browser sets the multipart boundary, so we must not set Content-Type here.
+export async function uploadEmployeeDocument(
+  access: DashboardAccess,
+  employeeKey: string,
+  body: { file: File; itemId: string },
+) {
+  const form = new FormData()
+  form.append('file', body.file)
+  form.append('item_id', body.itemId)
+  const response = await fetch(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents`, {
+    method: 'POST',
+    headers: dashboardHeaders(access),
+    body: form,
+  })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new DashboardApiError(response.status, payload?.detail || payload, 'Could not upload the document.')
+  return payload as { ok: boolean; file_id: string | null; item_id: string; storage_status?: string }
+}
+
 // Open or download an employee document. Auth is header-based, so we fetch the
 // proxied file with credentials and hand the browser a blob URL (local files) or
 // follow the access-controlled external URL (e.g. Google Drive). No raw storage

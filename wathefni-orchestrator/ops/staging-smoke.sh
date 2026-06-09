@@ -111,6 +111,9 @@ log "employee document hub (tenant isolation + RBAC gate + path-traversal guard 
 log "manager-scoped read isolation (employees/onboarding/compliance/360 reads honor manager scope, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-manager-read-isolation.py | sed 's/^/    /'
 
+log "HR document upload (flag gate + RBAC + scope + validation + reuse ingestion bundle + downloadable, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-document-upload.py | sed 's/^/    /'
+
 log "pre-hire registry migration (WATHEFNI_PREHIRE_VIA_REGISTRY: flag/parity/harness, hire->transition_hire, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-prehire-registry-parity.py | sed 's/^/    /'
 

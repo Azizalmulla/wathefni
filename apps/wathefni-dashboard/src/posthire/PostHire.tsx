@@ -15,9 +15,10 @@ import {
   Repeat,
   Search,
   ShieldCheck,
+  Upload,
   UserRound,
 } from 'lucide-react'
-import { Fragment, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ChangeEvent, Fragment, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ import {
   openEmployeeDocument,
   resolveHrTask,
   runPosthireAction,
+  uploadEmployeeDocument,
 } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import type {
@@ -819,11 +821,57 @@ function DocumentActions({
   )
 }
 
+function DocumentUploadButton({
+  access,
+  employeeKey,
+  itemId,
+  hasFile,
+  onUploaded,
+  onError,
+}: {
+  access: DashboardAccess
+  employeeKey: string
+  itemId: string
+  hasFile: boolean
+  onUploaded: (message: string) => void
+  onError: (message: string) => void
+}) {
+  const [busy, setBusy] = useState(false)
+  const inputId = `doc-upload-${employeeKey}-${itemId}`
+  const onPick = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = '' // allow re-picking the same file
+    if (!file) return
+    setBusy(true)
+    try {
+      await uploadEmployeeDocument(access, employeeKey, { file, itemId })
+      onUploaded(hasFile ? 'Document replaced.' : 'Document uploaded.')
+    } catch (err) {
+      onError(friendlyError(err, 'We could not upload that document.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <>
+      <input id={inputId} type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.heic" onChange={onPick} disabled={busy} />
+      <Button variant="ghost" size="sm" disabled={busy} onClick={() => document.getElementById(inputId)?.click()} title={hasFile ? 'Replace document' : 'Upload document'}>
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+        <span className="ml-1.5">{hasFile ? 'Replace' : 'Upload'}</span>
+      </Button>
+    </>
+  )
+}
+
 function OnboardingChecklistItem({
   access,
   item,
   fileId,
   canMutate,
+  canUpload,
+  employeeKey,
+  onUploaded,
+  onError,
   busy,
   runningKey,
   onMark,
@@ -832,6 +880,10 @@ function OnboardingChecklistItem({
   item: OnboardingItem
   fileId?: string | null
   canMutate: boolean
+  canUpload?: boolean
+  employeeKey?: string
+  onUploaded?: (message: string) => void
+  onError?: (message: string) => void
   busy: boolean
   runningKey: string | null
   onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
@@ -855,6 +907,16 @@ function OnboardingChecklistItem({
       <div className="flex items-center gap-2">
         <StatusBadge status={item.status} />
         <DocumentActions access={access} fileId={fileId} filename={item.label || item.document_type || undefined} compact />
+        {canUpload && employeeKey && item.item_id && onUploaded && onError ? (
+          <DocumentUploadButton
+            access={access}
+            employeeKey={employeeKey}
+            itemId={item.item_id}
+            hasFile={Boolean(fileId)}
+            onUploaded={onUploaded}
+            onError={onError}
+          />
+        ) : null}
         {canMutate ? (
           <>
             <Button
@@ -888,6 +950,8 @@ function OnboardingDetailPanel({
   busy,
   runningKey,
   onMark,
+  onUploaded,
+  onError,
 }: {
   access: DashboardAccess
   detail: OnboardingDetailResponse | null
@@ -896,6 +960,8 @@ function OnboardingDetailPanel({
   busy: boolean
   runningKey: string | null
   onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
+  onUploaded?: (message: string) => void
+  onError?: (message: string) => void
 }) {
   if (loading && !detail) {
     return <div className="px-4 py-3 text-[12.5px] text-subtle/80">Loading checklist…</div>
@@ -904,6 +970,8 @@ function OnboardingDetailPanel({
   const pending = detail.pending ?? []
   const received = detail.received ?? []
   const documentIndex = detail.document_index ?? {}
+  const canUpload = canMutate && Boolean(detail.doc_upload_enabled)
+  const employeeKey = detail.employee_key
   const fileIdFor = (item: OnboardingItem) =>
     documentIndex[item.item_id || ''] || documentIndex[item.document_type || ''] || null
   return (
@@ -921,6 +989,10 @@ function OnboardingDetailPanel({
               item={item}
               fileId={fileIdFor(item)}
               canMutate={canMutate}
+              canUpload={canUpload}
+              employeeKey={employeeKey}
+              onUploaded={onUploaded}
+              onError={onError}
               busy={busy}
               runningKey={runningKey}
               onMark={onMark}
@@ -938,6 +1010,10 @@ function OnboardingDetailPanel({
               item={item}
               fileId={fileIdFor(item)}
               canMutate={false}
+              canUpload={canUpload}
+              employeeKey={employeeKey}
+              onUploaded={onUploaded}
+              onError={onError}
               busy={busy}
               runningKey={runningKey}
               onMark={onMark}
@@ -1112,6 +1188,8 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                             busy={action.busy}
                             runningKey={action.runningKey}
                             onMark={(item, status) => markItem(emp, item, status)}
+                            onUploaded={(message) => { onNotice(message); void reloadAll() }}
+                            onError={onNotice}
                           />
                         ) : null}
                       </div>

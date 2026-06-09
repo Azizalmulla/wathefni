@@ -282,6 +282,13 @@ def onboarding_hr_mutate_enabled() -> bool:
     return (os.environ.get("WATHEFNI_ONBOARDING_HR_MUTATE") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
+def doc_upload_enabled() -> bool:
+    """Dark-launch gate for HR-driven document uploads from the dashboard (attach
+    or replace an employee's onboarding document). Defaults OFF so the upload
+    controls stay hidden and the endpoint inert in production until enabled."""
+    return (os.environ.get("WATHEFNI_DOC_UPLOAD") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
 def leave_balances_enabled() -> bool:
     """Dark-launch gate for leave-balance tracking (P1: accrual + observe-only
     consumption + read-only balance surfacing). Defaults OFF so accrual, the
@@ -41442,6 +41449,141 @@ def _document_hub_read_context(context: dict[str, Any]) -> str:
     return company
 
 
+# HR document upload (dark-launched behind WATHEFNI_DOC_UPLOAD). Allowlist + hard
+# size cap are intentionally stricter than the WhatsApp path, which relies on the
+# upstream channel; an HR-initiated upload accepts arbitrary browser files so it
+# must gate type/size itself before anything touches storage.
+_DOC_UPLOAD_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".doc", ".docx", ".heic"}
+_DOC_UPLOAD_MAX_BYTES = 15 * 1024 * 1024  # 15 MiB
+
+
+@app.post("/dashboard/posthire/employees/{employee_key}/documents")
+async def dashboard_posthire_employee_document_upload(
+    employee_key: str,
+    file: UploadFile = File(...),
+    item_id: str = Form(...),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    # Mutating write: requires manage (not just read) on onboarding, and the
+    # dark-launch flag. Mirrors the WhatsApp ingestion bundle exactly so a
+    # dashboard-uploaded file is indistinguishable from one the employee sent.
+    require_entitlement(context, "onboarding", "onboarding.manage")
+    company = context["company_code"]
+    if not doc_upload_enabled():
+        raise HTTPException(status_code=403, detail={"error": "feature_disabled", "message": "Document upload is not enabled."})
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+
+    item = str(item_id or "").strip()
+    if not item:
+        raise HTTPException(status_code=400, detail={"error": "item_required", "message": "Pick the checklist item this document is for."})
+
+    filename = str(file.filename or "").strip() or "document"
+    ext = Path(filename).suffix.lower()
+    if ext not in _DOC_UPLOAD_EXTENSIONS:
+        raise HTTPException(status_code=400, detail={"error": "unsupported_file_type", "message": "Upload a PDF, image, or Word document."})
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail={"error": "empty_file", "message": "That file is empty."})
+    if len(data) > _DOC_UPLOAD_MAX_BYTES:
+        raise HTTPException(status_code=400, detail={"error": "file_too_large", "message": "Files must be 15 MB or smaller."})
+
+    mime_type = str(file.content_type or "").strip() or (mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    tmp_dir = tempfile.mkdtemp(prefix="hr-doc-upload-")
+    tmp_path = str(Path(tmp_dir) / safe_storage_name(filename))
+    new_file_id: str | None = None
+    try:
+        with open(tmp_path, "wb") as fh:
+            fh.write(data)
+        media = {"path": tmp_path, "type": mime_type}
+        storage_result = store_onboarding_document(employee=employee, item_id=item, media=media)
+        if not storage_result.get("ok") or str(storage_result.get("storage_status")) in {"failed"}:
+            raise HTTPException(status_code=502, detail={"error": "storage_failed", "message": "We couldn't store that document. Please try again."})
+        value = filename
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE onboarding_items
+                    SET status='received',
+                        value=%s,
+                        local_path=COALESCE(%s, local_path),
+                        drive_file_id=COALESCE(%s, drive_file_id),
+                        drive_url=COALESCE(%s, drive_url),
+                        storage_provider=%s,
+                        storage_object_key=%s,
+                        external_file_id=%s,
+                        storage_url=%s,
+                        content_sha256=%s,
+                        mime_type=%s,
+                        storage_status=%s,
+                        storage_error=%s,
+                        stored_at=CASE WHEN %s IS NOT NULL THEN now() ELSE stored_at END,
+                        updated_at=now()
+                    WHERE employee_key=%s AND item_id=%s
+                    """,
+                    (
+                        value,
+                        storage_result.get("metadata", {}).get("local_path") or tmp_path,
+                        storage_result.get("drive_file_id"),
+                        storage_result.get("drive_url"),
+                        storage_result.get("provider"),
+                        storage_result.get("storage_object_key"),
+                        storage_result.get("external_file_id"),
+                        storage_result.get("storage_url"),
+                        storage_result.get("content_sha256"),
+                        storage_result.get("mime_type"),
+                        storage_result.get("storage_status"),
+                        storage_result.get("storage_error"),
+                        storage_result.get("provider"),
+                        str(employee.get("employee_key")),
+                        item,
+                    ),
+                )
+                # extraction={} skips the synchronous vision/OCR call the WhatsApp
+                # path runs; HR uploads rely on the compliance review surface for
+                # expiry, keeping this endpoint fast and free of an LLM dependency.
+                record_employee_document_receipt(cur, employee=employee, item_id=item, value=value, media=media, storage_result=storage_result, extraction={})
+                recompute_employee_onboarding_counts(cur, str(employee.get("employee_key")))
+                cur.execute(
+                    """
+                    SELECT file_id FROM file_registry
+                    WHERE company_code=%s AND subject_type='employee' AND subject_key=%s
+                      AND file_kind='onboarding_document' AND content_sha256=%s
+                    ORDER BY updated_at DESC NULLS LAST LIMIT 1
+                    """,
+                    (company, str(employee.get("employee_key")), storage_result.get("content_sha256")),
+                )
+                row = cur.fetchone()
+                new_file_id = str(row["file_id"]) if row else None
+            conn.commit()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    sync_employee_posthire(employee.get("phone") or "", company)
+    record_admin_audit(
+        context,
+        "document_uploaded",
+        summary=f"Uploaded an onboarding document for item {item}.",
+        target_type="employee",
+        target=str(employee.get("employee_key")),
+        details={"item_id": item, "file_id": new_file_id, "mime_type": mime_type, "size_bytes": len(data), "provider": storage_result.get("provider")},
+    )
+    return json_safe({
+        "ok": True,
+        "company_code": company,
+        "employee_key": employee.get("employee_key"),
+        "item_id": item,
+        "file_id": new_file_id,
+        "storage_status": storage_result.get("storage_status"),
+    })
+
+
 @app.get("/dashboard/posthire/employees/{employee_key}/documents")
 def dashboard_posthire_employee_documents(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
     company = _document_hub_read_context(context)
@@ -41573,6 +41715,7 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
     return json_safe({
         "company_code": company,
         "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
+        "doc_upload_enabled": doc_upload_enabled(),
         "document_index": document_index,
         **summary,
     })

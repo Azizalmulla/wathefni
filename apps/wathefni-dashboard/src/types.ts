@@ -970,6 +970,7 @@ export type OnboardingItem = {
 export type OnboardingDetailResponse = {
   company_code: string
   hr_mutate_enabled?: boolean
+  doc_upload_enabled?: boolean
   document_index?: Record<string, string>
   employee_key: string
   name?: string | null
