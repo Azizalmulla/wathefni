@@ -274,6 +274,13 @@ def outbound_flow_enabled(flow: str) -> bool:
     return flow.strip().lower() in {part.strip() for part in raw.split(",") if part.strip()}
 
 
+def onboarding_hr_mutate_enabled() -> bool:
+    """Dark-launch gate for HR-driven onboarding mutations from the dashboard
+    (start/restart onboarding, mark/waive a checklist item). Defaults OFF so the
+    new controls stay hidden and inert in production until explicitly enabled."""
+    return (os.environ.get("WATHEFNI_ONBOARDING_HR_MUTATE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
 def outbound_templates_enabled() -> bool:
     """WhatsApp approved-template (HSM) step. Defaults OFF until templates exist."""
     return (os.environ.get("WATHEFNI_OUTBOUND_TEMPLATES") or "").strip().lower() in _OUTBOUND_ON_VALUES
@@ -24967,6 +24974,68 @@ def employee_onboarding_summary(employee: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+ONBOARDING_HR_MARK_STATES = {"received", "waived"}
+
+
+def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
+    """HR-side resolution of a single onboarding checklist item.
+
+    Two safe outcomes only:
+      * received  — HR confirms the item is in hand (status='received')
+      * waived    — HR waives the requirement (status='waived', required=FALSE so
+                    it drops out of the outstanding count without faking receipt)
+    Always recomputes the employee's onboarding rollup. Gated upstream by the
+    WATHEFNI_ONBOARDING_HR_MUTATE flag + onboarding.manage + confirmation."""
+    company = (company_code or "WATHEFNI").upper()
+    employee = find_employee_by_key(action.get("employee_key"), company_code=company) or resolve_employee_for_direct_action(action, allow_latest=False)
+    if not employee:
+        return {"ok": False, "error": "employee_not_found", "safe_user_message": "I need the employee before I can update a checklist item."}
+    item_id = str(action.get("item_id") or "").strip()
+    if not item_id:
+        return {"ok": False, "error": "needs_clarification", "safe_user_message": "Which checklist item should I update?"}
+    new_status = normalize_text(action.get("item_status") or "received") or "received"
+    if new_status not in ONBOARDING_HR_MARK_STATES:
+        new_status = "received"
+    employee_key = str(employee.get("employee_key") or "")
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            if new_status == "waived":
+                cur.execute(
+                    """
+                    UPDATE onboarding_items
+                    SET status='waived', required=FALSE, updated_at=now()
+                    WHERE employee_key=%s AND item_id=%s
+                    RETURNING item_id, label, document_type, status, required
+                    """,
+                    (employee_key, item_id),
+                )
+            else:
+                cur.execute(
+                    """
+                    UPDATE onboarding_items
+                    SET status='received', updated_at=now()
+                    WHERE employee_key=%s AND item_id=%s
+                    RETURNING item_id, label, document_type, status, required
+                    """,
+                    (employee_key, item_id),
+                )
+            row = cur.fetchone()
+            if not row:
+                conn.rollback()
+                return {"ok": False, "error": "item_not_found", "safe_user_message": "I could not find that checklist item."}
+            recompute_employee_onboarding_counts(cur, employee_key)
+        conn.commit()
+    item = json_safe(dict(row))
+    label = item_display_label({"document_type": item.get("document_type"), "label": item.get("label"), "item_id": item.get("item_id")})
+    return {
+        "ok": True,
+        "employee": json_safe(posthire_employee_card(employee)),
+        "item": item,
+        "item_label": label,
+        "item_status": new_status,
+    }
+
+
 def format_inline_list(items: list[str]) -> str:
     cleaned = [item for item in items if item]
     if not cleaned:
@@ -26143,8 +26212,34 @@ def find_employee_by_phone(phone: str | None, *, company_code: str | None = None
     return None
 
 
+def find_employee_by_key(employee_key: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
+    """Resolve a single employee by its stable key, tenant-scoped. Fails closed
+    when no company can be resolved so a key never crosses tenants."""
+    key = str(employee_key or "").strip()
+    if not key:
+        return None
+    company = resolved_company_scope(company_code)
+    if not company:
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+                (company, key),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
+    return None
+
+
 def resolve_employee_for_direct_action(action: dict[str, Any], *, allow_latest: bool = False) -> dict[str, Any] | None:
     company = action.get("company_code")
+    key = action.get("employee_key")
+    if key:
+        employee = find_employee_by_key(key, company_code=company)
+        if employee:
+            return employee
     phone = action.get("subject_phone")
     if phone:
         employee = find_employee_by_phone(phone, company_code=company)
@@ -40708,11 +40803,42 @@ def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_con
     return {"company_code": company, "count": len(employees), "employees": employees}
 
 
+def onboarding_counts_by_employee(company_code: str | None) -> dict[str, dict[str, int]]:
+    """One-query rollup of required-item pending/received counts per employee for
+    a company, so the onboarding list can show progress without an N+1 fan-out."""
+    company = (company_code or "WATHEFNI").upper()
+    out: dict[str, dict[str, int]] = {}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT oi.employee_key,
+                       COUNT(*) FILTER (WHERE oi.required IS TRUE AND lower(oi.status) NOT IN ('received','complete','completed','verified')) AS pending,
+                       COUNT(*) FILTER (WHERE oi.required IS TRUE AND lower(oi.status) IN ('received','complete','completed','verified')) AS received
+                FROM onboarding_items oi
+                JOIN employees e ON e.employee_key = oi.employee_key AND e.company_code=%s
+                GROUP BY oi.employee_key
+                """,
+                (company,),
+            )
+            for r in cur.fetchall():
+                out[str(r.get("employee_key"))] = {
+                    "pending_count": int(r.get("pending") or 0),
+                    "received_count": int(r.get("received") or 0),
+                }
+    return out
+
+
 @app.get("/dashboard/posthire/onboarding")
 def dashboard_posthire_onboarding(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "onboarding")
     rows = company_employees(company)
     cards = [posthire_employee_card(row) for row in rows]
+    counts = onboarding_counts_by_employee(company)
+    for card in cards:
+        c = counts.get(card["employee_key"]) or {"pending_count": 0, "received_count": 0}
+        card["pending_count"] = c["pending_count"]
+        card["received_count"] = c["received_count"]
     in_progress = [c for c in cards if c["onboarding_status"] in {"in_progress", "not_started", "pending"}]
     completed = [c for c in cards if c["onboarding_status"] in {"complete", "completed", "done"}]
     return {
@@ -40720,7 +40846,22 @@ def dashboard_posthire_onboarding(context: dict[str, Any] = Depends(dashboard_co
         "in_progress": in_progress,
         "completed_count": len(completed),
         "total": len(cards),
+        "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
     }
+
+
+@app.get("/dashboard/posthire/onboarding/{employee_key}")
+def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _posthire_read_context(context, "onboarding")
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    summary = employee_onboarding_summary(employee)
+    return json_safe({
+        "company_code": company,
+        "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
+        **summary,
+    })
 
 
 @app.get("/dashboard/posthire/attendance")

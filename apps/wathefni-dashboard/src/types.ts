@@ -844,6 +844,8 @@ export type PosthireEmployee = {
   department: string
   onboarding_status: string
   updated_at?: string | null
+  pending_count?: number
+  received_count?: number
 }
 
 export type PosthireEmployeesResponse = {
@@ -919,6 +921,41 @@ export type PosthireOnboardingResponse = {
   in_progress: PosthireEmployee[]
   completed_count: number
   total: number
+  hr_mutate_enabled?: boolean
+}
+
+export type OnboardingItem = {
+  item_id?: string
+  label?: string
+  item_type?: string
+  required?: boolean
+  document_type?: string
+  status?: string
+  value?: string | null
+  storage_provider?: string | null
+  storage_status?: string | null
+  storage_url?: string | null
+  drive_url?: string | null
+  reminder_count?: number | null
+  last_reminded_at?: string | null
+  escalated_at?: string | null
+  updated_at?: string | null
+}
+
+export type OnboardingDetailResponse = {
+  company_code: string
+  hr_mutate_enabled?: boolean
+  employee_key: string
+  name?: string | null
+  phone?: string | null
+  status?: string | null
+  required_total: number
+  received_count: number
+  pending_count: number
+  received: OnboardingItem[]
+  pending: OnboardingItem[]
+  received_labels: string[]
+  pending_labels: string[]
 }
 
 export type PosthireAttendanceRow = {

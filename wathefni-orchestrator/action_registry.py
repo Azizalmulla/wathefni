@@ -4066,6 +4066,70 @@ def _compliance_mark_reviewed_executor(ctx: ExecutionContext) -> dict[str, Any]:
     return legacy.normalize_posthire_result(result, action_type="compliance_mark_reviewed", reply=reply)
 
 
+def _onboarding_start_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    """Start (or restart) the onboarding flow for an employee from the dashboard.
+    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE; the backend is authority."""
+
+    legacy = ctx.legacy
+    action = _posthire_action(ctx)
+    if not legacy.onboarding_hr_mutate_enabled():
+        msg = "Onboarding changes from the dashboard are not enabled yet."
+        return legacy.normalize_posthire_result(
+            {"ok": False, "error": "feature_disabled", "safe_user_message": msg},
+            action_type="start_onboarding",
+            reply=msg,
+        )
+    employee = legacy.resolve_employee_for_direct_action(action, allow_latest=False)
+    if not employee:
+        msg = "I need the employee before I can start onboarding."
+        return legacy.normalize_posthire_result(
+            {"ok": False, "error": "employee_not_found", "safe_user_message": msg},
+            action_type="start_onboarding",
+            reply=msg,
+        )
+    name = employee.get("name") or action.get("subject_name") or "the employee"
+    try:
+        legacy.start_onboarding(employee)
+        result = {
+            "ok": True,
+            "employee": legacy.json_safe(legacy.posthire_employee_card(employee)),
+            "onboarding_status": "in_progress",
+        }
+        reply = f"Onboarding started for {name}."
+    except Exception:
+        logger.warning("start_onboarding failed", exc_info=True)
+        result = {"ok": False, "error": "start_failed", "safe_user_message": f"I could not start onboarding for {name}."}
+        reply = f"I could not start onboarding for {name}."
+    return legacy.normalize_posthire_result(result, action_type="start_onboarding", reply=reply)
+
+
+def _onboarding_mark_item_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    """Mark one onboarding checklist item received/waived from the dashboard.
+    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE."""
+
+    legacy = ctx.legacy
+    action = _posthire_action(ctx)
+    if not legacy.onboarding_hr_mutate_enabled():
+        msg = "Onboarding changes from the dashboard are not enabled yet."
+        return legacy.normalize_posthire_result(
+            {"ok": False, "error": "feature_disabled", "safe_user_message": msg},
+            action_type="onboarding_mark_item",
+            reply=msg,
+        )
+    result = legacy.mark_onboarding_item(
+        action,
+        company_code=action.get("company_code"),
+        created_by_phone=_posthire_actor_phone(ctx),
+    )
+    if isinstance(result, dict) and result.get("ok"):
+        label = result.get("item_label") or "checklist item"
+        verb = "waived" if result.get("item_status") == "waived" else "marked received"
+        reply = f"{label.capitalize()} {verb}."
+    else:
+        reply = (result.get("safe_user_message") if isinstance(result, dict) else None) or "I could not update that checklist item."
+    return legacy.normalize_posthire_result(result, action_type="onboarding_mark_item", reply=reply)
+
+
 _POSTHIRE_RESULT_KEYS = (
     "action_type", "success", "status", "message", "safe_user_message",
     "employee", "employee_notification", "hr_notification", "sheet_sync",
@@ -4230,7 +4294,29 @@ register(ActionSpec(
     module="onboarding", requires_confirmation=False,
     executor=_send_onboarding_reminder_executor,
     result_keys=_POSTHIRE_RESULT_KEYS, sensitive=False,
-    notes="Wraps app.send_onboarding_reminder (employee-object signature). start_onboarding/answer_onboarding_status remain legacy-only.",
+    notes="Wraps app.send_onboarding_reminder (employee-object signature). answer_onboarding_status remains legacy-only.",
+))
+
+register(ActionSpec(
+    name="start_onboarding",
+    description="Start (or restart) the onboarding flow for an employee from the dashboard. Provide employee_key (preferred) or name/phone. SENSITIVE: ask the user to confirm first.",
+    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone"),
+    module="onboarding", requires_confirmation=True,
+    executor=_onboarding_start_executor,
+    preflight=_posthire_confirm_preflight("start_onboarding", "Start onboarding"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
+    notes="Wraps app.start_onboarding; HR-driven dashboard mutation, dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE.",
+))
+
+register(ActionSpec(
+    name="onboarding_mark_item",
+    description="Mark one onboarding checklist item as received or waived for an employee. Provide employee_key (or name/phone) and item_id; optional item_status ('received' or 'waived'). SENSITIVE: ask the user to confirm first.",
+    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone", "item_id", "item_status", "notes"),
+    module="onboarding", requires_confirmation=True,
+    executor=_onboarding_mark_item_executor,
+    preflight=_posthire_confirm_preflight("onboarding_mark_item", "Update the onboarding checklist item"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
+    notes="Updates onboarding_items (received, or waived+required=false) and recomputes counts; dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE.",
 ))
 
 

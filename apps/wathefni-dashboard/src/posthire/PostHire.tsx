@@ -31,6 +31,7 @@ import {
   getEmployeeProfile,
   getPosthireCompliance,
   getPosthireEmployees,
+  getOnboardingDetail,
   getPosthireLeave,
   getPosthireOnboarding,
   getPosthirePayroll,
@@ -51,7 +52,10 @@ import type {
   EmployeeProfileResponse,
   PosthireComplianceResponse,
   PosthireEmployeesResponse,
+  PosthireEmployee,
   PosthireLeaveResponse,
+  OnboardingDetailResponse,
+  OnboardingItem,
   PosthireOnboardingResponse,
   PosthirePayrollPolicy,
   PosthirePayrollResponse,
@@ -728,14 +732,184 @@ function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAcc
 
 // --- Onboarding ------------------------------------------------------------
 
+function OnboardingChecklistItem({
+  item,
+  canMutate,
+  busy,
+  runningKey,
+  onMark,
+}: {
+  item: OnboardingItem
+  canMutate: boolean
+  busy: boolean
+  runningKey: string | null
+  onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
+  done?: boolean
+}) {
+  const key = item.item_id || item.document_type || item.label || ''
+  const reminded = Number(item.reminder_count || 0)
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[0.9rem] border border-line/45 bg-panel/55 px-3.5 py-2.5">
+      <div className="min-w-0">
+        <p className="text-[13px] font-medium text-text">
+          {item.label || item.document_type || item.item_id}
+          {item.required ? null : <span className="ml-1.5 text-[11px] font-normal text-subtle/70">(optional)</span>}
+        </p>
+        <p className="mt-0.5 text-[11.5px] text-subtle/80">
+          {reminded > 0 ? `${reminded} reminder${reminded === 1 ? '' : 's'} sent` : 'No reminders sent'}
+          {item.last_reminded_at ? ` · last ${formatDate(item.last_reminded_at)}` : ''}
+          {item.escalated_at ? ' · escalated' : ''}
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <StatusBadge status={item.status} />
+        {canMutate ? (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() => onMark(item, 'received')}
+            >
+              {runningKey === `mark:received:${key}` ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark received'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() => onMark(item, 'waived')}
+            >
+              {runningKey === `mark:waived:${key}` ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Waive'}
+            </Button>
+          </>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function OnboardingDetailPanel({
+  detail,
+  loading,
+  canMutate,
+  busy,
+  runningKey,
+  onMark,
+}: {
+  detail: OnboardingDetailResponse | null
+  loading: boolean
+  canMutate: boolean
+  busy: boolean
+  runningKey: string | null
+  onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
+}) {
+  if (loading && !detail) {
+    return <div className="px-4 py-3 text-[12.5px] text-subtle/80">Loading checklist…</div>
+  }
+  if (!detail) return null
+  const pending = detail.pending ?? []
+  const received = detail.received ?? []
+  return (
+    <div className="space-y-4 border-t border-line/45 bg-panel-muted/30 px-4 py-4">
+      {pending.length === 0 && received.length === 0 ? (
+        <p className="text-[12.5px] text-subtle/80">No checklist items recorded for this employee yet.</p>
+      ) : null}
+      {pending.length ? (
+        <div className="space-y-2">
+          <p className="text-[11.5px] font-semibold uppercase tracking-[0.07em] text-subtle/80">Outstanding ({pending.length})</p>
+          {pending.map((item) => (
+            <OnboardingChecklistItem
+              key={`p-${item.item_id || item.document_type || item.label}`}
+              item={item}
+              canMutate={canMutate}
+              busy={busy}
+              runningKey={runningKey}
+              onMark={onMark}
+            />
+          ))}
+        </div>
+      ) : null}
+      {received.length ? (
+        <div className="space-y-2">
+          <p className="text-[11.5px] font-semibold uppercase tracking-[0.07em] text-subtle/80">Received ({received.length})</p>
+          {received.map((item) => (
+            <OnboardingChecklistItem
+              key={`r-${item.item_id || item.document_type || item.label}`}
+              item={item}
+              canMutate={false}
+              busy={busy}
+              runningKey={runningKey}
+              onMark={onMark}
+              done
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
   const loader = useCallback(() => getPosthireOnboarding(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireOnboardingResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
   const confirm = useConfirm()
   const canManage = can(permissions, 'onboarding.manage')
 
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [detail, setDetail] = useState<OnboardingDetailResponse | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+
+  const loadDetail = useCallback(
+    async (key: string) => {
+      setDetailLoading(true)
+      try {
+        setDetail(await getOnboardingDetail(access, key))
+      } catch {
+        setDetail(null)
+      } finally {
+        setDetailLoading(false)
+      }
+    },
+    [access],
+  )
+
+  // After any mutation, refresh both the list (progress counts) and the open panel.
+  const reloadAll = useCallback(async () => {
+    await reload()
+    if (expanded) await loadDetail(expanded)
+  }, [reload, expanded, loadDetail])
+
+  const action = usePosthireAction(access, reloadAll, onNotice)
+
   const inProgress = data?.in_progress ?? []
+  const hrMutate = Boolean(data?.hr_mutate_enabled)
+  const canMutate = canManage && hrMutate
+
+  const toggleExpand = useCallback(
+    (key: string) => {
+      if (expanded === key) {
+        setExpanded(null)
+        setDetail(null)
+        return
+      }
+      setExpanded(key)
+      setDetail(null)
+      void loadDetail(key)
+    },
+    [expanded, loadDetail],
+  )
+
+  const markItem = useCallback(
+    (emp: PosthireEmployee, item: OnboardingItem, status: 'received' | 'waived') => {
+      const key = item.item_id || item.document_type || item.label || ''
+      action.run(
+        'onboarding_mark_item',
+        { employee_key: emp.employee_key, item_id: item.item_id, item_status: status },
+        { destructive: status === 'waived', key: `mark:${status}:${key}` },
+      )
+    },
+    [action],
+  )
 
   return (
     <div className="space-y-6">
@@ -751,7 +925,7 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
             tone={inProgress.length ? 'warning' : 'success'}
             icon={inProgress.length ? <ClipboardList className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
             title={inProgress.length ? `${inProgress.length} new hire${inProgress.length === 1 ? '' : 's'} still onboarding` : 'Everyone is fully onboarded'}
-            detail={inProgress.length ? 'Send a reminder to anyone with open documents.' : `${data?.completed_count ?? 0} completed of ${data?.total ?? 0}`}
+            detail={inProgress.length ? 'Open a new hire to see their checklist, send a reminder, or resolve items.' : `${data?.completed_count ?? 0} completed of ${data?.total ?? 0}`}
           />
           <Card>
             <CardHeader>
@@ -763,36 +937,84 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                 <EmptyState icon={<CheckCircle2 className="h-5 w-5" />} title="Nothing pending" hint="New hires will appear here while they finish onboarding." />
               ) : (
                 <div className="space-y-2.5">
-                  {inProgress.map((emp) => (
-                    <div key={emp.employee_key || emp.phone || emp.name} className="flex flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-line/50 bg-panel/70 px-4 py-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-text">{emp.name}</p>
-                        <p className="text-[12px] text-subtle/85">{emp.position_title || 'Team member'}{emp.department ? ` · ${emp.department}` : ''}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <StatusBadge status={emp.onboarding_status} />
-                        {canManage ? (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            disabled={action.busy}
-                            onClick={async () => {
-                              if (!(await confirm({ title: 'Send onboarding reminder?', body: `${emp.name} will receive an onboarding reminder message now.`, confirmLabel: 'Send reminder' }))) return
-                              await action.run('send_onboarding_reminder', employeeRef(emp), { key: `reminder:${emp.employee_key}` })
-                            }}
-                          >
-                            {action.runningKey === `reminder:${emp.employee_key}` ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" /> Sending…
-                              </>
-                            ) : (
-                              'Send reminder'
-                            )}
-                          </Button>
+                  {inProgress.map((emp) => {
+                    const isOpen = expanded === emp.employee_key
+                    const pendingCount = Number(emp.pending_count || 0)
+                    const receivedCount = Number(emp.received_count || 0)
+                    const total = pendingCount + receivedCount
+                    return (
+                      <div key={emp.employee_key || emp.phone || emp.name} className="overflow-hidden rounded-[1.1rem] border border-line/50 bg-panel/70">
+                        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                          <button type="button" onClick={() => toggleExpand(emp.employee_key)} className="min-w-0 flex-1 text-left">
+                            <p className="font-semibold text-text">{emp.name}</p>
+                            <p className="text-[12px] text-subtle/85">
+                              {emp.position_title || 'Team member'}{emp.department ? ` · ${emp.department}` : ''}
+                              {total > 0 ? ` · ${receivedCount}/${total} documents` : ''}
+                            </p>
+                          </button>
+                          <div className="flex items-center gap-2.5">
+                            <StatusBadge status={emp.onboarding_status} />
+                            {canMutate ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={action.busy}
+                                onClick={() =>
+                                  action.run(
+                                    'start_onboarding',
+                                    { employee_key: emp.employee_key },
+                                    { key: `start:${emp.employee_key}` },
+                                  )
+                                }
+                              >
+                                {action.runningKey === `start:${emp.employee_key}` ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin" /> Working…
+                                  </>
+                                ) : emp.onboarding_status === 'not_started' ? (
+                                  'Start'
+                                ) : (
+                                  'Restart'
+                                )}
+                              </Button>
+                            ) : null}
+                            {canManage ? (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={action.busy}
+                                onClick={async () => {
+                                  if (!(await confirm({ title: 'Send onboarding reminder?', body: `${emp.name} will receive an onboarding reminder message now.`, confirmLabel: 'Send reminder' }))) return
+                                  await action.run('send_onboarding_reminder', employeeRef(emp), { key: `reminder:${emp.employee_key}` })
+                                }}
+                              >
+                                {action.runningKey === `reminder:${emp.employee_key}` ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                                  </>
+                                ) : (
+                                  'Send reminder'
+                                )}
+                              </Button>
+                            ) : null}
+                            <Button variant="ghost" size="sm" onClick={() => toggleExpand(emp.employee_key)}>
+                              {isOpen ? 'Hide' : 'Checklist'}
+                            </Button>
+                          </div>
+                        </div>
+                        {isOpen ? (
+                          <OnboardingDetailPanel
+                            detail={detail}
+                            loading={detailLoading}
+                            canMutate={canMutate}
+                            busy={action.busy}
+                            runningKey={action.runningKey}
+                            onMark={(item, status) => markItem(emp, item, status)}
+                          />
                         ) : null}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </CardContent>

@@ -96,6 +96,9 @@ log "employee-hub integrity (orphan scan: company-scoped, read-only, catches dri
 log "compliance V1.1 actions (send reminder / mark reviewed: registry + RBAC + harness + behaviour, staging DB)"
 "$VENV_PY" smoke-test-compliance-actions.py | sed 's/^/    /'
 
+log "onboarding dashboard upgrade (start/restart + mark item: registry + RBAC + flag gate + behaviour, staging DB)"
+"$VENV_PY" smoke-test-onboarding-dashboard.py | sed 's/^/    /'
+
 log "employee 360 profile (read-only, tenant + entitlement scoped, staging DB)"
 "$VENV_PY" smoke-test-employee-profile.py | sed 's/^/    /'
 
