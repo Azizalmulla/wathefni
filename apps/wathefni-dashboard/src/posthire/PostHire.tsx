@@ -769,7 +769,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                         <li key={it.item_id || idx} className="flex flex-wrap items-center justify-between gap-2">
                           <span className="text-text">{it.label}</span>
                           <span className="flex items-center gap-1.5">
-                            <Badge tone="warning">{it.status}</Badge>
+                            <StatusBadge status={it.status} />
                             {canOnboardingMutate && it.item_id ? (
                               <>
                                 <Button
@@ -938,7 +938,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                             <span className="text-text capitalize">{(it.leave_type || 'leave').replace('_', ' ')} · {formatDate(it.start_date)}–{formatDate(it.end_date)}</span>
                             {it.status === 'requested' && canLeaveDecide ? (
                               <span className="flex items-center gap-1.5">
-                                <Badge tone="warning">{it.status}</Badge>
+                                <StatusBadge status={it.status} />
                                 <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_leave_request', leaveArgs, { destructive: true, key: rejectKey })}>
                                   {action.runningKey === rejectKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Decline'}
                                 </Button>
@@ -947,7 +947,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                                 </Button>
                               </span>
                             ) : (
-                              <Badge tone={it.status === 'requested' ? 'warning' : 'success'}>{it.status}</Badge>
+                              <StatusBadge status={it.status} />
                             )}
                           </li>
                         )
@@ -1001,7 +1001,8 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                           <li key={it.timesheet_id || idx} className="flex flex-wrap items-center justify-between gap-2">
                             <span className="text-text">{formatDate(it.period_start)}–{formatDate(it.period_end)}</span>
                             <span className="flex items-center gap-1.5 text-subtle/90">
-                              <span>{it.worked_hours}h{it.overtime_hours ? ` · OT ${it.overtime_hours}h` : ''} · {it.status}</span>
+                              <span>{it.worked_hours}h{it.overtime_hours ? ` · OT ${it.overtime_hours}h` : ''}</span>
+                              <StatusBadge status={it.status} />
                               {needsDecision ? (
                                 <>
                                   <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', tsArgs, { destructive: true, key: rejectKey })}>
@@ -2670,8 +2671,8 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
         summary && summary.employees_total > 0 ? (
           <EmptyState
             icon={<FileText className="h-5 w-5" />}
-            title="Some employees are missing required documents"
-            hint="No employee documents are being tracked yet. Compliance fills in as documents are uploaded."
+            title="No compliance documents tracked yet"
+            hint="Compliance fills in as you upload employee documents — expiring and missing items will surface here automatically."
             points={[
               'Upload civil IDs, passports, residency/work permits, medical documents, and certificates',
               'Open Employees to see who is on your team',

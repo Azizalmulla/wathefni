@@ -1712,7 +1712,6 @@ function App() {
               onClose={() => setSelectedJob(null)}
               onCopy={copyToClipboard}
               onDownloadQr={() => downloadQr(jobQrDataUrl, selectedJob)}
-              onEdit={() => setNotice('Editing job details from the dashboard is coming soon.')}
               onViewCandidates={() => viewJobCandidates(selectedJob)}
               qrDataUrl={jobQrDataUrl}
             />
@@ -2420,7 +2419,7 @@ function CandidateDrawer({
               )}
               {primaryRunning ? 'Working…' : primaryAction.button}
             </Button>
-            <Button disabled={!candidate.cv?.received} onClick={() => onPreviewCv(candidate)} variant="secondary">
+            <Button disabled={!candidate.cv?.received} onClick={() => onPreviewCv(candidate)} title={!candidate.cv?.received ? 'CV not received yet' : undefined} variant="secondary">
               <FileText size={16} /> Preview CV
             </Button>
             <details className="relative">
@@ -2701,7 +2700,6 @@ function JobDrawer({
   onClose,
   onCopy,
   onDownloadQr,
-  onEdit,
   onViewCandidates,
   qrDataUrl,
 }: {
@@ -2709,7 +2707,6 @@ function JobDrawer({
   onClose: () => void
   onCopy: (value: string | undefined, label: string) => void
   onDownloadQr: () => void
-  onEdit: () => void
   onViewCandidates: () => void
   qrDataUrl: string
 }) {
@@ -2824,12 +2821,6 @@ function JobDrawer({
           <Button disabled={!job.application_link} onClick={() => onCopy(job.application_link, 'Application link')} variant="secondary">
             <ExternalLink size={16} /> Copy link
           </Button>
-          <Button disabled title="Close job mutation is not exposed yet." variant="ghost">
-            <PauseCircle size={16} /> Close job
-          </Button>
-          <Button onClick={onEdit} variant="ghost">
-            <Pencil size={16} /> Edit job
-          </Button>
         </section>
       </aside>
     </div>
@@ -2866,12 +2857,12 @@ function JobsPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <Button onClick={onCreate}>
-            <Plus size={16} /> Create job opening
+            <Plus size={16} /> Create with Assistant
           </Button>
           <Button onClick={onRefresh} variant="secondary">
             <RefreshCw size={16} /> Refresh
           </Button>
-          <Button disabled={!canExportReports} onClick={onExport} variant="secondary">
+          <Button disabled={!canExportReports} onClick={onExport} title={!canExportReports ? 'Exports are disabled for your role' : undefined} variant="secondary">
             <Download size={16} /> Export
           </Button>
         </div>
@@ -3814,7 +3805,7 @@ function RankingPage({
               </option>
             ))}
           </Select>
-          <Button disabled={busy || !rankPosition} onClick={runRanking}>
+          <Button disabled={busy || !rankPosition} onClick={runRanking} title={!rankPosition ? 'Select a job first' : undefined}>
             <Search size={16} /> Rank
           </Button>
         </CardContent>
@@ -5537,11 +5528,10 @@ function Info({ label, value }: { label: string; value?: string | null }) {
 function EmptyState({ text }: { text: string }) {
   return (
     <div className="rounded-[1.5rem] border border-dashed border-line/75 bg-white/28 p-5 text-sm leading-6 text-subtle">
-      <div className="flex items-center gap-2 font-semibold text-text">
+      <div className="flex items-center gap-2 font-medium text-text">
         <span className="h-1.5 w-1.5 rounded-full bg-[#c89445]" />
-        Nothing needs action here.
+        <span className="max-w-2xl">{text}</span>
       </div>
-      <div className="mt-1.5 max-w-2xl">{text}</div>
     </div>
   )
 }
