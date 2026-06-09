@@ -29738,8 +29738,8 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
 COMPLIANCE_DOC_LABELS = {
     "civil_id": "Civil ID",
     "passport": "Passport",
-    "residency": "Residency / Work Permit",
-    "work_permit": "Residency / Work Permit",
+    "residency": "Residency (Iqama)",
+    "work_permit": "Work Permit",
     "medical": "Medical Document",
     "education_cert": "Education Certificate",
 }
