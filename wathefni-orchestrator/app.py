@@ -29877,6 +29877,7 @@ def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) 
         "company_code": company,
         "summary": summary,
         "documents": documents,
+        "doc_upload_enabled": doc_upload_enabled(),
     }
 
 
@@ -41427,6 +41428,7 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
         "available_modules": modules,
         "sections": sections,
         "next_actions": next_actions,
+        "doc_upload_enabled": doc_upload_enabled(),
     })
 
 

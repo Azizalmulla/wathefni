@@ -394,14 +394,14 @@ function employeeRef(emp: { phone?: string; name?: string; employee_phone?: stri
 
 // --- Employees -------------------------------------------------------------
 
-function EmployeesPage({ access }: { access: DashboardAccess }) {
+function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (message: string) => void }) {
   const loader = useCallback(() => getPosthireEmployees(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader)
   const [query, setQuery] = useState('')
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
   if (selectedKey) {
-    return <EmployeeProfile access={access} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} />
+    return <EmployeeProfile access={access} permissions={permissions} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} />
   }
 
   const employees = data?.employees ?? []
@@ -520,9 +520,10 @@ function EmployeesPage({ access }: { access: DashboardAccess }) {
 
 // --- Employee 360 ----------------------------------------------------------
 
-function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAccess; employeeKey: string; onBack: () => void }) {
+function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: (message: string) => void }) {
   const loader = useCallback(() => getEmployeeProfile(access, employeeKey), [access, employeeKey])
   const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader)
+  const canUpload = can(permissions, 'onboarding.manage') && Boolean(data?.doc_upload_enabled)
 
   const emp = data?.employee
   const sections = data?.sections
@@ -762,11 +763,23 @@ function EmployeeProfile({ access, employeeKey, onBack }: { access: DashboardAcc
                             {doc.stored_at ? ` · ${formatDate(doc.stored_at)}` : ''}
                           </p>
                         </div>
-                        {doc.has_file ? (
-                          <DocumentActions access={access} fileId={doc.file_id} filename={doc.filename || doc.label || undefined} />
-                        ) : (
-                          <span className="text-[11.5px] text-subtle/70">File unavailable</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {doc.has_file ? (
+                            <DocumentActions access={access} fileId={doc.file_id} filename={doc.filename || doc.label || undefined} />
+                          ) : (
+                            <span className="text-[11.5px] text-subtle/70">File unavailable</span>
+                          )}
+                          {canUpload && doc.document_type ? (
+                            <DocumentUploadButton
+                              access={access}
+                              employeeKey={employeeKey}
+                              itemId={doc.document_type}
+                              hasFile={Boolean(doc.has_file)}
+                              onUploaded={(message) => { onNotice(message); void reload() }}
+                              onError={onNotice}
+                            />
+                          ) : null}
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -2339,6 +2352,7 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
   const action = usePosthireAction(access, reload, onNotice)
   const confirm = useConfirm()
   const canManage = can(permissions, 'compliance.manage')
+  const canUpload = can(permissions, 'onboarding.manage') && Boolean(data?.doc_upload_enabled)
 
   const summary = data?.summary
   const documents = data?.documents ?? []
@@ -2476,6 +2490,16 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
                               <div className="flex items-center gap-2">
                                 <span>{doc.document_label}</span>
                                 <DocumentActions access={access} fileId={doc.file_id} filename={doc.document_label} compact />
+                                {canUpload && doc.document_type ? (
+                                  <DocumentUploadButton
+                                    access={access}
+                                    employeeKey={doc.employee_key}
+                                    itemId={doc.document_type}
+                                    hasFile={Boolean(doc.file_id)}
+                                    onUploaded={(message) => { onNotice(message); void reload() }}
+                                    onError={onNotice}
+                                  />
+                                ) : null}
                               </div>
                             </td>
                             <td className="px-4 py-3">
@@ -2621,7 +2645,7 @@ export function PostHirePage({ page, access, permissions, onNotice }: PostHirePr
 function PostHireModuleBody({ page, access, permissions, onNotice }: PostHireProps) {
   switch (page) {
     case 'employees':
-      return <EmployeesPage access={access} />
+      return <EmployeesPage access={access} permissions={permissions} onNotice={onNotice} />
     case 'onboarding':
       return <OnboardingPage access={access} permissions={permissions} onNotice={onNotice} />
     case 'attendance':

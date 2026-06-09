@@ -206,9 +206,14 @@ def run_checks(checks: Checks) -> None:
     _flag(False)
     checks.check("flag defaults OFF", lambda: app.doc_upload_enabled() is False)
     checks.check("upload denied while flag OFF (403)", lambda: _denied(lambda: _upload(EMP, ITEM, "id.pdf", pdf, "application/pdf", _ctx()), 403))
+    # Compliance + Employee 360 surfaces must mirror the gate (OFF -> hidden).
+    checks.check("compliance payload gate OFF when flag OFF", lambda: app.dashboard_compliance_payload(COMPANY).get("doc_upload_enabled") is False)
+    checks.check("employee 360 gate OFF when flag OFF", lambda: app.dashboard_employee_profile(_ctx(), EMP).get("doc_upload_enabled") is False)
 
     _flag(True)
     checks.check("flag flips ON", lambda: app.doc_upload_enabled() is True)
+    checks.check("compliance payload gate ON when flag ON", lambda: app.dashboard_compliance_payload(COMPANY).get("doc_upload_enabled") is True)
+    checks.check("employee 360 gate ON when flag ON", lambda: app.dashboard_employee_profile(_ctx(), EMP).get("doc_upload_enabled") is True)
 
     # --- Validation ----------------------------------------------------------
     checks.check("unsupported extension rejected (400)", lambda: _denied(lambda: _upload(EMP, ITEM, "id.exe", pdf, "application/octet-stream", _ctx()), 400))
@@ -242,6 +247,21 @@ def run_checks(checks: Checks) -> None:
     resolved = app.resolve_employee_document_file(COMPANY, str(res.get("file_id")))
     checks.check("uploaded file resolves tenant-scoped", lambda: resolved is not None and str(resolved.get("subject_key")) == EMP)
     checks.check("uploaded file is downloadable from disk", lambda: app.employee_document_local_path(resolved) is not None)
+
+    # --- Compliance + Employee 360 surfaces see the uploaded document --------
+    # civil_id is a compliance type, so the dashboard-uploaded file must surface
+    # on both the company compliance read and the per-employee 360 documents tab,
+    # which is where the new upload/replace controls live.
+    comp = app.dashboard_compliance_payload(COMPANY)
+    checks.check(
+        "compliance payload lists the uploaded civil_id with a file_id",
+        lambda: any(d.get("document_type") == ITEM and d.get("file_id") for d in comp.get("documents", [])),
+    )
+    prof = app.dashboard_employee_profile(_ctx(), EMP)
+    checks.check(
+        "employee 360 documents section includes the uploaded file",
+        lambda: any(str(x.get("file_id")) == str(res.get("file_id")) for x in ((prof.get("sections") or {}).get("documents") or {}).get("items", [])),
+    )
 
     # --- Replace (re-upload) keeps a single indexed file ---------------------
     res2 = _upload(EMP, ITEM, "civil-id-v2.pdf", pdf + b" v2", "application/pdf", _ctx())

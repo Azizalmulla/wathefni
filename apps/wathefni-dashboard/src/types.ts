@@ -939,6 +939,7 @@ export type EmployeeProfileResponse = {
   available_modules: string[]
   sections: EmployeeProfileSections
   next_actions: EmployeeProfileNextAction[]
+  doc_upload_enabled?: boolean
 }
 
 export type PosthireOnboardingResponse = {
@@ -1170,6 +1171,7 @@ export type PosthireComplianceResponse = {
   company_code: string
   summary: ComplianceSummary
   documents: ComplianceDocument[]
+  doc_upload_enabled?: boolean
 }
 
 export type HrTask = {
