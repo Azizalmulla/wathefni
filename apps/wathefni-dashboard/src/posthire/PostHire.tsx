@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Select } from '@/components/ui/field'
-import { useConfirm } from '@/components/ConfirmDialog'
+import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
   DashboardApiError,
   getHrTasks,
@@ -335,6 +335,7 @@ function useModuleData<T>(loader: () => Promise<T>) {
 type PendingConfirmation = { text: string; actionType: string; args: Record<string, unknown>; destructive: boolean }
 
 function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: (message: string) => void) {
+  const askConfirm = useConfirm()
   const [pending, setPending] = useState<PendingConfirmation | null>(null)
   const [busy, setBusy] = useState(false)
   const [runningKey, setRunningKey] = useState<string | null>(null)
@@ -369,10 +370,25 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
   )
 
   const run = useCallback(
-    (actionType: string, args: Record<string, unknown> = {}, options: { destructive?: boolean; key?: string } = {}) => {
-      void execute(actionType, args, Boolean(options.destructive), options.key || actionType)
+    (
+      actionType: string,
+      args: Record<string, unknown> = {},
+      options: { destructive?: boolean; key?: string; confirm?: ConfirmOptions } = {},
+    ) => {
+      const go = () => execute(actionType, args, Boolean(options.destructive), options.key || actionType)
+      // When a call site supplies confirm copy, ask first (reusing the global
+      // confirm system). Otherwise run immediately — the backend can still raise
+      // its own confirmation step for actions that need one.
+      if (options.confirm) {
+        const copy = options.confirm
+        void (async () => {
+          if (await askConfirm(copy)) void go()
+        })()
+        return
+      }
+      void go()
     },
-    [execute],
+    [execute, askConfirm],
   )
 
   const confirm = useCallback(() => {
@@ -784,7 +800,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                                   variant="ghost"
                                   size="sm"
                                   disabled={action.busy}
-                                  onClick={() => action.run('onboarding_mark_item', { employee_key: employeeKey, item_id: it.item_id, item_status: 'waived' }, { destructive: true, key: `mark:waived:${it.item_id}` })}
+                                  onClick={() => action.run('onboarding_mark_item', { employee_key: employeeKey, item_id: it.item_id, item_status: 'waived' }, { destructive: true, key: `mark:waived:${it.item_id}`, confirm: { title: 'Waive this item?', body: `“${it.label}” will no longer be required for ${emp.name}'s onboarding. You can mark it received later if needed.`, confirmLabel: 'Waive item' } })}
                                 >
                                   {action.runningKey === `mark:waived:${it.item_id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Waive'}
                                 </Button>
@@ -939,7 +955,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                             {it.status === 'requested' && canLeaveDecide ? (
                               <span className="flex items-center gap-1.5">
                                 <StatusBadge status={it.status} />
-                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_leave_request', leaveArgs, { destructive: true, key: rejectKey })}>
+                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_leave_request', leaveArgs, { destructive: true, key: rejectKey, confirm: { title: 'Decline this leave request?', body: `${emp.name}'s ${(it.leave_type || 'leave').replace('_', ' ')} request for ${formatDate(it.start_date)}–${formatDate(it.end_date)} will be declined and they'll be notified.`, confirmLabel: 'Decline request' } })}>
                                   {action.runningKey === rejectKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Decline'}
                                 </Button>
                                 <Button size="sm" disabled={action.busy} onClick={() => action.run('approve_leave_request', leaveArgs, { key: approveKey })}>
@@ -1005,7 +1021,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                               <StatusBadge status={it.status} />
                               {needsDecision ? (
                                 <>
-                                  <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', tsArgs, { destructive: true, key: rejectKey })}>
+                                  <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', tsArgs, { destructive: true, key: rejectKey, confirm: { title: 'Reject this timesheet?', body: `${emp.name}'s timesheet for ${formatDate(it.period_start)}–${formatDate(it.period_end)} will be sent back and won't count toward payroll until it's corrected and approved.`, confirmLabel: 'Reject timesheet' } })}>
                                     {action.runningKey === rejectKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
                                   </Button>
                                   <Button size="sm" disabled={action.busy} onClick={() => action.run('approve_timesheet', tsArgs, { key: approveKey })}>
@@ -1377,7 +1393,18 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
       action.run(
         'onboarding_mark_item',
         { employee_key: emp.employee_key, item_id: item.item_id, item_status: status },
-        { destructive: status === 'waived', key: `mark:${status}:${key}` },
+        {
+          destructive: status === 'waived',
+          key: `mark:${status}:${key}`,
+          confirm:
+            status === 'waived'
+              ? {
+                  title: 'Waive this item?',
+                  body: `“${item.label}” will no longer be required for ${emp.name || 'this employee'}'s onboarding. You can mark it received later if needed.`,
+                  confirmLabel: 'Waive item',
+                }
+              : undefined,
+        },
       )
     },
     [action],
@@ -1801,7 +1828,15 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
                               action.run(
                                 'reject_leave_request',
                                 { employee_name: row.employee_name, employee_phone: row.employee_phone, start_date: row.start_date, end_date: row.end_date },
-                                { destructive: true, key: `reject-leave:${row.leave_id || idx}` },
+                                {
+                                  destructive: true,
+                                  key: `reject-leave:${row.leave_id || idx}`,
+                                  confirm: {
+                                    title: 'Decline this leave request?',
+                                    body: `${row.employee_name || 'This employee'}'s ${titleCase(row.leave_type || 'leave')} request for ${formatDate(row.start_date)} → ${formatDate(row.end_date)} will be declined and they'll be notified.`,
+                                    confirmLabel: 'Decline request',
+                                  },
+                                },
                               )
                             }
                           >
@@ -1976,7 +2011,7 @@ function ShiftsPage({ access, permissions, onNotice }: { access: DashboardAccess
                       </div>
                       {canManage ? (
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_shift_swap', { swap_id: swap.swap_id }, { destructive: true, key: `reject-swap:${swap.swap_id || idx}` })}>
+                          <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_shift_swap', { swap_id: swap.swap_id }, { destructive: true, key: `reject-swap:${swap.swap_id || idx}`, confirm: { title: 'Decline this swap request?', body: `${swap.employee_name || 'This employee'}'s shift swap for ${formatDate(swap.shift_date)} will be declined. The shift stays as scheduled.`, confirmLabel: 'Decline swap' } })}>
                             {action.runningKey === `reject-swap:${swap.swap_id || idx}` ? (
                               <>
                                 <Loader2 className="h-4 w-4 animate-spin" /> Declining…
@@ -2343,7 +2378,7 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
                             <td className="px-4 py-3 text-right">
                               {String(ts.status).toLowerCase() === 'draft' ? (
                                 <div className="flex items-center justify-end gap-2">
-                                  <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', { timesheet_id: ts.timesheet_id, employee_name: ts.employee_name }, { destructive: true, key: `reject-ts:${ts.timesheet_id || idx}` })}>
+                                  <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('reject_timesheet', { timesheet_id: ts.timesheet_id, employee_name: ts.employee_name }, { destructive: true, key: `reject-ts:${ts.timesheet_id || idx}`, confirm: { title: 'Reject this timesheet?', body: `${ts.employee_name || 'This employee'}'s timesheet will be sent back and won't count toward payroll until it's corrected and approved.`, confirmLabel: 'Reject timesheet' } })}>
                                     {action.runningKey === `reject-ts:${ts.timesheet_id || idx}` ? (
                                       <>
                                         <Loader2 className="h-4 w-4 animate-spin" /> Rejecting…

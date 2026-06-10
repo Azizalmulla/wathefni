@@ -1031,6 +1031,27 @@ function App() {
   }
 
   async function changeInterviewStatus(interview: CandidateInterview, nextStatus: string) {
+    const who = interview.candidate_name || 'this candidate'
+    if (nextStatus === 'cancelled') {
+      if (
+        !(await confirm({
+          title: 'Cancel this interview?',
+          body: `${who}'s interview will be marked cancelled. You can schedule a new one later if needed.`,
+          confirmLabel: 'Cancel interview',
+          cancelLabel: 'Keep interview',
+        }))
+      )
+        return
+    } else if (nextStatus === 'no_show') {
+      if (
+        !(await confirm({
+          title: 'Mark as no response?',
+          body: `${who}'s interview will be marked as no response. You can change this later if they reply.`,
+          confirmLabel: 'Mark no response',
+        }))
+      )
+        return
+    }
     setBusy(true)
     setNotice(`Updating ${interview.candidate_name || 'interview'}...`)
     try {
@@ -2189,6 +2210,10 @@ function CandidatesPage({
         ) : null}
       </CardHeader>
       <CardContent>
+        {applications.length === 0 ? (
+          <EmptyState text="No candidates match the current filters. Try clearing filters, or share a job’s application link to start receiving applicants." />
+        ) : (
+          <>
         <div className="overflow-hidden rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
@@ -2226,7 +2251,8 @@ function CandidatesPage({
             </Button>
           </div>
         </div>
-        {!applications.length ? <EmptyState text="No candidates match the current filters." /> : null}
+          </>
+        )}
       </CardContent>
       </Card>
     </div>
@@ -2883,6 +2909,9 @@ function JobsPage({
           <CardDescription>Application links, QR codes, and applicant demand by role.</CardDescription>
         </CardHeader>
         <CardContent>
+          {positions.length === 0 ? (
+            <EmptyState text="No job openings yet. Use “Create with Assistant” to add your first opening — you’ll get an application link and QR code to share." />
+          ) : (
           <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
@@ -2942,7 +2971,7 @@ function JobsPage({
               </tbody>
             </table>
           </div>
-          {!positions.length ? <EmptyState text="No job openings found yet. Create one to generate an application link and QR code." /> : null}
+          )}
         </CardContent>
       </Card>
     </div>
