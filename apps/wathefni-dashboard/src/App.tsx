@@ -2214,8 +2214,8 @@ function CandidatesPage({
           <EmptyState text="No candidates match the current filters. Try clearing filters, or share a job’s application link to start receiving applicants." />
         ) : (
           <>
-        <div className="overflow-hidden rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
               <tr>
                 <th className="px-4 py-3">Candidate</th>
@@ -3602,8 +3602,8 @@ function AssessmentsPage({
         </CardHeader>
         <CardContent>
           {queue.length ? (
-            <div className="overflow-hidden rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-              <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
+              <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                   <tr>
                     <th className="px-4 py-3">Candidate</th>
@@ -3660,8 +3660,8 @@ function AssessmentsPage({
         </CardHeader>
         <CardContent>
           {recentAttempts.length ? (
-            <div className="overflow-hidden rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-              <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
+              <table className="w-full min-w-[960px] text-left text-sm">
                 <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                   <tr>
                     <th className="px-4 py-3">Candidate</th>
@@ -4490,8 +4490,8 @@ function SettingsPage({
                 </div>
               </div>
             ) : null}
-            <div className="overflow-hidden rounded-3xl border border-line/55 bg-panel/75">
-              <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto rounded-3xl border border-line/55 bg-panel/75">
+              <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                   <tr>
                     <th className="px-4 py-3">Name</th>

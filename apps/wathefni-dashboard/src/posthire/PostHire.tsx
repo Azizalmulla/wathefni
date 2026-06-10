@@ -493,8 +493,8 @@ function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAcc
               {filtered.length === 0 ? (
                 <EmptyState icon={<Search className="h-5 w-5" />} title="No employees match your search" hint="Try a different name, role, or department." />
               ) : (
-                <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                  <table className="w-full text-left text-[13px]">
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[640px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
@@ -1649,8 +1649,8 @@ function AttendancePage({ access, permissions, onNotice }: { access: DashboardAc
                   hint="Attendance appears once employees check in against their shifts. If you haven't set up shifts yet, add them in Shifts so check-ins can be tracked."
                 />
               ) : (
-                <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                  <table className="w-full text-left text-[13px]">
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[560px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
@@ -2048,8 +2048,8 @@ function ShiftsPage({ access, permissions, onNotice }: { access: DashboardAccess
               {shifts.length === 0 ? (
                 <EmptyState icon={<CalendarDays className="h-5 w-5" />} title="No shifts this week" hint={canManage ? 'Schedule a shift above to get started.' : undefined} />
               ) : (
-                <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                  <table className="w-full text-left text-[13px]">
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[640px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
@@ -2355,8 +2355,8 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
                   ]}
                 />
               ) : (
-                <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                  <table className="w-full text-left text-[13px]">
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[560px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
@@ -2431,8 +2431,8 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
                     hint="Preview reflects approved timesheets for the period. Approve timesheets first, then preview."
                   />
                 ) : (
-                  <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                    <table className="w-full text-left text-[13px]">
+                  <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                    <table className="w-full min-w-[640px] text-left text-[13px]">
                       <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                         <tr>
                           <th className="px-4 py-3 font-medium">Employee</th>
@@ -2777,8 +2777,8 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
               {filtered.length === 0 ? (
                 <EmptyState icon={<ShieldCheck className="h-5 w-5" />} title="Nothing in this view" hint="Try a different status filter." />
               ) : (
-                <div className="overflow-hidden rounded-[1.1rem] border border-line/50">
-                  <table className="w-full text-left text-[13px]">
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[920px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
