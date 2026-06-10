@@ -3724,7 +3724,7 @@ function AssessmentsPage({
                   <div className="font-semibold">{battery.label}</div>
                   <div className="mt-1 text-sm text-subtle">{battery.sections}</div>
                 </div>
-                <Badge tone="success">{battery.status}</Badge>
+                <Badge tone="success">{stageLabel(battery.status)}</Badge>
               </div>
               <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                 <Info label="Time limit" value={battery.timeLimit} />
@@ -5171,7 +5171,7 @@ function AdminAIPage({
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="font-semibold">{card.name || card.phone || 'Candidate'}</div>
-                              <div className="mt-1 text-sm text-subtle">{card.position || card.status || card.phone}</div>
+                              <div className="mt-1 text-sm text-subtle">{card.position || (card.status ? stageLabel(card.status) : '') || card.phone}</div>
                             </div>
                             {card.score != null ? (
                               <div className="rounded-full border border-white/70 bg-white/60 px-2.5 py-1 text-xs font-semibold text-text shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
@@ -5901,8 +5901,12 @@ const STAGE_LABELS: Record<string, string> = {
   hired: 'Hired',
   rejected: 'Rejected',
   in_progress: 'In progress',
+  in_review: 'In review',
   needs_review: 'Needs review',
+  pending_review: 'Pending review',
   not_started: 'Not started',
+  phone_screen: 'Phone screen',
+  offer_sent: 'Offer sent',
   link_sent: 'Sent',
   opened: 'Opened',
   consented: 'Opened',
@@ -5917,7 +5921,11 @@ const STAGE_LABELS: Record<string, string> = {
 
 function stageLabel(value: string | null | undefined) {
   const normalized = String(value || 'unknown').toLowerCase()
-  return STAGE_LABELS[normalized] || normalized.replaceAll('_', ' ')
+  if (STAGE_LABELS[normalized]) return STAGE_LABELS[normalized]
+  // Humanize any remaining snake_case key into sentence case so raw status keys
+  // (e.g. "phone_screen") never reach users as-is.
+  const spaced = normalized.replaceAll('_', ' ').trim()
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : spaced
 }
 
 function friendlyDashboardError(error: unknown, fallback: string) {
