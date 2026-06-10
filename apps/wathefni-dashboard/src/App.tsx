@@ -182,6 +182,7 @@ type OverviewQueueItem = {
   detail: string
   badge?: string
   tone?: 'default' | 'success' | 'warning' | 'danger' | 'muted'
+  appKey?: string
 }
 const statuses = [
   '',
@@ -1473,6 +1474,7 @@ function App() {
                   assessmentPendingTotal={summary?.action_counts?.assessment_pending}
                   needsReview={needsReview}
                   notificationIssues={notificationIssues}
+                  onOpenCandidate={openCandidateByKey}
                   onOpenCandidates={() => openPage('candidates')}
                   onOpenInterviews={() => openPage('interviews')}
                   onOpenRanking={() => openPage('ranking')}
@@ -1661,6 +1663,7 @@ function App() {
                   actionItems={notifications?.action_items || []}
                   enabledModules={enabledNotificationModules}
                   notifications={notifications?.notifications || []}
+                  onNavigate={openPage}
                 />
               )}
               {activePage === 'reports' && (
@@ -1855,6 +1858,7 @@ function OverviewPage({
   needsReview,
   notificationIssues,
   onOpenAssessments,
+  onOpenCandidate,
   onOpenCandidates,
   onOpenInterviews,
   onOpenRanking,
@@ -1867,6 +1871,7 @@ function OverviewPage({
   needsReview: OverviewQueueItem[]
   notificationIssues: NotificationRow[]
   onOpenAssessments: () => void
+  onOpenCandidate: (appKey?: string) => void
   onOpenCandidates: () => void
   onOpenInterviews: () => void
   onOpenRanking: () => void
@@ -2007,15 +2012,32 @@ function OverviewPage({
             <CardDescription>Specific candidate actions, written as the next HR step.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {needsReview.slice(0, 5).map((item) => (
-              <div className="rounded-3xl border border-white/70 bg-white/48 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft" key={`${item.label}-${item.detail}`}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="font-medium">{item.label}</div>
-                  {item.badge ? <Badge tone={item.tone}>{item.badge}</Badge> : <span className={`h-2.5 w-2.5 rounded-full ${item.tone === 'danger' ? 'bg-rose-500' : 'bg-amber-500'}`} />}
+            {needsReview.slice(0, 5).map((item) => {
+              const clickable = Boolean(item.appKey)
+              const body = (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-medium">{item.label}</div>
+                    {item.badge ? <Badge tone={item.tone}>{item.badge}</Badge> : <span className={`h-2.5 w-2.5 rounded-full ${item.tone === 'danger' ? 'bg-rose-500' : 'bg-amber-500'}`} />}
+                  </div>
+                  <div className="mt-1 text-sm text-subtle">{item.detail}</div>
+                </>
+              )
+              return clickable ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenCandidate(item.appKey)}
+                  className="block w-full rounded-3xl border border-white/70 bg-white/48 p-4 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft"
+                  key={`${item.label}-${item.detail}`}
+                >
+                  {body}
+                </button>
+              ) : (
+                <div className="rounded-3xl border border-white/70 bg-white/48 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur" key={`${item.label}-${item.detail}`}>
+                  {body}
                 </div>
-                <div className="mt-1 text-sm text-subtle">{item.detail}</div>
-              </div>
-            ))}
+              )
+            })}
             {!needsReview.length ? <EmptyState text="No urgent hiring actions right now." /> : null}
           </CardContent>
         </Card>
@@ -3888,14 +3910,26 @@ function RankingPage({
   )
 }
 
+// Alerts whose action label points at a real dashboard destination become
+// buttons that navigate there; everything else is rendered as plain guidance
+// (so a static label never looks like a button that does nothing).
+const NOTIFICATION_ACTION_TARGETS: Record<string, Page> = {
+  'Open Assessments queue': 'assessments',
+  'Open Interviews queue': 'interviews',
+  'Review in Wathefni Assistant': 'ai',
+  'Review completed screening': 'candidates',
+}
+
 function NotificationsPage({
   actionItems,
   enabledModules,
   notifications,
+  onNavigate,
 }: {
   actionItems: NotificationActionItem[]
   enabledModules?: string[]
   notifications: NotificationRow[]
+  onNavigate: (page: Page) => void
 }) {
   const issues = moduleScopedNotificationRows(notifications, enabledModules)
   const alerts = groupedNotificationAlerts(actionItems, issues, enabledModules)
@@ -3929,7 +3963,18 @@ function NotificationsPage({
                         </div>
                         <Badge tone={notificationSeverityTone(item.severity)}>{item.count}</Badge>
                       </div>
-                      <div className="mt-3 text-xs font-semibold uppercase tracking-wide text-subtle">{item.actionLabel}</div>
+                      {NOTIFICATION_ACTION_TARGETS[item.actionLabel] ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigate(NOTIFICATION_ACTION_TARGETS[item.actionLabel])}
+                          className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#8a5a16] transition hover:text-[#6f4711]"
+                        >
+                          {item.actionLabel}
+                          <span aria-hidden="true">→</span>
+                        </button>
+                      ) : (
+                        <div className="mt-3 text-xs text-subtle">Suggested next step: {item.actionLabel}</div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -5839,6 +5884,7 @@ function reviewQueue(applications: ApplicationSummary[], notificationIssues: Not
           : `${candidateRoleText(application)} is ready for an HR decision. Open the profile, check fit, then shortlist or interview.`,
         badge: 'Ready for review',
         tone: 'warning',
+        appKey: application.app_key,
       })
     })
 
@@ -5851,6 +5897,7 @@ function reviewQueue(applications: ApplicationSummary[], notificationIssues: Not
           detail: `${candidateRoleText(application)} has enough profile information to move into assessment.`,
           badge: 'Assessment pending',
           tone: 'warning',
+          appKey: application.app_key,
         })
       })
   }
@@ -5866,6 +5913,7 @@ function reviewQueue(applications: ApplicationSummary[], notificationIssues: Not
         detail: role ? `${role}: ${hrFollowUpDetail(item)}` : hrFollowUpDetail(item),
         badge: 'Follow up',
         tone: 'danger',
+        appKey: item.app_key || undefined,
       })
     })
 

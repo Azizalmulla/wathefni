@@ -1191,6 +1191,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       </li>
                     ))}
                   </ul>
+                  {canUpload ? <DocumentPrivacyNote className="mt-3" /> : null}
                 </CardContent>
               </Card>
             ) : null}
@@ -1314,6 +1315,18 @@ function DocumentUploadButton({
       </Button>
       <span className="text-[10px] text-subtle/70">PDF, JPG, PNG, DOC · up to 15 MB</span>
     </div>
+  )
+}
+
+// Calm, accurate reassurance shown where HR uploads employee documents. We only
+// state what the system actually does — RBAC-scoped access + an audit trail — and
+// deliberately avoid encryption/compliance claims the code doesn't back.
+function DocumentPrivacyNote({ className }: { className?: string }) {
+  return (
+    <p className={cn('flex items-start gap-1.5 text-[11px] leading-4 text-subtle/75', className)}>
+      <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-subtle/60" />
+      <span>Only permitted HR and admin users can view uploaded employee documents. Wathefni records document activity for accountability.</span>
+    </p>
   )
 }
 
@@ -1498,6 +1511,7 @@ function OnboardingDetailPanel({
           ))}
         </div>
       ) : null}
+      {canUpload ? <DocumentPrivacyNote /> : null}
     </div>
   )
 }
@@ -3100,6 +3114,7 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                   </table>
                 </div>
               )}
+              {canUpload ? <DocumentPrivacyNote /> : null}
             </CardContent>
           </Card>
         </>
