@@ -441,7 +441,7 @@ function accessIssueFromError(error: unknown): AccessIssue | null {
     return {
       code: error.code,
       title: 'Verify your access',
-      description: 'Your saved session was rejected. Sign in again with your workspace email and password, or use recovery access.',
+      description: 'Your saved session is no longer valid. Sign in again with your workspace email and password, or use a backup access code.',
     }
   }
   if (error.code === 'dashboard_user_identity_required') {
@@ -1411,7 +1411,7 @@ function App() {
                 {showingInviteAcceptance
                   ? 'Create your workspace login to join this Wathefni company workspace.'
                   : accessIssue
-                  ? 'Sign in with your workspace account, or use recovery access only when you need to bootstrap the workspace.'
+                  ? 'Sign in with your workspace account, or use a backup access code only if you need to set up or recover the workspace.'
                   : activePage === 'overview'
                   ? 'A clean view of who needs review, who needs follow-up, and what HR should do next.'
                   : pageSubtitles[activePage]}
@@ -4370,7 +4370,7 @@ function SettingsPage({
           <CardContent className="space-y-4">
             {recoveryAccess ? (
               <div className="rounded-2xl border border-[#e8c47d]/55 bg-[#fff7e6]/80 p-4 text-sm leading-6 text-[#8a5a12]">
-                You are using recovery access. Create or sign in to a workspace account for normal access.
+                You’re signed in with a backup access code. Create or sign in to a workspace account for everyday use.
               </div>
             ) : null}
             <div className="grid gap-3 md:grid-cols-2">
@@ -4414,14 +4414,14 @@ function SettingsPage({
               <p className="mt-2 text-xs leading-5 text-subtle">Dashboard login and WhatsApp conversations stay separate. Linking lets Wathefni map WhatsApp AI actions to this user.</p>
             </div>
             <details className="rounded-lg border border-line bg-panel-muted/45 p-3">
-              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-subtle">Recovery access</summary>
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-subtle">Backup access</summary>
               <div className="mt-3 space-y-3">
                 <p className="text-xs leading-5 text-subtle">
-                  Use this only to recover or bootstrap workspace access. Normal access should use a workspace email and password.
+                  Use this only to set up or recover workspace access. For everyday use, sign in with a workspace email and password.
                 </p>
                 <Input
                   onChange={(event) => setAccess({ ...access, token: event.target.value })}
-                  placeholder="Recovery access token"
+                  placeholder="Backup access code"
                   type="password"
                   value={access.token}
                 />
@@ -4434,7 +4434,7 @@ function SettingsPage({
                   />
                 </div>
                 <Button disabled={busy} onClick={onSave} variant="secondary">
-                  Use recovery access
+                  Use backup access
                 </Button>
               </div>
             </details>
@@ -4443,7 +4443,7 @@ function SettingsPage({
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Team Access</CardTitle>
-            <CardDescription>Invite team members and assign one of Wathefni’s fixed roles. Roles are fixed by Wathefni for now.</CardDescription>
+            <CardDescription>Invite team members and assign one of Wathefni’s built-in roles.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             {canManageUsers ? (
@@ -4457,12 +4457,12 @@ function SettingsPage({
                   <Button disabled={busy} onClick={onInvite}><Plus size={16} /> Create invite link</Button>
                 </div>
                 <p className="text-xs leading-5 text-subtle">
-                  For now Wathefni creates a secure setup link. Email sending can be added later; share this link manually with the team member.
+                  Wathefni creates a secure invite link for each team member — share it with them directly.
                 </p>
                 {createdInviteLink ? (
                   <div className="rounded-2xl border border-[#e8c47d]/55 bg-[#fff7e6]/80 p-4">
                     <div className="text-sm font-semibold text-text">Invite link ready</div>
-                    <p className="mt-1 text-xs leading-5 text-subtle">Share this setup link with the new team member. It expires automatically.</p>
+                    <p className="mt-1 text-xs leading-5 text-subtle">Share this invite link with the new team member. It expires automatically.</p>
                     <div className="mt-3 flex flex-col gap-2 md:flex-row">
                       <Input readOnly value={createdInviteLink} />
                       <Button onClick={() => onCopyInviteLink(createdInviteLink)} variant="secondary"><Copy size={16} /> Copy link</Button>
@@ -4824,7 +4824,7 @@ function IntegrationsCard({ access }: { access: DashboardAccess }) {
                 {needsReconnect ? 'Reconnect inbox' : 'Connect recruitment inbox'}
               </Button>
               {!feature.gmail_oauth_ready ? (
-                <p className="mt-2 text-xs leading-5 text-subtle">Email connection is being set up on the server. Please check back shortly.</p>
+                <p className="mt-2 text-xs leading-5 text-subtle">Email connection isn’t available for your workspace yet. Please check back soon.</p>
               ) : null}
             </div>
           ) : (
@@ -4960,14 +4960,14 @@ function AccessVerificationPage({
             <span className="text-xs text-subtle">Use your invited workspace account.</span>
           </div>
           <details className="rounded-2xl border border-line bg-panel-muted/50 p-4">
-            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-subtle">Recovery access</summary>
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-subtle">Backup access</summary>
             <div className="mt-3 space-y-3">
               <p className="text-xs leading-5 text-subtle">
-                Use recovery access only if you need to bootstrap or recover the workspace.
+                Use a backup access code only if you need to set up or recover the workspace.
               </p>
               <Input
                 onChange={(event) => setAccess({ ...access, token: event.target.value })}
-                placeholder="Recovery access token"
+                placeholder="Backup access code"
                 type="password"
                 value={access.token}
               />
