@@ -9,6 +9,7 @@ import {
   getImportIntake,
   uploadBulkCvImport,
 } from '@/lib/api'
+import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,6 +51,16 @@ const MAX_TOTAL_BYTES = 250 * 1024 * 1024
 // Lead with the formats HR actually recognises; the rest live under "More supported formats".
 const PRIMARY_FORMATS = ['PDF', 'DOC', 'DOCX', 'ZIP']
 const MORE_FORMATS = ['RTF', 'TXT', 'PNG', 'JPG', 'WEBP']
+const ACCEPTED_CV_EXTENSIONS = new Set(CV_ACCEPT.split(',').map((ext) => ext.trim()))
+
+function fileExtension(name: string): string {
+  const dot = name.lastIndexOf('.')
+  return dot >= 0 ? name.slice(dot).toLowerCase() : ''
+}
+
+function isAcceptedCvFile(file: File): boolean {
+  return ACCEPTED_CV_EXTENSIONS.has(fileExtension(file.name))
+}
 // Provenance labels only — generic CSV/Excel + CVs are the universal bridge.
 const IMPORT_SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: 'bulk_upload', label: 'Bulk upload' },
@@ -103,10 +114,12 @@ export function ImportCvButton({
   access,
   positions,
   onImported,
+  onAccessIssue,
 }: {
   access: DashboardAccess
   positions: PositionSummary[]
   onImported: () => void
+  onAccessIssue?: (issue: AccessIssue) => void
 }) {
   const [open, setOpen] = useState(false)
   const [files, setFiles] = useState<File[]>([])
@@ -123,6 +136,7 @@ export function ImportCvButton({
   const confirm = useConfirm()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const metaInputRef = useRef<HTMLInputElement>(null)
+  const lastUploadErrorRef = useRef('')
 
   const totalBytes = files.reduce((sum, file) => sum + file.size, 0)
   const overFileLimit = files.length > MAX_FILES
@@ -135,7 +149,7 @@ export function ImportCvButton({
 
   function openModal() {
     setOpen(true)
-    setError('')
+    if (lastUploadErrorRef.current) setError(lastUploadErrorRef.current)
   }
 
   // Additive selection: merge new picks into the existing set and de-dupe by
@@ -146,11 +160,24 @@ export function ImportCvButton({
     // Snapshot the File refs NOW: the setFiles updater runs after we clear the
     // input below, which would otherwise empty the live FileList before it reads.
     const picked = Array.from(incoming)
-    setError('')
+    const accepted: File[] = []
+    const rejected: string[] = []
+    for (const file of picked) {
+      if (!isAcceptedCvFile(file)) rejected.push(file.name)
+      else accepted.push(file)
+    }
+    if (rejected.length) {
+      setError(
+        `${rejected.length} file${rejected.length === 1 ? '' : 's'} skipped — accepted formats: ${PRIMARY_FORMATS.join(', ')}, ${MORE_FORMATS.join(', ')}.`,
+      )
+    } else if (!lastUploadErrorRef.current) {
+      setError('')
+    }
+    if (!accepted.length) return
     setFiles((current) => {
       const seen = new Set(current.map(fileSignature))
       const merged = [...current]
-      for (const file of picked) {
+      for (const file of accepted) {
         const signature = fileSignature(file)
         if (!seen.has(signature)) {
           seen.add(signature)
@@ -186,9 +213,14 @@ export function ImportCvButton({
   }
 
   function closeModal() {
+    if (uploading) return
     setOpen(false)
-    setResult(null)
-    resetForm()
+    if (result) {
+      setResult(null)
+      resetForm()
+      lastUploadErrorRef.current = ''
+      setError('')
+    }
   }
 
   async function runImport() {
@@ -222,10 +254,18 @@ export function ImportCvButton({
         source,
       })
       setResult(response)
+      lastUploadErrorRef.current = ''
       resetForm()
       onImported()
     } catch (err) {
-      setError(friendlyImportError(err, 'We couldn’t import these files. Please check the format and try again.'))
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      const message = friendlyImportError(err, 'We couldn’t import these files. Please check the format and try again.')
+      lastUploadErrorRef.current = message
+      setError(message)
     } finally {
       setUploading(false)
     }
@@ -240,7 +280,7 @@ export function ImportCvButton({
       </Button>
 
       {open ? (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-ink/20 p-4 backdrop-blur-[2px]" onClick={closeModal}>
+        <div className="fixed inset-0 z-40 grid place-items-center bg-ink/20 p-4 backdrop-blur-[2px]" onClick={() => { if (!uploading) closeModal() }}>
           <div
             className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] border border-white/70 bg-panel/95 p-6 shadow-[0_24px_80px_rgba(24,20,15,0.18)] backdrop-blur-2xl"
             onClick={(event) => event.stopPropagation()}
@@ -251,8 +291,11 @@ export function ImportCvButton({
                 <p className="mt-1 text-sm leading-6 text-subtle">
                   Upload CVs or a ZIP file. Wathefni will prepare them for review before they’re added to your candidates.
                 </p>
+                <p className="mt-1 text-xs text-subtle/80">
+                  Up to {MAX_FILES} files · {formatBytes(MAX_TOTAL_BYTES)} total · {PRIMARY_FORMATS.join(', ')} and more
+                </p>
               </div>
-              <button className="rounded-full p-1.5 text-subtle hover:bg-panel-muted" onClick={closeModal} type="button">
+              <button className="rounded-full p-1.5 text-subtle hover:bg-panel-muted disabled:opacity-40" disabled={uploading} onClick={closeModal} type="button" aria-label="Close">
                 <X size={18} />
               </button>
             </div>
@@ -492,7 +535,7 @@ export function ImportCvButton({
                 </section>
 
                 <div className="flex justify-end gap-2 pt-1">
-                  <Button onClick={closeModal} type="button" variant="secondary">Cancel</Button>
+                  <Button disabled={uploading} onClick={closeModal} type="button" variant="secondary">Cancel</Button>
                   <Button disabled={uploading || !canSubmit} onClick={runImport} type="button">
                     {uploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={16} />}
                     {uploading
@@ -580,11 +623,13 @@ export function ImportReviewQueue({
   positions,
   reloadKey,
   onChanged,
+  onAccessIssue,
 }: {
   access: DashboardAccess
   positions: PositionSummary[]
   reloadKey: number
   onChanged: () => void
+  onAccessIssue?: (issue: AccessIssue) => void
 }) {
   const [groups, setGroups] = useState<ImportIntakeGroup[]>([])
   const [total, setTotal] = useState(0)
@@ -611,11 +656,16 @@ export function ImportReviewQueue({
         return new Set([...current].filter((key) => live.has(key)))
       })
     } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
       setError(friendlyImportError(err, 'We couldn’t load the intake queue right now. Please try again.'))
     } finally {
       setLoading(false)
     }
-  }, [access])
+  }, [access, onAccessIssue])
 
   useEffect(() => {
     void refresh()
@@ -689,6 +739,11 @@ export function ImportReviewQueue({
       setSuccess(parts.length ? `Done · ${parts.join(' · ')}.` : 'Done.')
     } catch (err) {
       setSuccess('')
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
       setError(friendlyImportError(err, 'We couldn’t update these candidates right now. Please try again.'))
     } finally {
       setBusyGroup('')

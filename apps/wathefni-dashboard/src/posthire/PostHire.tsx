@@ -43,6 +43,7 @@ import {
   runPosthireAction,
   uploadEmployeeDocument,
 } from '@/lib/api'
+import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { cn } from '@/lib/utils'
 import type {
   ComplianceBucket,
@@ -81,18 +82,42 @@ export type PostHireModulePage =
 
 export type NoticeFn = (message: string, tone?: 'success' | 'error' | 'info') => void
 
+const PRIVILEGED_ROLES = new Set(['owner', 'hr_manager', 'admin'])
+const MAX_EMPLOYEE_DOC_BYTES = 15 * 1024 * 1024
+const SENSITIVE_DOC_KEYS = new Set(['civil_id', 'passport', 'residency', 'work_permit', 'medical', 'personal_photo', 'iqama'])
+
 type PostHireProps = {
   page: PostHireModulePage
   access: DashboardAccess
   permissions: string[]
+  role?: string | null
   onNotice: NoticeFn
+  onAccessIssue: (issue: AccessIssue) => void
 }
+
+type PostHireCommonProps = Pick<PostHireProps, 'access' | 'permissions' | 'role' | 'onNotice' | 'onAccessIssue'>
 
 // --- helpers ---------------------------------------------------------------
 
-function can(permissions: string[], permission: string): boolean {
-  if (!permissions.length) return true
-  return permissions.includes(permission)
+function normalizeRole(role?: string | null): string {
+  return String(role || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_')
+}
+
+function can(permissions: string[], permission: string, role?: string | null): boolean {
+  if (permissions.includes(permission)) return true
+  // Fail closed when permissions weren't loaded — except known owner/admin roles.
+  if (!permissions.length) return PRIVILEGED_ROLES.has(normalizeRole(role))
+  return false
+}
+
+function isSensitiveIdentityDocument(itemId: string, label?: string | null): boolean {
+  const key = itemId.trim().toLowerCase().replace(/[\s-]+/g, '_')
+  if (SENSITIVE_DOC_KEYS.has(key)) return true
+  const text = String(label || '').toLowerCase()
+  return /\bcivil id\b|\bpassport\b|\bresidency\b|\biqama\b|\bwork permit\b|\bmedical\b/.test(text)
 }
 
 // HR-facing copy for the error codes the post-hire backend can return, so we
@@ -306,7 +331,7 @@ function ConfirmDialog({
 
 // --- data + action hooks ---------------------------------------------------
 
-function useModuleData<T>(loader: () => Promise<T>) {
+function useModuleData<T>(loader: () => Promise<T>, onAccessIssue?: (issue: AccessIssue) => void) {
   const [data, setData] = useState<T | null>(null)
   const [refreshing, setRefreshing] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -317,11 +342,16 @@ function useModuleData<T>(loader: () => Promise<T>) {
     try {
       setData(await loader())
     } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
       setError(friendlyError(err, 'We couldn’t load this section right now.'))
     } finally {
       setRefreshing(false)
     }
-  }, [loader])
+  }, [loader, onAccessIssue])
 
   useEffect(() => {
     void reload()
@@ -336,7 +366,7 @@ function useModuleData<T>(loader: () => Promise<T>) {
 
 type PendingConfirmation = { text: string; actionType: string; args: Record<string, unknown>; destructive: boolean }
 
-function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: NoticeFn) {
+function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: NoticeFn, onAccessIssue?: (issue: AccessIssue) => void) {
   const askConfirm = useConfirm()
   const [pending, setPending] = useState<PendingConfirmation | null>(null)
   const [busy, setBusy] = useState(false)
@@ -362,13 +392,18 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
         await reload()
       } catch (err) {
         setPending(null)
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          onAccessIssue?.(issue)
+          return
+        }
         onNotice(friendlyError(err, 'We could not complete that action.'), 'error')
       } finally {
         setBusy(false)
         setRunningKey(null)
       }
     },
-    [access, reload, onNotice],
+    [access, reload, onNotice, onAccessIssue],
   )
 
   const run = useCallback(
@@ -414,14 +449,14 @@ function employeeRef(emp: { phone?: string; name?: string; employee_phone?: stri
 
 // --- Employees -------------------------------------------------------------
 
-function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireEmployees(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader)
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader, onAccessIssue)
   const [query, setQuery] = useState('')
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
   if (selectedKey) {
-    return <EmployeeProfile access={access} permissions={permissions} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} />
+    return <EmployeeProfile access={access} permissions={permissions} role={role} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} onAccessIssue={onAccessIssue} />
   }
 
   const employees = data?.employees ?? []
@@ -646,18 +681,18 @@ function NextActionsPanel({
   )
 }
 
-function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: NoticeFn }) {
+function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNotice, onAccessIssue }: PostHireCommonProps & { employeeKey: string; onBack: () => void }) {
   const loader = useCallback(() => getEmployeeProfile(access, employeeKey), [access, employeeKey])
-  const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
+  const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader, onAccessIssue)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const confirm = useConfirm()
-  const canUpload = can(permissions, 'onboarding.manage') && Boolean(data?.doc_upload_enabled)
+  const canUpload = can(permissions, 'onboarding.manage', role) && Boolean(data?.doc_upload_enabled)
   // Same gates the module pages use, so behaviour matches wherever HR acts from.
-  const canOnboardingManage = can(permissions, 'onboarding.manage')
+  const canOnboardingManage = can(permissions, 'onboarding.manage', role)
   const canOnboardingMutate = canOnboardingManage && Boolean(data?.hr_mutate_enabled)
-  const canComplianceManage = can(permissions, 'compliance.manage')
-  const canLeaveDecide = can(permissions, 'leave.decide')
-  const canPayrollManage = can(permissions, 'payroll.manage')
+  const canComplianceManage = can(permissions, 'compliance.manage', role)
+  const canLeaveDecide = can(permissions, 'leave.decide', role)
+  const canPayrollManage = can(permissions, 'payroll.manage', role)
 
   const emp = data?.employee
   const sections = data?.sections
@@ -1074,9 +1109,11 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                               access={access}
                               employeeKey={employeeKey}
                               itemId={doc.document_type}
+                              documentLabel={doc.label || doc.document_type}
                               hasFile={Boolean(doc.has_file)}
                               onUploaded={(message) => { onNotice(message, 'success'); void reload() }}
                               onError={(message) => onNotice(message, 'error')}
+                              onAccessIssue={onAccessIssue}
                             />
                           ) : null}
                         </div>
@@ -1146,41 +1183,66 @@ function DocumentUploadButton({
   access,
   employeeKey,
   itemId,
+  documentLabel,
   hasFile,
   onUploaded,
   onError,
+  onAccessIssue,
 }: {
   access: DashboardAccess
   employeeKey: string
   itemId: string
+  documentLabel?: string | null
   hasFile: boolean
   onUploaded: (message: string) => void
   onError: (message: string) => void
+  onAccessIssue?: (issue: AccessIssue) => void
 }) {
+  const confirm = useConfirm()
   const [busy, setBusy] = useState(false)
   const inputId = `doc-upload-${employeeKey}-${itemId}`
+  const label = documentLabel || titleCase(itemId) || 'document'
   const onPick = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     event.target.value = '' // allow re-picking the same file
     if (!file) return
+    if (file.size > MAX_EMPLOYEE_DOC_BYTES) {
+      onError('This file is too large. Please upload a file up to 15 MB.')
+      return
+    }
+    if (hasFile && isSensitiveIdentityDocument(itemId, documentLabel)) {
+      const ok = await confirm({
+        title: 'Replace this document?',
+        body: `The new file will replace the current ${label}. The previous file will no longer be shown here.`,
+        confirmLabel: 'Replace document',
+        destructive: true,
+      })
+      if (!ok) return
+    }
     setBusy(true)
     try {
       await uploadEmployeeDocument(access, employeeKey, { file, itemId })
       onUploaded(hasFile ? 'Document replaced.' : 'Document uploaded.')
     } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
       onError(friendlyError(err, 'We could not upload that document.'))
     } finally {
       setBusy(false)
     }
   }
   return (
-    <>
+    <div className="flex flex-col items-end gap-0.5">
       <input id={inputId} type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.heic" onChange={onPick} disabled={busy} />
       <Button variant="ghost" size="sm" disabled={busy} onClick={() => document.getElementById(inputId)?.click()} title={hasFile ? 'Replace document' : 'Upload document'}>
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
         <span className="ml-1.5">{hasFile ? 'Replace' : 'Upload'}</span>
       </Button>
-    </>
+      <span className="text-[10px] text-subtle/70">PDF, JPG, PNG, DOC · up to 15 MB</span>
+    </div>
   )
 }
 
@@ -1193,6 +1255,7 @@ function OnboardingChecklistItem({
   employeeKey,
   onUploaded,
   onError,
+  onAccessIssue,
   busy,
   runningKey,
   onMark,
@@ -1205,6 +1268,7 @@ function OnboardingChecklistItem({
   employeeKey?: string
   onUploaded?: (message: string) => void
   onError?: (message: string) => void
+  onAccessIssue?: (issue: AccessIssue) => void
   busy: boolean
   runningKey: string | null
   onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
@@ -1233,9 +1297,11 @@ function OnboardingChecklistItem({
             access={access}
             employeeKey={employeeKey}
             itemId={item.item_id}
+            documentLabel={item.label || item.document_type}
             hasFile={Boolean(fileId)}
             onUploaded={onUploaded}
             onError={onError}
+            onAccessIssue={onAccessIssue}
           />
         ) : null}
         {canMutate ? (
@@ -1275,6 +1341,7 @@ function OnboardingDetailPanel({
   onMark,
   onUploaded,
   onError,
+  onAccessIssue,
 }: {
   access: DashboardAccess
   detail: OnboardingDetailResponse | null
@@ -1287,6 +1354,7 @@ function OnboardingDetailPanel({
   onMark: (item: OnboardingItem, status: 'received' | 'waived') => void
   onUploaded?: (message: string) => void
   onError?: (message: string) => void
+  onAccessIssue?: (issue: AccessIssue) => void
 }) {
   if (loading && !detail) {
     return <div className="px-4 py-3 text-[12.5px] text-subtle/80">Loading checklist…</div>
@@ -1328,6 +1396,7 @@ function OnboardingDetailPanel({
               employeeKey={employeeKey}
               onUploaded={onUploaded}
               onError={onError}
+              onAccessIssue={onAccessIssue}
               busy={busy}
               runningKey={runningKey}
               onMark={onMark}
@@ -1349,6 +1418,7 @@ function OnboardingDetailPanel({
               employeeKey={employeeKey}
               onUploaded={onUploaded}
               onError={onError}
+              onAccessIssue={onAccessIssue}
               busy={busy}
               runningKey={runningKey}
               onMark={onMark}
@@ -1361,11 +1431,11 @@ function OnboardingDetailPanel({
   )
 }
 
-function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireOnboarding(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireOnboardingResponse>(loader)
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireOnboardingResponse>(loader, onAccessIssue)
   const confirm = useConfirm()
-  const canManage = can(permissions, 'onboarding.manage')
+  const canManage = can(permissions, 'onboarding.manage', role)
 
   const [expanded, setExpanded] = useState<string | null>(null)
   const [detail, setDetail] = useState<OnboardingDetailResponse | null>(null)
@@ -1394,7 +1464,7 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
     if (expanded) await loadDetail(expanded)
   }, [reload, expanded, loadDetail])
 
-  const action = usePosthireAction(access, reloadAll, onNotice)
+  const action = usePosthireAction(access, reloadAll, onNotice, onAccessIssue)
 
   const inProgress = data?.in_progress ?? []
   const hrMutate = Boolean(data?.hr_mutate_enabled)
@@ -1543,6 +1613,7 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                             onMark={(item, status) => markItem(emp, item, status)}
                             onUploaded={(message) => { onNotice(message, 'success'); void reloadAll() }}
                             onError={(message) => onNotice(message, 'error')}
+                            onAccessIssue={onAccessIssue}
                           />
                         ) : null}
                       </div>
@@ -1622,11 +1693,11 @@ function AttendanceCorrectionRow({
   )
 }
 
-function AttendancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireAttendance(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireAttendanceResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
-  const canManage = can(permissions, 'attendance.manage')
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireAttendanceResponse>(loader, onAccessIssue)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
+  const canManage = can(permissions, 'attendance.manage', role)
   const [correcting, setCorrecting] = useState<string | null>(null)
 
   const rows = data?.attendance ?? []
@@ -1792,11 +1863,11 @@ function CalendarCheckIcon() {
 
 // --- Leave -----------------------------------------------------------------
 
-function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireLeave(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireLeaveResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
-  const canManage = can(permissions, 'leave.decide')
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireLeaveResponse>(loader, onAccessIssue)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
+  const canManage = can(permissions, 'leave.decide', role)
 
   const pending = data?.pending ?? []
   const upcoming = data?.upcoming ?? []
@@ -1947,11 +2018,11 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
 
 // --- Shifts ----------------------------------------------------------------
 
-function ShiftsPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireShifts(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireShiftsResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
-  const canManage = can(permissions, 'shifts.manage')
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireShiftsResponse>(loader, onAccessIssue)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
+  const canManage = can(permissions, 'shifts.manage', role)
 
   const shifts = data?.shifts ?? []
   const swaps = data?.swaps ?? []
@@ -2252,12 +2323,12 @@ function PayrollPolicyEditor({
   )
 }
 
-function PayrollPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthirePayroll(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader)
-  const action = usePosthireAction(access, reload, onNotice)
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader, onAccessIssue)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const confirm = useConfirm()
-  const canManage = can(permissions, 'payroll.manage')
+  const canManage = can(permissions, 'payroll.manage', role)
   const [editingPolicy, setEditingPolicy] = useState(false)
   const [previewBusy, setPreviewBusy] = useState(false)
   const [preview, setPreview] = useState<{ rows: PayrollPreviewRow[]; count: number } | null>(null)
@@ -2276,11 +2347,16 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
       setPreview({ rows, count: payload?.timesheet_count ?? rows.length })
       onNotice(res.message || `Preview ready · ${rows.length} timesheet${rows.length === 1 ? '' : 's'}.`, 'success')
     } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
       onNotice(friendlyError(err, 'We could not preview payroll right now.'), 'error')
     } finally {
       setPreviewBusy(false)
     }
-  }, [access, periodArgs, onNotice])
+  }, [access, periodArgs, onNotice, onAccessIssue])
 
   const timesheets = data?.timesheets ?? []
   const exports = data?.exports ?? []
@@ -2592,9 +2668,9 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
 // matching single-row insights so we don't show the same number twice.
 const ANALYTICS_HEADLINE_METRICS = new Set(['Scheduled shifts', 'Absences', 'Late records', 'Pending review'])
 
-function AnalyticsPage({ access }: { access: DashboardAccess }) {
+function AnalyticsPage({ access, onAccessIssue }: Pick<PostHireProps, 'access' | 'onAccessIssue'>) {
   const loader = useCallback(() => getPosthireAnalytics(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireAnalyticsResponse>(loader)
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireAnalyticsResponse>(loader, onAccessIssue)
 
   const counts = data?.counts ?? {}
   const insights = Array.isArray(data?.insights) ? data?.insights ?? [] : []
@@ -2718,14 +2794,14 @@ function complianceReminderLabel(doc: { last_reminded_at?: string | null; remind
   return (doc.reminder_count ?? 0) > 0 ? `${when} · ${doc.reminder_count} sent` : when
 }
 
-function CompliancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireCompliance(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireComplianceResponse>(loader)
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireComplianceResponse>(loader, onAccessIssue)
   const [filter, setFilter] = useState<'all' | ComplianceBucket>('all')
-  const action = usePosthireAction(access, reload, onNotice)
+  const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const confirm = useConfirm()
-  const canManage = can(permissions, 'compliance.manage')
-  const canUpload = can(permissions, 'onboarding.manage') && Boolean(data?.doc_upload_enabled)
+  const canManage = can(permissions, 'compliance.manage', role)
+  const canUpload = can(permissions, 'onboarding.manage', role) && Boolean(data?.doc_upload_enabled)
 
   const summary = data?.summary
   const documents = data?.documents ?? []
@@ -2868,9 +2944,11 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
                                     access={access}
                                     employeeKey={doc.employee_key}
                                     itemId={doc.document_type}
+                                    documentLabel={doc.document_label || doc.document_type}
                                     hasFile={Boolean(doc.file_id)}
                                     onUploaded={(message) => { onNotice(message, 'success'); void reload() }}
                                     onError={(message) => onNotice(message, 'error')}
+                                    onAccessIssue={onAccessIssue}
                                   />
                                 ) : null}
                               </div>
@@ -2944,13 +3022,13 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
 // "couldn't reach an employee, please follow up". Renders nothing when there is
 // nothing to do (and stays silent until flows are wired in a later phase), so it
 // never adds noise to a clean workspace.
-function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
+function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getHrTasks(access, 'open'), [access])
-  const { data, error, reload } = useModuleData<HrTasksResponse>(loader)
+  const { data, error, reload } = useModuleData<HrTasksResponse>(loader, onAccessIssue)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
   const canManage =
-    can(permissions, 'users.manage') ||
-    ['leave', 'onboarding', 'compliance', 'attendance', 'shifts', 'payroll'].some((m) => can(permissions, `${m}.manage`))
+    can(permissions, 'users.manage', role) ||
+    ['leave', 'onboarding', 'compliance', 'attendance', 'shifts', 'payroll'].some((m) => can(permissions, `${m}.manage`, role))
 
   const tasks: HrTask[] = data?.tasks ?? []
   // The endpoint can 403 on workspaces without a post-hire module / read access;
@@ -2964,6 +3042,11 @@ function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: Dashb
       onNotice('Marked as done.', 'success')
       await reload()
     } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
       onNotice(friendlyError(err, 'We could not update that task.'), 'error')
     } finally {
       setResolvingId(null)
@@ -3005,34 +3088,34 @@ function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: Dashb
   )
 }
 
-export function PostHirePage({ page, access, permissions, onNotice }: PostHireProps) {
-  const followUp = <DeliveryFollowUpCard access={access} permissions={permissions} onNotice={onNotice} />
+export function PostHirePage({ page, access, permissions, role, onNotice, onAccessIssue }: PostHireProps) {
+  const followUp = <DeliveryFollowUpCard access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
   return (
     <>
       {followUp}
-      <PostHireModuleBody page={page} access={access} permissions={permissions} onNotice={onNotice} />
+      <PostHireModuleBody page={page} access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     </>
   )
 }
 
-function PostHireModuleBody({ page, access, permissions, onNotice }: PostHireProps) {
+function PostHireModuleBody({ page, access, permissions, role, onNotice, onAccessIssue }: PostHireProps) {
   switch (page) {
     case 'employees':
-      return <EmployeesPage access={access} permissions={permissions} onNotice={onNotice} />
+      return <EmployeesPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'onboarding':
-      return <OnboardingPage access={access} permissions={permissions} onNotice={onNotice} />
+      return <OnboardingPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'attendance':
-      return <AttendancePage access={access} permissions={permissions} onNotice={onNotice} />
+      return <AttendancePage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'leave':
-      return <LeavePage access={access} permissions={permissions} onNotice={onNotice} />
+      return <LeavePage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'shifts':
-      return <ShiftsPage access={access} permissions={permissions} onNotice={onNotice} />
+      return <ShiftsPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'payroll':
-      return <PayrollPage access={access} permissions={permissions} onNotice={onNotice} />
+      return <PayrollPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     case 'analytics':
-      return <AnalyticsPage access={access} />
+      return <AnalyticsPage access={access} onAccessIssue={onAccessIssue} />
     case 'compliance':
-      return <CompliancePage access={access} permissions={permissions} onNotice={onNotice} />
+      return <CompliancePage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     default:
       return null
   }

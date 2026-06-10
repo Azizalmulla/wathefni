@@ -85,6 +85,7 @@ import {
   updateDashboardUser,
   updateInterviewStatus,
 } from '@/lib/api'
+import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
 import { Badge } from '@/components/ui/badge'
@@ -182,12 +183,6 @@ type OverviewQueueItem = {
   badge?: string
   tone?: 'default' | 'success' | 'warning' | 'danger' | 'muted'
 }
-type AccessIssue = {
-  code: string
-  title: string
-  description: string
-}
-
 const statuses = [
   '',
   'cv_received',
@@ -435,53 +430,6 @@ function missingAccessIssue(access: DashboardAccess): AccessIssue {
   }
 }
 
-function accessIssueFromError(error: unknown): AccessIssue | null {
-  if (!(error instanceof DashboardApiError)) return null
-  if (error.code === 'dashboard_auth_failed') {
-    return {
-      code: error.code,
-      title: 'Verify your access',
-      description: 'Your saved session is no longer valid. Sign in again with your workspace email and password, or use a backup access code.',
-    }
-  }
-  if (error.code === 'dashboard_user_identity_required') {
-    return {
-      code: error.code,
-      title: 'Verify your access',
-      description: 'Wathefni needs your registered HR phone before loading company data.',
-    }
-  }
-  if (error.code === 'dashboard_company_required') {
-    return {
-      code: error.code,
-      title: 'Verify your access',
-      description: 'Wathefni needs your company code before loading hiring data.',
-    }
-  }
-  if (error.code === 'hr_user_not_allowed') {
-    return {
-      code: error.code,
-      title: 'Access not allowed for this company',
-      description: 'This HR phone is not registered for the selected company. Check the company code and HR phone, then verify again.',
-    }
-  }
-  if (error.code === 'permission_denied') {
-    return {
-      code: error.code,
-      title: 'Your role cannot open this dashboard',
-      description: 'Your HR role does not include pre-hiring access. Ask a company Owner or HR Manager to update your role.',
-    }
-  }
-  if (error.code === 'account_inactive') {
-    return {
-      code: error.code,
-      title: 'Your account is not active',
-      description: 'Your account is not active. Ask a company Owner or HR Manager to restore access.',
-    }
-  }
-  return null
-}
-
 function App() {
   const [access, setAccess] = useState<DashboardAccess>(() => normalizedAccess(storedAccess()))
   const [page, setPage] = useState<Page>(() => (new URLSearchParams(window.location.search).get('page') === 'settings' ? 'settings' : 'overview'))
@@ -565,6 +513,9 @@ function App() {
   const setNoticeErr = useCallback((text: string) => setNotice(text, 'error'), [setNotice])
   const setNoticeOk = useCallback((text: string) => setNotice(text, 'success'), [setNotice])
   const [accessIssue, setAccessIssue] = useState<AccessIssue | null>(() => initialAccessIssue())
+  const handleAccessIssue = useCallback((issue: AccessIssue) => {
+    setAccessIssue(issue)
+  }, [])
 
   const allApplications = applications?.applications || summary?.recent_applications || []
   const enabledNotificationModules = notifications?.enabled_modules
@@ -1577,6 +1528,7 @@ function App() {
                       <ImportCvButton
                         access={access}
                         positions={summary?.positions || []}
+                        onAccessIssue={handleAccessIssue}
                         onImported={() => {
                           setImportReloadKey((value) => value + 1)
                           void refreshEverything()
@@ -1589,6 +1541,7 @@ function App() {
                       <ImportReviewQueue
                         access={access}
                         positions={summary?.positions || []}
+                        onAccessIssue={handleAccessIssue}
                         reloadKey={importReloadKey}
                         onChanged={() => {
                           setImportReloadKey((value) => value + 1)
@@ -1752,7 +1705,9 @@ function App() {
                   page={activePage}
                   access={access}
                   permissions={userAccess?.permissions || []}
+                  role={userAccess?.role || userAccess?.user?.role}
                   onNotice={setNotice}
+                  onAccessIssue={handleAccessIssue}
                 />
               )}
             </>
