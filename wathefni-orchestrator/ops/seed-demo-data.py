@@ -1,8 +1,12 @@
-"""Reversible demo-data seed for the Wathefni dashboard (demo-readiness).
+"""Reversible sample-data seed for the Wathefni dashboard (client-readiness).
 
-Fills the modules that are otherwise empty in a fresh company so a live demo
-shows real data across Employee 360, attendance, shifts, leave and the ranked
-Next Actions engine. Everything it writes is tagged so it can be removed cleanly:
+Fills the modules that are otherwise empty in a fresh company so a live
+walkthrough shows realistic data across Employee 360, attendance, shifts, leave
+and the ranked Next Actions engine. Everything it writes is tagged so it can be
+removed cleanly. NOTE: the tag literals below ('demo_seed', '_demo_backup',
+'wathefni_v1') are intentionally stable — they identify already-seeded rows in
+staging/production, so renaming them would orphan that data. They are internal
+identifiers, not user-facing copy.
 
   - attendance_records / shift_assignments / leave_requests rows carry
     metadata->>'demo_seed' = 'wathefni_v1'
