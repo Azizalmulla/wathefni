@@ -1296,7 +1296,7 @@ function App() {
                 item.id === assistantId
                   ? {
                       ...item,
-                      text: typeof event.message === 'string' ? event.message : 'I hit an issue while answering. Try again in a moment.',
+                      text: friendlyDashboardError(event.message, 'Wathefni couldn’t finish answering just now. Please try again in a moment.'),
                       isStreaming: false,
                     }
                   : item,
@@ -1318,7 +1318,7 @@ function App() {
           item.id === assistantId
             ? {
                 ...item,
-                text: error instanceof Error ? error.message : 'I hit an issue while answering. Try again in a moment.',
+                text: friendlyDashboardError(error, 'Wathefni couldn’t finish answering just now. Please try again in a moment.'),
                 isStreaming: false,
               }
             : item,
@@ -4613,7 +4613,7 @@ function IntakeSettingsCard({ access }: { access: DashboardAccess }) {
       const data = await updateImportSettings(access, next)
       setAutoAdmit(data.auto_admit_explicit_imports)
     } catch (err) {
-      setError(err instanceof DashboardApiError ? err.message : 'Could not update this setting.')
+      setError(friendlyDashboardError(err, 'We couldn’t update this setting right now. Please try again.'))
     } finally {
       setBusy(false)
     }
@@ -4711,7 +4711,7 @@ function IntegrationsCard({ access }: { access: DashboardAccess }) {
       const data = await connectMailbox(access, {})
       window.location.href = data.authorize_url
     } catch (error) {
-      setNotice({ tone: 'warning', text: error instanceof DashboardApiError ? error.message : 'Could not start the connection.' })
+      setNotice({ tone: 'warning', text: friendlyDashboardError(error, 'We couldn’t start the inbox connection right now. Please try again.') })
       setBusy(false)
     }
   }
@@ -5937,7 +5937,7 @@ function friendlyDashboardError(error: unknown, fallback: string) {
     if (/no_usable_conversation_id|conversation_closed|conversation_inactive/i.test(error.message)) return 'WhatsApp conversation is not active.'
     if (error.message && !/backend|traceback|exception|error"|detail|module_disabled|auth_failed|not_found|permission_denied/i.test(error.message)) return error.message
   }
-  const message = error instanceof Error ? error.message : ''
+  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
   if (!message) return fallback
   if (/invalid_grant|gmail_auth|token has been expired/i.test(message)) return 'Email needs reconnecting.'
   if (/no_usable_conversation_id|conversation_closed|conversation_inactive/i.test(message)) return 'WhatsApp conversation is not active.'
