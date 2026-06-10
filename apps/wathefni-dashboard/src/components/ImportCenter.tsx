@@ -305,7 +305,13 @@ export function ImportCvButton({
                     className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-emerald-800 underline-offset-2 hover:underline"
                     onClick={async () => {
                       if (!(await confirm({ title: 'Download import report?', body: 'This report contains candidate data and will download to this device as a file. Continue?', confirmLabel: 'Download' }))) return
-                      void downloadImportReport(access, result.batch_id)
+                      setError('')
+                      try {
+                        await downloadImportReport(access, result.batch_id)
+                      } catch (err) {
+                        console.error('Import report download failed', err)
+                        setError(friendlyImportError(err, 'We couldn’t download the import report. Please try again.'))
+                      }
                     }}
                     type="button"
                   >
@@ -585,6 +591,7 @@ export function ImportReviewQueue({
   const [autoAdmittedTotal, setAutoAdmittedTotal] = useState(0)
   const [collapsed, setCollapsed] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [assignDraft, setAssignDraft] = useState<Record<string, string>>({})
@@ -651,6 +658,7 @@ export function ImportReviewQueue({
     if (action === 'assign') {
       const code = assignDraft[group.key]
       if (!code) {
+        setSuccess('')
         setError('Pick a role to assign before confirming this group.')
         return
       }
@@ -668,11 +676,19 @@ export function ImportReviewQueue({
     if (!(await confirm(prompt))) return
     setBusyGroup(`${group.key}:${action}`)
     setError('')
+    setSuccess('')
     try {
-      await bulkImportAction(access, body)
+      const res = await bulkImportAction(access, body)
       await refresh()
       onChanged()
+      const parts: string[] = []
+      if (res.promoted) parts.push(`${res.promoted} added to your pipeline`)
+      if (res.updated) parts.push(`${res.updated} updated`)
+      if (res.archived) parts.push(`${res.archived} archived`)
+      if (res.skipped) parts.push(`${res.skipped} skipped`)
+      setSuccess(parts.length ? `Done · ${parts.join(' · ')}.` : 'Done.')
     } catch (err) {
+      setSuccess('')
       setError(friendlyImportError(err, 'We couldn’t update these candidates right now. Please try again.'))
     } finally {
       setBusyGroup('')
@@ -729,6 +745,11 @@ export function ImportReviewQueue({
           {error ? (
             <div className="flex items-start gap-2 rounded-2xl border border-rose-200/70 bg-rose-50/70 px-4 py-2.5 text-sm text-rose-700">
               <AlertTriangle className="mt-0.5 shrink-0" size={16} /> <span>{error}</span>
+            </div>
+          ) : null}
+          {success ? (
+            <div className="flex items-start gap-2 rounded-2xl border border-emerald-200/70 bg-emerald-50/70 px-4 py-2.5 text-sm text-emerald-800">
+              <CheckCircle2 className="mt-0.5 shrink-0" size={16} /> <span>{success}</span>
             </div>
           ) : null}
           {groups.map((group) => {

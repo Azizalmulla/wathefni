@@ -541,7 +541,29 @@ function App() {
   const [busy, setBusy] = useState(false)
   const [runningAction, setRunningAction] = useState<string | null>(null)
   const [importReloadKey, setImportReloadKey] = useState(0)
-  const [notice, setNotice] = useState(() => initialAccessIssue()?.title || (access.token ? 'Loading saved dashboard access...' : 'Access verification required.'))
+  const [notice, setNoticeState] = useState<{ text: string; tone: 'info' | 'success' | 'error' }>(() => ({
+    text: initialAccessIssue()?.title || (access.token ? 'Loading saved dashboard access...' : 'Access verification required.'),
+    tone: 'info',
+  }))
+  const noticeTimer = useRef<number | null>(null)
+  // Tone-aware notices: successes look successful and auto-clear; errors look
+  // failed and persist until replaced or dismissed. Default tone is neutral
+  // (info) which also covers in-progress "...ing..." status messages.
+  const setNotice = useCallback((text: string, tone: 'info' | 'success' | 'error' = 'info') => {
+    if (noticeTimer.current) {
+      window.clearTimeout(noticeTimer.current)
+      noticeTimer.current = null
+    }
+    setNoticeState({ text, tone })
+    if (tone === 'success' && text) {
+      noticeTimer.current = window.setTimeout(() => {
+        setNoticeState((cur) => (cur.text === text ? { text: '', tone: 'info' } : cur))
+        noticeTimer.current = null
+      }, 4000)
+    }
+  }, [])
+  const setNoticeErr = useCallback((text: string) => setNotice(text, 'error'), [setNotice])
+  const setNoticeOk = useCallback((text: string) => setNotice(text, 'success'), [setNotice])
   const [accessIssue, setAccessIssue] = useState<AccessIssue | null>(() => initialAccessIssue())
 
   const allApplications = applications?.applications || summary?.recent_applications || []
@@ -585,7 +607,7 @@ function App() {
 
   function openPage(nextPage: Page) {
     if (!pageAvailableForSummary(nextPage, summary)) {
-      setNotice('This feature is not enabled for this company.')
+      setNoticeErr('This feature is not enabled for this company.')
       setPage('overview')
       return
     }
@@ -630,7 +652,7 @@ function App() {
           setAccessIssue(issue)
           setNotice(issue.title)
         } else {
-          setNotice(friendlyDashboardError(error, 'Could not load candidates.'))
+          setNoticeErr(friendlyDashboardError(error, 'Could not load candidates.'))
         }
       }
     },
@@ -655,7 +677,7 @@ function App() {
         })
         setInterviews(interviewsData)
       } catch (error) {
-        if (!opts.silent) setNotice(friendlyDashboardError(error, 'Could not load interviews.'))
+        if (!opts.silent) setNoticeErr(friendlyDashboardError(error, 'Could not load interviews.'))
       }
     },
     [access, interviewTab, interviewQuery, interviewRole, interviewDate, interviewInterviewer, interviewOffset],
@@ -701,7 +723,7 @@ function App() {
         setAssessmentConfig(assessmentConfigData)
         setNotifications(notificationsData)
         setReports(reportsData)
-        if (!silent) setNotice('You’re viewing the latest data.')
+        if (!silent) setNoticeOk('You’re viewing the latest data.')
       } catch (error) {
         if (!silent) {
           const issue = accessIssueFromError(error)
@@ -709,7 +731,7 @@ function App() {
             setAccessIssue(issue)
             setNotice(issue.title)
           } else {
-            setNotice(friendlyDashboardError(error, 'Could not refresh the hiring dashboard.'))
+            setNoticeErr(friendlyDashboardError(error, 'Could not refresh the hiring dashboard.'))
           }
         }
       } finally {
@@ -786,7 +808,7 @@ function App() {
     try {
       setTeam(await getDashboardTeam(effectiveAccess))
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not load team access.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not load team access.'))
     }
   }, [access])
 
@@ -813,7 +835,7 @@ function App() {
     const nextAccess = normalizedAccess(access)
     if (inviteToken.trim()) {
       if (!acceptName.trim() || acceptPassword.length < 8) {
-        setNotice('Enter your name and a password with at least 8 characters.')
+        setNoticeErr('Enter your name and a password with at least 8 characters.')
         return
       }
       setBusy(true)
@@ -839,11 +861,11 @@ function App() {
         window.history.replaceState({}, '', window.location.pathname)
         setAccessIssue(null)
         setAccess(loggedInAccess)
-        setNotice('Invite accepted. You’re signed in.')
+        setNoticeOk('Invite accepted. You’re signed in.')
         await refreshEverything(loggedInAccess)
         await loadTeam(loggedInAccess)
       } catch (error) {
-        setNotice(friendlyDashboardError(error, 'Could not accept invite.'))
+        setNoticeErr(friendlyDashboardError(error, 'Could not accept invite.'))
       } finally {
         setBusy(false)
       }
@@ -873,7 +895,7 @@ function App() {
       setChatConversationId(nextChatId)
       setAccessIssue(null)
       setAccess(loggedInAccess)
-      setNotice('You’re signed in.')
+      setNoticeOk('You’re signed in.')
       await loadChatSessions(loggedInAccess)
       await refreshEverything(loggedInAccess)
       await loadTeam(loggedInAccess)
@@ -888,7 +910,7 @@ function App() {
 
   async function inviteTeamMember() {
     if (!inviteEmail.trim()) {
-      setNotice('Enter an email address first.')
+      setNoticeErr('Enter an email address first.')
       return
     }
     setBusy(true)
@@ -898,16 +920,16 @@ function App() {
       if (result.invite_token) {
         const link = dashboardInviteLink(result.invite_token)
         setCreatedInviteLink(link)
-        setNotice('Invite link created. Share it with the new team member.')
+        setNoticeOk('Invite link created. Share it with the new team member.')
       } else {
         setCreatedInviteLink('')
-        setNotice('Invite created.')
+        setNoticeOk('Invite created.')
       }
       setInviteEmail('')
       setInviteName('')
       await loadTeam(access)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not create invite.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not create invite.'))
     } finally {
       setBusy(false)
     }
@@ -917,10 +939,10 @@ function App() {
     setBusy(true)
     try {
       await updateDashboardUser(access, userId, body)
-      setNotice('Team access updated.')
+      setNoticeOk('Team access updated.')
       await loadTeam(access)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not update team access.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not update team access.'))
     } finally {
       setBusy(false)
     }
@@ -928,7 +950,7 @@ function App() {
 
   async function linkWhatsAppPhone() {
     if (!linkPhone.trim()) {
-      setNotice('Enter a WhatsApp phone first.')
+      setNoticeErr('Enter a WhatsApp phone first.')
       return
     }
     if (
@@ -945,10 +967,10 @@ function App() {
       await linkDashboardWhatsApp(access, linkPhone)
       setAccess((current) => ({ ...current, hrPhone: linkPhone }))
       localStorage.setItem('wathefni_hr_phone', linkPhone)
-      setNotice('WhatsApp phone linked to your dashboard user.')
+      setNoticeOk('WhatsApp phone linked to your dashboard user.')
       await loadTeam(access)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not link WhatsApp phone.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not link WhatsApp phone.'))
     } finally {
       setBusy(false)
     }
@@ -979,7 +1001,7 @@ function App() {
       setChatMessages([])
       setChatSessions([])
       setAccessIssue(missingAccessIssue(nextAccess))
-      setNotice('Signed out.')
+      setNoticeOk('Signed out.')
       setBusy(false)
       setPage('overview')
     }
@@ -987,15 +1009,15 @@ function App() {
 
   async function runRanking() {
     if (!rankPosition) {
-      setNotice('Select a job before ranking candidates.')
+      setNoticeErr('Select a job before ranking candidates.')
       return
     }
     setBusy(true)
     try {
       setRanking(await getRanking(access, { position: rankPosition }))
-      setNotice('Ranking updated.')
+      setNoticeOk('Ranking updated.')
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not refresh ranking.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not refresh ranking.'))
     } finally {
       setBusy(false)
     }
@@ -1007,7 +1029,7 @@ function App() {
     setNotice(`${label}...`)
     try {
       const result = await action()
-      setNotice(result.reply || `${label} completed.`)
+      setNoticeOk(result.reply || `${label} completed.`)
       if (result.application) {
         const updatedApplication = result.application
         setSelected((current) => (current?.app_key === updatedApplication.app_key ? updatedApplication : current))
@@ -1018,7 +1040,7 @@ function App() {
         )
       }
     } catch (error) {
-      setNotice(friendlyDashboardError(error, `${label} needs another try.`))
+      setNoticeErr(friendlyDashboardError(error, `${label} needs another try.`))
       setBusy(false)
       setRunningAction(null)
       return
@@ -1056,10 +1078,10 @@ function App() {
     setNotice(`Updating ${interview.candidate_name || 'interview'}...`)
     try {
       await updateInterviewStatus(access, interview.interview_id, nextStatus)
-      setNotice(interview.interview_type === 'async_video' && nextStatus === 'completed' ? 'Video interview marked reviewed.' : `Interview marked ${stageLabel(nextStatus)}.`)
+      setNoticeOk(interview.interview_type === 'async_video' && nextStatus === 'completed' ? 'Video interview marked reviewed.' : `Interview marked ${stageLabel(nextStatus)}.`)
       revalidatePrehire()
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not update the interview.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not update the interview.'))
     } finally {
       setBusy(false)
     }
@@ -1068,7 +1090,7 @@ function App() {
   async function saveNotesForInterview(interview: CandidateInterview) {
     const notes = (interviewNotes[interview.interview_id] || '').trim()
     if (!notes) {
-      setNotice('Add interview notes before saving.')
+      setNoticeErr('Add interview notes before saving.')
       return
     }
     setBusy(true)
@@ -1076,10 +1098,10 @@ function App() {
     try {
       const result = await saveInterviewNotes(access, interview.interview_id, { notes, status: 'completed', generate_summary: true })
       setInterviewNotes((items) => ({ ...items, [interview.interview_id]: '' }))
-      setNotice(result.reply || 'Interview notes saved.')
+      setNoticeOk(result.reply || 'Interview notes saved.')
       revalidatePrehire()
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not save interview notes.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not save interview notes.'))
     } finally {
       setBusy(false)
     }
@@ -1090,10 +1112,10 @@ function App() {
     setNotice(`Preparing video interview summary again for ${interview.candidate_name || 'candidate'}...`)
     try {
       const result = await retryVideoInterviewTranscripts(access, interview.interview_id)
-      setNotice(result.reply || 'Video interview summary is being prepared again.')
+      setNoticeOk(result.reply || 'Video interview summary is being prepared again.')
       revalidatePrehire()
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not prepare the video summary again.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not prepare the video summary again.'))
     } finally {
       setBusy(false)
     }
@@ -1107,9 +1129,9 @@ function App() {
     try {
       setNotice('Opening video answer...')
       await previewVideoInterviewAnswer(access, videoUrl)
-      setNotice('Video answer opened.')
+      setNoticeOk('Video answer opened.')
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not open the video answer.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not open the video answer.'))
     }
   }
 
@@ -1121,9 +1143,9 @@ function App() {
     try {
       setNotice(`Opening CV for ${candidateName(application)}...`)
       await previewCandidateCv(access, application.app_key)
-      setNotice(`CV preview opened for ${candidateName(application)}.`)
+      setNoticeOk(`CV preview opened for ${candidateName(application)}.`)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not open the CV preview.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not open the CV preview.'))
     }
   }
 
@@ -1131,9 +1153,9 @@ function App() {
     try {
       setNotice(`Opening assessment report for ${attempt.candidate_name || attempt.phone || 'candidate'}...`)
       await previewAssessmentReport(access, attempt.attempt_id)
-      setNotice('Assessment report opened.')
+      setNoticeOk('Assessment report opened.')
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not open the assessment report.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not open the assessment report.'))
     }
   }
 
@@ -1150,14 +1172,14 @@ function App() {
     setNotice('Refreshing assessment setup...')
     try {
       const result = await recalculateAssessmentNorms(access, true)
-      setNotice(
+      setNoticeOk(
         result.status === 'empirical_ready'
           ? 'Assessment setup refreshed.'
           : 'Assessment setup saved. More completed results are needed before calibration is complete.',
       )
       revalidatePrehire()
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not refresh assessment scoring.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not refresh assessment scoring.'))
     } finally {
       setBusy(false)
     }
@@ -1169,7 +1191,7 @@ function App() {
       return
     }
     await navigator.clipboard.writeText(value)
-    setNotice(`${label} copied.`)
+    setNoticeOk(`${label} copied.`)
   }
 
   function viewJobCandidates(job: PositionSummary) {
@@ -1211,9 +1233,9 @@ function App() {
       rememberDashboardChatConversationId(access, payload.session.conversation_id)
       setChatMessages((payload.messages || []).map(storedDashboardMessageToChatMessage))
       setChatHistoryOpen(false)
-      setNotice(`Reopened ${payload.session.title || 'Wathefni Assistant chat'}.`)
+      setNoticeOk(`Reopened ${payload.session.title || 'Wathefni Assistant chat'}.`)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not open that chat.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not open that chat.'))
     }
   }
 
@@ -1229,9 +1251,9 @@ function App() {
       setChatInput('')
       setNewChatConfirmOpen(false)
       await loadChatSessions(access)
-      setNotice('Started a new Wathefni Assistant chat. Saved records were not changed.')
+      setNoticeOk('Started a new Wathefni Assistant chat. Saved records were not changed.')
     } catch (error) {
-      setNotice(friendlyDashboardError(error, 'Could not start a new chat.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not start a new chat.'))
     } finally {
       setChatBusy(false)
     }
@@ -1252,6 +1274,7 @@ function App() {
     setChatBusy(true)
     let finalResponse: DashboardChatResponse | null = null
     let finalSessionId: string | null = null
+    let streamFailed = false
     try {
       await streamDashboardChat(
         access,
@@ -1291,6 +1314,7 @@ function App() {
             )
           }
           if (event.type === 'error') {
+            streamFailed = true
             setChatMessages((items) =>
               items.map((item) =>
                 item.id === assistantId
@@ -1305,13 +1329,19 @@ function App() {
           }
         },
       )
-      setNotice('Answered by the Wathefni assistant.')
+      // A mid-stream error resolves the stream normally (the bubble already shows
+      // the friendly failure). Never claim success after a failed answer.
+      if (streamFailed) {
+        setNoticeErr('Wathefni couldn’t finish answering. Please try again.')
+      } else {
+        setNoticeOk('Answered by the Wathefni assistant.')
+      }
       if (finalSessionId) {
         setChatConversationId(finalSessionId)
         rememberDashboardChatConversationId(access, finalSessionId)
       }
       await loadChatSessions(access)
-      if (finalResponse) await refreshEverything()
+      if (finalResponse && !streamFailed) await refreshEverything()
     } catch (error) {
       setChatMessages((items) =>
         items.map((item) =>
@@ -1324,6 +1354,7 @@ function App() {
             : item,
         ),
       )
+      setNoticeErr('Wathefni couldn’t finish answering. Please try again.')
     } finally {
       setChatBusy(false)
     }
@@ -1341,9 +1372,9 @@ function App() {
     setNotice(`Preparing ${label.toLowerCase()}...`)
     try {
       await downloadPrehireReport(access, type)
-      setNotice(`${label} downloaded.`)
+      setNoticeOk(`${label} downloaded.`)
     } catch (error) {
-      setNotice(friendlyDashboardError(error, `Could not download ${label.toLowerCase()}.`))
+      setNoticeErr(friendlyDashboardError(error, `Could not download ${label.toLowerCase()}.`))
     }
   }
 
@@ -1418,9 +1449,35 @@ function App() {
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="rounded-full border border-white/70 bg-panel/65 px-3.5 py-2 text-xs font-medium text-mist shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_28px_rgba(24,20,15,0.04)] backdrop-blur-xl">
-                {busy ? 'Refreshing hiring data...' : notice}
-              </div>
+              {busy ? (
+                <div className="rounded-full border border-white/70 bg-panel/65 px-3.5 py-2 text-xs font-medium text-mist shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_28px_rgba(24,20,15,0.04)] backdrop-blur-xl">
+                  Refreshing hiring data...
+                </div>
+              ) : notice.text ? (
+                <div
+                  className={cn(
+                    'flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_28px_rgba(24,20,15,0.04)] backdrop-blur-xl',
+                    notice.tone === 'success'
+                      ? 'border-emerald-300/60 bg-emerald-50/80 text-emerald-800'
+                      : notice.tone === 'error'
+                      ? 'border-rose-300/60 bg-rose-50/85 text-rose-700'
+                      : 'border-white/70 bg-panel/65 text-mist',
+                  )}
+                  role="status"
+                >
+                  <span>{notice.text}</span>
+                  {notice.tone === 'error' ? (
+                    <button
+                      type="button"
+                      onClick={() => setNotice('')}
+                      aria-label="Dismiss"
+                      className="-mr-1 ml-0.5 rounded-full px-1 text-rose-500/80 hover:text-rose-700"
+                    >
+                      ×
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
               {/* Post-hire pages carry their own module Refresh (ModuleToolbar) that
                   reloads the data actually on screen. The global Refresh only reloads
                   pre-hiring data, so it is hidden there to avoid a misleading duplicate. */}
@@ -1451,7 +1508,7 @@ function App() {
           ) : activePage !== 'settings' && !access.token.trim() ? (
             <NeedsSettings onOpenSettings={() => openPage('settings')} />
           ) : activePage !== 'settings' && !dashboardLoaded ? (
-            <LoadingDashboard busy={busy} notice={notice} onOpenSettings={() => openPage('settings')} onRefresh={() => refreshEverything()} />
+            <LoadingDashboard busy={busy} notice={notice.text} onOpenSettings={() => openPage('settings')} onRefresh={() => refreshEverything()} />
           ) : (
             <>
               {activePage === 'overview' && canManageWorkspace && setupReadiness && !setupReadiness.ready && Array.isArray(setupReadiness.steps) && setupReadiness.steps.length > 0 ? (

@@ -79,11 +79,13 @@ export type PostHireModulePage =
   | 'analytics'
   | 'compliance'
 
+export type NoticeFn = (message: string, tone?: 'success' | 'error' | 'info') => void
+
 type PostHireProps = {
   page: PostHireModulePage
   access: DashboardAccess
   permissions: string[]
-  onNotice: (message: string) => void
+  onNotice: NoticeFn
 }
 
 // --- helpers ---------------------------------------------------------------
@@ -334,7 +336,7 @@ function useModuleData<T>(loader: () => Promise<T>) {
 
 type PendingConfirmation = { text: string; actionType: string; args: Record<string, unknown>; destructive: boolean }
 
-function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: (message: string) => void) {
+function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: NoticeFn) {
   const askConfirm = useConfirm()
   const [pending, setPending] = useState<PendingConfirmation | null>(null)
   const [busy, setBusy] = useState(false)
@@ -356,11 +358,11 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
           return
         }
         setPending(null)
-        onNotice(result.message || 'Done.')
+        onNotice(result.message || 'Done.', 'success')
         await reload()
       } catch (err) {
         setPending(null)
-        onNotice(friendlyError(err, 'We could not complete that action.'))
+        onNotice(friendlyError(err, 'We could not complete that action.'), 'error')
       } finally {
         setBusy(false)
         setRunningKey(null)
@@ -412,7 +414,7 @@ function employeeRef(emp: { phone?: string; name?: string; employee_phone?: stri
 
 // --- Employees -------------------------------------------------------------
 
-function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (message: string) => void }) {
+function EmployeesPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireEmployees(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader)
   const [query, setQuery] = useState('')
@@ -644,7 +646,7 @@ function NextActionsPanel({
   )
 }
 
-function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: (message: string) => void }) {
+function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }: { access: DashboardAccess; permissions: string[]; employeeKey: string; onBack: () => void; onNotice: NoticeFn }) {
   const loader = useCallback(() => getEmployeeProfile(access, employeeKey), [access, employeeKey])
   const { data, loading, refreshing, error, reload } = useModuleData<EmployeeProfileResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
@@ -1073,8 +1075,8 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                               employeeKey={employeeKey}
                               itemId={doc.document_type}
                               hasFile={Boolean(doc.has_file)}
-                              onUploaded={(message) => { onNotice(message); void reload() }}
-                              onError={onNotice}
+                              onUploaded={(message) => { onNotice(message, 'success'); void reload() }}
+                              onError={(message) => onNotice(message, 'error')}
                             />
                           ) : null}
                         </div>
@@ -1359,7 +1361,7 @@ function OnboardingDetailPanel({
   )
 }
 
-function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireOnboarding(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireOnboardingResponse>(loader)
   const confirm = useConfirm()
@@ -1539,8 +1541,8 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                             busy={action.busy}
                             runningKey={action.runningKey}
                             onMark={(item, status) => markItem(emp, item, status)}
-                            onUploaded={(message) => { onNotice(message); void reloadAll() }}
-                            onError={onNotice}
+                            onUploaded={(message) => { onNotice(message, 'success'); void reloadAll() }}
+                            onError={(message) => onNotice(message, 'error')}
                           />
                         ) : null}
                       </div>
@@ -1620,7 +1622,7 @@ function AttendanceCorrectionRow({
   )
 }
 
-function AttendancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function AttendancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireAttendance(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireAttendanceResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
@@ -1790,7 +1792,7 @@ function CalendarCheckIcon() {
 
 // --- Leave -----------------------------------------------------------------
 
-function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireLeave(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireLeaveResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
@@ -1945,7 +1947,7 @@ function LeavePage({ access, permissions, onNotice }: { access: DashboardAccess;
 
 // --- Shifts ----------------------------------------------------------------
 
-function ShiftsPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function ShiftsPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireShifts(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireShiftsResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
@@ -2250,7 +2252,7 @@ function PayrollPolicyEditor({
   )
 }
 
-function PayrollPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function PayrollPage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthirePayroll(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
@@ -2272,9 +2274,9 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
       const payload = (res.result as { preview_rows?: PayrollPreviewRow[]; timesheet_count?: number } | null) || null
       const rows = payload?.preview_rows ?? []
       setPreview({ rows, count: payload?.timesheet_count ?? rows.length })
-      onNotice(res.message || `Preview ready · ${rows.length} timesheet${rows.length === 1 ? '' : 's'}.`)
+      onNotice(res.message || `Preview ready · ${rows.length} timesheet${rows.length === 1 ? '' : 's'}.`, 'success')
     } catch (err) {
-      onNotice(friendlyError(err, 'We could not preview payroll right now.'))
+      onNotice(friendlyError(err, 'We could not preview payroll right now.'), 'error')
     } finally {
       setPreviewBusy(false)
     }
@@ -2716,7 +2718,7 @@ function complianceReminderLabel(doc: { last_reminded_at?: string | null; remind
   return (doc.reminder_count ?? 0) > 0 ? `${when} · ${doc.reminder_count} sent` : when
 }
 
-function CompliancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (message: string) => void }) {
+function CompliancePage({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getPosthireCompliance(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireComplianceResponse>(loader)
   const [filter, setFilter] = useState<'all' | ComplianceBucket>('all')
@@ -2867,8 +2869,8 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
                                     employeeKey={doc.employee_key}
                                     itemId={doc.document_type}
                                     hasFile={Boolean(doc.file_id)}
-                                    onUploaded={(message) => { onNotice(message); void reload() }}
-                                    onError={onNotice}
+                                    onUploaded={(message) => { onNotice(message, 'success'); void reload() }}
+                                    onError={(message) => onNotice(message, 'error')}
                                   />
                                 ) : null}
                               </div>
@@ -2942,7 +2944,7 @@ function CompliancePage({ access, permissions, onNotice }: { access: DashboardAc
 // "couldn't reach an employee, please follow up". Renders nothing when there is
 // nothing to do (and stays silent until flows are wired in a later phase), so it
 // never adds noise to a clean workspace.
-function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: (m: string) => void }) {
+function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: DashboardAccess; permissions: string[]; onNotice: NoticeFn }) {
   const loader = useCallback(() => getHrTasks(access, 'open'), [access])
   const { data, error, reload } = useModuleData<HrTasksResponse>(loader)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
@@ -2959,10 +2961,10 @@ function DeliveryFollowUpCard({ access, permissions, onNotice }: { access: Dashb
     setResolvingId(task.task_id)
     try {
       await resolveHrTask(access, task.task_id, 'done')
-      onNotice('Marked as done.')
+      onNotice('Marked as done.', 'success')
       await reload()
     } catch (err) {
-      onNotice(friendlyError(err, 'We could not update that task.'))
+      onNotice(friendlyError(err, 'We could not update that task.'), 'error')
     } finally {
       setResolvingId(null)
     }
