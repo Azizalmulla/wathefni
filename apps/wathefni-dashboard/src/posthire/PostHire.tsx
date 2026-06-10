@@ -1723,7 +1723,15 @@ function AttendancePage({ access, permissions, onNotice }: { access: DashboardAc
                                           action.run(
                                             'mark_attendance_absent',
                                             { employee_name: row.employee_name, date: data?.date },
-                                            { destructive: true, key: `absent:${rowKey}` },
+                                            {
+                                              destructive: true,
+                                              key: `absent:${rowKey}`,
+                                              confirm: {
+                                                title: 'Mark this employee absent?',
+                                                body: `${row.employee_name || 'This employee'} will be marked absent for ${data?.date ? formatDate(data.date) : 'this day'}. You can correct it later if needed.`,
+                                                confirmLabel: 'Mark absent',
+                                              },
+                                            },
                                           )
                                         }
                                       >
@@ -2232,7 +2240,7 @@ function PayrollPolicyEditor({
             })
           }
         >
-          Review changes
+          Apply changes
         </Button>
         <Button variant="ghost" size="sm" disabled={busy} onClick={onCancel}>
           Cancel
@@ -2246,6 +2254,7 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
   const loader = useCallback(() => getPosthirePayroll(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader)
   const action = usePosthireAction(access, reload, onNotice)
+  const confirm = useConfirm()
   const canManage = can(permissions, 'payroll.manage')
   const [editingPolicy, setEditingPolicy] = useState(false)
   const [previewBusy, setPreviewBusy] = useState(false)
@@ -2333,7 +2342,17 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
               <Button
                 size="sm"
                 disabled={action.busy}
-                onClick={() => action.run('export_payroll', periodArgs, { destructive: true, key: 'export-payroll' })}
+                onClick={() =>
+                  action.run('export_payroll', periodArgs, {
+                    destructive: true,
+                    key: 'export-payroll',
+                    confirm: {
+                      title: 'Export this payroll period?',
+                      body: `This creates a locked payroll export from the approved timesheets for ${data?.period.start_date ? `${formatDate(data.period.start_date)}–${formatDate(data.period.end_date)}` : 'this period'}. It doesn’t transfer money or create bank files.`,
+                      confirmLabel: 'Export payroll',
+                    },
+                  })
+                }
               >
                 {action.runningKey === 'export-payroll' ? (
                   <>
@@ -2509,7 +2528,13 @@ function PayrollPage({ access, permissions, onNotice }: { access: DashboardAcces
                     policy={policy}
                     busy={action.busy}
                     onCancel={() => setEditingPolicy(false)}
-                    onSubmit={(values) => {
+                    onSubmit={async (values) => {
+                      const ok = await confirm({
+                        title: 'Apply payroll policy?',
+                        body: 'These payroll rules will apply to this company’s pay calculations going forward. You can update them again anytime.',
+                        confirmLabel: 'Apply changes',
+                      })
+                      if (!ok) return
                       action.run(
                         'set_payroll_policy',
                         { structured_policy: true, ...values },
