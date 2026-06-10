@@ -287,12 +287,16 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 function ConfirmDialog({
   text,
+  title,
+  confirmLabel,
   busy,
   destructive,
   onConfirm,
   onCancel,
 }: {
   text: string
+  title?: string
+  confirmLabel?: string
   busy: boolean
   destructive: boolean
   onConfirm: () => void
@@ -308,10 +312,10 @@ function ConfirmDialog({
               destructive ? 'bg-rose-50 text-rose-600' : 'bg-[#fff7e8] text-[#8a5a16]',
             )}
           >
-            <AlertTriangle className="h-5 w-5" />
+            {destructive ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
           </div>
           <div className="space-y-1">
-            <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Please confirm</p>
+            <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">{title || 'Confirm this action'}</p>
             <p className="text-[13px] leading-6 text-subtle/95">{text}</p>
           </div>
         </div>
@@ -319,14 +323,42 @@ function ConfirmDialog({
           <Button variant="secondary" size="sm" onClick={onCancel} disabled={busy}>
             Cancel
           </Button>
-          <Button size="sm" onClick={onConfirm} disabled={busy}>
+          <Button
+            size="sm"
+            className={destructive ? 'bg-rose-600 hover:bg-rose-600/90' : undefined}
+            onClick={onConfirm}
+            disabled={busy}
+          >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            Confirm
+            {confirmLabel || (destructive ? 'Confirm' : 'Continue')}
           </Button>
         </div>
       </div>
     </div>
   )
+}
+
+// Contextual copy for the backend-driven confirmation modal (shown when the
+// server asks for an explicit confirmation step). The body text still comes
+// from the backend; this only gives the modal a clear header + action label
+// instead of a generic "Please confirm" / "Confirm".
+const BACKEND_CONFIRM_COPY: Record<string, { title: string; confirmLabel: string }> = {
+  approve_leave_request: { title: 'Approve this leave request?', confirmLabel: 'Approve' },
+  reject_leave_request: { title: 'Decline this leave request?', confirmLabel: 'Decline' },
+  approve_timesheet: { title: 'Approve this timesheet?', confirmLabel: 'Approve' },
+  reject_timesheet: { title: 'Reject this timesheet?', confirmLabel: 'Reject' },
+  approve_shift_swap: { title: 'Approve this swap request?', confirmLabel: 'Approve' },
+  reject_shift_swap: { title: 'Decline this swap request?', confirmLabel: 'Decline' },
+  mark_attendance_absent: { title: 'Mark this employee absent?', confirmLabel: 'Mark absent' },
+  correct_attendance_record: { title: 'Save this attendance correction?', confirmLabel: 'Save correction' },
+  onboarding_mark_item: { title: 'Update this onboarding item?', confirmLabel: 'Confirm' },
+  set_payroll_policy: { title: 'Apply payroll policy?', confirmLabel: 'Apply changes' },
+  export_payroll: { title: 'Export this payroll period?', confirmLabel: 'Export' },
+  create_shift_assignment: { title: 'Schedule this shift?', confirmLabel: 'Schedule shift' },
+  create_timesheet_review: { title: 'Generate timesheets?', confirmLabel: 'Generate timesheets' },
+  compliance_mark_reviewed: { title: 'Mark document as reviewed?', confirmLabel: 'Mark reviewed' },
+  compliance_send_reminder: { title: 'Send document reminder?', confirmLabel: 'Send reminder' },
+  send_onboarding_reminder: { title: 'Send onboarding reminder?', confirmLabel: 'Send reminder' },
 }
 
 // --- data + action hooks ---------------------------------------------------
@@ -373,31 +405,57 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
   const [runningKey, setRunningKey] = useState<string | null>(null)
 
   const execute = useCallback(
-    async (actionType: string, args: Record<string, unknown>, destructive: boolean, key: string) => {
+    async (actionType: string, args: Record<string, unknown>, destructive: boolean, key: string, preconfirmed = false): Promise<boolean> => {
       setBusy(true)
       setRunningKey(key)
       try {
         const result = await runPosthireAction(access, { action_type: actionType, args })
         if (result.confirmation) {
+          // The user already confirmed with a polished frontend dialog — don't
+          // stack a second generic modal on top. Auto-confirm the server's step
+          // once by re-sending the identical request (server-side safety stays).
+          if (preconfirmed) {
+            const confirmed = await runPosthireAction(access, {
+              action_type: result.confirmation.action_type,
+              args: result.confirmation.args,
+            })
+            if (confirmed.confirmation) {
+              // Still asking after the retry — fall back to the modal so we
+              // never silently run something the server wants reconfirmed.
+              setPending({
+                text: confirmed.confirmation.text,
+                actionType: confirmed.confirmation.action_type,
+                args: confirmed.confirmation.args,
+                destructive,
+              })
+              return false
+            }
+            setPending(null)
+            onNotice(confirmed.message || 'Done.', 'success')
+            await reload()
+            return true
+          }
           setPending({
             text: result.confirmation.text,
             actionType: result.confirmation.action_type,
             args: result.confirmation.args,
             destructive,
           })
-          return
+          return false
         }
         setPending(null)
         onNotice(result.message || 'Done.', 'success')
         await reload()
+        return true
       } catch (err) {
         setPending(null)
         const issue = accessIssueFromError(err)
         if (issue) {
           onAccessIssue?.(issue)
-          return
+          return false
         }
         onNotice(friendlyError(err, 'We could not complete that action.'), 'error')
+        return false
       } finally {
         setBusy(false)
         setRunningKey(null)
@@ -410,20 +468,25 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
     (
       actionType: string,
       args: Record<string, unknown> = {},
-      options: { destructive?: boolean; key?: string; confirm?: ConfirmOptions } = {},
+      options: { destructive?: boolean; key?: string; confirm?: ConfirmOptions; onSuccess?: () => void } = {},
     ) => {
-      const go = () => execute(actionType, args, Boolean(options.destructive), options.key || actionType)
+      const go = async (preconfirmed: boolean) => {
+        const ok = await execute(actionType, args, Boolean(options.destructive), options.key || actionType, preconfirmed)
+        // Success-only callback lets call sites reset/close forms only once the
+        // save actually lands — entered values survive a failure.
+        if (ok) options.onSuccess?.()
+      }
       // When a call site supplies confirm copy, ask first (reusing the global
       // confirm system). Otherwise run immediately — the backend can still raise
       // its own confirmation step for actions that need one.
       if (options.confirm) {
         const copy = options.confirm
         void (async () => {
-          if (await askConfirm(copy)) void go()
+          if (await askConfirm(copy)) void go(true)
         })()
         return
       }
-      void go()
+      void go(false)
     },
     [execute, askConfirm],
   )
@@ -434,7 +497,15 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
   }, [pending, execute])
 
   const dialog = pending ? (
-    <ConfirmDialog text={pending.text} busy={busy} destructive={pending.destructive} onConfirm={confirm} onCancel={() => setPending(null)} />
+    <ConfirmDialog
+      text={pending.text}
+      title={BACKEND_CONFIRM_COPY[pending.actionType]?.title}
+      confirmLabel={BACKEND_CONFIRM_COPY[pending.actionType]?.confirmLabel}
+      busy={busy}
+      destructive={pending.destructive}
+      onConfirm={confirm}
+      onCancel={() => setPending(null)}
+    />
   ) : null
 
   return { run, busy, runningKey, dialog }
@@ -902,7 +973,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                             <span className="flex items-center gap-1.5">
                               <Badge tone={doc.tone}>{doc.status_label}</Badge>
                               {canComplianceManage && doc.status === 'needs_review' ? (
-                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey })}>
+                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${emp.name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}>
                                   {action.runningKey === reviewKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark reviewed'}
                                 </Button>
                               ) : null}
@@ -1836,9 +1907,10 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                                       time: time || undefined,
                                       notes: notes || undefined,
                                     },
-                                    { destructive: true, key: `correct:${rowKey}` },
+                                    // Keep the row open with its entered values if
+                                    // saving fails; close only after it succeeds.
+                                    { destructive: true, key: `correct:${rowKey}`, onSuccess: () => setCorrecting(null) },
                                   )
-                                  setCorrecting(null)
                                 }}
                               />
                             ) : null}
@@ -2032,12 +2104,21 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
 
   const submitShift = () => {
     if (!formReady) return
+    const employeeName = form.employee_name.trim()
     action.run(
       'create_shift_assignment',
-      { employee_name: form.employee_name.trim(), shift_date: form.shift_date, start_time: form.start_time, end_time: form.end_time },
-      { key: 'create-shift' },
+      { employee_name: employeeName, shift_date: form.shift_date, start_time: form.start_time, end_time: form.end_time },
+      {
+        key: 'create-shift',
+        confirm: {
+          title: 'Schedule this shift?',
+          body: `${employeeName} will be scheduled on ${formatDate(form.shift_date)} from ${form.start_time} to ${form.end_time}. They may be notified automatically.`,
+          confirmLabel: 'Schedule shift',
+        },
+        // Keep the entered values if scheduling fails; clear only on success.
+        onSuccess: () => setForm({ employee_name: '', shift_date: '', start_time: '', end_time: '' }),
+      },
     )
-    setForm({ employee_name: '', shift_date: '', start_time: '', end_time: '' })
   }
 
   return (
@@ -2327,7 +2408,6 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
   const loader = useCallback(() => getPosthirePayroll(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader, onAccessIssue)
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
-  const confirm = useConfirm()
   const canManage = can(permissions, 'payroll.manage', role)
   const [editingPolicy, setEditingPolicy] = useState(false)
   const [previewBusy, setPreviewBusy] = useState(false)
@@ -2392,7 +2472,16 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
                 variant="ghost"
                 size="sm"
                 disabled={action.busy}
-                onClick={() => action.run('create_timesheet_review', periodArgs, { key: 'generate-timesheets' })}
+                onClick={() =>
+                  action.run('create_timesheet_review', periodArgs, {
+                    key: 'generate-timesheets',
+                    confirm: {
+                      title: 'Generate timesheets?',
+                      body: `This builds timesheets for review from approved attendance and completed shifts${data?.period.start_date ? ` for ${formatDate(data.period.start_date)}–${formatDate(data.period.end_date)}` : ''}. Existing reviewed timesheets aren’t changed.`,
+                      confirmLabel: 'Generate timesheets',
+                    },
+                  })
+                }
               >
                 {action.runningKey === 'generate-timesheets' ? (
                   <>
@@ -2606,19 +2695,22 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
                     policy={policy}
                     busy={action.busy}
                     onCancel={() => setEditingPolicy(false)}
-                    onSubmit={async (values) => {
-                      const ok = await confirm({
-                        title: 'Apply payroll policy?',
-                        body: 'These payroll rules will apply to this company’s pay calculations going forward. You can update them again anytime.',
-                        confirmLabel: 'Apply changes',
-                      })
-                      if (!ok) return
+                    onSubmit={(values) => {
                       action.run(
                         'set_payroll_policy',
                         { structured_policy: true, ...values },
-                        { destructive: true, key: 'set-policy' },
+                        {
+                          destructive: true,
+                          key: 'set-policy',
+                          confirm: {
+                            title: 'Apply payroll policy?',
+                            body: 'These payroll rules will apply to this company’s pay calculations going forward. You can update them again anytime.',
+                            confirmLabel: 'Apply changes',
+                          },
+                          // Keep the editor open with entered values if applying fails.
+                          onSuccess: () => setEditingPolicy(false),
+                        },
                       )
-                      setEditingPolicy(false)
                     }}
                   />
                 ) : policyItems.length ? (
@@ -2968,7 +3060,7 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                                       variant="ghost"
                                       size="sm"
                                       disabled={action.busy}
-                                      onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey })}
+                                      onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${doc.employee_name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}
                                     >
                                       {action.runningKey === reviewKey ? (
                                         <>
