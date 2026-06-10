@@ -909,7 +909,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                       {sections.attendance.recent.slice(0, 5).map((r, idx) => (
                         <li key={idx} className="flex items-center justify-between gap-2">
                           <span>{formatDate(r.date)}</span>
-                          <span className="capitalize">{r.status}{r.late_minutes ? ` · +${r.late_minutes}m` : ''}</span>
+                          <span>{titleCase(r.status || '')}{r.late_minutes ? ` · +${r.late_minutes}m` : ''}</span>
                         </li>
                       ))}
                     </ul>
@@ -931,7 +931,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                     <div className="mb-3 space-y-1.5">
                       {sections.leave.balances!.map((b, idx) => (
                         <div key={idx} className="flex items-center justify-between gap-2 rounded-[0.9rem] border border-line/45 bg-panel/55 px-3 py-2 text-[12px]">
-                          <span className="capitalize text-subtle/90">{b.leave_type} balance</span>
+                          <span className="text-subtle/90">{titleCase(b.leave_type)} balance</span>
                           <span className="font-medium text-text">
                             {Math.round(b.current_balance * 10) / 10}
                             {b.entitlement_days ? ` / ${Math.round(b.entitlement_days * 10) / 10} days` : ' days'}
@@ -951,7 +951,7 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                         const rejectKey = `profile-reject-leave:${idx}`
                         return (
                           <li key={idx} className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-text capitalize">{(it.leave_type || 'leave').replace('_', ' ')} · {formatDate(it.start_date)}–{formatDate(it.end_date)}</span>
+                            <span className="text-text">{titleCase(it.leave_type || 'leave')} · {formatDate(it.start_date)}–{formatDate(it.end_date)}</span>
                             {it.status === 'requested' && canLeaveDecide ? (
                               <span className="flex items-center gap-1.5">
                                 <StatusBadge status={it.status} />
@@ -1055,9 +1055,9 @@ function EmployeeProfile({ access, permissions, employeeKey, onBack, onNotice }:
                     {sections.documents.items.map((doc) => (
                       <li key={doc.file_id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
                         <div className="min-w-0">
-                          <p className="text-[13px] font-medium text-text">{doc.label || doc.document_type || doc.filename || 'Document'}</p>
+                          <p className="text-[13px] font-medium text-text">{doc.label || (doc.document_type ? titleCase(doc.document_type) : '') || doc.filename || 'Document'}</p>
                           <p className="text-[11.5px] text-subtle/80">
-                            {doc.filename ? `${doc.filename}` : doc.document_type || ''}
+                            {doc.filename ? `${doc.filename}` : doc.document_type ? titleCase(doc.document_type) : ''}
                             {doc.stored_at ? ` · ${formatDate(doc.stored_at)}` : ''}
                           </p>
                         </div>
@@ -1214,7 +1214,7 @@ function OnboardingChecklistItem({
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-[0.9rem] border border-line/45 bg-panel/55 px-3.5 py-2.5">
       <div className="min-w-0">
         <p className="text-[13px] font-medium text-text">
-          {item.label || item.document_type || item.item_id}
+          {item.label || (item.document_type ? titleCase(item.document_type) : item.item_id)}
           {item.required ? null : <span className="ml-1.5 text-[11px] font-normal text-subtle/70">(optional)</span>}
         </p>
         <p className="mt-0.5 text-[11.5px] text-subtle/80">

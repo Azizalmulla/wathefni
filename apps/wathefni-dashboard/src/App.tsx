@@ -2744,7 +2744,7 @@ function JobDrawer({
       >
         <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
           <div>
-            <Badge tone={normalizedJobStatus(job) === 'open' ? 'success' : 'muted'}>{normalizedJobStatus(job)}</Badge>
+            <Badge tone={normalizedJobStatus(job) === 'open' ? 'success' : 'muted'}>{stageLabel(normalizedJobStatus(job))}</Badge>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">{job.position_title || job.position_code}</h2>
             <p className="mt-1 text-sm text-subtle">{job.description || 'Application opening.'}</p>
           </div>
@@ -2754,7 +2754,7 @@ function JobDrawer({
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Info label="Status" value={normalizedJobStatus(job)} />
+          <Info label="Status" value={stageLabel(normalizedJobStatus(job))} />
           <Info label="Candidate count" value={String(job.application_count || 0)} />
           <Info label="Latest applicant" value={job.latest_applicant || 'No applicants yet'} />
           <Info label="Created" value={formatDateTime(job.created_at || job.latest_application_at)} />
@@ -2764,7 +2764,6 @@ function JobDrawer({
           <summary className="cursor-pointer text-sm font-semibold text-text">Sharing details</summary>
           <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
             <Info label="Application code" value={job.apply_code || 'Not generated yet'} />
-            <Info label="Role ID" value={job.application_key || job.position_code} />
             <Info label="Application link" value={job.application_link || 'Not generated yet'} />
           </div>
         </details>
@@ -2930,7 +2929,6 @@ function JobsPage({
                   <tr className="cursor-pointer transition duration-150 hover:bg-white/55" key={job.position_code} onClick={() => onSelect(job)}>
                     <td className="px-4 py-2.5">
                       <div className="font-semibold">{job.position_title || job.position_code}</div>
-                      <div className="text-xs text-subtle">{job.position_code}</div>
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex max-w-[220px] items-center rounded-full border border-line bg-panel-muted px-2.5 py-1 font-mono text-xs text-text">
@@ -3623,7 +3621,7 @@ function AssessmentsPage({
                       <td className="px-4 py-3 text-subtle">{application.position?.title || application.position?.code || '—'}</td>
                       <td className="px-4 py-3">
                         <Badge tone={statusTone(application.assessment?.status || application.status)}>
-                          {application.assessment?.status ? `assessment ${stageLabel(application.assessment.status)}` : stageLabel(application.status)}
+                          {application.assessment?.status ? `Assessment ${stageLabel(application.assessment.status)}` : stageLabel(application.status)}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-subtle">{recommendedBattery(application)}</td>
@@ -3666,7 +3664,7 @@ function AssessmentsPage({
                   <tr>
                     <th className="px-4 py-3">Candidate</th>
                     <th className="px-4 py-3">Job</th>
-                    <th className="px-4 py-3">Battery</th>
+                    <th className="px-4 py-3">Assessment set</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Score</th>
                     <th className="px-4 py-3">Job match</th>
@@ -3954,7 +3952,7 @@ function RankingCandidateCard({
           <div className="text-xs font-semibold uppercase tracking-wide text-subtle">Rank #{index + 1}</div>
           <h3 className="mt-1 text-lg font-semibold tracking-tight">{candidate.name || candidate.phone}</h3>
           <div className="mt-1 text-sm text-subtle">
-            {candidate.position_title || candidate.position_code} / {stageLabel(candidate.status)} / evidence {candidate.confidence || 'limited'}
+            {candidate.position_title || candidate.position_code} / {stageLabel(candidate.status)} / {stageLabel(candidate.confidence || 'limited')} evidence
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -5655,7 +5653,7 @@ function notificationAlertFromActionItem(item: NotificationActionItem): Notifica
       group: 'pre_hiring',
       title: 'AI action needs approval',
       detail: `${count} AI action${count === 1 ? '' : 's'} are waiting for HR approval.`,
-      actionLabel: 'Review in Admin AI',
+      actionLabel: 'Review in Wathefni Assistant',
       count,
       severity: item.severity,
     }
@@ -6017,12 +6015,12 @@ function safeModuleRecommendation(value: string | null | undefined, fallback: st
 
 function recommendedBattery(application: ApplicationSummary) {
   const role = `${application.position?.title || ''} ${application.position?.code || ''}`.toLowerCase()
-  if (role.includes('teller') || role.includes('cashier')) return 'Teller battery'
-  if (role.includes('customer') || role.includes('service') || role.includes('call center')) return 'Customer Service Officer battery'
-  if (role.includes('sales') || role.includes('relationship') || role.includes('business development')) return 'Sales Officer battery'
-  if (role.includes('operation') || role.includes('back office') || role.includes('processing')) return 'Operations Officer battery'
-  if (role.includes('hr') || role.includes('recruit') || role.includes('admin') || role.includes('finance')) return 'HR/Admin battery'
-  return 'General role battery'
+  if (role.includes('teller') || role.includes('cashier')) return 'Teller set'
+  if (role.includes('customer') || role.includes('service') || role.includes('call center')) return 'Customer Service set'
+  if (role.includes('sales') || role.includes('relationship') || role.includes('business development')) return 'Sales set'
+  if (role.includes('operation') || role.includes('back office') || role.includes('processing')) return 'Operations set'
+  if (role.includes('hr') || role.includes('recruit') || role.includes('admin') || role.includes('finance')) return 'HR / Admin set'
+  return 'General set'
 }
 
 function roleBatteryCards(questionCount: number, sections: string) {
