@@ -1105,29 +1105,37 @@ function DocumentActions({
   compact?: boolean
 }) {
   const [busy, setBusy] = useState<'inline' | 'attachment' | null>(null)
+  const [failed, setFailed] = useState(false)
   if (!fileId) return null
   const open = async (disposition: 'inline' | 'attachment') => {
     setBusy(disposition)
+    setFailed(false)
     try {
       await openEmployeeDocument(access, fileId, { disposition, filename: filename || undefined })
     } catch (err) {
-      // Surface nothing intrusive — the file simply fails to open. The fetch
-      // itself logs via the network layer; we avoid leaking detail to the DOM.
+      // Raw detail stays in the console; the user gets a calm inline notice
+      // instead of a silently-failing button.
       console.error('Could not open document', err)
+      setFailed(true)
     } finally {
       setBusy(null)
     }
   }
   return (
-    <div className="flex items-center gap-1.5">
-      <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('inline')} title="View document">
-        {busy === 'inline' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-        {compact ? null : <span className="ml-1.5">View</span>}
-      </Button>
-      <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('attachment')} title="Download document">
-        {busy === 'attachment' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-        {compact ? null : <span className="ml-1.5">Download</span>}
-      </Button>
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex items-center gap-1.5">
+        <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('inline')} title="View document">
+          {busy === 'inline' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+          {compact ? null : <span className="ml-1.5">View</span>}
+        </Button>
+        <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => open('attachment')} title="Download document">
+          {busy === 'attachment' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {compact ? null : <span className="ml-1.5">Download</span>}
+        </Button>
+      </div>
+      {failed ? (
+        <span className="text-[11px] leading-4 text-rose-600">Couldn’t open this document. Please try again.</span>
+      ) : null}
     </div>
   )
 }
@@ -1257,6 +1265,8 @@ function OnboardingDetailPanel({
   access,
   detail,
   loading,
+  error,
+  onRetry,
   canMutate,
   busy,
   runningKey,
@@ -1267,6 +1277,8 @@ function OnboardingDetailPanel({
   access: DashboardAccess
   detail: OnboardingDetailResponse | null
   loading: boolean
+  error?: boolean
+  onRetry?: () => void
   canMutate: boolean
   busy: boolean
   runningKey: string | null
@@ -1276,6 +1288,16 @@ function OnboardingDetailPanel({
 }) {
   if (loading && !detail) {
     return <div className="px-4 py-3 text-[12.5px] text-subtle/80">Loading checklist…</div>
+  }
+  if (error && !detail) {
+    return (
+      <div className="flex flex-wrap items-center gap-3 border-t border-line/45 bg-panel-muted/30 px-4 py-3 text-[12.5px] text-subtle/80">
+        <span>We couldn’t load this checklist. Please try again.</span>
+        {onRetry ? (
+          <Button variant="secondary" size="sm" onClick={onRetry}>Try again</Button>
+        ) : null}
+      </div>
+    )
   }
   if (!detail) return null
   const pending = detail.pending ?? []
@@ -1346,14 +1368,17 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
   const [expanded, setExpanded] = useState<string | null>(null)
   const [detail, setDetail] = useState<OnboardingDetailResponse | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState(false)
 
   const loadDetail = useCallback(
     async (key: string) => {
       setDetailLoading(true)
+      setDetailError(false)
       try {
         setDetail(await getOnboardingDetail(access, key))
       } catch {
         setDetail(null)
+        setDetailError(true)
       } finally {
         setDetailLoading(false)
       }
@@ -1378,10 +1403,12 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
       if (expanded === key) {
         setExpanded(null)
         setDetail(null)
+        setDetailError(false)
         return
       }
       setExpanded(key)
       setDetail(null)
+      setDetailError(false)
       void loadDetail(key)
     },
     [expanded, loadDetail],
@@ -1506,6 +1533,8 @@ function OnboardingPage({ access, permissions, onNotice }: { access: DashboardAc
                             access={access}
                             detail={detail}
                             loading={detailLoading}
+                            error={detailError}
+                            onRetry={() => { if (emp.employee_key) void loadDetail(emp.employee_key) }}
                             canMutate={canMutate}
                             busy={action.busy}
                             runningKey={action.runningKey}

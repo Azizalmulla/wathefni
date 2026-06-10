@@ -585,6 +585,7 @@ export function ImportReviewQueue({
   const [autoAdmittedTotal, setAutoAdmittedTotal] = useState(0)
   const [collapsed, setCollapsed] = useState(false)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [assignDraft, setAssignDraft] = useState<Record<string, string>>({})
   const [busyGroup, setBusyGroup] = useState<string>('')
@@ -604,6 +605,8 @@ export function ImportReviewQueue({
       })
     } catch (err) {
       setError(friendlyImportError(err, 'We couldn’t load the intake queue right now. Please try again.'))
+    } finally {
+      setLoading(false)
     }
   }, [access])
 
@@ -674,6 +677,16 @@ export function ImportReviewQueue({
     } finally {
       setBusyGroup('')
     }
+  }
+
+  if (loading && !groups.length && !error) {
+    return (
+      <Card>
+        <CardContent className="flex items-center gap-2 py-4 text-sm text-subtle">
+          <Loader2 className="animate-spin" size={16} /> Loading candidates to review…
+        </CardContent>
+      </Card>
+    )
   }
 
   if (!groups.length && !error) {
