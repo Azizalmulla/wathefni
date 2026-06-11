@@ -15880,7 +15880,15 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
 
 def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
-    start_date, end_date = leave_date_window(action)
+    if action.get("history"):
+        # History view uses the explicit window verbatim (the shared leave/shift
+        # window clamps the span to ~31 days, which would hide older history).
+        start_date = parse_shift_date_value(action.get("start_date")) or (kuwait_today() - timedelta(days=180))
+        end_date = parse_shift_date_value(action.get("end_date")) or kuwait_today()
+        if end_date < start_date:
+            start_date, end_date = end_date, start_date
+    else:
+        start_date, end_date = leave_date_window(action)
     scope = org_scope_for_action(action, company)
     employee = resolve_leave_employee(action, company_code=company, required=False)
     if employee and action.get("viewer_phone") and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=action.get("viewer_phone")):
@@ -15904,6 +15912,16 @@ def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> 
     if scope_clause:
         where.append(scope_clause.removeprefix("AND "))
         params.extend(scope_params)
+    # Optional knobs (default behavior unchanged for existing callers). History
+    # needs recent-first + a higher cap so recent rows aren't truncated on a busy
+    # company; the operational pending/upcoming reads keep ascending + 50.
+    order_sql = "lr.start_date DESC, lr.employee_name NULLS LAST" if normalize_text(action.get("order") or "") == "recent" else "lr.start_date, lr.employee_name NULLS LAST"
+    try:
+        row_limit = int(action.get("limit") or 50)
+    except (TypeError, ValueError):
+        row_limit = 50
+    row_limit = max(1, min(row_limit, 500))
+    params.append(row_limit)
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -15919,8 +15937,8 @@ def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> 
                   ) AS shift_conflict_count
                 FROM leave_requests lr
                 WHERE {' AND '.join(where)}
-                ORDER BY lr.start_date, lr.employee_name NULLS LAST
-                LIMIT 50
+                ORDER BY {order_sql}
+                LIMIT %s
                 """,
                 params,
             )
@@ -42773,17 +42791,54 @@ def dashboard_posthire_attendance_export(
     )
 
 
+LEAVE_HISTORY_STATUSES = {"approved", "rejected", "cancelled", "requested"}
+
+
 @app.get("/dashboard/posthire/leave")
-def dashboard_posthire_leave(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_leave(
+    view: str = Query("active"),
+    status: str | None = Query(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "leave")
-    start, end = _posthire_window(7, 60)
     viewer_phone = context.get("hr_phone")
+
+    # History view: decided/past leave over a wide window. Same source of truth,
+    # same manager scope; HR keeps pending/upcoming as the default focus.
+    if str(view).strip().lower() == "history":
+        hist_start, hist_end = _posthire_window(180, 30)
+        status_norm = str(status or "").strip().lower()
+        result = list_leave_requests(
+            {
+                "company_code": company,
+                "status": status_norm if status_norm in LEAVE_HISTORY_STATUSES else "",
+                "start_date": hist_start,
+                "end_date": hist_end,
+                "viewer_phone": viewer_phone,
+                "order": "recent",
+                "limit": 200,
+                "history": True,
+            },
+            company_code=company,
+        )
+        rows = result.get("leave_requests") or []
+        rows = sorted(rows, key=lambda r: str(r.get("start_date") or ""), reverse=True)
+        return json_safe({
+            "company_code": company,
+            "view": "history",
+            "history": rows,
+            "status_filter": status_norm if status_norm in LEAVE_HISTORY_STATUSES else None,
+            "balances_enabled": leave_balances_enabled(),
+        })
+
+    start, end = _posthire_window(7, 60)
     pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
     upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
     pending_rows = pending.get("leave_requests") or []
     upcoming_rows = upcoming.get("leave_requests") or []
     payload = {
         "company_code": company,
+        "view": "active",
         "pending": pending_rows,
         "upcoming": upcoming_rows,
         "balances_enabled": leave_balances_enabled(),

@@ -1046,6 +1046,7 @@ export type PosthireLeaveRow = {
   status?: string
   start_date?: string
   end_date?: string
+  reason?: string | null
 }
 
 export type LeaveBalance = {
@@ -1061,8 +1062,11 @@ export type LeaveBalance = {
 
 export type PosthireLeaveResponse = {
   company_code: string
-  pending: PosthireLeaveRow[]
-  upcoming: PosthireLeaveRow[]
+  view?: 'active' | 'history'
+  pending?: PosthireLeaveRow[]
+  upcoming?: PosthireLeaveRow[]
+  history?: PosthireLeaveRow[]
+  status_filter?: string | null
   balances_enabled?: boolean
   balances?: Record<string, LeaveBalance[]>
 }

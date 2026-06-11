@@ -24,7 +24,7 @@ import { type ChangeEvent, Fragment, type ReactNode, useCallback, useEffect, use
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input, Select } from '@/components/ui/field'
+import { Input, Select, Textarea } from '@/components/ui/field'
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
   cancelShift,
@@ -2304,14 +2304,168 @@ function CalendarCheckIcon() {
 
 // --- Leave -----------------------------------------------------------------
 
+const LEAVE_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'annual', label: 'Annual leave' },
+  { value: 'sick', label: 'Sick leave' },
+  { value: 'time_off', label: 'Time off' },
+]
+
+// File a leave request on behalf of an employee. request_leave does NOT notify
+// the employee or change balances (those happen on approval), so the form submit
+// itself is the deliberate step — no extra confirm modal. Errors stay inline and
+// the form keeps its values so HR can fix and retry.
+function FileLeaveModal({ access, onClose, onNotice, onDone, onAccessIssue }: {
+  access: DashboardAccess
+  onClose: () => void
+  onNotice: NoticeFn
+  onDone: () => void
+  onAccessIssue?: (issue: AccessIssue) => void
+}) {
+  const [employees, setEmployees] = useState<PosthireEmployee[]>([])
+  const [loadingEmployees, setLoadingEmployees] = useState(true)
+  const [employeeKey, setEmployeeKey] = useState('')
+  const [leaveType, setLeaveType] = useState('annual')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [reason, setReason] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    setLoadingEmployees(true)
+    getPosthireEmployees(access)
+      .then((r) => {
+        if (alive) setEmployees(r.employees || [])
+      })
+      .catch((err) => {
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          onAccessIssue?.(issue)
+          return
+        }
+        setError(friendlyError(err, 'We couldn’t load employees. Please try again.'))
+      })
+      .finally(() => {
+        if (alive) setLoadingEmployees(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [access, onAccessIssue])
+
+  const selected = employees.find((e) => e.employee_key === employeeKey)
+  const ready = Boolean(employeeKey && startDate && endDate)
+
+  const submit = async () => {
+    if (!ready) {
+      setError('Choose an employee and the leave dates.')
+      return
+    }
+    if (endDate < startDate) {
+      setError('The end date must be on or after the start date.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await runPosthireAction(access, {
+        action_type: 'request_leave',
+        args: {
+          employee_name: selected?.name,
+          employee_phone: selected?.phone,
+          leave_type: leaveType,
+          start_date: startDate,
+          end_date: endDate,
+          reason: reason.trim() || undefined,
+        },
+      })
+      if (res.ok) {
+        onNotice(res.message || 'Leave filed for approval.', 'success')
+        onDone()
+        onClose()
+      } else {
+        // Honest failure (e.g. overlapping leave) — keep the form open.
+        setError(res.message || 'We couldn’t file this leave. Please check the details and try again.')
+      }
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      setError(friendlyError(err, 'We couldn’t file this leave. Please try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="space-y-1">
+          <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">File leave on behalf</p>
+          <p className="text-[13px] leading-6 text-subtle/95">Record a leave request for an employee. It’s filed for approval — balances update only when you approve it.</p>
+        </div>
+        <div className="mt-5 space-y-3.5">
+          <RosterField label="Employee" required>
+            <Select className="w-full" value={employeeKey} onChange={(e) => setEmployeeKey(e.target.value)} disabled={loadingEmployees}>
+              <option value="">{loadingEmployees ? 'Loading employees…' : 'Select an employee'}</option>
+              {employees.map((e) => (
+                <option key={e.employee_key} value={e.employee_key}>
+                  {e.name}{e.position_title ? ` · ${e.position_title}` : ''}
+                </option>
+              ))}
+            </Select>
+          </RosterField>
+          <RosterField label="Leave type" required>
+            <Select className="w-full" value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
+              {LEAVE_TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </Select>
+          </RosterField>
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            <RosterField label="Start date" required>
+              <Input className="w-full" type="date" value={startDate} max={endDate || undefined} onChange={(e) => setStartDate(e.target.value)} />
+            </RosterField>
+            <RosterField label="End date" required>
+              <Input className="w-full" type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} />
+            </RosterField>
+          </div>
+          <RosterField label="Reason (optional)">
+            <Textarea className="w-full" rows={2} value={reason} placeholder="Add a note for context" onChange={(e) => setReason(e.target.value)} />
+          </RosterField>
+        </div>
+        {error ? <p className="mt-3 text-[13px] text-rose-600">{error}</p> : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button size="sm" onClick={() => void submit()} disabled={busy || !ready}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            File leave
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireLeave(access), [access])
+  const [view, setView] = useState<'active' | 'history'>('active')
+  const [historyStatus, setHistoryStatus] = useState('')
+  const [showFile, setShowFile] = useState(false)
+  const loader = useCallback(
+    () => getPosthireLeave(access, view === 'history' ? { view: 'history', status: historyStatus || undefined } : undefined),
+    [access, view, historyStatus],
+  )
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireLeaveResponse>(loader, onAccessIssue)
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const canManage = can(permissions, 'leave.decide', role)
+  const canFile = can(permissions, 'leave.request', role)
 
   const pending = data?.pending ?? []
   const upcoming = data?.upcoming ?? []
+  const history = data?.history ?? []
   const balancesEnabled = Boolean(data?.balances_enabled)
 
   const annualChip = (row: PosthireLeaveRow) => {
@@ -2330,11 +2484,81 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
   return (
     <div className="space-y-6">
       {action.dialog}
-      <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
+      {showFile ? (
+        <FileLeaveModal
+          access={access}
+          onClose={() => setShowFile(false)}
+          onNotice={onNotice}
+          onDone={() => void reload()}
+          onAccessIssue={onAccessIssue}
+        />
+      ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button variant={view === 'active' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('active')}>Active</Button>
+          <Button variant={view === 'history' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('history')}>History</Button>
+        </div>
+        <div className="flex items-center gap-2">
+          {canFile ? (
+            <Button size="sm" onClick={() => setShowFile(true)}>
+              <Plus className="h-4 w-4" /> File leave
+            </Button>
+          ) : null}
+          <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
+        </div>
+      </div>
       {loading ? (
         <LoadingState />
       ) : error ? (
         <ErrorState message={error} onRetry={() => void reload()} />
+      ) : view === 'history' ? (
+        <Card>
+          <CardHeader className="flex flex-col gap-3">
+            <div className="flex flex-row flex-wrap items-center justify-between gap-3">
+              <div>
+                <CardTitle>Leave history</CardTitle>
+                <CardDescription>Approved, declined, cancelled, and past leave.</CardDescription>
+              </div>
+              <Select className="h-9 w-auto" value={historyStatus} onChange={(e) => setHistoryStatus(e.target.value)}>
+                <option value="">All statuses</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Declined</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="requested">Requested</option>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {history.length === 0 ? (
+              <EmptyState icon={<CalendarDays className="h-5 w-5" />} title="No leave history yet" hint="Approved, declined, cancelled, and past leave will appear here." />
+            ) : (
+              <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                <table className="w-full min-w-[640px] text-left text-[13px]">
+                  <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Employee</th>
+                      <th className="px-4 py-3 font-medium">Type</th>
+                      <th className="px-4 py-3 font-medium">Dates</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line/45">
+                    {history.map((row, idx) => (
+                      <tr key={row.leave_id || idx} className="hover:bg-white/45">
+                        <td className="px-4 py-3 font-semibold text-text">{row.employee_name || '—'}</td>
+                        <td className="px-4 py-3 text-subtle/90">{titleCase(row.leave_type || 'leave')}</td>
+                        <td className="px-4 py-3 text-subtle/90">{formatDate(row.start_date)} → {formatDate(row.end_date)}</td>
+                        <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
+                        <td className="px-4 py-3 text-subtle/80">{row.reason || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : (
         <>
           <NextAction
@@ -2444,7 +2668,39 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
                         <span className="font-medium text-text">{row.employee_name || 'Employee'}</span>
                         {annualChip(row)}
                       </div>
-                      <span className="text-subtle/90">{formatDate(row.start_date)} → {formatDate(row.end_date)}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-subtle/90">{formatDate(row.start_date)} → {formatDate(row.end_date)}</span>
+                        {canManage ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={action.busy}
+                            onClick={() =>
+                              action.run(
+                                'cancel_leave_request',
+                                { leave_id: row.leave_id, employee_name: row.employee_name, employee_phone: row.employee_phone, start_date: row.start_date, end_date: row.end_date },
+                                {
+                                  destructive: true,
+                                  key: `cancel-leave:${row.leave_id || idx}`,
+                                  confirm: {
+                                    title: 'Cancel this leave?',
+                                    body: `${row.employee_name || 'This employee'}'s ${titleCase(row.leave_type || 'leave')} for ${formatDate(row.start_date)} → ${formatDate(row.end_date)} will be cancelled. They'll be notified, and any tracked balance is restored.`,
+                                    confirmLabel: 'Cancel leave',
+                                  },
+                                },
+                              )
+                            }
+                          >
+                            {action.runningKey === `cancel-leave:${row.leave_id || idx}` ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Cancelling…
+                              </>
+                            ) : (
+                              'Cancel'
+                            )}
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -667,8 +667,12 @@ export async function exportAttendanceCsv(access: DashboardAccess, range: { star
   URL.revokeObjectURL(url)
 }
 
-export function getPosthireLeave(access: DashboardAccess) {
-  return request<PosthireLeaveResponse>('/dashboard/posthire/leave', access)
+export function getPosthireLeave(access: DashboardAccess, opts?: { view?: 'active' | 'history'; status?: string }) {
+  const params = new URLSearchParams()
+  if (opts?.view) params.set('view', opts.view)
+  if (opts?.status) params.set('status', opts.status)
+  const qs = params.toString()
+  return request<PosthireLeaveResponse>(`/dashboard/posthire/leave${qs ? `?${qs}` : ''}`, access)
 }
 
 export function getPosthireShifts(access: DashboardAccess, week = 0) {
