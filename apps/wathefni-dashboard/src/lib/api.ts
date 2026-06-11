@@ -28,6 +28,7 @@ import type {
   PosthireAnalyticsResponse,
   PosthireComplianceResponse,
   PosthireAttendanceResponse,
+  PosthireEmployee,
   PosthireEmployeesResponse,
   EmployeeProfileResponse,
   HrTasksResponse,
@@ -420,6 +421,12 @@ export function hireCandidate(access: DashboardAccess, appKey: string) {
   })
 }
 
+export function rejectCandidate(access: DashboardAccess, appKey: string) {
+  return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/reject`, access, {
+    method: 'POST',
+  })
+}
+
 export function notifyCandidate(access: DashboardAccess, appKey: string, message?: string) {
   return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/notify`, access, {
     method: 'POST',
@@ -572,6 +579,50 @@ export function runPosthireAction(access: DashboardAccess, body: { action_type: 
 
 export function getPosthireEmployees(access: DashboardAccess) {
   return request<PosthireEmployeesResponse>('/dashboard/posthire/employees', access)
+}
+
+// Add a single employee directly to the workforce (no pre-hiring pipeline). The
+// server returns { status: 'exists' } with ok:false when the phone already maps
+// to an employee, so the caller shows a friendly message instead of throwing.
+export function createEmployee(
+  access: DashboardAccess,
+  body: { name: string; phone: string; email?: string; position_title?: string; department?: string; start_date?: string },
+) {
+  return request<{ ok: boolean; status: 'created' | 'exists'; employee: PosthireEmployee | null; message?: string }>(
+    '/dashboard/posthire/employees',
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
+}
+
+export type EmployeeImportRow = { row: number; name: string; reason?: string }
+export type EmployeeImportResult = {
+  ok: boolean
+  dry_run: boolean
+  total_rows: number
+  counts: { created: number; skipped: number; needs_review: number; failed: number }
+  results: {
+    created: EmployeeImportRow[]
+    skipped: EmployeeImportRow[]
+    needs_review: EmployeeImportRow[]
+    failed: EmployeeImportRow[]
+  }
+}
+
+// Bulk import employees from CSV/XLSX. The browser sets the multipart boundary,
+// so we must not set Content-Type here. dryRun previews the result without writing.
+export async function importEmployees(access: DashboardAccess, body: { file: File; dryRun?: boolean }) {
+  const form = new FormData()
+  form.append('file', body.file)
+  form.append('dry_run', body.dryRun ? 'true' : 'false')
+  const response = await fetch('/dashboard/posthire/employees/import', {
+    method: 'POST',
+    headers: dashboardHeaders(access),
+    body: form,
+  })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new DashboardApiError(response.status, payload?.detail || payload, 'Could not import employees.')
+  return payload as EmployeeImportResult
 }
 
 export function getEmployeeProfile(access: DashboardAccess, employeeKey: string) {

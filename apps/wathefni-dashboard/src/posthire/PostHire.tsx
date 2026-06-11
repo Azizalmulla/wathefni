@@ -11,6 +11,7 @@ import {
   Eye,
   FileText,
   Loader2,
+  Plus,
   RefreshCw,
   Repeat,
   Search,
@@ -26,8 +27,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input, Select } from '@/components/ui/field'
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
+  createEmployee,
   DashboardApiError,
+  type EmployeeImportResult,
   getHrTasks,
+  importEmployees,
   getPosthireAnalytics,
   getPosthireAttendance,
   getEmployeeProfile,
@@ -244,7 +248,7 @@ function StatCard({ label, value, hint }: { label: string; value: string | numbe
   )
 }
 
-function EmptyState({ icon, title, hint, points }: { icon: ReactNode; title: string; hint?: string; points?: string[] }) {
+function EmptyState({ icon, title, hint, points, action }: { icon: ReactNode; title: string; hint?: string; points?: string[]; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 rounded-[1.3rem] border border-dashed border-line/70 bg-panel/50 px-6 py-12 text-center">
       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-subtle shadow-sm">{icon}</div>
@@ -260,6 +264,7 @@ function EmptyState({ icon, title, hint, points }: { icon: ReactNode; title: str
           ))}
         </ul>
       ) : null}
+      {action ? <div className="mt-3">{action}</div> : null}
     </div>
   )
 }
@@ -520,11 +525,239 @@ function employeeRef(emp: { phone?: string; name?: string; employee_phone?: stri
 
 // --- Employees -------------------------------------------------------------
 
+function RosterField({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="text-[12px] font-medium text-subtle/90">
+        {label}
+        {required ? <span className="text-rose-500"> *</span> : null}
+      </span>
+      {children}
+    </label>
+  )
+}
+
+function AddEmployeeModal({ access, onClose, onNotice, onAdded }: {
+  access: DashboardAccess
+  onClose: () => void
+  onNotice: NoticeFn
+  onAdded: () => void
+}) {
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [title, setTitle] = useState('')
+  const [department, setDepartment] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const ready = name.trim().length > 0 && phone.trim().length > 0
+
+  const submit = async () => {
+    if (!ready) {
+      setError('Add a full name and a WhatsApp phone number.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await createEmployee(access, {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim() || undefined,
+        position_title: title.trim() || undefined,
+        department: department.trim() || undefined,
+        start_date: startDate || undefined,
+      })
+      if (res.ok && res.status === 'created') {
+        onNotice(`${name.trim()} was added to your workforce.`, 'success')
+        onAdded()
+        onClose()
+        return
+      }
+      // Existing employee — keep the form so HR can correct the number.
+      setError(res.message || 'An employee with this phone number already exists.')
+    } catch (err) {
+      setError(friendlyError(err, 'We couldn’t add this employee. Please try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-lg overflow-y-auto rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="space-y-1">
+          <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Add employee</p>
+          <p className="text-[13px] leading-6 text-subtle/95">Add someone already on your team. They’ll appear across your enabled modules right away.</p>
+        </div>
+        <div className="mt-5 grid gap-3.5 sm:grid-cols-2">
+          <RosterField label="Full name" required>
+            <Input className="w-full" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sara Al-Ali" autoFocus />
+          </RosterField>
+          <RosterField label="Phone / WhatsApp" required>
+            <Input className="w-full" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 96550000000" inputMode="tel" />
+          </RosterField>
+          <RosterField label="Email">
+            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" type="email" />
+          </RosterField>
+          <RosterField label="Job title">
+            <Input className="w-full" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Optional" />
+          </RosterField>
+          <RosterField label="Department / team">
+            <Input className="w-full" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Optional" />
+          </RosterField>
+          <RosterField label="Start date">
+            <Input className="w-full" value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
+          </RosterField>
+        </div>
+        {error ? <p className="mt-3 text-[13px] text-rose-600">{error}</p> : null}
+        <p className="mt-3 text-[12px] leading-5 text-subtle/80">The phone number is the employee’s WhatsApp contact. We won’t message them automatically.</p>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button size="sm" onClick={() => void submit()} disabled={busy || !ready}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Add employee
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ImportSummaryRow({ label, rows, tone }: { label: string; rows: EmployeeImportResult['results']['created']; tone: 'success' | 'warning' | 'danger' | 'muted' }) {
+  if (!rows.length) return null
+  const toneClass = tone === 'success'
+    ? 'text-emerald-700'
+    : tone === 'danger'
+      ? 'text-rose-600'
+      : tone === 'warning'
+        ? 'text-[#8a5a16]'
+        : 'text-subtle/85'
+  return (
+    <div className="rounded-2xl border border-line/50 bg-white/55 p-3">
+      <p className={cn('text-[13px] font-semibold', toneClass)}>{label} · {rows.length}</p>
+      <ul className="mt-1 space-y-0.5 text-[12px] leading-5 text-subtle/85">
+        {rows.slice(0, 8).map((r) => (
+          <li key={`${label}-${r.row}`}>{r.name}{r.reason ? ` — ${r.reason}` : ''}</li>
+        ))}
+        {rows.length > 8 ? <li className="text-subtle/70">+{rows.length - 8} more</li> : null}
+      </ul>
+    </div>
+  )
+}
+
+function ImportEmployeesModal({ access, onClose, onNotice, onImported }: {
+  access: DashboardAccess
+  onClose: () => void
+  onNotice: NoticeFn
+  onImported: () => void
+}) {
+  const [file, setFile] = useState<File | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [preview, setPreview] = useState<EmployeeImportResult | null>(null)
+  const [result, setResult] = useState<EmployeeImportResult | null>(null)
+
+  const pickFile = (next: File | null) => {
+    setFile(next)
+    setPreview(null)
+    setResult(null)
+    setError(null)
+  }
+
+  const run = async (dryRun: boolean) => {
+    if (!file) {
+      setError('Choose a CSV or XLSX file first.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await importEmployees(access, { file, dryRun })
+      if (dryRun) {
+        setPreview(res)
+      } else {
+        setResult(res)
+        setPreview(null)
+        if (res.counts.created > 0) {
+          onNotice(`Imported ${res.counts.created} employee${res.counts.created === 1 ? '' : 's'}.`, 'success')
+          onImported()
+        } else {
+          onNotice('No new employees were added.', 'info')
+        }
+      }
+    } catch (err) {
+      setError(friendlyError(err, 'We couldn’t import this file. Please check the format and try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const summary = result ?? preview
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-lg overflow-y-auto rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="space-y-1">
+          <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Import employees</p>
+          <p className="text-[13px] leading-6 text-subtle/95">Upload a CSV or XLSX of your existing team. We never message anyone during an import.</p>
+        </div>
+        <div className="mt-4 rounded-2xl border border-line/50 bg-white/55 p-3 text-[12px] leading-5 text-subtle/85">
+          <p className="font-medium text-subtle/95">Required columns: <span className="font-semibold text-text">name</span>, <span className="font-semibold text-text">phone</span></p>
+          <p className="mt-0.5">Optional: email, job title, department, start date. Format phone columns as text to keep leading digits.</p>
+        </div>
+        <div className="mt-4">
+          <input
+            type="file"
+            accept=".csv,.xlsx,.xlsm,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+            disabled={busy}
+            className="block w-full text-[13px] text-subtle/90 file:mr-3 file:rounded-full file:border-0 file:bg-[#fff7e8] file:px-4 file:py-2 file:text-[13px] file:font-medium file:text-[#8a5a16] hover:file:bg-[#fdeecb]"
+          />
+          {file ? <p className="mt-2 text-[12px] text-subtle/80">{file.name}</p> : null}
+        </div>
+        {error ? <p className="mt-3 text-[13px] text-rose-600">{error}</p> : null}
+        {summary ? (
+          <div className="mt-4 space-y-2">
+            <p className="text-[12px] font-medium text-subtle/90">
+              {result ? 'Import complete' : `Preview · ${summary.total_rows} row${summary.total_rows === 1 ? '' : 's'} found`}
+            </p>
+            <ImportSummaryRow label={result ? 'Added' : 'Will be added'} rows={summary.results.created} tone="success" />
+            <ImportSummaryRow label="Skipped (already in workforce)" rows={summary.results.skipped} tone="muted" />
+            <ImportSummaryRow label="Needs review" rows={summary.results.needs_review} tone="warning" />
+            <ImportSummaryRow label="Couldn’t be added" rows={summary.results.failed} tone="danger" />
+          </div>
+        ) : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={busy}>{result ? 'Close' : 'Cancel'}</Button>
+          {!result ? (
+            <>
+              <Button variant="secondary" size="sm" onClick={() => void run(true)} disabled={busy || !file}>
+                {busy && preview === null ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                Preview
+              </Button>
+              <Button size="sm" onClick={() => void run(false)} disabled={busy || !file}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                Import
+              </Button>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const loader = useCallback(() => getPosthireEmployees(access), [access])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader, onAccessIssue)
   const [query, setQuery] = useState('')
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [showImport, setShowImport] = useState(false)
+  const canManageRoster = can(permissions, 'settings.manage', role)
 
   if (selectedKey) {
     return <EmployeeProfile access={access} permissions={permissions} role={role} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} onAccessIssue={onAccessIssue} />
@@ -542,9 +775,20 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
   const onboarding = employees.filter((e) => !['complete', 'completed', 'done'].includes(e.onboarding_status)).length
   const departments = new Set(employees.map((e) => e.department).filter(Boolean)).size
 
+  const rosterActions = canManageRoster ? (
+    <>
+      <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
+        <Upload className="h-4 w-4" /> Import employees
+      </Button>
+      <Button size="sm" onClick={() => setShowAdd(true)}>
+        <Plus className="h-4 w-4" /> Add employee
+      </Button>
+    </>
+  ) : undefined
+
   return (
     <div className="space-y-6">
-      <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
+      <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} actions={rosterActions} />
       {loading ? (
         <LoadingState />
       ) : error ? (
@@ -553,12 +797,22 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
         <EmptyState
           icon={<UserRound className="h-5 w-5" />}
           title="No employees yet"
-          hint="Your directory builds itself as you hire. Here’s how people arrive:"
+          hint={canManageRoster ? 'Add your team manually, or import them from a CSV/XLSX. People also arrive automatically when you hire:' : 'Your directory builds itself as you hire. Here’s how people arrive:'}
           points={[
+            'Add employees directly, or import your existing workforce',
             'Hire candidates from Pre-Hiring — they become employees automatically',
-            'Onboarding starts the moment someone is hired',
-            'Attendance, shifts, leave, and payroll all flow from this directory',
+            'Attendance, shifts, leave, payroll, and compliance all flow from this directory',
           ]}
+          action={canManageRoster ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" onClick={() => setShowAdd(true)}>
+                <Plus className="h-4 w-4" /> Add employee
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
+                <Upload className="h-4 w-4" /> Import employees
+              </Button>
+            </div>
+          ) : undefined}
         />
       ) : (
         <>
@@ -640,6 +894,12 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
           </Card>
         </>
       )}
+      {showAdd ? (
+        <AddEmployeeModal access={access} onClose={() => setShowAdd(false)} onNotice={onNotice} onAdded={() => void reload()} />
+      ) : null}
+      {showImport ? (
+        <ImportEmployeesModal access={access} onClose={() => setShowImport(false)} onNotice={onNotice} onImported={() => void reload()} />
+      ) : null}
     </div>
   )
 }

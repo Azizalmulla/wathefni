@@ -102,6 +102,9 @@ log "onboarding dashboard upgrade (start/restart + mark item: registry + RBAC + 
 log "employee 360 profile (read-only, tenant + entitlement scoped, staging DB)"
 "$VENV_PY" smoke-test-employee-profile.py | sed 's/^/    /'
 
+log "employee roster (add/import: RBAC + dedupe + compliance-seed + no-message + CSV/XLSX, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-roster.py | sed 's/^/    /'
+
 log "leave balances P1 (chargeable days + flag gate + accrual + observe-only consumption, staging DB)"
 "$VENV_PY" smoke-test-leave-balances.py | sed 's/^/    /'
 

@@ -31050,6 +31050,7 @@ PREHIRE_DASHBOARD_ACTION_TYPES = [
     "rank_candidates",
     "hire_candidate",
     "shortlist_candidate",
+    "reject_candidate",
     "notify_candidate",
     "send_assessment",
     "send_video_interview",
@@ -40848,6 +40849,42 @@ def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(
     )
 
 
+@app.post("/dashboard/prehire/applications/{app_key}/reject")
+def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidate.manage")
+    company = context["company_code"]
+    application = dashboard_application_or_404(app_key, company)
+    if _prehire_registry_enabled("reject_candidate"):
+        return run_prehire_registry_action(context, "reject_candidate", {}, app_key=app_key)
+    update_result = update_application_status(application, "rejected")
+    update_ok = workspace_tool_operation_ok(update_result)
+    sheet_ok = workspace_tool_sheet_sync_ok(update_result)
+    status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+    name = application.get("candidate_name") or application.get("phone") or "the candidate"
+    if update_ok and sheet_ok:
+        reply = f"{name} was moved out of the active pipeline."
+    elif update_ok:
+        reply = f"{name} was rejected in the backend, but Google Sheets sync failed."
+    else:
+        reply = f"I could not reject {name}."
+    result_payload = {
+        "application": json_safe(application),
+        "update": update_result,
+        "action": {"type": "reject_candidate", "target_type": "application", "target": app_key},
+        "source": "dashboard",
+        "company_code": company,
+        "requested_by": context.get("hr_user"),
+    }
+    return dashboard_prehire_mutation_response(
+        action_type="reject_candidate",
+        status=status,
+        reply=reply,
+        result_payload=result_payload,
+        app_key=app_key,
+        company_code=company,
+    )
+
+
 @app.post("/dashboard/prehire/applications/{app_key}/hire")
 def dashboard_prehire_hire(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     require_entitlement(context, "pre_hiring", "candidate.decide")
@@ -42224,7 +42261,7 @@ def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_con
     # Employees directory is the shared people view; visible when the company has
     # any post-hire module and the user can read it.
     company = context["company_code"]
-    readable = [m for m in ("onboarding", "attendance", "shifts", "payroll", "leave") if company_has_module(company, m) and dashboard_context_has_permission(context, f"{m}.read")]
+    readable = [m for m in POSTHIRE_PEOPLE_MODULES if company_has_module(company, m) and dashboard_context_has_permission(context, f"{m}.read")]
     if not readable:
         raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
     rows = company_employees(company)
@@ -42233,6 +42270,322 @@ def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_con
         rows = [r for r in rows if str(r.get("employee_key")) in allowed_keys]
     employees = [posthire_employee_card(row) for row in rows]
     return {"company_code": company, "count": len(employees), "employees": employees}
+
+
+# --- Employee roster management (Add employee / Import employees) -------------
+# A company that buys only a post-hire module must be able to load its existing
+# workforce WITHOUT the pre-hiring pipeline. These endpoints INSERT directly into
+# the `employees` hub (app_key left NULL), consistent with the orchestrator's
+# other direct writes (e.g. start_onboarding). No external workspace script and
+# no pre-hiring dependency. Onboarding stays 'not_started' and NO welcome message
+# is sent — these are existing staff, not new hires.
+POSTHIRE_PEOPLE_MODULES = ("onboarding", "attendance", "shifts", "payroll", "leave", "compliance")
+
+# Seeded as 'missing' so a newly added employee shows up on the Compliance page
+# with a clear checklist. Only seeded when the company has the compliance module.
+# Sends nothing (compliance reminders are always a manual HR action).
+DEFAULT_COMPLIANCE_SEED_TYPES = ("civil_id", "passport", "work_permit")
+
+# Import header normalization: map common CSV/XLSX column names to our fields.
+EMPLOYEE_IMPORT_HEADER_ALIASES = {
+    "name": "name", "full_name": "name", "employee_name": "name", "fullname": "name",
+    "phone": "phone", "mobile": "phone", "whatsapp": "phone", "phone_number": "phone",
+    "whatsapp_number": "phone", "mobile_number": "phone", "contact": "phone",
+    "email": "email", "email_address": "email", "e_mail": "email",
+    "job_title": "position_title", "title": "position_title", "position": "position_title",
+    "position_title": "position_title", "role": "position_title", "designation": "position_title",
+    "department": "department", "team": "department", "dept": "department", "division": "department",
+    "start_date": "start_date", "hire_date": "start_date", "joining_date": "start_date", "start": "start_date",
+}
+EMPLOYEE_IMPORT_MAX_ROWS = 1000
+
+
+def _normalize_import_header(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+
+
+def _coerce_employee_start_date(value: Any) -> date | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return date.fromisoformat(text[:10])
+    except Exception:
+        return None
+
+
+def _seed_employee_compliance_documents(cur: Any, company_code: str, employee_key: str) -> int:
+    seeded = 0
+    for doc_type in DEFAULT_COMPLIANCE_SEED_TYPES:
+        cur.execute(
+            """
+            INSERT INTO compliance_documents (employee_key, document_type, label, status, warning_days, company_code, updated_at)
+            VALUES (%s,%s,%s,'missing',%s,%s, now())
+            ON CONFLICT (employee_key, document_type) DO NOTHING
+            """,
+            (employee_key, doc_type, COMPLIANCE_DOC_LABELS.get(doc_type), COMPLIANCE_WARNING_DAYS.get(doc_type), company_code),
+        )
+        seeded += cur.rowcount or 0
+    return seeded
+
+
+def create_company_employee(
+    company_code: str,
+    *,
+    name: str | None,
+    phone: str | None,
+    email: str | None = None,
+    position_title: str | None = None,
+    department: str | None = None,
+    start_date: str | None = None,
+    seed_compliance: bool = False,
+) -> dict[str, Any]:
+    """Create a single employee directly in the hub (no pre-hiring pipeline).
+
+    Returns {status: 'created'|'exists'|'failed', ...}. The key is deterministic
+    ({COMPANY}-{phone digits}) so the same person in the same company self-dedupes
+    via the primary key — an existing (possibly hired) employee is never overwritten.
+    """
+    company = (company_code or "").upper()
+    phone_digits = digits(phone)
+    clean_name = str(name or "").strip()
+    if not phone_digits:
+        return {"status": "failed", "reason": "A WhatsApp phone number is required."}
+    if not clean_name:
+        return {"status": "failed", "reason": "A full name is required."}
+    employee_key = f"{company}-{phone_digits}"
+    dept = str(department or "").strip()
+    title = str(position_title or "").strip() or None
+    profile: dict[str, Any] = {}
+    if dept:
+        profile["department"] = dept
+    raw_meta: dict[str, Any] = {"source": "dashboard_roster"}
+    if dept:
+        raw_meta["department"] = dept
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO employees (employee_key, phone, company_code, name, email, position_title, start_date, profile, raw_json, updated_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s, now())
+                ON CONFLICT (employee_key) DO NOTHING
+                RETURNING *
+                """,
+                (
+                    employee_key, phone_digits, company, clean_name,
+                    str(email or "").strip() or None, title,
+                    _coerce_employee_start_date(start_date),
+                    Json(profile), Json(raw_meta),
+                ),
+            )
+            row = cur.fetchone()
+            if not row:
+                cur.execute(
+                    "SELECT * FROM employees WHERE employee_key=%s AND company_code=%s LIMIT 1",
+                    (employee_key, company),
+                )
+                existing = cur.fetchone()
+                conn.commit()
+                return {
+                    "status": "exists",
+                    "employee_key": employee_key,
+                    "employee": posthire_employee_card(dict(existing)) if existing else None,
+                }
+            employee = dict(row)
+            seeded = _seed_employee_compliance_documents(cur, company, employee_key) if seed_compliance else 0
+            conn.commit()
+    return {
+        "status": "created",
+        "employee_key": employee_key,
+        "employee": posthire_employee_card(employee),
+        "compliance_seeded": seeded,
+    }
+
+
+def require_employee_roster_admin(context: dict[str, Any]) -> str:
+    """Gate for roster management: company must have at least one post-hire people
+    module enabled (module-agnostic, so an attendance-only or compliance-only
+    company qualifies) and the user must hold settings.manage (owner / HR manager).
+    Managers and recruiters cannot add employees. Server RBAC remains authority."""
+    company = context["company_code"]
+    if not any(company_has_module(company, m) for m in POSTHIRE_PEOPLE_MODULES):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
+    if not dashboard_context_has_permission(context, "settings.manage"):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
+    return company
+
+
+class DashboardEmployeeCreate(BaseModel):
+    name: str
+    phone: str
+    email: str | None = None
+    position_title: str | None = None
+    department: str | None = None
+    start_date: str | None = None
+
+
+@app.post("/dashboard/posthire/employees")
+def dashboard_posthire_create_employee(request: DashboardEmployeeCreate, context: dict[str, Any] = Depends(dashboard_context)):
+    company = require_employee_roster_admin(context)
+    seed = company_has_module(company, "compliance")
+    result = create_company_employee(
+        company,
+        name=request.name,
+        phone=request.phone,
+        email=request.email,
+        position_title=request.position_title,
+        department=request.department,
+        start_date=request.start_date,
+        seed_compliance=seed,
+    )
+    if result["status"] == "failed":
+        raise HTTPException(status_code=422, detail={"error": "invalid_employee", "message": result["reason"]})
+    if result["status"] == "exists":
+        return {"ok": False, "status": "exists", "employee": result.get("employee"), "message": "An employee with this phone number already exists."}
+    record_admin_audit(
+        context,
+        "employee_created",
+        summary=f"Added employee {request.name}.",
+        target_type="employee",
+        target=result["employee_key"],
+        details={"phone": digits(request.phone), "compliance_seeded": result.get("compliance_seeded", 0)},
+    )
+    return {"ok": True, "status": "created", "employee": result.get("employee")}
+
+
+def _parse_employee_import_file(raw: bytes, filename: str) -> tuple[list[dict[str, str]], str | None]:
+    """Parse a CSV or XLSX upload into normalized {name, phone, email, ...} dicts.
+    Returns (rows, error). Numbers from XLSX (e.g. a phone read as a float) are
+    coerced back to integer strings before normalization."""
+    name = str(filename or "").lower()
+    try:
+        if name.endswith(".xlsx") or name.endswith(".xlsm"):
+            import openpyxl  # available in the orchestrator venv
+
+            wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+            ws = wb.active
+            if ws is None:
+                return [], "We couldn't read this spreadsheet."
+            iterator = ws.iter_rows(values_only=True)
+            try:
+                header = next(iterator)
+            except StopIteration:
+                return [], "The file is empty."
+            mapped = [EMPLOYEE_IMPORT_HEADER_ALIASES.get(_normalize_import_header(h)) for h in header]
+            if "name" not in mapped or "phone" not in mapped:
+                return [], "The file needs a 'name' and a 'phone' column."
+            rows: list[dict[str, str]] = []
+            for values in iterator:
+                if not values:
+                    continue
+                rec: dict[str, str] = {}
+                for key, val in zip(mapped, values):
+                    if not key or val is None:
+                        continue
+                    if isinstance(val, float) and val.is_integer():
+                        val = int(val)
+                    text = str(val).strip()
+                    if text:
+                        rec[key] = text
+                if rec:
+                    rows.append(rec)
+            return rows, None
+        # default: CSV
+        text = raw.decode("utf-8-sig", errors="replace")
+        reader = csv.DictReader(io.StringIO(text))
+        if not reader.fieldnames:
+            return [], "The file is empty or missing a header row."
+        field_map = {fn: EMPLOYEE_IMPORT_HEADER_ALIASES.get(_normalize_import_header(fn)) for fn in reader.fieldnames}
+        if "name" not in field_map.values() or "phone" not in field_map.values():
+            return [], "The file needs a 'name' and a 'phone' column."
+        rows = []
+        for raw_rec in reader:
+            rec = {}
+            for fn, key in field_map.items():
+                if not key:
+                    continue
+                value = str(raw_rec.get(fn) or "").strip()
+                if value:
+                    rec[key] = value
+            if rec:
+                rows.append(rec)
+        return rows, None
+    except Exception:
+        logger.warning("employee import parse failed", exc_info=True)
+        return [], "We couldn't read this file. Please upload a CSV or XLSX with name and phone columns."
+
+
+@app.post("/dashboard/posthire/employees/import")
+async def dashboard_posthire_import_employees(
+    file: UploadFile = File(...),
+    dry_run: bool = Form(False),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context)
+    seed = company_has_module(company, "compliance")
+    raw = await file.read()
+    rows, parse_error = _parse_employee_import_file(raw, file.filename or "")
+    if parse_error:
+        raise HTTPException(status_code=422, detail={"error": "unreadable_file", "message": parse_error})
+    if len(rows) > EMPLOYEE_IMPORT_MAX_ROWS:
+        raise HTTPException(status_code=422, detail={"error": "too_many_rows", "message": f"Please import up to {EMPLOYEE_IMPORT_MAX_ROWS} employees per file."})
+
+    summary: dict[str, list[dict[str, Any]]] = {"created": [], "skipped": [], "needs_review": [], "failed": []}
+    seen_phones: dict[str, int] = {}
+    for idx, rec in enumerate(rows, start=1):
+        clean_name = str(rec.get("name") or "").strip()
+        phone_digits = digits(rec.get("phone"))
+        row_label = clean_name or str(rec.get("phone") or "").strip() or f"Row {idx}"
+        if not phone_digits:
+            summary["failed"].append({"row": idx, "name": row_label, "reason": "Missing or invalid phone number."})
+            continue
+        if not clean_name:
+            summary["failed"].append({"row": idx, "name": row_label, "reason": "Missing name."})
+            continue
+        if phone_digits in seen_phones:
+            summary["needs_review"].append({"row": idx, "name": row_label, "reason": f"Duplicate phone in this file (also row {seen_phones[phone_digits]})."})
+            continue
+        seen_phones[phone_digits] = idx
+        existing = find_employee_by_phone(phone_digits, company_code=company)
+        if existing:
+            existing_name = str(existing.get("name") or "").strip()
+            if existing_name and existing_name.lower() != clean_name.lower():
+                summary["needs_review"].append({"row": idx, "name": row_label, "reason": f"Already exists as '{existing_name}' with a different name."})
+            else:
+                summary["skipped"].append({"row": idx, "name": row_label, "reason": "Already in the workforce."})
+            continue
+        if dry_run:
+            summary["created"].append({"row": idx, "name": row_label, "reason": "Will be added."})
+            continue
+        result = create_company_employee(
+            company,
+            name=clean_name,
+            phone=phone_digits,
+            email=rec.get("email"),
+            position_title=rec.get("position_title"),
+            department=rec.get("department"),
+            start_date=rec.get("start_date"),
+            seed_compliance=seed,
+        )
+        status = result.get("status")
+        if status == "created":
+            summary["created"].append({"row": idx, "name": row_label})
+        elif status == "exists":
+            summary["skipped"].append({"row": idx, "name": row_label, "reason": "Already in the workforce."})
+        else:
+            summary["failed"].append({"row": idx, "name": row_label, "reason": result.get("reason") or "Could not be added."})
+
+    counts = {key: len(value) for key, value in summary.items()}
+    if not dry_run and counts["created"]:
+        record_admin_audit(
+            context,
+            "employees_imported",
+            summary=f"Imported {counts['created']} employees ({counts['skipped']} skipped, {counts['needs_review']} need review, {counts['failed']} failed).",
+            target_type="company",
+            target=company,
+            details=counts,
+        )
+    return {"ok": True, "dry_run": dry_run, "total_rows": len(rows), "counts": counts, "results": summary}
 
 
 def onboarding_counts_by_employee(company_code: str | None) -> dict[str, dict[str, int]]:
