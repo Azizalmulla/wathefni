@@ -37,6 +37,7 @@ import type {
   PosthireLeaveResponse,
   PosthireOnboardingResponse,
   PosthirePayrollResponse,
+  PayrollExportDetail,
   PosthireShiftsResponse,
   PrehireReportsResponse,
   RankingResponse,
@@ -700,8 +701,36 @@ export function rescheduleShift(
   )
 }
 
-export function getPosthirePayroll(access: DashboardAccess) {
-  return request<PosthirePayrollResponse>('/dashboard/posthire/payroll', access)
+export function getPosthirePayroll(access: DashboardAccess, period?: { start_date?: string; end_date?: string }) {
+  const params = new URLSearchParams()
+  if (period?.start_date) params.set('start_date', period.start_date)
+  if (period?.end_date) params.set('end_date', period.end_date)
+  const qs = params.toString()
+  return request<PosthirePayrollResponse>(`/dashboard/posthire/payroll${qs ? `?${qs}` : ''}`, access)
+}
+
+export function getPayrollExportDetail(access: DashboardAccess, exportId: string) {
+  return request<PayrollExportDetail>(`/dashboard/posthire/payroll/exports/${encodeURIComponent(exportId)}`, access)
+}
+
+// Download a finalized payroll export as CSV. Header-authenticated fetch → blob.
+export async function downloadPayrollExportCsv(access: DashboardAccess, exportId: string) {
+  const response = await fetch(`/dashboard/posthire/payroll/exports/${encodeURIComponent(exportId)}/download.csv`, {
+    headers: dashboardHeaders(access),
+  })
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    throw new DashboardApiError(response.status, payload?.detail || payload, 'Could not download the payroll export.')
+  }
+  const blob = await response.blob()
+  const disposition = response.headers.get('Content-Disposition') || ''
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || `payroll-export-${exportId}.csv`
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  URL.revokeObjectURL(url)
 }
 
 export function getPosthireAnalytics(access: DashboardAccess) {

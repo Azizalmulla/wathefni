@@ -1131,13 +1131,43 @@ export type PosthirePayrollPolicy = {
   [key: string]: unknown
 }
 
+export type PayrollPeriodOption = {
+  start_date: string
+  end_date: string
+  has_timesheets?: boolean
+}
+
 export type PosthirePayrollResponse = {
   company_code: string
   timesheets: PosthireTimesheetRow[]
   period: { start_date?: string | null; end_date?: string | null }
+  periods?: PayrollPeriodOption[]
   policy?: PosthirePayrollPolicy
   exports: PosthireExportRow[]
   can_export: boolean
+}
+
+export type PayrollExportPreviewRow = {
+  employee_name?: string
+  employee_pay_type?: string
+  payable_minutes?: number | null
+  deduction_minutes?: number | null
+  overtime_review_minutes?: number | null
+  estimated_amount_kwd?: number | null
+  amount_status?: string
+}
+
+export type PayrollExportDetail = {
+  company_code: string
+  export_id: string
+  period: { start_date?: string | null; end_date?: string | null }
+  status?: string
+  row_count?: number | null
+  created_at?: string | null
+  totals?: Record<string, unknown>
+  policy?: PosthirePayrollPolicy
+  preview_rows?: PayrollExportPreviewRow[]
+  sheet_url?: string | null
 }
 
 export type PosthireAnalyticsInsight = {

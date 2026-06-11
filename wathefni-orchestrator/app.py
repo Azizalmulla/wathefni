@@ -43016,15 +43016,62 @@ def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleR
 
 
 @app.get("/dashboard/posthire/payroll")
-def dashboard_posthire_payroll(context: dict[str, Any] = Depends(dashboard_context)):
+def available_payroll_periods(company_code: str | None, selected: tuple[str, str] | None = None) -> list[dict[str, Any]]:
+    """Pay periods HR can pick from: every period that already has timesheets,
+    plus the last few calendar months so HR can open an empty month and generate
+    timesheets for it. The currently-selected period is always included."""
+    company = (company_code or "WATHEFNI").upper()
+    periods: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT DISTINCT period_start, period_end FROM payroll_timesheets WHERE company_code=%s "
+                "ORDER BY period_start DESC, period_end DESC LIMIT 12",
+                (company,),
+            )
+            for r in [dict(x) for x in cur.fetchall()]:
+                if not (r.get("period_start") and r.get("period_end")):
+                    continue
+                key = (r["period_start"].isoformat(), r["period_end"].isoformat())
+                if key in seen:
+                    continue
+                seen.add(key)
+                periods.append({"start_date": key[0], "end_date": key[1], "has_timesheets": True})
+    cursor_day = kuwait_today().replace(day=1)
+    for _ in range(6):
+        start = cursor_day
+        end = (start.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+        key = (start.isoformat(), end.isoformat())
+        if key not in seen:
+            seen.add(key)
+            periods.append({"start_date": key[0], "end_date": key[1], "has_timesheets": False})
+        cursor_day = (start - timedelta(days=1)).replace(day=1)
+    if selected and selected not in seen:
+        periods.append({"start_date": selected[0], "end_date": selected[1], "has_timesheets": True})
+    periods.sort(key=lambda p: p["start_date"], reverse=True)
+    return periods
+
+
+def dashboard_posthire_payroll(
+    start_date: str | None = Query(None),
+    end_date: str | None = Query(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "payroll")
-    # Open on the latest pay period that has timesheets; fall back to the current
-    # month so the period label is sensible even before any timesheets exist.
-    period = latest_timesheet_period(company)
-    if period:
-        start_iso, end_iso = period[0].isoformat(), period[1].isoformat()
+    # Explicit period (from the picker) wins; otherwise open on the latest pay
+    # period that has timesheets, falling back to the current month so the label
+    # is sensible even before any timesheets exist.
+    picked_start = parse_shift_date_value(start_date)
+    picked_end = parse_shift_date_value(end_date)
+    if picked_start and picked_end and picked_end >= picked_start:
+        start_iso, end_iso = picked_start.isoformat(), picked_end.isoformat()
     else:
-        start_iso, end_iso = _posthire_month_window()
+        period = latest_timesheet_period(company)
+        if period:
+            start_iso, end_iso = period[0].isoformat(), period[1].isoformat()
+        else:
+            start_iso, end_iso = _posthire_month_window()
     timesheets = list_timesheets({"company_code": company, "start_date": start_iso, "end_date": end_iso, "viewer_phone": context.get("hr_phone")}, company_code=company)
     policy = show_payroll_policy({"company_code": company}, company_code=company)
     exports = list_payroll_exports({"company_code": company}, company_code=company)
@@ -43036,14 +43083,118 @@ def dashboard_posthire_payroll(context: dict[str, Any] = Depends(dashboard_conte
             continue
         row["total_hours"] = round(float(row.get("worked_minutes") or 0) / 60.0, 1)
         row["overtime_hours"] = round(float(row.get("overtime_minutes") or 0) / 60.0, 1)
+    selected_period = (str(timesheets.get("start_date") or start_iso), str(timesheets.get("end_date") or end_iso))
     return json_safe({
         "company_code": company,
         "timesheets": timesheet_rows,
         "period": {"start_date": timesheets.get("start_date"), "end_date": timesheets.get("end_date")},
+        "periods": available_payroll_periods(company, selected_period),
         "policy": policy.get("policy") or policy,
         "exports": exports.get("exports") or exports.get("payroll_exports") or [],
         "can_export": dashboard_context_has_permission(context, "payroll.export"),
     })
+
+
+def _dashboard_payroll_export_or_404(company_code: str, export_id: str) -> dict[str, Any]:
+    """Fetch a single payroll export scoped to the company, or raise 404."""
+    try:
+        eid = str(uuid.UUID(str(export_id)))
+    except (ValueError, AttributeError, TypeError):
+        raise HTTPException(status_code=404, detail={"error": "export_not_found", "message": "We couldn't find that payroll export."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM payroll_exports WHERE export_id=%s AND company_code=%s LIMIT 1", (eid, company_code))
+            row = cur.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail={"error": "export_not_found", "message": "We couldn't find that payroll export."})
+    return dict(row)
+
+
+def payroll_export_sheet_url(export: dict[str, Any]) -> str | None:
+    """Surface the Google Sheet destination for an export, if the sync recorded one."""
+    sync = export.get("sheet_sync") if isinstance(export.get("sheet_sync"), dict) else {}
+    for key in ("spreadsheet_url", "sheet_url", "url", "spreadsheetUrl"):
+        value = sync.get(key)
+        if value:
+            return str(value)
+    return None
+
+
+@app.get("/dashboard/posthire/payroll/exports/{export_id}")
+def dashboard_posthire_payroll_export_detail(export_id: str, context: dict[str, Any] = Depends(dashboard_context)):
+    # Retrieving a finalized payroll export is export-gated (same bar as creating
+    # it), company-scoped, and audited.
+    ctx = require_entitlement(context, "payroll", "payroll.export")
+    company = ctx["company_code"]
+    export = _dashboard_payroll_export_or_404(company, export_id)
+    preview_rows = export.get("preview_snapshot") if isinstance(export.get("preview_snapshot"), list) else []
+    record_admin_audit(
+        context,
+        "payroll_export_viewed",
+        summary=f"Viewed payroll export {export.get('export_id')} for {export.get('period_start')}–{export.get('period_end')}.",
+        target_type="payroll_export",
+        target=str(export.get("export_id") or ""),
+        details={"period_start": str(export.get("period_start") or ""), "period_end": str(export.get("period_end") or "")},
+    )
+    return json_safe({
+        "company_code": company,
+        "export_id": str(export.get("export_id") or ""),
+        "period": {"start_date": export.get("period_start"), "end_date": export.get("period_end")},
+        "status": export.get("status") or "exported",
+        "row_count": export.get("row_count"),
+        "created_at": export.get("created_at"),
+        "totals": export.get("totals") or {},
+        "policy": export.get("policy_snapshot") or {},
+        "preview_rows": preview_rows,
+        "sheet_url": payroll_export_sheet_url(export),
+    })
+
+
+def build_payroll_export_csv(export: dict[str, Any]) -> str:
+    """Render a payroll export's per-employee rows to CSV. Pure/no I/O so the
+    download endpoint and the smoke test share one column contract."""
+    rows = export.get("preview_snapshot") if isinstance(export.get("preview_snapshot"), list) else []
+    policy = export.get("policy_snapshot") if isinstance(export.get("policy_snapshot"), dict) else {}
+    currency = str(policy.get("currency") or "KWD").upper()
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["Employee", "Pay type", "Payable hours", "Deduction hours", "Overtime (review) hours", f"Estimated amount ({currency})", "Status"])
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        amount = row.get("estimated_amount_kwd")
+        writer.writerow([
+            row.get("employee_name") or "",
+            str(row.get("employee_pay_type") or "").replace("_", " ").strip().title(),
+            decimal_hours(row.get("payable_minutes")),
+            decimal_hours(row.get("deduction_minutes")),
+            decimal_hours(row.get("overtime_review_minutes")),
+            "" if amount is None else f"{float(amount):.3f}",
+            str(row.get("amount_status") or "").replace("_", " ").strip().title(),
+        ])
+    return buffer.getvalue()
+
+
+@app.get("/dashboard/posthire/payroll/exports/{export_id}/download.csv")
+def dashboard_posthire_payroll_export_download(export_id: str, context: dict[str, Any] = Depends(dashboard_context)):
+    ctx = require_entitlement(context, "payroll", "payroll.export")
+    company = ctx["company_code"]
+    export = _dashboard_payroll_export_or_404(company, export_id)
+    csv_text = build_payroll_export_csv(export)
+    record_admin_audit(
+        context,
+        "payroll_export_downloaded",
+        summary=f"Downloaded payroll export {export.get('export_id')} for {export.get('period_start')}–{export.get('period_end')}.",
+        target_type="payroll_export",
+        target=str(export.get("export_id") or ""),
+        details={"period_start": str(export.get("period_start") or ""), "period_end": str(export.get("period_end") or ""), "row_count": export.get("row_count")},
+    )
+    filename = f"payroll-{company}-{export.get('period_start')}-to-{export.get('period_end')}.csv"
+    return StreamingResponse(
+        iter([csv_text]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"},
+    )
 
 
 @app.get("/dashboard/posthire/analytics")

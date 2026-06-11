@@ -44,6 +44,8 @@ import {
   getPosthireLeave,
   getPosthireOnboarding,
   getPosthirePayroll,
+  getPayrollExportDetail,
+  downloadPayrollExportCsv,
   getPosthireShifts,
   openEmployeeDocument,
   resolveHrTask,
@@ -74,6 +76,7 @@ import type {
   PosthireOnboardingResponse,
   PosthirePayrollPolicy,
   PosthirePayrollResponse,
+  PayrollExportDetail,
   PosthireShiftRow,
   PosthireShiftsResponse,
 } from '@/types'
@@ -3085,6 +3088,174 @@ function minutesToHours(value: number | null | undefined): string {
   return (Number(value || 0) / 60).toFixed(1)
 }
 
+const PAYROLL_FLOW_STEPS = [
+  'Choose period',
+  'Generate timesheets',
+  'Approve / reject',
+  'Preview payroll',
+  'Export',
+  'Download / view',
+]
+
+function PayrollFlowGuide() {
+  return (
+    <div className="rounded-[1.1rem] border border-line/45 bg-panel/55 px-4 py-3">
+      <p className="text-[11.5px] font-medium uppercase tracking-[0.08em] text-subtle/80">How payroll works</p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12.5px] text-subtle/90">
+        {PAYROLL_FLOW_STEPS.map((step, idx) => (
+          <Fragment key={step}>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-panel-muted/80 text-[11px] font-semibold text-text">{idx + 1}</span>
+              {step}
+            </span>
+            {idx < PAYROLL_FLOW_STEPS.length - 1 ? <span className="text-subtle/45">→</span> : null}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PayrollExportDetailModal({ access, exportId, currency, onClose, onNotice, onAccessIssue }: {
+  access: DashboardAccess
+  exportId: string
+  currency: string
+  onClose: () => void
+  onNotice: NoticeFn
+  onAccessIssue?: (issue: AccessIssue) => void
+}) {
+  const [detail, setDetail] = useState<PayrollExportDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    setError(null)
+    getPayrollExportDetail(access, exportId)
+      .then((d) => {
+        if (alive) setDetail(d)
+      })
+      .catch((err) => {
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          onAccessIssue?.(issue)
+          return
+        }
+        setError(friendlyError(err, 'We couldn’t load this export. Please try again.'))
+      })
+      .finally(() => {
+        if (alive) setLoading(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [access, exportId, onAccessIssue])
+
+  const runDownload = async () => {
+    setDownloading(true)
+    try {
+      await downloadPayrollExportCsv(access, exportId)
+      onNotice('Payroll export downloaded.', 'success')
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t download the export. Please try again.'), 'error')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const rows = detail?.preview_rows ?? []
+  const totalAmount = detail?.totals && typeof detail.totals.estimated_amount_kwd === 'number' ? (detail.totals.estimated_amount_kwd as number) : null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Payroll export</p>
+            <p className="text-[13px] leading-6 text-subtle/95">
+              {detail ? `${formatDate(detail.period.start_date)} → ${formatDate(detail.period.end_date)}` : 'Loading…'}
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+        </div>
+
+        {loading ? (
+          <div className="py-10"><LoadingState /></div>
+        ) : error ? (
+          <div className="py-6"><ErrorState message={error} onRetry={() => setDetail(null)} /></div>
+        ) : (
+          <>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-3">
+                <p className="text-[11.5px] font-medium uppercase tracking-[0.08em] text-subtle/80">Employees</p>
+                <p className="mt-1 text-[14px] font-semibold text-text">{detail?.row_count ?? rows.length}</p>
+              </div>
+              <div className="rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-3">
+                <p className="text-[11.5px] font-medium uppercase tracking-[0.08em] text-subtle/80">Est. total</p>
+                <p className="mt-1 text-[14px] font-semibold text-text">{totalAmount != null ? `${totalAmount.toFixed(3)} ${currency}` : '—'}</p>
+              </div>
+              <div className="rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-3">
+                <p className="text-[11.5px] font-medium uppercase tracking-[0.08em] text-subtle/80">Status</p>
+                <p className="mt-1 text-[14px] font-semibold text-text">{titleCase(detail?.status || 'exported')}</p>
+              </div>
+            </div>
+
+            {detail?.sheet_url ? (
+              <a href={detail.sheet_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#8a5a16] hover:underline">
+                <FileText className="h-3.5 w-3.5" /> Open in Google Sheets
+              </a>
+            ) : null}
+
+            <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              {rows.length === 0 ? (
+                <EmptyState icon={<FileText className="h-5 w-5" />} title="No rows in this export" />
+              ) : (
+                <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
+                  <table className="w-full min-w-[520px] text-left text-[13px]">
+                    <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Employee</th>
+                        <th className="px-4 py-3 font-medium">Payable hrs</th>
+                        <th className="px-4 py-3 font-medium">Est. amount</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line/45">
+                      {rows.map((row, idx) => (
+                        <tr key={`${row.employee_name || idx}`} className="hover:bg-white/45">
+                          <td className="px-4 py-3 font-semibold text-text">{row.employee_name || '—'}</td>
+                          <td className="px-4 py-3 text-subtle/90">{minutesToHours(row.payable_minutes)}</td>
+                          <td className="px-4 py-3 text-subtle/90">{row.estimated_amount_kwd != null ? `${Number(row.estimated_amount_kwd).toFixed(3)} ${currency}` : '—'}</td>
+                          <td className="px-4 py-3"><StatusBadge status={row.amount_status || 'estimated'} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={onClose}>Close</Button>
+              <Button size="sm" disabled={downloading || rows.length === 0} onClick={() => void runDownload()}>
+                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                Download CSV
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function PayrollPolicyEditor({
   policy,
   busy,
@@ -3194,13 +3365,21 @@ function PayrollPolicyEditor({
 }
 
 function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthirePayroll(access), [access])
+  const [period, setPeriod] = useState<{ start: string; end: string } | null>(null)
+  const loader = useCallback(
+    () => getPosthirePayroll(access, period ? { start_date: period.start, end_date: period.end } : undefined),
+    [access, period],
+  )
   const { data, loading, refreshing, error, reload } = useModuleData<PosthirePayrollResponse>(loader, onAccessIssue)
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const canManage = can(permissions, 'payroll.manage', role)
   const [editingPolicy, setEditingPolicy] = useState(false)
   const [previewBusy, setPreviewBusy] = useState(false)
   const [preview, setPreview] = useState<{ rows: PayrollPreviewRow[]; count: number } | null>(null)
+  const [detailId, setDetailId] = useState<string | null>(null)
+
+  const periods = data?.periods ?? []
+  const periodValue = data?.period.start_date && data?.period.end_date ? `${data.period.start_date}|${data.period.end_date}` : ''
 
   const periodArgs = useMemo(
     () => ({ start_date: data?.period.start_date || undefined, end_date: data?.period.end_date || undefined }),
@@ -3256,6 +3435,23 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
         refreshing={refreshing}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {periods.length ? (
+              <Select
+                className="h-9 w-auto"
+                value={periodValue}
+                onChange={(e) => {
+                  const [start, end] = e.target.value.split('|')
+                  if (start && end) setPeriod({ start, end })
+                }}
+                aria-label="Pay period"
+              >
+                {periods.map((p) => (
+                  <option key={`${p.start_date}|${p.end_date}`} value={`${p.start_date}|${p.end_date}`}>
+                    {formatDate(p.start_date)} → {formatDate(p.end_date)}{p.has_timesheets ? '' : ' · no timesheets'}
+                  </option>
+                ))}
+              </Select>
+            ) : null}
             {canManage ? (
               <Button
                 variant="ghost"
@@ -3340,6 +3536,7 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
                 : 'No active payroll period'
             }
           />
+          <PayrollFlowGuide />
           <Card>
             <CardHeader>
               <CardTitle>Timesheets</CardTitle>
@@ -3520,17 +3717,29 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
           <Card>
             <CardHeader>
               <CardTitle>Recent exports</CardTitle>
-              <CardDescription>A record of payroll runs that have been exported.</CardDescription>
+              <CardDescription>
+                {canExport ? 'Open an export to review its detail or download the CSV.' : 'A record of payroll runs that have been exported.'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {exports.length === 0 ? (
-                <EmptyState icon={<Download className="h-5 w-5" />} title="No exports yet" />
+                <EmptyState icon={<Download className="h-5 w-5" />} title="No exports yet" hint="Export an approved payroll period above and it will appear here for download." />
               ) : (
                 <div className="space-y-2">
                   {exports.map((row, idx) => (
                     <div key={row.export_id || idx} className="flex items-center justify-between gap-3 rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-2.5 text-[13px]">
-                      <span className="font-medium text-text">{formatDate(row.period_start)} → {formatDate(row.period_end)}</span>
-                      <StatusBadge status={row.status || 'exported'} />
+                      <div className="flex flex-col">
+                        <span className="font-medium text-text">{formatDate(row.period_start)} → {formatDate(row.period_end)}</span>
+                        {row.created_at ? <span className="text-[11.5px] text-subtle/75">Exported {formatDate(row.created_at)}</span> : null}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={row.status || 'exported'} />
+                        {canExport && row.export_id ? (
+                          <Button variant="ghost" size="sm" onClick={() => setDetailId(String(row.export_id))}>
+                            <Eye className="h-4 w-4" /> View
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -3539,6 +3748,16 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
           </Card>
         </>
       )}
+      {detailId ? (
+        <PayrollExportDetailModal
+          access={access}
+          exportId={detailId}
+          currency={String(policy.currency || 'KWD').toUpperCase()}
+          onClose={() => setDetailId(null)}
+          onNotice={onNotice}
+          onAccessIssue={onAccessIssue}
+        />
+      ) : null}
     </div>
   )
 }
