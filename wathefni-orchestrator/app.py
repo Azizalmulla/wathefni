@@ -42298,10 +42298,22 @@ EMPLOYEE_IMPORT_HEADER_ALIASES = {
     "start_date": "start_date", "hire_date": "start_date", "joining_date": "start_date", "start": "start_date",
 }
 EMPLOYEE_IMPORT_MAX_ROWS = 1000
+EMPLOYEE_IMPORT_MAX_BYTES = 5 * 1024 * 1024
 
 
 def _normalize_import_header(value: Any) -> str:
     return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+
+
+def canonical_employee_phone(value: str | None) -> str:
+    """Canonicalize a phone to the form the workforce already stores (965-prefixed
+    for Kuwait local numbers), so a manually added employee maps to the SAME
+    employee_key as a pipeline-hired one and de-dupes via the primary key. Mirrors
+    the 8-digit <-> 965 rule in phone_identity_candidates; other formats unchanged."""
+    raw = digits(value)
+    if len(raw) == 8:
+        return f"965{raw}"
+    return raw
 
 
 def _coerce_employee_start_date(value: Any) -> date | None:
@@ -42347,7 +42359,7 @@ def create_company_employee(
     via the primary key — an existing (possibly hired) employee is never overwritten.
     """
     company = (company_code or "").upper()
-    phone_digits = digits(phone)
+    phone_digits = canonical_employee_phone(phone)
     clean_name = str(name or "").strip()
     if not phone_digits:
         return {"status": "failed", "reason": "A WhatsApp phone number is required."}
@@ -42524,6 +42536,8 @@ async def dashboard_posthire_import_employees(
     company = require_employee_roster_admin(context)
     seed = company_has_module(company, "compliance")
     raw = await file.read()
+    if len(raw) > EMPLOYEE_IMPORT_MAX_BYTES:
+        raise HTTPException(status_code=422, detail={"error": "file_too_large", "message": f"This file is too large. Please keep imports under {EMPLOYEE_IMPORT_MAX_BYTES // (1024 * 1024)} MB."})
     rows, parse_error = _parse_employee_import_file(raw, file.filename or "")
     if parse_error:
         raise HTTPException(status_code=422, detail={"error": "unreadable_file", "message": parse_error})
@@ -42534,7 +42548,8 @@ async def dashboard_posthire_import_employees(
     seen_phones: dict[str, int] = {}
     for idx, rec in enumerate(rows, start=1):
         clean_name = str(rec.get("name") or "").strip()
-        phone_digits = digits(rec.get("phone"))
+        # Canonicalize so a local 8-digit number de-dupes against the stored 965 form.
+        phone_digits = canonical_employee_phone(rec.get("phone"))
         row_label = clean_name or str(rec.get("phone") or "").strip() or f"Row {idx}"
         if not phone_digits:
             summary["failed"].append({"row": idx, "name": row_label, "reason": "Missing or invalid phone number."})
@@ -42546,34 +42561,41 @@ async def dashboard_posthire_import_employees(
             summary["needs_review"].append({"row": idx, "name": row_label, "reason": f"Duplicate phone in this file (also row {seen_phones[phone_digits]})."})
             continue
         seen_phones[phone_digits] = idx
-        existing = find_employee_by_phone(phone_digits, company_code=company)
-        if existing:
-            existing_name = str(existing.get("name") or "").strip()
-            if existing_name and existing_name.lower() != clean_name.lower():
-                summary["needs_review"].append({"row": idx, "name": row_label, "reason": f"Already exists as '{existing_name}' with a different name."})
-            else:
+        # Each row is created in its own transaction (create_company_employee owns
+        # its connection/commit). Guard per row so one bad row becomes a 'failed'
+        # entry instead of aborting the whole import and discarding the summary.
+        try:
+            existing = find_employee_by_phone(phone_digits, company_code=company)
+            if existing:
+                existing_name = str(existing.get("name") or "").strip()
+                if existing_name and existing_name.lower() != clean_name.lower():
+                    summary["needs_review"].append({"row": idx, "name": row_label, "reason": f"Already exists as '{existing_name}' with a different name."})
+                else:
+                    summary["skipped"].append({"row": idx, "name": row_label, "reason": "Already in the workforce."})
+                continue
+            if dry_run:
+                summary["created"].append({"row": idx, "name": row_label, "reason": "Will be added."})
+                continue
+            result = create_company_employee(
+                company,
+                name=clean_name,
+                phone=phone_digits,
+                email=rec.get("email"),
+                position_title=rec.get("position_title"),
+                department=rec.get("department"),
+                start_date=rec.get("start_date"),
+                seed_compliance=seed,
+            )
+            status = result.get("status")
+            if status == "created":
+                summary["created"].append({"row": idx, "name": row_label})
+            elif status == "exists":
                 summary["skipped"].append({"row": idx, "name": row_label, "reason": "Already in the workforce."})
-            continue
-        if dry_run:
-            summary["created"].append({"row": idx, "name": row_label, "reason": "Will be added."})
-            continue
-        result = create_company_employee(
-            company,
-            name=clean_name,
-            phone=phone_digits,
-            email=rec.get("email"),
-            position_title=rec.get("position_title"),
-            department=rec.get("department"),
-            start_date=rec.get("start_date"),
-            seed_compliance=seed,
-        )
-        status = result.get("status")
-        if status == "created":
-            summary["created"].append({"row": idx, "name": row_label})
-        elif status == "exists":
-            summary["skipped"].append({"row": idx, "name": row_label, "reason": "Already in the workforce."})
-        else:
-            summary["failed"].append({"row": idx, "name": row_label, "reason": result.get("reason") or "Could not be added."})
+            else:
+                summary["failed"].append({"row": idx, "name": row_label, "reason": result.get("reason") or "Could not be added."})
+        except Exception:
+            logger.warning("employee import row failed", exc_info=True)
+            summary["failed"].append({"row": idx, "name": row_label, "reason": "Could not be added right now."})
 
     counts = {key: len(value) for key, value in summary.items()}
     if not dry_run and counts["created"]:

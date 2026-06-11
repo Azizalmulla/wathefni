@@ -52,6 +52,9 @@ def main() -> int:
         raise
 
     # --- pure parsing checks (no DB) -------------------------------------
+    check("canonical phone: 8-digit local -> 965 prefix", app.canonical_employee_phone("5025 2299") == "96550252299")
+    check("canonical phone: 965 form is unchanged", app.canonical_employee_phone("96550252299") == "96550252299")
+
     csv_bytes = b"name,phone,email,job title\nSara Al-Ali,9655 000 111,sara@x.com,Manager\n,9650000000,,\n"
     rows, err = app._parse_employee_import_file(csv_bytes, "team.csv")
     check("CSV parses without error", err is None)
@@ -118,8 +121,11 @@ def main() -> int:
     test_phone = "99900000099"
     test_key = f"{company}-{test_phone}"
 
+    local8 = "50252299"
+    canonical_key = f"{company}-965{local8}"
+
     def cleanup():
-        keys = (test_key, f"{company}-0{test_phone}")
+        keys = (test_key, f"{company}-0{test_phone}", canonical_key)
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM employees WHERE employee_key = ANY(%s)", (list(keys),))
@@ -157,6 +163,12 @@ def main() -> int:
 
         again = app.create_company_employee(company, name="Roster Tester", phone="0" + test_phone)
         check("second create de-dupes to 'exists'", again["status"] == "exists")
+
+        # canonical phone: local 8-digit and the stored 965 form must be one employee
+        local_created = app.create_company_employee(company, name="Canon Tester", phone=local8)
+        check("8-digit local create uses 965 canonical key", local_created.get("employee_key") == canonical_key)
+        canon_dupe = app.create_company_employee(company, name="Canon Tester", phone="965" + local8)
+        check("965 form de-dupes against the 8-digit-created employee", canon_dupe["status"] == "exists")
 
         # cleanup the prefixed-phone variant created above
         with app.db_connect() as conn:
