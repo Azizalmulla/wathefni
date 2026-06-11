@@ -42713,11 +42713,15 @@ def dashboard_posthire_leave(context: dict[str, Any] = Depends(dashboard_context
 
 
 @app.get("/dashboard/posthire/shifts")
-def dashboard_posthire_shifts(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_shifts(week: int = Query(0), context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "shifts")
-    start, end = _posthire_window(0, 7)
+    # week is a 7-day window offset from today (0 = current week, +/- for nav).
+    week = max(-26, min(26, int(week or 0)))
+    base = kuwait_today() + timedelta(days=7 * week)
+    start, end = base.isoformat(), (base + timedelta(days=6)).isoformat()
     viewer_phone = context.get("hr_phone")
-    shifts = list_shifts({"company_code": company, "start_date": start, "end_date": end, "query": "this week", "viewer_phone": viewer_phone}, company_code=company)
+    # Pass explicit start/end (no relative "query") so the window honors the offset.
+    shifts = list_shifts({"company_code": company, "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
     swaps = list_shift_swaps({"company_code": company, "status": "requested", "viewer_phone": viewer_phone}, company_code=company)
     return json_safe({
         "company_code": company,
@@ -42725,7 +42729,150 @@ def dashboard_posthire_shifts(context: dict[str, Any] = Depends(dashboard_contex
         "swaps": swaps.get("swaps") or [],
         "start_date": start,
         "end_date": end,
+        "week": week,
     })
+
+
+def _parse_clock(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    for fmt in ("%H:%M", "%H:%M:%S"):
+        try:
+            return datetime.strptime(text, fmt).strftime("%H:%M")
+        except ValueError:
+            continue
+    return None
+
+
+def _dashboard_scheduled_shift_or_error(company_code: str, shift_id: str, context: dict[str, Any]) -> dict[str, Any]:
+    """Resolve a scheduled shift by id, company-scoped AND manager-scoped. Raises
+    404 (unknown/other tenant), 403 (outside the viewer's managed team), or 409
+    (no longer scheduled) so cancel/reschedule can never touch the wrong row."""
+    try:
+        uuid.UUID(str(shift_id))
+    except (ValueError, AttributeError, TypeError):
+        raise HTTPException(status_code=404, detail={"error": "shift_not_found", "message": "We couldn't find that shift."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM shift_assignments WHERE shift_id=%s AND company_code=%s LIMIT 1", (str(shift_id), company_code))
+            row = cur.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail={"error": "shift_not_found", "message": "We couldn't find that shift."})
+    shift = dict(row)
+    allowed = manager_scope_employee_keys(company_code, context.get("hr_phone"))
+    if allowed is not None and str(shift.get("employee_key")) not in allowed:
+        raise HTTPException(status_code=403, detail={"error": "out_of_scope", "message": "That shift is outside the team you manage."})
+    if str(shift.get("status")) != "scheduled":
+        raise HTTPException(status_code=409, detail={"error": "not_scheduled", "message": "That shift is no longer active."})
+    return shift
+
+
+def _employee_for_shift(shift: dict[str, Any], company_code: str) -> dict[str, Any]:
+    return find_employee_by_key(shift.get("employee_key"), company_code=company_code) or {
+        "employee_key": shift.get("employee_key"),
+        "name": shift.get("employee_name"),
+        "phone": shift.get("employee_phone"),
+    }
+
+
+@app.post("/dashboard/posthire/shifts/{shift_id}/cancel")
+def dashboard_posthire_cancel_shift(shift_id: str, context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "shifts", "shifts.manage")
+    company = context["company_code"]
+    _dashboard_scheduled_shift_or_error(company, shift_id, context)
+    actor_phone = context.get("hr_phone")
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE shift_assignments SET status='cancelled', updated_at=now() WHERE shift_id=%s AND company_code=%s AND status='scheduled' RETURNING *",
+                (str(shift_id), company),
+            )
+            row = cur.fetchone()
+            if not row:
+                conn.commit()
+                raise HTTPException(status_code=409, detail={"error": "not_scheduled", "message": "That shift is no longer active."})
+            cancelled = dict(row)
+            record_shift_event(cur, shift=cancelled, company_code=company, event_type="cancelled", payload={"shift": cancelled, "source": "dashboard"}, created_by_phone=actor_phone)
+        conn.commit()
+    employee = _employee_for_shift(cancelled, company)
+    notified = False
+    try:
+        notification = notify_employee_shift_cancelled(result={"employee": employee, "cancelled": [cancelled]}, account_id=company, created_by_phone=actor_phone)
+        notified = bool(notification.get("ok"))
+    except Exception:
+        logger.warning("dashboard shift cancel notification failed", exc_info=True)
+    try:
+        sync_shift_sheet_rows(company, [cancelled])
+    except Exception:
+        logger.warning("dashboard shift cancel sheet sync failed", exc_info=True)
+    record_admin_audit(
+        context,
+        "shift_cancelled",
+        summary=f"Cancelled {cancelled.get('employee_name') or 'an employee'}'s shift on {cancelled.get('shift_date')}.",
+        target_type="employee",
+        target=cancelled.get("employee_key"),
+        details={"shift_id": str(shift_id), "shift_date": str(cancelled.get("shift_date"))},
+    )
+    name = cancelled.get("employee_name") or "The employee"
+    return json_safe({"ok": True, "status": "cancelled", "message": f"{name}'s shift was cancelled.", "shift": cancelled, "notified": notified})
+
+
+class ShiftRescheduleRequest(BaseModel):
+    shift_date: str
+    start_time: str
+    end_time: str
+
+
+@app.post("/dashboard/posthire/shifts/{shift_id}/reschedule")
+def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleRequest, context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "shifts", "shifts.manage")
+    company = context["company_code"]
+    new_date = _coerce_employee_start_date(request.shift_date)
+    start_clock = _parse_clock(request.start_time)
+    end_clock = _parse_clock(request.end_time)
+    if not new_date or not start_clock or not end_clock:
+        raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "Enter a valid date, start time, and end time."})
+    if end_clock <= start_clock:
+        raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "The end time must be after the start time."})
+    _dashboard_scheduled_shift_or_error(company, shift_id, context)
+    actor_phone = context.get("hr_phone")
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE shift_assignments SET shift_date=%s, start_time=%s, end_time=%s, updated_at=now() WHERE shift_id=%s AND company_code=%s AND status='scheduled' RETURNING *",
+                (new_date, start_clock, end_clock, str(shift_id), company),
+            )
+            row = cur.fetchone()
+            if not row:
+                conn.commit()
+                raise HTTPException(status_code=409, detail={"error": "not_scheduled", "message": "That shift is no longer active."})
+            updated = dict(row)
+            record_shift_event(cur, shift=updated, company_code=company, event_type="rescheduled", payload={"shift": updated, "source": "dashboard"}, created_by_phone=actor_phone)
+        conn.commit()
+    employee = _employee_for_shift(updated, company)
+    notified = False
+    try:
+        # Reuse the "shift scheduled" notice — it carries the new date/time, which
+        # is exactly what the employee needs to see after a reschedule.
+        notification = notify_employee_shift_created(result={"employee": employee, "created": [updated]}, account_id=company, created_by_phone=actor_phone)
+        notified = bool(notification.get("ok"))
+    except Exception:
+        logger.warning("dashboard shift reschedule notification failed", exc_info=True)
+    try:
+        sync_shift_sheet_rows(company, [updated])
+    except Exception:
+        logger.warning("dashboard shift reschedule sheet sync failed", exc_info=True)
+    record_admin_audit(
+        context,
+        "shift_rescheduled",
+        summary=f"Rescheduled {updated.get('employee_name') or 'an employee'}'s shift to {updated.get('shift_date')} {start_clock}-{end_clock}.",
+        target_type="employee",
+        target=updated.get("employee_key"),
+        details={"shift_id": str(shift_id), "shift_date": str(updated.get("shift_date")), "start_time": start_clock, "end_time": end_clock},
+    )
+    name = updated.get("employee_name") or "The employee"
+    return json_safe({"ok": True, "status": "rescheduled", "message": f"{name}'s shift was moved to {updated.get('shift_date')}.", "shift": updated, "notified": notified})
 
 
 @app.get("/dashboard/posthire/payroll")

@@ -1087,6 +1087,7 @@ export type PosthireShiftsResponse = {
   swaps: PosthireSwapRow[]
   start_date?: string
   end_date?: string
+  week?: number
 }
 
 export type PosthireTimesheetRow = {

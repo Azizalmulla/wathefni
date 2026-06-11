@@ -27,11 +27,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input, Select } from '@/components/ui/field'
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
+  cancelShift,
   createEmployee,
   DashboardApiError,
   type EmployeeImportResult,
   getHrTasks,
   importEmployees,
+  rescheduleShift,
   getPosthireAnalytics,
   getPosthireAttendance,
   getEmployeeProfile,
@@ -71,6 +73,7 @@ import type {
   PosthireOnboardingResponse,
   PosthirePayrollPolicy,
   PosthirePayrollResponse,
+  PosthireShiftRow,
   PosthireShiftsResponse,
 } from '@/types'
 
@@ -2364,14 +2367,142 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
 
 // --- Shifts ----------------------------------------------------------------
 
+function RescheduleShiftModal({ access, shift, onClose, onNotice, onDone, onAccessIssue }: {
+  access: DashboardAccess
+  shift: PosthireShiftRow
+  onClose: () => void
+  onNotice: NoticeFn
+  onDone: () => void
+  onAccessIssue?: (issue: AccessIssue) => void
+}) {
+  const confirm = useConfirm()
+  const [shiftDate, setShiftDate] = useState((shift.shift_date || '').slice(0, 10))
+  const [startTime, setStartTime] = useState((shift.start_time || '').slice(0, 5))
+  const [endTime, setEndTime] = useState((shift.end_time || '').slice(0, 5))
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const ready = Boolean(shiftDate && startTime && endTime)
+
+  const submit = async () => {
+    if (!ready) {
+      setError('Enter a date, start time, and end time.')
+      return
+    }
+    if (endTime <= startTime) {
+      setError('The end time must be after the start time.')
+      return
+    }
+    const who = shift.employee_name || 'this employee'
+    if (
+      !(await confirm({
+        title: 'Reschedule this shift?',
+        body: `${who}'s shift will move to ${formatDate(shiftDate)} from ${startTime} to ${endTime}. They may be notified automatically.`,
+        confirmLabel: 'Reschedule shift',
+      }))
+    )
+      return
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await rescheduleShift(access, shift.shift_id || '', { shift_date: shiftDate, start_time: startTime, end_time: endTime })
+      onNotice(res.message || 'Shift rescheduled.', 'success')
+      onDone()
+      onClose()
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      // Keep the entered values so HR can adjust and retry.
+      setError(friendlyError(err, 'We couldn’t reschedule that shift. Please try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="space-y-1">
+          <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Edit shift</p>
+          <p className="text-[13px] leading-6 text-subtle/95">Change the date or time for {shift.employee_name || 'this employee'}'s shift.</p>
+        </div>
+        <div className="mt-5 grid gap-3.5 sm:grid-cols-3">
+          <RosterField label="Date" required>
+            <Input className="w-full" type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} />
+          </RosterField>
+          <RosterField label="Start" required>
+            <Input className="w-full" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          </RosterField>
+          <RosterField label="End" required>
+            <Input className="w-full" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          </RosterField>
+        </div>
+        {error ? <p className="mt-3 text-[13px] text-rose-600">{error}</p> : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button size="sm" onClick={() => void submit()} disabled={busy || !ready}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarClock className="h-4 w-4" />}
+            Save changes
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireShifts(access), [access])
+  const confirm = useConfirm()
+  const [week, setWeek] = useState(0)
+  const loader = useCallback(() => getPosthireShifts(access, week), [access, week])
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireShiftsResponse>(loader, onAccessIssue)
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const canManage = can(permissions, 'shifts.manage', role)
 
   const shifts = data?.shifts ?? []
   const swaps = data?.swaps ?? []
+
+  const [rowBusy, setRowBusy] = useState<string | null>(null)
+  const [editShift, setEditShift] = useState<PosthireShiftRow | null>(null)
+
+  const weekLabel = data?.start_date && data?.end_date
+    ? `${formatDate(data.start_date)} – ${formatDate(data.end_date)}`
+    : week === 0
+      ? 'This week'
+      : week > 0
+        ? `${week} week${week === 1 ? '' : 's'} ahead`
+        : `${Math.abs(week)} week${week === -1 ? '' : 's'} ago`
+
+  const runCancelShift = async (shift: PosthireShiftRow) => {
+    if (!shift.shift_id) return
+    const who = shift.employee_name || 'this employee'
+    const when = `${formatDate(shift.shift_date)}, ${formatTime(shift.start_time)} – ${formatTime(shift.end_time)}`
+    if (
+      !(await confirm({
+        title: 'Cancel this shift?',
+        body: `${who}'s shift on ${when} will be cancelled. They may be notified automatically.`,
+        confirmLabel: 'Cancel shift',
+        destructive: true,
+      }))
+    )
+      return
+    setRowBusy(shift.shift_id)
+    try {
+      const res = await cancelShift(access, shift.shift_id)
+      onNotice(res.message || 'Shift cancelled.', 'success')
+      await reload()
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t cancel that shift. Please try again.'), 'error')
+    } finally {
+      setRowBusy(null)
+    }
+  }
 
   const [form, setForm] = useState({ employee_name: '', shift_date: '', start_time: '', end_time: '' })
   const formReady = form.employee_name.trim() && form.shift_date && form.start_time && form.end_time
@@ -2505,13 +2636,26 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
             </Card>
           ) : null}
           <Card>
-            <CardHeader>
-              <CardTitle>This week's schedule</CardTitle>
-              <CardDescription>{shifts.length} shift{shifts.length === 1 ? '' : 's'} scheduled.</CardDescription>
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+              <div>
+                <CardTitle>Schedule</CardTitle>
+                <CardDescription>{weekLabel} · {shifts.length} shift{shifts.length === 1 ? '' : 's'}</CardDescription>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Button variant="secondary" size="sm" disabled={refreshing} onClick={() => setWeek((w) => w - 1)} aria-label="Previous week">
+                  <ArrowRight className="h-4 w-4 rotate-180" />
+                </Button>
+                <Button variant={week === 0 ? 'secondary' : 'ghost'} size="sm" disabled={week === 0 || refreshing} onClick={() => setWeek(0)}>
+                  This week
+                </Button>
+                <Button variant="secondary" size="sm" disabled={refreshing} onClick={() => setWeek((w) => w + 1)} aria-label="Next week">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {shifts.length === 0 ? (
-                <EmptyState icon={<CalendarDays className="h-5 w-5" />} title="No shifts this week" hint={canManage ? 'Schedule a shift above to get started.' : undefined} />
+                <EmptyState icon={<CalendarDays className="h-5 w-5" />} title="No shifts this week" hint={canManage ? 'Schedule a shift above, or use the arrows to view another week.' : 'Use the arrows to view another week.'} />
               ) : (
                 <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
                   <table className="w-full min-w-[640px] text-left text-[13px]">
@@ -2521,6 +2665,7 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
                         <th className="px-4 py-3 font-medium">Date</th>
                         <th className="px-4 py-3 font-medium">Time</th>
                         <th className="px-4 py-3 font-medium">Status</th>
+                        {canManage ? <th className="px-4 py-3 text-right font-medium">Actions</th> : null}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-line/45">
@@ -2530,6 +2675,18 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
                           <td className="px-4 py-3 text-subtle/90">{formatDate(shift.shift_date)}</td>
                           <td className="px-4 py-3 text-subtle/90">{formatTime(shift.start_time)} – {formatTime(shift.end_time)}</td>
                           <td className="px-4 py-3"><StatusBadge status={shift.status || 'scheduled'} /></td>
+                          {canManage ? (
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <Button variant="ghost" size="sm" disabled={!shift.shift_id || rowBusy === shift.shift_id} onClick={() => setEditShift(shift)}>
+                                  Edit
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-rose-600 hover:text-rose-600" disabled={!shift.shift_id || rowBusy === shift.shift_id} onClick={() => void runCancelShift(shift)}>
+                                  {rowBusy === shift.shift_id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancel'}
+                                </Button>
+                              </div>
+                            </td>
+                          ) : null}
                         </tr>
                       ))}
                     </tbody>
@@ -2540,6 +2697,16 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
           </Card>
         </>
       )}
+      {editShift ? (
+        <RescheduleShiftModal
+          access={access}
+          shift={editShift}
+          onClose={() => setEditShift(null)}
+          onNotice={onNotice}
+          onDone={() => void reload()}
+          onAccessIssue={onAccessIssue}
+        />
+      ) : null}
     </div>
   )
 }

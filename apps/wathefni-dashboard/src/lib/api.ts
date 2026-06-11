@@ -645,8 +645,29 @@ export function getPosthireLeave(access: DashboardAccess) {
   return request<PosthireLeaveResponse>('/dashboard/posthire/leave', access)
 }
 
-export function getPosthireShifts(access: DashboardAccess) {
-  return request<PosthireShiftsResponse>('/dashboard/posthire/shifts', access)
+export function getPosthireShifts(access: DashboardAccess, week = 0) {
+  const qs = week ? `?week=${encodeURIComponent(String(week))}` : ''
+  return request<PosthireShiftsResponse>(`/dashboard/posthire/shifts${qs}`, access)
+}
+
+export function cancelShift(access: DashboardAccess, shiftId: string) {
+  return request<{ ok: boolean; status: string; message?: string; notified?: boolean }>(
+    `/dashboard/posthire/shifts/${encodeURIComponent(shiftId)}/cancel`,
+    access,
+    { method: 'POST' },
+  )
+}
+
+export function rescheduleShift(
+  access: DashboardAccess,
+  shiftId: string,
+  body: { shift_date: string; start_time: string; end_time: string },
+) {
+  return request<{ ok: boolean; status: string; message?: string; notified?: boolean }>(
+    `/dashboard/posthire/shifts/${encodeURIComponent(shiftId)}/reschedule`,
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
 }
 
 export function getPosthirePayroll(access: DashboardAccess) {
