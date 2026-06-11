@@ -1029,6 +1029,9 @@ export type PosthireAttendanceRow = {
 export type PosthireAttendanceResponse = {
   company_code: string
   date: string
+  start_date?: string
+  end_date?: string
+  is_today?: boolean
   ok?: boolean
   attendance?: PosthireAttendanceRow[]
   status_filter?: string | null

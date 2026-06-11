@@ -16981,6 +16981,12 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
     if scope_clause:
         where.append(scope_clause.removeprefix("AND "))
         params.extend(scope_params)
+    try:
+        row_limit = int(action.get("limit") or 100)
+    except (TypeError, ValueError):
+        row_limit = 100
+    row_limit = max(1, min(row_limit, 5000))
+    params.append(row_limit)
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -16989,7 +16995,7 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
                 FROM attendance_records ar
                 WHERE {' AND '.join(where)}
                 ORDER BY ar.attendance_date DESC, ar.scheduled_start NULLS LAST, ar.employee_name NULLS LAST
-                LIMIT 100
+                LIMIT %s
                 """,
                 params,
             )
@@ -42681,11 +42687,90 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
 
 
 @app.get("/dashboard/posthire/attendance")
-def dashboard_posthire_attendance(context: dict[str, Any] = Depends(dashboard_context)):
+def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[date, date]:
+    """Resolve the requested attendance window, defaulting to today and clamping
+    to a 92-day span so a date-range read/export can never scan unbounded history."""
+    today = kuwait_today()
+    start = parse_shift_date_value(start_date) or today
+    end = parse_shift_date_value(end_date) or start
+    if end < start:
+        start, end = end, start
+    if (end - start).days > 92:
+        start = end - timedelta(days=92)
+    return start, end
+
+
+def dashboard_posthire_attendance(
+    start_date: str | None = Query(None),
+    end_date: str | None = Query(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "attendance")
+    start, end = _attendance_range(start_date, end_date)
     today = kuwait_today().isoformat()
-    result = list_attendance({"company_code": company, "start_date": today, "end_date": today, "query": "today", "viewer_phone": context.get("hr_phone")}, company_code=company)
-    return json_safe({"company_code": company, "date": today, **result})
+    result = list_attendance(
+        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": 1000},
+        company_code=company,
+    )
+    return json_safe({
+        "company_code": company,
+        "date": today,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "is_today": start == end == kuwait_today(),
+        **result,
+    })
+
+
+def build_attendance_csv(rows: list[dict[str, Any]]) -> str:
+    """Render attendance rows to CSV text (header + one row each). Pure/no I/O so
+    the export endpoint and smoke test share the exact same column contract."""
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["Employee", "Date", "Status", "Check-in", "Check-out", "Late minutes", "Notes"])
+    for row in rows or []:
+        status = str(row.get("status") or "").replace("_", " ").strip().title()
+        writer.writerow([
+            row.get("employee_name") or "",
+            row.get("attendance_date") or "",
+            status,
+            format_attendance_time(row.get("check_in_at")),
+            format_attendance_time(row.get("check_out_at")),
+            row.get("late_minutes") if row.get("late_minutes") is not None else "",
+            row.get("notes") or "",
+        ])
+    return buffer.getvalue()
+
+
+@app.get("/dashboard/posthire/attendance/export.csv")
+def dashboard_posthire_attendance_export(
+    start_date: str | None = Query(None),
+    end_date: str | None = Query(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = _posthire_read_context(context, "attendance")
+    start, end = _attendance_range(start_date, end_date)
+    result = list_attendance(
+        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": 5000},
+        company_code=company,
+    )
+    rows = result.get("attendance") or []
+    csv_text = build_attendance_csv(rows)
+
+    record_admin_audit(
+        context,
+        "attendance_exported",
+        summary=f"Exported {len(rows)} attendance record(s) for {start.isoformat()} to {end.isoformat()}.",
+        target_type="company",
+        target=company,
+        details={"start_date": start.isoformat(), "end_date": end.isoformat(), "row_count": len(rows)},
+    )
+    filename = f"attendance-{company}-{start.isoformat()}-to-{end.isoformat()}.csv"
+    return StreamingResponse(
+        iter([csv_text]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"},
+    )
 
 
 @app.get("/dashboard/posthire/leave")

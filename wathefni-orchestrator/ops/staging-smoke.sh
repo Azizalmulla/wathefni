@@ -108,6 +108,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-roster.py | sed 's
 log "shift management (cancel/reschedule/week-nav: RBAC + tenant scope + events, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-management.py | sed 's/^/    /'
 
+log "attendance history (date-range read + CSV export: RBAC + tenant scope + audit, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-attendance-history.py | sed 's/^/    /'
+
 log "leave balances P1 (chargeable days + flag gate + accrual + observe-only consumption, staging DB)"
 "$VENV_PY" smoke-test-leave-balances.py | sed 's/^/    /'
 

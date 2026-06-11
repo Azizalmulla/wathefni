@@ -637,8 +637,34 @@ export function getOnboardingDetail(access: DashboardAccess, employeeKey: string
   return request<OnboardingDetailResponse>(`/dashboard/posthire/onboarding/${encodeURIComponent(employeeKey)}`, access)
 }
 
-export function getPosthireAttendance(access: DashboardAccess) {
-  return request<PosthireAttendanceResponse>('/dashboard/posthire/attendance', access)
+export function getPosthireAttendance(access: DashboardAccess, range?: { start_date?: string; end_date?: string }) {
+  const params = new URLSearchParams()
+  if (range?.start_date) params.set('start_date', range.start_date)
+  if (range?.end_date) params.set('end_date', range.end_date)
+  const qs = params.toString()
+  return request<PosthireAttendanceResponse>(`/dashboard/posthire/attendance${qs ? `?${qs}` : ''}`, access)
+}
+
+// Download attendance for the selected range as CSV. Auth is header-based, so we
+// fetch with credentials and hand the browser a blob (no raw URL in the DOM).
+export async function exportAttendanceCsv(access: DashboardAccess, range: { start_date: string; end_date: string }) {
+  const params = new URLSearchParams({ start_date: range.start_date, end_date: range.end_date })
+  const response = await fetch(`/dashboard/posthire/attendance/export.csv?${params.toString()}`, {
+    headers: dashboardHeaders(access),
+  })
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    throw new DashboardApiError(response.status, payload?.detail || payload, 'Could not export attendance.')
+  }
+  const blob = await response.blob()
+  const disposition = response.headers.get('Content-Disposition') || ''
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || `attendance-${range.start_date}-to-${range.end_date}.csv`
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  URL.revokeObjectURL(url)
 }
 
 export function getPosthireLeave(access: DashboardAccess) {

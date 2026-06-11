@@ -36,6 +36,7 @@ import {
   rescheduleShift,
   getPosthireAnalytics,
   getPosthireAttendance,
+  exportAttendanceCsv,
   getEmployeeProfile,
   getPosthireCompliance,
   getPosthireEmployees,
@@ -2041,17 +2042,65 @@ function AttendanceCorrectionRow({
   )
 }
 
+function attendanceAddDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00`)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function attendanceMonthStart(iso: string): string {
+  return `${iso.slice(0, 7)}-01`
+}
+
 function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireAttendance(access), [access])
+  const [range, setRange] = useState<{ start: string; end: string } | null>(null)
+  const loader = useCallback(
+    () => getPosthireAttendance(access, range ? { start_date: range.start, end_date: range.end } : undefined),
+    [access, range],
+  )
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireAttendanceResponse>(loader, onAccessIssue)
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const canManage = can(permissions, 'attendance.manage', role)
+  const canExport = can(permissions, 'attendance.read', role)
   const [correcting, setCorrecting] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   const rows = data?.attendance ?? []
   const late = rows.filter((r) => Number(r.late_minutes || 0) > 0 || String(r.status).toLowerCase() === 'late')
   const absent = rows.filter((r) => String(r.status).toLowerCase() === 'absent')
   const present = rows.filter((r) => ['present', 'completed'].includes(String(r.status).toLowerCase()))
+
+  // The backend resolves and echoes the effective window (Kuwait time), so we
+  // anchor presets and inputs to it rather than the browser clock.
+  const today = data?.date || ''
+  const effStart = range?.start || data?.start_date || today
+  const effEnd = range?.end || data?.end_date || today
+  const isSingleDay = effStart === effEnd
+  const isToday = Boolean(data?.is_today) && !range
+
+  const rangeLabel = isToday
+    ? `Today · ${formatDate(today)}`
+    : isSingleDay
+      ? formatDate(effStart)
+      : `${formatDate(effStart)} → ${formatDate(effEnd)}`
+
+  const runExport = async () => {
+    if (!effStart || !effEnd) return
+    setExporting(true)
+    try {
+      await exportAttendanceCsv(access, { start_date: effStart, end_date: effEnd })
+      onNotice('Attendance export downloaded.', 'success')
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t export attendance. Please try again.'), 'error')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -2068,43 +2117,83 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
             icon={<Clock className="h-5 w-5" />}
             title={
               absent.length || late.length
-                ? `${absent.length} absent · ${late.length} late today`
+                ? `${absent.length} absent · ${late.length} late`
                 : rows.length === 0
-                  ? 'No check-ins recorded yet today'
-                  : 'Attendance looks clean today'
+                  ? 'No attendance records for this range'
+                  : 'Attendance looks clean'
             }
             detail={
               absent.length || late.length
                 ? 'Review the exceptions below and correct records if needed.'
                 : rows.length === 0
                   ? 'Attendance appears here as employees check in against their shifts.'
-                  : `${present.length} checked in`
+                  : `${present.length} present · ${rows.length} record${rows.length === 1 ? '' : 's'}`
             }
           />
           <div className="grid gap-3 sm:grid-cols-3">
-            <StatCard label="Checked in" value={present.length} />
+            <StatCard label="Present" value={present.length} />
             <StatCard label="Late" value={late.length} />
             <StatCard label="Absent" value={absent.length} />
           </div>
           <Card>
-            <CardHeader>
-              <CardTitle>Today · {formatDate(data?.date)}</CardTitle>
-              <CardDescription>{rows.length} attendance record{rows.length === 1 ? '' : 's'}</CardDescription>
+            <CardHeader className="flex flex-col gap-3">
+              <div className="flex flex-row flex-wrap items-center justify-between gap-3">
+                <div>
+                  <CardTitle>{rangeLabel}</CardTitle>
+                  <CardDescription>{rows.length} attendance record{rows.length === 1 ? '' : 's'}</CardDescription>
+                </div>
+                {canExport ? (
+                  <Button variant="secondary" size="sm" disabled={exporting || rows.length === 0} onClick={() => void runExport()}>
+                    {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                    Export CSV
+                  </Button>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant={isToday ? 'secondary' : 'ghost'} size="sm" disabled={refreshing} onClick={() => setRange(null)}>
+                  Today
+                </Button>
+                <Button variant="ghost" size="sm" disabled={refreshing || !today} onClick={() => setRange({ start: attendanceAddDays(today, -6), end: today })}>
+                  Last 7 days
+                </Button>
+                <Button variant="ghost" size="sm" disabled={refreshing || !today} onClick={() => setRange({ start: attendanceMonthStart(today), end: today })}>
+                  This month
+                </Button>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="date"
+                    value={effStart}
+                    max={effEnd || undefined}
+                    onChange={(e) => e.target.value && setRange({ start: e.target.value, end: effEnd < e.target.value ? e.target.value : effEnd })}
+                    className="h-9 rounded-full border border-line/60 bg-white/70 px-3 text-[12.5px] text-text outline-none focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+                  />
+                  <span className="text-[12px] text-subtle/70">→</span>
+                  <input
+                    type="date"
+                    value={effEnd}
+                    min={effStart || undefined}
+                    onChange={(e) => e.target.value && setRange({ start: effStart, end: e.target.value })}
+                    className="h-9 rounded-full border border-line/60 bg-white/70 px-3 text-[12.5px] text-text outline-none focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {rows.length === 0 ? (
                 <EmptyState
                   icon={<CalendarCheckIcon />}
-                  title="No check-ins recorded yet today"
-                  hint="Attendance appears once employees check in against their shifts. If you haven't set up shifts yet, add them in Shifts so check-ins can be tracked."
+                  title="No attendance records for this range"
+                  hint="Attendance appears once employees check in against their shifts. Try a wider date range, or set up shifts so check-ins can be tracked."
                 />
               ) : (
                 <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
-                  <table className="w-full min-w-[560px] text-left text-[13px]">
+                  <table className="w-full min-w-[640px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
+                        <th className="px-4 py-3 font-medium">Date</th>
                         <th className="px-4 py-3 font-medium">Check-in</th>
+                        <th className="px-4 py-3 font-medium">Check-out</th>
                         <th className="px-4 py-3 font-medium">Status</th>
                         {canManage ? <th className="px-4 py-3 text-right font-medium">Action</th> : null}
                       </tr>
@@ -2113,14 +2202,17 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                       {rows.map((row, idx) => {
                         const rowKey = row.attendance_id || `${row.employee_key}-${idx}`
                         const isEditing = correcting === rowKey
+                        const rowDate = row.attendance_date || data?.date
                         return (
                           <Fragment key={rowKey}>
                             <tr className="hover:bg-white/45">
                               <td className="px-4 py-3 font-semibold text-text">{row.employee_name || '—'}</td>
+                              <td className="px-4 py-3 text-subtle/90">{formatDate(row.attendance_date)}</td>
                               <td className="px-4 py-3 text-subtle/90">
                                 {formatTime(row.check_in_at)}
                                 {Number(row.late_minutes || 0) > 0 ? <span className="ml-1 text-[12px] text-rose-600">+{row.late_minutes}m</span> : null}
                               </td>
+                              <td className="px-4 py-3 text-subtle/90">{formatTime(row.check_out_at)}</td>
                               <td className="px-4 py-3">
                                 <StatusBadge status={row.status} />
                               </td>
@@ -2143,13 +2235,13 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                                         onClick={() =>
                                           action.run(
                                             'mark_attendance_absent',
-                                            { employee_name: row.employee_name, date: data?.date },
+                                            { employee_name: row.employee_name, date: rowDate },
                                             {
                                               destructive: true,
                                               key: `absent:${rowKey}`,
                                               confirm: {
                                                 title: 'Mark this employee absent?',
-                                                body: `${row.employee_name || 'This employee'} will be marked absent for ${data?.date ? formatDate(data.date) : 'this day'}. You can correct it later if needed.`,
+                                                body: `${row.employee_name || 'This employee'} will be marked absent for ${rowDate ? formatDate(rowDate) : 'this day'}. You can correct it later if needed.`,
                                                 confirmLabel: 'Mark absent',
                                               },
                                             },
@@ -2179,7 +2271,7 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                                     'correct_attendance_record',
                                     {
                                       employee_name: row.employee_name,
-                                      date: data?.date,
+                                      date: rowDate,
                                       status,
                                       time: time || undefined,
                                       notes: notes || undefined,
