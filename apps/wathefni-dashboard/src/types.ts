@@ -1318,3 +1318,54 @@ export type SetupReadinessResponse = {
   total: number
   steps: SetupReadinessStep[]
 }
+
+export type ActivityActor = {
+  name?: string | null
+  email?: string | null
+  phone?: string | null
+  role?: string | null
+  role_label?: string | null
+  display: string
+}
+
+export type ActivityItem = {
+  id: string
+  at: string | null
+  actor: ActivityActor
+  action_type: string
+  category: string
+  summary: string
+  target?: string | null
+  status?: string | null
+  sensitive: boolean
+}
+
+export type ActivityActorOption = {
+  user_id?: string | null
+  name?: string | null
+  email?: string | null
+  role_label?: string | null
+}
+
+export type ActivityResponse = {
+  company_code: string
+  total: number
+  limit: number
+  offset: number
+  count: number
+  has_more: boolean
+  categories: string[]
+  actors: ActivityActorOption[]
+  items: ActivityItem[]
+}
+
+export type ActivityFilters = {
+  start_date?: string
+  end_date?: string
+  actor?: string
+  category?: string
+  action_type?: string
+  q?: string
+  limit?: number
+  offset?: number
+}

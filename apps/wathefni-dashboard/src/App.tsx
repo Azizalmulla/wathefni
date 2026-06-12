@@ -1,4 +1,5 @@
 import {
+  Activity,
   AlertTriangle,
   ArrowUp,
   BarChart3,
@@ -75,6 +76,7 @@ import {
   previewAssessmentReport,
   previewCandidateCv,
   recalculateAssessmentNorms,
+  rejectCandidate,
   retryVideoInterviewTranscripts,
   saveInterviewNotes,
   sendVideoInterview,
@@ -87,6 +89,7 @@ import {
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
+import { ActivityLog } from '@/components/ActivityLog'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -141,6 +144,7 @@ type Page =
   | 'payroll'
   | 'analytics'
   | 'compliance'
+  | 'activity'
   | 'settings'
 type NavGroup = 'prehire' | 'posthire' | 'settings'
 type DashboardNavItem = { id: Page; label: string; icon: typeof LayoutDashboard; module?: string; group: NavGroup }
@@ -215,6 +219,7 @@ const navItems: DashboardNavItem[] = [
   { id: 'payroll', label: 'Payroll', icon: Wallet, module: 'payroll', group: 'posthire' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, module: 'analytics', group: 'posthire' },
   { id: 'compliance', label: 'Compliance', icon: ShieldCheck, module: 'compliance', group: 'posthire' },
+  { id: 'activity', label: 'Activity', icon: Activity, group: 'settings' },
   { id: 'settings', label: 'Settings', icon: Settings, group: 'settings' },
 ]
 
@@ -346,6 +351,7 @@ const PERMISSION_CAPABILITY_LABELS: Record<string, string> = {
 const ROLE_LABELS_UI: Record<string, string> = {
   owner: 'Owner / Admin',
   hr_manager: 'HR Manager',
+  manager: 'Team Manager',
   recruiter: 'Recruiter / HR Officer',
   hiring_manager: 'Hiring Manager',
   viewer: 'Viewer',
@@ -527,6 +533,7 @@ function App() {
   const pageTitle = pageLabels[activePage]
   const availableNavItems = navItems.filter((item) => {
     if (item.id === 'employees') return anyPosthireModuleEnabled(summary)
+    if (item.id === 'activity') return hasDashboardPermission(summary?.access, 'audit.read')
     return !item.module || dashboardModuleEnabled(summary, item.module)
   })
   const dashboardLoaded = Boolean(summary && applications && notifications && interviews && reports)
@@ -1386,7 +1393,7 @@ function App() {
         <section className="p-5 lg:p-9">
           <header className="mb-9 flex flex-col gap-5 border-b border-line/50 pb-8 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' ? 'Workspace' : 'Pre-hiring'}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' || activePage === 'activity' ? 'Workspace' : 'Pre-hiring'}</div>
               <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl">
                 {showingInviteAcceptance ? 'Complete your Wathefni invite' : accessIssue ? 'Verify your Wathefni access' : activePage === 'overview' ? 'Wathefni Pre-Hiring Control Center' : pageTitle}
               </h1>
@@ -1703,6 +1710,9 @@ function App() {
                   userAccess={userAccess}
                 />
               )}
+              {activePage === 'activity' && (
+                <ActivityLog access={access} onAccessIssue={handleAccessIssue} />
+              )}
               {isPostHirePage(activePage) && (
                 <PostHirePage
                   page={activePage}
@@ -1826,6 +1836,7 @@ const pageLabels: Record<Page, string> = {
   payroll: 'Payroll',
   analytics: 'Analytics',
   compliance: 'Compliance',
+  activity: 'Activity',
   settings: 'Settings',
 }
 
@@ -1843,10 +1854,11 @@ const pageSubtitles: Record<Page, string> = {
   onboarding: 'New hires in progress, open documents, and reminders to keep onboarding moving.',
   attendance: 'Today’s attendance, late and missing check-ins, and corrections that need a decision.',
   leave: 'Pending leave requests, approvals, and who is away in the weeks ahead.',
-  shifts: 'This week’s schedule, open shift gaps, and swap requests to clear.',
+  shifts: 'This week’s schedule, upcoming assignments, and swap requests to clear.',
   payroll: 'Timesheets, exceptions, and a controlled, audited payroll export.',
   analytics: 'A calm executive view of workforce, attendance, and post-hire trends.',
   compliance: 'Track missing, expired, and expiring employee documents.',
+  activity: 'A read-only record of who did what across your workspace.',
   settings: 'Manage your workspace, team access, and account settings.',
 }
 
@@ -2414,6 +2426,18 @@ function CandidateDrawer({
       return
     await mutate('Hiring candidate', () => hireCandidate(access, candidate.app_key), actionKey('hire'))
   }
+  const runReject = async () => {
+    if (
+      !(await confirm({
+        title: 'Reject this candidate?',
+        body: `This will move ${who} out of the active pipeline. You can still find their record later.`,
+        confirmLabel: 'Reject candidate',
+        destructive: true,
+      }))
+    )
+      return
+    await mutate('Rejecting candidate', () => rejectCandidate(access, candidate.app_key), actionKey('reject'))
+  }
   const runPrimaryAction = () => {
     if (primaryAction.id === 'send_assessment') return runSendAssessment()
     if (primaryAction.id === 'send_video_interview') return runSendVideoInterview()
@@ -2503,6 +2527,9 @@ function CandidateDrawer({
                 </Button>
                 <Button disabled={busy || !canDecideCandidates} onClick={() => void runHire()} size="sm" variant="secondary">
                   {runningAction === actionKey('hire') ? <><Loader2 className="animate-spin" size={14} /> Hiring…</> : 'Hire'}
+                </Button>
+                <Button disabled={busy || !canManageCandidates} onClick={() => void runReject()} size="sm" variant="secondary">
+                  {runningAction === actionKey('reject') ? <><Loader2 className="animate-spin" size={14} /> Rejecting…</> : 'Reject candidate'}
                 </Button>
               </div>
             </details>

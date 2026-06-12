@@ -1,4 +1,6 @@
 import type {
+  ActivityFilters,
+  ActivityResponse,
   ApplicationsResponse,
   AssessmentConfigResponse,
   AssessmentNormRecalculationResponse,
@@ -132,6 +134,43 @@ export function logoutDashboard(access: DashboardAccess) {
 
 export function getDashboardTeam(access: DashboardAccess) {
   return request<DashboardTeamResponse>('/dashboard/team', access)
+}
+
+function activitySearchParams(filters: ActivityFilters = {}): URLSearchParams {
+  const search = new URLSearchParams()
+  if (filters.start_date) search.set('start_date', filters.start_date)
+  if (filters.end_date) search.set('end_date', filters.end_date)
+  if (filters.actor) search.set('actor', filters.actor)
+  if (filters.category && filters.category !== 'all') search.set('category', filters.category)
+  if (filters.action_type) search.set('action_type', filters.action_type)
+  if (filters.q) search.set('q', filters.q)
+  if (typeof filters.limit === 'number') search.set('limit', String(filters.limit))
+  if (typeof filters.offset === 'number') search.set('offset', String(filters.offset))
+  return search
+}
+
+export function getCompanyActivity(access: DashboardAccess, filters: ActivityFilters = {}) {
+  const qs = activitySearchParams(filters).toString()
+  return request<ActivityResponse>(`/dashboard/activity${qs ? `?${qs}` : ''}`, access)
+}
+
+export async function downloadCompanyActivityCsv(access: DashboardAccess, filters: ActivityFilters = {}) {
+  const search = activitySearchParams({ ...filters, limit: undefined, offset: undefined })
+  search.set('format', 'csv')
+  const response = await fetch(`/dashboard/activity?${search.toString()}`, { headers: dashboardHeaders(access) })
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    throw new DashboardApiError(response.status, payload?.detail || payload, 'Could not download the activity log.')
+  }
+  const blob = await response.blob()
+  const disposition = response.headers.get('Content-Disposition') || ''
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || 'activity.csv'
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  URL.revokeObjectURL(url)
 }
 
 export function inviteDashboardUser(access: DashboardAccess, body: { email: string; role: string; name?: string; phone?: string }) {

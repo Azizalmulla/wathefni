@@ -5297,8 +5297,8 @@ _POSTHIRE_PERMS_TEAM_MANAGER = {
 }
 
 ROLE_PERMISSIONS = {
-    "owner": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", "users.manage", *_POSTHIRE_PERMS_FULL},
-    "hr_manager": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", *_POSTHIRE_PERMS_FULL},
+    "owner": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
+    "hr_manager": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
     "manager": set(_POSTHIRE_PERMS_TEAM_MANAGER),
     "recruiter": {"prehire.read", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "report.export"},
     "hiring_manager": {"prehire.read", "interview.manage", "report.export", *_POSTHIRE_PERMS_MANAGER},
@@ -33969,6 +33969,359 @@ def record_admin_audit(
         dashboard_record_action_result(action_type, status, payload, summary)
     except Exception:
         logger.warning("admin audit failed for %s", action_type, exc_info=True)
+
+
+# ---------------------------------------------------------------------------
+# Company Activity & Audit (read-only).
+#
+# A safe, company-scoped view over the EXISTING action_results audit substrate
+# so client HR can see "who did what". There is NO mutation or delete path —
+# audit rows are immutable. Operator/platform/provider actions are never
+# exposed to clients, and only a whitelist of safe, humanized fields is
+# returned (never raw result payloads, details blobs, final replies, tokens,
+# provider config, or stack traces).
+# ---------------------------------------------------------------------------
+
+AUDIT_CATEGORIES = [
+    "Leave", "Payroll", "Employees", "Onboarding", "Documents",
+    "Attendance", "Shifts", "Candidates", "Team & Access", "Other",
+]
+
+# Module key (from ACTION_REQUIRED_MODULES) -> HR-facing category label.
+AUDIT_MODULE_CATEGORY = {
+    "pre_hiring": "Candidates",
+    "assessments": "Candidates",
+    "video_interviews": "Candidates",
+    "onboarding": "Onboarding",
+    "shifts": "Shifts",
+    "attendance": "Attendance",
+    "leave": "Leave",
+    "payroll": "Payroll",
+    "analytics": "Other",
+}
+
+# Dashboard admin/config audit action_type -> category (these go through
+# record_admin_audit and are NOT in ACTION_REQUIRED_MODULES).
+AUDIT_ADMIN_CATEGORY = {
+    "team_member_invited": "Team & Access", "team_member_updated": "Team & Access",
+    "team_member_role_changed": "Team & Access", "team_member_deactivated": "Team & Access",
+    "team_member_reactivated": "Team & Access", "team_whatsapp_linked": "Team & Access",
+    "org_branch_saved": "Team & Access", "org_team_saved": "Team & Access",
+    "org_assignment_saved": "Team & Access", "org_manager_scope_saved": "Team & Access",
+    "org_manager_scope_removed": "Team & Access",
+    "import_candidate_assigned": "Candidates", "import_settings_updated": "Candidates",
+    "import_bulk_action": "Candidates",
+    "document_uploaded": "Documents", "document_downloaded": "Documents",
+    "employee_created": "Employees", "employee_updated": "Employees",
+    "employee_marked_left": "Employees", "employee_reactivated": "Employees",
+    "employees_imported": "Employees",
+    "attendance_exported": "Attendance",
+    "shift_cancelled": "Shifts", "shift_rescheduled": "Shifts",
+    "payroll_export_downloaded": "Payroll",
+    "hr_task_resolved": "Other",
+}
+
+# Combined action_type -> category, derived from the canonical module map plus
+# the admin/config audit actions. Built once at import time.
+AUDIT_CATEGORY_BY_ACTION = {
+    act: AUDIT_MODULE_CATEGORY.get(mod, "Other") for act, mod in ACTION_REQUIRED_MODULES.items()
+}
+AUDIT_CATEGORY_BY_ACTION.update(AUDIT_ADMIN_CATEGORY)
+
+# Sensitive actions to emphasise in the UI (real action_type names).
+AUDIT_SENSITIVE_ACTIONS = {
+    # Payroll
+    "export_payroll", "payroll_export_downloaded", "set_payroll_policy",
+    "approve_timesheet", "reject_timesheet",
+    # Leave
+    "approve_leave_request", "reject_leave_request", "cancel_leave_request",
+    # Employees
+    "employee_updated", "employee_marked_left", "employee_reactivated",
+    # Documents
+    "document_uploaded", "document_downloaded",
+    # Team & access
+    "team_member_invited", "team_member_updated", "team_member_role_changed",
+    "team_member_deactivated", "team_member_reactivated", "team_whatsapp_linked",
+    # Candidates
+    "hire_candidate", "reject_candidate",
+}
+
+# Provider/integration/config events that must NEVER appear in a client feed,
+# plus pure read/list events that would just be noise. (setup_*, list_*, and
+# answer_* are excluded via prefix checks in the query.)
+AUDIT_HIDDEN_ACTIONS = [
+    "mailbox_connection_started", "mailbox_settings_updated", "mailbox_disconnected",
+    "intake_address_created", "intake_address_deleted",
+    "document_viewed", "payroll_export_viewed",
+    "show_payroll_policy", "check_assessment_config",
+    "request_availability", "rank_candidates", "compare_candidates",
+    "candidate_cv_evaluation", "workforce_analytics", "prepare_candidate_email",
+]
+
+# action_type -> friendly verb phrase (HR-readable, no backend names).
+AUDIT_ACTION_LABELS = {
+    "approve_leave_request": "approved a leave request",
+    "reject_leave_request": "declined a leave request",
+    "cancel_leave_request": "cancelled a leave request",
+    "request_leave": "filed a leave request",
+    "export_payroll": "exported payroll",
+    "preview_payroll": "previewed payroll",
+    "payroll_export_downloaded": "downloaded a payroll export",
+    "set_payroll_policy": "updated the payroll policy",
+    "create_timesheet_review": "started a timesheet review",
+    "approve_timesheet": "approved a timesheet",
+    "reject_timesheet": "rejected a timesheet",
+    "employee_created": "added an employee",
+    "employee_updated": "edited an employee",
+    "employee_marked_left": "marked an employee as left",
+    "employee_reactivated": "reactivated an employee",
+    "employees_imported": "imported employees",
+    "start_onboarding": "started onboarding",
+    "send_onboarding_reminder": "sent an onboarding reminder",
+    "document_uploaded": "uploaded a document",
+    "document_downloaded": "downloaded a document",
+    "create_shift_assignment": "assigned a shift",
+    "replace_conflicting_shift_assignment": "reassigned a shift",
+    "cancel_shift_assignment": "cancelled a shift",
+    "shift_cancelled": "cancelled a shift",
+    "shift_rescheduled": "rescheduled a shift",
+    "request_shift_swap": "requested a shift swap",
+    "approve_shift_swap": "approved a shift swap",
+    "reject_shift_swap": "declined a shift swap",
+    "check_in_employee": "recorded a check-in",
+    "check_out_employee": "recorded a check-out",
+    "mark_attendance_absent": "marked attendance as absent",
+    "correct_attendance_record": "corrected an attendance record",
+    "attendance_exported": "exported attendance",
+    "hire_candidate": "hired a candidate",
+    "reject_candidate": "rejected a candidate",
+    "shortlist_candidate": "shortlisted a candidate",
+    "notify_candidate": "messaged a candidate",
+    "send_assessment": "sent an assessment",
+    "send_video_interview": "sent a video interview",
+    "schedule_interview": "scheduled an interview",
+    "schedule_candidate_meeting": "scheduled a meeting",
+    "team_member_invited": "invited a team member",
+    "team_member_updated": "updated a team member",
+    "team_member_role_changed": "changed a team member's role",
+    "team_member_deactivated": "deactivated a team member",
+    "team_member_reactivated": "reactivated a team member",
+    "team_whatsapp_linked": "linked a WhatsApp number",
+    "org_assignment_saved": "updated an employee's org placement",
+    "org_manager_scope_saved": "granted a manager scope",
+    "org_manager_scope_removed": "removed a manager scope",
+    "import_bulk_action": "ran a bulk candidate action",
+    "import_candidate_assigned": "assigned an imported candidate",
+    "import_settings_updated": "updated import settings",
+    "hr_task_resolved": "resolved an HR task",
+}
+
+
+def _audit_category(action_type: str | None) -> str:
+    return AUDIT_CATEGORY_BY_ACTION.get(str(action_type or ""), "Other")
+
+
+def _audit_target_display(payload: dict[str, Any]) -> str | None:
+    """Pull a human, NON-sensitive target name from the stored payload. Never
+    returns emails/keys that look like identifiers or anything secret."""
+    data = payload if isinstance(payload, dict) else {}
+
+    def _clean(val: Any) -> str | None:
+        if not isinstance(val, str):
+            return None
+        cleaned = val.strip()
+        # Only surface readable names — skip emails, tokens, and long opaque ids.
+        if cleaned and "@" not in cleaned and len(cleaned) <= 80 and not re.fullmatch(r"[0-9a-f]{16,}", cleaned):
+            return cleaned
+        return None
+
+    details = data.get("details") if isinstance(data.get("details"), dict) else {}
+    for key in ("employee_name", "candidate_name", "target_name", "display_name", "subject_name", "name"):
+        out = _clean(details.get(key))
+        if out:
+            return out
+    normalized = data.get("normalized_action_result") if isinstance(data.get("normalized_action_result"), dict) else {}
+    for key in ("target_label", "subject_label", "display", "employee_name", "candidate_name"):
+        out = _clean(normalized.get(key))
+        if out:
+            return out
+    action = data.get("action") if isinstance(data.get("action"), dict) else {}
+    return _clean(action.get("target")) or _clean(normalized.get("target_id"))
+
+
+def _audit_item(row: dict[str, Any], users_by_id: dict[str, Any], users_by_email: dict[str, Any]) -> dict[str, Any]:
+    payload = row.get("result") if isinstance(row.get("result"), dict) else {}
+    requested = payload.get("requested_by") if isinstance(payload.get("requested_by"), dict) else {}
+    action_type = str(row.get("action_type") or "")
+    uid = str(row.get("actor_user_id") or "").strip()
+    email = normalize_email(row.get("actor_email"))
+    phone = digits(row.get("actor_phone")) or None
+    user = users_by_id.get(uid) or (users_by_email.get(email) if email else None) or {}
+    name = str(requested.get("name") or "").strip() or str(user.get("name") or "").strip()
+    role_key = normalize_hr_role(row.get("actor_role") or user.get("role") or requested.get("role"))
+    role_label = ROLE_LABELS.get(role_key, "")
+    actor_display = name or email or (f"+{phone}" if phone else "") or role_label or "A team member"
+
+    target = _audit_target_display(payload)
+    verb = AUDIT_ACTION_LABELS.get(action_type)
+    stored_summary = str(payload.get("summary") or "").strip()
+    if verb:
+        summary = f"{actor_display} {verb}" + (f" · {target}" if target else "")
+    elif stored_summary:
+        summary = stored_summary if actor_display and actor_display in stored_summary else (f"{actor_display}: {stored_summary}" if actor_display else stored_summary)
+    else:
+        humanized = re.sub(r"[_\s]+", " ", action_type).strip() or "performed an action"
+        summary = f"{actor_display} {humanized}" + (f" · {target}" if target else "")
+
+    created = row.get("created_at")
+    return {
+        "id": str(row.get("result_id") or ""),
+        "at": created.isoformat() if hasattr(created, "isoformat") else (str(created) if created else None),
+        "actor": {
+            "name": name or None,
+            "email": email or None,
+            "phone": phone,
+            "role": role_key,
+            "role_label": role_label or None,
+            "display": actor_display,
+        },
+        "action_type": action_type,
+        "category": _audit_category(action_type),
+        "summary": summary,
+        "target": target,
+        "status": str(row.get("status") or "") or None,
+        "sensitive": action_type in AUDIT_SENSITIVE_ACTIONS,
+    }
+
+
+@app.get("/dashboard/activity")
+def dashboard_company_activity(
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
+    actor: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    action_type: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    format: str | None = Query(default=None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    # Permission-only gate (audit spans every module): Owner + HR Manager only.
+    require_entitlement(context, None, "audit.read")
+    company = context["company_code"]
+
+    where = [
+        "company_code = %s",
+        "left(action_type, 6) <> 'setup_'",
+        "left(action_type, 5) <> 'list_'",
+        "left(action_type, 7) <> 'answer_'",
+    ]
+    params: list[Any] = [company]
+    if AUDIT_HIDDEN_ACTIONS:
+        where.append("action_type <> ALL(%s)")
+        params.append(list(AUDIT_HIDDEN_ACTIONS))
+
+    start = _coerce_employee_start_date(start_date) if start_date else None
+    end = _coerce_employee_start_date(end_date) if end_date else None
+    if start:
+        where.append("created_at >= %s")
+        params.append(datetime(start.year, start.month, start.day, tzinfo=timezone.utc))
+    if end:
+        where.append("created_at < %s")
+        params.append(datetime(end.year, end.month, end.day, tzinfo=timezone.utc) + timedelta(days=1))
+
+    if category and category not in ("", "all"):
+        if category == "Other":
+            where.append("action_type <> ALL(%s)")
+            params.append(list(AUDIT_CATEGORY_BY_ACTION.keys()))
+        else:
+            cat_actions = [a for a, c in AUDIT_CATEGORY_BY_ACTION.items() if c == category]
+            where.append("action_type = ANY(%s)")
+            params.append(cat_actions or ["__none__"])
+
+    if action_type:
+        where.append("action_type = %s")
+        params.append(str(action_type).strip())
+
+    if actor and actor.strip():
+        token = actor.strip()
+        where.append("(actor_user_id = %s OR actor_email ILIKE %s OR actor_phone LIKE %s)")
+        params += [token, f"%{token}%", f"%{digits(token) or token}%"]
+
+    if q and q.strip():
+        like = f"%{q.strip()}%"
+        where.append("(action_type ILIKE %s OR coalesce(result->>'summary','') ILIKE %s OR coalesce(actor_email,'') ILIKE %s)")
+        params += [like, like, like]
+
+    where_sql = " AND ".join(where)
+    is_csv = str(format or "").lower() == "csv"
+    page_limit = 5000 if is_csv else limit
+    page_offset = 0 if is_csv else offset
+
+    users_by_id: dict[str, Any] = {}
+    users_by_email: dict[str, Any] = {}
+    actors: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT user_id, name, email, phone, role, status FROM dashboard_users WHERE company_code=%s ORDER BY lower(name), email",
+                (company,),
+            )
+            for raw in cur.fetchall():
+                u = dict(raw)
+                uid = str(u.get("user_id") or "").strip()
+                em = normalize_email(u.get("email"))
+                if uid:
+                    users_by_id[uid] = u
+                if em:
+                    users_by_email[em] = u
+                actors.append({
+                    "user_id": uid or None,
+                    "name": str(u.get("name") or "").strip() or None,
+                    "email": em or None,
+                    "role_label": ROLE_LABELS.get(normalize_hr_role(u.get("role")), None),
+                })
+            cur.execute(f"SELECT count(*) AS n FROM action_results WHERE {where_sql}", params)
+            total = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                f"SELECT result_id, action_type, status, result, created_at, "
+                f"actor_user_id, actor_email, actor_phone, actor_role "
+                f"FROM action_results WHERE {where_sql} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+                params + [page_limit, page_offset],
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+
+    items = [_audit_item(r, users_by_id, users_by_email) for r in rows]
+
+    if is_csv:
+        def csv_rows():
+            for it in items:
+                yield [
+                    it.get("at") or "",
+                    it["actor"]["display"],
+                    it["actor"].get("role_label") or "",
+                    it["category"],
+                    it["summary"],
+                    it.get("status") or "",
+                ]
+        return csv_stream_response(
+            f"activity-{company}.csv",
+            ["When", "Who", "Role", "Category", "Activity", "Status"],
+            csv_rows(),
+        )
+
+    return {
+        "company_code": company,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "count": len(items),
+        "has_more": offset + len(items) < total,
+        "categories": AUDIT_CATEGORIES,
+        "actors": actors,
+        "items": items,
+    }
 
 
 INTERVIEW_STATUSES = {"scheduled", "completed", "no_show", "rescheduled", "cancelled"}

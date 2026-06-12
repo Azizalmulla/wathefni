@@ -90,6 +90,9 @@ log "google sheets is optional (best-effort, off-the-request-path; a sheets outa
 log "admin/config audit trail (team/role/whatsapp/mailbox/intake/import changes are traceable + best-effort)"
 "$VENV_PY" smoke-test-admin-audit.py | sed 's/^/    /'
 
+log "company activity & audit UI (read-only, company-scoped, audit.read RBAC, redaction, filters, pagination, staging DB)"
+"$VENV_PY" smoke-test-company-activity.py | sed 's/^/    /'
+
 log "employee-hub integrity (orphan scan: company-scoped, read-only, catches drift, staging DB)"
 "$VENV_PY" smoke-test-hub-integrity.py | sed 's/^/    /'
 
