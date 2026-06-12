@@ -24,8 +24,17 @@ AUTH=(-H "Authorization: Bearer ${TOKEN}" -H "X-HR-Phone: ${HR_PHONE}" -H "X-Com
 
 # 1) HTTP checks against the staging server
 h=$(code "$BASE/health"); [ "$h" = "200" ] || fail "health=$h"; log "health 200"
-for path in /dashboard/auth/me /dashboard/prehire/summary /dashboard/team /dashboard/prehire/import/batches /dashboard/posthire/compliance; do
+for path in /dashboard/auth/me /dashboard/prehire/summary /dashboard/team /dashboard/prehire/import/batches /dashboard/posthire/compliance /dashboard/posthire/attendance /dashboard/posthire/payroll; do
   c=$(code "${AUTH[@]}" "$BASE$path"); [ "$c" = "200" ] || fail "$path=$c"; log "$path 200"
+done
+
+# Regression guard: post-hire reads must require auth. Their @app.get decorator must
+# sit on the real handler (with Depends(dashboard_context)), not on a helper defined
+# right beneath it. Unauthenticated must be 401/403 and must NEVER return 200 — a 200
+# here means a helper got registered as the route (auth + tenant-scope bypass).
+for path in /dashboard/posthire/attendance /dashboard/posthire/payroll; do
+  c=$(code "$BASE$path?company_code=WATHEFNI&start_date=2026-01-01&end_date=2026-01-31")
+  case "$c" in 401|403) log "$path unauth=$c (guarded)";; *) fail "$path served unauthenticated (code=$c) — route is on a helper, not the auth'd handler";; esac
 done
 
 # 2) Behavioural checks against the staging DB (app uses staging env + workspace)

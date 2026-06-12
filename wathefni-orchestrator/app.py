@@ -43214,7 +43214,6 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
     })
 
 
-@app.get("/dashboard/posthire/attendance")
 def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[date, date]:
     """Resolve the requested attendance window, defaulting to today and clamping
     to a 92-day span so a date-range read/export can never scan unbounded history."""
@@ -43228,6 +43227,7 @@ def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[dat
     return start, end
 
 
+@app.get("/dashboard/posthire/attendance")
 def dashboard_posthire_attendance(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
@@ -43525,7 +43525,6 @@ def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleR
     return json_safe({"ok": True, "status": "rescheduled", "message": f"{name}'s shift was moved to {updated.get('shift_date')}.", "shift": updated, "notified": notified})
 
 
-@app.get("/dashboard/posthire/payroll")
 def available_payroll_periods(company_code: str | None, selected: tuple[str, str] | None = None) -> list[dict[str, Any]]:
     """Pay periods HR can pick from: every period that already has timesheets,
     plus the last few calendar months so HR can open an empty month and generate
@@ -43563,6 +43562,7 @@ def available_payroll_periods(company_code: str | None, selected: tuple[str, str
     return periods
 
 
+@app.get("/dashboard/posthire/payroll")
 def dashboard_posthire_payroll(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
