@@ -117,6 +117,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-leave-standalone.py | sed '
 log "payroll standalone (period picker + export detail/CSV: RBAC + tenant scope + audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-payroll-standalone.py | sed 's/^/    /'
 
+log "employee lifecycle (edit + mark as left + reactivate: RBAC + tenant scope + audit, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-lifecycle.py | sed 's/^/    /'
+
 log "leave balances P1 (chargeable days + flag gate + accrual + observe-only consumption, staging DB)"
 "$VENV_PY" smoke-test-leave-balances.py | sed 's/^/    /'
 

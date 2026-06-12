@@ -626,6 +626,30 @@ export async function importEmployees(access: DashboardAccess, body: { file: Fil
   return payload as EmployeeImportResult
 }
 
+// Edit an existing employee's core fields. Only the provided fields are sent
+// (PATCH semantics). Returns { status: 'duplicate' } with ok:false when the new
+// phone collides with another employee, so the caller shows a friendly message.
+export function updateEmployee(
+  access: DashboardAccess,
+  employeeKey: string,
+  body: { name?: string; phone?: string; email?: string; position_title?: string; department?: string; start_date?: string | null },
+) {
+  return request<{ ok: boolean; status: 'updated' | 'duplicate'; employee: PosthireEmployee | null; message?: string }>(
+    `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}`,
+    access,
+    { method: 'PATCH', body: JSON.stringify(body) },
+  )
+}
+
+// Mark an employee as left (inactive) or reactivate them. Never deletes history.
+export function setEmployeeStatus(access: DashboardAccess, employeeKey: string, status: 'left' | 'active') {
+  return request<{ ok: boolean; status: string; employment_status: string; employee: PosthireEmployee | null }>(
+    `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/status`,
+    access,
+    { method: 'POST', body: JSON.stringify({ status }) },
+  )
+}
+
 export function getEmployeeProfile(access: DashboardAccess, employeeKey: string) {
   return request<EmployeeProfileResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}`, access)
 }

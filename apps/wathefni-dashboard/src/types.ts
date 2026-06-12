@@ -843,6 +843,8 @@ export type PosthireEmployee = {
   position_title: string
   department: string
   onboarding_status: string
+  employment_status?: string
+  start_date?: string | null
   updated_at?: string | null
   pending_count?: number
   received_count?: number

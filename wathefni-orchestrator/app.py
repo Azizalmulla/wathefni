@@ -2008,6 +2008,7 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS renewal_status text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS severity text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS company_code text;
+    ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS employment_status text;
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS data_source text NOT NULL DEFAULT 'production';
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS data_source_detail text;
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS import_batch_id uuid;
@@ -41120,6 +41121,9 @@ def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:
     )
     email = data.get("email") or profile.get("email") or raw.get("email") or ""
     status = normalize_text(data.get("onboarding_status") or raw.get("onboarding_status") or "not_started") or "not_started"
+    # Lifecycle: 'active' (default) | 'left'. Stored on the employees row; absent
+    # rows (legacy / never offboarded) read as active.
+    employment_status = normalize_text(data.get("employment_status") or "active") or "active"
     return json_safe({
         "employee_key": str(data.get("employee_key") or ""),
         "name": data.get("name") or raw.get("name") or "Unnamed employee",
@@ -41128,6 +41132,8 @@ def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:
         "position_title": data.get("position_title") or raw.get("position_title") or raw.get("role") or "",
         "department": department,
         "onboarding_status": status,
+        "employment_status": employment_status,
+        "start_date": data.get("start_date"),
         "updated_at": data.get("updated_at"),
     })
 
@@ -42438,6 +42444,90 @@ def create_company_employee(
     }
 
 
+EMPLOYEE_EDITABLE_FIELDS = {"name", "phone", "email", "position_title", "department", "start_date"}
+
+
+def update_company_employee(company_code: str, employee_key: str, *, fields: dict[str, Any]) -> dict[str, Any]:
+    """Edit an existing employee's core fields in place. The employee_key (the
+    history anchor that child tables hang off) is NEVER changed — editing the
+    phone updates the `phone` column only, so attendance/leave/shifts/payroll/
+    compliance history stays linked. Returns {status, ...}."""
+    company = (company_code or "").upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM employees WHERE employee_key=%s AND company_code=%s LIMIT 1", (employee_key, company))
+            row = cur.fetchone()
+            if not row:
+                return {"status": "not_found"}
+            current = dict(row)
+
+            updates: dict[str, Any] = {}
+            if "name" in fields:
+                clean = str(fields.get("name") or "").strip()
+                if not clean:
+                    return {"status": "failed", "reason": "A full name is required."}
+                updates["name"] = clean
+            if "phone" in fields:
+                new_phone = canonical_employee_phone(fields.get("phone"))
+                if not new_phone:
+                    return {"status": "failed", "reason": "A valid WhatsApp phone number is required."}
+                if new_phone != str(current.get("phone") or ""):
+                    cur.execute(
+                        "SELECT 1 FROM employees WHERE company_code=%s AND employee_key<>%s AND phone=%s LIMIT 1",
+                        (company, employee_key, new_phone),
+                    )
+                    if cur.fetchone():
+                        return {"status": "duplicate", "reason": "Another employee already uses this phone number."}
+                updates["phone"] = new_phone
+            if "email" in fields:
+                updates["email"] = str(fields.get("email") or "").strip() or None
+            if "position_title" in fields:
+                updates["position_title"] = str(fields.get("position_title") or "").strip() or None
+            if "start_date" in fields:
+                updates["start_date"] = _coerce_employee_start_date(fields.get("start_date"))
+
+            # Department lives in the profile JSON (not a column).
+            profile = current.get("profile") if isinstance(current.get("profile"), dict) else {}
+            if "department" in fields:
+                dept = str(fields.get("department") or "").strip()
+                profile = {**profile}
+                if dept:
+                    profile["department"] = dept
+                else:
+                    profile.pop("department", None)
+                updates["profile"] = Json(profile)
+
+            if not updates:
+                return {"status": "noop", "employee": posthire_employee_card(current)}
+
+            set_clause = ", ".join(f"{col}=%s" for col in updates) + ", updated_at=now()"
+            params = list(updates.values()) + [employee_key, company]
+            cur.execute(f"UPDATE employees SET {set_clause} WHERE employee_key=%s AND company_code=%s RETURNING *", params)
+            updated = dict(cur.fetchone())
+        conn.commit()
+    return {"status": "updated", "employee_key": employee_key, "employee": posthire_employee_card(updated)}
+
+
+def set_employee_employment_status(company_code: str, employee_key: str, status: str) -> dict[str, Any]:
+    """Mark an employee active or left. Never deletes — history is preserved and
+    the row stays searchable. Returns {status, ...}."""
+    company = (company_code or "").upper()
+    target = "left" if str(status or "").strip().lower() in {"left", "inactive", "terminated"} else "active"
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE employees SET employment_status=%s, updated_at=now() WHERE employee_key=%s AND company_code=%s RETURNING *",
+                (target, employee_key, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                conn.commit()
+                return {"status": "not_found"}
+            updated = dict(row)
+        conn.commit()
+    return {"status": "ok", "employment_status": target, "employee_key": employee_key, "employee": posthire_employee_card(updated)}
+
+
 def require_employee_roster_admin(context: dict[str, Any]) -> str:
     """Gate for roster management: company must have at least one post-hire people
     module enabled (module-agnostic, so an attendance-only or compliance-only
@@ -42487,6 +42577,73 @@ def dashboard_posthire_create_employee(request: DashboardEmployeeCreate, context
         details={"phone": digits(request.phone), "compliance_seeded": result.get("compliance_seeded", 0)},
     )
     return {"ok": True, "status": "created", "employee": result.get("employee")}
+
+
+class DashboardEmployeeUpdate(BaseModel):
+    name: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    position_title: str | None = None
+    department: str | None = None
+    start_date: str | None = None
+
+
+@app.patch("/dashboard/posthire/employees/{employee_key}")
+def dashboard_posthire_update_employee(
+    employee_key: str,
+    request: DashboardEmployeeUpdate,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context)
+    # Only fields the caller actually sent are touched (PATCH semantics), so an
+    # edit of just the title can never blank the phone/name.
+    provided = request.model_dump(exclude_unset=True) if hasattr(request, "model_dump") else request.dict(exclude_unset=True)
+    fields = {k: v for k, v in provided.items() if k in EMPLOYEE_EDITABLE_FIELDS}
+    if not fields:
+        raise HTTPException(status_code=422, detail={"error": "no_fields", "message": "Nothing to update."})
+    result = update_company_employee(company, employee_key, fields=fields)
+    if result["status"] == "not_found":
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    if result["status"] == "duplicate":
+        return {"ok": False, "status": "duplicate", "message": result["reason"]}
+    if result["status"] == "failed":
+        raise HTTPException(status_code=422, detail={"error": "invalid_employee", "message": result["reason"]})
+    record_admin_audit(
+        context,
+        "employee_updated",
+        summary=f"Updated employee {result.get('employee', {}).get('name') or employee_key}.",
+        target_type="employee",
+        target=employee_key,
+        details={"fields": sorted(fields.keys())},
+    )
+    return {"ok": True, "status": "updated", "employee": result.get("employee")}
+
+
+class DashboardEmployeeStatus(BaseModel):
+    status: str
+
+
+@app.post("/dashboard/posthire/employees/{employee_key}/status")
+def dashboard_posthire_set_employee_status(
+    employee_key: str,
+    request: DashboardEmployeeStatus,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context)
+    target = "left" if str(request.status or "").strip().lower() in {"left", "inactive", "terminated"} else "active"
+    result = set_employee_employment_status(company, employee_key, target)
+    if result["status"] == "not_found":
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    record_admin_audit(
+        context,
+        "employee_marked_left" if target == "left" else "employee_reactivated",
+        summary=(f"Marked {result.get('employee', {}).get('name') or employee_key} as left."
+                 if target == "left" else f"Reactivated {result.get('employee', {}).get('name') or employee_key}."),
+        target_type="employee",
+        target=employee_key,
+        details={"employment_status": target},
+    )
+    return {"ok": True, "status": "updated", "employment_status": target, "employee": result.get("employee")}
 
 
 def _parse_employee_import_file(raw: bytes, filename: str) -> tuple[list[dict[str, str]], str | None]:

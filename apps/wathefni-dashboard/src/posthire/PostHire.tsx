@@ -38,6 +38,8 @@ import {
   getPosthireAttendance,
   exportAttendanceCsv,
   getEmployeeProfile,
+  updateEmployee,
+  setEmployeeStatus,
   getPosthireCompliance,
   getPosthireEmployees,
   getOnboardingDetail,
@@ -633,6 +635,95 @@ function AddEmployeeModal({ access, onClose, onNotice, onAdded }: {
   )
 }
 
+function EditEmployeeModal({ access, employee, onClose, onNotice, onSaved }: {
+  access: DashboardAccess
+  employee: PosthireEmployee
+  onClose: () => void
+  onNotice: NoticeFn
+  onSaved: () => void
+}) {
+  const [name, setName] = useState(employee.name || '')
+  const [phone, setPhone] = useState(employee.phone || '')
+  const [email, setEmail] = useState(employee.email || '')
+  const [title, setTitle] = useState(employee.position_title || '')
+  const [department, setDepartment] = useState(employee.department || '')
+  const [startDate, setStartDate] = useState(employee.start_date ? String(employee.start_date).slice(0, 10) : '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const ready = name.trim().length > 0 && phone.trim().length > 0
+
+  const submit = async () => {
+    if (!ready) {
+      setError('A full name and a WhatsApp phone number are required.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await updateEmployee(access, employee.employee_key, {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        position_title: title.trim(),
+        department: department.trim(),
+        start_date: startDate || null,
+      })
+      if (res.ok && res.status === 'updated') {
+        onNotice(`${name.trim()}'s details were updated.`, 'success')
+        onSaved()
+        onClose()
+        return
+      }
+      // Duplicate phone or other soft failure — keep the form so HR can fix it.
+      setError(res.message || 'Another employee already uses this phone number.')
+    } catch (err) {
+      setError(friendlyError(err, 'We couldn’t save these changes. Please try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-lg overflow-y-auto rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <div className="space-y-1">
+          <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">Edit employee</p>
+          <p className="text-[13px] leading-6 text-subtle/95">Correct this employee’s details. History stays linked even if the phone number changes.</p>
+        </div>
+        <div className="mt-5 grid gap-3.5 sm:grid-cols-2">
+          <RosterField label="Full name" required>
+            <Input className="w-full" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+          </RosterField>
+          <RosterField label="Phone / WhatsApp" required>
+            <Input className="w-full" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
+          </RosterField>
+          <RosterField label="Email">
+            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" type="email" />
+          </RosterField>
+          <RosterField label="Job title">
+            <Input className="w-full" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Optional" />
+          </RosterField>
+          <RosterField label="Department / team">
+            <Input className="w-full" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Optional" />
+          </RosterField>
+          <RosterField label="Start date">
+            <Input className="w-full" value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
+          </RosterField>
+        </div>
+        {error ? <p className="mt-3 text-[13px] text-rose-600">{error}</p> : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button size="sm" onClick={() => void submit()} disabled={busy || !ready}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Save changes
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ImportSummaryRow({ label, rows, tone }: { label: string; rows: EmployeeImportResult['results']['created']; tone: 'success' | 'warning' | 'danger' | 'muted' }) {
   if (!rows.length) return null
   const toneClass = tone === 'success'
@@ -764,6 +855,7 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [showImport, setShowImport] = useState(false)
+  const [showLeft, setShowLeft] = useState(false)
   const canManageRoster = can(permissions, 'settings.manage', role)
 
   if (selectedKey) {
@@ -771,16 +863,22 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
   }
 
   const employees = data?.employees ?? []
+  const isLeft = (e: PosthireEmployee) => String(e.employment_status || 'active').toLowerCase() === 'left'
+  const active = employees.filter((e) => !isLeft(e))
+  const leftCount = employees.length - active.length
+  // The directory shows active people by default; left employees stay searchable
+  // behind a toggle so history is never lost, just out of the active roster view.
+  const roster = showLeft ? employees : active
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase()
-    if (!term) return employees
-    return employees.filter((e) =>
+    if (!term) return roster
+    return roster.filter((e) =>
       [e.name, e.position_title, e.department, e.phone, e.email].filter(Boolean).some((v) => String(v).toLowerCase().includes(term)),
     )
-  }, [employees, query])
+  }, [roster, query])
 
-  const onboarding = employees.filter((e) => !['complete', 'completed', 'done'].includes(e.onboarding_status)).length
-  const departments = new Set(employees.map((e) => e.department).filter(Boolean)).size
+  const onboarding = active.filter((e) => !['complete', 'completed', 'done'].includes(e.onboarding_status)).length
+  const departments = new Set(active.map((e) => e.department).filter(Boolean)).size
 
   const rosterActions = canManageRoster ? (
     <>
@@ -834,11 +932,11 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
             detail={
               onboarding
                 ? 'Open Onboarding to send reminders and clear open documents.'
-                : `${employees.length} employee${employees.length === 1 ? '' : 's'} across ${departments} department${departments === 1 ? '' : 's'}`
+                : `${active.length} employee${active.length === 1 ? '' : 's'} across ${departments} department${departments === 1 ? '' : 's'}`
             }
           />
           <div className="grid gap-3 sm:grid-cols-3">
-            <StatCard label="Total employees" value={employees.length} />
+            <StatCard label="Active employees" value={active.length} hint={leftCount ? `${leftCount} marked as left` : undefined} />
             <StatCard label="Onboarding in progress" value={onboarding} hint={onboarding ? 'Needs follow-up' : 'All set'} />
             <StatCard label="Departments" value={departments} />
           </div>
@@ -846,16 +944,23 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
             <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <div>
                 <CardTitle>Directory</CardTitle>
-                <CardDescription>{filtered.length} of {employees.length} employees</CardDescription>
+                <CardDescription>{filtered.length} of {showLeft ? employees.length : active.length} {showLeft ? 'employees' : 'active employees'}</CardDescription>
               </div>
-              <div className="relative w-full max-w-xs">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle/70" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search name, role, department…"
-                  className="h-10 w-full rounded-full border border-line/60 bg-white/70 pl-9 pr-3 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
-                />
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {leftCount ? (
+                  <Button variant="ghost" size="sm" onClick={() => setShowLeft((v) => !v)}>
+                    {showLeft ? 'Hide employees who left' : `Show employees who left (${leftCount})`}
+                  </Button>
+                ) : null}
+                <div className="relative w-full max-w-xs">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle/70" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search name, role, department…"
+                    className="h-10 w-full rounded-full border border-line/60 bg-white/70 pl-9 pr-3 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -880,7 +985,10 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
                           onClick={emp.employee_key ? () => setSelectedKey(emp.employee_key) : undefined}
                         >
                           <td className="px-4 py-3">
-                            <p className="font-semibold text-text">{emp.name}</p>
+                            <p className="flex items-center gap-2 font-semibold text-text">
+                              {emp.name}
+                              {isLeft(emp) ? <Badge tone="muted">Left</Badge> : null}
+                            </p>
                             <p className="text-[12px] text-subtle/85">{emp.position_title || '—'}</p>
                           </td>
                           <td className="px-4 py-3 text-subtle/90">{emp.department || '—'}</td>
@@ -1031,8 +1139,43 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   const canComplianceManage = can(permissions, 'compliance.manage', role)
   const canLeaveDecide = can(permissions, 'leave.decide', role)
   const canPayrollManage = can(permissions, 'payroll.manage', role)
+  const canManageRoster = can(permissions, 'settings.manage', role)
+  const [showEdit, setShowEdit] = useState(false)
+  const [statusBusy, setStatusBusy] = useState(false)
 
   const emp = data?.employee
+  const hasLeft = String(emp?.employment_status || 'active').toLowerCase() === 'left'
+
+  const changeStatus = useCallback(
+    async (next: 'left' | 'active') => {
+      if (!emp) return
+      if (next === 'left') {
+        const ok = await confirm({
+          title: 'Mark this employee as left?',
+          body: 'They will be removed from active rosters, but their history and documents will stay available.',
+          confirmLabel: 'Mark as left',
+          destructive: true,
+        })
+        if (!ok) return
+      }
+      setStatusBusy(true)
+      try {
+        await setEmployeeStatus(access, emp.employee_key, next)
+        onNotice(next === 'left' ? `${emp.name} was marked as left.` : `${emp.name} was reactivated.`, 'success')
+        await reload()
+      } catch (err) {
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          onAccessIssue(issue)
+          return
+        }
+        onNotice(friendlyError(err, 'We couldn’t update this employee. Please try again.'), 'error')
+      } finally {
+        setStatusBusy(false)
+      }
+    },
+    [access, emp, confirm, onNotice, onAccessIssue, reload],
+  )
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
   const nextActionsEnabled = Boolean(data?.next_actions_enabled)
@@ -1077,6 +1220,9 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   return (
     <div className="space-y-6">
       {action.dialog}
+      {showEdit && emp ? (
+        <EditEmployeeModal access={access} employee={emp} onClose={() => setShowEdit(false)} onNotice={onNotice} onSaved={() => void reload()} />
+      ) : null}
       <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
           ← Back to directory
@@ -1109,7 +1255,28 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                   </p>
                 ) : null}
               </div>
-              <StatusBadge status={emp.onboarding_status} />
+              <div className="flex flex-col items-start gap-2 sm:items-end">
+                <div className="flex items-center gap-2">
+                  {hasLeft ? <Badge tone="muted">Left</Badge> : null}
+                  <StatusBadge status={emp.onboarding_status} />
+                </div>
+                {canManageRoster ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="secondary" size="sm" disabled={statusBusy} onClick={() => setShowEdit(true)}>
+                      Edit
+                    </Button>
+                    {hasLeft ? (
+                      <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('active')}>
+                        {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Reactivate
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('left')}>
+                        {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Mark as left
+                      </Button>
+                    )}
+                  </div>
+                ) : null}
+              </div>
             </CardContent>
           </Card>
 
@@ -2339,7 +2506,8 @@ function FileLeaveModal({ access, onClose, onNotice, onDone, onAccessIssue }: {
     setLoadingEmployees(true)
     getPosthireEmployees(access)
       .then((r) => {
-        if (alive) setEmployees(r.employees || [])
+        // Exclude employees who have left — you can't file new leave for them.
+        if (alive) setEmployees((r.employees || []).filter((e) => String(e.employment_status || 'active').toLowerCase() !== 'left'))
       })
       .catch((err) => {
         const issue = accessIssueFromError(err)
