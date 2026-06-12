@@ -1,0 +1,13 @@
+[Unit]
+Description=Wathefni uptime dead-man's switch — ping Healthchecks every 5 min when /health is OK
+
+[Timer]
+# Healthchecks check is configured for a 5-minute period (10-minute grace),
+# so we probe + ping every 5 minutes.
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=20s
+Unit=wathefni-uptime.service
+
+[Install]
+WantedBy=timers.target

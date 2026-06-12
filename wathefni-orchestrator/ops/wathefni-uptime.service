@@ -1,0 +1,11 @@
+[Unit]
+Description=Wathefni uptime check + Healthchecks.io ping (dead-man's switch)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/wathefni-healthcheck-ping
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
