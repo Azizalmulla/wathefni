@@ -34021,12 +34021,23 @@ AUDIT_ADMIN_CATEGORY = {
     "hr_task_resolved": "Other",
 }
 
+# Tool actions that aren't in ACTION_REQUIRED_MODULES but map cleanly to a
+# client-facing category, so they don't fall into "Other".
+AUDIT_EXTRA_CATEGORY = {
+    "execute_candidate_workflow": "Candidates",
+    "interview_status_update": "Candidates",
+    "interview_feedback": "Candidates",
+    "create_job_opening": "Candidates",
+    "onboarding_mark_item": "Onboarding",
+}
+
 # Combined action_type -> category, derived from the canonical module map plus
 # the admin/config audit actions. Built once at import time.
 AUDIT_CATEGORY_BY_ACTION = {
     act: AUDIT_MODULE_CATEGORY.get(mod, "Other") for act, mod in ACTION_REQUIRED_MODULES.items()
 }
 AUDIT_CATEGORY_BY_ACTION.update(AUDIT_ADMIN_CATEGORY)
+AUDIT_CATEGORY_BY_ACTION.update(AUDIT_EXTRA_CATEGORY)
 
 # Sensitive actions to emphasise in the UI (real action_type names).
 AUDIT_SENSITIVE_ACTIONS = {
@@ -34056,6 +34067,9 @@ AUDIT_HIDDEN_ACTIONS = [
     "show_payroll_policy", "check_assessment_config",
     "request_availability", "rank_candidates", "compare_candidates",
     "candidate_cv_evaluation", "workforce_analytics", "prepare_candidate_email",
+    # Agent chatter and pure status reads — noise in an HR audit feed.
+    "small_talk", "unknown", "clarification", "candidate_profile_evaluation",
+    "get_interview_invite_status", "get_candidate_status",
 ]
 
 # action_type -> friendly verb phrase (HR-readable, no backend names).
@@ -34114,6 +34128,16 @@ AUDIT_ACTION_LABELS = {
     "import_candidate_assigned": "assigned an imported candidate",
     "import_settings_updated": "updated import settings",
     "hr_task_resolved": "resolved an HR task",
+    "execute_candidate_workflow": "ran a candidate workflow",
+    "interview_status_update": "updated an interview",
+    "interview_feedback": "left interview feedback",
+    "create_job_opening": "created a job opening",
+    "onboarding_mark_item": "marked an onboarding item",
+    "direct_reply": "replied to a message",
+    "send_email": "sent an email",
+    "send_custom_employee_message": "sent a message to an employee",
+    "retry_last_employee_message": "resent a message to an employee",
+    "retry_last_failed_action": "retried the last action",
 }
 
 
@@ -34216,6 +34240,7 @@ def dashboard_company_activity(
         "left(action_type, 6) <> 'setup_'",
         "left(action_type, 5) <> 'list_'",
         "left(action_type, 7) <> 'answer_'",
+        "left(action_type, 4) <> 'get_'",
     ]
     params: list[Any] = [company]
     if AUDIT_HIDDEN_ACTIONS:

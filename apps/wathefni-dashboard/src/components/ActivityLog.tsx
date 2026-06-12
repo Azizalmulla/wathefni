@@ -1,5 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Activity, AlertTriangle, Download, Loader2, RotateCcw, Search, ShieldAlert } from 'lucide-react'
+import {
+  Activity,
+  AlertTriangle,
+  Briefcase,
+  CalendarClock,
+  ClipboardCheck,
+  Clock,
+  Download,
+  FileText,
+  type LucideIcon,
+  Loader2,
+  MessageSquare,
+  Plane,
+  RotateCcw,
+  Search,
+  ShieldAlert,
+  ShieldCheck,
+  Users,
+  Wallet,
+} from 'lucide-react'
 
 import { DashboardApiError, downloadCompanyActivityCsv, getCompanyActivity } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
@@ -7,20 +26,50 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Select } from '@/components/ui/field'
+import { cn } from '@/lib/utils'
 import type { ActivityActorOption, ActivityItem, ActivityResponse, DashboardAccess } from '@/types'
 
 const PAGE_SIZE = 50
 
-// Categories that get a calm "sensitive" highlight are driven by the backend
-// `sensitive` flag on each row; this just maps category -> badge tone.
-const CATEGORY_TONE: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'muted'> = {
-  Payroll: 'warning',
-  Leave: 'default',
-  Employees: 'default',
-  'Team & Access': 'warning',
-  Documents: 'default',
-  Compliance: 'default',
-  Candidates: 'default',
+// Each category gets a quiet icon + colour so the feed reads like a timeline
+// instead of one flat list. The icon is the primary visual cue per row.
+const CATEGORY_META: Record<string, { Icon: LucideIcon; chip: string }> = {
+  Employees: { Icon: Users, chip: 'bg-slate-100 text-slate-700' },
+  Documents: { Icon: FileText, chip: 'bg-slate-100 text-slate-700' },
+  Compliance: { Icon: FileText, chip: 'bg-slate-100 text-slate-700' },
+  Leave: { Icon: Plane, chip: 'bg-sky-100 text-sky-700' },
+  Payroll: { Icon: Wallet, chip: 'bg-[#f7e7c6] text-[#8a5a16]' },
+  Attendance: { Icon: Clock, chip: 'bg-slate-100 text-slate-700' },
+  Shifts: { Icon: CalendarClock, chip: 'bg-violet-100 text-violet-700' },
+  Candidates: { Icon: Briefcase, chip: 'bg-indigo-100 text-indigo-700' },
+  Onboarding: { Icon: ClipboardCheck, chip: 'bg-emerald-100 text-emerald-700' },
+  'Team & Access': { Icon: ShieldCheck, chip: 'bg-[#f7e7c6] text-[#8a5a16]' },
+  Other: { Icon: MessageSquare, chip: 'bg-slate-100 text-slate-600' },
+}
+
+function categoryMeta(category: string) {
+  return CATEGORY_META[category] || { Icon: Activity, chip: 'bg-slate-100 text-slate-600' }
+}
+
+// Raw backend run states -> HR-friendly outcome labels. `completed` (and empty)
+// are intentionally not shown — the activity already happened.
+const STATUS_LABELS: Record<string, { label: string; tone: 'success' | 'warning' | 'danger' | 'muted' }> = {
+  failed: { label: 'Failed', tone: 'danger' },
+  needs_confirmation: { label: 'Needs confirmation', tone: 'warning' },
+  needs_clarification: { label: 'Needs clarification', tone: 'warning' },
+  needs_backend_tool: { label: 'In progress', tone: 'muted' },
+  partial: { label: 'Partly done', tone: 'muted' },
+  candidate_ambiguous: { label: 'Candidate unclear', tone: 'warning' },
+  candidate_not_found: { label: 'Candidate not found', tone: 'warning' },
+  needs_candidate_reference: { label: 'Needs a candidate', tone: 'warning' },
+}
+
+function statusMeta(status: string | null | undefined) {
+  if (!status || status === 'completed') return null
+  const known = STATUS_LABELS[status]
+  if (known) return known
+  const label = status.replace(/[_\s]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase())
+  return { label, tone: 'muted' as const }
 }
 
 type Filters = {
@@ -33,17 +82,36 @@ type Filters = {
 
 const EMPTY_FILTERS: Filters = { start_date: '', end_date: '', actor: '', category: 'all', q: '' }
 
-function formatWhen(at: string | null): string {
+function startOfDay(date: Date): Date {
+  const out = new Date(date)
+  out.setHours(0, 0, 0, 0)
+  return out
+}
+
+// Group key + heading for a timestamp: Today / Yesterday / a weekday (this week)
+// / an exact date for older entries.
+function dateGroup(at: string | null): { key: string; label: string } {
+  if (!at) return { key: 'unknown', label: 'Earlier' }
+  const date = new Date(at)
+  if (Number.isNaN(date.getTime())) return { key: 'unknown', label: 'Earlier' }
+  const today = startOfDay(new Date())
+  const that = startOfDay(date)
+  const diffDays = Math.round((today.getTime() - that.getTime()) / 86_400_000)
+  const dayKey = that.toISOString().slice(0, 10)
+  if (diffDays <= 0) return { key: 'today', label: 'Today' }
+  if (diffDays === 1) return { key: 'yesterday', label: 'Yesterday' }
+  if (diffDays < 7) return { key: dayKey, label: date.toLocaleDateString(undefined, { weekday: 'long' }) }
+  return {
+    key: dayKey,
+    label: date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
+  }
+}
+
+function formatTime(at: string | null): string {
   if (!at) return '—'
   const date = new Date(at)
   if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
 }
 
 function actorOptionLabel(actor: ActivityActorOption): string {
@@ -136,6 +204,24 @@ export function ActivityLog({
     void load(0, false)
   }, [load])
 
+  // Items arrive newest-first, so grouping in order yields date sections in the
+  // right order and "Load more" simply extends the trailing (older) groups.
+  const groups = useMemo(() => {
+    const out: { key: string; label: string; items: ActivityItem[] }[] = []
+    const index = new Map<string, number>()
+    for (const item of items) {
+      const { key, label } = dateGroup(item.at)
+      let i = index.get(key)
+      if (i === undefined) {
+        i = out.length
+        index.set(key, i)
+        out.push({ key, label, items: [] })
+      }
+      out[i].items.push(item)
+    }
+    return out
+  }, [items])
+
   const filtersActive = Boolean(
     filters.start_date || filters.end_date || filters.actor || (filters.category && filters.category !== 'all') || filters.q,
   )
@@ -181,7 +267,7 @@ export function ActivityLog({
                 <Activity size={18} /> Company activity
               </CardTitle>
               <CardDescription>
-                A read-only record of who did what across your workspace. Sensitive actions are highlighted.
+                A read-only timeline of who did what across your workspace. Sensitive actions are highlighted.
               </CardDescription>
             </div>
             <Button onClick={() => void exportCsv()} type="button" variant="secondary" disabled={exporting || loading}>
@@ -256,7 +342,7 @@ export function ActivityLog({
             </div>
           ) : null}
 
-          {/* Feed */}
+          {/* Timeline */}
           {loading ? (
             <div className="flex items-center gap-2 py-8 text-sm text-subtle">
               <Loader2 className="animate-spin" size={16} /> Loading activity…
@@ -274,29 +360,55 @@ export function ActivityLog({
               </p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-line/55">
-              <ul className="divide-y divide-line/45">
-                {items.map((item) => (
-                  <li key={item.id} className="flex items-start gap-3 bg-white/45 px-4 py-3 hover:bg-white/65">
-                    <span
-                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.sensitive ? 'bg-[#c89445]' : 'bg-subtle/35'}`}
-                      aria-hidden
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm text-text">{item.summary}</span>
-                        {item.sensitive ? <Badge tone="warning">Sensitive</Badge> : null}
-                      </div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-subtle">
-                        <Badge tone={CATEGORY_TONE[item.category] || 'muted'}>{item.category}</Badge>
-                        <span>{formatWhen(item.at)}</span>
-                        {item.actor.role_label ? <span>· {item.actor.role_label}</span> : null}
-                        {item.status && item.status !== 'completed' ? <span>· {item.status}</span> : null}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            <div className="space-y-5">
+              {groups.map((group) => (
+                <section key={group.key}>
+                  <div className="mb-2 flex items-center gap-3">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{group.label}</h3>
+                    <span className="h-px flex-1 bg-line/55" />
+                    <span className="text-[11px] text-subtle/70">{group.items.length}</span>
+                  </div>
+                  <ul className="overflow-hidden rounded-2xl border border-line/55 divide-y divide-line/40">
+                    {group.items.map((item) => {
+                      const { Icon, chip } = categoryMeta(item.category)
+                      const status = statusMeta(item.status)
+                      return (
+                        <li
+                          key={item.id}
+                          className={cn(
+                            'flex items-start gap-3 px-4 py-3 transition-colors',
+                            item.sensitive
+                              ? 'border-l-2 border-l-[#c89445] bg-[#fffaf0] hover:bg-[#fff6e6]'
+                              : 'bg-white/45 hover:bg-white/70',
+                          )}
+                        >
+                          <span className={cn('mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full', chip)} aria-hidden>
+                            <Icon size={16} />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="text-sm font-medium text-text">{item.summary}</span>
+                              {item.sensitive ? <Badge tone="warning">Sensitive</Badge> : null}
+                              {status ? <Badge tone={status.tone}>{status.label}</Badge> : null}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[12px] text-subtle">
+                              <span className="font-medium text-subtle/90">{item.category}</span>
+                              <span aria-hidden>·</span>
+                              <span>{formatTime(item.at)}</span>
+                              {item.actor.role_label ? (
+                                <>
+                                  <span aria-hidden>·</span>
+                                  <span>{item.actor.role_label}</span>
+                                </>
+                              ) : null}
+                            </div>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              ))}
             </div>
           )}
 
