@@ -1277,6 +1277,7 @@ export type OutboundDeliveryStatus =
   | 'failed'
   | 'suppressed'
   | 'throttled'
+  | 'dashboard_only'
 
 export type OutboundFollowUpMessage = {
   message_id: string

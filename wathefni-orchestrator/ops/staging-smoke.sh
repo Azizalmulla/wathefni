@@ -183,6 +183,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-reminder-frequency.py | sed
 log "notification semantics Phase 1 (catalog contract, no-behavior-change criticality alias, hard channel-intent anti-leak for payroll/attendance/compliance/admin, caps stable, templates off)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-notification-semantics.py | sed 's/^/    /'
 
+log "company notification presets (frontline/office/conservative resolved matrix, payroll never WhatsApp, attendance dashboard-only, calmer-never-louder, stubbed-ladder integration, flag-OFF regression, presets flag default OFF)"
+WATHEFNI_CHANNEL_PRESETS=on WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-channel-presets.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 

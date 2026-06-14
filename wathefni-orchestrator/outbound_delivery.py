@@ -76,6 +76,62 @@ def derived_criticality(failure_escalation: str) -> str:
     the Phase-1 contract test to prove no behavior change."""
     return FAILURE_ESCALATION_TO_CRITICALITY.get(str(failure_escalation), CRITICALITY_STANDARD)
 
+
+# --- Company notification presets (operator-selected; downgrade-only) -------
+# A preset is a per-company channel policy that can only make routing CALMER than
+# the template's employee_channel_intent ceiling, never louder. It composes
+# delivery_urgency + employee_channel_intent; it NEVER reads failure_escalation.
+PRESET_FRONTLINE = "frontline"
+PRESET_OFFICE = "office"
+PRESET_CONSERVATIVE = "conservative"
+NOTIFICATION_PRESETS = {PRESET_FRONTLINE, PRESET_OFFICE, PRESET_CONSERVATIVE}
+DEFAULT_NOTIFICATION_PRESET = PRESET_FRONTLINE
+
+
+def channel_plan_for(preset: str, intent: str, urgency: str) -> dict[str, Any]:
+    """Pure policy decision (no I/O): given a company preset + a template's channel
+    intent (ceiling) + delivery urgency, decide which channels may be used.
+
+    Invariants:
+      - WhatsApp is only ever possible when intent == whatsapp_ok.
+      - A preset can only REMOVE channels, never add one above the ceiling.
+      - dashboard_only intent -> no proactive send on any preset.
+      - conservative never uses WhatsApp; office uses it only for action_now.
+    """
+    preset = preset if preset in NOTIFICATION_PRESETS else DEFAULT_NOTIFICATION_PRESET
+
+    if intent == CHANNEL_DASHBOARD_ONLY:
+        return {"whatsapp": False, "email": False, "dashboard_only": True, "reason": "intent_dashboard_only"}
+
+    # Email is the always-available fallback for every non-dashboard intent.
+    email_ok = intent in (CHANNEL_WHATSAPP_OK, CHANNEL_EMAIL_FIRST, CHANNEL_EMAIL_ONLY)
+
+    if intent != CHANNEL_WHATSAPP_OK:
+        # email_first / email_only — WhatsApp is above the ceiling, never allowed.
+        return {"whatsapp": False, "email": email_ok, "dashboard_only": False, "reason": f"intent_{intent}_no_whatsapp"}
+
+    # intent == whatsapp_ok: the preset decides whether WhatsApp is actually used.
+    if preset == PRESET_FRONTLINE:
+        return {"whatsapp": True, "email": email_ok, "dashboard_only": False, "reason": "frontline_whatsapp_first"}
+    if preset == PRESET_OFFICE:
+        if urgency == URGENCY_ACTION_NOW:
+            return {"whatsapp": True, "email": email_ok, "dashboard_only": False, "reason": "office_action_now_whatsapp"}
+        return {"whatsapp": False, "email": email_ok, "dashboard_only": False, "reason": "office_non_urgent_email_first"}
+    # conservative
+    return {"whatsapp": False, "email": email_ok, "dashboard_only": False, "reason": "conservative_no_whatsapp"}
+
+
+def resolve_channel_plan(legacy: Any, company_code: str, template_key: str) -> dict[str, Any]:
+    """Bind the pure channel policy to a company's saved preset + the template's
+    catalog semantics. Reads the preset (one settings lookup); no sends."""
+    entry = catalog_entry(template_key)
+    intent = entry.get("employee_channel_intent") or CHANNEL_WHATSAPP_OK
+    urgency = entry.get("delivery_urgency") or URGENCY_REMINDER
+    preset = legacy.company_notification_preset(company_code)
+    plan = channel_plan_for(preset, intent, urgency)
+    plan.update({"preset": preset, "intent": intent, "urgency": urgency, "template_key": template_key})
+    return plan
+
 # sensitivity drives how the message body is stored:
 #   plain         -> store full text (low sensitivity, fine for HR to read)
 #   preview       -> store a short safe preview only
@@ -98,6 +154,10 @@ STATUS_SUPPRESSED = "suppressed"
 # flow's cooldown window. Terminal, non-retryable, and NOT a failure — surfaced
 # calmly so HR sees "we stayed quiet on purpose," never a scary delivery error.
 STATUS_THROTTLED = "throttled"
+# Message was intentionally NOT pushed to any employee channel because the company
+# notification preset + template channel-intent route it to the dashboard only
+# (e.g. attendance nudges). Terminal, non-retryable, info-tone, never an HR task.
+STATUS_DASHBOARD_ONLY = "dashboard_only"
 
 _TERMINAL_STATUSES = {
     STATUS_DELIVERED_WHATSAPP,
@@ -107,6 +167,7 @@ _TERMINAL_STATUSES = {
     STATUS_FAILED,
     STATUS_SUPPRESSED,
     STATUS_THROTTLED,
+    STATUS_DASHBOARD_ONLY,
 }
 _DELIVERED_STATUSES = {STATUS_DELIVERED_WHATSAPP, STATUS_DELIVERED_TEMPLATE, STATUS_SENT_EMAIL}
 
@@ -454,9 +515,32 @@ def _attempt_ladder(
     wa_suppressed = bool(sup.get("suppressed"))
     all_suppressed = wa_suppressed and str(sup.get("scope")) == "all"
 
-    # 1. WhatsApp session (free-form) — only if we have a phone and aren't suppressed.
+    # 0b. Company notification preset (flag-gated, downgrade-only). Composes the
+    #     template's channel-intent ceiling + delivery_urgency with the company's
+    #     preset to decide which channels may be used. It can only make routing
+    #     CALMER than suppression already does, never louder. When the flag is off,
+    #     the ladder behaves exactly as before (all channels allowed).
+    if legacy.channel_presets_enabled():
+        plan = resolve_channel_plan(legacy, company_code, template_key)
+    else:
+        plan = {"whatsapp": True, "email": True, "dashboard_only": False, "preset": None, "reason": "presets_off"}
+    wa_allowed = bool(plan.get("whatsapp")) and not wa_suppressed
+    email_allowed = bool(plan.get("email")) and not all_suppressed
+
+    # dashboard_only routing: no proactive employee send at all. Terminal, calm,
+    # auditable — never a failure or an HR task.
+    if plan.get("dashboard_only"):
+        return {
+            "status": None,
+            "channel": None,
+            "reasons": [f"channel:dashboard_only:{plan.get('reason') or 'preset'}"],
+            "retryable": False,
+            "dashboard_only": True,
+        }
+
+    # 1. WhatsApp session (free-form) — only if allowed by preset, has a phone, not suppressed.
     session_retryable = False
-    if phone and not wa_suppressed:
+    if phone and wa_allowed:
         r = OctopusProvider.send_session(
             legacy,
             account_id=account_id,
@@ -471,13 +555,15 @@ def _attempt_ladder(
         err = str(r.get("error") or "whatsapp_failed")
         reasons.append(f"session:{err}")
         session_retryable = err not in _NON_RETRYABLE_SESSION_ERRORS
+    elif not phone:
+        reasons.append("session:no_phone")
     elif wa_suppressed:
         reasons.append("session:suppressed_opt_out")
     else:
-        reasons.append("session:no_phone")
+        reasons.append("session:preset_no_whatsapp")
 
-    # 2. WhatsApp approved template (HSM) — only if we have a phone and aren't suppressed.
-    if phone and not wa_suppressed:
+    # 2. WhatsApp approved template (HSM) — only if allowed by preset, has a phone, not suppressed.
+    if phone and wa_allowed:
         t = OctopusProvider.send_template(
             legacy,
             account_id=account_id,
@@ -494,12 +580,15 @@ def _attempt_ladder(
         if t.get("ok"):
             return {"status": STATUS_DELIVERED_TEMPLATE, "channel": "whatsapp_template", "reasons": reasons, "retryable": False}
         reasons.append(f"template:{str(t.get('error') or 'template_failed')}")
-    elif wa_suppressed:
+    elif phone and wa_suppressed:
         reasons.append("template:suppressed_opt_out")
+    elif phone and not wa_allowed:
+        reasons.append("template:preset_no_whatsapp")
 
-    # 3. Email fallback — allowed unless the employee opted out of ALL channels.
-    if all_suppressed:
-        reasons.append("email:suppressed_opt_out")
+    # 3. Email fallback — allowed unless the employee opted out of ALL channels or the
+    #    preset routes this template away from email.
+    if not email_allowed:
+        reasons.append("email:suppressed_opt_out" if all_suppressed else "email:preset_blocked")
     elif legacy.outbound_email_fallback_enabled():
         if email:
             e = EmailProvider.send(
@@ -595,7 +684,12 @@ def _record_layer_event(
         account_id=account_id,
         target_phone=target_phone,
         target_conversation_id=None,
-        status="sent" if status in _DELIVERED_STATUSES else ("dry_run" if status == STATUS_PENDING else "failed"),
+        status=(
+            "sent" if status in _DELIVERED_STATUSES
+            else "dry_run" if status == STATUS_PENDING
+            else "skipped" if status == STATUS_DASHBOARD_ONLY
+            else "failed"
+        ),
         message_text=event_text,
         last_error=None if status in _DELIVERED_STATUSES else "; ".join(reasons)[:300] or None,
         payload={
@@ -649,6 +743,11 @@ def _finalize(
         if retryable:
             status = STATUS_PENDING
             next_attempt_at = _now(legacy) + _dt.timedelta(minutes=_backoff_minutes(attempts))
+        elif outcome.get("dashboard_only"):
+            # Company preset routes this template to the dashboard only (e.g. attendance
+            # nudges). Terminal + no HR task: this is a deliberate, calm routing choice,
+            # not a failure. Surfaced as info-tone in Delivery Issues.
+            status = STATUS_DASHBOARD_ONLY
         elif outcome.get("suppressed"):
             # Employee opted out of WhatsApp and email couldn't (or mustn't) carry it.
             # Terminal + no HR task: this is a deliberate opt-out, not a failure. It is
@@ -1004,7 +1103,7 @@ def list_needs_follow_up(
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key
          WHERE m.company_code = %s
-           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}', '{STATUS_THROTTLED}') {clause}
+           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}', '{STATUS_THROTTLED}', '{STATUS_DASHBOARD_ONLY}') {clause}
          ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC
          LIMIT %s
     """

@@ -16021,6 +16021,22 @@ def reminder_caps_enabled() -> bool:
     return val not in {"off", "0", "false", "no"}
 
 
+def channel_presets_enabled() -> bool:
+    """Per-company notification presets (downgrade-only channel policy). Default
+    OFF: when the flag is off the outbound ladder behaves exactly as before (every
+    channel allowed). Set WATHEFNI_CHANNEL_PRESETS=on to enable; off to roll back."""
+    val = (os.environ.get("WATHEFNI_CHANNEL_PRESETS") or "").strip().lower()
+    return val in {"on", "1", "true", "yes"}
+
+
+def company_notification_preset(company_code: str | None) -> str:
+    """The company's effective notification preset (frontline | office |
+    conservative). Defaults to frontline when unset — visible/overridable by the
+    operator in Setup Console, never hidden magic."""
+    val = str(get_company_settings(company_code).get("notification_preset") or "").strip().lower()
+    return val if val in _outbound_delivery.NOTIFICATION_PRESETS else _outbound_delivery.DEFAULT_NOTIFICATION_PRESET
+
+
 def reminder_cap_window_hours(template_key: str) -> int | None:
     return REMINDER_CAP_HOURS.get(str(template_key or ""))
 
@@ -31378,12 +31394,24 @@ function renderPanel(d){
     `<li><span class="dot ${m.employees_missing_email>0?'todo':'done'}">${m.employees_missing_email>0?'':'✓'}</span>${esc(String(m.employees_with_email))} of ${esc(String(m.employees_total))} employees have an email${m.employees_missing_email>0?` · ${esc(String(m.employees_missing_email))} missing`:''}</li>`,
   ].join('') : '';
   const messaging = m ? `<div class="section"><h2>Messaging</h2><ul class="steps">${msgRows}</ul><p class="muted" style="font-size:12px;margin-top:8px">${esc(m.summary)}</p></div>` : '';
+  const presetOpts = (r.notification_preset_options||['frontline','office','conservative']);
+  const presetLabels = {frontline:'Frontline — WhatsApp-first for shifts & leave', office:'Office — WhatsApp only for act-now, otherwise email', conservative:'Conservative — email only, never WhatsApp'};
+  const presetSel = presetOpts.map(p=>`<option value="${esc(p)}" ${r.notification_preset===p?'selected':''}>${esc(presetLabels[p]||p)}</option>`).join('');
+  const presetNote = r.notification_preset_explicit
+    ? `Saved: <strong>${esc(r.notification_preset)}</strong>.`
+    : `Defaulted to <strong>${esc(r.notification_preset)}</strong> (not yet set). Pick a value to set it explicitly.`;
+  const presetFlag = r.notification_presets_enabled ? '' : ' <span class="muted">· presets flag is OFF, so this is recorded but not yet enforced.</span>';
+  const notifications = `<div class="section"><h2>Notification preset</h2>
+    <select id="notifPreset">${presetSel}</select>
+    <div class="row" style="margin-top:10px"><button onclick="savePreset()">Save preset</button></div>
+    <p class="muted" style="font-size:12px;margin-top:8px">${presetNote} Presets only make routing calmer (payroll never WhatsApp, attendance dashboard-only, compliance never WhatsApp).${presetFlag}</p></div>`;
   $('panel').innerHTML = `
     <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(r.name||r.company_code)} <span class="muted">(${esc(r.company_code)})</span></h2><span class="badge ${r.ready?'ok':'warn'}">${r.ready?'Ready':'Needs setup'}</span></div>
     <div class="section"><h2>Readiness</h2><ul class="steps">${steps}</ul></div>
     ${messaging}
     <div class="section"><h2>Modules</h2><div class="modules">${mods}</div><button onclick="saveModules()">Save modules</button></div>
     <div class="section"><h2>Timezone</h2><input type="text" id="tz" value="${esc(r.timezone||'Asia/Kuwait')}" /><div class="row" style="margin-top:10px"><button onclick="saveTimezone()">Save timezone</button></div></div>
+    ${notifications}
     <div class="section"><h2>First Owner</h2>
       <label>Email</label><input type="email" id="ownerEmail" placeholder="owner@company.com" />
       <label>Name</label><input type="text" id="ownerName" placeholder="Full name" />
@@ -31404,6 +31432,12 @@ async function saveModules(){
 }
 async function saveTimezone(){
   try { await api('PATCH','/dashboard/superadmin/setup/companies/'+encodeURIComponent(selected)+'/settings',{timezone:$('tz').value.trim()}); toast('Timezone saved'); selectCompany(selected); }
+  catch(e){ toast(e.message, true); }
+}
+async function savePreset(){
+  const preset=$('notifPreset').value;
+  if(!confirm('Set notification preset for "'+selected+'" to "'+preset+'"? Presets only make employee messaging calmer, never louder.')) return;
+  try { await api('PATCH','/dashboard/superadmin/setup/companies/'+encodeURIComponent(selected)+'/settings',{notification_preset:preset}); toast('Notification preset saved'); selectCompany(selected); }
   catch(e){ toast(e.message, true); }
 }
 async function seedOwner(){
@@ -33652,6 +33686,10 @@ def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboa
             reason = f"Reminder paused for {name} — already reminded recently."
             suggested = "No action needed. Reminders resume after the quiet window."
             kind = "info"
+        elif status == _outbound_delivery.STATUS_DASHBOARD_ONLY:
+            reason = f"Kept on the dashboard for {name} — not pushed to WhatsApp or email."
+            suggested = "No action needed. This update is shown here on purpose."
+            kind = "info"
         else:
             reason, suggested = _humanize_delivery_failure(
                 last_error=row.get("last_error"),
@@ -33867,6 +33905,8 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
             whatsapp_links = int((cur.fetchone() or {}).get("n") or 0)
     settings = get_company_settings(company)
     timezone_value = str(settings.get("timezone") or "").strip()
+    preset_saved = str(settings.get("notification_preset") or "").strip().lower()
+    preset_effective = preset_saved if preset_saved in _outbound_delivery.NOTIFICATION_PRESETS else _outbound_delivery.DEFAULT_NOTIFICATION_PRESET
     steps = [
         {"key": "company", "label": "Company created", "done": exists},
         {"key": "modules", "label": "At least one module enabled", "done": bool(modules)},
@@ -33884,6 +33924,10 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
         "owners": owners,
         "whatsapp_links": whatsapp_links,
         "timezone": timezone_value or None,
+        "notification_preset": preset_effective,
+        "notification_preset_explicit": bool(preset_saved in _outbound_delivery.NOTIFICATION_PRESETS),
+        "notification_preset_options": sorted(_outbound_delivery.NOTIFICATION_PRESETS),
+        "notification_presets_enabled": channel_presets_enabled(),
         "steps": steps,
         "messaging": messaging_readiness(company) if exists else None,
         "ready": bool(exists and required_done),
@@ -33901,6 +33945,7 @@ class SetupModulesRequest(BaseModel):
 
 class SetupSettingsRequest(BaseModel):
     timezone: str | None = None
+    notification_preset: str | None = None
 
 
 class SetupOwnerRequest(BaseModel):
@@ -34087,6 +34132,15 @@ def setup_console_set_settings(company_code: str, request: SetupSettingsRequest,
             raise HTTPException(status_code=422, detail={"error": "invalid_timezone", "message": "Enter a timezone, e.g. Asia/Kuwait."})
         set_company_setting(company, "timezone", timezone_value)
         changes.append(f"timezone → {timezone_value}")
+    if request.notification_preset is not None:
+        preset_value = str(request.notification_preset).strip().lower()
+        if preset_value not in _outbound_delivery.NOTIFICATION_PRESETS:
+            raise HTTPException(status_code=422, detail={
+                "error": "invalid_notification_preset",
+                "message": "Choose one of: " + ", ".join(sorted(_outbound_delivery.NOTIFICATION_PRESETS)) + ".",
+            })
+        set_company_setting(company, "notification_preset", preset_value)
+        changes.append(f"notification_preset → {preset_value}")
     if not changes:
         raise HTTPException(status_code=422, detail={"error": "no_update", "message": "No setting was provided."})
     record_admin_audit(
