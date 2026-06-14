@@ -40,6 +40,7 @@ export type DashboardTeamUser = {
   permissions?: string[]
   auth_source?: string
   is_recovery_access?: boolean
+  whatsapp_linked?: boolean
 }
 
 export type DashboardTeamInvite = {

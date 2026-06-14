@@ -192,6 +192,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-settings-durability.py | se
 log "shift reminder email fallback (scan passes employee email; with-email -> sent_email_fallback via email; no-email -> calm terminal, no HR task; templates off)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-reminder-email.py | sed 's/^/    /'
 
+log "team whatsapp-linked visibility (GET /dashboard/team whatsapp_linked: active=linked, none/disabled=not, company-scoped, no cross-company leak)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-team-whatsapp-visibility.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 

@@ -719,28 +719,28 @@ function App() {
   )
 
   useEffect(() => {
-    if (!access.token || !access.companyCode) return
+    if (!access.token || !access.companyCode || accessIssue) return
     const timer = window.setTimeout(() => {
       void refreshAll(access)
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [access, refreshAll])
+  }, [access, accessIssue, refreshAll])
 
   useEffect(() => {
-    if (!access.token || !access.companyCode) return
+    if (!access.token || !access.companyCode || accessIssue) return
     const timer = window.setTimeout(() => {
       void loadApplications(access, { silent: true })
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [access, loadApplications])
+  }, [access, accessIssue, loadApplications])
 
   useEffect(() => {
-    if (!access.token || !access.companyCode) return
+    if (!access.token || !access.companyCode || accessIssue) return
     const timer = window.setTimeout(() => {
       void loadInterviews(access, { silent: true })
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [access, loadInterviews])
+  }, [access, accessIssue, loadInterviews])
 
   useEffect(() => {
     const nextId = dashboardChatConversationId(access)
@@ -859,9 +859,19 @@ function App() {
       await refreshEverything(loggedInAccess)
       await loadTeam(loggedInAccess)
     } catch (error) {
-      const issue = accessIssueFromError(error) || { code: 'dashboard_auth_failed', title: 'Verify your access', description: friendlyDashboardError(error, 'Access needs to be verified.') }
-      setAccessIssue(issue)
-      setNotice(issue.title)
+      // An explicit email+password sign-in that fails with 401 means the credentials
+      // were rejected. Show that plainly instead of the generic "session expired"
+      // copy, which otherwise makes a wrong password look like nothing happened.
+      const wasPasswordLogin = Boolean(nextAccess.email && nextAccess.password)
+      const unauthorized = error instanceof DashboardApiError && (error.status === 401 || error.code === 'dashboard_auth_failed')
+      if (wasPasswordLogin && unauthorized) {
+        setAccessIssue({ code: 'dashboard_auth_failed', title: 'Sign in to Wathefni', description: 'Incorrect email or password. Please try again.' })
+        setNoticeErr('Incorrect email or password. Please try again.')
+      } else {
+        const issue = accessIssueFromError(error) || { code: 'dashboard_auth_failed', title: 'Verify your access', description: friendlyDashboardError(error, 'Access needs to be verified.') }
+        setAccessIssue(issue)
+        setNotice(issue.title)
+      }
     } finally {
       setBusy(false)
     }
@@ -4579,6 +4589,7 @@ function SettingsPage({
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Email</th>
                     <th className="px-4 py-3">Phone</th>
+                    <th className="px-4 py-3">WhatsApp</th>
                     <th className="px-4 py-3">Role</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Last active</th>
@@ -4591,6 +4602,9 @@ function SettingsPage({
                       <td className="px-4 py-3 font-medium text-text">{user.name || 'Invited user'}</td>
                       <td className="px-4 py-3 text-subtle">{user.email}</td>
                       <td className="px-4 py-3 text-subtle">{user.phone || 'Not linked'}</td>
+                      <td className="px-4 py-3">
+                        <Badge tone={user.whatsapp_linked ? 'success' : 'muted'}>{user.whatsapp_linked ? 'WhatsApp linked' : 'Not linked'}</Badge>
+                      </td>
                       <td className="px-4 py-3">
                         {canManageUsers ? (
                           <Select
@@ -4641,7 +4655,7 @@ function SettingsPage({
                     </tr>
                   ))}
                   {!displayedTeamUsers.length ? (
-                    <tr><td className="px-4 py-6 text-subtle" colSpan={7}>{team ? 'No team members yet.' : 'Team members are loading...'}</td></tr>
+                    <tr><td className="px-4 py-6 text-subtle" colSpan={8}>{team ? 'No team members yet.' : 'Team members are loading...'}</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -4983,12 +4997,20 @@ function AccessVerificationPage({
             <CardDescription>Create your workspace login. Your fixed role is already assigned by the company Owner/Admin.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input autoFocus onChange={(event) => setAcceptName(event.target.value)} placeholder="Your name" value={acceptName} />
-            <Input onChange={(event) => setAcceptPassword(event.target.value)} placeholder="Create password" type="password" value={acceptPassword} />
-            <Input onChange={(event) => setAcceptPhone(event.target.value)} placeholder="WhatsApp phone optional" value={acceptPhone} />
-            <Button disabled={busy} onClick={onVerify}>
-              {busy ? <Loader2 className="animate-spin" size={16} /> : <UserCheck size={16} />} Accept invite
-            </Button>
+            <form
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault()
+                if (!busy) onVerify()
+              }}
+            >
+              <Input autoComplete="name" autoFocus name="name" onChange={(event) => setAcceptName(event.target.value)} placeholder="Your name" value={acceptName} />
+              <Input autoComplete="new-password" name="new-password" onChange={(event) => setAcceptPassword(event.target.value)} placeholder="Create password" type="password" value={acceptPassword} />
+              <Input autoComplete="tel" name="phone" onChange={(event) => setAcceptPhone(event.target.value)} placeholder="WhatsApp phone optional" value={acceptPhone} />
+              <Button disabled={busy} type="submit">
+                {busy ? <Loader2 className="animate-spin" size={16} /> : <UserCheck size={16} />} Accept invite
+              </Button>
+            </form>
           </CardContent>
         </Card>
         <Card>
@@ -5013,34 +5035,48 @@ function AccessVerificationPage({
           <CardDescription>{accessIssue.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="grid gap-3 md:grid-cols-2">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault()
+              if (!busy) onVerify()
+            }}
+          >
+            <div className="space-y-3">
+              <div className="grid gap-3 md:grid-cols-2">
+                <Input
+                  autoComplete="username"
+                  autoFocus
+                  name="email"
+                  onChange={(event) => setAccess({ ...access, email: event.target.value })}
+                  placeholder="Work email"
+                  type="email"
+                  value={access.email || ''}
+                />
+                <Input
+                  autoComplete="current-password"
+                  name="password"
+                  onChange={(event) => setAccess({ ...access, password: event.target.value })}
+                  placeholder="Password"
+                  type="password"
+                  value={access.password || ''}
+                />
+              </div>
               <Input
-                autoFocus
-                onChange={(event) => setAccess({ ...access, email: event.target.value })}
-                placeholder="Work email"
-                type="email"
-                value={access.email || ''}
-              />
-              <Input
-                onChange={(event) => setAccess({ ...access, password: event.target.value })}
-                placeholder="Password"
-                type="password"
-                value={access.password || ''}
+                autoComplete="off"
+                name="company-code"
+                onChange={(event) => setAccess({ ...access, companyCode: event.target.value.toUpperCase() })}
+                placeholder="Company code"
+                value={access.companyCode}
               />
             </div>
-            <Input
-              onChange={(event) => setAccess({ ...access, companyCode: event.target.value.toUpperCase() })}
-              placeholder="Company code"
-              value={access.companyCode}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button disabled={busy} onClick={onVerify}>
-              {busy ? <Loader2 className="animate-spin" size={16} /> : <UserCheck size={16} />} Sign in
-            </Button>
-            <span className="text-xs text-subtle">Use your invited workspace account.</span>
-          </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button disabled={busy} type="submit">
+                {busy ? <Loader2 className="animate-spin" size={16} /> : <UserCheck size={16} />} Sign in
+              </Button>
+              <span className="text-xs text-subtle">Use your invited workspace account.</span>
+            </div>
+          </form>
           <details className="rounded-2xl border border-line bg-panel-muted/50 p-4">
             <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-subtle">Backup access</summary>
             <div className="mt-3 space-y-3">

@@ -33284,6 +33284,17 @@ def dashboard_team_list(context: dict[str, Any] = Depends(prehire_dashboard_cont
                 (company,),
             )
             invites = [json_safe(dict(row)) for row in cur.fetchall()]
+            # Which of these users currently have an ACTIVE WhatsApp identity in
+            # THIS company. Company-scoped + status='active' so a disabled/relinked
+            # row never counts. Used only to show a calm "linked / not linked"
+            # badge — no phone numbers are exposed by this.
+            cur.execute(
+                "SELECT DISTINCT user_id FROM dashboard_whatsapp_identities WHERE company_code=%s AND status='active'",
+                (company,),
+            )
+            linked_user_ids = {str(row["user_id"]) for row in cur.fetchall() if row.get("user_id")}
+    for member in users:
+        member["whatsapp_linked"] = str(member.get("user_id") or "") in linked_user_ids
     return {"company_code": company, "users": users, "invites": invites, "role_capabilities": {role: hr_role_permissions(role) for role in ROLE_PERMISSIONS}}
 
 
