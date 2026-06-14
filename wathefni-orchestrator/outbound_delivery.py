@@ -131,6 +131,15 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
             "ar": "مرحباً {employee_name}، لديك مناوبة يوم {shift_date} من {shift_time}. الموقع: {location}.",
         },
     },
+    "shift_rescheduled": {
+        "criticality": CRITICALITY_STANDARD,
+        "sensitivity": SENS_PREVIEW,
+        "label": "Shift updated",
+        "text": {
+            "en": "Hi {employee_name}, your shift has been moved to {shift_date} from {shift_time}. Location: {location}. Please check the new time.",
+            "ar": "مرحباً {employee_name}، تم تغيير موعد مناوبتك إلى {shift_date} من {shift_time}. الموقع: {location}. يرجى مراجعة الموعد الجديد.",
+        },
+    },
     "shift_reminder": {
         "criticality": CRITICALITY_INFORMATIONAL,
         "sensitivity": SENS_PREVIEW,
@@ -355,9 +364,18 @@ def _attempt_ladder(
     deciding terminal vs retry (the caller owns that, using criticality)."""
     reasons: list[str] = []
 
-    # 1. WhatsApp session (free-form) — only if we have a phone.
+    # 0. Opt-out / suppression gate (GLOBAL BY PHONE). A clear opt-out blocks every
+    #    proactive WhatsApp + template send BEFORE any provider call. scope='whatsapp'
+    #    still allows the email fallback; scope='all' blocks email too. This runs in
+    #    both deliver_to_employee and the retry sweep, so a mid-flight opt-out is
+    #    honoured on the next attempt as well.
+    sup = legacy.whatsapp_suppression_state(phone) if phone else {"suppressed": False, "scope": None}
+    wa_suppressed = bool(sup.get("suppressed"))
+    all_suppressed = wa_suppressed and str(sup.get("scope")) == "all"
+
+    # 1. WhatsApp session (free-form) — only if we have a phone and aren't suppressed.
     session_retryable = False
-    if phone:
+    if phone and not wa_suppressed:
         r = OctopusProvider.send_session(
             legacy,
             account_id=account_id,
@@ -372,11 +390,13 @@ def _attempt_ladder(
         err = str(r.get("error") or "whatsapp_failed")
         reasons.append(f"session:{err}")
         session_retryable = err not in _NON_RETRYABLE_SESSION_ERRORS
+    elif wa_suppressed:
+        reasons.append("session:suppressed_opt_out")
     else:
         reasons.append("session:no_phone")
 
-    # 2. WhatsApp approved template (HSM) — only if we have a phone.
-    if phone:
+    # 2. WhatsApp approved template (HSM) — only if we have a phone and aren't suppressed.
+    if phone and not wa_suppressed:
         t = OctopusProvider.send_template(
             legacy,
             account_id=account_id,
@@ -393,9 +413,13 @@ def _attempt_ladder(
         if t.get("ok"):
             return {"status": STATUS_DELIVERED_TEMPLATE, "channel": "whatsapp_template", "reasons": reasons, "retryable": False}
         reasons.append(f"template:{str(t.get('error') or 'template_failed')}")
+    elif wa_suppressed:
+        reasons.append("template:suppressed_opt_out")
 
-    # 3. Email fallback.
-    if legacy.outbound_email_fallback_enabled():
+    # 3. Email fallback — allowed unless the employee opted out of ALL channels.
+    if all_suppressed:
+        reasons.append("email:suppressed_opt_out")
+    elif legacy.outbound_email_fallback_enabled():
         if email:
             e = EmailProvider.send(
                 legacy,
@@ -416,9 +440,15 @@ def _attempt_ladder(
     else:
         reasons.append("email:disabled")
 
-    # Nothing landed. Whether a retry could help depends on the session result
-    # (a closed conversation won't reopen on its own, so don't spin retries).
-    return {"status": None, "channel": None, "reasons": reasons, "retryable": session_retryable}
+    # Nothing landed. A suppressed message is terminal (not a transient failure);
+    # otherwise a retry only helps if the session error was retryable.
+    return {
+        "status": None,
+        "channel": None,
+        "reasons": reasons,
+        "retryable": session_retryable and not wa_suppressed,
+        "suppressed": wa_suppressed,
+    }
 
 
 def create_hr_task(
@@ -538,6 +568,11 @@ def _finalize(
         if retryable:
             status = STATUS_PENDING
             next_attempt_at = _now(legacy) + _dt.timedelta(minutes=_backoff_minutes(attempts))
+        elif outcome.get("suppressed"):
+            # Employee opted out of WhatsApp and email couldn't (or mustn't) carry it.
+            # Terminal + no HR task: this is a deliberate opt-out, not a failure. It is
+            # still surfaced calmly in Delivery Issues so HR can reach them another way.
+            status = STATUS_SUPPRESSED
         elif criticality == CRITICALITY_CRITICAL:
             status = STATUS_NEEDS_HR
             if not hr_task_id:
@@ -670,6 +705,14 @@ def deliver_to_employee(
     locale = (locale or recipient["locale"] or "en").strip().lower()[:5] or "en"
     variables = dict(variables or {})
     variables.setdefault("employee_name", recipient["name"])
+    # {company_name} is a first-class template variable (e.g. onboarding welcome,
+    # and the "[Company] via Wathefni" shared-sender wording). Inject it centrally
+    # so every flow gets it without each call site passing it.
+    if not variables.get("company_name"):
+        try:
+            variables["company_name"] = legacy.company_display_name(company)
+        except Exception:
+            variables["company_name"] = company
     subject_key = subject_key or employee_key
 
     entry = catalog_entry(template_key)
@@ -880,7 +923,7 @@ def list_needs_follow_up(
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key
          WHERE m.company_code = %s
-           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}') {clause}
+           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}') {clause}
          ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC
          LIMIT %s
     """

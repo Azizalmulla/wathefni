@@ -1377,6 +1377,26 @@ def _ensure_schema_impl() -> None:
       updated_at timestamptz NOT NULL DEFAULT now(),
       UNIQUE (template_key, locale, provider, company_code)
     );
+    -- WhatsApp opt-out / suppression. GLOBAL BY PHONE: there is one Wathefni-owned
+    -- WhatsApp sender, so an opt-out (STOP/unsubscribe) means "don't proactively
+    -- WhatsApp this person from our number" across every tenant — the Meta-correct
+    -- semantics for a single sender. Enforcement is global; UI visibility stays
+    -- company-scoped because it is only ever surfaced through company-scoped
+    -- employee_messages. scope='whatsapp' blocks WhatsApp/template only (email
+    -- fallback still allowed); scope='all' blocks every channel. Never deletes
+    -- employee data; unsuppress flips active=false-> true via an audited operator action.
+    CREATE TABLE IF NOT EXISTS whatsapp_suppressions (
+      phone text PRIMARY KEY,
+      scope text NOT NULL DEFAULT 'whatsapp',
+      active boolean NOT NULL DEFAULT true,
+      reason text,
+      source text,
+      context_company_code text,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      created_by text
+    );
     CREATE TABLE IF NOT EXISTS shift_assignments (
       shift_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
@@ -26740,6 +26760,155 @@ def employee_company_code_for_phone(phone: str | None) -> str | None:
     return None
 
 
+def company_display_name(company_code: str | None) -> str:
+    """Human company name for message bodies (the {company_name} variable).
+    Falls back to the company code so a template never renders a blank name."""
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return ""
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name FROM companies WHERE company_code=%s LIMIT 1", (company,))
+                row = cur.fetchone()
+    except Exception:
+        return company
+    name = str((row or {}).get("name") or "").strip() if row else ""
+    return name or company
+
+
+# --- WhatsApp opt-out / suppression -----------------------------------------
+# One Wathefni-owned WhatsApp number means an opt-out is global by phone (Meta
+# STOP semantics for a single sender). We detect ONLY clear opt-out wording so a
+# casual "no" (لا) never silences someone. scope='whatsapp' blocks proactive
+# WhatsApp/template sends but keeps email fallback; scope='all' blocks everything.
+_OPT_OUT_EXACT = {
+    "stop", "unsubscribe", "unsub", "cancel messages", "cancel message",
+    "stop messages", "stop all messages",
+    "توقف", "ايقاف", "الغاء", "الغاء الاشتراك", "الغاء الاشتراك",
+}
+# Unambiguous phrases that count even inside a longer message.
+_OPT_OUT_CONTAINS = ("unsubscribe", "cancel messages", "الغاء الاشتراك")
+
+
+def _normalize_opt_out(text: str) -> str:
+    t = str(text or "").strip().lower()
+    t = re.sub(r"[.!؟?،,\-_/\\|]+", " ", t)
+    # Light Arabic normalization so hamza/alef variants and tatweel collapse.
+    for src in ("أ", "إ", "آ", "ٱ"):
+        t = t.replace(src, "ا")
+    t = t.replace("ـ", "")
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def detect_whatsapp_opt_out(text: str | None) -> bool:
+    """True only for clear opt-out wording (STOP / unsubscribe / cancel messages /
+    إلغاء الاشتراك / إيقاف / توقف). A bare 'لا' is intentionally NOT an opt-out."""
+    norm = _normalize_opt_out(text or "")
+    if not norm:
+        return False
+    if norm in _OPT_OUT_EXACT:
+        return True
+    return any(kw in norm for kw in _OPT_OUT_CONTAINS)
+
+
+def whatsapp_suppression_state(phone: str | None) -> dict[str, Any]:
+    """Global-by-phone suppression lookup. Returns {'suppressed': bool, 'scope': str|None}."""
+    canon = canonical_employee_phone(phone)
+    if not canon:
+        return {"suppressed": False, "scope": None}
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT scope FROM whatsapp_suppressions WHERE phone=%s AND active IS TRUE LIMIT 1", (canon,))
+                row = cur.fetchone()
+    except Exception:
+        return {"suppressed": False, "scope": None}
+    if not row:
+        return {"suppressed": False, "scope": None}
+    return {"suppressed": True, "scope": str(row.get("scope") or "whatsapp")}
+
+
+def suppress_whatsapp(
+    phone: str | None,
+    *,
+    scope: str = "whatsapp",
+    reason: str | None = None,
+    source: str = "inbound_optout",
+    context_company_code: str | None = None,
+    created_by: str | None = None,
+) -> dict[str, Any]:
+    """Record/activate a suppression for a phone (global). Never deletes employee data."""
+    canon = canonical_employee_phone(phone)
+    if not canon:
+        return {"ok": False, "error": "missing_phone"}
+    scope = "all" if str(scope or "").strip().lower() == "all" else "whatsapp"
+    ctx_company = str(context_company_code or "").strip().upper() or None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO whatsapp_suppressions (phone, scope, active, reason, source, context_company_code, created_by, metadata, updated_at)
+                VALUES (%s,%s,true,%s,%s,%s,%s,%s,now())
+                ON CONFLICT (phone) DO UPDATE SET
+                  active=true, scope=EXCLUDED.scope, reason=EXCLUDED.reason, source=EXCLUDED.source,
+                  context_company_code=COALESCE(EXCLUDED.context_company_code, whatsapp_suppressions.context_company_code),
+                  created_by=EXCLUDED.created_by, updated_at=now()
+                """,
+                (canon, scope, reason, source, ctx_company, created_by, Json({})),
+            )
+        conn.commit()
+    return {"ok": True, "phone": canon, "scope": scope}
+
+
+def unsuppress_whatsapp(phone: str | None, *, by: str | None = None) -> dict[str, Any]:
+    """Deactivate a suppression (operator action). Keeps the row for audit."""
+    canon = canonical_employee_phone(phone)
+    if not canon:
+        return {"ok": False, "error": "missing_phone"}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE whatsapp_suppressions SET active=false, created_by=COALESCE(%s, created_by), updated_at=now() WHERE phone=%s AND active IS TRUE RETURNING phone",
+                (by, canon),
+            )
+            row = cur.fetchone()
+        conn.commit()
+    return {"ok": bool(row), "phone": canon}
+
+
+def maybe_handle_employee_opt_out(request: "WhatsAppTurnRequest") -> dict[str, Any] | None:
+    """If an employee texts a clear opt-out, suppress their phone (global) and
+    acknowledge. Auto-suppression is recorded in whatsapp_suppressions (its own
+    audit trail) and intentionally NOT written to the HR Activity feed, so the
+    timeline stays quiet unless an HR/operator action caused the change."""
+    phone = getattr(request, "sender_phone", None)
+    if not phone or not detect_whatsapp_opt_out(getattr(request, "raw_text", "")):
+        return None
+    # Only act for phones that belong to an employee somewhere — proactive sends
+    # target employees; candidates/HR are out of scope for this suppression.
+    company = employee_company_code_for_phone(phone)
+    if not company:
+        return None
+    suppress_whatsapp(
+        phone,
+        scope="whatsapp",
+        reason="inbound_opt_out",
+        source="inbound_optout",
+        context_company_code=company,
+        created_by="employee_inbound",
+    )
+    logger.info("whatsapp opt-out suppression recorded phone=%s company=%s", digits(phone), company)
+    reply = (
+        "You've been unsubscribed from WhatsApp updates. We won't send you proactive WhatsApp "
+        "messages. Please contact your HR team if you'd like to receive them again.\n"
+        "تم إلغاء اشتراكك في رسائل واتساب. لن نرسل لك رسائل تلقائية عبر واتساب. يرجى التواصل مع "
+        "قسم الموارد البشرية إذا رغبت في استلامها مجدداً."
+    )
+    return {"reply": reply, "company_code": company}
+
+
 def find_employee_by_phone(phone: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
     phone_digits = digits(phone)
     if not phone_digits:
@@ -33219,6 +33388,13 @@ def _humanize_delivery_failure(
     action. Never surfaces provider payloads, tokens, or raw error strings."""
     codes = [c.strip() for c in str(last_error or "").split(";") if c.strip()]
     name = (str(employee_name or "").strip() or "this employee")
+    # Opt-out is a deliberate choice by the employee, not a delivery failure —
+    # surface it calmly and never imply something went wrong.
+    if any("suppressed_opt_out" in c for c in codes):
+        return (
+            f"{name} opted out of WhatsApp messages.",
+            f"Contact {name} another way, or use email if it's on file.",
+        )
     no_phone = any(c == "session:no_phone" for c in codes)
     # Any session:* reason other than "no_phone" means WhatsApp couldn't be used
     # (most commonly the chat isn't open — no usable conversation).
@@ -33570,6 +33746,57 @@ class SetupOwnerRequest(BaseModel):
 class SetupWhatsAppLinkRequest(BaseModel):
     phone: str
     email: str | None = None
+
+
+class WhatsAppSuppressionRequest(BaseModel):
+    phone: str
+    scope: str | None = None
+    reason: str | None = None
+
+
+@app.get("/dashboard/superadmin/whatsapp-suppressions")
+def setup_console_list_whatsapp_suppressions(superadmin: dict[str, Any] = Depends(superadmin_context)):
+    """Operator view of active WhatsApp opt-outs (global by phone). Platform-admin
+    only — suppression is global, so it is never exposed to a single company's HR."""
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT phone, scope, source, reason, context_company_code, created_by, created_at, updated_at
+                FROM whatsapp_suppressions
+                WHERE active IS TRUE
+                ORDER BY updated_at DESC
+                LIMIT 500
+                """
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+    return json_safe({"ok": True, "count": len(rows), "suppressions": rows})
+
+
+@app.post("/dashboard/superadmin/whatsapp-suppressions")
+def setup_console_suppress_whatsapp(request: WhatsAppSuppressionRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    """Manual operator suppression (e.g. an employee asked HR to stop). Audited via
+    the row's source='operator' + created_by."""
+    result = suppress_whatsapp(
+        request.phone,
+        scope=("all" if str(request.scope or "").strip().lower() == "all" else "whatsapp"),
+        reason=(str(request.reason or "").strip() or "operator_suppress"),
+        source="operator",
+        created_by=str(superadmin.get("actor_phone") or "operator"),
+    )
+    if not result.get("ok"):
+        raise HTTPException(status_code=422, detail={"error": "missing_phone", "message": "Provide a valid phone number."})
+    return {"ok": True, "phone": result.get("phone"), "scope": result.get("scope")}
+
+
+@app.post("/dashboard/superadmin/whatsapp-suppressions/unsuppress")
+def setup_console_unsuppress_whatsapp(request: WhatsAppSuppressionRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    """Operator unsuppress (re-enable proactive WhatsApp for a phone). Audited: the
+    row is kept (active=false) and stamped with the operator who re-enabled it."""
+    result = unsuppress_whatsapp(request.phone, by=str(superadmin.get("actor_phone") or "operator"))
+    if not result.get("ok"):
+        raise HTTPException(status_code=404, detail={"error": "not_suppressed", "message": "No active suppression for that phone."})
+    return {"ok": True, "phone": result.get("phone")}
 
 
 @app.get("/dashboard/superadmin/setup/companies")
@@ -43950,6 +44177,22 @@ def whatsapp_turn(request: WhatsAppTurnRequest):
 def _whatsapp_turn_impl(request: WhatsAppTurnRequest):
     link_refresh = refresh_conversation_link_from_inbound(request)
     hr_link_refresh = refresh_hr_conversation_link_from_inbound(request)
+    # Honour clear opt-out replies (STOP / unsubscribe / إلغاء الاشتراك ...) before
+    # any routing, so a suppressed employee stops getting proactive WhatsApp.
+    opt_out = maybe_handle_employee_opt_out(request)
+    if opt_out is not None:
+        return OrchestratorResponse(
+            authoritative=True,
+            reply_text=opt_out["reply"],
+            final_reply_source="whatsapp_opt_out",
+            intent="whatsapp_opt_out",
+            turn_focus="opt_out",
+            audit={
+                "conversation_link_refresh": link_refresh,
+                "hr_conversation_link_refresh": hr_link_refresh,
+                "whatsapp_opt_out": {"company_code": opt_out.get("company_code")},
+            },
+        )
     if request.sender_role != "hr_admin" and not is_hr_phone(request.sender_phone):
         non_hr_response = handle_non_hr_conversational_turn(request)
         if non_hr_response:

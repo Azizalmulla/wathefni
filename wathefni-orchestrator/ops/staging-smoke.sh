@@ -174,6 +174,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-outbound-shift.py | sed 's/
 log "post-hire delivery reliability (email fallback when templates off, reminder no-refire, readiness, humanized issues, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-reliability.py | sed 's/^/    /'
 
+log "whatsapp opt-out / suppression (inbound STOP suppress, pre-send block, email fallback, scope=all terminal, no cross-tenant leak, template-map override, templates stay off)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-whatsapp-suppression.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 
