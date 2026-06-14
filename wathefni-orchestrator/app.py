@@ -31435,6 +31435,7 @@ function renderPanel(d){
     ${messaging}
     <div class="section"><h2>Modules</h2><div class="modules">${mods}</div><button onclick="saveModules()">Save modules</button></div>
     <div class="section"><h2>Timezone</h2><input type="text" id="tz" value="${esc(r.timezone||'Asia/Kuwait')}" /><div class="row" style="margin-top:10px"><button onclick="saveTimezone()">Save timezone</button></div></div>
+    <div class="section"><h2>Country</h2><input type="text" id="country" maxlength="2" placeholder="KW" value="${esc(r.country||'')}" style="text-transform:uppercase" /><div class="row" style="margin-top:10px"><button onclick="saveCountry()">Save country</button></div><p class="muted" style="font-size:12px;margin-top:8px">2-letter ISO code (e.g. KW, SA, AE, QA, BH, OM). Used for leave & public-holiday logic.</p></div>
     ${notifications}
     <div class="section"><h2>First Owner</h2>
       <label>Email</label><input type="email" id="ownerEmail" placeholder="owner@company.com" />
@@ -31443,9 +31444,10 @@ function renderPanel(d){
       <div class="row" style="margin-top:10px"><button onclick="seedOwner()">Seed Owner</button></div>
       <div id="inviteBox"></div>
     </div>
-    <div class="section"><h2>Owner WhatsApp (optional)</h2>
+    <div class="section"><h2>Owner WhatsApp identity (optional)</h2>
+      <p class="muted" style="font-size:12px;margin-bottom:8px"><strong>Owner WhatsApp identity linked</strong> = lets this owner/admin operate the workspace through the shared Wathefni WhatsApp assistant.<br/><strong>Customer WhatsApp channel provisioning</strong> = a separate, manual step (the company's own client-facing WhatsApp sender, employee intake, and proactive templates). It is <strong>not</strong> set up here.</p>
       <label>WhatsApp phone</label><input type="text" id="waPhone" placeholder="9659xxxxxxx" />
-      <div class="row" style="margin-top:10px"><button class="secondary" onclick="linkWhatsapp()">Link to Owner</button></div>
+      <div class="row" style="margin-top:10px"><button class="secondary" onclick="linkWhatsapp()">Link owner identity</button></div>
     </div>`;
 }
 async function saveModules(){
@@ -31458,6 +31460,16 @@ async function saveTimezone(){
   try { await api('PATCH','/dashboard/superadmin/setup/companies/'+encodeURIComponent(selected)+'/settings',{timezone:$('tz').value.trim()}); toast('Timezone saved'); selectCompany(selected); }
   catch(e){ toast(e.message, true); }
 }
+async function saveCountry(){
+  const country=($('country').value||'').trim().toUpperCase();
+  if(!country){ toast('Enter a 2-letter country code, e.g. KW', true); return; }
+  try { await api('PATCH','/dashboard/superadmin/setup/companies/'+encodeURIComponent(selected)+'/settings',{country}); toast('Country saved'); selectCompany(selected); }
+  catch(e){ toast(e.message, true); }
+}
+function copyInvite(){
+  const el=$('inviteLink'); const t=el?el.textContent:''; if(!t){ return; }
+  navigator.clipboard.writeText(t).then(()=>toast('Invite link copied')).catch(()=>toast('Copy failed — select the link manually', true));
+}
 async function savePreset(){
   const preset=$('notifPreset').value;
   if(!confirm('Set notification preset for "'+selected+'" to "'+preset+'"? Presets only make employee messaging calmer, never louder.')) return;
@@ -31469,7 +31481,10 @@ async function seedOwner(){
   if(!confirm('Seed '+email+' as the first Owner of "'+selected+'"? They will get full access to this workspace.')) return;
   try { const r=await api('POST','/dashboard/superadmin/setup/companies/'+encodeURIComponent(selected)+'/owner',{email,name:$('ownerName').value.trim()||null,phone:$('ownerPhone').value.trim()||null});
     toast('Owner seeded');
-    if(r.invite_token){ $('inviteBox').innerHTML='<label>Invite link token (share with the owner to set a password)</label><code class="token">'+esc(r.invite_token)+'</code>'; }
+    if(r.invite_token){
+      const link=location.origin+'/dashboard?invite='+encodeURIComponent(r.invite_token);
+      $('inviteBox').innerHTML='<label>Owner invite link — send this to the owner so they can set a password and sign in</label><code class="token" id="inviteLink">'+esc(link)+'</code><div class="row" style="margin-top:8px"><button class="secondary" onclick="copyInvite()">Copy link</button></div><p class="muted" style="font-size:12px;margin-top:6px">Link expires in 14 days. The owner sets their own password on first use.</p>';
+    }
     selectCompany(selected);
   } catch(e){ toast(e.message, true); }
 }
@@ -33911,16 +33926,18 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
     ready. Composes the existing tables; never mutates."""
     company = str(company_code or "").strip().upper()
     name: str | None = None
+    country: str | None = None
     modules: list[str] = []
     owners = 0
     whatsapp_links = 0
     exists = False
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT company_code, name FROM companies WHERE company_code=%s LIMIT 1", (company,))
+            cur.execute("SELECT company_code, name, country FROM companies WHERE company_code=%s LIMIT 1", (company,))
             crow = cur.fetchone()
             exists = bool(crow)
             name = (dict(crow).get("name") if crow else None)
+            country = (str(dict(crow).get("country") or "").strip().upper() or None) if crow else None
             cur.execute("SELECT module_key FROM company_modules WHERE company_code=%s AND enabled IS TRUE ORDER BY module_key", (company,))
             modules = [str(r["module_key"]) for r in cur.fetchall()]
             cur.execute("SELECT count(*) AS n FROM dashboard_users WHERE company_code=%s AND role='owner' AND status <> 'disabled'", (company,))
@@ -33936,12 +33953,13 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
         {"key": "modules", "label": "At least one module enabled", "done": bool(modules)},
         {"key": "owner", "label": "Owner account seeded", "done": owners > 0},
         {"key": "timezone", "label": "Timezone set", "done": bool(timezone_value)},
-        {"key": "whatsapp", "label": "Owner WhatsApp linked", "done": whatsapp_links > 0, "optional": True},
+        {"key": "whatsapp", "label": "Owner WhatsApp identity linked", "done": whatsapp_links > 0, "optional": True},
     ]
     required_done = all(step["done"] for step in steps if not step.get("optional"))
     return {
         "company_code": company,
         "name": name,
+        "country": country,
         "exists": exists,
         "modules": modules,
         "module_display": {key: MODULE_DISPLAY_NAMES.get(key, key) for key in modules},
@@ -33970,6 +33988,7 @@ class SetupModulesRequest(BaseModel):
 class SetupSettingsRequest(BaseModel):
     timezone: str | None = None
     notification_preset: str | None = None
+    country: str | None = None
 
 
 class SetupOwnerRequest(BaseModel):
@@ -34165,6 +34184,19 @@ def setup_console_set_settings(company_code: str, request: SetupSettingsRequest,
             })
         set_company_setting(company, "notification_preset", preset_value)
         changes.append(f"notification_preset → {preset_value}")
+    if request.country is not None:
+        # Country is a first-class column on `companies` (the runtime source of
+        # truth), not a company_settings blob key. The registry sync never
+        # overwrites companies.country, so writing it here is durable across
+        # restart/deploy.
+        country_value = str(request.country).strip().upper()
+        if not re.fullmatch(r"[A-Z]{2}", country_value):
+            raise HTTPException(status_code=422, detail={"error": "invalid_country", "message": "Use a 2-letter ISO country code, e.g. KW."})
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE companies SET country=%s, updated_at=now() WHERE company_code=%s", (country_value, company))
+            conn.commit()
+        changes.append(f"country → {country_value}")
     if not changes:
         raise HTTPException(status_code=422, detail={"error": "no_update", "message": "No setting was provided."})
     record_admin_audit(

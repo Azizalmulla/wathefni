@@ -72,6 +72,14 @@ def _settings() -> dict[str, Any]:
     return app.get_company_settings(TEST_CO)
 
 
+def _company_country() -> str | None:
+    with app.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT country FROM companies WHERE company_code=%s", (TEST_CO,))
+            row = cur.fetchone()
+    return (str((row or {}).get("country") or "").strip().upper() or None)
+
+
 class Checks:
     def __init__(self) -> None:
         self.passed: list[str] = []
@@ -151,6 +159,35 @@ def run_checks(checks: Checks) -> None:
     # The Setup Console readiness snapshot reflects the durable explicit value.
     r = app.setup_console_company_readiness(TEST_CO)
     checks.check("readiness shows explicit notification_preset after re-sync", lambda: r.get("notification_preset") == "office" and r.get("notification_preset_explicit") is True)
+
+    # --- Country lives on companies.country (column), NOT company_settings -----
+    # company.json profile currently says country=BH (from SmokeV3 above). The
+    # operator sets a DIFFERENT country through Setup Console; it must land on the
+    # `companies.country` column, drive readiness, survive a restart-style sync,
+    # and must NOT be shoved into company_settings.settings.
+    app.setup_console_set_settings(
+        TEST_CO,
+        app.SetupSettingsRequest(country="sa"),  # lowercase in -> normalized to SA
+        superadmin=FAKE_SUPERADMIN,
+    )
+    checks.check("country: written to companies.country column (SA)", lambda: _company_country() == "SA")
+    r_country = app.setup_console_company_readiness(TEST_CO)
+    checks.check("country: readiness reflects companies.country (SA)", lambda: r_country.get("country") == "SA")
+    checks.check("country: NOT shoved into company_settings.settings (profile stays BH)", lambda: _settings().get("country") == "BH")
+
+    # Restart/deploy-style re-sync must not clobber the column-backed country.
+    app.sync_company_module_registry()
+    checks.check("country: companies.country survives re-sync (SA)", lambda: _company_country() == "SA")
+    checks.check("country: readiness still SA after re-sync", lambda: app.setup_console_company_readiness(TEST_CO).get("country") == "SA")
+
+    # Invalid country is rejected (defensive — operators can't write junk).
+    def _bad_country() -> bool:
+        try:
+            app.setup_console_set_settings(TEST_CO, app.SetupSettingsRequest(country="Kuwait"), superadmin=FAKE_SUPERADMIN)
+            return False
+        except app.HTTPException as exc:
+            return exc.status_code == 422
+    checks.check("country: non-ISO value rejected with 422", _bad_country)
 
 
 def main() -> None:
