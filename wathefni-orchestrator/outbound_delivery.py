@@ -32,9 +32,49 @@ from typing import Any
 #   critical      -> raise a visible HR task (needs_hr_action)
 #   standard      -> mark failed; surfaced in the dashboard "needs follow-up" view
 #   informational -> mark failed; log only (no HR task, low priority)
+#
+# NOTE (semantics cleanup, Phase 1): `criticality` historically conflated three
+# unrelated ideas. It is being split into the three orthogonal fields below.
+# `criticality` REMAINS the runtime source of truth for failure escalation +
+# needs-follow-up sort; the new fields are additive metadata with NO consumer yet
+# (channel presets will read them later). `failure_escalation` is a strict 1:1
+# alias of `criticality` so Phase 1 is byte-for-byte behavior-frozen.
 CRITICALITY_CRITICAL = "critical"
 CRITICALITY_STANDARD = "standard"
 CRITICALITY_INFORMATIONAL = "informational"
+
+# delivery_urgency — how fast the employee needs it (channel-preset weighting).
+URGENCY_ACTION_NOW = "action_now"
+URGENCY_REMINDER = "reminder"
+URGENCY_INFORMATIONAL = "informational"
+DELIVERY_URGENCIES = {URGENCY_ACTION_NOW, URGENCY_REMINDER, URGENCY_INFORMATIONAL}
+
+# failure_escalation — what happens when NO channel succeeds. 1:1 with criticality.
+ESCALATION_HR_TASK = "hr_task"
+ESCALATION_DELIVERY_ISSUE = "delivery_issue_only"
+ESCALATION_AUDIT_ONLY = "audit_only"
+FAILURE_ESCALATIONS = {ESCALATION_HR_TASK, ESCALATION_DELIVERY_ISSUE, ESCALATION_AUDIT_ONLY}
+
+# employee_channel_intent — the LOUDEST channel a preset may use for this template.
+# A company preset may only go calmer than this, never louder.
+CHANNEL_WHATSAPP_OK = "whatsapp_ok"
+CHANNEL_EMAIL_FIRST = "email_first"
+CHANNEL_EMAIL_ONLY = "email_only"
+CHANNEL_DASHBOARD_ONLY = "dashboard_only"
+CHANNEL_INTENTS = {CHANNEL_WHATSAPP_OK, CHANNEL_EMAIL_FIRST, CHANNEL_EMAIL_ONLY, CHANNEL_DASHBOARD_ONLY}
+
+# Strict 1:1 alias so derived_criticality(failure_escalation) == legacy criticality.
+FAILURE_ESCALATION_TO_CRITICALITY = {
+    ESCALATION_HR_TASK: CRITICALITY_CRITICAL,
+    ESCALATION_DELIVERY_ISSUE: CRITICALITY_STANDARD,
+    ESCALATION_AUDIT_ONLY: CRITICALITY_INFORMATIONAL,
+}
+
+
+def derived_criticality(failure_escalation: str) -> str:
+    """Map the (new) failure_escalation back to the (legacy) criticality. Used by
+    the Phase-1 contract test to prove no behavior change."""
+    return FAILURE_ESCALATION_TO_CRITICALITY.get(str(failure_escalation), CRITICALITY_STANDARD)
 
 # sensitivity drives how the message body is stored:
 #   plain         -> store full text (low sensitivity, fine for HR to read)
@@ -93,6 +133,9 @@ _BACKOFF_MINUTES = [1, 5, 15, 30, 60, 120]
 TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     "employee_onboarding_welcome": {
         "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Onboarding welcome",
         "text": {
@@ -102,6 +145,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "onboarding_reminder": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_REMINDER,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Onboarding reminder",
         "text": {
@@ -111,6 +157,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "compliance_document_required": {
         "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_REMINDER,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_EMAIL_FIRST,
         "sensitivity": SENS_METADATA,
         "label": "Document required",
         "text": {
@@ -120,6 +169,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "compliance_document_expiring": {
         "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_REMINDER,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_EMAIL_FIRST,
         "sensitivity": SENS_METADATA,
         "label": "Document expiring",
         "text": {
@@ -129,6 +181,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "shift_assigned": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift assigned",
         "text": {
@@ -138,6 +193,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "shift_rescheduled": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift updated",
         "text": {
@@ -147,6 +205,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "shift_reminder": {
         "criticality": CRITICALITY_INFORMATIONAL,
+        "delivery_urgency": URGENCY_REMINDER,
+        "failure_escalation": ESCALATION_AUDIT_ONLY,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift reminder",
         "text": {
@@ -156,6 +217,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "shift_cancelled": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift cancelled",
         "text": {
@@ -165,6 +229,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "attendance_missed_checkin": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_INFORMATIONAL,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_DASHBOARD_ONLY,
         "sensitivity": SENS_PREVIEW,
         "label": "Missed check-in",
         "text": {
@@ -174,6 +241,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "leave_request_approved": {
         "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Leave approved",
         "text": {
@@ -183,6 +253,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "leave_request_rejected": {
         "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Leave decision",
         "text": {
@@ -192,6 +265,9 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
     },
     "payroll_timesheet_ready": {
         "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_INFORMATIONAL,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_EMAIL_ONLY,
         "sensitivity": SENS_METADATA,
         "label": "Payroll update",
         "text": {

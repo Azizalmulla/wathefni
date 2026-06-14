@@ -180,6 +180,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-whatsapp-suppression.py | s
 log "reminder frequency caps (flag on, throttle within window, idempotent critical events, shift per-shift not collapsed, low-noise audit, calm Delivery Issues, compliance grouping, templates stay off)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-reminder-frequency.py | sed 's/^/    /'
 
+log "notification semantics Phase 1 (catalog contract, no-behavior-change criticality alias, hard channel-intent anti-leak for payroll/attendance/compliance/admin, caps stable, templates off)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-notification-semantics.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 
