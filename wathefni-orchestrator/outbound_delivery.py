@@ -875,7 +875,7 @@ def list_needs_follow_up(
     sql = f"""
         SELECT m.message_id, m.employee_key, m.flow, m.template_key, m.criticality,
                m.status, m.channel_used, m.last_error, m.attempts, m.hr_task_id,
-               m.body_preview, m.created_at, m.updated_at, e.name AS employee_name
+               m.body_preview, m.target_email, m.created_at, m.updated_at, e.name AS employee_name
           FROM employee_messages m
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key

@@ -18417,7 +18417,7 @@ def run_shift_reminder_scan(*, account_id: str | None, dry_run: bool = True, lim
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT s.*, e.phone, e.name
+                SELECT s.*, e.phone, e.name, e.email
                 FROM shift_assignments s
                 LEFT JOIN employees e ON e.employee_key=s.employee_key
                 WHERE s.status='scheduled'
@@ -18438,7 +18438,7 @@ def run_shift_reminder_scan(*, account_id: str | None, dry_run: bool = True, lim
         message = f"Reminder: your shift is on {format_shift_date(shift.get('shift_date'))} from {format_shift_time(shift.get('start_time'))} to {format_shift_time(shift.get('end_time'))}."
         entry = {"shift_id": str(shift.get("shift_id")), "employee_key": shift.get("employee_key"), "phone": shift.get("phone") or shift.get("employee_phone"), "message": message, "dry_run": dry_run}
         if not dry_run:
-            employee = {"phone": shift.get("phone") or shift.get("employee_phone"), "name": shift.get("name") or shift.get("employee_name"), "employee_key": shift.get("employee_key"), "company_code": shift.get("company_code")}
+            employee = {"phone": shift.get("phone") or shift.get("employee_phone"), "email": shift.get("email"), "name": shift.get("name") or shift.get("employee_name"), "employee_key": shift.get("employee_key"), "company_code": shift.get("company_code")}
             if outbound_flow_enabled("shift"):
                 send_result = deliver_employee_notification(
                     employee,
@@ -18456,12 +18456,17 @@ def run_shift_reminder_scan(*, account_id: str | None, dry_run: bool = True, lim
             else:
                 send_result = send_custom_employee_message(employee, account_id, message)
             entry["send"] = send_result
-            if send_result.get("ok"):
-                with db_connect() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute("UPDATE shift_assignments SET reminder_sent_at=now(), updated_at=now() WHERE shift_id=%s", (shift.get("shift_id"),))
-                        record_shift_event(cur, shift=shift, company_code=str(shift.get("company_code") or ""), event_type="reminder_sent", payload=entry, created_by_phone=None)
-                    conn.commit()
+            # Mark the reminder as attempted regardless of outcome. A shift only
+            # needs one reminder; stamping reminder_sent_at on a failed attempt
+            # stops this scan from re-firing the same reminder every hour for the
+            # rest of the window. The delivery layer still owns transient retries
+            # for any message it queued as pending, and the failure stays visible
+            # to HR via the Delivery Issues card (employee_messages status).
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("UPDATE shift_assignments SET reminder_sent_at=now(), updated_at=now() WHERE shift_id=%s", (shift.get("shift_id"),))
+                    record_shift_event(cur, shift=shift, company_code=str(shift.get("company_code") or ""), event_type=("reminder_sent" if send_result.get("ok") else "reminder_attempt_failed"), payload=entry, created_by_phone=None)
+                conn.commit()
         results.append(entry)
     return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped}
 
@@ -29457,6 +29462,30 @@ def pending_onboarding_reminder_candidates(limit: int = 25, min_hours_since_last
             return [dict(row) for row in cur.fetchall()]
 
 
+def mark_onboarding_reminder_attempted(employee_key: str) -> dict[str, Any]:
+    """Stamp last_reminded_at without bumping reminder_count, so a *failed* reminder
+    is throttled by the same cooldown as a successful one. This stops a delivery
+    failure (closed WhatsApp + no email) from re-firing the onboarding reminder
+    every hour, while still allowing a legitimate retry after the cooldown."""
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE onboarding_items
+                SET last_reminded_at=now(),
+                    updated_at=now()
+                WHERE employee_key=%s
+                  AND required IS TRUE
+                  AND status IN ('missing','pending','requested')
+                RETURNING item_id
+                """,
+                (employee_key,),
+            )
+            rows = cur.fetchall()
+        conn.commit()
+    return {"updated": len(rows)}
+
+
 def mark_onboarding_reminder_sent(employee_key: str) -> dict[str, Any]:
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -29576,6 +29605,9 @@ def run_onboarding_reminder_scan(*, account_id: str | None, dry_run: bool = True
                 if escalation:
                     entry["escalation"] = escalation
             else:
+                # Throttle the failed reminder to the normal cooldown so it does
+                # not re-fire every hour; the failure is still surfaced to HR.
+                entry["reminder_update"] = mark_onboarding_reminder_attempted(str(employee.get("employee_key")))
                 company = str(employee.get("company_code") or "WATHEFNI").upper()
                 failures_by_company.setdefault(company, []).append(entry)
         results.append(entry)
@@ -31015,9 +31047,18 @@ function renderPanel(d){
   const r=d.readiness; const enabled=new Set(r.modules);
   const mods = d.available_modules.map(m=>`<label><input type="checkbox" value="${esc(m.key)}" ${enabled.has(m.key)?'checked':''}/> ${esc(m.label)}</label>`).join('');
   const steps = r.steps.map(s=>`<li><span class="dot ${s.done?'done':'todo'}">${s.done?'✓':''}</span>${esc(s.label)}${s.optional?' <span class="muted">(optional)</span>':''}</li>`).join('');
+  const m=r.messaging;
+  const msgRows = m ? [
+    `<li><span class="dot ${m.whatsapp_connected?'done':'todo'}">${m.whatsapp_connected?'✓':''}</span>WhatsApp ${m.whatsapp_connected?'connected':'not linked'}</li>`,
+    `<li><span class="dot ${m.templates_configured?'done':'todo'}">${m.templates_configured?'✓':''}</span>Proactive WhatsApp templates ${m.templates_configured?'configured':'not configured yet'}</li>`,
+    `<li><span class="dot ${m.email_fallback?'done':'todo'}">${m.email_fallback?'✓':''}</span>Email fallback ${m.email_fallback?'available':'off'}</li>`,
+    `<li><span class="dot ${m.employees_missing_email>0?'todo':'done'}">${m.employees_missing_email>0?'':'✓'}</span>${esc(String(m.employees_with_email))} of ${esc(String(m.employees_total))} employees have an email${m.employees_missing_email>0?` · ${esc(String(m.employees_missing_email))} missing`:''}</li>`,
+  ].join('') : '';
+  const messaging = m ? `<div class="section"><h2>Messaging</h2><ul class="steps">${msgRows}</ul><p class="muted" style="font-size:12px;margin-top:8px">${esc(m.summary)}</p></div>` : '';
   $('panel').innerHTML = `
     <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(r.name||r.company_code)} <span class="muted">(${esc(r.company_code)})</span></h2><span class="badge ${r.ready?'ok':'warn'}">${r.ready?'Ready':'Needs setup'}</span></div>
     <div class="section"><h2>Readiness</h2><ul class="steps">${steps}</ul></div>
+    ${messaging}
     <div class="section"><h2>Modules</h2><div class="modules">${mods}</div><button onclick="saveModules()">Save modules</button></div>
     <div class="section"><h2>Timezone</h2><input type="text" id="tz" value="${esc(r.timezone||'Asia/Kuwait')}" /><div class="row" style="margin-top:10px"><button onclick="saveTimezone()">Save timezone</button></div></div>
     <div class="section"><h2>First Owner</h2>
@@ -33150,12 +33191,155 @@ def dashboard_hr_task_resolve(task_id: str, request: HrTaskResolveRequest, conte
     return json_safe(result)
 
 
+# Plain-language labels for outbound flows so HR never sees internal flow keys.
+_DELIVERY_FLOW_LABELS = {
+    "shift": "Shift",
+    "onboarding": "Onboarding",
+    "compliance": "Compliance",
+    "leave_decision": "Leave",
+    "leave": "Leave",
+    "payroll": "Payroll",
+    "document": "Documents",
+}
+
+
+def _delivery_flow_label(flow: str | None) -> str:
+    key = str(flow or "").strip().lower()
+    return _DELIVERY_FLOW_LABELS.get(key, key.replace("_", " ").title() or "Message")
+
+
+def _humanize_delivery_failure(
+    *,
+    last_error: str | None,
+    employee_name: str | None,
+    has_email: bool,
+) -> tuple[str, str]:
+    """Turn internal reason codes (e.g. ``session:no_usable_conversation_id;
+    email:no_employee_email``) into one calm HR sentence plus a suggested next
+    action. Never surfaces provider payloads, tokens, or raw error strings."""
+    codes = [c.strip() for c in str(last_error or "").split(";") if c.strip()]
+    name = (str(employee_name or "").strip() or "this employee")
+    no_phone = any(c == "session:no_phone" for c in codes)
+    # Any session:* reason other than "no_phone" means WhatsApp couldn't be used
+    # (most commonly the chat isn't open — no usable conversation).
+    whatsapp_blocked = any(c.startswith("session:") and c != "session:no_phone" for c in codes)
+    no_email = any(c == "email:no_employee_email" for c in codes)
+    email_disabled = any(c == "email:disabled" for c in codes)
+    email_failed = any(c.startswith("email:") and c not in {"email:no_employee_email", "email:disabled"} for c in codes)
+
+    if no_phone and (no_email or not has_email):
+        return (
+            f"No WhatsApp number or email on file for {name}.",
+            f"Add a phone number or email for {name}, then resend.",
+        )
+    if (whatsapp_blocked or no_phone) and (no_email or not has_email):
+        return (
+            f"WhatsApp chat isn't open and no email is on file for {name}.",
+            f"Add an email for {name}, or ask them to message you on WhatsApp first.",
+        )
+    if (whatsapp_blocked or no_phone) and email_disabled:
+        return (
+            f"Couldn't reach {name} on WhatsApp and email fallback is turned off.",
+            f"Reach {name} directly, then mark this done.",
+        )
+    if (whatsapp_blocked or no_phone) and email_failed:
+        return (
+            f"WhatsApp chat isn't open and the email couldn't be sent to {name}.",
+            f"Check {name}'s email address and resend.",
+        )
+    if whatsapp_blocked or no_phone:
+        return (
+            f"Couldn't reach {name} on WhatsApp yet.",
+            f"Reach {name} directly, or ask them to message you on WhatsApp first.",
+        )
+    return (
+        f"We couldn't deliver this message to {name}.",
+        f"Reach {name} directly, then mark this done.",
+    )
+
+
+def messaging_readiness(company_code: str) -> dict[str, Any]:
+    """Honest, HR/operator-safe snapshot of how employee messages can be
+    delivered right now: WhatsApp link, approved templates, and email fallback /
+    employee email coverage. Read-only; never exposes credentials or provider
+    config. Used by the Setup Console (operator) and the Delivery Issues card."""
+    company = str(company_code or "").strip().upper()
+    whatsapp_links = 0
+    employees_total = 0
+    employees_missing_email = 0
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT count(*) AS n FROM dashboard_whatsapp_identities WHERE company_code=%s AND status='active'", (company,))
+            whatsapp_links = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                """
+                SELECT count(*) AS total,
+                       count(*) FILTER (WHERE coalesce(nullif(trim(email), ''), NULL) IS NULL) AS missing
+                FROM employees
+                WHERE company_code=%s AND coalesce(employment_status, 'active') <> 'left'
+                """,
+                (company,),
+            )
+            row = cur.fetchone() or {}
+            employees_total = int(row.get("total") or 0)
+            employees_missing_email = int(row.get("missing") or 0)
+    templates_configured = outbound_templates_enabled()
+    email_fallback = outbound_email_fallback_enabled()
+    whatsapp_connected = whatsapp_links > 0
+    employees_with_email = max(0, employees_total - employees_missing_email)
+    if templates_configured:
+        summary = "Proactive WhatsApp messages are configured. Employees can also be reached by open WhatsApp chat or email fallback."
+    elif email_fallback:
+        summary = "Proactive WhatsApp templates are not configured yet. Employees can still be reached by an open WhatsApp chat or by email fallback."
+    else:
+        summary = "Proactive WhatsApp templates are not configured yet, and email fallback is off. Employees can only be reached through an open WhatsApp chat."
+    return {
+        "whatsapp_connected": whatsapp_connected,
+        "whatsapp_links": whatsapp_links,
+        "templates_configured": templates_configured,
+        "email_fallback": email_fallback,
+        "employees_total": employees_total,
+        "employees_with_email": employees_with_email,
+        "employees_missing_email": employees_missing_email,
+        "summary": summary,
+    }
+
+
 @app.get("/dashboard/outbound/needs-follow-up")
 def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboard_context)):
     company = _hr_tasks_context(context)
     scope = context.get("scope")
-    messages = _outbound_delivery.list_needs_follow_up(company_code=company, scope=scope, limit=200)
-    return json_safe({"ok": True, "company_code": company, "count": len(messages), "messages": messages})
+    rows = _outbound_delivery.list_needs_follow_up(company_code=company, scope=scope, limit=200)
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        has_email = bool(str(row.get("target_email") or "").strip())
+        reason, suggested = _humanize_delivery_failure(
+            last_error=row.get("last_error"),
+            employee_name=row.get("employee_name"),
+            has_email=has_email,
+        )
+        items.append({
+            "message_id": str(row.get("message_id")),
+            "employee_key": row.get("employee_key"),
+            "employee_name": row.get("employee_name"),
+            "flow": row.get("flow"),
+            "flow_label": _delivery_flow_label(row.get("flow")),
+            "criticality": row.get("criticality"),
+            "status": row.get("status"),
+            "reason": reason,
+            "suggested_action": suggested,
+            "has_email": has_email,
+            "has_task": bool(row.get("hr_task_id")),
+            "attempts": row.get("attempts"),
+            "last_attempt_at": row.get("updated_at"),
+        })
+    return json_safe({
+        "ok": True,
+        "company_code": company,
+        "count": len(items),
+        "messages": items,
+        "messaging": messaging_readiness(company),
+    })
 
 
 # ---------------------------------------------------------------------------
@@ -33359,6 +33543,7 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
         "whatsapp_links": whatsapp_links,
         "timezone": timezone_value or None,
         "steps": steps,
+        "messaging": messaging_readiness(company) if exists else None,
         "ready": bool(exists and required_done),
     }
 
@@ -42699,7 +42884,8 @@ EMPLOYEE_IMPORT_HEADER_ALIASES = {
     "name": "name", "full_name": "name", "employee_name": "name", "fullname": "name",
     "phone": "phone", "mobile": "phone", "whatsapp": "phone", "phone_number": "phone",
     "whatsapp_number": "phone", "mobile_number": "phone", "contact": "phone",
-    "email": "email", "email_address": "email", "e_mail": "email",
+    "email": "email", "email_address": "email", "e_mail": "email", "mail": "email",
+    "email_id": "email", "work_email": "email", "personal_email": "email",
     "job_title": "position_title", "title": "position_title", "position": "position_title",
     "position_title": "position_title", "role": "position_title", "designation": "position_title",
     "department": "department", "team": "department", "dept": "department", "division": "department",

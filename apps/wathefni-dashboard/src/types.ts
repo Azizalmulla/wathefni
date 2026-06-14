@@ -1282,16 +1282,26 @@ export type OutboundFollowUpMessage = {
   employee_key: string | null
   employee_name: string | null
   flow: string
-  template_key: string | null
+  flow_label: string
   criticality: string
   status: OutboundDeliveryStatus
-  channel_used: string | null
-  last_error: string | null
-  attempts: number
-  hr_task_id: string | null
-  body_preview: string | null
-  created_at: string
-  updated_at: string
+  reason: string
+  suggested_action: string
+  has_email: boolean
+  has_task: boolean
+  attempts: number | null
+  last_attempt_at: string
+}
+
+export type MessagingReadiness = {
+  whatsapp_connected: boolean
+  whatsapp_links: number
+  templates_configured: boolean
+  email_fallback: boolean
+  employees_total: number
+  employees_with_email: number
+  employees_missing_email: number
+  summary: string
 }
 
 export type OutboundNeedsFollowUpResponse = {
@@ -1299,6 +1309,7 @@ export type OutboundNeedsFollowUpResponse = {
   company_code: string
   count: number
   messages: OutboundFollowUpMessage[]
+  messaging: MessagingReadiness
 }
 
 export type SetupReadinessStep = {

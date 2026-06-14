@@ -32,6 +32,7 @@ import {
   DashboardApiError,
   type EmployeeImportResult,
   getHrTasks,
+  getOutboundNeedsFollowUp,
   importEmployees,
   rescheduleShift,
   getPosthireAnalytics,
@@ -61,6 +62,7 @@ import type {
   DashboardAccess,
   HrTask,
   HrTasksResponse,
+  OutboundNeedsFollowUpResponse,
   PosthireAnalyticsResponse,
   PosthireAttendanceResponse,
   PosthireAttendanceRow,
@@ -458,6 +460,14 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
           return false
         }
         setPending(null)
+        // A 200 with ok:false means the action ran but delivery (e.g. a manual
+        // reminder) didn't land. Show the server's failure text with an error
+        // tone instead of a green "success" so HR is never misled.
+        if (result.ok === false) {
+          onNotice(result.message || 'We couldn’t complete that action.', 'error')
+          await reload()
+          return false
+        }
         onNotice(result.message || 'Done.', 'success')
         await reload()
         return true
@@ -609,7 +619,7 @@ function AddEmployeeModal({ access, onClose, onNotice, onAdded }: {
             <Input className="w-full" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 96550000000" inputMode="tel" />
           </RosterField>
           <RosterField label="Email">
-            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" type="email" />
+            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Recommended for notifications" type="email" />
           </RosterField>
           <RosterField label="Job title">
             <Input className="w-full" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Optional" />
@@ -699,7 +709,7 @@ function EditEmployeeModal({ access, employee, onClose, onNotice, onSaved }: {
             <Input className="w-full" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
           </RosterField>
           <RosterField label="Email">
-            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" type="email" />
+            <Input className="w-full" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Recommended for notifications" type="email" />
           </RosterField>
           <RosterField label="Job title">
             <Input className="w-full" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Optional" />
@@ -804,7 +814,7 @@ function ImportEmployeesModal({ access, onClose, onNotice, onImported }: {
         </div>
         <div className="mt-4 rounded-2xl border border-line/50 bg-white/55 p-3 text-[12px] leading-5 text-subtle/85">
           <p className="font-medium text-subtle/95">Required columns: <span className="font-semibold text-text">name</span>, <span className="font-semibold text-text">phone</span></p>
-          <p className="mt-0.5">Optional: email, job title, department, start date. Format phone columns as text to keep leading digits.</p>
+          <p className="mt-0.5">Optional: <span className="font-semibold text-text">email</span> (recommended for notifications), job title, department, start date. Format phone columns as text to keep leading digits.</p>
         </div>
         <div className="mt-4">
           <input
@@ -4357,11 +4367,67 @@ function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIss
   )
 }
 
+// Surfaces employee messages that failed to deliver but did NOT raise an HR task
+// (typically standard/informational reminders like shift nudges). These would
+// otherwise be invisible to HR. Reasons are plain-language and carry a suggested
+// next action; raw provider/error strings are never shown. Renders nothing when
+// there is nothing to surface, so a clean workspace stays clean.
+function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps, 'access' | 'onAccessIssue'>) {
+  const loader = useCallback(() => getOutboundNeedsFollowUp(access), [access])
+  const { data, error } = useModuleData<OutboundNeedsFollowUpResponse>(loader, onAccessIssue)
+
+  // The endpoint can 403 on workspaces without a post-hire module / read access;
+  // treat that as "nothing to surface" rather than showing an error.
+  if (error || !data) return null
+  // Critical follow-ups already appear in the HR-tasks card above; only show the
+  // delivery failures that have no task so HR isn't shown the same row twice.
+  const issues = (data.messages ?? []).filter((m) => !m.has_task)
+  if (issues.length === 0) return null
+
+  const fmtWhen = (iso: string) => {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return ''
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  }
+
+  return (
+    <Card className="mb-5 border-amber-200/70 bg-[#fffaf0]">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-[#8a5a16]" />
+          <CardTitle className="text-[15px]">Delivery issues</CardTitle>
+          <Badge tone="warning" className="ml-1">
+            {issues.length}
+          </Badge>
+        </div>
+        <CardDescription>
+          {data.messaging?.summary
+            || 'Some employee messages couldn’t be delivered. Reach these employees directly.'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2.5">
+        {issues.map((m) => (
+          <div key={m.message_id} className="rounded-xl border border-amber-200/60 bg-white/70 px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <Badge tone="default" className="shrink-0">{m.flow_label}</Badge>
+              <p className="truncate text-[13.5px] font-medium text-text">{m.employee_name || 'Employee'}</p>
+              {m.last_attempt_at ? <span className="ml-auto shrink-0 text-[11.5px] text-subtle/80">{fmtWhen(m.last_attempt_at)}</span> : null}
+            </div>
+            <p className="mt-1 text-[12.5px] leading-5 text-subtle/90">{m.reason}</p>
+            <p className="mt-0.5 text-[12.5px] leading-5 text-[#8a5a16]">{m.suggested_action}</p>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function PostHirePage({ page, access, permissions, role, onNotice, onAccessIssue }: PostHireProps) {
   const followUp = <DeliveryFollowUpCard access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
   return (
     <>
       {followUp}
+      <DeliveryIssuesCard access={access} onAccessIssue={onAccessIssue} />
       <PostHireModuleBody page={page} access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     </>
   )
