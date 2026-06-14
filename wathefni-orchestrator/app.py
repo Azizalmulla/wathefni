@@ -15991,6 +15991,101 @@ def employee_has_approved_leave(company_code: str | None, employee_key: str | No
             return dict(row) if row else None
 
 
+# --- Reminder frequency caps + send idempotency (flag-gated) ----------------
+# Per-EMPLOYEE, per-reminder-template cooldown windows (hours). Only *repeatable
+# reminder* templates appear here; EVENT templates (shift_assigned / shift_cancelled
+# / shift_rescheduled, leave decisions, onboarding welcome) are never frequency
+# capped — they are protected by idempotency/dedupe instead so an accidental
+# repeat never double-messages the employee.
+#
+# shift_reminder is deliberately ABSENT: its unit is per-SHIFT (already enforced by
+# shift_assignments.reminder_sent_at), not per-employee. Two different shifts in one
+# window must each still get their single reminder, so a per-employee cap would be
+# wrong here.
+REMINDER_CAP_HOURS = {
+    "onboarding_reminder": 24,
+    "compliance_document_required": 24,
+    "compliance_document_expiring": 24,
+    "payroll_timesheet_ready": 72,
+    "attendance_missed_checkin": 24,
+}
+# Accidental rapid re-fires of the SAME content to the SAME employee collapse
+# within this window (idempotency, applies to every proactive send incl. critical).
+REMINDER_IDEMPOTENCY_MINUTES = 10
+
+
+def reminder_caps_enabled() -> bool:
+    """Frequency caps + send idempotency. Default ON; the flag is the kill switch
+    (set WATHEFNI_REMINDER_CAPS=off to restore the pre-cap per-flow behaviour)."""
+    val = (os.environ.get("WATHEFNI_REMINDER_CAPS") or "").strip().lower()
+    return val not in {"off", "0", "false", "no"}
+
+
+def reminder_cap_window_hours(template_key: str) -> int | None:
+    return REMINDER_CAP_HOURS.get(str(template_key or ""))
+
+
+def _auto_dedupe_key(*, flow: str, template_key: str, employee_key: str | None, text: str, variables: dict[str, Any] | None) -> str:
+    """Stable idempotency key for a proactive send when the caller didn't supply
+    one. Identical content to the same employee within a short bucket collapses to
+    a single send, so an accidentally repeated CRITICAL event never spams."""
+    bucket = int(now_utc().timestamp() // (max(1, REMINDER_IDEMPOTENCY_MINUTES) * 60))
+    basis = json.dumps({"t": text or "", "v": variables or {}}, sort_keys=True, default=str)
+    digest_hex = hashlib.sha1(basis.encode("utf-8")).hexdigest()[:12]
+    return f"auto:{flow}:{template_key}:{employee_key or 'noemp'}:{digest_hex}:{bucket}"
+
+
+def reminder_cap_throttled(company_code: str, employee_key: str, template_key: str, window_hours: int) -> bool:
+    """True if a real (non-throttled) send of this reminder template already went
+    to this employee within the cooldown window."""
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT 1 FROM employee_messages
+                 WHERE company_code=%s AND employee_key=%s AND template_key=%s
+                   AND status <> '{_outbound_delivery.STATUS_THROTTLED}'
+                   AND created_at > now() - (%s || ' hours')::interval
+                 LIMIT 1
+                """,
+                (str(company_code or "").upper(), str(employee_key), str(template_key), int(window_hours)),
+            )
+            return cur.fetchone() is not None
+
+
+def record_throttled_reminder(*, company_code: str, employee_key: str, flow: str, template_key: str, window_hours: int) -> dict[str, Any]:
+    """Low-noise audit row: at most ONE throttled row per employee/template/window
+    (collapsed via a window-bucketed dedupe key), so Delivery Issues never fills up
+    with a row per skipped reminder. Records intent, never sends anything."""
+    company = str(company_code or "").upper()
+    bucket = int(now_utc().timestamp() // max(1, int(window_hours) * 3600))
+    dedupe = f"cap:{template_key}:{employee_key}:{bucket}"
+    entry = _outbound_delivery.catalog_entry(template_key)
+    label = entry.get("label") or str(template_key or "").replace("_", " ").strip().capitalize()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM employee_messages WHERE company_code=%s AND dedupe_key=%s LIMIT 1", (company, dedupe))
+            if cur.fetchone():
+                return {"recorded": False, "deduped": True}
+            cur.execute(
+                """
+                INSERT INTO employee_messages
+                  (company_code, employee_key, flow, template_key, criticality, sensitivity, locale,
+                   status, body_preview, dedupe_key, metadata)
+                VALUES (%s,%s,%s,%s,%s,%s,'en',%s,%s,%s,%s)
+                """,
+                (
+                    company, str(employee_key), str(flow), str(template_key),
+                    entry.get("criticality") or _outbound_delivery.CRITICALITY_STANDARD,
+                    entry.get("sensitivity") or _outbound_delivery.SENS_PREVIEW,
+                    _outbound_delivery.STATUS_THROTTLED, label, dedupe,
+                    Json({"reason": "frequency_cap", "window_hours": int(window_hours)}),
+                ),
+            )
+        conn.commit()
+    return {"recorded": True}
+
+
 def deliver_employee_notification(
     employee: dict[str, Any],
     *,
@@ -16013,6 +16108,32 @@ def deliver_employee_notification(
     payload_vars = {"employee_name": employee.get("name") or ""}
     if variables:
         payload_vars.update(variables)
+
+    if reminder_caps_enabled():
+        emp_key = employee.get("employee_key")
+        # Idempotency for EVERY proactive send (incl. critical events): a stable
+        # dedupe key so an accidentally repeated event never double-messages.
+        if not dedupe_key:
+            dedupe_key = _auto_dedupe_key(flow=flow, template_key=template_key, employee_key=emp_key, text=text, variables=variables)
+        # Frequency cap — reminder templates only; event/critical templates are not
+        # in REMINDER_CAP_HOURS and so are never throttled (idempotency still applies).
+        window = reminder_cap_window_hours(template_key)
+        if window and emp_key and reminder_cap_throttled(company, str(emp_key), template_key, window):
+            record_throttled_reminder(company_code=company, employee_key=str(emp_key), flow=flow, template_key=template_key, window_hours=window)
+            throttled = {
+                "ok": False,
+                "via": "outbound_layer",
+                "delivery_status": _outbound_delivery.STATUS_THROTTLED,
+                "channel": None,
+                "hr_task_id": None,
+                "throttled": True,
+                "message": text,
+                "employee": json_safe(employee),
+            }
+            if extra:
+                throttled.update(extra)
+            return throttled
+
     result = deliver_to_employee(
         company_code=company,
         flow=flow,
@@ -29773,6 +29894,12 @@ def run_onboarding_reminder_scan(*, account_id: str | None, dry_run: bool = True
                 escalation = maybe_escalate_onboarding_reminder(employee, account_id, reminder_update.get("items") or [])
                 if escalation:
                     entry["escalation"] = escalation
+            elif send_result.get("throttled"):
+                # The frequency cap intentionally stayed quiet (a reminder already
+                # went out within the cooldown). This is NOT a delivery failure, so
+                # it must not be reported to HR as one. Stamp the cooldown anyway.
+                entry["throttled"] = True
+                entry["reminder_update"] = mark_onboarding_reminder_attempted(str(employee.get("employee_key")))
             else:
                 # Throttle the failed reminder to the normal cooldown so it does
                 # not re-fire every hour; the failure is still surfaced to HR.
@@ -29871,6 +29998,9 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
     results: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
     affected_employees: dict[str, dict[str, Any]] = {}
+    # Group due compliance alerts per company so HR gets ONE digest per run instead
+    # of a separate WhatsApp/notification per document (low-noise reminder summary).
+    grouped_alerts: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         if not company_has_module(row.get("company_code"), "compliance"):
             skipped.append({
@@ -29927,34 +30057,58 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
                     "phone": row.get("phone"),
                     "company_code": row.get("company_code"),
                 }
-            if due:
-                message = compliance_alert_message(row, classification)
-                notification = notify_hr_admins(
-                    company_code=row.get("company_code"),
-                    account_id=account_id,
-                    message=message,
-                    subject_type="employee",
-                    subject_key=row.get("employee_key"),
-                )
-                entry["notification"] = notification
-                if notification.get("ok"):
-                    with db_connect() as conn:
-                        with conn.cursor() as cur:
+        if due:
+            # Defer the send: collect per company, then emit one grouped digest
+            # below so HR is pinged once per company per run, not once per document.
+            # Collected in dry-run too (visibility only); the actual send + cooldown
+            # stamp stay gated on `not dry_run`.
+            company = str(row.get("company_code") or "WATHEFNI").upper()
+            grouped_alerts.setdefault(company, []).append(
+                {"row": row, "classification": classification, "entry": entry}
+            )
+            entry["alert_grouped"] = True
+        results.append(entry)
+    # One grouped HR reminder per company (instead of one per document). Stamp the
+    # cooldown on every included document only when the digest is actually sent.
+    grouped_notifications: dict[str, Any] = {}
+    if not dry_run:
+        for company, items in grouped_alerts.items():
+            lines = [compliance_alert_message(it["row"], it["classification"]) for it in items]
+            shown = lines[:10]
+            body_lines = [f"{len(items)} compliance document(s) need attention:"]
+            body_lines += [f"• {line}" for line in shown]
+            if len(items) > len(shown):
+                body_lines.append(f"• …and {len(items) - len(shown)} more")
+            body = "\n".join(body_lines)
+            notification = notify_hr_admins(
+                company_code=company,
+                account_id=account_id,
+                message=body,
+                subject_type="company",
+                subject_key=company,
+            )
+            grouped_notifications[company] = {"ok": bool(notification.get("ok")), "documents": len(items)}
+            for it in items:
+                it["entry"]["notification"] = {"ok": bool(notification.get("ok")), "grouped": True}
+            if notification.get("ok"):
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        for it in items:
                             cur.execute(
                                 """
                                 UPDATE compliance_documents
                                 SET last_alerted_at=now(), reminder_count=reminder_count + 1, last_reminded=CURRENT_DATE, updated_at=now()
                                 WHERE employee_key=%s AND document_type=%s
                                 """,
-                                (row.get("employee_key"), row.get("document_type")),
+                                (it["row"].get("employee_key"), it["row"].get("document_type")),
                             )
-                        conn.commit()
-        results.append(entry)
+                    conn.commit()
     sheet_syncs: dict[str, Any] = {}
     if not dry_run:
         for key, employee in affected_employees.items():
             sheet_syncs[key] = sync_employee_posthire(str(employee.get("phone") or ""), employee.get("company_code"))
-    return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped, "sheet_syncs": json_safe(sheet_syncs)}
+    grouped_documents = {company: len(items) for company, items in grouped_alerts.items()}
+    return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped, "sheet_syncs": json_safe(sheet_syncs), "grouped_notifications": grouped_notifications, "grouped_companies": len(grouped_alerts), "grouped_documents": grouped_documents}
 
 
 # --- Compliance dashboard (read) -------------------------------------------
@@ -33489,11 +33643,22 @@ def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboa
     items: list[dict[str, Any]] = []
     for row in rows:
         has_email = bool(str(row.get("target_email") or "").strip())
-        reason, suggested = _humanize_delivery_failure(
-            last_error=row.get("last_error"),
-            employee_name=row.get("employee_name"),
-            has_email=has_email,
-        )
+        status = str(row.get("status") or "")
+        name = str(row.get("employee_name") or "").strip() or "this employee"
+        # "kind" lets the dashboard keep real delivery FAILURES in the amber issues
+        # card while showing intentional/non-failure states (throttled, opt-out)
+        # in a calm, neutral section — never as a scary error.
+        if status == _outbound_delivery.STATUS_THROTTLED:
+            reason = f"Reminder paused for {name} — already reminded recently."
+            suggested = "No action needed. Reminders resume after the quiet window."
+            kind = "info"
+        else:
+            reason, suggested = _humanize_delivery_failure(
+                last_error=row.get("last_error"),
+                employee_name=row.get("employee_name"),
+                has_email=has_email,
+            )
+            kind = "info" if status == _outbound_delivery.STATUS_SUPPRESSED else "issue"
         items.append({
             "message_id": str(row.get("message_id")),
             "employee_key": row.get("employee_key"),
@@ -33502,6 +33667,7 @@ def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboa
             "flow_label": _delivery_flow_label(row.get("flow")),
             "criticality": row.get("criticality"),
             "status": row.get("status"),
+            "kind": kind,
             "reason": reason,
             "suggested_action": suggested,
             "has_email": has_email,

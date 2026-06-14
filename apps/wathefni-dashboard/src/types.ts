@@ -1276,6 +1276,7 @@ export type OutboundDeliveryStatus =
   | 'needs_hr_action'
   | 'failed'
   | 'suppressed'
+  | 'throttled'
 
 export type OutboundFollowUpMessage = {
   message_id: string
@@ -1285,6 +1286,7 @@ export type OutboundFollowUpMessage = {
   flow_label: string
   criticality: string
   status: OutboundDeliveryStatus
+  kind?: 'issue' | 'info'
   reason: string
   suggested_action: string
   has_email: boolean

@@ -10,6 +10,7 @@ import {
   Download,
   Eye,
   FileText,
+  Info,
   Loader2,
   Plus,
   RefreshCw,
@@ -4380,9 +4381,14 @@ function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps,
   // treat that as "nothing to surface" rather than showing an error.
   if (error || !data) return null
   // Critical follow-ups already appear in the HR-tasks card above; only show the
-  // delivery failures that have no task so HR isn't shown the same row twice.
-  const issues = (data.messages ?? []).filter((m) => !m.has_task)
-  if (issues.length === 0) return null
+  // delivery rows that have no task so HR isn't shown the same row twice.
+  const rows = (data.messages ?? []).filter((m) => !m.has_task)
+  // Real delivery FAILURES stay in the amber "issues" card; intentional states
+  // (reminders paused by the frequency cap, employees who opted out) render in a
+  // separate calm/neutral section so they never look like scary errors.
+  const issues = rows.filter((m) => (m.kind ?? 'issue') === 'issue')
+  const infos = rows.filter((m) => (m.kind ?? 'issue') === 'info')
+  if (issues.length === 0 && infos.length === 0) return null
 
   const fmtWhen = (iso: string) => {
     const d = new Date(iso)
@@ -4391,34 +4397,68 @@ function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps,
   }
 
   return (
-    <Card className="mb-5 border-amber-200/70 bg-[#fffaf0]">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-[#8a5a16]" />
-          <CardTitle className="text-[15px]">Delivery issues</CardTitle>
-          <Badge tone="warning" className="ml-1">
-            {issues.length}
-          </Badge>
-        </div>
-        <CardDescription>
-          {data.messaging?.summary
-            || 'Some employee messages couldn’t be delivered. Reach these employees directly.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2.5">
-        {issues.map((m) => (
-          <div key={m.message_id} className="rounded-xl border border-amber-200/60 bg-white/70 px-3.5 py-2.5">
+    <>
+      {issues.length > 0 ? (
+        <Card className="mb-5 border-amber-200/70 bg-[#fffaf0]">
+          <CardHeader>
             <div className="flex items-center gap-2">
-              <Badge tone="default" className="shrink-0">{m.flow_label}</Badge>
-              <p className="truncate text-[13.5px] font-medium text-text">{m.employee_name || 'Employee'}</p>
-              {m.last_attempt_at ? <span className="ml-auto shrink-0 text-[11.5px] text-subtle/80">{fmtWhen(m.last_attempt_at)}</span> : null}
+              <AlertTriangle className="h-4 w-4 text-[#8a5a16]" />
+              <CardTitle className="text-[15px]">Delivery issues</CardTitle>
+              <Badge tone="warning" className="ml-1">
+                {issues.length}
+              </Badge>
             </div>
-            <p className="mt-1 text-[12.5px] leading-5 text-subtle/90">{m.reason}</p>
-            <p className="mt-0.5 text-[12.5px] leading-5 text-[#8a5a16]">{m.suggested_action}</p>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+            <CardDescription>
+              {data.messaging?.summary
+                || 'Some employee messages couldn’t be delivered. Reach these employees directly.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {issues.map((m) => (
+              <div key={m.message_id} className="rounded-xl border border-amber-200/60 bg-white/70 px-3.5 py-2.5">
+                <div className="flex items-center gap-2">
+                  <Badge tone="default" className="shrink-0">{m.flow_label}</Badge>
+                  <p className="truncate text-[13.5px] font-medium text-text">{m.employee_name || 'Employee'}</p>
+                  {m.last_attempt_at ? <span className="ml-auto shrink-0 text-[11.5px] text-subtle/80">{fmtWhen(m.last_attempt_at)}</span> : null}
+                </div>
+                <p className="mt-1 text-[12.5px] leading-5 text-subtle/90">{m.reason}</p>
+                <p className="mt-0.5 text-[12.5px] leading-5 text-[#8a5a16]">{m.suggested_action}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {infos.length > 0 ? (
+        <Card className="mb-5 border-border/70 bg-surface">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-subtle" />
+              <CardTitle className="text-[15px]">Reminder activity</CardTitle>
+              <Badge tone="muted" className="ml-1">
+                {infos.length}
+              </Badge>
+            </div>
+            <CardDescription>
+              Nothing to fix here — Wathefni intentionally stayed quiet to avoid over-messaging employees.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {infos.map((m) => (
+              <div key={m.message_id} className="rounded-xl border border-border/60 bg-white/60 px-3.5 py-2.5">
+                <div className="flex items-center gap-2">
+                  <Badge tone="muted" className="shrink-0">{m.flow_label}</Badge>
+                  <p className="truncate text-[13.5px] font-medium text-text">{m.employee_name || 'Employee'}</p>
+                  {m.last_attempt_at ? <span className="ml-auto shrink-0 text-[11.5px] text-subtle/80">{fmtWhen(m.last_attempt_at)}</span> : null}
+                </div>
+                <p className="mt-1 text-[12.5px] leading-5 text-subtle/90">{m.reason}</p>
+                <p className="mt-0.5 text-[12.5px] leading-5 text-subtle/75">{m.suggested_action}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
+    </>
   )
 }
 

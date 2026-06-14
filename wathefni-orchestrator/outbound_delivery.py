@@ -54,6 +54,10 @@ STATUS_SENT_EMAIL = "sent_email_fallback"
 STATUS_NEEDS_HR = "needs_hr_action"
 STATUS_FAILED = "failed"
 STATUS_SUPPRESSED = "suppressed"
+# Reminder was intentionally not (re)sent because one already went out within the
+# flow's cooldown window. Terminal, non-retryable, and NOT a failure — surfaced
+# calmly so HR sees "we stayed quiet on purpose," never a scary delivery error.
+STATUS_THROTTLED = "throttled"
 
 _TERMINAL_STATUSES = {
     STATUS_DELIVERED_WHATSAPP,
@@ -62,6 +66,7 @@ _TERMINAL_STATUSES = {
     STATUS_NEEDS_HR,
     STATUS_FAILED,
     STATUS_SUPPRESSED,
+    STATUS_THROTTLED,
 }
 _DELIVERED_STATUSES = {STATUS_DELIVERED_WHATSAPP, STATUS_DELIVERED_TEMPLATE, STATUS_SENT_EMAIL}
 
@@ -923,7 +928,7 @@ def list_needs_follow_up(
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key
          WHERE m.company_code = %s
-           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}') {clause}
+           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}', '{STATUS_THROTTLED}') {clause}
          ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC
          LIMIT %s
     """

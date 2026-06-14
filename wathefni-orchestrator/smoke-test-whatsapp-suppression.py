@@ -143,6 +143,10 @@ def _purge() -> None:
     with app.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM whatsapp_suppressions WHERE phone = ANY(%s)", (_canon_phones(),))
+            # Global (company_code NULL) template-map rows this harness inserts are
+            # not company-scoped, so delete them by their throwaway provider names —
+            # otherwise they leak into other smokes' "unmapped key" expectations.
+            cur.execute("DELETE FROM message_template_map WHERE provider_template_name IN ('wa_global_leave', 'wa_company_leave')")
             for company in (COMPANY, COMPANY2):
                 for table in ("employee_messages", "hr_tasks", "message_template_map", "outbound_delivery_events", "employees", "company_modules"):
                     cur.execute(f"DELETE FROM {table} WHERE company_code=%s", (company,))
