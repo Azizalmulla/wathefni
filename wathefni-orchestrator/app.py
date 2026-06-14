@@ -2508,6 +2508,21 @@ def get_company_settings(company_code: str | None) -> dict[str, Any]:
         return {}
 
 
+# Keys in company_settings.settings that are OWNED BY THE OPERATOR (set via the
+# Setup Console / dashboard), not by the workspace company.json profile. The DB is
+# the source of truth for these; the company.json registry sync must preserve them
+# (otherwise a restart/deploy silently reverts operator changes). Keep this list in
+# sync with every set_company_setting(...) call site:
+#   - timezone                    -> PATCH /superadmin/setup/companies/{c}/settings
+#   - notification_preset         -> PATCH /superadmin/setup/companies/{c}/settings
+#   - intake_auto_admit_explicit  -> PUT  /dashboard/prehire/import/settings
+OPERATOR_MANAGED_SETTING_KEYS: tuple[str, ...] = (
+    "timezone",
+    "notification_preset",
+    "intake_auto_admit_explicit",
+)
+
+
 def set_company_setting(company_code: str | None, key: str, value: Any) -> None:
     """Merge a single key into company_settings.settings (idempotent upsert)."""
     company = (company_code or "WATHEFNI").upper()
@@ -2637,12 +2652,21 @@ def sync_company_module_registry() -> None:
                             (company, module, Json(settings)),
                         )
                     settings = workspace_company_config(company)
+                    # Refresh profile fields from company.json, but PRESERVE operator-
+                    # managed keys already in the DB so a restart/deploy never silently
+                    # reverts a Setup Console change. DB operator keys win (right side of
+                    # ||); jsonb_strip_nulls drops keys not yet set so company.json can
+                    # still seed an initial default for them.
+                    preserve_obj = ", ".join(f"'{k}', company_settings.settings->'{k}'" for k in OPERATOR_MANAGED_SETTING_KEYS)
                     cur.execute(
-                        """
+                        f"""
                         INSERT INTO company_settings (company_code, settings, raw_json, updated_at)
                         VALUES (%s,%s,%s,now())
                         ON CONFLICT (company_code)
-                        DO UPDATE SET settings=EXCLUDED.settings, raw_json=EXCLUDED.raw_json, updated_at=now()
+                        DO UPDATE SET
+                          settings = EXCLUDED.settings || jsonb_strip_nulls(jsonb_build_object({preserve_obj})),
+                          raw_json = EXCLUDED.raw_json,
+                          updated_at = now()
                         """,
                         (company, Json(settings), Json({"source": "workspace_company_json", "path": str(company_root(company) / "company.json")})),
                     )

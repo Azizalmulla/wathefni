@@ -186,6 +186,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-notification-semantics.py |
 log "company notification presets (frontline/office/conservative resolved matrix, payroll never WhatsApp, attendance dashboard-only, calmer-never-louder, stubbed-ladder integration, flag-OFF regression, presets flag default OFF)"
 WATHEFNI_CHANNEL_PRESETS=on WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-channel-presets.py | sed 's/^/    /'
 
+log "setup console settings durability (operator keys timezone/notification_preset/intake_auto_admit_explicit survive company.json registry sync; profile fields still refresh; DB operator value wins)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-settings-durability.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 
