@@ -189,6 +189,9 @@ WATHEFNI_CHANNEL_PRESETS=on WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test
 log "setup console settings durability (operator keys timezone/notification_preset/intake_auto_admit_explicit survive company.json registry sync; profile fields still refresh; DB operator value wins)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-settings-durability.py | sed 's/^/    /'
 
+log "shift reminder email fallback (scan passes employee email; with-email -> sent_email_fallback via email; no-email -> calm terminal, no HR task; templates off)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-reminder-email.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 
