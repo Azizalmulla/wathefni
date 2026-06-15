@@ -58,6 +58,7 @@ import {
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { cn } from '@/lib/utils'
+import { AttendanceImportDialog } from '@/posthire/AttendanceImport'
 import type {
   ComplianceBucket,
   DashboardAccess,
@@ -2245,6 +2246,7 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
   const canExport = can(permissions, 'attendance.read', role)
   const [correcting, setCorrecting] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
+  const [showImport, setShowImport] = useState(false)
 
   const rows = data?.attendance ?? []
   const late = rows.filter((r) => Number(r.late_minutes || 0) > 0 || String(r.status).toLowerCase() === 'late')
@@ -2286,6 +2288,13 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
   return (
     <div className="space-y-6">
       {action.dialog}
+      {showImport ? (
+        <AttendanceImportDialog
+          access={access}
+          onClose={() => setShowImport(false)}
+          onImported={() => { void reload() }}
+        />
+      ) : null}
       <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
       {loading ? (
         <LoadingState />
@@ -2323,6 +2332,11 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                   <CardTitle>{rangeLabel}</CardTitle>
                   <CardDescription>{rows.length} attendance record{rows.length === 1 ? '' : 's'}</CardDescription>
                 </div>
+                {canManage && data?.import_enabled ? (
+                  <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
+                    <Upload className="h-4 w-4" /> Import from device
+                  </Button>
+                ) : null}
                 {canExport ? (
                   <Button variant="secondary" size="sm" disabled={exporting || rows.length === 0} onClick={() => void runExport()}>
                     {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

@@ -5,6 +5,12 @@ import type {
   AssessmentConfigResponse,
   AssessmentNormRecalculationResponse,
   AssessmentsResponse,
+  AttendanceImportBatchesResponse,
+  AttendanceImportCommitResponse,
+  AttendanceImportMapping,
+  AttendanceImportMappingsResponse,
+  AttendanceImportPreview,
+  AttendanceImportReverseResponse,
   DashboardAccess,
   DashboardAuthResponse,
   DashboardChatResponse,
@@ -707,6 +713,59 @@ export function getPosthireAttendance(access: DashboardAccess, range?: { start_d
   if (range?.end_date) params.set('end_date', range.end_date)
   const qs = params.toString()
   return request<PosthireAttendanceResponse>(`/dashboard/posthire/attendance${qs ? `?${qs}` : ''}`, access)
+}
+
+// --- Attendance Import (behind WATHEFNI_ATTENDANCE_IMPORT) ------------------
+// All uploads are multipart; the browser sets the boundary so we must not set
+// Content-Type. The same file is sent for preview and commit (no raw upload is
+// stored on the server).
+async function attendanceImportUpload<T>(access: DashboardAccess, path: string, form: FormData): Promise<T> {
+  const response = await fetch(path, { method: 'POST', headers: dashboardHeaders(access), body: form })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new DashboardApiError(response.status, payload?.detail || payload, 'Attendance import failed.')
+  return payload as T
+}
+
+export function previewAttendanceImport(access: DashboardAccess, body: { file: File; mapping?: Record<string, string>; mappingId?: string }) {
+  const form = new FormData()
+  form.append('file', body.file)
+  if (body.mapping) form.append('mapping', JSON.stringify(body.mapping))
+  if (body.mappingId) form.append('mapping_id', body.mappingId)
+  return attendanceImportUpload<AttendanceImportPreview>(access, '/dashboard/posthire/attendance/import/preview', form)
+}
+
+export function commitAttendanceImport(access: DashboardAccess, body: { file: File; mapping?: Record<string, string>; sourceLabel?: string }) {
+  const form = new FormData()
+  form.append('file', body.file)
+  if (body.mapping) form.append('mapping', JSON.stringify(body.mapping))
+  if (body.sourceLabel) form.append('source_label', body.sourceLabel)
+  return attendanceImportUpload<AttendanceImportCommitResponse>(access, '/dashboard/posthire/attendance/import/commit', form)
+}
+
+export function listAttendanceImportBatches(access: DashboardAccess) {
+  return request<AttendanceImportBatchesResponse>('/dashboard/posthire/attendance/import/batches', access)
+}
+
+export function reverseAttendanceImportBatch(access: DashboardAccess, batchId: string) {
+  return request<AttendanceImportReverseResponse>(`/dashboard/posthire/attendance/import/batches/${encodeURIComponent(batchId)}/reverse`, access, { method: 'POST' })
+}
+
+export function listAttendanceImportMappings(access: DashboardAccess) {
+  return request<AttendanceImportMappingsResponse>('/dashboard/posthire/attendance/import/mappings', access)
+}
+
+export function saveAttendanceImportMapping(access: DashboardAccess, body: { name: string; mapping: Record<string, string> }) {
+  return request<{ ok: boolean; mapping: AttendanceImportMapping }>('/dashboard/posthire/attendance/import/mappings', access, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export function bindAttendanceDevice(access: DashboardAccess, body: { external_id: string; employee_key: string }) {
+  return request<{ ok: boolean }>('/dashboard/posthire/attendance/import/map', access, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
 }
 
 // Download attendance for the selected range as CSV. Auth is header-based, so we

@@ -60,6 +60,106 @@ export type DashboardTeamResponse = {
   role_capabilities?: Record<string, string[]>
 }
 
+// --- Attendance Import -----------------------------------------------------
+export type AttendanceImportRecord = {
+  employee_key: string
+  employee_name?: string | null
+  attendance_date: string
+  shift_id?: string | null
+  check_in_at?: string | null
+  check_out_at?: string | null
+  status?: string
+  late_minutes?: number
+  outcome?: string
+  issue_codes?: string[]
+}
+
+export type AttendanceImportProblem = {
+  row_number?: number
+  external_id?: string
+  name_hint?: string | null
+  outcome: string
+  issue_codes: string[]
+}
+
+export type AttendanceImportUnmatched = {
+  external_id: string
+  name_hint?: string | null
+  count: number
+}
+
+export type AttendanceImportCounts = {
+  punches?: number
+  records?: number
+  skipped_locked?: number
+  incomplete?: number
+  unmatched?: number
+  duplicates?: number
+  errors?: number
+}
+
+export type AttendanceImportPreview = {
+  ok: boolean
+  headers?: string[]
+  suggested_mapping?: Record<string, string>
+  applied_mapping?: Record<string, string>
+  dropped_biometric?: string[]
+  records: AttendanceImportRecord[]
+  problems: AttendanceImportProblem[]
+  unmatched: AttendanceImportUnmatched[]
+  counts: AttendanceImportCounts
+  period?: { start: string | null; end: string | null }
+}
+
+export type AttendanceImportCommitResponse = {
+  ok: boolean
+  batch_id: string
+  applied: number
+  skipped_locked: number
+  counts: AttendanceImportCounts
+  preview: AttendanceImportPreview
+}
+
+export type AttendanceImportBatch = {
+  batch_id: string
+  filename?: string | null
+  source_label?: string | null
+  period_start?: string | null
+  period_end?: string | null
+  counts?: AttendanceImportCounts
+  status: string
+  created_by_phone?: string | null
+  created_at?: string
+  reversed_at?: string | null
+}
+
+export type AttendanceImportBatchesResponse = {
+  company_code: string
+  batches: AttendanceImportBatch[]
+}
+
+export type AttendanceImportReverseResponse = {
+  ok: boolean
+  batch_id: string
+  reversed: number
+  deleted: number
+  restored: number
+  conflicts: number
+  locked_skipped: number
+}
+
+export type AttendanceImportMapping = {
+  mapping_id: string
+  name: string
+  mapping: Record<string, string>
+  updated_at?: string
+}
+
+export type AttendanceImportMappingsResponse = {
+  company_code: string
+  mappings: AttendanceImportMapping[]
+}
+
 export type DashboardAuthResponse = {
   access_token: string
   token_type: string
@@ -1036,6 +1136,7 @@ export type PosthireAttendanceResponse = {
   end_date?: string
   is_today?: boolean
   ok?: boolean
+  import_enabled?: boolean
   attendance?: PosthireAttendanceRow[]
   status_filter?: string | null
 }

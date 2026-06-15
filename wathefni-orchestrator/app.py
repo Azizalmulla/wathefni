@@ -54,6 +54,10 @@ import outbound_delivery as _outbound_delivery  # noqa: E402
 deliver_to_employee = _outbound_delivery.deliver_to_employee
 run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 
+# Attendance Import V1 (upload-only, behind WATHEFNI_ATTENDANCE_IMPORT). Pure
+# pipeline lives in attendance_import.py; this module owns the DB + endpoints.
+import attendance_import as _attendance_import  # noqa: E402
+
 logger = logging.getLogger("wathefni")
 
 # Google Sheets is an optional downstream mirror; the database is the source of
@@ -1724,6 +1728,45 @@ def _ensure_schema_impl() -> None:
       created_by_phone text,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS attendance_import_mappings (
+      mapping_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      name text NOT NULL,
+      mapping jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_by_phone text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, name)
+    );
+    CREATE TABLE IF NOT EXISTS attendance_import_batches (
+      batch_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      filename text,
+      source_label text,
+      mapping jsonb NOT NULL DEFAULT '{}'::jsonb,
+      period_start date,
+      period_end date,
+      counts jsonb NOT NULL DEFAULT '{}'::jsonb,
+      status text NOT NULL DEFAULT 'committed',
+      notes text,
+      created_by_phone text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      reversed_at timestamptz,
+      reversed_by_phone text
+    );
+    CREATE TABLE IF NOT EXISTS attendance_import_batch_rows (
+      row_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      batch_id uuid NOT NULL REFERENCES attendance_import_batches(batch_id) ON DELETE CASCADE,
+      company_code text NOT NULL,
+      employee_key text,
+      attendance_id uuid REFERENCES attendance_records(attendance_id) ON DELETE SET NULL,
+      action text NOT NULL DEFAULT 'applied',
+      outcome text NOT NULL DEFAULT 'applied',
+      issue_codes text[] NOT NULL DEFAULT '{}',
+      committed_hash text,
+      prior_state jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
     CREATE TABLE IF NOT EXISTS conversation_links (
       link_key text PRIMARY KEY,
       phone text NOT NULL,
@@ -2029,6 +2072,12 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS severity text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS company_code text;
     ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS employment_status text;
+    ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS device_user_id text;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_device_user_id ON employees(company_code, device_user_id) WHERE device_user_id IS NOT NULL AND device_user_id <> '';
+    ALTER TABLE IF EXISTS attendance_events ADD COLUMN IF NOT EXISTS import_batch_id uuid;
+    CREATE INDEX IF NOT EXISTS idx_attendance_events_import_batch ON attendance_events(import_batch_id) WHERE import_batch_id IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_attendance_import_batches_company ON attendance_import_batches(company_code, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_attendance_import_batch_rows_batch ON attendance_import_batch_rows(batch_id);
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS data_source text NOT NULL DEFAULT 'production';
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS data_source_detail text;
     ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS import_batch_id uuid;
@@ -33879,6 +33928,10 @@ def setup_console_enabled() -> bool:
     return os.environ.get("WATHEFNI_SETUP_CONSOLE_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def attendance_import_enabled() -> bool:
+    return os.environ.get("WATHEFNI_ATTENDANCE_IMPORT", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def platform_admin_phones() -> set[str]:
     raw = os.environ.get("WATHEFNI_PLATFORM_ADMINS", "") or ""
     return {digits(part) for part in re.split(r"[,\s]+", raw) if digits(part)}
@@ -43971,6 +44024,7 @@ def dashboard_posthire_attendance(
         "start_date": start.isoformat(),
         "end_date": end.isoformat(),
         "is_today": start == end == kuwait_today(),
+        "import_enabled": attendance_import_enabled(),
         **result,
     })
 
@@ -44024,6 +44078,528 @@ def dashboard_posthire_attendance_export(
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Attendance Import V1 (upload-only) — behind WATHEFNI_ATTENDANCE_IMPORT.
+#
+# Wathefni imports punch events from a company's existing fingerprint/attendance
+# device export (CSV/XLSX). It stores ONLY {device id, timestamp, direction} —
+# never fingerprints, faceprints, templates, images, or any raw biometric data.
+# Pure parse/normalize/match/derive logic lives in attendance_import.py.
+# ---------------------------------------------------------------------------
+
+
+def _attendance_import_guard(context: dict[str, Any], *, write: bool) -> str:
+    """Flag + RBAC gate. Returns company code. 404 when the flag is OFF so the
+    feature is invisible in production until explicitly enabled."""
+    if not attendance_import_enabled():
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
+    require_entitlement(context, "attendance", "attendance.manage" if write else "attendance.read")
+    return context["company_code"]
+
+
+def _company_tzinfo(company: str):
+    name = str(get_company_settings(company).get("timezone") or "Asia/Kuwait").strip() or "Asia/Kuwait"
+    try:
+        from zoneinfo import ZoneInfo
+
+        return ZoneInfo(name)
+    except Exception:
+        return KUWAIT_TZ
+
+
+def _ai_load_device_map(cur: Any, company: str) -> dict[str, str]:
+    cur.execute(
+        "SELECT device_user_id, employee_key FROM employees WHERE company_code=%s AND device_user_id IS NOT NULL AND device_user_id <> ''",
+        (company,),
+    )
+    return {str(r["device_user_id"]).strip(): str(r["employee_key"]) for r in cur.fetchall()}
+
+
+def _ai_load_employees(cur: Any, company: str, keys: list[str]) -> dict[str, dict[str, Any]]:
+    if not keys:
+        return {}
+    cur.execute("SELECT employee_key, name, phone FROM employees WHERE company_code=%s AND employee_key = ANY(%s)", (company, keys))
+    return {str(r["employee_key"]): dict(r) for r in cur.fetchall()}
+
+
+def _ai_load_shifts(cur: Any, company: str, keys: list[str], start_d: date, end_d: date) -> tuple[dict[str, list[dict[str, Any]]], dict[str, dict[str, Any]]]:
+    by_emp: dict[str, list[dict[str, Any]]] = {}
+    by_id: dict[str, dict[str, Any]] = {}
+    if not keys:
+        return by_emp, by_id
+    cur.execute(
+        "SELECT shift_id, employee_key, shift_date, start_time, end_time FROM shift_assignments "
+        "WHERE company_code=%s AND employee_key = ANY(%s) AND shift_date BETWEEN %s AND %s AND status='scheduled'",
+        (company, keys, start_d - timedelta(days=1), end_d + timedelta(days=1)),
+    )
+    for r in cur.fetchall():
+        shift = {"shift_id": r["shift_id"], "shift_date": r["shift_date"], "start_time": r["start_time"], "end_time": r["end_time"]}
+        by_emp.setdefault(str(r["employee_key"]), []).append(shift)
+        by_id[str(r["shift_id"])] = shift
+    return by_emp, by_id
+
+
+def _ai_date_locked(cur: Any, company: str, employee_key: str, d: date) -> bool:
+    cur.execute(
+        "SELECT 1 FROM payroll_timesheets WHERE company_code=%s AND employee_key=%s AND status='approved' AND period_start<=%s AND period_end>=%s LIMIT 1",
+        (company, employee_key, d, d),
+    )
+    if cur.fetchone():
+        return True
+    cur.execute(
+        "SELECT 1 FROM payroll_exports WHERE company_code=%s AND period_start<=%s AND period_end>=%s LIMIT 1",
+        (company, d, d),
+    )
+    return bool(cur.fetchone())
+
+
+def _ai_pipeline(cur: Any, company: str, raw: bytes, filename: str, mapping: dict[str, str] | None) -> dict[str, Any]:
+    """Read-only analysis shared by preview and commit. Returns derived records,
+    problem rows, counts, mapping, dropped biometric columns, and unmatched ids."""
+    rows, headers, dropped_bio, error = _attendance_import.parse_tabular(raw, filename)
+    if error:
+        return {"ok": False, "error": error, "headers": headers, "dropped_biometric": dropped_bio}
+    suggested = _attendance_import.suggest_mapping(headers)
+    applied = {k: v for k, v in (mapping or suggested).items() if v}
+    usable, why = _attendance_import.mapping_is_usable(applied)
+    if not usable:
+        return {"ok": False, "error": why, "headers": headers, "suggested_mapping": suggested, "applied_mapping": applied, "dropped_biometric": dropped_bio}
+
+    tz = _company_tzinfo(company)
+    punches = [_attendance_import.coerce_punch(r, applied, tz, i) for i, r in enumerate(rows, start=1)]
+    device_map = _ai_load_device_map(cur, company)
+    _attendance_import.match_punches(punches, device_map)
+    _attendance_import.mark_duplicates(punches)
+
+    dated = [p["dt"] for p in punches if p.get("dt") is not None]
+    matched_keys = sorted({p["employee_key"] for p in punches if p.get("employee_key")})
+    shifts_by_emp, shift_by_id = ({}, {})
+    if dated and matched_keys:
+        shifts_by_emp, shift_by_id = _ai_load_shifts(cur, company, matched_keys, min(dated).astimezone(tz).date(), max(dated).astimezone(tz).date())
+    derived = _attendance_import.derive_records(punches, shifts_by_emp, tz)
+    emps = _ai_load_employees(cur, company, matched_keys)
+
+    # Enrich each derived record: late/status + locked-period check.
+    for d in derived:
+        shift = shift_by_id.get(d["shift_id"]) if d.get("shift_id") else None
+        late = attendance_minutes_late(d["check_in_at"], shift) if d.get("check_in_at") and shift else 0
+        early = attendance_minutes_early_leave(d["check_out_at"], shift) if d.get("check_out_at") and shift else 0
+        d["late_minutes"] = int(late)
+        d["early_leave_minutes"] = int(early)
+        if "missing_checkout" in d["issues"] or "missing_checkin" in d["issues"]:
+            d["status"] = "incomplete"
+        elif late > 0:
+            d["status"] = "late"
+        else:
+            d["status"] = "present"
+        d["locked"] = _ai_date_locked(cur, company, d["employee_key"], d["attendance_date"])
+        d["employee_name"] = (emps.get(d["employee_key"], {}) or {}).get("name")
+        d["outcome"] = "skipped_locked" if d["locked"] else "applied"
+
+    # Problem punches that did not roll into a record.
+    problems: list[dict[str, Any]] = []
+    for p in punches:
+        if not p["employee_key"] or p.get("dt") is None or "duplicate_punch" in p["issues"] or "bad_datetime" in p["issues"] or "missing_external_id" in p["issues"]:
+            outcome = (
+                "error" if ("bad_datetime" in p["issues"] or "missing_external_id" in p["issues"])
+                else "duplicate" if "duplicate_punch" in p["issues"]
+                else "needs_review"
+            )
+            problems.append({
+                "row_number": p["row_number"],
+                "external_id": p["external_id"],
+                "name_hint": p.get("name_hint"),
+                "outcome": outcome,
+                "issue_codes": p["issues"],
+            })
+
+    unmatched: dict[str, dict[str, Any]] = {}
+    for p in punches:
+        if not p["employee_key"] and p["external_id"]:
+            slot = unmatched.setdefault(p["external_id"], {"external_id": p["external_id"], "name_hint": p.get("name_hint"), "count": 0})
+            slot["count"] += 1
+
+    counts = {
+        "punches": len(punches),
+        "records": len([d for d in derived if d["outcome"] == "applied"]),
+        "skipped_locked": len([d for d in derived if d["outcome"] == "skipped_locked"]),
+        "incomplete": len([d for d in derived if "missing_checkout" in d["issues"] or "missing_checkin" in d["issues"]]),
+        "unmatched": sum(s["count"] for s in unmatched.values()),
+        "duplicates": len([p for p in problems if p["outcome"] == "duplicate"]),
+        "errors": len([p for p in problems if p["outcome"] == "error"]),
+    }
+    period = {"start": min(dated).astimezone(tz).date().isoformat(), "end": max(dated).astimezone(tz).date().isoformat()} if dated else {"start": None, "end": None}
+    return {
+        "ok": True,
+        "headers": headers,
+        "suggested_mapping": suggested,
+        "applied_mapping": applied,
+        "dropped_biometric": dropped_bio,
+        "derived": derived,
+        "problems": problems,
+        "unmatched": list(unmatched.values()),
+        "counts": counts,
+        "period": period,
+        "_punches": punches,
+        "_shift_by_id": shift_by_id,
+        "_emps": emps,
+    }
+
+
+def _ai_preview_json(result: dict[str, Any]) -> dict[str, Any]:
+    """Strip internal keys + make derived rows JSON-safe for the UI."""
+    derived = [
+        {
+            "employee_key": d["employee_key"],
+            "employee_name": d.get("employee_name"),
+            "attendance_date": d["attendance_date"].isoformat() if isinstance(d["attendance_date"], date) else d["attendance_date"],
+            "shift_id": d.get("shift_id"),
+            "check_in_at": d["check_in_at"].isoformat() if d.get("check_in_at") else None,
+            "check_out_at": d["check_out_at"].isoformat() if d.get("check_out_at") else None,
+            "status": d.get("status"),
+            "late_minutes": d.get("late_minutes"),
+            "outcome": d.get("outcome"),
+            "issue_codes": d.get("issues"),
+        }
+        for d in result.get("derived", [])
+    ]
+    return {
+        "ok": True,
+        "headers": result.get("headers"),
+        "suggested_mapping": result.get("suggested_mapping"),
+        "applied_mapping": result.get("applied_mapping"),
+        "dropped_biometric": result.get("dropped_biometric"),
+        "records": derived,
+        "problems": result.get("problems"),
+        "unmatched": result.get("unmatched"),
+        "counts": result.get("counts"),
+        "period": result.get("period"),
+    }
+
+
+class AttendanceMappingSave(BaseModel):
+    name: str
+    mapping: dict[str, str] = Field(default_factory=dict)
+
+
+class AttendanceDeviceBind(BaseModel):
+    external_id: str
+    employee_key: str
+
+
+def _parse_mapping_form(mapping: str | None) -> dict[str, str] | None:
+    if not mapping:
+        return None
+    try:
+        data = json.loads(mapping)
+        return {str(k): str(v) for k, v in data.items() if v} if isinstance(data, dict) else None
+    except Exception:
+        raise HTTPException(status_code=422, detail={"error": "bad_mapping", "message": "The column mapping was not valid."})
+
+
+@app.post("/dashboard/posthire/attendance/import/preview")
+async def attendance_import_preview(
+    file: UploadFile = File(...),
+    mapping: str | None = Form(None),
+    mapping_id: str | None = Form(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = _attendance_import_guard(context, write=True)
+    raw = await file.read()
+    if len(raw) > _attendance_import.MAX_BYTES:
+        raise HTTPException(status_code=422, detail={"error": "file_too_large", "message": f"This file is too large. Please keep imports under {_attendance_import.MAX_BYTES // (1024 * 1024)} MB."})
+    chosen = _parse_mapping_form(mapping)
+    if chosen is None and mapping_id:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT mapping FROM attendance_import_mappings WHERE company_code=%s AND mapping_id=%s", (company, mapping_id))
+                row = cur.fetchone()
+        if row:
+            chosen = {str(k): str(v) for k, v in (row["mapping"] or {}).items() if v}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            result = _ai_pipeline(cur, company, raw, file.filename or "", chosen)
+    if not result.get("ok"):
+        raise HTTPException(status_code=422, detail={"error": "unreadable_or_unmapped", "message": result.get("error"), "headers": result.get("headers"), "suggested_mapping": result.get("suggested_mapping"), "dropped_biometric": result.get("dropped_biometric")})
+    return json_safe(_ai_preview_json(result))
+
+
+def attendance_import_run_commit(company: str, raw: bytes, filename: str, mapping: dict[str, str] | None, source_label: str | None, created_by: str | None) -> dict[str, Any]:
+    """Pipeline + write, in one transaction. Testable without FastAPI. Raises
+    HTTPException(422) on an unreadable/unmapped file."""
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            result = _ai_pipeline(cur, company, raw, filename or "", mapping)
+            if not result.get("ok"):
+                raise HTTPException(status_code=422, detail={"error": "unreadable_or_unmapped", "message": result.get("error")})
+            cur.execute(
+                """
+                INSERT INTO attendance_import_batches (company_code, filename, source_label, mapping, period_start, period_end, counts, status, created_by_phone)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,'committed',%s)
+                RETURNING batch_id
+                """,
+                (company, str(filename or ""), source_label or None, Json(result["applied_mapping"]),
+                 result["period"]["start"], result["period"]["end"], Json(result["counts"]), created_by),
+            )
+            batch_id = cur.fetchone()["batch_id"]
+
+            punch_by_row = {p["row_number"]: p for p in result["_punches"]}
+            applied = skipped = 0
+            for d in result["derived"]:
+                if d["outcome"] == "skipped_locked":
+                    cur.execute(
+                        "INSERT INTO attendance_import_batch_rows (batch_id, company_code, employee_key, action, outcome, issue_codes) VALUES (%s,%s,%s,'skipped','skipped_locked',%s)",
+                        (batch_id, company, d["employee_key"], list(d["issues"]) + ["locked_period"]),
+                    )
+                    skipped += 1
+                    continue
+                emp = result["_emps"].get(d["employee_key"], {})
+                shift_id = d.get("shift_id")
+                cur.execute(
+                    "SELECT * FROM attendance_records WHERE company_code=%s AND employee_key=%s AND attendance_date=%s AND ((shift_id IS NULL AND %s IS NULL) OR shift_id=%s) ORDER BY updated_at DESC LIMIT 1",
+                    (company, d["employee_key"], d["attendance_date"], shift_id, shift_id),
+                )
+                existing = cur.fetchone()
+                prior_state = None
+                action = "created"
+                if existing:
+                    existing = dict(existing)
+                    action = "updated"
+                    prior_state = {
+                        "check_in_at": _attendance_import._iso(existing.get("check_in_at")),
+                        "check_out_at": _attendance_import._iso(existing.get("check_out_at")),
+                        "status": existing.get("status"),
+                        "late_minutes": int(existing.get("late_minutes") or 0),
+                        "early_leave_minutes": int(existing.get("early_leave_minutes") or 0),
+                    }
+                    cur.execute(
+                        """
+                        UPDATE attendance_records
+                        SET check_in_at=COALESCE(%s, check_in_at),
+                            check_out_at=COALESCE(%s, check_out_at),
+                            status=%s, late_minutes=%s, early_leave_minutes=%s,
+                            metadata=metadata || %s, updated_at=now()
+                        WHERE attendance_id=%s
+                        RETURNING *
+                        """,
+                        (d.get("check_in_at"), d.get("check_out_at"), d["status"], d["late_minutes"], d["early_leave_minutes"],
+                         Json({"source": "fingerprint_import", "import_batch_id": str(batch_id)}), existing["attendance_id"]),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO attendance_records (company_code, employee_key, employee_phone, employee_name, shift_id, attendance_date, check_in_at, check_out_at, status, late_minutes, early_leave_minutes, source_text, metadata, created_by_phone)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        RETURNING *
+                        """,
+                        (company, d["employee_key"], digits(emp.get("phone")), emp.get("name"), shift_id, d["attendance_date"],
+                         d.get("check_in_at"), d.get("check_out_at"), d["status"], d["late_minutes"], d["early_leave_minutes"],
+                         "Imported from fingerprint device", Json({"source": "fingerprint_import", "import_batch_id": str(batch_id)}), created_by),
+                    )
+                record = dict(cur.fetchone())
+                committed_hash = _attendance_import.state_hash(record)
+                cur.execute(
+                    "INSERT INTO attendance_import_batch_rows (batch_id, company_code, employee_key, attendance_id, action, outcome, issue_codes, committed_hash, prior_state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    (batch_id, company, d["employee_key"], record["attendance_id"], action,
+                     "applied_incomplete" if d["status"] == "incomplete" else "applied", list(d["issues"]), committed_hash, Json(prior_state) if prior_state else None),
+                )
+                # One tagged punch event per source punch (raw, no biometric data).
+                for rn in d["row_numbers"]:
+                    p = punch_by_row.get(rn)
+                    if not p:
+                        continue
+                    cur.execute(
+                        "INSERT INTO attendance_events (attendance_id, shift_id, company_code, employee_key, event_type, payload, created_by_phone, import_batch_id) VALUES (%s,%s,%s,%s,'punch_import',%s,%s,%s)",
+                        (record["attendance_id"], shift_id, company, d["employee_key"],
+                         Json({"external_id": p["external_id"], "direction": p["direction"], "punched_at": _attendance_import._iso(p["dt"]), "device": p.get("device")}),
+                         created_by, batch_id),
+                    )
+                applied += 1
+
+            for prob in result["problems"]:
+                cur.execute(
+                    "INSERT INTO attendance_import_batch_rows (batch_id, company_code, employee_key, action, outcome, issue_codes) VALUES (%s,%s,NULL,'none',%s,%s)",
+                    (batch_id, company, prob["outcome"], prob["issue_codes"]),
+                )
+        conn.commit()
+    return {"ok": True, "batch_id": str(batch_id), "applied": applied, "skipped_locked": skipped, "counts": result["counts"], "filename": filename, "source_label": source_label, "preview": _ai_preview_json(result)}
+
+
+@app.post("/dashboard/posthire/attendance/import/commit")
+async def attendance_import_commit(
+    file: UploadFile = File(...),
+    mapping: str | None = Form(None),
+    source_label: str | None = Form(None),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = _attendance_import_guard(context, write=True)
+    raw = await file.read()
+    if len(raw) > _attendance_import.MAX_BYTES:
+        raise HTTPException(status_code=422, detail={"error": "file_too_large", "message": f"This file is too large. Please keep imports under {_attendance_import.MAX_BYTES // (1024 * 1024)} MB."})
+    chosen = _parse_mapping_form(mapping)
+    created_by = digits(context.get("actor_phone") or context.get("hr_phone")) or None
+    outcome = attendance_import_run_commit(company, raw, file.filename or "", chosen, source_label, created_by)
+    record_admin_audit(
+        context,
+        "attendance_imported",
+        summary=f"Imported attendance batch from {file.filename or 'file'}: {outcome['applied']} record(s) applied, {outcome['skipped_locked']} locked-skipped.",
+        target_type="company",
+        target=company,
+        details={"batch_id": outcome["batch_id"], "counts": outcome["counts"], "source_label": source_label},
+    )
+    return json_safe(outcome)
+
+
+@app.get("/dashboard/posthire/attendance/import/batches")
+def attendance_import_batches(context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=False)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT batch_id, filename, source_label, period_start, period_end, counts, status, created_by_phone, created_at, reversed_at FROM attendance_import_batches WHERE company_code=%s ORDER BY created_at DESC LIMIT 100",
+                (company,),
+            )
+            batches = [json_safe(dict(r)) for r in cur.fetchall()]
+    return {"company_code": company, "batches": batches}
+
+
+@app.get("/dashboard/posthire/attendance/import/batches/{batch_id}")
+def attendance_import_batch_detail(batch_id: str, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=False)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM attendance_import_batches WHERE company_code=%s AND batch_id=%s", (company, batch_id))
+            batch = cur.fetchone()
+            if not batch:
+                raise HTTPException(status_code=404, detail={"error": "batch_not_found", "message": "Import batch not found."})
+            cur.execute("SELECT employee_key, action, outcome, issue_codes, attendance_id FROM attendance_import_batch_rows WHERE batch_id=%s ORDER BY created_at", (batch_id,))
+            rows = [json_safe(dict(r)) for r in cur.fetchall()]
+    return {"company_code": company, "batch": json_safe(dict(batch)), "rows": rows}
+
+
+def attendance_import_run_reverse(company: str, batch_id: str, reversed_by: str | None) -> dict[str, Any]:
+    """Conflict-safe reverse. Only touches records still in the exact state the
+    import left (committed_hash match) and not in a locked payroll period.
+    Testable without FastAPI. Raises HTTPException for not-found/already-reversed."""
+    reversed_count = restored = deleted = conflicts = locked = 0
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM attendance_import_batches WHERE company_code=%s AND batch_id=%s", (company, batch_id))
+            batch = cur.fetchone()
+            if not batch:
+                raise HTTPException(status_code=404, detail={"error": "batch_not_found", "message": "Import batch not found."})
+            if dict(batch).get("status") == "reversed":
+                raise HTTPException(status_code=409, detail={"error": "already_reversed", "message": "This import was already reversed."})
+            cur.execute("SELECT * FROM attendance_import_batch_rows WHERE batch_id=%s AND attendance_id IS NOT NULL", (batch_id,))
+            rows = [dict(r) for r in cur.fetchall()]
+            for row in rows:
+                att_id = row.get("attendance_id")
+                cur.execute("SELECT * FROM attendance_records WHERE company_code=%s AND attendance_id=%s", (company, att_id))
+                rec = cur.fetchone()
+                if not rec:
+                    continue
+                rec = dict(rec)
+                if _ai_date_locked(cur, company, str(rec.get("employee_key")), rec.get("attendance_date")):
+                    locked += 1
+                    continue
+                # Conflict guard: only touch records still in the exact state the import left.
+                if row.get("committed_hash") and _attendance_import.state_hash(rec) != row["committed_hash"]:
+                    conflicts += 1
+                    continue
+                if row.get("action") == "created":
+                    cur.execute("DELETE FROM attendance_events WHERE attendance_id=%s AND import_batch_id=%s", (att_id, batch_id))
+                    cur.execute("DELETE FROM attendance_records WHERE attendance_id=%s", (att_id,))
+                    deleted += 1
+                else:
+                    prior = row.get("prior_state") or {}
+                    cur.execute(
+                        "UPDATE attendance_records SET check_in_at=%s, check_out_at=%s, status=%s, late_minutes=%s, early_leave_minutes=%s, metadata=metadata || %s, updated_at=now() WHERE attendance_id=%s",
+                        (prior.get("check_in_at") or None, prior.get("check_out_at") or None, prior.get("status"),
+                         int(prior.get("late_minutes") or 0), int(prior.get("early_leave_minutes") or 0),
+                         Json({"reversed_import_batch_id": str(batch_id)}), att_id),
+                    )
+                    cur.execute("DELETE FROM attendance_events WHERE attendance_id=%s AND import_batch_id=%s", (att_id, batch_id))
+                    restored += 1
+                reversed_count += 1
+            cur.execute(
+                "UPDATE attendance_import_batches SET status='reversed', reversed_at=now(), reversed_by_phone=%s WHERE batch_id=%s",
+                (reversed_by, batch_id),
+            )
+        conn.commit()
+    return {"ok": True, "batch_id": str(batch_id), "reversed": reversed_count, "deleted": deleted, "restored": restored, "conflicts": conflicts, "locked_skipped": locked}
+
+
+@app.post("/dashboard/posthire/attendance/import/batches/{batch_id}/reverse")
+def attendance_import_reverse(batch_id: str, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=True)
+    reversed_by = digits(context.get("actor_phone") or context.get("hr_phone")) or None
+    outcome = attendance_import_run_reverse(company, batch_id, reversed_by)
+    record_admin_audit(
+        context,
+        "attendance_import_reversed",
+        summary=f"Reversed attendance import {batch_id}: {outcome['deleted']} removed, {outcome['restored']} restored, {outcome['conflicts']} skipped (changed), {outcome['locked_skipped']} skipped (locked).",
+        target_type="company",
+        target=company,
+        details={"batch_id": str(batch_id), **{k: outcome[k] for k in ("deleted", "restored", "conflicts", "locked_skipped")}},
+    )
+    return outcome
+
+
+@app.get("/dashboard/posthire/attendance/import/mappings")
+def attendance_import_mappings_list(context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=False)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT mapping_id, name, mapping, updated_at FROM attendance_import_mappings WHERE company_code=%s ORDER BY name", (company,))
+            mappings = [json_safe(dict(r)) for r in cur.fetchall()]
+    return {"company_code": company, "mappings": mappings}
+
+
+@app.post("/dashboard/posthire/attendance/import/mappings")
+def attendance_import_mapping_save(request: AttendanceMappingSave, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=True)
+    name = str(request.name or "").strip()
+    if not name:
+        raise HTTPException(status_code=422, detail={"error": "name_required", "message": "Give this mapping a name."})
+    mapping = {str(k): str(v) for k, v in (request.mapping or {}).items() if v}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO attendance_import_mappings (company_code, name, mapping, created_by_phone)
+                VALUES (%s,%s,%s,%s)
+                ON CONFLICT (company_code, name) DO UPDATE SET mapping=EXCLUDED.mapping, updated_at=now()
+                RETURNING mapping_id, name, mapping, updated_at
+                """,
+                (company, name, Json(mapping), digits(context.get("actor_phone") or context.get("hr_phone")) or None),
+            )
+            saved = dict(cur.fetchone())
+        conn.commit()
+    record_admin_audit(context, "attendance_import_mapping_saved", summary=f"Saved attendance import mapping '{name}'.", target_type="company", target=company, details={"name": name})
+    return {"ok": True, "mapping": json_safe(saved)}
+
+
+@app.post("/dashboard/posthire/attendance/import/map")
+def attendance_import_bind_device(request: AttendanceDeviceBind, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _attendance_import_guard(context, write=True)
+    external_id = str(request.external_id or "").strip()
+    employee_key = str(request.employee_key or "").strip()
+    if not external_id or not employee_key:
+        raise HTTPException(status_code=422, detail={"error": "missing_fields", "message": "Provide both the device ID and the employee."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT employee_key FROM employees WHERE company_code=%s AND employee_key=%s", (company, employee_key))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "That employee was not found."})
+            cur.execute("SELECT employee_key FROM employees WHERE company_code=%s AND device_user_id=%s AND employee_key <> %s", (company, external_id, employee_key))
+            if cur.fetchone():
+                raise HTTPException(status_code=409, detail={"error": "device_id_in_use", "message": "That device ID is already linked to another employee."})
+            cur.execute("UPDATE employees SET device_user_id=%s, updated_at=now() WHERE company_code=%s AND employee_key=%s", (external_id, company, employee_key))
+        conn.commit()
+    record_admin_audit(context, "attendance_device_bound", summary=f"Linked device ID {external_id} to employee {employee_key}.", target_type="employee", target=employee_key, details={"external_id": external_id, "employee_key": employee_key})
+    return {"ok": True, "external_id": external_id, "employee_key": employee_key}
 
 
 LEAVE_HISTORY_STATUSES = {"approved", "rejected", "cancelled", "requested"}

@@ -195,6 +195,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-reminder-email.py | s
 log "team whatsapp-linked visibility (GET /dashboard/team whatsapp_linked: active=linked, none/disabled=not, company-scoped, no cross-company leak)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-team-whatsapp-visibility.py | sed 's/^/    /'
 
+log "attendance import V1 (file-safety + biometric-drop + strict device matching + cross-midnight + commit/reverse + conflict-safe reverse + locked-period guard + company scoping + flag gate, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-attendance-import.py | sed 's/^/    /'
+
 log "dry-run delivery sends nothing real"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-delivery-mode.py | sed 's/^/    /'
 
