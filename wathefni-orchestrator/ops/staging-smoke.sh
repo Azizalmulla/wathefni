@@ -93,9 +93,6 @@ log "company-wide summary counts (counts exceed 50-window, match page definition
 log "compliance dashboard (company-scoped read, counts/classifier parity, RBAC + module gate, staging DB)"
 "$VENV_PY" smoke-test-compliance-dashboard.py | sed 's/^/    /'
 
-log "google sheets is optional (best-effort, off-the-request-path; a sheets outage never breaks a workflow)"
-"$VENV_PY" smoke-test-sheets-sync.py | sed 's/^/    /'
-
 log "admin/config audit trail (team/role/whatsapp/mailbox/intake/import changes are traceable + best-effort)"
 "$VENV_PY" smoke-test-admin-audit.py | sed 's/^/    /'
 
@@ -120,14 +117,56 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-roster.py | sed 's
 log "shift management (cancel/reschedule/week-nav: RBAC + tenant scope + events, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-management.py | sed 's/^/    /'
 
+log "shift pagination (>100 shifts/week reachable via limit/offset, company-scoped, legacy default unchanged, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-shift-pagination.py | sed 's/^/    /'
+
 log "attendance history (date-range read + CSV export: RBAC + tenant scope + audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-attendance-history.py | sed 's/^/    /'
 
 log "leave standalone (file on behalf + cancel + history: RBAC + tenant scope + audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-leave-standalone.py | sed 's/^/    /'
 
+log "leave pagination (>50 requests reachable via section/offset, company-scoped, legacy default unchanged, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-leave-pagination.py | sed 's/^/    /'
+
 log "payroll standalone (period picker + export detail/CSV: RBAC + tenant scope + audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-payroll-standalone.py | sed 's/^/    /'
+
+log "payroll pagination (>200 timesheets paged + preview money path uncapped, company-scoped, legacy default unchanged, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-payroll-pagination.py | sed 's/^/    /'
+
+log "employees pagination (hub uncapped >1000 + directory paged with SQL stat counts, stable + tenant-scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employees-pagination.py | sed 's/^/    /'
+
+log "onboarding pagination (in-progress paged + server-side search, completed excluded, workforce-wide counts, scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-onboarding-pagination.py | sed 's/^/    /'
+
+log "compliance search (summary over full set + bucket filter/search/paging bounded, tenant-scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-compliance-search.py | sed 's/^/    /'
+
+log "jobs pagination (summary over full set + paging/search bounded, no silent 25-cap truncation, tenant-scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-pagination.py | sed 's/^/    /'
+
+log "job close/reopen (status flip stops/resumes public intake, orphan positions, tenant-scoped, chat title/code resolution, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-job-close-reopen.py | sed 's/^/    /'
+
+log "assessments pagination (true company-wide totals/status-counts/average over paged attempts, awaiting-assessment filter matches headline count, tenant-scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assessments-pagination.py | sed 's/^/    /'
+
+log "notifications delivery (eligibility-aware failure messages never blame a channel the company doesn't use, true HR-task/needs-follow-up counts + pagination, tenant-scoped, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-notifications-delivery.py | sed 's/^/    /'
+
+log "post-hire high-severity fixes (leave+timesheet mutations tenant-scoped, pending queue not hidden by date window, employee-360 leave count is a true aggregate, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-posthire-highsev.py | sed 's/^/    /'
+
+log "post-hire medium fixes (capped overtime caps pay, attendance/timesheet pagination + true counts, shift-swap queue not truncated, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-posthire-medium.py | sed 's/^/    /'
+
+log "google sheets fully removed (no sheet_sync in posthire mutations, no reachable sheets transport, source of truth is postgres)"
+"$VENV_PY" smoke-test-sheets-removed.py | sed 's/^/    /'
+
+log "internal-auth lockdown (require_internal_access fail-closed on audit/debug/worker routes + whatsapp-link anti-hijack, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-internal-auth.py | sed 's/^/    /'
 
 log "employee lifecycle (edit + mark as left + reactivate: RBAC + tenant scope + audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-lifecycle.py | sed 's/^/    /'
@@ -143,6 +182,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-manager-read-isolation.py |
 
 log "HR document upload (flag gate + RBAC + scope + validation + reuse ingestion bundle + downloadable, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-document-upload.py | sed 's/^/    /'
+
+log "Employee App (flag gate + activation/lockout + sessions + self-scope reads/writes + push + offboarding revoke, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-employee-app.py | sed 's/^/    /'
 
 log "assistant HR reads (list_onboarding_status / list_compliance_documents: flag gate + RBAC + tenant + manager scope + dashboard parity + no leakage, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assistant-hr-reads.py | sed 's/^/    /'

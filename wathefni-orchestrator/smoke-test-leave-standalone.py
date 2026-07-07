@@ -83,9 +83,8 @@ def main() -> int:
 
     owner = ctx(["leave.read", "leave.request", "leave.decide"])
 
-    # Neutralize external side-effects so file/cancel never reach WhatsApp/Sheets.
+    # Neutralize external side-effects so file/cancel never reach WhatsApp.
     app.notify_employee_leave_decision = lambda *a, **k: {"ok": True, "stub": True}
-    app.sync_leave_sheet_rows = lambda *a, **k: {"ok": True, "stub": True}
     audits: list[dict] = []
     real_record = app.dashboard_record_action_result
     app.dashboard_record_action_result = lambda action_type, status, payload, reply: audits.append({"action_type": action_type, "status": status})

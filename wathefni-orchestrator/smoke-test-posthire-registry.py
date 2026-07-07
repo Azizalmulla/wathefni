@@ -132,7 +132,7 @@ class FakeLegacy:
 
     # --- one read executor exercised end-to-end --------------------------
     @classmethod
-    def workforce_analytics(cls, action, *, company_code, sync_sheet=True):
+    def workforce_analytics(cls, action, *, company_code):
         return {"ok": True, "metric": action.get("metric") or "headcount", "value": 42, "company_code": company_code}
 
     @staticmethod

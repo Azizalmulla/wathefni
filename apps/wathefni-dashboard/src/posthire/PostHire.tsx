@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   Clock,
   DollarSign,
@@ -26,6 +27,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Select, Textarea } from '@/components/ui/field'
+import { SearchInput, useDebouncedValue } from '@/components/ui/search-input'
+import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
   cancelShift,
@@ -57,13 +60,15 @@ import {
   uploadEmployeeDocument,
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
-import { cn } from '@/lib/utils'
+import { cn, mapWithConcurrency } from '@/lib/utils'
 import { AttendanceImportDialog } from '@/posthire/AttendanceImport'
 import type {
   ComplianceBucket,
+  ComplianceDocument,
   DashboardAccess,
   HrTask,
   HrTasksResponse,
+  OutboundFollowUpMessage,
   OutboundNeedsFollowUpResponse,
   PosthireAnalyticsResponse,
   PosthireAttendanceResponse,
@@ -77,11 +82,13 @@ import type {
   PosthireEmployee,
   PosthireLeaveResponse,
   PosthireLeaveRow,
+  LeaveBalance,
   OnboardingDetailResponse,
   OnboardingItem,
   PosthireOnboardingResponse,
   PosthirePayrollPolicy,
   PosthirePayrollResponse,
+  PosthireTimesheetRow,
   PayrollExportDetail,
   PosthireShiftRow,
   PosthireShiftsResponse,
@@ -110,6 +117,7 @@ type PostHireProps = {
   role?: string | null
   onNotice: NoticeFn
   onAccessIssue: (issue: AccessIssue) => void
+  onOpenNotifications?: () => void
 }
 
 type PostHireCommonProps = Pick<PostHireProps, 'access' | 'permissions' | 'role' | 'onNotice' | 'onAccessIssue'>
@@ -861,36 +869,81 @@ function ImportEmployeesModal({ access, onClose, onNotice, onImported }: {
 }
 
 function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireEmployees(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader, onAccessIssue)
   const [query, setQuery] = useState('')
+  // Search runs on the server so it reaches the whole workforce, not just the
+  // pages already loaded. Debounce the raw input so we fetch on the settled term.
+  const debouncedQuery = useDebouncedValue(query.trim(), 350)
+  const loader = useCallback(
+    () => getPosthireEmployees(access, debouncedQuery ? { search: debouncedQuery } : undefined),
+    [access, debouncedQuery],
+  )
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader, onAccessIssue)
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showLeft, setShowLeft] = useState(false)
   const canManageRoster = can(permissions, 'settings.manage', role)
 
+  // All hooks (including this useMemo) must run unconditionally on every
+  // render — the "open a profile" early return below must come after every
+  // hook call, or React throws "Rendered fewer hooks than expected" the
+  // moment a row is clicked and selectedKey flips from null to a value.
+  //
+  // Pagination: page 1 comes from useModuleData; extra pages accumulate here and
+  // reset whenever the base data reloads (refresh / roster change) so we page
+  // through the whole workforce instead of silently stopping at a cap.
+  const [extraEmployees, setExtraEmployees] = useState<PosthireEmployee[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraEmployees([])
+  }, [data])
+
+  const baseEmployees = data?.employees ?? []
+  const employees = useMemo(() => [...baseEmployees, ...extraEmployees], [baseEmployees, extraEmployees])
+  const isLeft = (e: PosthireEmployee) => String(e.employment_status || 'active').toLowerCase() === 'left'
+  const active = employees.filter((e) => !isLeft(e))
+  // Headline counts come from the server so the stat cards stay correct across
+  // the entire workforce, not just the pages loaded into the table so far.
+  const totalEmployees = data?.total_count ?? employees.length
+  const activeTotal = data?.active_count ?? active.length
+  const leftTotal = data?.left_count ?? employees.length - active.length
+  const onboardingTotal = data?.onboarding_count ?? active.filter((e) => !['complete', 'completed', 'done'].includes(e.onboarding_status)).length
+  const departmentTotal = data?.department_count ?? new Set(active.map((e) => e.department).filter(Boolean)).size
+  // The directory shows active people by default; left employees stay behind a
+  // toggle so history is never lost, just out of the active roster view. When a
+  // search is active we show every match regardless of status — the point of
+  // search is to find anyone. Text matching itself happens on the server.
+  const searching = debouncedQuery.length > 0
+  const roster = searching || showLeft ? employees : active
+  const filtered = roster
+
+  const loadMoreEmployees = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthireEmployees(access, {
+        offset: employees.length,
+        ...(debouncedQuery ? { search: debouncedQuery } : {}),
+      })
+      setExtraEmployees((prev) => [...prev, ...(res.employees ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more employees. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, employees.length, debouncedQuery, onAccessIssue, onNotice])
+
   if (selectedKey) {
     return <EmployeeProfile access={access} permissions={permissions} role={role} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} onAccessIssue={onAccessIssue} />
   }
 
-  const employees = data?.employees ?? []
-  const isLeft = (e: PosthireEmployee) => String(e.employment_status || 'active').toLowerCase() === 'left'
-  const active = employees.filter((e) => !isLeft(e))
-  const leftCount = employees.length - active.length
-  // The directory shows active people by default; left employees stay searchable
-  // behind a toggle so history is never lost, just out of the active roster view.
-  const roster = showLeft ? employees : active
-  const filtered = useMemo(() => {
-    const term = query.trim().toLowerCase()
-    if (!term) return roster
-    return roster.filter((e) =>
-      [e.name, e.position_title, e.department, e.phone, e.email].filter(Boolean).some((v) => String(v).toLowerCase().includes(term)),
-    )
-  }, [roster, query])
-
-  const onboarding = active.filter((e) => !['complete', 'completed', 'done'].includes(e.onboarding_status)).length
-  const departments = new Set(active.map((e) => e.department).filter(Boolean)).size
+  const onboarding = onboardingTotal
+  const departments = departmentTotal
+  const leftCount = leftTotal
 
   const rosterActions = canManageRoster ? (
     <>
@@ -944,11 +997,11 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
             detail={
               onboarding
                 ? 'Open Onboarding to send reminders and clear open documents.'
-                : `${active.length} employee${active.length === 1 ? '' : 's'} across ${departments} department${departments === 1 ? '' : 's'}`
+                : `${activeTotal} employee${activeTotal === 1 ? '' : 's'} across ${departments} department${departments === 1 ? '' : 's'}`
             }
           />
           <div className="grid gap-3 sm:grid-cols-3">
-            <StatCard label="Active employees" value={active.length} hint={leftCount ? `${leftCount} marked as left` : undefined} />
+            <StatCard label="Active employees" value={activeTotal} hint={leftCount ? `${leftCount} marked as left` : undefined} />
             <StatCard label="Onboarding in progress" value={onboarding} hint={onboarding ? 'Needs follow-up' : 'All set'} />
             <StatCard label="Departments" value={departments} />
           </div>
@@ -956,28 +1009,32 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
             <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <div>
                 <CardTitle>Directory</CardTitle>
-                <CardDescription>{filtered.length} of {showLeft ? employees.length : active.length} {showLeft ? 'employees' : 'active employees'}</CardDescription>
+                <CardDescription>
+                  {searching
+                    ? `${totalEmployees} result${totalEmployees === 1 ? '' : 's'} for “${debouncedQuery}”`
+                    : `${filtered.length} of ${showLeft ? totalEmployees : activeTotal} ${showLeft ? 'employees' : 'active employees'}`}
+                </CardDescription>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
-                {leftCount ? (
+                {leftCount && !searching ? (
                   <Button variant="ghost" size="sm" onClick={() => setShowLeft((v) => !v)}>
                     {showLeft ? 'Hide employees who left' : `Show employees who left (${leftCount})`}
                   </Button>
                 ) : null}
-                <div className="relative w-full max-w-xs">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle/70" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search name, role, department…"
-                    className="h-10 w-full rounded-full border border-line/60 bg-white/70 pl-9 pr-3 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
-                  />
-                </div>
+                <SearchInput
+                  value={query}
+                  onChange={setQuery}
+                  placeholder="Search name, role, department, phone…"
+                />
               </div>
             </CardHeader>
             <CardContent>
               {filtered.length === 0 ? (
-                <EmptyState icon={<Search className="h-5 w-5" />} title="No employees match your search" hint="Try a different name, role, or department." />
+                <EmptyState
+                  icon={<Search className="h-5 w-5" />}
+                  title={searching ? `No employees match “${debouncedQuery}”` : 'No employees to show'}
+                  hint={searching ? 'Try a different name, role, department, or phone number.' : 'Add or import employees to get started.'}
+                />
               ) : (
                 <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
                   <table className="w-full min-w-[640px] text-left text-[13px]">
@@ -1017,6 +1074,13 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
                   </table>
                 </div>
               )}
+              <LoadMoreBar
+                loaded={employees.length}
+                total={totalEmployees}
+                loading={loadingMore}
+                onLoadMore={() => void loadMoreEmployees()}
+                noun="employee"
+              />
             </CardContent>
           </Card>
         </>
@@ -1135,6 +1199,49 @@ function NextActionsPanel({
           </div>
         ) : null}
       </CardContent>
+    </Card>
+  )
+}
+
+// A module card that collapses to just its header when there is nothing to act
+// on, and opens by default when the caller marks it as needing attention.
+// Keeps every action exactly as-is — this only changes what's visible by default.
+function CollapsibleSection({
+  id,
+  icon,
+  title,
+  description,
+  defaultOpen,
+  className,
+  children,
+}: {
+  id?: string
+  icon: ReactNode
+  title: string
+  description: ReactNode
+  defaultOpen: boolean
+  className?: string
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <Card id={id} className={className}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-start justify-between gap-3 border-b border-line/50 pb-5 text-left"
+        aria-expanded={open}
+      >
+        <div className="space-y-2">
+          <CardTitle className="flex items-center gap-2">
+            {icon}
+            {title}
+          </CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+        <ChevronDown className={cn('mt-1 h-4 w-4 shrink-0 text-subtle/60 transition-transform duration-200', open && 'rotate-180')} />
+      </button>
+      {open ? <div className="pt-5">{children}</div> : null}
     </Card>
   )
 }
@@ -1321,16 +1428,16 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
             </Card>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-4">
             {sections?.onboarding ? (
-              <Card id="emp360-section-onboarding">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Onboarding</CardTitle>
-                  <CardDescription>
-                    {sections.onboarding.outstanding_count} outstanding · {sections.onboarding.complete_count} complete
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <CollapsibleSection
+                id="emp360-section-onboarding"
+                icon={<ClipboardList className="h-4 w-4" />}
+                title="Onboarding"
+                description={`${sections.onboarding.outstanding_count} outstanding · ${sections.onboarding.complete_count} complete`}
+                defaultOpen={sections.onboarding.outstanding_count > 0}
+              >
+                <div className="space-y-3">
                   {sections.onboarding.outstanding.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">All required documents are in.</p>
                   ) : (
@@ -1384,21 +1491,23 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       )}
                     </Button>
                   ) : null}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.compliance ? (
-              <Card id="emp360-section-compliance">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Compliance</CardTitle>
-                  <CardDescription>
-                    {sections.compliance.needs_attention
-                      ? `${sections.compliance.needs_attention} need attention`
-                      : 'All documents up to date'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              <CollapsibleSection
+                id="emp360-section-compliance"
+                icon={<ShieldCheck className="h-4 w-4" />}
+                title="Compliance"
+                description={
+                  sections.compliance.needs_attention
+                    ? `${sections.compliance.needs_attention} need attention`
+                    : 'All documents up to date'
+                }
+                defaultOpen={sections.compliance.documents.length > 0}
+              >
+                <div>
                   {sections.compliance.documents.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No documents are expired, expiring, or missing.</p>
                   ) : (
@@ -1442,17 +1551,19 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       })}
                     </ul>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.attendance ? (
-              <Card id="emp360-section-attendance">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Clock className="h-4 w-4" /> Attendance</CardTitle>
-                  <CardDescription>Last {sections.attendance.window_days} days</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <CollapsibleSection
+                id="emp360-section-attendance"
+                icon={<Clock className="h-4 w-4" />}
+                title="Attendance"
+                description={`Last ${sections.attendance.window_days} days`}
+                defaultOpen={sections.attendance.absent > 0}
+              >
+                <div className="space-y-3">
                   <div className="grid grid-cols-3 gap-2">
                     <StatCard label="Present" value={sections.attendance.present} />
                     <StatCard label="Late" value={sections.attendance.late} />
@@ -1468,19 +1579,19 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       ))}
                     </ul>
                   ) : null}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.leave ? (
-              <Card id="emp360-section-leave">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><CalendarDays className="h-4 w-4" /> Leave</CardTitle>
-                  <CardDescription>
-                    {sections.leave.pending_count ? `${sections.leave.pending_count} awaiting decision` : 'No pending requests'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              <CollapsibleSection
+                id="emp360-section-leave"
+                icon={<CalendarDays className="h-4 w-4" />}
+                title="Leave"
+                description={sections.leave.pending_count ? `${sections.leave.pending_count} awaiting decision` : 'No pending requests'}
+                defaultOpen={sections.leave.pending_count > 0}
+              >
+                <div>
                   {sections.leave.balances_enabled && (sections.leave.balances?.length ?? 0) > 0 ? (
                     <div className="mb-3 space-y-1.5">
                       {sections.leave.balances!.map((b, idx) => (
@@ -1524,17 +1635,19 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       })}
                     </ul>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.shifts ? (
-              <Card id="emp360-section-shifts">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Upcoming shifts</CardTitle>
-                  <CardDescription>{sections.shifts.upcoming_count} scheduled</CardDescription>
-                </CardHeader>
-                <CardContent>
+              <CollapsibleSection
+                id="emp360-section-shifts"
+                icon={<CalendarClock className="h-4 w-4" />}
+                title="Upcoming shifts"
+                description={`${sections.shifts.upcoming_count} scheduled`}
+                defaultOpen={false}
+              >
+                <div>
                   {sections.shifts.items.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No upcoming shifts.</p>
                   ) : (
@@ -1547,17 +1660,19 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       ))}
                     </ul>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.payroll ? (
-              <Card id="emp360-section-payroll">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Payroll</CardTitle>
-                  <CardDescription>Recent timesheets</CardDescription>
-                </CardHeader>
-                <CardContent>
+              <CollapsibleSection
+                id="emp360-section-payroll"
+                icon={<DollarSign className="h-4 w-4" />}
+                title="Payroll"
+                description="Recent timesheets"
+                defaultOpen={sections.payroll.items.some((it) => canPayrollManage && String(it.status || '').toLowerCase() === 'draft')}
+              >
+                <div>
                   {sections.payroll.items.length === 0 ? (
                     <p className="text-[13px] text-subtle/85">No timesheets yet.</p>
                   ) : (
@@ -1589,22 +1704,25 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                       })}
                     </ul>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
 
             {sections?.documents && sections.documents.items.length > 0 ? (
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</CardTitle>
-                  <CardDescription>
+              <CollapsibleSection
+                icon={<FileText className="h-4 w-4" />}
+                title="Documents"
+                description={
+                  <>
                     {sections.documents.count} file{sections.documents.count === 1 ? '' : 's'} submitted
                     {sections.onboarding && sections.onboarding.outstanding_count > 0
                       ? ` · ${sections.onboarding.outstanding_count} required document${sections.onboarding.outstanding_count === 1 ? '' : 's'} still missing`
                       : ' · nothing missing'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+                  </>
+                }
+                defaultOpen={false}
+              >
+                <div>
                   <ul className="divide-y divide-line/45">
                     {sections.documents.items.map((doc) => (
                       <li key={doc.file_id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
@@ -1638,8 +1756,8 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                     ))}
                   </ul>
                   {canUpload ? <DocumentPrivacyNote className="mt-3" /> : null}
-                </CardContent>
-              </Card>
+                </div>
+              </CollapsibleSection>
             ) : null}
           </div>
         </>
@@ -1706,6 +1824,7 @@ function DocumentUploadButton({
   onUploaded,
   onError,
   onAccessIssue,
+  compact,
 }: {
   access: DashboardAccess
   employeeKey: string
@@ -1715,6 +1834,7 @@ function DocumentUploadButton({
   onUploaded: (message: string) => void
   onError: (message: string) => void
   onAccessIssue?: (issue: AccessIssue) => void
+  compact?: boolean
 }) {
   const confirm = useConfirm()
   const [busy, setBusy] = useState(false)
@@ -1752,14 +1872,16 @@ function DocumentUploadButton({
       setBusy(false)
     }
   }
+  const hint = 'PDF, JPG, PNG, DOC · up to 15 MB'
+  const actionLabel = hasFile ? 'Replace' : 'Upload'
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className={cn('flex', compact ? 'items-center' : 'flex-col items-end gap-0.5')}>
       <input id={inputId} type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.heic" onChange={onPick} disabled={busy} />
-      <Button variant="ghost" size="sm" disabled={busy} onClick={() => document.getElementById(inputId)?.click()} title={hasFile ? 'Replace document' : 'Upload document'}>
+      <Button variant="ghost" size="sm" disabled={busy} onClick={() => document.getElementById(inputId)?.click()} title={`${actionLabel} document (${hint})`}>
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-        <span className="ml-1.5">{hasFile ? 'Replace' : 'Upload'}</span>
+        {compact ? null : <span className="ml-1.5">{actionLabel}</span>}
       </Button>
-      <span className="text-[10px] text-subtle/70">PDF, JPG, PNG, DOC · up to 15 MB</span>
+      {compact ? null : <span className="text-[10px] text-subtle/70">{hint}</span>}
     </div>
   )
 }
@@ -1963,10 +2085,23 @@ function OnboardingDetailPanel({
 }
 
 function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireOnboarding(access), [access])
+  const [query, setQuery] = useState('')
+  // Server-side search so HR can find anyone across the whole onboarding intake,
+  // not just the page currently loaded.
+  const debouncedQuery = useDebouncedValue(query.trim(), 350)
+  const loader = useCallback(
+    () => getPosthireOnboarding(access, debouncedQuery ? { search: debouncedQuery } : undefined),
+    [access, debouncedQuery],
+  )
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireOnboardingResponse>(loader, onAccessIssue)
   const confirm = useConfirm()
   const canManage = can(permissions, 'onboarding.manage', role)
+
+  const [extraInProgress, setExtraInProgress] = useState<PosthireEmployee[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraInProgress([])
+  }, [data])
 
   const [expanded, setExpanded] = useState<string | null>(null)
   const [detail, setDetail] = useState<OnboardingDetailResponse | null>(null)
@@ -1997,9 +2132,32 @@ function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue }: 
 
   const action = usePosthireAction(access, reloadAll, onNotice, onAccessIssue)
 
-  const inProgress = data?.in_progress ?? []
+  const baseInProgress = data?.in_progress ?? []
+  const inProgress = [...baseInProgress, ...extraInProgress]
+  const totalInProgress = data?.total_count ?? baseInProgress.length
+  const searching = debouncedQuery.length > 0
   const hrMutate = Boolean(data?.hr_mutate_enabled)
   const canMutate = canManage && hrMutate
+
+  const loadMoreOnboarding = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthireOnboarding(access, {
+        offset: inProgress.length,
+        ...(debouncedQuery ? { search: debouncedQuery } : {}),
+      })
+      setExtraInProgress((prev) => [...prev, ...(res.in_progress ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more people. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, inProgress.length, debouncedQuery, onAccessIssue, onNotice])
 
   const toggleExpand = useCallback(
     (key: string) => {
@@ -2051,19 +2209,30 @@ function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue }: 
       ) : (
         <>
           <NextAction
-            tone={inProgress.length ? 'warning' : 'success'}
-            icon={inProgress.length ? <ClipboardList className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
-            title={inProgress.length ? `${inProgress.length} new hire${inProgress.length === 1 ? '' : 's'} still onboarding` : 'Everyone is fully onboarded'}
-            detail={inProgress.length ? 'Open a new hire to see their checklist, send a reminder, or resolve items.' : `${data?.completed_count ?? 0} completed of ${data?.total ?? 0}`}
+            tone={totalInProgress ? 'warning' : 'success'}
+            icon={totalInProgress ? <ClipboardList className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+            title={totalInProgress ? `${totalInProgress} new hire${totalInProgress === 1 ? '' : 's'} still onboarding` : 'Everyone is fully onboarded'}
+            detail={totalInProgress ? 'Open a new hire to see their checklist, send a reminder, or resolve items.' : `${data?.completed_count ?? 0} completed of ${data?.total ?? 0}`}
           />
           <Card>
-            <CardHeader>
-              <CardTitle>In progress</CardTitle>
-              <CardDescription>New hires who have not completed onboarding yet.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+              <div>
+                <CardTitle>In progress</CardTitle>
+                <CardDescription>
+                  {searching
+                    ? `${totalInProgress} result${totalInProgress === 1 ? '' : 's'} for “${debouncedQuery}”`
+                    : 'New hires who have not completed onboarding yet.'}
+                </CardDescription>
+              </div>
+              <SearchInput value={query} onChange={setQuery} placeholder="Search name, role, department…" />
             </CardHeader>
             <CardContent>
               {inProgress.length === 0 ? (
-                <EmptyState icon={<CheckCircle2 className="h-5 w-5" />} title="Nothing pending" hint="New hires will appear here while they finish onboarding." />
+                <EmptyState
+                  icon={searching ? <Search className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+                  title={searching ? `No new hires match “${debouncedQuery}”` : 'Nothing pending'}
+                  hint={searching ? 'Try a different name, role, or department.' : 'New hires will appear here while they finish onboarding.'}
+                />
               ) : (
                 <div className="space-y-2.5">
                   {inProgress.map((emp) => {
@@ -2150,6 +2319,13 @@ function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue }: 
                       </div>
                     )
                   })}
+                  <LoadMoreBar
+                    loaded={inProgress.length}
+                    total={totalInProgress}
+                    loading={loadingMore}
+                    onLoadMore={() => void loadMoreOnboarding()}
+                    noun="new hire"
+                  />
                 </div>
               )}
             </CardContent>
@@ -2248,10 +2424,41 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
   const [exporting, setExporting] = useState(false)
   const [showImport, setShowImport] = useState(false)
 
-  const rows = data?.attendance ?? []
+  // Pagination: page 1 comes from useModuleData (range-scoped); extra pages are
+  // appended here and reset whenever the base data reloads (new range / refresh)
+  // so a busy window (>the page size) isn't silently truncated.
+  const [extraRows, setExtraRows] = useState<PosthireAttendanceRow[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraRows([])
+  }, [data])
+
+  const rows = [...(data?.attendance ?? []), ...extraRows]
+  const totalRows = data?.total_count ?? rows.length
   const late = rows.filter((r) => Number(r.late_minutes || 0) > 0 || String(r.status).toLowerCase() === 'late')
   const absent = rows.filter((r) => String(r.status).toLowerCase() === 'absent')
   const present = rows.filter((r) => ['present', 'completed'].includes(String(r.status).toLowerCase()))
+
+  const loadMore = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthireAttendance(
+        access,
+        range ? { start_date: range.start, end_date: range.end } : { start_date: data?.start_date, end_date: data?.end_date },
+        { offset: rows.length },
+      )
+      setExtraRows((prev) => [...prev, ...(res.attendance ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more attendance. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, range, data?.start_date, data?.end_date, rows.length, onAccessIssue, onNotice])
 
   // The backend resolves and echoes the effective window (Kuwait time), so we
   // anchor presets and inputs to it rather than the browser clock.
@@ -2330,7 +2537,7 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
               <div className="flex flex-row flex-wrap items-center justify-between gap-3">
                 <div>
                   <CardTitle>{rangeLabel}</CardTitle>
-                  <CardDescription>{rows.length} attendance record{rows.length === 1 ? '' : 's'}</CardDescription>
+                  <CardDescription>{totalRows} attendance record{totalRows === 1 ? '' : 's'}</CardDescription>
                 </div>
                 {canManage && data?.import_enabled ? (
                   <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
@@ -2485,6 +2692,13 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                   </table>
                 </div>
               )}
+              <LoadMoreBar
+                loaded={rows.length}
+                total={totalRows}
+                loading={loadingMore}
+                onLoadMore={() => void loadMore()}
+                noun="record"
+              />
             </CardContent>
           </Card>
         </>
@@ -2659,14 +2873,63 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
   const canManage = can(permissions, 'leave.decide', role)
   const canFile = can(permissions, 'leave.request', role)
 
-  const pending = data?.pending ?? []
-  const upcoming = data?.upcoming ?? []
-  const history = data?.history ?? []
+  // Pagination: page 1 of each section comes from useModuleData; additional
+  // pages accumulate here and reset whenever the base data reloads (view/status
+  // change or manual refresh) so we never show stale rows from another view.
+  const [extraPending, setExtraPending] = useState<PosthireLeaveRow[]>([])
+  const [extraUpcoming, setExtraUpcoming] = useState<PosthireLeaveRow[]>([])
+  const [extraHistory, setExtraHistory] = useState<PosthireLeaveRow[]>([])
+  const [extraBalances, setExtraBalances] = useState<Record<string, LeaveBalance[]>>({})
+  const [loadingSection, setLoadingSection] = useState<'pending' | 'upcoming' | 'history' | null>(null)
+  useEffect(() => {
+    setExtraPending([])
+    setExtraUpcoming([])
+    setExtraHistory([])
+    setExtraBalances({})
+  }, [data])
+
+  const pending = [...(data?.pending ?? []), ...extraPending]
+  const upcoming = [...(data?.upcoming ?? []), ...extraUpcoming]
+  const history = [...(data?.history ?? []), ...extraHistory]
+  const balances = { ...(data?.balances ?? {}), ...extraBalances }
   const balancesEnabled = Boolean(data?.balances_enabled)
+  const pendingTotal = data?.pending_total ?? pending.length
+  const upcomingTotal = data?.upcoming_total ?? upcoming.length
+  const historyTotal = data?.history_total ?? history.length
+
+  const loadMoreLeave = useCallback(
+    async (sec: 'pending' | 'upcoming' | 'history') => {
+      setLoadingSection(sec)
+      try {
+        if (sec === 'history') {
+          const res = await getPosthireLeave(access, { view: 'history', status: historyStatus || undefined, offset: history.length })
+          setExtraHistory((prev) => [...prev, ...(res.history ?? [])])
+          if (res.balances) setExtraBalances((prev) => ({ ...prev, ...res.balances }))
+        } else {
+          const offset = sec === 'pending' ? pending.length : upcoming.length
+          const res = await getPosthireLeave(access, { view: 'active', section: sec, offset })
+          const rows = (sec === 'pending' ? res.pending : res.upcoming) ?? []
+          if (sec === 'pending') setExtraPending((prev) => [...prev, ...rows])
+          else setExtraUpcoming((prev) => [...prev, ...rows])
+          if (res.balances) setExtraBalances((prev) => ({ ...prev, ...res.balances }))
+        }
+      } catch (err) {
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          onAccessIssue?.(issue)
+          return
+        }
+        onNotice(friendlyError(err, 'We couldn’t load more leave. Please try again.'), 'error')
+      } finally {
+        setLoadingSection(null)
+      }
+    },
+    [access, historyStatus, history.length, pending.length, upcoming.length, onAccessIssue, onNotice],
+  )
 
   const annualChip = (row: PosthireLeaveRow) => {
     if (!balancesEnabled || !row.employee_key) return null
-    const annual = (data?.balances?.[row.employee_key] ?? []).find((b) => b.leave_type === 'annual')
+    const annual = (balances[row.employee_key] ?? []).find((b) => b.leave_type === 'annual')
     if (!annual) return null
     const remaining = Math.round(annual.current_balance * 10) / 10
     const entitlement = Math.round(annual.entitlement_days * 10) / 10
@@ -2751,6 +3014,13 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
                     ))}
                   </tbody>
                 </table>
+                <LoadMoreBar
+                  loaded={history.length}
+                  total={historyTotal}
+                  loading={loadingSection === 'history'}
+                  onLoadMore={() => void loadMoreLeave('history')}
+                  noun="record"
+                />
               </div>
             )}
           </CardContent>
@@ -2758,10 +3028,10 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
       ) : (
         <>
           <NextAction
-            tone={pending.length ? 'warning' : 'success'}
+            tone={pendingTotal ? 'warning' : 'success'}
             icon={<CalendarClock className="h-5 w-5" />}
-            title={pending.length ? `${pending.length} leave request${pending.length === 1 ? '' : 's'} awaiting your decision` : 'No leave requests waiting'}
-            detail={pending.length ? 'Approve or decline below — each decision is confirmed before it applies.' : `${upcoming.length} upcoming approved leave`}
+            title={pendingTotal ? `${pendingTotal} leave request${pendingTotal === 1 ? '' : 's'} awaiting your decision` : 'No leave requests waiting'}
+            detail={pendingTotal ? 'Approve or decline below — each decision is confirmed before it applies.' : `${upcomingTotal} upcoming approved leave`}
           />
           {balancesEnabled ? (
             <p className="rounded-[1rem] border border-line/45 bg-panel/55 px-4 py-2.5 text-[12px] text-subtle/85">
@@ -2844,6 +3114,13 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
                       )}
                     </div>
                   ))}
+                  <LoadMoreBar
+                    loaded={pending.length}
+                    total={pendingTotal}
+                    loading={loadingSection === 'pending'}
+                    onLoadMore={() => void loadMoreLeave('pending')}
+                    noun="request"
+                  />
                 </div>
               )}
             </CardContent>
@@ -2899,6 +3176,13 @@ function LeavePage({ access, permissions, role, onNotice, onAccessIssue }: PostH
                       </div>
                     </div>
                   ))}
+                  <LoadMoreBar
+                    loaded={upcoming.length}
+                    total={upcomingTotal}
+                    loading={loadingSection === 'upcoming'}
+                    onLoadMore={() => void loadMoreLeave('upcoming')}
+                    noun="leave"
+                  />
                 </div>
               )}
             </CardContent>
@@ -3004,8 +3288,36 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const canManage = can(permissions, 'shifts.manage', role)
 
-  const shifts = data?.shifts ?? []
+  // Pagination: page 1 comes from useModuleData (week-scoped). Additional pages
+  // are appended here and reset whenever the base data reloads (new week / manual
+  // refresh) so we never show stale shifts from a different week.
+  const [extraShifts, setExtraShifts] = useState<PosthireShiftRow[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraShifts([])
+  }, [data])
+
+  const baseShifts = data?.shifts ?? []
+  const shifts = [...baseShifts, ...extraShifts]
+  const totalShifts = data?.total_count ?? baseShifts.length
   const swaps = data?.swaps ?? []
+
+  const loadMoreShifts = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthireShifts(access, week, { offset: shifts.length })
+      setExtraShifts((prev) => [...prev, ...(res.shifts ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more shifts. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, week, shifts.length, onAccessIssue, onNotice])
 
   const [rowBusy, setRowBusy] = useState<string | null>(null)
   const [editShift, setEditShift] = useState<PosthireShiftRow | null>(null)
@@ -3084,7 +3396,7 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
             tone={swaps.length ? 'warning' : 'success'}
             icon={<Repeat className="h-5 w-5" />}
             title={swaps.length ? `${swaps.length} swap request${swaps.length === 1 ? '' : 's'} to review` : 'No swap requests pending'}
-            detail={swaps.length ? 'Approve or decline swaps below.' : `${shifts.length} shifts scheduled this week`}
+            detail={swaps.length ? 'Approve or decline swaps below.' : `${totalShifts} shifts scheduled this week`}
           />
           {canManage ? (
             <Card>
@@ -3183,7 +3495,7 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
             <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
               <div>
                 <CardTitle>Schedule</CardTitle>
-                <CardDescription>{weekLabel} · {shifts.length} shift{shifts.length === 1 ? '' : 's'}</CardDescription>
+                <CardDescription>{weekLabel} · {totalShifts} shift{totalShifts === 1 ? '' : 's'}</CardDescription>
               </div>
               <div className="flex items-center gap-1.5">
                 <Button variant="secondary" size="sm" disabled={refreshing} onClick={() => setWeek((w) => w - 1)} aria-label="Previous week">
@@ -3235,6 +3547,13 @@ function ShiftsPage({ access, permissions, role, onNotice, onAccessIssue }: Post
                       ))}
                     </tbody>
                   </table>
+                  <LoadMoreBar
+                    loaded={shifts.length}
+                    total={totalShifts}
+                    loading={loadingMore}
+                    onLoadMore={() => void loadMoreShifts()}
+                    noun="shift"
+                  />
                 </div>
               )}
             </CardContent>
@@ -3399,12 +3718,6 @@ function PayrollExportDetailModal({ access, exportId, currency, onClose, onNotic
                 <p className="mt-1 text-[14px] font-semibold text-text">{titleCase(detail?.status || 'exported')}</p>
               </div>
             </div>
-
-            {detail?.sheet_url ? (
-              <a href={detail.sheet_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#8a5a16] hover:underline">
-                <FileText className="h-3.5 w-3.5" /> Open in Google Sheets
-              </a>
-            ) : null}
 
             <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
               {rows.length === 0 ? (
@@ -3599,12 +3912,47 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
     }
   }, [access, periodArgs, onNotice, onAccessIssue])
 
-  const timesheets = data?.timesheets ?? []
+  // Pagination: page 1 comes from useModuleData (period-scoped); more pages
+  // accumulate here and reset whenever the base data reloads (period change or
+  // manual refresh) so we never mix timesheets from different periods.
+  const [extraTimesheets, setExtraTimesheets] = useState<PosthireTimesheetRow[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraTimesheets([])
+  }, [data])
+
+  const baseTimesheets = data?.timesheets ?? []
+  const timesheets = [...baseTimesheets, ...extraTimesheets]
+  const totalTimesheets = data?.total_count ?? baseTimesheets.length
   const exports = data?.exports ?? []
   const policy = data?.policy ?? {}
   const draft = timesheets.filter((t) => String(t.status).toLowerCase() === 'draft')
+  // True count of drafts across the whole period (from the backend), so the
+  // "need review" banner doesn't shrink to the loaded page at scale.
+  const draftCount = data?.draft_count ?? draft.length
   const canExport = Boolean(data?.can_export)
   const periodLabel = data?.period.start_date ? `${formatDate(data.period.start_date)} → ${formatDate(data.period.end_date)}` : ''
+
+  const loadMoreTimesheets = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthirePayroll(access, {
+        start_date: data?.period.start_date || undefined,
+        end_date: data?.period.end_date || undefined,
+        offset: timesheets.length,
+      })
+      setExtraTimesheets((prev) => [...prev, ...(res.timesheets ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more timesheets. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, data?.period.start_date, data?.period.end_date, timesheets.length, onAccessIssue, onNotice])
 
   const policyItems: Array<{ label: string; value: string }> = []
   if (policy.employee_pay_type) policyItems.push({ label: 'Pay type', value: titleCase(String(policy.employee_pay_type)) })
@@ -3720,9 +4068,9 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
       ) : (
         <>
           <NextAction
-            tone={draft.length ? 'warning' : 'success'}
+            tone={draftCount ? 'warning' : 'success'}
             icon={<DollarSign className="h-5 w-5" />}
-            title={draft.length ? `${draft.length} timesheet${draft.length === 1 ? '' : 's'} need review` : 'All timesheets reviewed'}
+            title={draftCount ? `${draftCount} timesheet${draftCount === 1 ? '' : 's'} need review` : 'All timesheets reviewed'}
             detail={
               data?.period.start_date
                 ? `Period ${formatDate(data?.period.start_date)} → ${formatDate(data?.period.end_date)}`
@@ -3798,6 +4146,13 @@ function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: Pos
                       ))}
                     </tbody>
                   </table>
+                  <LoadMoreBar
+                    loaded={timesheets.length}
+                    total={totalTimesheets}
+                    loading={loadingMore}
+                    onLoadMore={() => void loadMoreTimesheets()}
+                    noun="timesheet"
+                  />
                 </div>
               )}
             </CardContent>
@@ -4088,20 +4443,111 @@ function complianceReminderLabel(doc: { last_reminded_at?: string | null; remind
 }
 
 function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getPosthireCompliance(access), [access])
-  const { data, loading, refreshing, error, reload } = useModuleData<PosthireComplianceResponse>(loader, onAccessIssue)
   const [filter, setFilter] = useState<'all' | ComplianceBucket>('all')
+  const [query, setQuery] = useState('')
+  // Server-side search + bucket filter so HR can work the whole compliance list,
+  // not just the rows currently loaded in the browser. Bucket counts stay accurate
+  // because the server computes the summary over the full set regardless of paging.
+  const debouncedQuery = useDebouncedValue(query.trim(), 350)
+  const loader = useCallback(
+    () =>
+      getPosthireCompliance(access, {
+        bucket: filter,
+        ...(debouncedQuery ? { search: debouncedQuery } : {}),
+      }),
+    [access, filter, debouncedQuery],
+  )
+  const { data, loading, refreshing, error, reload } = useModuleData<PosthireComplianceResponse>(loader, onAccessIssue)
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [extraDocuments, setExtraDocuments] = useState<ComplianceDocument[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraDocuments([])
+  }, [data])
   const action = usePosthireAction(access, reload, onNotice, onAccessIssue)
   const confirm = useConfirm()
   const canManage = can(permissions, 'compliance.manage', role)
   const canUpload = can(permissions, 'onboarding.manage', role) && Boolean(data?.doc_upload_enabled)
 
   const summary = data?.summary
-  const documents = data?.documents ?? []
-  const filtered = useMemo(
-    () => (filter === 'all' ? documents : documents.filter((d) => d.status === filter)),
-    [documents, filter],
+  const documents = useMemo(
+    () => [...(data?.documents ?? []), ...extraDocuments],
+    [data?.documents, extraDocuments],
   )
+  const totalDocuments = data?.filtered_total ?? documents.length
+  const searching = debouncedQuery.length > 0
+  // Rows with a "Send reminder" control available in the loaded view. Lets HR clear
+  // a bucket in one confirmed step instead of clicking the same button repeatedly —
+  // same single-document action, run in sequence over what's currently loaded.
+  const remindableInView = useMemo(() => documents.filter((d) => d.status !== 'valid'), [documents])
+
+  const loadMoreDocuments = useCallback(async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getPosthireCompliance(access, {
+        offset: documents.length,
+        bucket: filter,
+        ...(debouncedQuery ? { search: debouncedQuery } : {}),
+      })
+      setExtraDocuments((prev) => [...prev, ...(res.documents ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more documents. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [access, documents.length, filter, debouncedQuery, onAccessIssue, onNotice])
+
+  const sendBulkReminders = useCallback(async () => {
+    if (remindableInView.length < 2) return
+    const ok = await confirm({
+      title: `Send ${remindableInView.length} reminders?`,
+      body: `Every employee shown in this view with an outstanding document will get a reminder message now.`,
+      confirmLabel: `Send ${remindableInView.length} reminders`,
+    })
+    if (!ok) return
+    setBulkBusy(true)
+    let sent = 0
+    let failed = 0
+    // Fan out a few reminders at a time instead of one strictly-sequential await
+    // per row — clearing a big bucket stays fast at scale without flooding the
+    // server. The first access issue short-circuits the rest of the batch.
+    let accessIssue: ReturnType<typeof accessIssueFromError> = null
+    await mapWithConcurrency(remindableInView, 5, async (doc) => {
+      if (accessIssue) return
+      try {
+        const result = await runPosthireAction(access, {
+          action_type: 'compliance_send_reminder',
+          args: { employee_name: doc.employee_name, document_type: doc.document_type },
+        })
+        if (result.ok === false) failed += 1
+        else sent += 1
+      } catch (err) {
+        const issue = accessIssueFromError(err)
+        if (issue) {
+          accessIssue = issue
+          return
+        }
+        failed += 1
+      }
+    })
+    setBulkBusy(false)
+    if (accessIssue) {
+      onAccessIssue(accessIssue)
+      return
+    }
+    onNotice(
+      failed === 0
+        ? `Sent ${sent} reminder${sent === 1 ? '' : 's'}.`
+        : `Sent ${sent} reminder${sent === 1 ? '' : 's'}, ${failed} couldn't be delivered.`,
+      failed === 0 ? 'success' : 'error',
+    )
+    await reload()
+  }, [remindableInView, confirm, access, onNotice, onAccessIssue, reload])
 
   const needsAttention = summary?.needs_attention ?? 0
   const bannerTone: Tone = needsAttention ? (summary && summary.expired ? 'danger' : 'warning') : 'success'
@@ -4167,20 +4613,35 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
             <StatCard label="Valid" value={summary.valid} hint="Up to date" />
           </div>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
               <div>
                 <CardTitle>Employee documents</CardTitle>
                 <CardDescription>
-                  {filtered.length} of {documents.length} document{documents.length === 1 ? '' : 's'} across {summary.employees_checked} employee
-                  {summary.employees_checked === 1 ? '' : 's'}
+                  {searching
+                    ? `${totalDocuments} result${totalDocuments === 1 ? '' : 's'} for “${debouncedQuery}”`
+                    : `${documents.length} of ${totalDocuments} document${totalDocuments === 1 ? '' : 's'} across ${summary.employees_checked} employee${summary.employees_checked === 1 ? '' : 's'}`}
                 </CardDescription>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <SearchInput value={query} onChange={setQuery} placeholder="Search name, document, department…" />
+                {canManage && remindableInView.length > 1 ? (
+                  <Button disabled={action.busy || bulkBusy} onClick={() => void sendBulkReminders()} size="sm" variant="secondary">
+                    {bulkBusy ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                      </>
+                    ) : (
+                      `Remind all in view (${remindableInView.length})`
+                    )}
+                  </Button>
+                ) : null}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {COMPLIANCE_FILTERS.map((chip) => {
                   const count =
-                    chip.key === 'all' ? documents.length : (summary[chip.key as ComplianceBucket] as number)
+                    chip.key === 'all' ? summary.total_documents : (summary[chip.key as ComplianceBucket] as number)
                   const activeChip = filter === chip.key
                   return (
                     <button
@@ -4199,11 +4660,15 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                   )
                 })}
               </div>
-              {filtered.length === 0 ? (
-                <EmptyState icon={<ShieldCheck className="h-5 w-5" />} title="Nothing in this view" hint="Try a different status filter." />
+              {documents.length === 0 ? (
+                <EmptyState
+                  icon={searching ? <Search className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
+                  title={searching ? `No documents match “${debouncedQuery}”` : 'Nothing in this view'}
+                  hint={searching ? 'Try a different name, document type, or department.' : 'Try a different status filter.'}
+                />
               ) : (
                 <div className="overflow-x-auto rounded-[1.1rem] border border-line/50">
-                  <table className="w-full min-w-[920px] text-left text-[13px]">
+                  <table className="w-full min-w-[820px] text-left text-[13px]">
                     <thead className="bg-panel-muted/60 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">Employee</th>
@@ -4212,12 +4677,11 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                         <th className="px-4 py-3 font-medium">Expiry</th>
                         <th className="px-4 py-3 font-medium">Days left</th>
                         <th className="px-4 py-3 font-medium">Last reminder</th>
-                        <th className="px-4 py-3 font-medium">Next action</th>
-                        {canManage ? <th className="px-4 py-3 text-right font-medium">Action</th> : null}
+                        <th className="px-4 py-3 text-right font-medium">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-line/45">
-                      {filtered.map((doc, idx) => {
+                      {documents.map((doc, idx) => {
                         const rowKey = `${doc.employee_key}-${doc.document_type}-${idx}`
                         const remindKey = `remind:${doc.employee_key}:${doc.document_type}`
                         const reviewKey = `review:${doc.employee_key}:${doc.document_type}`
@@ -4228,9 +4692,17 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                               <p className="font-semibold text-text">{doc.employee_name}</p>
                               {doc.department ? <p className="text-[12px] text-subtle/85">{doc.department}</p> : null}
                             </td>
-                            <td className="px-4 py-3 text-subtle/90">
-                              <div className="flex items-center gap-2">
-                                <span>{doc.document_label}</span>
+                            <td className="px-4 py-3 text-subtle/90">{doc.document_label}</td>
+                            <td className="px-4 py-3">
+                              <Badge tone={doc.tone}>{doc.status_label}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-subtle/90">{formatDate(doc.expiry_date)}</td>
+                            <td className="px-4 py-3 text-subtle/90">{complianceDaysLabel(doc)}</td>
+                            <td className="px-4 py-3 text-subtle/90">{complianceReminderLabel(doc)}</td>
+                            <td className="px-4 py-3 text-right">
+                              {/* Every control for this row lives here — viewing, uploading,
+                                  and following up — so HR never has to look in two places. */}
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 <DocumentActions access={access} fileId={doc.file_id} filename={doc.document_label} compact />
                                 {canUpload && doc.document_type ? (
                                   <DocumentUploadButton
@@ -4242,58 +4714,46 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                                     onUploaded={(message) => { onNotice(message, 'success'); void reload() }}
                                     onError={(message) => onNotice(message, 'error')}
                                     onAccessIssue={onAccessIssue}
+                                    compact
                                   />
+                                ) : null}
+                                {canManage && doc.status === 'needs_review' ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={action.busy || bulkBusy}
+                                    onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${doc.employee_name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}
+                                  >
+                                    {action.runningKey === reviewKey ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                                      </>
+                                    ) : (
+                                      'Mark reviewed'
+                                    )}
+                                  </Button>
+                                ) : null}
+                                {canManage && doc.status !== 'valid' ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={action.busy || bulkBusy}
+                                    onClick={async () => {
+                                      if (!(await confirm({ title: 'Send document reminder?', body: `${doc.employee_name} will receive a reminder about their ${doc.document_label}.`, confirmLabel: 'Send reminder' }))) return
+                                      await action.run('compliance_send_reminder', args, { key: remindKey })
+                                    }}
+                                  >
+                                    {action.runningKey === remindKey ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                                      </>
+                                    ) : (
+                                      'Send reminder'
+                                    )}
+                                  </Button>
                                 ) : null}
                               </div>
                             </td>
-                            <td className="px-4 py-3">
-                              <Badge tone={doc.tone}>{doc.status_label}</Badge>
-                            </td>
-                            <td className="px-4 py-3 text-subtle/90">{formatDate(doc.expiry_date)}</td>
-                            <td className="px-4 py-3 text-subtle/90">{complianceDaysLabel(doc)}</td>
-                            <td className="px-4 py-3 text-subtle/90">{complianceReminderLabel(doc)}</td>
-                            <td className="px-4 py-3 text-subtle/90">{doc.next_action}</td>
-                            {canManage ? (
-                              <td className="px-4 py-3 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  {doc.status === 'needs_review' ? (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      disabled={action.busy}
-                                      onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${doc.employee_name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}
-                                    >
-                                      {action.runningKey === reviewKey ? (
-                                        <>
-                                          <Loader2 className="h-4 w-4 animate-spin" /> Saving…
-                                        </>
-                                      ) : (
-                                        'Mark reviewed'
-                                      )}
-                                    </Button>
-                                  ) : null}
-                                  {doc.status !== 'valid' ? (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      disabled={action.busy}
-                                      onClick={async () => {
-                                        if (!(await confirm({ title: 'Send document reminder?', body: `${doc.employee_name} will receive a reminder about their ${doc.document_label}.`, confirmLabel: 'Send reminder' }))) return
-                                        await action.run('compliance_send_reminder', args, { key: remindKey })
-                                      }}
-                                    >
-                                      {action.runningKey === remindKey ? (
-                                        <>
-                                          <Loader2 className="h-4 w-4 animate-spin" /> Sending…
-                                        </>
-                                      ) : (
-                                        'Send reminder'
-                                      )}
-                                    </Button>
-                                  ) : null}
-                                </div>
-                              </td>
-                            ) : null}
                           </tr>
                         )
                       })}
@@ -4301,6 +4761,15 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
                   </table>
                 </div>
               )}
+              {documents.length > 0 ? (
+                <LoadMoreBar
+                  loaded={documents.length}
+                  total={totalDocuments}
+                  loading={loadingMore}
+                  onLoadMore={() => void loadMoreDocuments()}
+                  noun="document"
+                />
+              ) : null}
               {canUpload ? <DocumentPrivacyNote /> : null}
             </CardContent>
           </Card>
@@ -4317,17 +4786,48 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }: 
 // nothing to do (and stays silent until flows are wired in a later phase), so it
 // never adds noise to a clean workspace.
 function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
-  const loader = useCallback(() => getHrTasks(access, 'open'), [access])
+  const loader = useCallback(() => getHrTasks(access, 'open', { limit: 50 }), [access])
   const { data, error, reload } = useModuleData<HrTasksResponse>(loader, onAccessIssue)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
+  // Page 1 comes from useModuleData; extra pages accumulate here and reset
+  // whenever the base page reloads, so a company with more open tasks than fit
+  // on one page can page through all of them instead of the badge/list
+  // silently freezing at the page cap.
+  const [extraTasks, setExtraTasks] = useState<HrTask[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraTasks([])
+  }, [data])
   const canManage =
     can(permissions, 'users.manage', role) ||
     ['leave', 'onboarding', 'compliance', 'attendance', 'shifts', 'payroll'].some((m) => can(permissions, `${m}.manage`, role))
 
-  const tasks: HrTask[] = data?.tasks ?? []
+  const baseTasks: HrTask[] = data?.tasks ?? []
+  const tasks = useMemo(() => [...baseTasks, ...extraTasks], [baseTasks, extraTasks])
+  // Always the true company-wide open count, never the length of a page that
+  // may be capped — otherwise the badge silently freezes once a company
+  // crosses the page size.
+  const total = data?.open_count ?? data?.total ?? tasks.length
   // The endpoint can 403 on workspaces without a post-hire module / read access;
   // treat that as "nothing to surface" rather than showing an error here.
-  if (error || tasks.length === 0) return null
+  if (error || (tasks.length === 0 && total === 0)) return null
+
+  const loadMore = async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getHrTasks(access, 'open', { limit: 50, offset: tasks.length })
+      setExtraTasks((prev) => [...prev, ...(res.tasks ?? [])])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t load more follow-ups. Please try again.'), 'error')
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   const resolve = async (task: HrTask) => {
     setResolvingId(task.task_id)
@@ -4354,11 +4854,11 @@ function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIss
           <AlertTriangle className="h-4 w-4 text-[#8a5a16]" />
           <CardTitle className="text-[15px]">Needs your follow-up</CardTitle>
           <Badge tone="warning" className="ml-1">
-            {tasks.length}
+            {total}
           </Badge>
         </div>
         <CardDescription>
-          We couldn’t reach {tasks.length === 1 ? 'an employee' : 'some employees'} for {tasks.length === 1 ? 'this' : 'these'} message{tasks.length === 1 ? '' : 's'}. Please follow up directly, then mark it done.
+          Wathefni could not reach {total === 1 ? 'this employee' : 'these employees'} through the currently enabled channels. Please follow up directly, then mark it done.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2.5">
@@ -4377,6 +4877,7 @@ function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIss
             ) : null}
           </div>
         ))}
+        <LoadMoreBar loaded={tasks.length} total={total} loading={loadingMore} onLoadMore={() => void loadMore()} noun="task" />
       </CardContent>
     </Card>
   )
@@ -4388,21 +4889,45 @@ function DeliveryFollowUpCard({ access, permissions, role, onNotice, onAccessIss
 // next action; raw provider/error strings are never shown. Renders nothing when
 // there is nothing to surface, so a clean workspace stays clean.
 function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps, 'access' | 'onAccessIssue'>) {
-  const loader = useCallback(() => getOutboundNeedsFollowUp(access), [access])
+  const loader = useCallback(() => getOutboundNeedsFollowUp(access, { limit: 50 }), [access])
   const { data, error } = useModuleData<OutboundNeedsFollowUpResponse>(loader, onAccessIssue)
+  // Page 1 comes from useModuleData; extra pages accumulate here and reset
+  // whenever the base page reloads — throttled/dashboard-only rows never get
+  // "resolved" the way HR tasks do, so this list can realistically grow past
+  // one page for an active company and must stay fully reachable.
+  const [extraMessages, setExtraMessages] = useState<OutboundFollowUpMessage[]>([])
+  const [loadingMore, setLoadingMore] = useState(false)
+  useEffect(() => {
+    setExtraMessages([])
+  }, [data])
 
   // The endpoint can 403 on workspaces without a post-hire module / read access;
   // treat that as "nothing to surface" rather than showing an error.
   if (error || !data) return null
+  const allMessages = [...(data.messages ?? []), ...extraMessages]
+  const total = data.total ?? allMessages.length
   // Critical follow-ups already appear in the HR-tasks card above; only show the
   // delivery rows that have no task so HR isn't shown the same row twice.
-  const rows = (data.messages ?? []).filter((m) => !m.has_task)
+  const rows = allMessages.filter((m) => !m.has_task)
   // Real delivery FAILURES stay in the amber "issues" card; intentional states
   // (reminders paused by the frequency cap, employees who opted out) render in a
   // separate calm/neutral section so they never look like scary errors.
   const issues = rows.filter((m) => (m.kind ?? 'issue') === 'issue')
   const infos = rows.filter((m) => (m.kind ?? 'issue') === 'info')
-  if (issues.length === 0 && infos.length === 0) return null
+  if (issues.length === 0 && infos.length === 0 && allMessages.length >= total) return null
+
+  const loadMore = async () => {
+    setLoadingMore(true)
+    try {
+      const res = await getOutboundNeedsFollowUp(access, { limit: 50, offset: allMessages.length })
+      setExtraMessages((prev) => [...prev, ...(res.messages ?? [])])
+    } catch {
+      // Silent: this is a background "load more" for a secondary card; a
+      // failed page fetch just leaves the button available to retry.
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   const fmtWhen = (iso: string) => {
     const d = new Date(iso)
@@ -4423,8 +4948,7 @@ function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps,
               </Badge>
             </div>
             <CardDescription>
-              {data.messaging?.summary
-                || 'Some employee messages couldn’t be delivered. Reach these employees directly.'}
+              Wathefni could not reach these employees through the currently enabled channels. Add an email, invite the employee to the app, or contact them directly.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
@@ -4472,16 +4996,84 @@ function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps,
           </CardContent>
         </Card>
       ) : null}
+
+      {allMessages.length < total ? (
+        <div className="mb-5 rounded-2xl border border-line/50 bg-panel/70">
+          <LoadMoreBar loaded={allMessages.length} total={total} loading={loadingMore} onLoadMore={() => void loadMore()} noun="message" />
+        </div>
+      ) : null}
     </>
   )
 }
 
-export function PostHirePage({ page, access, permissions, role, onNotice, onAccessIssue }: PostHireProps) {
-  const followUp = <DeliveryFollowUpCard access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
+// Full delivery monitoring view (follow-up tasks + delivery issues + reminder
+// activity). Rendered only on the Notifications / Delivery Center page so
+// post-hire module pages stay focused on their own content.
+export function PostHireDeliveryCenter({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   return (
     <>
-      {followUp}
+      <DeliveryFollowUpCard access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
       <DeliveryIssuesCard access={access} onAccessIssue={onAccessIssue} />
+    </>
+  )
+}
+
+// Compact one-line indicator shown on post-hire module pages. Summarises how
+// many employee messages need another channel and links to the Notifications
+// page, without pushing the module's own content down. Renders nothing when
+// delivery is clean.
+function DeliveryStatusStrip({ access, onAccessIssue, onOpenNotifications }: Pick<PostHireProps, 'access' | 'onAccessIssue' | 'onOpenNotifications'>) {
+  const tasksLoader = useCallback(() => getHrTasks(access, 'open'), [access])
+  const followUpLoader = useCallback(() => getOutboundNeedsFollowUp(access), [access])
+  const { data: tasksData, error: tasksError } = useModuleData<HrTasksResponse>(tasksLoader, onAccessIssue)
+  const { data: followUpData, error: followUpError } = useModuleData<OutboundNeedsFollowUpResponse>(followUpLoader, onAccessIssue)
+
+  // Either endpoint can 403 on workspaces without post-hire read access; treat
+  // that as "nothing to surface" rather than an error.
+  const tasks: HrTask[] = tasksError ? [] : tasksData?.tasks ?? []
+  const issues = followUpError
+    ? []
+    : (followUpData?.messages ?? []).filter((m) => !m.has_task && (m.kind ?? 'issue') === 'issue')
+  // Use the true company-wide open-task count for the HR-tasks half of this
+  // number (never a page length); the needs-follow-up half doesn't have an
+  // equally precise "issues only, excluding tasked ones" count from the
+  // server, so it stays a same-page estimate — this banner only teases the
+  // full picture, which lives (accurately, with pagination) on the
+  // Notifications page.
+  const openTaskCount = tasksError ? 0 : tasksData?.open_count ?? tasks.length
+  const total = openTaskCount + issues.length
+  if (total === 0) return null
+
+  const names = [...tasks.map((t) => t.employee_name), ...issues.map((m) => m.employee_name)]
+    .map((n) => String(n || '').trim())
+    .filter(Boolean)
+  const uniqueNames = [...new Set(names)]
+  const preview = uniqueNames.slice(0, 2).join(', ')
+  const remaining = uniqueNames.length - Math.min(uniqueNames.length, 2)
+
+  return (
+    <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-amber-200/70 bg-[#fffaf0] px-3.5 py-2.5">
+      <AlertTriangle className="h-4 w-4 shrink-0 text-[#8a5a16]" />
+      <p className="min-w-0 flex-1 truncate text-[13px] text-text">
+        <span className="font-medium">{total} employee message{total === 1 ? '' : 's'} need{total === 1 ? 's' : ''} another channel.</span>
+        {preview ? (
+          <span className="text-subtle"> Latest: {preview}{remaining > 0 ? ` +${remaining} more` : ''}</span>
+        ) : null}
+      </p>
+      {onOpenNotifications ? (
+        <Button size="sm" variant="secondary" className="shrink-0" onClick={onOpenNotifications}>
+          Open Notifications
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
+export function PostHirePage({ page, access, permissions, role, onNotice, onAccessIssue, onOpenNotifications }: PostHireProps) {
+  return (
+    <>
+      <DeliveryStatusStrip access={access} onAccessIssue={onAccessIssue} onOpenNotifications={onOpenNotifications} />
       <PostHireModuleBody page={page} access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
     </>
   )

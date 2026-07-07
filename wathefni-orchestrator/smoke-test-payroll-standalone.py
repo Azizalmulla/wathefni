@@ -142,12 +142,11 @@ def main() -> int:
                     """
                     INSERT INTO payroll_exports
                       (export_id, company_code, period_start, period_end, status, export_kind, row_count,
-                       totals, policy_snapshot, preview_snapshot, source_payload, sheet_sync)
-                    VALUES (%s,%s,%s,%s,'exported','payroll_preview',%s,%s,%s,%s,%s,%s)
+                       totals, policy_snapshot, preview_snapshot, source_payload)
+                    VALUES (%s,%s,%s,%s,'exported','payroll_preview',%s,%s,%s,%s,%s)
                     """,
                     (export_id, company, mstart, mend, len(rows), app.Json(app.json_safe(totals)),
-                     app.Json({"currency": "KWD"}), app.Json(app.json_safe(rows)), app.Json({}),
-                     app.Json({"spreadsheet_url": "https://docs.google.com/spreadsheets/d/smoke"})),
+                     app.Json({"currency": "KWD"}), app.Json(app.json_safe(rows)), app.Json({})),
                 )
             conn.commit()
 
@@ -161,7 +160,6 @@ def main() -> int:
         check("detail returns the export's period", detail.get("period", {}).get("start_date") == mstart.isoformat())
         check("detail returns the per-employee rows", len(detail.get("preview_rows") or []) == 2)
         check("detail returns totals", isinstance(detail.get("totals"), dict) and detail["totals"].get("row_count") == 2)
-        check("detail surfaces the sheet destination", "smoke" in str(detail.get("sheet_url") or ""))
         check("detail recorded a 'payroll_export_viewed' audit", any(a["action_type"] == "payroll_export_viewed" for a in audits))
 
         # unknown / cross-company id => 404

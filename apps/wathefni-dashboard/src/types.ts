@@ -253,6 +253,22 @@ export type SummaryResponse = {
   recent_applications: ApplicationSummary[]
 }
 
+export type PositionsResponse = {
+  company_code: string
+  positions: PositionSummary[]
+  total_count?: number
+  limit?: number
+  offset?: number
+  has_more?: boolean
+  summary?: {
+    total_positions: number
+    open_positions: number
+    closed_positions: number
+    active_qr_codes: number
+    total_applications: number
+  }
+}
+
 export type PositionSummary = {
   company_code?: string
   position_code: string
@@ -704,6 +720,8 @@ export type AssessmentsResponse = {
   module_disabled?: boolean
   required_module?: string
   total: number
+  limit?: number
+  offset?: number
   status_counts: Array<{ status: string; count: number }>
   average_percent?: number | null
   attempts: AssessmentAttempt[]
@@ -955,6 +973,14 @@ export type PosthireEmployeesResponse = {
   company_code: string
   count: number
   employees: PosthireEmployee[]
+  total_count?: number
+  limit?: number
+  offset?: number
+  has_more?: boolean
+  active_count?: number
+  left_count?: number
+  onboarding_count?: number
+  department_count?: number
 }
 
 export type NextActionSeverity = 'critical' | 'high' | 'medium' | 'low'
@@ -1080,6 +1106,10 @@ export type PosthireOnboardingResponse = {
   completed_count: number
   total: number
   hr_mutate_enabled?: boolean
+  total_count?: number
+  limit?: number
+  offset?: number
+  has_more?: boolean
 }
 
 export type OnboardingItem = {
@@ -1139,6 +1169,10 @@ export type PosthireAttendanceResponse = {
   import_enabled?: boolean
   attendance?: PosthireAttendanceRow[]
   status_filter?: string | null
+  total_count?: number
+  has_more?: boolean
+  limit?: number
+  offset?: number
 }
 
 export type PosthireLeaveRow = {
@@ -1167,12 +1201,21 @@ export type LeaveBalance = {
 export type PosthireLeaveResponse = {
   company_code: string
   view?: 'active' | 'history'
+  section?: 'pending' | 'upcoming'
   pending?: PosthireLeaveRow[]
   upcoming?: PosthireLeaveRow[]
   history?: PosthireLeaveRow[]
   status_filter?: string | null
   balances_enabled?: boolean
   balances?: Record<string, LeaveBalance[]>
+  pending_total?: number
+  pending_has_more?: boolean
+  upcoming_total?: number
+  upcoming_has_more?: boolean
+  history_total?: number
+  history_has_more?: boolean
+  offset?: number
+  limit?: number
 }
 
 export type PosthireShiftRow = {
@@ -1199,6 +1242,10 @@ export type PosthireShiftsResponse = {
   start_date?: string
   end_date?: string
   week?: number
+  total_count?: number
+  limit?: number
+  offset?: number
+  has_more?: boolean
 }
 
 export type PosthireTimesheetRow = {
@@ -1249,6 +1296,11 @@ export type PosthirePayrollResponse = {
   policy?: PosthirePayrollPolicy
   exports: PosthireExportRow[]
   can_export: boolean
+  total_count?: number
+  draft_count?: number
+  limit?: number
+  offset?: number
+  has_more?: boolean
 }
 
 export type PayrollExportPreviewRow = {
@@ -1271,7 +1323,6 @@ export type PayrollExportDetail = {
   totals?: Record<string, unknown>
   policy?: PosthirePayrollPolicy
   preview_rows?: PayrollExportPreviewRow[]
-  sheet_url?: string | null
 }
 
 export type PosthireAnalyticsInsight = {
@@ -1343,6 +1394,10 @@ export type PosthireComplianceResponse = {
   summary: ComplianceSummary
   documents: ComplianceDocument[]
   doc_upload_enabled?: boolean
+  filtered_total?: number
+  offset?: number
+  limit?: number | null
+  has_more?: boolean
 }
 
 export type HrTask = {
@@ -1365,6 +1420,9 @@ export type HrTasksResponse = {
   ok: boolean
   company_code: string
   open_count: number
+  total?: number
+  limit?: number
+  offset?: number
   tasks: HrTask[]
 }
 
@@ -1413,6 +1471,9 @@ export type OutboundNeedsFollowUpResponse = {
   ok: boolean
   company_code: string
   count: number
+  total?: number
+  limit?: number
+  offset?: number
   messages: OutboundFollowUpMessage[]
   messaging: MessagingReadiness
 }

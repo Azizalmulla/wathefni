@@ -101,8 +101,6 @@ def main() -> int:
 
     owner = ctx(["attendance.read", "attendance.manage"])
 
-    # Stub the sheet sync so a correction/insert never reaches Google.
-    app.sync_attendance_sheet_rows = lambda *a, **k: {"ok": True, "stub": True}
     # Capture audit calls without coupling to the audit store internals.
     audits: list[dict] = []
     real_audit = app.record_admin_audit

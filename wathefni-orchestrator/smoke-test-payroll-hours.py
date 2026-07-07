@@ -59,13 +59,11 @@ def main() -> None:
                     "payroll_status": "Review exceptions",
                 }
             ],
-            "sheet_sync": {"ok": True},
         }
     )
     assert_true("Fouad Burhamad" in reply, "payroll reply must include employee name")
     assert_true("worked 8.50h" in reply, "payroll reply must include worked hours")
     assert_true("overtime 0.50h" in reply, "payroll reply must include overtime hours")
-    assert_true("Payroll Hours sheet updated" in reply, "payroll reply must mention sheet sync when successful")
 
     review_action = app.infer_direct_action("Prepare timesheets this week")
     assert_true(bool(review_action), "timesheet review request must route")
@@ -142,11 +140,9 @@ def main() -> None:
                     "payroll_status": "Review exceptions",
                 }
             ],
-            "sheet_sync": {"ok": True},
         }
     )
     assert_true("Prepared 1 draft timesheet" in review_reply, "review reply must say draft timesheet was prepared")
-    assert_true("Timesheet Approvals sheet updated" in review_reply, "review reply must mention approvals sheet sync")
 
     policy_action = app.infer_direct_action("Set overtime policy to review only")
     assert_true(bool(policy_action), "payroll policy update must route")
@@ -226,12 +222,11 @@ def main() -> None:
     try:
         app.find_employee_by_phone = lambda phone, **_: {"employee_key": "emp-self", "phone": app.digits(phone), "company_code": "WATHEFNI", "name": "Self Employee"}
         app.company_has_module = lambda company_code, module_key: True
-        app.list_payroll_hours = lambda action, *, company_code, sync_sheet=True: {
+        app.list_payroll_hours = lambda action, *, company_code: {
             "ok": True,
             "start_date": "2026-05-11",
             "end_date": "2026-05-17",
             "summaries": [{"worked_minutes": 60, "scheduled_minutes": 120, "payroll_status": "Ready"}],
-            "sheet_sync": {"ok": True, "skipped": True, "reason": "employee_self_service_read"},
         }
         app.list_shifts = lambda action, *, company_code: (_ for _ in ()).throw(AssertionError("payroll hours should not route to shift status"))
         routed = app.handle_non_hr_conversational_turn(employee_req)
@@ -279,10 +274,8 @@ def main() -> None:
             "start_date": "2026-05-11",
             "end_date": "2026-05-17",
             "preview_rows": [preview],
-            "sheet_sync": {"ok": True},
         }
     )
-    assert_true("Payroll Preview sheet updated" in preview_reply, "preview reply must mention preview sheet sync")
     assert_true("No payment has been processed" in preview_reply, "preview reply must preserve no-payment boundary")
 
     employee_hours_reply = app.format_payroll_hours_reply(
@@ -291,13 +284,11 @@ def main() -> None:
             "start_date": "2026-05-11",
             "end_date": "2026-05-17",
             "summaries": [preview],
-            "sheet_sync": {"ok": True},
         },
         employee_view=True,
     )
     assert_true(employee_hours_reply.startswith("Your payroll hours"), "employee payroll reply must be self-view")
     assert_true("Fouad Burhamad" not in employee_hours_reply, "employee payroll reply must not expose names")
-    assert_true("Payroll Hours sheet updated" not in employee_hours_reply, "employee payroll reply must not mention HR dashboard sync")
 
     employee_timesheet_reply = app.format_list_timesheets_reply(
         {
@@ -359,11 +350,9 @@ def main() -> None:
             "end_date": "2026-05-17",
             "row_count": 1,
             "totals": totals,
-            "sheet_sync": {"ok": True},
         }
     )
     assert_true("Payroll export locked" in export_reply, "export reply must say the export is locked")
-    assert_true("Payroll Export sheet updated" in export_reply, "export reply must mention export sheet sync")
     assert_true("No payment has been processed" in export_reply, "export reply must preserve no-payment boundary")
     assert_true("no bank file was created" in export_reply, "export reply must preserve no-bank-file boundary")
 
@@ -522,12 +511,10 @@ def main() -> None:
                 {"metric": "Top lateness", "subject": "Fouad Burhamad", "value": 25, "detail": "2 attendance records."},
                 {"metric": "Branch absences", "subject": "Salmiya", "value": 1, "detail": "Absence records by primary branch."},
             ],
-            "sheet_sync": {"ok": True},
         }
     )
     assert_true("Workforce analytics" in analytics_reply, "analytics reply must have analytics title")
     assert_true("Fouad Burhamad" in analytics_reply, "analytics reply must include selected insight subject")
-    assert_true("Analytics sheet updated" in analytics_reply, "analytics reply must mention sheet sync")
     assert_true(
         app.format_workforce_analytics_reply({"ok": False, "error": "employee_outside_manager_scope"})
         == "That analytics view is outside your manager scope.",

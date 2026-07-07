@@ -60,12 +60,6 @@ import attendance_import as _attendance_import  # noqa: E402
 
 logger = logging.getLogger("wathefni")
 
-# Google Sheets is an optional downstream mirror; the database is the source of
-# truth. These back the best-effort, off-the-request-path sync (see
-# replace_dashboard_tab_values / sheets_sync_mode).
-_SHEETS_EXECUTOR: "concurrent.futures.ThreadPoolExecutor | None" = None
-_SHEETS_EXECUTOR_LOCK = threading.Lock()
-
 WORKSPACE = Path(os.environ.get("WATHEFNI_WORKSPACE", "/root/.openclaw/workspaces/company-wathefni"))
 ENV_PATH = Path(os.environ.get("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.env"))
 OPENCLAW_CONFIG_PATH = Path(os.environ.get("OPENCLAW_CONFIG", "/root/.openclaw/openclaw.json"))
@@ -299,6 +293,23 @@ def assistant_hr_reads_enabled() -> bool:
     tools are NOT offered to the LLM on either WhatsApp or the dashboard assistant
     until enabled. Read-only; reuses the dashboard's own data sources."""
     return (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def employee_app_enabled() -> bool:
+    """Master dark-launch gate for the Employee App / Portal (the /app/* surface:
+    employee activation, self-service reads, leave/document self-service, and push
+    token registration). Defaults OFF so every /app/* route is inert in production
+    until explicitly enabled. A per-company `employee_app` module row gates which
+    companies can actually activate on top of this master switch."""
+    return (os.environ.get("WATHEFNI_EMPLOYEE_APP") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def push_notifications_enabled() -> bool:
+    """Channel gate for the push rung in the outbound delivery ladder. Defaults
+    OFF; even when on, a send only happens if the employee has an active push
+    token AND a push provider is configured (otherwise the ladder falls through
+    to WhatsApp/email exactly as today — push is never load-bearing)."""
+    return (os.environ.get("WATHEFNI_PUSH_NOTIFICATIONS") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
 def employee_next_actions_enabled() -> bool:
@@ -2359,6 +2370,70 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_batch_actions_company ON batch_actions(company_code, status, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_batch_action_items_batch ON batch_action_items(batch_id, status, app_key);
     CREATE INDEX IF NOT EXISTS idx_outbound_delivery_events_company ON outbound_delivery_events(company_code, created_at DESC);
+    -- Employee App / Portal (dark-launched behind WATHEFNI_EMPLOYEE_APP). The
+    -- mobile client is a thin, employee-self-scoped surface over /app/*; these
+    -- tables back its HR-provisioned activation, opaque server-side sessions, push
+    -- tokens, and notification read-state. Identity (employee_key + company_code)
+    -- is ALWAYS taken from the verified session, never from the client.
+    CREATE TABLE IF NOT EXISTS employee_app_invites (
+      invite_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      phone text NOT NULL,
+      code_hash text NOT NULL,
+      status text NOT NULL DEFAULT 'pending',
+      attempts int NOT NULL DEFAULT 0,
+      created_by_phone text,
+      created_by_user_id text,
+      expires_at timestamptz NOT NULL,
+      redeemed_at timestamptz,
+      last_sent_at timestamptz,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS employee_sessions (
+      session_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      phone text,
+      token_hash text NOT NULL UNIQUE,
+      refresh_hash text UNIQUE,
+      status text NOT NULL DEFAULT 'active',
+      created_at timestamptz NOT NULL DEFAULT now(),
+      last_seen_at timestamptz NOT NULL DEFAULT now(),
+      expires_at timestamptz NOT NULL,
+      refresh_expires_at timestamptz NOT NULL,
+      revoked_at timestamptz,
+      revoked_reason text,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb
+    );
+    CREATE TABLE IF NOT EXISTS employee_push_tokens (
+      token_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      push_token text NOT NULL,
+      platform text,
+      device_id text,
+      active boolean NOT NULL DEFAULT true,
+      last_error text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      last_seen_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, push_token)
+    );
+    CREATE TABLE IF NOT EXISTS employee_notification_reads (
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      message_id uuid NOT NULL,
+      read_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (employee_key, message_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_employee_app_invites_lookup ON employee_app_invites(company_code, phone, status, expires_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_employee_app_invites_employee ON employee_app_invites(company_code, employee_key, status);
+    CREATE INDEX IF NOT EXISTS idx_employee_sessions_employee ON employee_sessions(company_code, employee_key, status, expires_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_employee_push_tokens_employee ON employee_push_tokens(company_code, employee_key, active);
+    CREATE INDEX IF NOT EXISTS idx_employee_notification_reads_employee ON employee_notification_reads(employee_key, message_id);
     INSERT INTO octopus_conversation_health
     (account_id, phone, conversation_id, source, status, last_success_at, last_failure_at,
      last_error, success_count, failure_count, raw_json, updated_at)
@@ -2455,6 +2530,9 @@ MODULE_ALIASES = {
     "insights": "analytics",
     "dashboard": "analytics",
     "reports": "analytics",
+    "employee_app": "employee_app",
+    "employee_portal": "employee_app",
+    "employee_mobile": "employee_app",
 }
 
 MODULE_DISPLAY_NAMES = {
@@ -2468,6 +2546,7 @@ MODULE_DISPLAY_NAMES = {
     "leave": "Leave",
     "payroll": "Payroll",
     "analytics": "Analytics",
+    "employee_app": "Employee App",
 }
 
 
@@ -4171,7 +4250,6 @@ def openclaw_concise_prompt_context_block(prompt_name: str | None = None) -> str
     return (
         f"Concise Wathefni context for {prompt_name or 'planner'}. Use GPT-5.4 to interpret natural HR language into structured JSON only when this is an interpretation step.\n"
         "Wathefni is an HR operations system. Postgres, backend validation, and ActionResult are operational truth.\n"
-        "Google Sheets are dashboard/export mirrors, not authority for WhatsApp mutations.\n"
         "GPT may propose intent, entities, targets, filters, message purpose, and clarification needs.\n"
         "GPT must not execute, invent records, invent sent status, invent permissions, or make operational truth claims.\n"
         "Backend validates candidate/employee records, permissions, modules, editable fields, and business rules before execution.\n"
@@ -6181,7 +6259,7 @@ def is_post_action_repair_text(text: str) -> bool:
     if normalized in {"thanks", "thank you", "perfect", "ok", "okay", "yes", "no"}:
         return False
     return bool(
-        re.search(r"\b(why not|why|huh|context|already|i told|told you|you said|did you say|why did|then why|google sheets?|sheets?|sheet|but|should|isn'?t|is not|its in|it's in)\b", normalized)
+        re.search(r"\b(why not|why|huh|context|already|i told|told you|you said|did you say|why did|then why|but|should|isn'?t|is not|its in|it's in)\b", normalized)
         or re.search(r"\b(we|you|he|she|they|him|her|them)\s+(?:already\s+)?(?:hired|shortlisted|rejected|sent|emailed)\b", normalized)
     )
 
@@ -12769,6 +12847,13 @@ def resolve_shift_employee(action: dict[str, Any], *, required: bool = True) -> 
 
 
 def company_employees(company_code: str | None) -> list[dict[str, Any]]:
+    # The employee hub is the source of truth for mention-resolution ("message all
+    # staff"), roster/analytics roll-ups and onboarding cards — every one of those
+    # needs the COMPLETE workforce, so this read is intentionally uncapped. A LIMIT
+    # here silently dropped every employee past the arbitrary cutoff (e.g. a 1,200
+    # person company would lose 200 people from "all staff" with no error). The
+    # result is bounded naturally by one company's headcount. For paged DISPLAY of
+    # the directory, use list_employees_page instead.
     company = (company_code or "WATHEFNI").upper()
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -12777,12 +12862,138 @@ def company_employees(company_code: str | None) -> list[dict[str, Any]]:
                 SELECT *
                 FROM employees
                 WHERE company_code=%s
-                ORDER BY name NULLS LAST, phone
-                LIMIT 1000
+                ORDER BY name NULLS LAST, phone, employee_key
                 """,
                 (company,),
             )
             return [dict(row) for row in cur.fetchall()]
+
+
+def _ilike_escape(term: str) -> str:
+    """Escape LIKE/ILIKE wildcards so a user's raw search text is matched
+    literally (a '%' the user typed shouldn't act as a wildcard). Backslash is
+    the default ILIKE escape character in Postgres."""
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _employee_scope_where(company_code: str | None, viewer_phone: str | None) -> tuple[str, list[Any]]:
+    """Shared WHERE fragment (aliased `e`) for scoped reads over `employees`:
+    company match + the manager scope clause. Returns the SQL string (already
+    joined with AND) and its params, so every directory-style read (employees,
+    onboarding, stats) narrows to the SAME rows a scoped manager may see."""
+    company = (company_code or "WATHEFNI").upper()
+    scope = manager_scope_context(viewer_phone, company)
+    where = ["e.company_code=%s"]
+    params: list[Any] = [company]
+    scope_clause, scope_params = employee_scope_sql("e", scope)
+    if scope_clause:
+        where.append(scope_clause.removeprefix("AND "))
+        params.extend(scope_params)
+    return " AND ".join(where), params
+
+
+def _employee_search_clause(term: str | None) -> tuple[str, list[Any]]:
+    """Shared ILIKE search fragment (aliased `e`) across name/phone/email/title
+    and the department/team stored in profile/raw_json JSON. Returns ('', []) when
+    there is no term so callers can conditionally AND it in."""
+    cleaned = (term or "").strip()
+    if not cleaned:
+        return "", []
+    like = f"%{_ilike_escape(cleaned)}%"
+    clause = (
+        "(e.name ILIKE %s OR e.phone ILIKE %s OR e.email ILIKE %s "
+        "OR e.position_title ILIKE %s "
+        "OR e.profile->>'department' ILIKE %s OR e.profile->>'team' ILIKE %s "
+        "OR e.raw_json->>'department' ILIKE %s OR e.raw_json->>'team' ILIKE %s)"
+    )
+    return clause, [like] * 8
+
+
+def list_employees_page(
+    company_code: str | None,
+    *,
+    viewer_phone: str | None = None,
+    search: str | None = None,
+    limit: int,
+    offset: int,
+) -> dict[str, Any]:
+    """Paged employee directory read for dashboard list surfaces.
+
+    Applies manager scope IN SQL (via employee_scope_sql) so page counts and
+    total_count are correct for restricted managers, not just filtered after the
+    fact. Returns rows plus total_count/has_more so the UI can page through the
+    entire workforce without ever silently truncating. The employee_key tiebreaker
+    makes the sort a total order so OFFSET paging is stable.
+
+    An optional `search` term filters IN SQL across name/phone/email/title and the
+    department/team stored in the profile JSON, so search reaches the WHOLE
+    workforce (not just the pages already loaded in the browser) and total_count
+    reflects the filtered set for correct paging.
+    """
+    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    search_clause, search_params = _employee_search_clause(search)
+    if search_clause:
+        where_sql = f"{where_sql} AND {search_clause}"
+        params.extend(search_params)
+    params.extend([limit, offset])
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT e.*, COUNT(*) OVER() AS _total_count
+                FROM employees e
+                WHERE {where_sql}
+                ORDER BY e.name NULLS LAST, e.phone, e.employee_key
+                LIMIT %s OFFSET %s
+                """,
+                params,
+            )
+            rows = [dict(row) for row in cur.fetchall()]
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
+
+
+def employee_directory_stats(company_code: str | None, *, viewer_phone: str | None = None) -> dict[str, Any]:
+    """Scope-aware directory headline counts computed in SQL over the WHOLE
+    workforce, so the stat cards stay correct no matter how many pages of the
+    directory are loaded in the UI. Uses the same manager scope as the paged read.
+    """
+    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    not_left = "lower(coalesce(e.employment_status,'active')) <> 'left'"
+    onboarding_done = "lower(coalesce(e.onboarding_status,'')) IN ('complete','completed','done')"
+    # `department` is not a column — it lives in the profile/raw_json JSON, mirroring
+    # the fallback chain posthire_employee_card uses, so the count matches the UI.
+    dept_expr = (
+        "NULLIF(btrim(coalesce("
+        "e.profile->>'department', e.profile->>'team', "
+        "e.raw_json->>'department', e.raw_json->>'team', '')), '')"
+    )
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT
+                  count(*) AS total,
+                  count(*) FILTER (WHERE {not_left}) AS active,
+                  count(*) FILTER (WHERE NOT ({not_left})) AS left_count,
+                  count(*) FILTER (WHERE {not_left} AND NOT ({onboarding_done})) AS onboarding_in_progress,
+                  count(DISTINCT {dept_expr}) FILTER (WHERE {not_left}) AS departments
+                FROM employees e
+                WHERE {where_sql}
+                """,
+                params,
+            )
+            row = dict(cur.fetchone() or {})
+    return {
+        "total_count": int(row.get("total") or 0),
+        "active_count": int(row.get("active") or 0),
+        "left_count": int(row.get("left_count") or 0),
+        "onboarding_count": int(row.get("onboarding_in_progress") or 0),
+        "department_count": int(row.get("departments") or 0),
+    }
 
 
 # Post-hire child tables that hang off an employee via (company_code, employee_key).
@@ -13019,143 +13230,6 @@ def shift_conflicts(cur: Any, *, employee_key: str, shift_date: date, start_time
     return [dict(row) for row in cur.fetchall()]
 
 
-EMPLOYEE_SHEET_TAB = "Employees"
-EMPLOYEE_SHEET_HEADERS = ["Name", "Phone", "Position", "Company", "Employment Status", "Onboarding Status", "Documents Progress", "Missing Items", "Hire Date", "Start Date", "Last Updated", "Employee Key"]
-COMPLIANCE_SHEET_TAB = "Compliance"
-COMPLIANCE_SHEET_HEADERS = ["Employee", "Phone", "Overall Status", "Valid", "Missing", "Expiring Soon", "Expired", "Needs Review", "Next Expiry", "Notes"]
-COMPLIANCE_DETAIL_SHEET_TAB = "Compliance Details"
-COMPLIANCE_DETAIL_SHEET_HEADERS = ["Employee", "Phone", "Document Type", "Status", "Expiry Date", "Validity", "Last Reminded", "Reminder Count", "Authority", "Notes", "Updated At"]
-SHIFT_SHEET_TAB = "Shifts"
-SHIFT_SHEET_HEADERS = ["Date", "Employee", "Phone", "Start", "End", "Location", "Role", "Notes", "Shift ID"]
-SHIFT_HISTORY_SHEET_TAB = "Shift History"
-SHIFT_HISTORY_SHEET_HEADERS = ["Date", "Employee", "Phone", "Start", "End", "Location", "Role", "Status", "Notes", "Shift ID", "Updated At"]
-AVAILABILITY_SHEET_TAB = "Availability"
-AVAILABILITY_SHEET_HEADERS = ["Start Date", "End Date", "Employee", "Phone", "Type", "Status", "Time Window", "Reason", "Availability ID", "Updated At"]
-SHIFT_SWAPS_SHEET_TAB = "Shift Swaps"
-SHIFT_SWAPS_SHEET_HEADERS = ["Date", "Requester", "Requester Phone", "Target", "Target Phone", "Status", "Requester Shift", "Target Shift", "Reason", "Swap ID", "Updated At"]
-ATTENDANCE_SHEET_TAB = "Attendance"
-ATTENDANCE_SHEET_HEADERS = ["Date", "Employee", "Phone", "Shift", "Check In", "Check Out", "Status", "Late Minutes", "Early Leave", "Notes", "Attendance ID"]
-ATTENDANCE_HISTORY_SHEET_TAB = "Attendance History"
-ATTENDANCE_HISTORY_SHEET_HEADERS = ["Date", "Employee", "Phone", "Shift", "Check In", "Check Out", "Status", "Event/Updated", "Notes", "Attendance ID", "Updated At"]
-LEAVE_SHEET_TAB = "Leave"
-LEAVE_SHEET_HEADERS = ["Start Date", "End Date", "Employee", "Phone", "Type", "Status", "Reason", "Shift Conflicts", "Leave ID", "Updated At"]
-LEAVE_HISTORY_SHEET_TAB = "Leave History"
-LEAVE_HISTORY_SHEET_HEADERS = ["Start Date", "End Date", "Employee", "Phone", "Type", "Status", "Event/Updated", "Reason", "Decision Note", "Leave ID", "Updated At"]
-PAYROLL_HOURS_SHEET_TAB = "Payroll Hours"
-PAYROLL_HOURS_SHEET_HEADERS = ["Period", "Employee", "Phone", "Scheduled Hours", "Worked Hours", "Approved Leave Hours", "Absent Hours", "Late Minutes", "Early Leave Minutes", "Overtime Hours", "Status", "Employee Key"]
-TIMESHEET_APPROVALS_SHEET_TAB = "Timesheet Approvals"
-TIMESHEET_APPROVALS_SHEET_HEADERS = ["Period", "Employee", "Phone", "Scheduled Hours", "Worked Hours", "Approved Leave Hours", "Absent Hours", "Late Minutes", "Early Leave Minutes", "Overtime Hours", "Status", "Payroll Status", "Timesheet ID", "Updated At"]
-PAYROLL_PREVIEW_SHEET_TAB = "Payroll Preview"
-PAYROLL_PREVIEW_SHEET_HEADERS = ["Period", "Employee", "Phone", "Pay Type", "Payable Hours", "Worked Hours", "Paid Leave Hours", "Deduction Hours", "Overtime Review Hours", "Estimated Amount KWD", "Amount Status", "Policy Flags", "Timesheet ID"]
-PAYROLL_EXPORT_SHEET_TAB = "Payroll Export"
-PAYROLL_EXPORT_SHEET_HEADERS = ["Exported At", "Export ID", "Period", "Employee", "Phone", "Pay Type", "Payable Hours", "Deduction Hours", "Overtime Review Hours", "Estimated Amount KWD", "Amount Status", "Policy Flags", "Timesheet ID", "Export Status"]
-ANALYTICS_SHEET_TAB = "Analytics"
-ANALYTICS_SHEET_HEADERS = ["Period", "Scope", "Metric", "Subject", "Value", "Detail", "Updated At"]
-
-
-def dashboard_sheet_id(company_code: str | None) -> str | None:
-    company = (company_code or "WATHEFNI").upper()
-    env_values = planner_env()
-    config = workspace_company_config(company)
-    sheet_id = (
-        env_values.get(f"{company}_SHEET_ID")
-        or env_values.get("WATHEFNI_SHEET_ID")
-        or env_values.get("GOOGLE_SHEET_ID")
-        or config.get("sheet_id")
-        or config.get("google_sheet_id")
-        or config.get("spreadsheet_id")
-    )
-    text = str(sheet_id or "").strip()
-    return text or None
-
-
-def sheet_values_from_result(result: dict[str, Any]) -> list[list[Any]]:
-    payload = result.get("json")
-    if isinstance(payload, dict):
-        values = payload.get("values")
-        if isinstance(values, list):
-            return values
-        nested = payload.get("result")
-        if isinstance(nested, dict) and isinstance(nested.get("values"), list):
-            return nested["values"]
-    return []
-
-
-def ensure_dashboard_tab(company_code: str | None, *, tab: str, headers: list[str], last_col: str) -> dict[str, Any]:
-    sheet_id = dashboard_sheet_id(company_code)
-    if not sheet_id:
-        return {"ok": False, "skipped": True, "reason": "missing_sheet_id"}
-    header_range = f"{tab}!A1:{last_col}1"
-    check = run_gog_wathefni(["sheets", "get", sheet_id, header_range], timeout=30)
-    if not check.get("ok"):
-        error_text = f"{check.get('stdout') or ''}\n{check.get('stderr') or ''}"
-        if "Unable to parse range" in error_text:
-            add_tab = run_gog_wathefni(["sheets", "add-tab", sheet_id, tab], timeout=30)
-            if not add_tab.get("ok"):
-                add_error = f"{add_tab.get('stdout') or ''}\n{add_tab.get('stderr') or ''}"
-                if "already exists" not in add_error.lower():
-                    return {"ok": False, "sheet_id": sheet_id, "step": "add_tab", "result": add_tab}
-        else:
-            return {"ok": False, "sheet_id": sheet_id, "step": "read_header", "result": check}
-    update = run_gog_wathefni(
-        ["sheets", "update", sheet_id, header_range, "--values-json", json.dumps([headers], ensure_ascii=False)],
-        timeout=30,
-    )
-    return {"ok": bool(update.get("ok")), "sheet_id": sheet_id, "tab": tab, "header_update": update}
-
-
-def ensure_shift_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=SHIFT_SHEET_TAB, headers=SHIFT_SHEET_HEADERS, last_col="I")
-
-
-def ensure_shift_history_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=SHIFT_HISTORY_SHEET_TAB, headers=SHIFT_HISTORY_SHEET_HEADERS, last_col="K")
-
-
-def ensure_availability_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=AVAILABILITY_SHEET_TAB, headers=AVAILABILITY_SHEET_HEADERS, last_col="J")
-
-
-def ensure_shift_swaps_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=SHIFT_SWAPS_SHEET_TAB, headers=SHIFT_SWAPS_SHEET_HEADERS, last_col="K")
-
-
-def ensure_attendance_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=ATTENDANCE_SHEET_TAB, headers=ATTENDANCE_SHEET_HEADERS, last_col="K")
-
-
-def ensure_attendance_history_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=ATTENDANCE_HISTORY_SHEET_TAB, headers=ATTENDANCE_HISTORY_SHEET_HEADERS, last_col="K")
-
-
-def ensure_leave_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=LEAVE_SHEET_TAB, headers=LEAVE_SHEET_HEADERS, last_col="J")
-
-
-def ensure_leave_history_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=LEAVE_HISTORY_SHEET_TAB, headers=LEAVE_HISTORY_SHEET_HEADERS, last_col="K")
-
-
-def ensure_payroll_hours_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=PAYROLL_HOURS_SHEET_TAB, headers=PAYROLL_HOURS_SHEET_HEADERS, last_col="L")
-
-
-def ensure_timesheet_approvals_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=TIMESHEET_APPROVALS_SHEET_TAB, headers=TIMESHEET_APPROVALS_SHEET_HEADERS, last_col="N")
-
-
-def ensure_payroll_preview_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=PAYROLL_PREVIEW_SHEET_TAB, headers=PAYROLL_PREVIEW_SHEET_HEADERS, last_col="M")
-
-
-def ensure_payroll_export_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=PAYROLL_EXPORT_SHEET_TAB, headers=PAYROLL_EXPORT_SHEET_HEADERS, last_col="N")
-
-
-def ensure_analytics_sheet(company_code: str | None) -> dict[str, Any]:
-    return ensure_dashboard_tab(company_code, tab=ANALYTICS_SHEET_TAB, headers=ANALYTICS_SHEET_HEADERS, last_col="G")
-
-
 def shift_sheet_cell(value: Any) -> str:
     if value is None:
         return ""
@@ -13180,444 +13254,6 @@ def employee_employment_status(employee: dict[str, Any]) -> str:
     return "Active"
 
 
-def employee_sheet_row(employee: dict[str, Any]) -> list[str]:
-    summary = employee_onboarding_summary(employee)
-    required_total = int(summary.get("required_total") or 0)
-    received_count = int(summary.get("received_count") or 0)
-    pending_labels = summary.get("pending_labels") if isinstance(summary.get("pending_labels"), list) else []
-    if required_total:
-        progress = f"{received_count}/{required_total} received"
-    else:
-        pending = int(employee.get("documents_pending") or 0)
-        complete = int(employee.get("documents_complete") or 0)
-        total = pending + complete
-        progress = f"{complete}/{total} received" if total else ""
-    return [
-        shift_sheet_cell(employee.get("name")),
-        digits(employee.get("phone")),
-        shift_sheet_cell(employee.get("position_title") or employee.get("position_code") or employee.get("role")),
-        shift_sheet_cell(employee.get("company_code") or "WATHEFNI"),
-        employee_employment_status(employee),
-        display_status(employee.get("onboarding_status") or "not_started"),
-        progress,
-        format_inline_list([str(item) for item in pending_labels]) if pending_labels else "",
-        shift_sheet_cell(employee.get("hire_date") or employee.get("hired_date") or employee.get("created_at")),
-        shift_sheet_cell(employee.get("start_date")),
-        shift_sheet_cell(employee.get("updated_at")),
-        shift_sheet_cell(employee.get("employee_key")),
-    ]
-
-
-def compact_sheet_note(value: Any, limit: int = 120) -> str:
-    text = re.sub(r"\s+", " ", str(value or "")).strip()
-    if len(text) <= limit:
-        return text
-    return text[: max(0, limit - 3)].rstrip() + "..."
-
-
-def compliance_document_label(row: dict[str, Any]) -> str:
-    return str(row.get("label") or item_display_label(str(row.get("document_type") or "document"))).strip()
-
-
-def compliance_validity_text(row: dict[str, Any]) -> str:
-    status = str(row.get("status") or "missing")
-    expiry = row.get("expiry_date")
-    days = row.get("days_until_expiry")
-    if status == "valid" and expiry:
-        if days is not None:
-            return f"Valid - expires in {days} days"
-        return f"Valid - expires {shift_sheet_cell(expiry)}"
-    if status == "expiring_soon" and days is not None:
-        return f"Expires in {days} days"
-    if status == "expired" and days is not None:
-        return f"Expired {abs(int(days))} days ago"
-    if status == "missing_expiry":
-        return "Needs expiry review"
-    if status == "missing":
-        return "Missing"
-    return status.replace("_", " ")
-
-
-def compliance_summary_list(labels: list[str], limit: int = 6) -> str:
-    if len(labels) <= limit:
-        return format_inline_list(labels)
-    shown = labels[:limit]
-    return f"{format_inline_list(shown)} and {len(labels) - limit} more"
-
-
-def compliance_detail_sheet_row(row: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(row.get("name")),
-        digits(row.get("phone")),
-        compliance_document_label(row),
-        shift_sheet_cell(row.get("status")),
-        shift_sheet_cell(row.get("expiry_date")),
-        compliance_validity_text(row),
-        shift_sheet_cell(row.get("last_reminded")),
-        shift_sheet_cell(row.get("reminder_count") if row.get("reminder_count") is not None else 0),
-        shift_sheet_cell(row.get("authority")),
-        compact_sheet_note(row.get("notes"), 160),
-        shift_sheet_cell(row.get("updated_at")),
-    ]
-
-
-def compliance_sheet_row(row: dict[str, Any]) -> list[str]:
-    return compliance_detail_sheet_row(row)[:10]
-
-
-def compliance_summary_rows(detail_rows: list[dict[str, Any]]) -> list[list[str]]:
-    grouped: dict[str, list[dict[str, Any]]] = {}
-    for row in detail_rows:
-        key = str(row.get("employee_key") or row.get("phone") or row.get("name") or "")
-        grouped.setdefault(key, []).append(row)
-
-    out: list[list[str]] = []
-    for rows in grouped.values():
-        first = rows[0]
-        valid: list[str] = []
-        missing: list[str] = []
-        expiring: list[str] = []
-        expired: list[str] = []
-        review: list[str] = []
-        next_expiry: tuple[Any, str] | None = None
-        for row in rows:
-            label = compliance_document_label(row)
-            status = str(row.get("status") or "missing")
-            expiry = row.get("expiry_date")
-            if status == "valid":
-                valid.append(label)
-            elif status == "expiring_soon":
-                expiring.append(label)
-            elif status == "expired":
-                expired.append(label)
-            elif status == "missing_expiry":
-                review.append(label)
-            elif status in {"missing", "pending", "requested"}:
-                missing.append(label)
-            else:
-                review.append(f"{label} ({status.replace('_', ' ')})")
-            if expiry and status in {"valid", "expiring_soon", "expired"}:
-                if next_expiry is None or str(expiry) < str(next_expiry[0]):
-                    next_expiry = (expiry, label)
-        if expired:
-            overall = "Critical"
-        elif expiring:
-            overall = "Expiring soon"
-        elif review:
-            overall = "Needs review"
-        elif missing:
-            overall = "Missing documents"
-        else:
-            overall = "Compliant"
-        notes: list[str] = []
-        if missing:
-            notes.append(f"Missing: {compliance_summary_list(missing)}")
-        if expiring:
-            notes.append(f"Expiring: {compliance_summary_list(expiring)}")
-        if expired:
-            notes.append(f"Expired: {compliance_summary_list(expired)}")
-        if review:
-            notes.append(f"Review: {compliance_summary_list(review)}")
-        if not notes:
-            notes.append("All tracked compliance documents are valid.")
-        out.append([
-            shift_sheet_cell(first.get("name")),
-            digits(first.get("phone")),
-            overall,
-            str(len(valid)),
-            str(len(missing)),
-            str(len(expiring)),
-            str(len(expired)),
-            str(len(review)),
-            f"{shift_sheet_cell(next_expiry[0])} ({next_expiry[1]})" if next_expiry else "",
-            compact_sheet_note(" ".join(notes), 180),
-        ])
-    out.sort(key=lambda item: (item[2] == "Compliant", item[0].lower()))
-    return out
-
-
-def shift_sheet_row(shift: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(shift.get("shift_date")),
-        shift_sheet_cell(shift.get("employee_name")),
-        digits(shift.get("employee_phone")),
-        format_shift_time(shift.get("start_time")) if shift.get("start_time") is not None else "",
-        format_shift_time(shift.get("end_time")) if shift.get("end_time") is not None else "",
-        shift_sheet_cell(shift.get("location")),
-        shift_sheet_cell(shift.get("role")),
-        shift_sheet_cell(shift.get("notes")),
-        shift_sheet_cell(shift.get("shift_id")),
-    ]
-
-
-def shift_history_sheet_row(shift: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(shift.get("shift_date")),
-        shift_sheet_cell(shift.get("employee_name")),
-        digits(shift.get("employee_phone")),
-        format_shift_time(shift.get("start_time")) if shift.get("start_time") is not None else "",
-        format_shift_time(shift.get("end_time")) if shift.get("end_time") is not None else "",
-        shift_sheet_cell(shift.get("location")),
-        shift_sheet_cell(shift.get("role")),
-        shift_sheet_cell(shift.get("status") or "scheduled"),
-        shift_sheet_cell(shift.get("notes")),
-        shift_sheet_cell(shift.get("shift_id")),
-        shift_sheet_cell(shift.get("updated_at") or shift.get("created_at")),
-    ]
-
-
-def employee_rows_from_db(company_code: str | None) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM employees
-                WHERE company_code=%s
-                ORDER BY name NULLS LAST, phone
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            return [dict(row) for row in cur.fetchall()]
-
-
-def sync_employee_sheet_from_db(phone: str, company_code: str | None) -> dict[str, Any]:
-    employee = find_employee_by_phone(phone)
-    if not employee:
-        return {"ok": False, "reason": "employee_not_found", "phone": digits(phone)}
-    company = (company_code or employee.get("company_code") or "WATHEFNI").upper()
-    if str(employee.get("company_code") or company).upper() != company:
-        return {"ok": False, "reason": "employee_company_mismatch", "phone": digits(phone), "company_code": company}
-    rows = employee_rows_from_db(company)
-    return replace_dashboard_tab_values(
-        company,
-        tab=EMPLOYEE_SHEET_TAB,
-        headers=EMPLOYEE_SHEET_HEADERS,
-        rows=[employee_sheet_row(row) for row in rows],
-        last_col="L",
-        clear_last_col="L",
-    )
-
-
-def compliance_rows_from_db(company_code: str | None) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT c.*, e.name, e.phone, e.company_code
-                FROM compliance_documents c
-                JOIN employees e ON e.employee_key=c.employee_key
-                WHERE e.company_code=%s
-                ORDER BY e.name NULLS LAST, e.phone, c.document_type
-                """,
-                (company,),
-            )
-            return [dict(row) for row in cur.fetchall()]
-
-
-def sync_compliance_sheets_from_db(company_code: str | None) -> dict[str, Any]:
-    rows = compliance_rows_from_db(company_code)
-    summary_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=COMPLIANCE_SHEET_TAB,
-        headers=COMPLIANCE_SHEET_HEADERS,
-        rows=compliance_summary_rows(rows),
-        last_col="J",
-        clear_last_col="K",
-    )
-    detail_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=COMPLIANCE_DETAIL_SHEET_TAB,
-        headers=COMPLIANCE_DETAIL_SHEET_HEADERS,
-        rows=[compliance_detail_sheet_row(row) for row in rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-    return {
-        "ok": bool(summary_sync.get("ok")) and bool(detail_sync.get("ok")),
-        "summary": summary_sync,
-        "details": detail_sync,
-        "row_count": len(rows),
-    }
-
-
-def sync_compliance_sheet_from_db(phone: str, company_code: str | None) -> dict[str, Any]:
-    employee = find_employee_by_phone(phone)
-    if not employee:
-        return {"ok": False, "reason": "employee_not_found", "phone": digits(phone)}
-    return sync_compliance_sheets_from_db(company_code or employee.get("company_code"))
-
-
-def sheets_sync_mode() -> str:
-    """How the optional Google Sheets export runs. The database is the source of
-    truth, so this must never block or break a workflow.
-
-      - "off"   : skip entirely (no Sheets calls at all)
-      - "sync"  : write inline, best-effort (never raises)
-      - "async" : write in a background thread, best-effort (default)
-    """
-    raw = str(planner_env().get("WATHEFNI_SHEETS_SYNC", "") or "").strip().lower()
-    if raw in ("off", "disabled", "none", "0", "false", "no"):
-        return "off"
-    if raw in ("sync", "blocking", "inline", "1", "true"):
-        return "sync"
-    return "async"
-
-
-def _sheets_executor() -> "concurrent.futures.ThreadPoolExecutor":
-    global _SHEETS_EXECUTOR
-    with _SHEETS_EXECUTOR_LOCK:
-        if _SHEETS_EXECUTOR is None:
-            _SHEETS_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="sheets-sync")
-        return _SHEETS_EXECUTOR
-
-
-def _safe_sheet_call(label: str, fn: Any, *args: Any, **kwargs: Any) -> dict[str, Any]:
-    """Run a Sheets operation so it can never raise into a workflow. Returns the
-    operation's dict result, or an ok=False marker if it failed."""
-    try:
-        result = fn(*args, **kwargs)
-        return result if isinstance(result, dict) else {"ok": bool(result)}
-    except Exception as exc:
-        logger.warning("sheets sync %s failed: %s", label, exc, exc_info=True)
-        return {"ok": False, "error": str(exc)[:300], "label": label}
-
-
-def replace_dashboard_tab_values(
-    company_code: str | None,
-    *,
-    tab: str,
-    headers: list[str],
-    rows: list[list[str]],
-    last_col: str,
-    clear_last_col: str | None = None,
-    max_rows: int = 2000,
-) -> dict[str, Any]:
-    mode = sheets_sync_mode()
-    if mode == "off":
-        return {"ok": True, "skipped": True, "reason": "sheets_sync_disabled", "tab": tab}
-    # Resolve the target up front so unconfigured companies stay a clean no-op and
-    # replies never claim a sheet was updated when none exists.
-    if not dashboard_sheet_id(company_code):
-        return {"ok": False, "skipped": True, "reason": "missing_sheet_id", "tab": tab}
-    if mode == "async":
-        _sheets_executor().submit(
-            _safe_sheet_call,
-            f"replace:{tab}",
-            _replace_dashboard_tab_values_blocking,
-            company_code,
-            tab=tab,
-            headers=headers,
-            rows=rows,
-            last_col=last_col,
-            clear_last_col=clear_last_col,
-            max_rows=max_rows,
-        )
-        return {"ok": True, "queued": True, "tab": tab, "row_count": len(rows)}
-    return _safe_sheet_call(
-        f"replace:{tab}",
-        _replace_dashboard_tab_values_blocking,
-        company_code,
-        tab=tab,
-        headers=headers,
-        rows=rows,
-        last_col=last_col,
-        clear_last_col=clear_last_col,
-        max_rows=max_rows,
-    )
-
-
-def _replace_dashboard_tab_values_blocking(
-    company_code: str | None,
-    *,
-    tab: str,
-    headers: list[str],
-    rows: list[list[str]],
-    last_col: str,
-    clear_last_col: str | None = None,
-    max_rows: int = 2000,
-) -> dict[str, Any]:
-    setup = ensure_dashboard_tab(company_code, tab=tab, headers=headers, last_col=last_col)
-    if not setup.get("ok"):
-        return {"ok": False, "setup": setup}
-    sheet_id = str(setup.get("sheet_id"))
-    clear_range = f"{tab}!A1:{clear_last_col or last_col}{max_rows}"
-    clear = run_gog_wathefni(["sheets", "clear", sheet_id, clear_range], timeout=30)
-    if not clear.get("ok"):
-        return {"ok": False, "setup": setup, "clear": clear}
-    values = [headers] + rows
-    end_row = max(1, len(values))
-    update = run_gog_wathefni(
-        ["sheets", "update", sheet_id, f"{tab}!A1:{last_col}{end_row}", "--values-json", json.dumps(values, ensure_ascii=False)],
-        timeout=30,
-    )
-    return {"ok": bool(update.get("ok")), "setup": setup, "clear": clear, "update": update, "row_count": len(rows)}
-
-
-def shift_sheet_rows_from_db(company_code: str | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM shift_assignments
-                WHERE company_code=%s
-                  AND status='scheduled'
-                ORDER BY shift_date, start_time, employee_name NULLS LAST
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            active_rows = [dict(row) for row in cur.fetchall()]
-            cur.execute(
-                """
-                SELECT *
-                FROM shift_assignments
-                WHERE company_code=%s
-                ORDER BY shift_date DESC, updated_at DESC, start_time, employee_name NULLS LAST
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            history_rows = [dict(row) for row in cur.fetchall()]
-    return active_rows, history_rows
-
-
-def sync_shift_sheets_from_db(company_code: str | None) -> dict[str, Any]:
-    active_rows, history_rows = shift_sheet_rows_from_db(company_code)
-    active_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=SHIFT_SHEET_TAB,
-        headers=SHIFT_SHEET_HEADERS,
-        rows=[shift_sheet_row(row) for row in active_rows],
-        last_col="I",
-        clear_last_col="K",
-    )
-    history_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=SHIFT_HISTORY_SHEET_TAB,
-        headers=SHIFT_HISTORY_SHEET_HEADERS,
-        rows=[shift_history_sheet_row(row) for row in history_rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-    return {
-        "ok": bool(active_sync.get("ok")) and bool(history_sync.get("ok")),
-        "active": active_sync,
-        "history": history_sync,
-    }
-
-
-def sync_shift_sheet_rows(company_code: str | None, shifts: list[dict[str, Any]]) -> dict[str, Any]:
-    if not shifts:
-        return {"ok": True, "skipped": True, "reason": "no_shifts"}
-    return sync_shift_sheets_from_db(company_code)
-
-
 def availability_time_window(row: dict[str, Any]) -> str:
     if row.get("start_time") and row.get("end_time"):
         return f"{format_shift_time(row.get('start_time'))}-{format_shift_time(row.get('end_time'))}"
@@ -13626,107 +13262,6 @@ def availability_time_window(row: dict[str, Any]) -> str:
     if row.get("end_time"):
         return f"until {format_shift_time(row.get('end_time'))}"
     return "All day"
-
-
-def availability_sheet_row(row: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(row.get("start_date")),
-        shift_sheet_cell(row.get("end_date")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        display_status(row.get("availability_type")),
-        display_status(row.get("status")),
-        availability_time_window(row),
-        shift_sheet_cell(row.get("reason")),
-        shift_sheet_cell(row.get("availability_id")),
-        shift_sheet_cell(row.get("updated_at") or row.get("created_at")),
-    ]
-
-
-def shift_swap_sheet_row(row: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(row.get("shift_date")),
-        shift_sheet_cell(row.get("requester_employee_name")),
-        digits(row.get("requester_employee_phone")),
-        shift_sheet_cell(row.get("target_employee_name")),
-        digits(row.get("target_employee_phone")),
-        display_status(row.get("status")),
-        shift_sheet_cell(row.get("requester_shift_id")),
-        shift_sheet_cell(row.get("target_shift_id")),
-        shift_sheet_cell(row.get("reason")),
-        shift_sheet_cell(row.get("swap_id")),
-        shift_sheet_cell(row.get("updated_at") or row.get("created_at")),
-    ]
-
-
-def availability_rows_from_db(company_code: str | None) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM employee_availability_requests
-                WHERE company_code=%s
-                ORDER BY start_date DESC, updated_at DESC, employee_name NULLS LAST
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            return [dict(row) for row in cur.fetchall()]
-
-
-def shift_swap_rows_from_db(company_code: str | None) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM shift_swap_requests
-                WHERE company_code=%s
-                ORDER BY requested_at DESC, shift_date DESC NULLS LAST
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            return [dict(row) for row in cur.fetchall()]
-
-
-def sync_availability_sheet(company_code: str | None) -> dict[str, Any]:
-    rows = availability_rows_from_db(company_code)
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=AVAILABILITY_SHEET_TAB,
-        headers=AVAILABILITY_SHEET_HEADERS,
-        rows=[availability_sheet_row(row) for row in rows],
-        last_col="J",
-        clear_last_col="J",
-    )
-
-
-def sync_shift_swaps_sheet(company_code: str | None) -> dict[str, Any]:
-    rows = shift_swap_rows_from_db(company_code)
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=SHIFT_SWAPS_SHEET_TAB,
-        headers=SHIFT_SWAPS_SHEET_HEADERS,
-        rows=[shift_swap_sheet_row(row) for row in rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-
-
-def sync_availability_rows(company_code: str | None, rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not rows:
-        return {"ok": True, "skipped": True, "reason": "no_availability_rows"}
-    return sync_availability_sheet(company_code)
-
-
-def sync_shift_swap_rows(company_code: str | None, rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not rows:
-        return {"ok": True, "skipped": True, "reason": "no_shift_swap_rows"}
-    return sync_shift_swaps_sheet(company_code)
 
 
 def attendance_date_from_action(action: dict[str, Any]) -> date:
@@ -13831,95 +13366,6 @@ def record_attendance_event(cur: Any, *, attendance: dict[str, Any] | None, comp
     )
 
 
-def attendance_sheet_row(row: dict[str, Any]) -> list[str]:
-    shift_text = ""
-    if row.get("scheduled_start") and row.get("scheduled_end"):
-        shift_text = f"{format_shift_time(row.get('scheduled_start'))}-{format_shift_time(row.get('scheduled_end'))}"
-    return [
-        shift_sheet_cell(row.get("attendance_date")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        shift_text,
-        shift_sheet_cell(row.get("check_in_at")),
-        shift_sheet_cell(row.get("check_out_at")),
-        display_status(row.get("status")),
-        shift_sheet_cell(row.get("late_minutes")),
-        shift_sheet_cell(row.get("early_leave_minutes")),
-        compact_sheet_note(row.get("notes"), 120),
-        shift_sheet_cell(row.get("attendance_id")),
-    ]
-
-
-def attendance_history_sheet_row(row: dict[str, Any]) -> list[str]:
-    base = attendance_sheet_row(row)
-    return base[:7] + [shift_sheet_cell(row.get("event_type") or row.get("status")), base[9], base[10], shift_sheet_cell(row.get("event_created_at") or row.get("updated_at") or row.get("created_at"))]
-
-
-def attendance_rows_from_db(company_code: str | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    company = (company_code or "WATHEFNI").upper()
-    today = kuwait_today()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM attendance_records
-                WHERE company_code=%s
-                  AND attendance_date >= %s
-                ORDER BY attendance_date DESC, employee_name NULLS LAST
-                LIMIT 1000
-                """,
-                (company, today - timedelta(days=7)),
-            )
-            active_rows = [dict(row) for row in cur.fetchall()]
-            cur.execute(
-                """
-                SELECT ar.*, ae.event_type, ae.created_at AS event_created_at
-                FROM attendance_records ar
-                LEFT JOIN LATERAL (
-                  SELECT event_type, created_at
-                  FROM attendance_events
-                  WHERE attendance_id=ar.attendance_id
-                  ORDER BY created_at DESC
-                  LIMIT 1
-                ) ae ON TRUE
-                WHERE ar.company_code=%s
-                ORDER BY ar.attendance_date DESC, ar.updated_at DESC
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            history_rows = [dict(row) for row in cur.fetchall()]
-    return active_rows, history_rows
-
-
-def sync_attendance_sheets_from_db(company_code: str | None) -> dict[str, Any]:
-    active_rows, history_rows = attendance_rows_from_db(company_code)
-    active_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=ATTENDANCE_SHEET_TAB,
-        headers=ATTENDANCE_SHEET_HEADERS,
-        rows=[attendance_sheet_row(row) for row in active_rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-    history_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=ATTENDANCE_HISTORY_SHEET_TAB,
-        headers=ATTENDANCE_HISTORY_SHEET_HEADERS,
-        rows=[attendance_history_sheet_row(row) for row in history_rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-    return {"ok": bool(active_sync.get("ok")) and bool(history_sync.get("ok")), "active": active_sync, "history": history_sync}
-
-
-def sync_attendance_sheet_rows(company_code: str | None, rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not rows:
-        return {"ok": True, "skipped": True, "reason": "no_attendance_rows"}
-    return sync_attendance_sheets_from_db(company_code)
-
-
 def leave_date_window(action: dict[str, Any]) -> tuple[date, date]:
     start_date, end_date = shift_query_window(action)
     if end_date < start_date:
@@ -13977,19 +13423,29 @@ def leave_shift_conflicts(cur: Any, *, company: str, employee_key: str, start_da
     return [dict(row) for row in cur.fetchall()]
 
 
-def leave_request_by_id(leave_id: str | None) -> dict[str, Any] | None:
+def leave_request_by_id(leave_id: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
     if not leave_id:
         return None
+    # Tenant isolation: when a company is known, a leave row from another company
+    # must never resolve — otherwise a guessed/leaked UUID could be acted on
+    # cross-tenant. Callers without a company (legacy smoke/soak harnesses) keep
+    # the unscoped behaviour.
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM leave_requests WHERE leave_id=%s LIMIT 1", (leave_id,))
+            if company_code:
+                cur.execute(
+                    "SELECT * FROM leave_requests WHERE leave_id=%s AND company_code=%s LIMIT 1",
+                    (leave_id, str(company_code).upper()),
+                )
+            else:
+                cur.execute("SELECT * FROM leave_requests WHERE leave_id=%s LIMIT 1", (leave_id,))
             row = cur.fetchone()
             return dict(row) if row else None
 
 
 def resolve_leave_request(action: dict[str, Any], *, company_code: str | None, statuses: tuple[str, ...] = ("requested",)) -> dict[str, Any] | None:
-    explicit = leave_request_by_id(str(action.get("leave_id") or "").strip())
     company = (company_code or "WATHEFNI").upper()
+    explicit = leave_request_by_id(str(action.get("leave_id") or "").strip(), company_code=company)
     if explicit:
         employee = find_employee_by_phone(explicit.get("employee_phone"))
         if action.get("viewer_phone") and not manager_scope_allows_employee(employee or {"employee_key": explicit.get("employee_key"), "company_code": company}, company_code=company, viewer_phone=action.get("viewer_phone")):
@@ -14027,112 +13483,6 @@ def resolve_leave_request(action: dict[str, Any], *, company_code: str | None, s
             )
             rows = [dict(row) for row in cur.fetchall()]
     return rows[0] if len(rows) == 1 else None
-
-
-def leave_sheet_row(row: dict[str, Any]) -> list[str]:
-    conflicts = row.get("shift_conflict_count")
-    return [
-        shift_sheet_cell(row.get("start_date")),
-        shift_sheet_cell(row.get("end_date")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        display_status(row.get("leave_type")),
-        display_status(row.get("status")),
-        compact_sheet_note(row.get("reason"), 140),
-        shift_sheet_cell(conflicts if conflicts is not None else ""),
-        shift_sheet_cell(row.get("leave_id")),
-        shift_sheet_cell(row.get("updated_at") or row.get("created_at")),
-    ]
-
-
-def leave_history_sheet_row(row: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(row.get("start_date")),
-        shift_sheet_cell(row.get("end_date")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        display_status(row.get("leave_type")),
-        display_status(row.get("status")),
-        shift_sheet_cell(row.get("event_type") or row.get("status")),
-        compact_sheet_note(row.get("reason"), 120),
-        compact_sheet_note(row.get("decision_note"), 120),
-        shift_sheet_cell(row.get("leave_id")),
-        shift_sheet_cell(row.get("event_created_at") or row.get("updated_at") or row.get("created_at")),
-    ]
-
-
-def leave_rows_from_db(company_code: str | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    company = (company_code or "WATHEFNI").upper()
-    today = kuwait_today()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT lr.*,
-                  (
-                    SELECT COUNT(*)
-                    FROM shift_assignments s
-                    WHERE s.company_code=lr.company_code
-                      AND s.employee_key=lr.employee_key
-                      AND s.shift_date BETWEEN lr.start_date AND lr.end_date
-                      AND s.status='scheduled'
-                  ) AS shift_conflict_count
-                FROM leave_requests lr
-                WHERE lr.company_code=%s
-                  AND lr.status IN ('requested','approved')
-                  AND lr.end_date >= %s
-                ORDER BY lr.start_date, lr.employee_name NULLS LAST
-                LIMIT 1000
-                """,
-                (company, today - timedelta(days=7)),
-            )
-            active_rows = [dict(row) for row in cur.fetchall()]
-            cur.execute(
-                """
-                SELECT lr.*, le.event_type, le.created_at AS event_created_at
-                FROM leave_requests lr
-                LEFT JOIN LATERAL (
-                  SELECT event_type, created_at
-                  FROM leave_events
-                  WHERE leave_id=lr.leave_id
-                  ORDER BY created_at DESC
-                  LIMIT 1
-                ) le ON TRUE
-                WHERE lr.company_code=%s
-                ORDER BY lr.updated_at DESC
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            history_rows = [dict(row) for row in cur.fetchall()]
-    return active_rows, history_rows
-
-
-def sync_leave_sheets_from_db(company_code: str | None) -> dict[str, Any]:
-    active_rows, history_rows = leave_rows_from_db(company_code)
-    active_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=LEAVE_SHEET_TAB,
-        headers=LEAVE_SHEET_HEADERS,
-        rows=[leave_sheet_row(row) for row in active_rows],
-        last_col="J",
-        clear_last_col="K",
-    )
-    history_sync = replace_dashboard_tab_values(
-        company_code,
-        tab=LEAVE_HISTORY_SHEET_TAB,
-        headers=LEAVE_HISTORY_SHEET_HEADERS,
-        rows=[leave_history_sheet_row(row) for row in history_rows],
-        last_col="K",
-        clear_last_col="K",
-    )
-    return {"ok": bool(active_sync.get("ok")) and bool(history_sync.get("ok")), "active": active_sync, "history": history_sync}
-
-
-def sync_leave_sheet_rows(company_code: str | None, rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not rows:
-        return {"ok": True, "skipped": True, "reason": "no_leave_rows"}
-    return sync_leave_sheets_from_db(company_code)
 
 
 def decimal_hours(minutes: int | float | None) -> str:
@@ -14191,36 +13541,7 @@ def payroll_period_from_action(action: dict[str, Any]) -> tuple[date, date]:
     return shift_query_window(action)
 
 
-def payroll_hours_row(summary: dict[str, Any]) -> list[str]:
-    return [
-        shift_sheet_cell(summary.get("period")),
-        shift_sheet_cell(summary.get("employee_name")),
-        digits(summary.get("employee_phone")),
-        decimal_hours(summary.get("scheduled_minutes")),
-        decimal_hours(summary.get("worked_minutes")),
-        decimal_hours(summary.get("approved_leave_minutes")),
-        decimal_hours(summary.get("absent_minutes")),
-        shift_sheet_cell(summary.get("late_minutes")),
-        shift_sheet_cell(summary.get("early_leave_minutes")),
-        decimal_hours(summary.get("overtime_minutes")),
-        shift_sheet_cell(summary.get("payroll_status")),
-        shift_sheet_cell(summary.get("employee_key")),
-    ]
-
-
-def sync_payroll_hours_sheet(company_code: str | None, result: dict[str, Any]) -> dict[str, Any]:
-    summaries = result.get("summaries") if isinstance(result.get("summaries"), list) else []
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=PAYROLL_HOURS_SHEET_TAB,
-        headers=PAYROLL_HOURS_SHEET_HEADERS,
-        rows=[payroll_hours_row(row) for row in summaries],
-        last_col="L",
-        clear_last_col="L",
-    )
-
-
-def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync_sheet: bool = True) -> dict[str, Any]:
+def list_payroll_hours(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     start_date, end_date = payroll_period_from_action(action)
     scope = org_scope_for_action(action, company)
@@ -14240,6 +13561,12 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync
     scope_clause_shifts, scope_params_shifts = employee_scope_sql("s", scope)
     scope_clause_attendance, scope_params_attendance = employee_scope_sql("ar", scope)
     scope_clause_leave, scope_params_leave = employee_scope_sql("lr", scope)
+    # These three reads are the SOURCE data for payroll hour aggregation (and the
+    # draft timesheets generated from it). They are intentionally UNCAPPED and
+    # bounded only by the pay period + company (+ optional employee/scope): a hard
+    # LIMIT here would silently drop employees from the money path once a company
+    # has enough shifts/attendance/leave in a period, producing wrong pay. Rows
+    # are grouped per-employee below, so the working set stays one pay period wide.
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -14252,7 +13579,6 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync
                   {employee_clause.format(alias='s') if employee_clause else ''}
                   {scope_clause_shifts}
                 ORDER BY s.employee_name NULLS LAST, s.shift_date, s.start_time
-                LIMIT 2000
                 """,
                 [*params, *scope_params_shifts],
             )
@@ -14266,7 +13592,6 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync
                   {employee_clause.format(alias='ar') if employee_clause else ''}
                   {scope_clause_attendance}
                 ORDER BY ar.employee_name NULLS LAST, ar.attendance_date
-                LIMIT 2000
                 """,
                 [*params, *scope_params_attendance],
             )
@@ -14282,7 +13607,6 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync
                   {employee_clause.format(alias='lr') if employee_clause else ''}
                   {scope_clause_leave}
                 ORDER BY lr.employee_name NULLS LAST, lr.start_date
-                LIMIT 1000
                 """,
                 [*leave_params, *scope_params_leave],
             )
@@ -14377,8 +13701,6 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None, sync
         "source_counts": {"shifts": len(shifts), "attendance": len(attendance_rows), "approved_leave": len(leaves)},
         "scope": json_safe(scope),
     }
-    scoped_view = bool(scope.get("restricted") or scope.get("requested_branch"))
-    result["sheet_sync"] = sync_payroll_hours_sheet(company, result) if sync_sheet and not scoped_view else {"ok": True, "skipped": True, "reason": "scoped_or_employee_self_service_read"}
     return result
 
 
@@ -14389,35 +13711,6 @@ def analytics_insight(metric: str, subject: str, value: Any, detail: str) -> dic
         "value": value,
         "detail": detail,
     }
-
-
-def analytics_sheet_row(result: dict[str, Any], insight: dict[str, Any]) -> list[str]:
-    scope = result.get("scope") if isinstance(result.get("scope"), dict) else {}
-    scope_text = "Scoped manager view" if scope.get("restricted") else "Company"
-    if scope.get("requested_branch"):
-        branch = scope.get("requested_branch") if isinstance(scope.get("requested_branch"), dict) else {}
-        scope_text = str(branch.get("branch_name") or branch.get("branch_key") or scope_text)
-    return [
-        format_shift_date_range(result.get("start_date"), result.get("end_date")),
-        scope_text,
-        shift_sheet_cell(insight.get("metric")),
-        shift_sheet_cell(insight.get("subject")),
-        shift_sheet_cell(insight.get("value")),
-        shift_sheet_cell(insight.get("detail")),
-        now_iso(),
-    ]
-
-
-def sync_analytics_sheet(company_code: str | None, result: dict[str, Any]) -> dict[str, Any]:
-    insights = result.get("insights") if isinstance(result.get("insights"), list) else []
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=ANALYTICS_SHEET_TAB,
-        headers=ANALYTICS_SHEET_HEADERS,
-        rows=[analytics_sheet_row(result, row) for row in insights],
-        last_col="G",
-        clear_last_col="G",
-    )
 
 
 def analytics_summary_counts(action: dict[str, Any], *, company: str, start_date: date, end_date: date, scope: dict[str, Any]) -> dict[str, int]:
@@ -14526,14 +13819,14 @@ def analytics_branch_absences(*, company: str, start_date: date, end_date: date,
             return [dict(row) for row in cur.fetchall()]
 
 
-def workforce_analytics(action: dict[str, Any], *, company_code: str | None, sync_sheet: bool = True) -> dict[str, Any]:
+def workforce_analytics(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     start_date, end_date = payroll_period_from_action(action)
     scope = org_scope_for_action(action, company)
     if scope.get("blocked"):
         return {"ok": False, "error": "employee_outside_manager_scope", "action": action, "scope": json_safe(scope)}
     metric = analytics_metric_from_text(action.get("metric") or action.get("prompt_text") or action.get("query") or "")
-    payroll = list_payroll_hours({**action, "start_date": start_date.isoformat(), "end_date": end_date.isoformat()}, company_code=company, sync_sheet=False)
+    payroll = list_payroll_hours({**action, "start_date": start_date.isoformat(), "end_date": end_date.isoformat()}, company_code=company)
     if not payroll.get("ok"):
         return payroll
     summaries = payroll.get("summaries") if isinstance(payroll.get("summaries"), list) else []
@@ -14584,57 +13877,7 @@ def workforce_analytics(action: dict[str, Any], *, company_code: str | None, syn
         "source_counts": {**(payroll.get("source_counts") if isinstance(payroll.get("source_counts"), dict) else {}), "analytics_insights": len(insights)},
         "scope": json_safe(scope),
     }
-    scoped_view = bool(scope.get("restricted") or scope.get("requested_branch"))
-    result["sheet_sync"] = sync_analytics_sheet(company, result) if sync_sheet and not scoped_view else {"ok": True, "skipped": True, "reason": "scoped_manager_read"}
     return result
-
-
-def timesheet_sheet_row(row: dict[str, Any]) -> list[str]:
-    return [
-        format_shift_date_range(row.get("period_start"), row.get("period_end")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        decimal_hours(row.get("scheduled_minutes")),
-        decimal_hours(row.get("worked_minutes")),
-        decimal_hours(row.get("approved_leave_minutes")),
-        decimal_hours(row.get("absent_minutes")),
-        shift_sheet_cell(row.get("late_minutes")),
-        shift_sheet_cell(row.get("early_leave_minutes")),
-        decimal_hours(row.get("overtime_minutes")),
-        display_status(row.get("status")),
-        shift_sheet_cell(row.get("payroll_status")),
-        shift_sheet_cell(row.get("timesheet_id")),
-        shift_sheet_cell(row.get("updated_at") or row.get("created_at")),
-    ]
-
-
-def timesheet_rows_from_db(company_code: str | None) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM payroll_timesheets
-                WHERE company_code=%s
-                ORDER BY period_start DESC, employee_name NULLS LAST, updated_at DESC
-                LIMIT 1000
-                """,
-                (company,),
-            )
-            return [dict(row) for row in cur.fetchall()]
-
-
-def sync_timesheet_approvals_sheet(company_code: str | None) -> dict[str, Any]:
-    rows = timesheet_rows_from_db(company_code)
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=TIMESHEET_APPROVALS_SHEET_TAB,
-        headers=TIMESHEET_APPROVALS_SHEET_HEADERS,
-        rows=[timesheet_sheet_row(row) for row in rows],
-        last_col="N",
-        clear_last_col="N",
-    )
 
 
 def record_timesheet_event(cur: Any, *, timesheet: dict[str, Any] | None, company_code: str, event_type: str, payload: dict[str, Any], created_by_phone: str | None) -> None:
@@ -14740,7 +13983,6 @@ def create_timesheet_review(action: dict[str, Any], *, company_code: str | None,
                 created_or_updated.append(row)
                 record_timesheet_event(cur, timesheet=row, company_code=company, event_type="draft_refreshed", payload={"timesheet": row, "summary": summary, "action": action}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_timesheet_approvals_sheet(company)
     return {
         "ok": True,
         "company_code": company,
@@ -14749,25 +13991,33 @@ def create_timesheet_review(action: dict[str, Any], *, company_code: str | None,
         "timesheets": json_safe(created_or_updated),
         "skipped_approved": json_safe(skipped_approved),
         "count": len(created_or_updated),
-        "sheet_sync": json_safe(sheet_sync),
-        "payroll": {key: payroll.get(key) for key in ("source_counts", "count", "sheet_sync")},
+        "payroll": {key: payroll.get(key) for key in ("source_counts", "count")},
         "action": action,
     }
 
 
-def timesheet_by_id(timesheet_id: str | None) -> dict[str, Any] | None:
+def timesheet_by_id(timesheet_id: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
     if not timesheet_id:
         return None
+    # Tenant isolation on a money-adjacent lookup: when a company is known, a
+    # timesheet from another company must never resolve — a guessed/leaked UUID
+    # could otherwise be approved/rejected cross-tenant.
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM payroll_timesheets WHERE timesheet_id=%s LIMIT 1", (timesheet_id,))
+            if company_code:
+                cur.execute(
+                    "SELECT * FROM payroll_timesheets WHERE timesheet_id=%s AND company_code=%s LIMIT 1",
+                    (timesheet_id, str(company_code).upper()),
+                )
+            else:
+                cur.execute("SELECT * FROM payroll_timesheets WHERE timesheet_id=%s LIMIT 1", (timesheet_id,))
             row = cur.fetchone()
             return dict(row) if row else None
 
 
 def resolve_timesheets(action: dict[str, Any], *, company_code: str | None, statuses: tuple[str, ...] = ("draft",)) -> list[dict[str, Any]]:
-    explicit = timesheet_by_id(str(action.get("timesheet_id") or "").strip())
     company = (company_code or "WATHEFNI").upper()
+    explicit = timesheet_by_id(str(action.get("timesheet_id") or "").strip(), company_code=company)
     if explicit:
         employee_ref = {"employee_key": explicit.get("employee_key"), "company_code": company}
         if action.get("viewer_phone") and not manager_scope_allows_employee(employee_ref, company_code=company, viewer_phone=action.get("viewer_phone")):
@@ -14821,10 +14071,10 @@ def decide_timesheets(action: dict[str, Any], *, company_code: str | None, creat
                     f"""
                     UPDATE payroll_timesheets
                     SET status=%s, decided_by_phone=%s, decision_note=%s, {timestamp_col}=now(), updated_at=now()
-                    WHERE timesheet_id=%s AND status='draft'
+                    WHERE timesheet_id=%s AND company_code=%s AND status='draft'
                     RETURNING *
                     """,
-                    (status_value, digits(created_by_phone), decision_note, row.get("timesheet_id")),
+                    (status_value, digits(created_by_phone), decision_note, row.get("timesheet_id"), company),
                 )
                 updated = cur.fetchone()
                 if not updated:
@@ -14833,8 +14083,7 @@ def decide_timesheets(action: dict[str, Any], *, company_code: str | None, creat
                 updated_rows.append(updated_dict)
                 record_timesheet_event(cur, timesheet=updated_dict, company_code=company, event_type=status_value, payload={"timesheet": updated_dict, "action": action}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_timesheet_approvals_sheet(company)
-    return {"ok": True, "company_code": company, "decision": status_value, "timesheets": json_safe(updated_rows), "count": len(updated_rows), "sheet_sync": json_safe(sheet_sync), "action": action}
+    return {"ok": True, "company_code": company, "decision": status_value, "timesheets": json_safe(updated_rows), "count": len(updated_rows), "action": action}
 
 
 def approve_timesheet(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -14868,20 +14117,54 @@ def list_timesheets(action: dict[str, Any], *, company_code: str | None) -> dict
     if scope_clause:
         where.append(scope_clause.removeprefix("AND "))
         params.extend(scope_params)
+    # Pagination. Default limit=200 keeps every existing caller identical; the
+    # dashboard passes limit/offset to page through a period with >200 timesheets
+    # (a company with >200 employees) instead of silently dropping the rest. The
+    # PK tiebreaker makes the sort a total order so OFFSET paging is stable, and
+    # COUNT(*) OVER() rides the same scan for an accurate total + has_more.
+    row_limit, offset = _paginate_params(action, default_limit=200, max_limit=500)
+    params.extend([row_limit, offset])
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT pt.*
+                SELECT pt.*,
+                       COUNT(*) OVER() AS _total_count,
+                       COUNT(*) FILTER (WHERE pt.status='draft') OVER() AS _draft_count
                 FROM payroll_timesheets pt
                 WHERE {' AND '.join(where)}
-                ORDER BY pt.employee_name NULLS LAST, pt.updated_at DESC
-                LIMIT 200
+                ORDER BY pt.employee_name NULLS LAST, pt.updated_at DESC, pt.timesheet_id
+                LIMIT %s OFFSET %s
                 """,
                 params,
             )
             rows = [dict(row) for row in cur.fetchall()]
-    return {"ok": True, "company_code": company, "start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "status_filter": status_filter if status_filter in allowed_statuses else "", "timesheets": json_safe(rows), "count": len(rows), "employee": json_safe(employee) if employee else None, "scope": json_safe(scope), "action": action}
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    # True count of draft (awaiting-review) timesheets across the WHOLE filtered
+    # period, not just the loaded page — the "N timesheets need review" banner must
+    # not shrink to a page length once a period has >200 employees.
+    draft_count = int(rows[0]["_draft_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+        row.pop("_draft_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {
+        "ok": True,
+        "company_code": company,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "status_filter": status_filter if status_filter in allowed_statuses else "",
+        "timesheets": json_safe(rows),
+        "count": len(rows),
+        "draft_count": draft_count,
+        "employee": json_safe(employee) if employee else None,
+        "scope": json_safe(scope),
+        "action": action,
+        "total_count": total_count,
+        "limit": row_limit,
+        "offset": offset,
+        "has_more": has_more,
+    }
 
 
 def default_payroll_policy() -> dict[str, Any]:
@@ -15096,37 +14379,6 @@ def set_payroll_policy(action: dict[str, Any], *, company_code: str | None, crea
     return {"ok": True, "company_code": company, "policy": json_safe(new_policy), "updates": json_safe(meaningful), "row": json_safe(row)}
 
 
-def payroll_preview_row(row: dict[str, Any]) -> list[str]:
-    amount = row.get("estimated_amount_kwd")
-    return [
-        shift_sheet_cell(row.get("period")),
-        shift_sheet_cell(row.get("employee_name")),
-        digits(row.get("employee_phone")),
-        shift_sheet_cell(row.get("employee_pay_type")),
-        decimal_hours(row.get("payable_minutes")),
-        decimal_hours(row.get("worked_minutes")),
-        decimal_hours(row.get("paid_leave_minutes")),
-        decimal_hours(row.get("deduction_minutes")),
-        decimal_hours(row.get("overtime_review_minutes")),
-        "" if amount is None else f"{float(amount):.3f}",
-        shift_sheet_cell(row.get("amount_status")),
-        shift_sheet_cell(", ".join(row.get("policy_flags") or [])),
-        shift_sheet_cell(row.get("timesheet_id")),
-    ]
-
-
-def sync_payroll_preview_sheet(company_code: str | None, result: dict[str, Any]) -> dict[str, Any]:
-    rows = result.get("preview_rows") if isinstance(result.get("preview_rows"), list) else []
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=PAYROLL_PREVIEW_SHEET_TAB,
-        headers=PAYROLL_PREVIEW_SHEET_HEADERS,
-        rows=[payroll_preview_row(row) for row in rows],
-        last_col="M",
-        clear_last_col="M",
-    )
-
-
 def payroll_preview_totals(preview_rows: list[dict[str, Any]]) -> dict[str, Any]:
     amount_values = [row.get("estimated_amount_kwd") for row in preview_rows if row.get("estimated_amount_kwd") is not None]
     status_values = sorted({str(row.get("amount_status") or "") for row in preview_rows if row.get("amount_status")})
@@ -15139,62 +14391,6 @@ def payroll_preview_totals(preview_rows: list[dict[str, Any]]) -> dict[str, Any]
         "amount_statuses": status_values,
         "payment_processing": "disabled",
     }
-
-
-def payroll_export_sheet_row(export: dict[str, Any], preview_row: dict[str, Any]) -> list[str]:
-    amount = preview_row.get("estimated_amount_kwd")
-    period = preview_row.get("period") or format_shift_date_range(export.get("period_start"), export.get("period_end"))
-    return [
-        shift_sheet_cell(export.get("created_at")),
-        shift_sheet_cell(export.get("export_id")),
-        shift_sheet_cell(period),
-        shift_sheet_cell(preview_row.get("employee_name")),
-        digits(preview_row.get("employee_phone")),
-        shift_sheet_cell(preview_row.get("employee_pay_type")),
-        decimal_hours(preview_row.get("payable_minutes")),
-        decimal_hours(preview_row.get("deduction_minutes")),
-        decimal_hours(preview_row.get("overtime_review_minutes")),
-        "" if amount is None else f"{float(amount):.3f}",
-        shift_sheet_cell(preview_row.get("amount_status")),
-        shift_sheet_cell(", ".join(preview_row.get("policy_flags") or [])),
-        shift_sheet_cell(preview_row.get("timesheet_id")),
-        shift_sheet_cell(export.get("status") or "exported"),
-    ]
-
-
-def payroll_export_rows_from_db(company_code: str | None) -> list[list[str]]:
-    company = (company_code or "WATHEFNI").upper()
-    rows: list[list[str]] = []
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM payroll_exports
-                WHERE company_code=%s
-                ORDER BY created_at DESC
-                LIMIT 200
-                """,
-                (company,),
-            )
-            exports = [dict(row) for row in cur.fetchall()]
-    for export in exports:
-        preview_rows = export.get("preview_snapshot") if isinstance(export.get("preview_snapshot"), list) else []
-        for preview_row in preview_rows:
-            if isinstance(preview_row, dict):
-                rows.append(payroll_export_sheet_row(export, preview_row))
-    return rows
-
-
-def sync_payroll_export_sheet(company_code: str | None) -> dict[str, Any]:
-    return replace_dashboard_tab_values(
-        company_code,
-        tab=PAYROLL_EXPORT_SHEET_TAB,
-        headers=PAYROLL_EXPORT_SHEET_HEADERS,
-        rows=payroll_export_rows_from_db(company_code),
-        last_col="N",
-        clear_last_col="N",
-    )
 
 
 def payroll_preview_from_timesheet(row: dict[str, Any], policy: dict[str, Any]) -> dict[str, Any]:
@@ -15225,6 +14421,7 @@ def payroll_preview_from_timesheet(row: dict[str, Any], policy: dict[str, Any]) 
     elif early:
         flags.append("early_leave_review")
     overtime_review = 0
+    overtime_capped_minutes = 0
     if policy.get("overtime_policy") == "review_only" and overtime:
         overtime_review = overtime
         flags.append("overtime_review")
@@ -15233,8 +14430,13 @@ def payroll_preview_from_timesheet(row: dict[str, Any], policy: dict[str, Any]) 
     elif policy.get("overtime_policy") == "capped" and overtime:
         cap = int(policy.get("overtime_cap_minutes") or 0)
         if cap and overtime > cap:
+            # Pay overtime only up to the cap: the excess must actually be removed
+            # from payable minutes, not merely flagged. Before, a "capped" policy
+            # still paid every overtime minute -- the cap was cosmetic and money
+            # went out uncapped.
+            overtime_capped_minutes = overtime - cap
             flags.append("overtime_capped")
-    payable = max(0, worked + paid_leave - deduction)
+    payable = max(0, worked + paid_leave - deduction - overtime_capped_minutes)
     amount = None
     amount_status = "rate_not_configured"
     rate = policy.get("default_hourly_rate_kwd")
@@ -15258,6 +14460,7 @@ def payroll_preview_from_timesheet(row: dict[str, Any], policy: dict[str, Any]) 
         "deduction_minutes": deduction,
         "payable_minutes": payable,
         "overtime_review_minutes": overtime_review,
+        "overtime_capped_minutes": overtime_capped_minutes,
         "estimated_amount_kwd": amount,
         "amount_status": amount_status,
         "policy_flags": flags or ["ready"],
@@ -15284,13 +14487,17 @@ def preview_payroll(action: dict[str, Any], *, company_code: str | None) -> dict
         params.extend(scope_params)
     with db_connect() as conn:
         with conn.cursor() as cur:
+            # Payroll is a money path: it MUST include every approved timesheet for
+            # the period, so this read is intentionally uncapped (bounded already by
+            # company + period + status='approved', i.e. one row per paid employee).
+            # A LIMIT here would silently underpay a large company. The PK tiebreaker
+            # keeps ordering deterministic for stable export snapshots.
             cur.execute(
                 f"""
                 SELECT pt.*
                 FROM payroll_timesheets pt
                 WHERE {' AND '.join(where)}
-                ORDER BY pt.employee_name NULLS LAST
-                LIMIT 500
+                ORDER BY pt.employee_name NULLS LAST, pt.timesheet_id
                 """,
                 params,
             )
@@ -15309,8 +14516,6 @@ def preview_payroll(action: dict[str, Any], *, company_code: str | None) -> dict
         "scope": json_safe(scope),
         "action": action,
     }
-    scoped_view = bool(scope.get("restricted") or scope.get("requested_branch"))
-    result["sheet_sync"] = sync_payroll_preview_sheet(company, result) if not scoped_view else {"ok": True, "skipped": True, "reason": "scoped_payroll_preview"}
     return result
 
 
@@ -15366,14 +14571,6 @@ def export_payroll(action: dict[str, Any], *, company_code: str | None, created_
                 (export_row.get("export_id"), company, Json(json_safe({"export": export_row, "totals": totals, "action": action})), digits(created_by_phone)),
             )
         conn.commit()
-    sheet_sync = sync_payroll_export_sheet(company)
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute("UPDATE payroll_exports SET sheet_sync=%s WHERE export_id=%s RETURNING *", (Json(json_safe(sheet_sync)), export_row.get("export_id")))
-            refreshed = cur.fetchone()
-            if refreshed:
-                export_row = dict(refreshed)
-        conn.commit()
     return {
         "ok": True,
         "company_code": company,
@@ -15385,8 +14582,6 @@ def export_payroll(action: dict[str, Any], *, company_code: str | None, created_
         "totals": json_safe(totals),
         "preview_rows": json_safe(preview_rows),
         "policy": json_safe(preview.get("policy") if isinstance(preview.get("policy"), dict) else {}),
-        "preview_sheet_sync": json_safe(preview.get("sheet_sync") if isinstance(preview.get("sheet_sync"), dict) else {}),
-        "sheet_sync": json_safe(sheet_sync),
         "action": action,
     }
 
@@ -15485,8 +14680,7 @@ def request_leave(action: dict[str, Any], *, company_code: str | None, created_b
             leave = dict(cur.fetchone())
             record_leave_event(cur, leave=leave, company_code=company, event_type="requested", payload={"action": action, "leave": leave, "shift_conflicts": conflicts}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_leave_sheet_rows(company, [leave])
-    return {"ok": True, "leave": json_safe(leave), "employee": json_safe(employee), "shift_conflicts": json_safe(conflicts), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": True, "leave": json_safe(leave), "employee": json_safe(employee), "shift_conflicts": json_safe(conflicts)}
 
 
 # --- Leave balances P1 (dark-launched behind WATHEFNI_LEAVE_BALANCES) ---------
@@ -15873,10 +15067,10 @@ def approve_leave_request(action: dict[str, Any], *, company_code: str | None, c
                 """
                 UPDATE leave_requests
                 SET status='approved', decision_note=%s, decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE leave_id=%s
+                WHERE leave_id=%s AND company_code=%s
                 RETURNING *
                 """,
-                (str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), leave.get("leave_id")),
+                (str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), leave.get("leave_id"), company),
             )
             updated = dict(cur.fetchone())
             record_leave_event(cur, leave=updated, company_code=company, event_type="approved", payload={"action": action, "leave": updated, "shift_conflicts": conflicts}, created_by_phone=created_by_phone)
@@ -15902,11 +15096,9 @@ def approve_leave_request(action: dict[str, Any], *, company_code: str | None, c
                 except Exception:
                     logger.warning("observe-only leave consumption failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
-    sheet_sync = sync_leave_sheet_rows(company, [updated])
-    attendance_sync = sync_attendance_sheet_rows(company, attendance_updates) if attendance_updates else {"ok": True, "skipped": True, "reason": "no_attendance_updates"}
     employee = find_employee_by_phone(updated.get("employee_phone"))
     notification = notify_employee_leave_decision(employee or updated, updated, "approved", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
-    return {"ok": True, "leave": json_safe(updated), "shift_conflicts": json_safe(conflicts), "attendance_updates": json_safe(attendance_updates), "sheet_sync": json_safe(sheet_sync), "attendance_sync": json_safe(attendance_sync), "employee_notification": json_safe(notification)}
+    return {"ok": True, "leave": json_safe(updated), "shift_conflicts": json_safe(conflicts), "attendance_updates": json_safe(attendance_updates), "employee_notification": json_safe(notification)}
 
 
 def reject_leave_request(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None, account_id: str | None = None) -> dict[str, Any]:
@@ -15923,18 +15115,17 @@ def reject_leave_request(action: dict[str, Any], *, company_code: str | None, cr
                 """
                 UPDATE leave_requests
                 SET status='rejected', decision_note=%s, decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE leave_id=%s
+                WHERE leave_id=%s AND company_code=%s
                 RETURNING *
                 """,
-                (str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), leave.get("leave_id")),
+                (str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), leave.get("leave_id"), company),
             )
             updated = dict(cur.fetchone())
             record_leave_event(cur, leave=updated, company_code=company, event_type="rejected", payload={"action": action, "leave": updated}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_leave_sheet_rows(company, [updated])
     employee = find_employee_by_phone(updated.get("employee_phone"))
     notification = notify_employee_leave_decision(employee or updated, updated, "rejected", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
-    return {"ok": True, "leave": json_safe(updated), "sheet_sync": json_safe(sheet_sync), "employee_notification": json_safe(notification)}
+    return {"ok": True, "leave": json_safe(updated), "employee_notification": json_safe(notification)}
 
 
 def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None, account_id: str | None = None) -> dict[str, Any]:
@@ -15951,10 +15142,10 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
                 """
                 UPDATE leave_requests
                 SET status='cancelled', decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE leave_id=%s
+                WHERE leave_id=%s AND company_code=%s
                 RETURNING *
                 """,
-                (digits(created_by_phone), leave.get("leave_id")),
+                (digits(created_by_phone), leave.get("leave_id"), company),
             )
             updated = dict(cur.fetchone())
             record_leave_event(cur, leave=updated, company_code=company, event_type="cancelled", payload={"action": action, "leave": updated}, created_by_phone=created_by_phone)
@@ -15966,10 +15157,9 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
                 except Exception:
                     logger.warning("observe-only leave reversal failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
-    sheet_sync = sync_leave_sheet_rows(company, [updated])
     employee = find_employee_by_phone(updated.get("employee_phone"))
     notification = notify_employee_leave_decision(employee or updated, updated, "cancelled", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
-    return {"ok": True, "leave": json_safe(updated), "sheet_sync": json_safe(sheet_sync), "employee_notification": json_safe(notification)}
+    return {"ok": True, "leave": json_safe(updated), "employee_notification": json_safe(notification)}
 
 
 def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
@@ -15994,8 +15184,27 @@ def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> 
             status_filter = "requested"
         elif "approved" in normalized or "off" in normalized:
             status_filter = "approved"
-    params: list[Any] = [company, end_date, start_date]
-    where = ["lr.company_code=%s", "lr.start_date <= %s", "lr.end_date >= %s"]
+    # A request awaiting a decision must never be hidden by the default active
+    # window: the ~31-day window is meant for the "upcoming approved" view, but a
+    # PENDING request whose leave dates fall outside it is still awaiting HR and
+    # must stay in the queue -- otherwise a manager sees "nothing to approve"
+    # while real requests sit unactioned. So for status='requested' we drop the
+    # date-overlap filter UNLESS the caller actually expressed a date intent in
+    # their prompt (e.g. "pending leave next week"); the dashboard passes its
+    # default window as start/end params, which must NOT be treated as such an
+    # intent. History always uses its own explicit window.
+    explicit_date_intent = bool(action.get("date")) or bool(
+        re.search(
+            r"\b(today|tomorrow|week|month|sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b",
+            normalize_text(action.get("prompt_text") or action.get("query") or ""),
+        )
+    )
+    apply_date_window = bool(action.get("history")) or status_filter != "requested" or explicit_date_intent
+    params: list[Any] = [company]
+    where = ["lr.company_code=%s"]
+    if apply_date_window:
+        where.extend(["lr.start_date <= %s", "lr.end_date >= %s"])
+        params.extend([end_date, start_date])
     if employee:
         where.append("lr.employee_key=%s")
         params.append(employee.get("employee_key"))
@@ -16009,13 +15218,16 @@ def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> 
     # Optional knobs (default behavior unchanged for existing callers). History
     # needs recent-first + a higher cap so recent rows aren't truncated on a busy
     # company; the operational pending/upcoming reads keep ascending + 50.
-    order_sql = "lr.start_date DESC, lr.employee_name NULLS LAST" if normalize_text(action.get("order") or "") == "recent" else "lr.start_date, lr.employee_name NULLS LAST"
-    try:
-        row_limit = int(action.get("limit") or 50)
-    except (TypeError, ValueError):
-        row_limit = 50
-    row_limit = max(1, min(row_limit, 500))
-    params.append(row_limit)
+    # A stable tiebreaker (the PK) makes the sort a *total* order so LIMIT/OFFSET
+    # pagination is deterministic — without it, rows sharing a start_date/name can
+    # shuffle between pages and get duplicated or skipped.
+    order_sql = "lr.start_date DESC, lr.employee_name NULLS LAST, lr.leave_id" if normalize_text(action.get("order") or "") == "recent" else "lr.start_date, lr.employee_name NULLS LAST, lr.leave_id"
+    # Pagination. Default limit=50 keeps every existing caller identical; the
+    # dashboard passes limit/offset to page through a busy queue instead of
+    # silently dropping requests past the 50th. COUNT(*) OVER() rides the same
+    # scan for an accurate total + has_more without a second query.
+    row_limit, offset = _paginate_params(action, default_limit=50, max_limit=500)
+    params.extend([row_limit, offset])
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -16028,16 +15240,34 @@ def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> 
                       AND s.employee_key=lr.employee_key
                       AND s.shift_date BETWEEN lr.start_date AND lr.end_date
                       AND s.status='scheduled'
-                  ) AS shift_conflict_count
+                  ) AS shift_conflict_count,
+                  COUNT(*) OVER() AS _total_count
                 FROM leave_requests lr
                 WHERE {' AND '.join(where)}
                 ORDER BY {order_sql}
-                LIMIT %s
+                LIMIT %s OFFSET %s
                 """,
                 params,
             )
             rows = [dict(row) for row in cur.fetchall()]
-    return {"ok": True, "leave_requests": json_safe(rows), "count": len(rows), "start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "status_filter": status_filter, "employee": json_safe(employee) if employee else None, "scope": json_safe(scope)}
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {
+        "ok": True,
+        "leave_requests": json_safe(rows),
+        "count": len(rows),
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "status_filter": status_filter,
+        "employee": json_safe(employee) if employee else None,
+        "scope": json_safe(scope),
+        "total_count": total_count,
+        "limit": row_limit,
+        "offset": offset,
+        "has_more": has_more,
+    }
 
 
 def employee_has_approved_leave(company_code: str | None, employee_key: str | None, attendance_date: date) -> dict[str, Any] | None:
@@ -16250,6 +15480,154 @@ def deliver_employee_notification(
     return normalized
 
 
+# --- Push notification channel (Expo) ---------------------------------------
+# A new rung in the shared outbound ladder for the Employee App. Mirrors the
+# Postmark email trio (config / pure-send / layer-facing wrapper) so push is just
+# another provider, never load-bearing: if push isn't configured or the employee
+# has no active token, the wrapper returns a soft reason and the ladder falls
+# through to WhatsApp/email exactly as today.
+_EXPO_PUSH_ENDPOINT = "https://exp.host/--/api/v2/push/send"
+
+
+def outbound_push_config() -> dict[str, str]:
+    return {
+        "provider": "expo",
+        # Optional Expo access token (enhanced push security). Expo accepts pushes
+        # to ExponentPushToken recipients without it, so it stays optional.
+        "access_token": (os.environ.get("WATHEFNI_EXPO_ACCESS_TOKEN") or "").strip(),
+    }
+
+
+def outbound_push_available() -> bool:
+    """Push is 'available' only when the channel flag is on. No mandatory secret
+    (Expo's push endpoint accepts ExponentPushToken recipients), so this gates on
+    the dark-launch flag alone — the recipient-token check happens per-send."""
+    return push_notifications_enabled()
+
+
+def active_push_tokens_for(company_code: str, employee_key: str) -> list[str]:
+    company = (company_code or "WATHEFNI").upper()
+    out: list[str] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT push_token FROM employee_push_tokens
+                WHERE company_code=%s AND employee_key=%s AND active IS TRUE
+                ORDER BY last_seen_at DESC NULLS LAST
+                """,
+                (company, str(employee_key)),
+            )
+            for row in cur.fetchall():
+                tok = str(row.get("push_token") or "").strip()
+                if tok:
+                    out.append(tok)
+    return out
+
+
+def _deactivate_push_tokens(company_code: str, tokens: list[str], *, reason: str) -> None:
+    if not tokens:
+        return
+    company = (company_code or "WATHEFNI").upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE employee_push_tokens SET active=FALSE, last_error=%s, updated_at=now() WHERE company_code=%s AND push_token = ANY(%s)",
+                (reason[:200], company, tokens),
+            )
+        conn.commit()
+
+
+def send_push_via_expo(tokens: list[str], *, title: str, body: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Pure HTTP send to Expo's push API. Never raises; returns a normalized result
+    including any tokens Expo reports as unregistered so the caller can deactivate
+    them. Mirrors send_email_via_postmark's defensive shape."""
+    valid = [t for t in tokens if str(t or "").strip()]
+    if not valid:
+        return {"ok": False, "provider": "expo", "error": "push_token_missing", "invalid_tokens": []}
+    cfg = outbound_push_config()
+    messages = [{"to": t, "title": title, "body": body, "sound": "default", "data": data or {}} for t in valid]
+    payload = json.dumps(messages).encode("utf-8")
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    if cfg.get("access_token"):
+        headers["Authorization"] = f"Bearer {cfg['access_token']}"
+    try:
+        req = urllib.request.Request(_EXPO_PUSH_ENDPOINT, data=payload, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+        parsed = json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        return {"ok": False, "provider": "expo", "error": f"http_{exc.code}", "invalid_tokens": []}
+    except Exception as exc:
+        return {"ok": False, "provider": "expo", "error": f"push_network_error:{type(exc).__name__}", "invalid_tokens": []}
+
+    receipts = parsed.get("data") if isinstance(parsed, dict) else None
+    invalid: list[str] = []
+    delivered = 0
+    if isinstance(receipts, list):
+        for tok, receipt in zip(valid, receipts):
+            if not isinstance(receipt, dict):
+                continue
+            if str(receipt.get("status")) == "ok":
+                delivered += 1
+            else:
+                detail = receipt.get("details") if isinstance(receipt.get("details"), dict) else {}
+                if str(detail.get("error")) == "DeviceNotRegistered":
+                    invalid.append(tok)
+    return {"ok": delivered > 0, "provider": "expo", "delivered": delivered, "invalid_tokens": invalid, "error": None if delivered > 0 else "push_no_delivery"}
+
+
+def send_outbound_push(
+    *,
+    company_code: str,
+    employee_key: str | None,
+    title: str,
+    body: str,
+    flow: str,
+    subject_type: str | None = None,
+    subject_key: str | None = None,
+    account_id: str | None = None,
+    message_kind: str | None = None,
+) -> dict[str, Any]:
+    """Layer-facing push wrapper: dry-run short-circuit, recipient-token lookup,
+    invalid-token cleanup, and best-effort delivery-event logging. Never raises and
+    never blocks the ladder — returns a soft reason when push can't be used."""
+    company = (company_code or "WATHEFNI").upper()
+    if not outbound_push_available():
+        return {"ok": False, "provider": "expo", "channel": "push", "error": "push_not_configured"}
+    if not employee_key:
+        return {"ok": False, "provider": "expo", "channel": "push", "error": "push_no_employee"}
+    if delivery_is_dry_run():
+        return {"ok": True, "provider": "expo", "channel": "push", "dry_run": True}
+    tokens = active_push_tokens_for(company, str(employee_key))
+    if not tokens:
+        return {"ok": False, "provider": "expo", "channel": "push", "error": "push_token_missing"}
+    result = send_push_via_expo(tokens, title=title, body=body, data={"flow": flow})
+    if result.get("invalid_tokens"):
+        try:
+            _deactivate_push_tokens(company, list(result.get("invalid_tokens") or []), reason="DeviceNotRegistered")
+        except Exception:
+            logger.warning("failed to deactivate stale push tokens for %s", employee_key, exc_info=True)
+    try:
+        record_outbound_delivery_event(
+            channel="push",
+            account_id=account_id,
+            target_phone=None,
+            target_conversation_id=None,
+            status="sent" if result.get("ok") else "failed",
+            subject_type=subject_type,
+            subject_key=subject_key or str(employee_key),
+            company_code=company,
+            message_kind=message_kind or flow,
+            message_text="",
+            last_error=result.get("error"),
+            payload={"flow": flow, "provider": "expo", "delivered": result.get("delivered", 0)},
+        )
+    except Exception:
+        logger.warning("failed to record push delivery event for %s", employee_key, exc_info=True)
+    return {"ok": bool(result.get("ok")), "provider": "expo", "channel": "push", "error": result.get("error")}
+
+
 def notify_employee_leave_decision(employee: dict[str, Any], leave: dict[str, Any], decision: str, *, account_id: str | None = None) -> dict[str, Any]:
     start_text = shift_sheet_cell(leave.get("start_date"))
     end_text = shift_sheet_cell(leave.get("end_date"))
@@ -16280,22 +15658,6 @@ def notify_employee_leave_decision(employee: dict[str, Any], leave: dict[str, An
         )
 
     return send_custom_employee_message(employee, account_id, message)
-
-
-def record_attendance_sheet_sync(attendance: dict[str, Any], sync_result: dict[str, Any], *, created_by_phone: str | None) -> None:
-    if not attendance:
-        return
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            record_attendance_event(
-                cur,
-                attendance=attendance,
-                company_code=str(attendance.get("company_code") or "WATHEFNI"),
-                event_type="sheet_synced" if sync_result.get("ok") else "sheet_sync_failed",
-                payload={"sheet_sync": sync_result},
-                created_by_phone=created_by_phone,
-            )
-        conn.commit()
 
 
 def create_shift_assignment_for_employee(action: dict[str, Any], *, employee: dict[str, Any], company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -16354,8 +15716,7 @@ def create_shift_assignment_for_employee(action: dict[str, Any], *, employee: di
                 record_shift_event(cur, shift=shift, company_code=company, event_type="created", payload={"action": action, "shift": shift}, created_by_phone=created_by_phone)
                 created.append(shift)
         conn.commit()
-    sheet_sync = sync_shift_sheet_rows(company, created) if created else {"ok": True, "skipped": True, "reason": "no_created_shifts"}
-    return {"ok": bool(created), "employee": json_safe(employee), "created": json_safe(created), "conflicts": json_safe(conflicts), "requested_dates": [d.isoformat() for d in dates], "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": bool(created), "employee": json_safe(employee), "created": json_safe(created), "conflicts": json_safe(conflicts), "requested_dates": [d.isoformat() for d in dates]}
 
 
 def create_shift_assignment(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -16396,6 +15757,35 @@ def create_shift_assignment(action: dict[str, Any], *, company_code: str | None,
     }
 
 
+def _paginate_params(action: dict[str, Any], *, default_limit: int, max_limit: int) -> tuple[int, int]:
+    """Resolve (limit, offset) for a paginated list read.
+
+    Shared by the post-hire list endpoints so every module paginates identically.
+    Callers that pass nothing get `default_limit` and offset 0 — this preserves the
+    exact pre-pagination behavior for WhatsApp/Assistant tool calls and workers.
+    The dashboard passes `limit`/`offset` (or `page`) to walk through large result
+    sets instead of silently truncating at the old hardcoded cap. limit is clamped
+    to [1, max_limit]; offset is clamped to >= 0.
+    """
+    try:
+        limit = int(action.get("limit") or default_limit)
+    except (TypeError, ValueError):
+        limit = default_limit
+    limit = max(1, min(limit, max_limit))
+    offset = action.get("offset")
+    if offset is None and action.get("page") is not None:
+        try:
+            offset = (max(1, int(action.get("page"))) - 1) * limit
+        except (TypeError, ValueError):
+            offset = 0
+    try:
+        offset = int(offset or 0)
+    except (TypeError, ValueError):
+        offset = 0
+    offset = max(0, offset)
+    return limit, offset
+
+
 def list_shifts(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     start_date, end_date = shift_query_window(action)
@@ -16412,20 +15802,43 @@ def list_shifts(action: dict[str, Any], *, company_code: str | None) -> dict[str
     if scope_clause:
         where.append(scope_clause.removeprefix("AND "))
         params.extend(scope_params)
+    # Pagination. Default limit=100 keeps every existing caller (WhatsApp/Assistant
+    # tools) byte-for-byte identical; the dashboard passes limit/offset to page
+    # through a full week without silently dropping shifts past the 100th row.
+    # COUNT(*) OVER() rides along on the same scan so we return an accurate total
+    # (and has_more) without a second query.
+    limit, offset = _paginate_params(action, default_limit=100, max_limit=200)
+    params.extend([limit, offset])
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT s.*
+                SELECT s.*, COUNT(*) OVER() AS _total_count
                 FROM shift_assignments s
                 WHERE {' AND '.join(where)}
-                ORDER BY s.shift_date, s.start_time, s.employee_name NULLS LAST
-                LIMIT 100
+                ORDER BY s.shift_date, s.start_time, s.employee_name NULLS LAST, s.shift_id
+                LIMIT %s OFFSET %s
                 """,
                 params,
             )
             rows = [dict(row) for row in cur.fetchall()]
-    return {"ok": True, "company_code": company, "start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "employee": json_safe(employee), "shifts": json_safe(rows), "scope": json_safe(scope)}
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {
+        "ok": True,
+        "company_code": company,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "employee": json_safe(employee),
+        "shifts": json_safe(rows),
+        "scope": json_safe(scope),
+        "total_count": total_count,
+        "limit": limit,
+        "offset": offset,
+        "has_more": has_more,
+    }
 
 
 def cancel_shift_assignment_for_employee(action: dict[str, Any], *, employee: dict[str, Any], company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -16451,8 +15864,7 @@ def cancel_shift_assignment_for_employee(action: dict[str, Any], *, employee: di
             for shift in rows:
                 record_shift_event(cur, shift=shift, company_code=company, event_type="cancelled", payload={"action": action, "shift": shift}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_shift_sheet_rows(company, rows) if rows else {"ok": True, "skipped": True, "reason": "no_cancelled_shifts"}
-    return {"ok": bool(rows), "employee": json_safe(employee), "cancelled": json_safe(rows), "start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": bool(rows), "employee": json_safe(employee), "cancelled": json_safe(rows), "start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
 
 
 def cancel_shift_assignment(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -16579,7 +15991,6 @@ def request_availability(action: dict[str, Any], *, company_code: str | None, cr
             availability = dict(cur.fetchone())
             record_availability_event(cur, availability=availability, company_code=company, event_type=status, payload={"action": action, "availability": availability, "shift_conflicts": conflicts}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_availability_rows(company, [availability])
     hr_notification = {"ok": True, "skipped": True, "reason": "created_by_hr_or_manager"}
     if status == "requested":
         hr_notification = notify_hr_admins(
@@ -16589,7 +16000,7 @@ def request_availability(action: dict[str, Any], *, company_code: str | None, cr
             subject_type="availability",
             subject_key=str(availability.get("availability_id")),
         )
-    return {"ok": True, "availability": json_safe(availability), "employee": json_safe(employee), "shift_conflicts": json_safe(conflicts), "sheet_sync": json_safe(sheet_sync), "hr_notification": json_safe(hr_notification)}
+    return {"ok": True, "availability": json_safe(availability), "employee": json_safe(employee), "shift_conflicts": json_safe(conflicts), "hr_notification": json_safe(hr_notification)}
 
 
 def list_availability(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
@@ -16742,7 +16153,6 @@ def request_shift_swap(action: dict[str, Any], *, company_code: str | None, crea
             swap = dict(cur.fetchone())
             record_shift_swap_event(cur, swap=swap, company_code=company, event_type="requested", payload={"action": action, "swap": swap}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_shift_swap_rows(company, [swap])
     hr_notification = notify_hr_admins(
         company_code=company,
         account_id=account_id,
@@ -16750,7 +16160,7 @@ def request_shift_swap(action: dict[str, Any], *, company_code: str | None, crea
         subject_type="shift_swap",
         subject_key=str(swap.get("swap_id")),
     )
-    return {"ok": True, "swap": json_safe(swap), "requester": json_safe(requester), "target": json_safe(target) if target else None, "requester_shift": json_safe(requester_shift), "sheet_sync": json_safe(sheet_sync), "hr_notification": json_safe(hr_notification)}
+    return {"ok": True, "swap": json_safe(swap), "requester": json_safe(requester), "target": json_safe(target) if target else None, "requester_shift": json_safe(requester_shift), "hr_notification": json_safe(hr_notification)}
 
 
 def resolve_shift_swaps(action: dict[str, Any], *, company_code: str | None, statuses: tuple[str, ...] = ("requested",)) -> list[dict[str, Any]]:
@@ -16779,6 +16189,15 @@ def resolve_shift_swaps(action: dict[str, Any], *, company_code: str | None, sta
         # Scope requester first; target scope is checked before approval.
         where.append(scope_clause.replace("ss.employee_key", "ss.requester_employee_key").removeprefix("AND "))
         params.extend(scope_params)
+    # Default 20 keeps WhatsApp/Assistant replies short; the dashboard passes a
+    # higher limit so the actionable pending-swap queue (and the "N swaps to
+    # review" banner counted from it) isn't truncated at 20 for a busy company.
+    try:
+        swap_limit = int(action.get("limit") or 20)
+    except (TypeError, ValueError):
+        swap_limit = 20
+    swap_limit = max(1, min(swap_limit, 500))
+    params.append(swap_limit)
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -16787,7 +16206,7 @@ def resolve_shift_swaps(action: dict[str, Any], *, company_code: str | None, sta
                 FROM shift_swap_requests ss
                 WHERE {' AND '.join(where)}
                 ORDER BY ss.requested_at DESC
-                LIMIT 20
+                LIMIT %s
                 """,
                 params,
             )
@@ -16889,12 +16308,10 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
             decided = dict(cur.fetchone())
             record_shift_swap_event(cur, swap=decided, company_code=company, event_type=status_value, payload={"action": action, "swap": decided, "updated_shifts": updated_shifts}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_shift_swap_rows(company, [decided])
-    shift_sync = sync_shift_sheet_rows(company, updated_shifts) if updated_shifts else {"ok": True, "skipped": True, "reason": "no_shift_updates"}
     notify_text = "approved" if decision == "approved" else "not approved"
     requester_notification = send_custom_employee_message(requester, account_id, f"Your shift swap request for {format_shift_date(decided.get('shift_date'))} was {notify_text}.")
     target_notification = send_custom_employee_message(target, account_id, f"A shift swap involving you for {format_shift_date(decided.get('shift_date'))} was {notify_text}.") if target else {"ok": True, "skipped": True}
-    return {"ok": True, "swap": json_safe(decided), "updated_shifts": json_safe(updated_shifts), "sheet_sync": json_safe(sheet_sync), "shift_sync": json_safe(shift_sync), "requester_notification": json_safe(requester_notification), "target_notification": json_safe(target_notification)}
+    return {"ok": True, "swap": json_safe(decided), "updated_shifts": json_safe(updated_shifts), "requester_notification": json_safe(requester_notification), "target_notification": json_safe(target_notification)}
 
 
 def approve_shift_swap(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None, account_id: str | None = None) -> dict[str, Any]:
@@ -17050,9 +16467,7 @@ def check_in_employee(action: dict[str, Any], *, company_code: str | None, creat
             event_type = "checked_in_late" if int(attendance.get("late_minutes") or 0) > 0 else "checked_in"
             record_attendance_event(cur, attendance=attendance, company_code=company, event_type=event_type, payload={"action": action, "attendance": attendance, "shift": shift}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_attendance_sheet_rows(company, [attendance])
-    record_attendance_sheet_sync(attendance, sheet_sync, created_by_phone=created_by_phone)
-    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance)}
 
 
 def check_out_employee(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -17094,9 +16509,7 @@ def check_out_employee(action: dict[str, Any], *, company_code: str | None, crea
             )
             record_attendance_event(cur, attendance=attendance, company_code=company, event_type="checked_out", payload={"action": action, "attendance": attendance, "shift": shift}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_attendance_sheet_rows(company, [attendance])
-    record_attendance_sheet_sync(attendance, sheet_sync, created_by_phone=created_by_phone)
-    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance)}
 
 
 def mark_attendance_absent(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -17144,9 +16557,7 @@ def mark_attendance_absent(action: dict[str, Any], *, company_code: str | None, 
             )
             record_attendance_event(cur, attendance=attendance, company_code=company, event_type="marked_absent", payload={"action": action, "attendance": attendance, "shift": shift}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_attendance_sheet_rows(company, [attendance])
-    record_attendance_sheet_sync(attendance, sheet_sync, created_by_phone=created_by_phone)
-    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance)}
 
 
 def correct_attendance_record(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -17190,9 +16601,7 @@ def correct_attendance_record(action: dict[str, Any], *, company_code: str | Non
             )
             record_attendance_event(cur, attendance=attendance, company_code=company, event_type="corrected", payload={"action": action, "attendance": attendance, "shift": shift}, created_by_phone=created_by_phone)
         conn.commit()
-    sheet_sync = sync_attendance_sheet_rows(company, [attendance])
-    record_attendance_sheet_sync(attendance, sheet_sync, created_by_phone=created_by_phone)
-    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance), "sheet_sync": json_safe(sheet_sync)}
+    return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance)}
 
 
 def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
@@ -17230,26 +16639,45 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
     if scope_clause:
         where.append(scope_clause.removeprefix("AND "))
         params.extend(scope_params)
-    try:
-        row_limit = int(action.get("limit") or 100)
-    except (TypeError, ValueError):
-        row_limit = 100
-    row_limit = max(1, min(row_limit, 5000))
-    params.append(row_limit)
+    # Pagination. Default limit=100 keeps every existing WhatsApp/Assistant/export
+    # caller identical; the dashboard passes limit/offset to page through a busy
+    # window instead of silently dropping records past the cap. COUNT(*) OVER()
+    # rides the same scan for an accurate total + has_more. The employee_key PK-ish
+    # tiebreaker makes the sort a total order so LIMIT/OFFSET pages don't shuffle
+    # rows sharing a date/name (which would duplicate or skip records across pages).
+    row_limit, offset = _paginate_params(action, default_limit=100, max_limit=5000)
+    params.extend([row_limit, offset])
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT ar.*
+                SELECT ar.*, COUNT(*) OVER() AS _total_count
                 FROM attendance_records ar
                 WHERE {' AND '.join(where)}
-                ORDER BY ar.attendance_date DESC, ar.scheduled_start NULLS LAST, ar.employee_name NULLS LAST
-                LIMIT %s
+                ORDER BY ar.attendance_date DESC, ar.scheduled_start NULLS LAST, ar.employee_name NULLS LAST, ar.employee_key
+                LIMIT %s OFFSET %s
                 """,
                 params,
             )
             rows = [dict(row) for row in cur.fetchall()]
-    return {"ok": True, "company_code": company, "start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "employee": json_safe(employee), "status_filter": status_filter or None, "attendance": json_safe(rows), "scope": json_safe(scope)}
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {
+        "ok": True,
+        "company_code": company,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "employee": json_safe(employee),
+        "status_filter": status_filter or None,
+        "attendance": json_safe(rows),
+        "scope": json_safe(scope),
+        "total_count": total_count,
+        "has_more": has_more,
+        "limit": row_limit,
+        "offset": offset,
+    }
 
 
 def format_attendance_time(value: Any) -> str:
@@ -17407,7 +16835,7 @@ def normalize_posthire_result(result: dict[str, Any], *, action_type: str, reply
     {"ok": bool, ...} dicts with domain payloads. The registry/tool-call layer
     expects action_type/success/status/message and a safe_user_message that the
     orchestrator can surface to the user verbatim. This keeps every original key
-    (leave, leave_requests, shift_conflicts, employee_notification, sheet_sync,
+    (leave, leave_requests, shift_conflicts, employee_notification,
     error, ...) so downstream renderers and audit retain full detail.
 
     `reply` is normally produced by the matching format_*_reply helper and becomes
@@ -17463,9 +16891,6 @@ def format_payroll_hours_reply(result: dict[str, Any], *, employee_view: bool = 
         lines.append(f"- {name}{', '.join(pieces)} ({row.get('payroll_status') or 'Ready'})")
     if len(rows) > 12 and not employee_view:
         lines.append(f"And {len(rows) - 12} more employees.")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok") and not employee_view:
-        lines.append("Payroll Hours sheet updated.")
     return "\n".join(lines)
 
 
@@ -17499,9 +16924,6 @@ def format_workforce_analytics_reply(result: dict[str, Any]) -> str:
         lines.append(f"- {item.get('metric')}: {item.get('subject')} - {item.get('value')} ({item.get('detail')})")
     if len(selected) > 8:
         lines.append(f"And {len(selected) - 8} more insight rows.")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok") and not sheet_sync.get("skipped"):
-        lines.append("Analytics sheet updated.")
     return "\n".join(lines)
 
 
@@ -17543,9 +16965,6 @@ def format_create_timesheet_review_reply(result: dict[str, Any]) -> str:
     skipped = result.get("skipped_approved") if isinstance(result.get("skipped_approved"), list) else []
     if skipped:
         lines.append(f"Skipped {len(skipped)} already-approved timesheet{'s' if len(skipped) != 1 else ''}.")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok"):
-        lines.append("Timesheet Approvals sheet updated.")
     lines.append("Review these, then approve or reject the timesheets for that period.")
     return "\n".join(lines)
 
@@ -17567,9 +16986,6 @@ def format_timesheet_decision_reply(result: dict[str, Any], decision: str) -> st
         lines.append(f"- {row.get('employee_name') or row.get('employee_phone')}: {timesheet_hours_parts(row)}")
     if len(rows) > 10:
         lines.append(f"And {len(rows) - 10} more timesheets.")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok"):
-        lines.append("Timesheet Approvals sheet updated.")
     return "\n".join(lines)
 
 
@@ -17666,9 +17082,6 @@ def format_preview_payroll_reply(result: dict[str, Any]) -> str:
         )
     if len(rows) > 12:
         lines.append(f"And {len(rows) - 12} more employees.")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok"):
-        lines.append("Payroll Preview sheet updated.")
     lines.append("No payment has been processed.")
     return "\n".join(lines)
 
@@ -17698,9 +17111,6 @@ def format_export_payroll_reply(result: dict[str, Any]) -> str:
     amount = totals.get("estimated_amount_kwd")
     if amount is not None:
         lines.append(f"- Estimated amount: {float(amount):.3f} KWD")
-    sheet_sync = result.get("sheet_sync") if isinstance(result.get("sheet_sync"), dict) else {}
-    if sheet_sync.get("ok"):
-        lines.append("Payroll Export sheet updated.")
     lines.append("No payment has been processed and no bank file was created.")
     return "\n".join(lines)
 
@@ -18359,7 +17769,6 @@ def replace_conflicting_shift_assignment(
                 for shift in cancelled:
                     record_shift_event(cur, shift=shift, company_code=company, event_type="cancelled_for_replacement", payload={"action": action, "shift": shift}, created_by_phone=created_by_phone)
             conn.commit()
-    cancel_sheet_sync = sync_shift_sheet_rows(company, cancelled) if cancelled else {"ok": True, "skipped": True, "reason": "no_cancelled_shifts"}
     create_result = create_shift_assignment_for_employee(action, employee=employee, company_code=company, created_by_phone=created_by_phone)
     if create_result.get("ok"):
         create_result["employee_notification"] = notify_employee_shift_created(result=create_result, account_id=account_id, created_by_phone=created_by_phone)
@@ -18376,7 +17785,6 @@ def replace_conflicting_shift_assignment(
         "cancelled": json_safe(cancelled),
         "created": json_safe(create_result.get("created") if isinstance(create_result.get("created"), list) else []),
         "create_result": json_safe(create_result),
-        "cancel_sheet_sync": json_safe(cancel_sheet_sync),
         "cancel_notification": json_safe(cancel_notification),
         "action": json_safe(action),
     }
@@ -18636,7 +18044,7 @@ def handle_employee_payroll_turn(request: WhatsAppTurnRequest) -> dict[str, Any]
         "query": request.raw_text,
     }
     action["subject_phone"] = employee.get("phone")
-    result = list_payroll_hours(action, company_code=company, sync_sheet=False)
+    result = list_payroll_hours(action, company_code=company)
     return {"reply": format_payroll_hours_reply(result, employee_view=True), "employee_key": employee.get("employee_key"), "result": result, "intent": "list_payroll_hours", "turn_focus": "employee_payroll"}
 
 
@@ -18759,9 +18167,7 @@ def run_attendance_absence_scan(*, account_id: str | None, dry_run: bool = True,
                         )
                         record_attendance_event(cur, attendance=attendance, company_code=company, event_type="approved_leave", payload={"attendance": attendance, "shift": shift, "leave_id": str(shift.get("approved_leave_id"))}, created_by_phone=None)
                     conn.commit()
-                sheet_sync = sync_attendance_sheet_rows(company, [attendance])
-                record_attendance_sheet_sync(attendance, sheet_sync, created_by_phone=None)
-                entry["result"] = {"ok": True, "attendance": json_safe(attendance), "sheet_sync": json_safe(sheet_sync)}
+                entry["result"] = {"ok": True, "attendance": json_safe(attendance)}
             results.append(entry)
             continue
         if not dry_run:
@@ -18815,28 +18221,6 @@ def recompute_employee_onboarding_counts(cur: Any, employee_key: str) -> None:
         """,
         (pending, complete, status, employee_key),
     )
-
-
-def sync_employee_posthire(phone: str, company_code: str | None) -> dict[str, Any]:
-    company = (company_code or "WATHEFNI").upper()
-    out: dict[str, Any] = {
-        "employee": sync_employee_sheet_from_db(phone, company),
-        "compliance": sync_compliance_sheet_from_db(phone, company),
-    }
-    fallback_helpers = {
-        "employee": "sync_employee_sheet.py",
-        "compliance": "sync_compliance_sheet.py",
-    }
-    for key, helper in fallback_helpers.items():
-        if not out.get(key, {}).get("ok"):
-            out[f"{key}_fallback"] = run_workspace_tool([
-                str(WORKSPACE / "tools" / "google" / helper),
-                "--company",
-                company,
-                "--phone",
-                digits(phone),
-            ], timeout=60)
-    return out
 
 
 def safe_storage_name(value: str | None, default: str = "document") -> str:
@@ -22919,7 +22303,6 @@ def handle_employee_onboarding_turn(request: WhatsAppTurnRequest) -> dict[str, A
             if updates:
                 recompute_employee_onboarding_counts(cur, employee_key)
         conn.commit()
-    sync_result = sync_employee_posthire(employee.get("phone") or "", employee.get("company_code")) if updates else {}
     next_item = find_next_required_onboarding_item(employee_key)
     hr_notification: dict[str, Any] = {}
     if received_item_ids:
@@ -22964,7 +22347,7 @@ def handle_employee_onboarding_turn(request: WhatsAppTurnRequest) -> dict[str, A
             reply = f"Hi {name}. Please send {next_item.get('label') or next_item.get('item_id')} so HR can continue your onboarding."
         else:
             reply = f"Hi {name}. HR has your onboarding items and will review them."
-    return {"reply": reply, "updates": updates, "employee_key": employee_key, "sync": sync_result, "hr_notification": hr_notification, "planned_reply": planned_reply, "storage": storage_result, "truth_reply": truth_reply, "rejected_item_id": rejected_item_id, "rejected_reason": rejected_reason}
+    return {"reply": reply, "updates": updates, "employee_key": employee_key, "hr_notification": hr_notification, "planned_reply": planned_reply, "storage": storage_result, "truth_reply": truth_reply, "rejected_item_id": rejected_item_id, "rejected_reason": rejected_reason}
 
 
 def refresh_conversation_link_from_inbound(request: WhatsAppTurnRequest) -> dict[str, Any]:
@@ -25626,7 +25009,7 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
     }
 
 
-def send_assessment(app: dict[str, Any], account_id: str | None) -> dict[str, Any]:
+def send_assessment(app: dict[str, Any], account_id: str | None, *, note: str | None = None) -> dict[str, Any]:
     attempt_result = create_or_resume_assessment_attempt(app, source="dashboard_or_hr_action")
     if not attempt_result.get("ok"):
         return attempt_result
@@ -25646,9 +25029,11 @@ def send_assessment(app: dict[str, Any], account_id: str | None) -> dict[str, An
             "assessment_link": link,
         },
     )
+    note_text = str(note or "").strip()
     body = (
         f"Hi {name},\n\n"
-        f"You have been invited to complete an application assessment for {title}.\n\n"
+        + (f"{note_text}\n\n" if note_text else "")
+        + f"You have been invited to complete an application assessment for {title}.\n\n"
         f"Open your assessment here:\n{link}\n\n"
         "You can complete it from your phone browser. Your answers are saved automatically."
     )
@@ -25772,6 +25157,11 @@ def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, cr
     employee = find_employee_by_key(action.get("employee_key"), company_code=company) or resolve_employee_for_direct_action(action, allow_latest=False)
     if not employee:
         return {"ok": False, "error": "employee_not_found", "safe_user_message": "I need the employee before I can update a checklist item."}
+    # Manager-scope gate: a scoped manager may only mutate checklist items for
+    # employees inside their org scope. HR admins (no manager_scopes row) stay
+    # unrestricted. viewer_phone is injected by the registry adapter.
+    if action.get("viewer_phone") and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=action.get("viewer_phone")):
+        return {"ok": False, "error": "employee_outside_manager_scope", "safe_user_message": "That employee is outside your manager scope."}
     item_id = str(action.get("item_id") or "").strip()
     if not item_id:
         return {"ok": False, "error": "needs_clarification", "safe_user_message": "Which checklist item should I update?"}
@@ -28198,13 +27588,12 @@ def approve_pending_action(state: GraphState) -> GraphState:
             start_onboarding(employee)
             refreshed_employee = find_employee_by_phone(employee.get("phone"), company_code=employee.get("company_code")) or employee
             employee_notification = notify_employee_onboarding_started(refreshed_employee, state["request"].account_id)
-            sheet_sync = sync_employee_posthire(refreshed_employee.get("phone") or "", refreshed_employee.get("company_code"))
             if employee_notification.get("ok"):
                 reply = f"Onboarding started for {refreshed_employee.get('name') or 'the employee'} and they were notified."
             else:
                 reply = f"Onboarding started for {refreshed_employee.get('name') or 'the employee'}, but I could not notify them immediately."
             status = "completed"
-            result_payload = {"employee": json_safe(refreshed_employee), "employee_notification": employee_notification, "sheet_sync": sheet_sync}
+            result_payload = {"employee": json_safe(refreshed_employee), "employee_notification": employee_notification}
     elif action_type == "hire_candidate":
         app = resolve_application_for_action(action, allow_latest=False)
         if not app:
@@ -28226,13 +27615,10 @@ def approve_pending_action(state: GraphState) -> GraphState:
         else:
             update_result = update_application_status(app, "shortlisted")
             update_ok = workspace_tool_operation_ok(update_result)
-            sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-            status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+            status = "completed" if update_ok else "failed"
             name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            if update_ok and sheet_ok:
-                reply = f"{name} is shortlisted and the sheet is synced."
-            elif update_ok:
-                reply = f"{name} is shortlisted in the backend, but Google Sheets sync failed."
+            if update_ok:
+                reply = f"{name} is shortlisted."
             else:
                 reply = f"I could not shortlist {name}."
             result_payload = {"application": json_safe(app), "update": update_result}
@@ -28244,13 +27630,10 @@ def approve_pending_action(state: GraphState) -> GraphState:
         else:
             update_result = update_application_status(app, "rejected")
             update_ok = workspace_tool_operation_ok(update_result)
-            sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-            status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+            status = "completed" if update_ok else "failed"
             name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            if update_ok and sheet_ok:
-                reply = f"{name} is rejected and the sheet is synced."
-            elif update_ok:
-                reply = f"{name} is rejected in the backend, but Google Sheets sync failed."
+            if update_ok:
+                reply = f"{name} is rejected."
             else:
                 reply = f"I could not reject {name}."
             result_payload = {"application": json_safe(app), "update": update_result}
@@ -28590,13 +27973,10 @@ def execute_direct_action(state: GraphState) -> GraphState:
         else:
             update_result = update_application_status(app, "shortlisted")
             update_ok = workspace_tool_operation_ok(update_result)
-            sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-            status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+            status = "completed" if update_ok else "failed"
             name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            if update_ok and sheet_ok:
-                reply = f"{name} is shortlisted and the sheet is synced."
-            elif update_ok:
-                reply = f"{name} is shortlisted in the backend, but Google Sheets sync failed."
+            if update_ok:
+                reply = f"{name} is shortlisted."
             else:
                 reply = f"I could not shortlist {name}."
             result_payload = {"application": json_safe(app), "update": update_result}
@@ -28609,13 +27989,10 @@ def execute_direct_action(state: GraphState) -> GraphState:
         else:
             update_result = update_application_status(app, "rejected")
             update_ok = workspace_tool_operation_ok(update_result)
-            sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-            status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+            status = "completed" if update_ok else "failed"
             name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            if update_ok and sheet_ok:
-                reply = f"{name} is rejected and the sheet is synced."
-            elif update_ok:
-                reply = f"{name} is rejected in the backend, but Google Sheets sync failed."
+            if update_ok:
+                reply = f"{name} is rejected."
             else:
                 reply = f"I could not reject {name}."
             result_payload = {"application": json_safe(app), "update": update_result}
@@ -29269,16 +28646,16 @@ def post_action_repair_context(request: WhatsAppTurnRequest, context: dict[str, 
     if reason == "candidate_notes_not_whatsapp_editable_yet" or (capability == "update_record" and field == "notes"):
         target = validation.get("target") if isinstance(validation.get("target"), dict) else {}
         name = target.get("display_name") or target.get("name") or "that candidate"
-        if re.search(r"\b(google sheets?|sheets?|sheet|its in|it's in)\b", normalize_text(text)):
+        if re.search(r"\b(google sheets?|sheets?|sheet|its in|it's in|dashboard)\b", normalize_text(text)):
             reply = (
-                f"You’re right that {name} can have notes visible in Google Sheets. "
-                "The reason I blocked the WhatsApp edit is that Sheets is a dashboard/export mirror here; Postgres and backend ActionResult are the operational truth. "
-                "Before I edit notes from WhatsApp, we need a backend-owned candidate-notes action that writes Postgres first and then syncs Sheets."
+                f"You can see {name} in the dashboard, and that record is real. "
+                "The reason I blocked the WhatsApp edit is that Postgres and the backend ActionResult are the operational truth here, and notes are not editable from WhatsApp yet. "
+                "Before I edit notes from WhatsApp, we need a backend-owned candidate-notes action that writes to Postgres directly."
             )
         else:
             reply = (
                 "I said that because the previous turn was validated as a candidate notes update, but the backend marked notes as not editable from WhatsApp yet. "
-                "That was a support boundary, not a claim that the candidate or the sheet does not exist."
+                "That was a support boundary, not a claim that the candidate does not exist."
             )
         return {"kind": "blocked_action_objection", "question": text, "reply": reply, "source": json_safe(recent)}
     normalized = payload.get("normalized_action_result") if isinstance(payload.get("normalized_action_result"), dict) else {}
@@ -30086,7 +29463,6 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
     rows = compliance_scan_rows(limit=limit)
     results: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
-    affected_employees: dict[str, dict[str, Any]] = {}
     # Group due compliance alerts per company so HR gets ONE digest per run instead
     # of a separate WhatsApp/notification per document (low-noise reminder summary).
     grouped_alerts: dict[str, list[dict[str, Any]]] = {}
@@ -30141,11 +29517,6 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
                         ),
                     )
                 conn.commit()
-            if row.get("phone"):
-                affected_employees[str(row.get("employee_key") or row.get("phone"))] = {
-                    "phone": row.get("phone"),
-                    "company_code": row.get("company_code"),
-                }
         if due:
             # Defer the send: collect per company, then emit one grouped digest
             # below so HR is pinged once per company per run, not once per document.
@@ -30192,12 +29563,8 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
                                 (it["row"].get("employee_key"), it["row"].get("document_type")),
                             )
                     conn.commit()
-    sheet_syncs: dict[str, Any] = {}
-    if not dry_run:
-        for key, employee in affected_employees.items():
-            sheet_syncs[key] = sync_employee_posthire(str(employee.get("phone") or ""), employee.get("company_code"))
     grouped_documents = {company: len(items) for company, items in grouped_alerts.items()}
-    return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped, "sheet_syncs": json_safe(sheet_syncs), "grouped_notifications": grouped_notifications, "grouped_companies": len(grouped_alerts), "grouped_documents": grouped_documents}
+    return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped, "grouped_notifications": grouped_notifications, "grouped_companies": len(grouped_alerts), "grouped_documents": grouped_documents}
 
 
 # --- Compliance dashboard (read) -------------------------------------------
@@ -30270,7 +29637,15 @@ def compliance_next_action(bucket: str, name: str, expiry_label: str | None) -> 
     return "No action needed."
 
 
-def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) -> dict[str, Any]:
+def dashboard_compliance_payload(
+    company: str,
+    viewer_phone: str | None = None,
+    *,
+    search: str | None = None,
+    bucket_filter: str | None = None,
+    offset: int = 0,
+    limit: int | None = None,
+) -> dict[str, Any]:
     """Company-scoped compliance read for the dashboard.
 
     Reuses the worker's classifier (classify_compliance_row) so status/severity
@@ -30279,6 +29654,13 @@ def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) 
     enforced by only looking at compliance documents for this company's employees.
     When viewer_phone is a scoped manager, the employee set is further narrowed to
     their branch/team/direct scope (inert for unscoped owners/HR).
+
+    `summary` counts are ALWAYS computed over the full classified set (using the
+    same classifier — no duplicated logic), so the bucket chips stay accurate.
+    Optional `bucket`/`search`/`offset`/`limit` filter and page the returned
+    `documents` list so the dashboard isn't shipped tens of thousands of rows at
+    once. Pagination is opt-in: when `limit` is None the full (optionally filtered)
+    list is returned, preserving every existing caller's behavior.
     """
     employees = company_employees(company)
     allowed_keys = manager_scope_employee_keys(company, viewer_phone)
@@ -30360,11 +29742,39 @@ def dashboard_compliance_payload(company: str, viewer_phone: str | None = None) 
         "employees_checked": len({d["employee_key"] for d in documents}),
         "employees_total": len(employee_keys),
     }
+    # Filter the classified list (bucket + free-text search) then page it. Summary
+    # above stays over the FULL set so the chips/banner are always accurate.
+    working = documents
+    bucket_key = (bucket_filter or "").strip().lower()
+    if bucket_key and bucket_key in COMPLIANCE_BUCKETS:
+        working = [d for d in working if d["status"] == bucket_key]
+    term = (search or "").strip().lower()
+    if term:
+        working = [
+            d for d in working
+            if term in str(d.get("employee_name") or "").lower()
+            or term in str(d.get("document_label") or "").lower()
+            or term in str(d.get("document_type") or "").lower()
+            or term in str(d.get("department") or "").lower()
+        ]
+    filtered_total = len(working)
+    if limit is None:
+        page_docs = working
+        eff_offset, eff_limit, has_more = 0, None, False
+    else:
+        eff_limit = max(1, min(int(limit), 500))
+        eff_offset = max(0, int(offset or 0))
+        page_docs = working[eff_offset:eff_offset + eff_limit]
+        has_more = (eff_offset + len(page_docs)) < filtered_total
     return {
         "company_code": company,
         "summary": summary,
-        "documents": documents,
+        "documents": page_docs,
         "doc_upload_enabled": doc_upload_enabled(),
+        "filtered_total": filtered_total,
+        "offset": eff_offset,
+        "limit": eff_limit,
+        "has_more": has_more,
     }
 
 
@@ -31024,6 +30434,30 @@ def run_document_extraction_backfill(*, dry_run: bool = True, limit: int = 25, f
     return {"ok": True, "dry_run": dry_run, "count": len(results), "skipped_count": len(skipped), "results": results, "skipped": skipped}
 
 
+def internal_configured_token() -> str | None:
+    value = os.environ.get("WATHEFNI_INTERNAL_TOKEN")
+    value = str(value or "").strip()
+    return value or None
+
+
+def require_internal_access(
+    authorization: str | None = Header(default=None),
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, Any]:
+    """Fail-closed gate for internal/operator-only orchestrator routes (audit,
+    debug, and worker triggers). These are not part of the client dashboard and
+    must never be reachable without the shared internal secret. Denies when the
+    secret is unconfigured so a missing env var can never leave a route open."""
+    configured = internal_configured_token()
+    provided = bearer_token(authorization) or str(x_internal_token or "").strip()
+    if not configured or not provided or not hmac.compare_digest(provided, configured):
+        raise HTTPException(
+            status_code=401,
+            detail={"error": "internal_auth_failed", "message": "Internal access was rejected."},
+        )
+    return {"is_internal": True}
+
+
 app = FastAPI(title="Wathefni HR Orchestrator")
 
 
@@ -31039,12 +30473,12 @@ def health():
 
 
 @app.get("/orchestrator/debug/prompt-context")
-def orchestrator_debug_prompt_context():
+def orchestrator_debug_prompt_context(_internal: dict[str, Any] = Depends(require_internal_access)):
     return openclaw_prompt_debug_status()
 
 
 @app.get("/orchestrator/debug/llm-usage")
-def orchestrator_debug_llm_usage(hours: int = Query(default=24, ge=1, le=168)):
+def orchestrator_debug_llm_usage(hours: int = Query(default=24, ge=1, le=168), _internal: dict[str, Any] = Depends(require_internal_access)):
     ensure_schema()
     hours = max(1, min(hours, 168))
     with db_connect() as conn:
@@ -31606,6 +31040,7 @@ class DashboardVideoInterviewRequest(BaseModel):
     link_ttl_days: int = 14
     send_invite: bool = True
     preferred_channel: str | None = None
+    message: str | None = None
 
 
 class DashboardLoginRequest(BaseModel):
@@ -33495,6 +32930,20 @@ def dashboard_team_link_whatsapp(request: DashboardWhatsAppLinkRequest, context:
     user_id = context.get("actor_user_id")
     with db_connect() as conn:
         with conn.cursor() as cur:
+            # Anti-hijack: a WhatsApp identity may only be (re)linked by the account
+            # that already owns it. Without this, any authenticated user could
+            # reassign a phone that is actively linked to a different colleague to
+            # themselves and steal attribution for WhatsApp-driven HR actions.
+            cur.execute(
+                "SELECT user_id FROM dashboard_whatsapp_identities WHERE company_code=%s AND phone=%s AND status='active'",
+                (company, phone),
+            )
+            existing = cur.fetchone()
+            if existing and existing.get("user_id") and existing.get("user_id") != user_id:
+                raise HTTPException(
+                    status_code=409,
+                    detail={"error": "whatsapp_already_linked", "message": "That WhatsApp number is already linked to another account in this company."},
+                )
             cur.execute(
                 """
                 INSERT INTO dashboard_whatsapp_identities (company_code, user_id, phone, status, updated_at)
@@ -33629,12 +33078,26 @@ def _hr_tasks_context(context: dict[str, Any], *, manage: bool = False) -> str:
 
 
 @app.get("/dashboard/hr-tasks")
-def dashboard_hr_tasks(status: str = "open", context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_hr_tasks(
+    status: str = "open",
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _hr_tasks_context(context)
     statuses = ["open"] if status == "open" else [s.strip() for s in status.split(",") if s.strip()]
     scope = context.get("scope")
-    tasks = _outbound_delivery.list_hr_tasks(company_code=company, scope=scope, statuses=statuses, limit=200)
-    return json_safe({"ok": True, "company_code": company, "open_count": _outbound_delivery.hr_task_open_count(company_code=company, scope=scope), "tasks": tasks})
+    tasks = _outbound_delivery.list_hr_tasks(company_code=company, scope=scope, statuses=statuses, limit=limit, offset=offset)
+    total = _outbound_delivery.count_hr_tasks(company_code=company, scope=scope, statuses=statuses)
+    return json_safe({
+        "ok": True,
+        "company_code": company,
+        "open_count": _outbound_delivery.hr_task_open_count(company_code=company, scope=scope),
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "tasks": tasks,
+    })
 
 
 @app.post("/dashboard/hr-tasks/{task_id}/resolve")
@@ -33672,7 +33135,17 @@ def _humanize_delivery_failure(
 ) -> tuple[str, str]:
     """Turn internal reason codes (e.g. ``session:no_usable_conversation_id;
     email:no_employee_email``) into one calm HR sentence plus a suggested next
-    action. Never surfaces provider payloads, tokens, or raw error strings."""
+    action. Never surfaces provider payloads, tokens, or raw error strings.
+
+    Critically: a channel this company/message never intended to use — WhatsApp
+    turned off by the company's notification preset (``preset_no_whatsapp``), or
+    email fallback turned off platform-wide (``email:disabled`` /
+    ``email:preset_blocked``) — is NEVER described as broken and never produces a
+    "fix this channel" suggestion. Only channels that were actually eligible for
+    this message and still failed (or are missing data) are surfaced as
+    something for HR to act on. Without this distinction, a company that
+    deliberately doesn't use WhatsApp would be told to "ask them to message you
+    on WhatsApp first," which can never help."""
     codes = [c.strip() for c in str(last_error or "").split(";") if c.strip()]
     name = (str(employee_name or "").strip() or "this employee")
     # Opt-out is a deliberate choice by the employee, not a delivery failure —
@@ -33682,42 +33155,69 @@ def _humanize_delivery_failure(
             f"{name} opted out of WhatsApp messages.",
             f"Contact {name} another way, or use email if it's on file.",
         )
-    no_phone = any(c == "session:no_phone" for c in codes)
-    # Any session:* reason other than "no_phone" means WhatsApp couldn't be used
-    # (most commonly the chat isn't open — no usable conversation).
-    whatsapp_blocked = any(c.startswith("session:") and c != "session:no_phone" for c in codes)
-    no_email = any(c == "email:no_employee_email" for c in codes)
-    email_disabled = any(c == "email:disabled" for c in codes)
-    email_failed = any(c.startswith("email:") and c not in {"email:no_employee_email", "email:disabled"} for c in codes)
 
-    if no_phone and (no_email or not has_email):
+    no_phone = "session:no_phone" in codes
+    whatsapp_not_eligible = "session:preset_no_whatsapp" in codes or "template:preset_no_whatsapp" in codes
+    # A real, fixable WhatsApp problem: it was eligible to try (not skipped by
+    # the company's own preset) and something about the attempt itself failed
+    # (chat not open, no usable conversation, provider error, ...).
+    whatsapp_technical_failure = (not whatsapp_not_eligible) and any(
+        c.startswith("session:") and c != "session:no_phone" for c in codes
+    )
+    whatsapp_is_issue = no_phone or whatsapp_technical_failure
+
+    no_email = "email:no_employee_email" in codes
+    email_not_eligible = "email:disabled" in codes or "email:preset_blocked" in codes
+    email_technical_failure = (not email_not_eligible) and any(
+        c.startswith("email:") and c != "email:no_employee_email" for c in codes
+    )
+    email_is_issue = no_email or email_technical_failure
+
+    if not whatsapp_is_issue and not email_is_issue:
+        # Everything that didn't land was a channel this company doesn't
+        # actually use for this message type — nothing genuinely eligible
+        # broke. Say so plainly instead of guessing at a WhatsApp/email problem
+        # that isn't real for this company's settings.
+        return (
+            f"No channel enabled for this company could reach {name} for this message.",
+            "Check your notification settings, or contact them directly.",
+        )
+
+    if no_phone and (no_email or not has_email) and not email_not_eligible:
         return (
             f"No WhatsApp number or email on file for {name}.",
             f"Add a phone number or email for {name}, then resend.",
         )
-    if (whatsapp_blocked or no_phone) and (no_email or not has_email):
+    if whatsapp_is_issue and (no_email or not has_email) and not email_not_eligible:
         return (
             f"WhatsApp chat isn't open and no email is on file for {name}.",
             f"Add an email for {name}, or ask them to message you on WhatsApp first.",
         )
-    if (whatsapp_blocked or no_phone) and email_disabled:
+    if whatsapp_is_issue and email_not_eligible:
         return (
             f"Couldn't reach {name} on WhatsApp and email fallback is turned off.",
             f"Reach {name} directly, then mark this done.",
         )
-    if (whatsapp_blocked or no_phone) and email_failed:
+    if whatsapp_is_issue and email_technical_failure:
         return (
             f"WhatsApp chat isn't open and the email couldn't be sent to {name}.",
             f"Check {name}'s email address and resend.",
         )
-    if whatsapp_blocked or no_phone:
+    if whatsapp_is_issue:
         return (
             f"Couldn't reach {name} on WhatsApp yet.",
             f"Reach {name} directly, or ask them to message you on WhatsApp first.",
         )
+    # WhatsApp was never eligible for this message (company doesn't use it
+    # here) — the only real problem is email, so only talk about email.
+    if no_email:
+        return (
+            f"No email on file for {name}, and WhatsApp isn't used for this message type.",
+            f"Add an email for {name}.",
+        )
     return (
-        f"We couldn't deliver this message to {name}.",
-        f"Reach {name} directly, then mark this done.",
+        f"Couldn't send an email to {name}, and WhatsApp isn't used for this message type.",
+        f"Check {name}'s email address and resend.",
     )
 
 
@@ -33769,10 +33269,14 @@ def messaging_readiness(company_code: str) -> dict[str, Any]:
 
 
 @app.get("/dashboard/outbound/needs-follow-up")
-def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_outbound_needs_follow_up(
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _hr_tasks_context(context)
     scope = context.get("scope")
-    rows = _outbound_delivery.list_needs_follow_up(company_code=company, scope=scope, limit=200)
+    rows = _outbound_delivery.list_needs_follow_up(company_code=company, scope=scope, limit=limit, offset=offset)
     items: list[dict[str, Any]] = []
     for row in rows:
         has_email = bool(str(row.get("target_email") or "").strip())
@@ -33816,6 +33320,9 @@ def dashboard_outbound_needs_follow_up(context: dict[str, Any] = Depends(dashboa
         "ok": True,
         "company_code": company,
         "count": len(items),
+        "total": _outbound_delivery.count_needs_follow_up(company_code=company, scope=scope),
+        "limit": limit,
+        "offset": offset,
         "messages": items,
         "messaging": messaging_readiness(company),
     })
@@ -34500,7 +34007,16 @@ def dashboard_position_summary(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def dashboard_prehire_positions_payload(company: str, *, limit: int = 200) -> list[dict[str, Any]]:
+def _dashboard_prehire_positions_query(
+    company: str, *, limit: int = 200, offset: int = 0, search: str | None = None
+) -> tuple[list[dict[str, Any]], int]:
+    """Core, paginated + searchable positions read shared by the summary card
+    (top-N glance), the legacy uncapped-ish endpoint, and the paginated Jobs
+    page. `total_count` reflects the full (optionally search-filtered) set so
+    callers can page through everything — no silent truncation once a company
+    passes the page size."""
+    term = (search or "").strip()
+    like = f"%{_ilike_escape(term)}%" if term else ""
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -34532,104 +34048,112 @@ def dashboard_prehire_positions_payload(company: str, *, limit: int = 200) -> li
                     AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
                     AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
                   ORDER BY a.company_code, a.position_code, a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST
+                ),
+                combined AS (
+                  SELECT
+                    COALESCE(p.company_code, s.company_code) AS company_code,
+                    COALESCE(p.position_code, s.position_code) AS position_code,
+                    COALESCE(p.title, s.position_title, p.position_code, s.position_code) AS position_title,
+                    p.status,
+                    p.apply_code,
+                    p.requirements,
+                    p.metadata,
+                    p.raw_json,
+                    p.created_at,
+                    p.updated_at,
+                    COALESCE(s.application_count, 0) AS application_count,
+                    COALESCE(s.active_count, 0) AS active_count,
+                    s.latest_application_at,
+                    l.latest_applicant_app_key,
+                    l.latest_phone,
+                    l.latest_candidate_name
+                  FROM positions p
+                  FULL OUTER JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
+                  LEFT JOIN latest l ON l.company_code=COALESCE(p.company_code, s.company_code) AND l.position_code=COALESCE(p.position_code, s.position_code)
+                  WHERE COALESCE(p.company_code, s.company_code)=%s
                 )
-                SELECT
-                  COALESCE(p.company_code, s.company_code) AS company_code,
-                  COALESCE(p.position_code, s.position_code) AS position_code,
-                  COALESCE(p.title, s.position_title, p.position_code, s.position_code) AS position_title,
-                  p.status,
-                  p.apply_code,
-                  p.requirements,
-                  p.metadata,
-                  p.raw_json,
-                  p.created_at,
-                  p.updated_at,
-                  COALESCE(s.application_count, 0) AS application_count,
-                  COALESCE(s.active_count, 0) AS active_count,
-                  s.latest_application_at,
-                  l.latest_applicant_app_key,
-                  l.latest_phone,
-                  l.latest_candidate_name
-                FROM positions p
-                FULL OUTER JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
-                LEFT JOIN latest l ON l.company_code=COALESCE(p.company_code, s.company_code) AND l.position_code=COALESCE(p.position_code, s.position_code)
-                WHERE COALESCE(p.company_code, s.company_code)=%s
-                ORDER BY COALESCE(s.active_count, 0) DESC, COALESCE(s.application_count, 0) DESC, COALESCE(p.updated_at, s.latest_application_at) DESC NULLS LAST
-                LIMIT %s
+                SELECT *, COUNT(*) OVER() AS total_count
+                FROM combined
+                WHERE (%s = '' OR position_title ILIKE %s OR position_code ILIKE %s)
+                ORDER BY active_count DESC, application_count DESC, COALESCE(updated_at, latest_application_at) DESC NULLS LAST, position_code
+                LIMIT %s OFFSET %s
                 """,
-                (company, company, company, limit),
+                (company, company, company, term, like, like, limit, offset),
             )
             rows = [dict(row) for row in cur.fetchall()]
-            cur.execute(
-                """
-                SELECT position_code, status, COUNT(*) AS count
-                FROM applications
-                WHERE company_code=%s
-                  AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
-                  AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
-                GROUP BY position_code, status
-                """,
-                (company,),
-            )
+            total_count = int(rows[0]["total_count"]) if rows else 0
+            codes = [str(row.get("position_code") or "") for row in rows if row.get("position_code")]
             stage_counts: dict[str, list[dict[str, Any]]] = {}
-            for row in cur.fetchall():
-                stage_counts.setdefault(str(row.get("position_code") or ""), []).append({"status": row.get("status"), "count": int(row.get("count") or 0)})
-            cur.execute(
-                """
-                SELECT *
-                FROM (
-                  SELECT
-                    a.position_code,
-                    a.app_key,
-                    a.phone,
-                    COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.raw_json->>'name') AS candidate_name,
-                    c.email AS candidate_email,
-                    a.status,
-                    a.ingested_at,
-                    a.updated_at,
-                    ROW_NUMBER() OVER (PARTITION BY a.position_code ORDER BY a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST) AS rn
-                  FROM applications a
-                  LEFT JOIN candidates c ON c.phone=a.phone
-                  WHERE a.company_code=%s
-                    AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
-                    AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                ) recent
-                WHERE rn <= 5
-                ORDER BY position_code, rn
-                """,
-                (company,),
-            )
             recent: dict[str, list[dict[str, Any]]] = {}
-            for row in cur.fetchall():
-                item = json_safe(dict(row))
-                recent.setdefault(str(row.get("position_code") or ""), []).append(item)
-            cur.execute(
-                """
-                SELECT *
-                FROM (
-                  SELECT
-                    a.position_code,
-                    ode.delivery_id,
-                    ode.target_phone,
-                    ode.status,
-                    ode.last_error,
-                    ode.created_at,
-                    ROW_NUMBER() OVER (PARTITION BY a.position_code ORDER BY ode.created_at DESC) AS rn
-                  FROM outbound_delivery_events ode
-                  JOIN applications a ON a.app_key=ode.subject_key
-                  WHERE a.company_code=%s AND a.position_code IS NOT NULL
-                    AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
-                    AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                ) events
-                WHERE rn <= 5
-                ORDER BY position_code, rn
-                """,
-                (company,),
-            )
             notifications: dict[str, list[dict[str, Any]]] = {}
-            for row in cur.fetchall():
-                item = json_safe(dict(row))
-                notifications.setdefault(str(row.get("position_code") or ""), []).append(item)
+            if codes:
+                cur.execute(
+                    """
+                    SELECT position_code, status, COUNT(*) AS count
+                    FROM applications
+                    WHERE company_code=%s AND position_code = ANY(%s)
+                      AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
+                      AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                    GROUP BY position_code, status
+                    """,
+                    (company, codes),
+                )
+                for row in cur.fetchall():
+                    stage_counts.setdefault(str(row.get("position_code") or ""), []).append({"status": row.get("status"), "count": int(row.get("count") or 0)})
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM (
+                      SELECT
+                        a.position_code,
+                        a.app_key,
+                        a.phone,
+                        COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.raw_json->>'name') AS candidate_name,
+                        c.email AS candidate_email,
+                        a.status,
+                        a.ingested_at,
+                        a.updated_at,
+                        ROW_NUMBER() OVER (PARTITION BY a.position_code ORDER BY a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST) AS rn
+                      FROM applications a
+                      LEFT JOIN candidates c ON c.phone=a.phone
+                      WHERE a.company_code=%s AND a.position_code = ANY(%s)
+                        AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
+                        AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
+                    ) recent
+                    WHERE rn <= 5
+                    ORDER BY position_code, rn
+                    """,
+                    (company, codes),
+                )
+                for row in cur.fetchall():
+                    item = json_safe(dict(row))
+                    recent.setdefault(str(row.get("position_code") or ""), []).append(item)
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM (
+                      SELECT
+                        a.position_code,
+                        ode.delivery_id,
+                        ode.target_phone,
+                        ode.status,
+                        ode.last_error,
+                        ode.created_at,
+                        ROW_NUMBER() OVER (PARTITION BY a.position_code ORDER BY ode.created_at DESC) AS rn
+                      FROM outbound_delivery_events ode
+                      JOIN applications a ON a.app_key=ode.subject_key
+                      WHERE a.company_code=%s AND a.position_code = ANY(%s)
+                        AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
+                        AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
+                    ) events
+                    WHERE rn <= 5
+                    ORDER BY position_code, rn
+                    """,
+                    (company, codes),
+                )
+                for row in cur.fetchall():
+                    item = json_safe(dict(row))
+                    notifications.setdefault(str(row.get("position_code") or ""), []).append(item)
     enriched = []
     for row in rows:
         code = str(row.get("position_code") or "")
@@ -34641,7 +34165,104 @@ def dashboard_prehire_positions_payload(company: str, *, limit: int = 200) -> li
         row["recent_applicants"] = recent.get(code, [])
         row["notifications"] = notifications.get(code, [])
         enriched.append(dashboard_position_summary(row))
-    return enriched
+    return enriched, total_count
+
+
+def dashboard_prehire_positions_payload(company: str, *, limit: int = 200) -> list[dict[str, Any]]:
+    rows, _ = _dashboard_prehire_positions_query(company, limit=limit)
+    return rows
+
+
+def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
+    """Lightweight aggregate counts over the FULL positions set (not the current
+    page/search filter), so the Jobs page headline stat cards stay accurate no
+    matter how many pages of postings a company has."""
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                WITH app_stats AS (
+                  SELECT company_code, position_code,
+                         COUNT(*) AS application_count,
+                         COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_count
+                  FROM applications
+                  WHERE company_code=%s
+                    AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
+                    AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                  GROUP BY company_code, position_code
+                ),
+                combined AS (
+                  SELECT
+                    lower(COALESCE(p.status, CASE WHEN COALESCE(s.active_count, 0) > 0 THEN 'open' ELSE 'closed' END)) AS status,
+                    p.apply_code,
+                    COALESCE(s.application_count, 0) AS application_count
+                  FROM positions p
+                  FULL OUTER JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
+                  WHERE COALESCE(p.company_code, s.company_code)=%s
+                )
+                SELECT
+                  COUNT(*) AS total_positions,
+                  COUNT(*) FILTER (WHERE status = 'open') AS open_positions,
+                  COUNT(*) FILTER (WHERE status != 'open') AS closed_positions,
+                  COUNT(*) FILTER (WHERE status = 'open' AND apply_code IS NOT NULL) AS active_qr_codes,
+                  COALESCE(SUM(application_count), 0) AS total_applications
+                FROM combined
+                """,
+                (company, company),
+            )
+            row = dict(cur.fetchone() or {})
+    return {
+        "total_positions": int(row.get("total_positions") or 0),
+        "open_positions": int(row.get("open_positions") or 0),
+        "closed_positions": int(row.get("closed_positions") or 0),
+        "active_qr_codes": int(row.get("active_qr_codes") or 0),
+        "total_applications": int(row.get("total_applications") or 0),
+    }
+
+
+def dashboard_set_position_status(company: str, position_code: str, status: str) -> dict[str, Any]:
+    """Open/close a job posting. Closing stops new WhatsApp/QR applicants —
+    `public_role_by_apply_code` already filters `positions.status IN ('open','active')`
+    — without touching candidates already in the pipeline for that role. Reopening
+    is a plain reversal: apply_code/QR stay identical either way, nothing is
+    regenerated. Raises ValueError if the status is invalid or the position
+    doesn't exist (no `positions` row AND no applications reference the code)."""
+    status = str(status or "").strip().lower()
+    if status not in ("open", "closed"):
+        raise ValueError("status must be 'open' or 'closed'")
+    company = str(company or "").strip().upper()
+    code = str(position_code or "").strip()
+    if not company or not code:
+        raise ValueError("company and position_code are required")
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT title FROM positions WHERE company_code=%s AND position_code=%s", (company, code))
+            existing = cur.fetchone()
+            if existing is not None:
+                fallback_title = str(existing.get("title") or code)
+            else:
+                cur.execute(
+                    "SELECT COUNT(*) AS n, MAX(position_title) AS position_title FROM applications WHERE company_code=%s AND position_code=%s",
+                    (company, code),
+                )
+                app_row = cur.fetchone() or {}
+                if int(app_row.get("n") or 0) == 0:
+                    raise ValueError("job opening not found")
+                fallback_title = str(app_row.get("position_title") or code)
+            cur.execute(
+                """
+                INSERT INTO positions (company_code, position_code, title, status, created_at, updated_at)
+                VALUES (%s,%s,%s,%s, now(), now())
+                ON CONFLICT (company_code, position_code) DO UPDATE SET
+                  status = EXCLUDED.status,
+                  updated_at = now()
+                RETURNING company_code, position_code, title, status, apply_code
+                """,
+                (company, code, fallback_title, status),
+            )
+            row = dict(cur.fetchone())
+        conn.commit()
+    return json_safe(row)
 
 
 def dashboard_record_action_result(action_type: str, status: str, result_payload: dict[str, Any], final_reply: str) -> dict[str, Any]:
@@ -34767,6 +34388,7 @@ AUDIT_ADMIN_CATEGORY = {
     "employee_created": "Employees", "employee_updated": "Employees",
     "employee_marked_left": "Employees", "employee_reactivated": "Employees",
     "employees_imported": "Employees",
+    "job_opening_closed": "Candidates", "job_opening_reopened": "Candidates",
     "attendance_exported": "Attendance",
     "shift_cancelled": "Shifts", "shift_rescheduled": "Shifts",
     "payroll_export_downloaded": "Payroll",
@@ -34780,6 +34402,8 @@ AUDIT_EXTRA_CATEGORY = {
     "interview_status_update": "Candidates",
     "interview_feedback": "Candidates",
     "create_job_opening": "Candidates",
+    "close_job_opening": "Candidates",
+    "reopen_job_opening": "Candidates",
     "onboarding_mark_item": "Onboarding",
 }
 
@@ -34884,6 +34508,10 @@ AUDIT_ACTION_LABELS = {
     "interview_status_update": "updated an interview",
     "interview_feedback": "left interview feedback",
     "create_job_opening": "created a job opening",
+    "close_job_opening": "closed a job opening",
+    "reopen_job_opening": "reopened a job opening",
+    "job_opening_closed": "closed a job opening",
+    "job_opening_reopened": "reopened a job opening",
     "onboarding_mark_item": "marked an onboarding item",
     "direct_reply": "replied to a message",
     "send_email": "sent an email",
@@ -36869,24 +36497,25 @@ def create_or_resume_async_video_interview(
     return {"interview": interview, "public_link": public_link, "resumed": False}
 
 
-def compose_async_video_interview_invite(application: dict[str, Any], interview: dict[str, Any], public_link: str) -> str:
+def compose_async_video_interview_invite(application: dict[str, Any], interview: dict[str, Any], public_link: str, *, note: str | None = None) -> str:
     name = interview.get("candidate_name") or application.get("candidate_name") or "there"
-    return "\n".join(
-        [
-            f"Hi {name},",
-            "",
-            "You have been invited to complete a short video interview for your application.",
-            "",
-            "Please open the link below when you are ready. You will be asked to review the instructions, give consent, and answer a few questions by video.",
-            "",
-            public_link,
-            "",
-            "This video interview helps the hiring team review your application. The final decision is always made by the hiring team.",
-            "",
-            "Thank you,",
-            "Wathefni HR",
-        ]
-    )
+    note_text = str(note or "").strip()
+    lines = [
+        f"Hi {name},",
+        "",
+        *([note_text, ""] if note_text else []),
+        "You have been invited to complete a short video interview for your application.",
+        "",
+        "Please open the link below when you are ready. You will be asked to review the instructions, give consent, and answer a few questions by video.",
+        "",
+        public_link,
+        "",
+        "This video interview helps the hiring team review your application. The final decision is always made by the hiring team.",
+        "",
+        "Thank you,",
+        "Wathefni HR",
+    ]
+    return "\n".join(lines)
 
 
 def send_async_video_interview_invite(
@@ -36897,9 +36526,10 @@ def send_async_video_interview_invite(
     account_id: str | None,
     preferred_channel: str | None = None,
     actor_context: dict[str, Any] | None = None,
+    note: str | None = None,
 ) -> dict[str, Any]:
     subject = "Video Interview Invitation"
-    body = compose_async_video_interview_invite(application, interview, public_link)
+    body = compose_async_video_interview_invite(application, interview, public_link, note=note)
     action = {
         "purpose": "video_interview_invite",
         "message_text": body,
@@ -37801,17 +37431,6 @@ def workspace_tool_operation_ok(result: dict[str, Any]) -> bool:
     return bool(result.get("ok") and payload.get("ok", True))
 
 
-def workspace_tool_sheet_sync(result: dict[str, Any]) -> dict[str, Any]:
-    payload = workspace_tool_json(result)
-    sheet_sync = payload.get("sheet_sync")
-    return sheet_sync if isinstance(sheet_sync, dict) else {"attempted": False}
-
-
-def workspace_tool_sheet_sync_ok(result: dict[str, Any]) -> bool:
-    sheet_sync = workspace_tool_sheet_sync(result)
-    return bool(sheet_sync.get("attempted") and sheet_sync.get("ok"))
-
-
 def dashboard_prehire_mutation_response(
     *,
     action_type: str,
@@ -37881,6 +37500,16 @@ def prehire_applications_query(
     if assessment_status:
         if assessment_status == "none":
             where.append("COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '') = ''")
+        elif assessment_status == "awaiting":
+            # Matches the exact "assessment_pending" definition used for the
+            # headline count (prehire_action_counts) and the Assessments page
+            # queue: candidate is in a stage ready for assessment, and the
+            # assessment itself is not sent yet or sent but not started. Keeps
+            # the "N pending" number and this filter in agreement.
+            where.append(
+                "a.status IN ('screening_complete','review_pending','shortlisted') "
+                "AND COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '') IN ('', 'pending')"
+            )
         else:
             where.append("COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status')=%s")
             params.append(assessment_status)
@@ -38202,6 +37831,7 @@ def dashboard_assessments_payload(
     status: str | None = None,
     position: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict[str, Any]:
     where = ["aa.company_code=%s", reviewable_application_predicate("a")]
     params: list[Any] = [company]
@@ -38212,8 +37842,41 @@ def dashboard_assessments_payload(
         where.append("(aa.position_code ILIKE %s OR aa.position_title ILIKE %s)")
         params.extend([f"%{position}%", f"%{position.replace('_', ' ')}%"])
     where_sql = " AND ".join(where)
+    limit_value = bounded_limit(limit)
+    offset_value = max(0, int(offset or 0))
     with db_connect() as conn:
         with conn.cursor() as cur:
+            # Company-wide, unpaginated: the headline metrics (tab counts, average
+            # score) must reflect ALL matching attempts, not just the page being
+            # rendered — otherwise they silently drift once a company passes the
+            # page size, which is exactly the kind of scale bug we've been hunting
+            # down across every other module.
+            cur.execute(
+                f"""
+                SELECT aa.status, COUNT(*) AS count
+                FROM assessment_attempts aa
+                LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
+                WHERE {where_sql}
+                GROUP BY aa.status
+                ORDER BY count DESC, aa.status
+                """,
+                params,
+            )
+            status_counts = [json_safe(dict(row)) for row in cur.fetchall()]
+            total = sum(int(row["count"]) for row in status_counts)
+            cur.execute(
+                f"""
+                SELECT AVG(s.percent) AS average_percent
+                FROM assessment_attempts aa
+                LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
+                LEFT JOIN assessment_scores s ON s.attempt_id=aa.attempt_id
+                WHERE {where_sql} AND aa.status='completed' AND s.percent IS NOT NULL
+                """,
+                params,
+            )
+            avg_row = cur.fetchone() or {}
+            raw_average = avg_row.get("average_percent")
+            average_percent = round(float(raw_average), 1) if raw_average is not None else None
             cur.execute(
                 f"""
                 WITH response_counts AS (
@@ -38240,26 +37903,19 @@ def dashboard_assessments_payload(
                 LEFT JOIN assessment_scores s ON s.attempt_id=aa.attempt_id
                 LEFT JOIN assessment_reports r ON r.attempt_id=aa.attempt_id
                 WHERE {where_sql}
-                ORDER BY aa.updated_at DESC, aa.created_at DESC
-                LIMIT %s
+                ORDER BY aa.updated_at DESC, aa.created_at DESC, aa.attempt_id
+                LIMIT %s OFFSET %s
                 """,
-                [*params, limit],
+                [*params, limit_value, offset_value],
             )
             attempts = [assessment_attempt_summary(dict(row)) for row in cur.fetchall()]
-    status_counts: dict[str, int] = {}
-    for attempt in attempts:
-        key = str(attempt.get("status") or "unknown")
-        status_counts[key] = status_counts.get(key, 0) + 1
-    completed = [attempt for attempt in attempts if attempt.get("status") == "completed"]
-    average_percent = None
-    if completed:
-        values = [float(attempt.get("percent") or 0) for attempt in completed]
-        average_percent = round(sum(values) / len(values), 1)
     return {
         "company_code": company,
         "ok": True,
-        "total": len(attempts),
-        "status_counts": [{"status": key, "count": value} for key, value in sorted(status_counts.items())],
+        "total": total,
+        "limit": limit_value,
+        "offset": offset_value,
+        "status_counts": status_counts,
         "average_percent": average_percent,
         "attempts": attempts,
     }
@@ -38432,9 +38088,66 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
 
 
 @app.get("/dashboard/prehire/positions")
-def dashboard_prehire_positions(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_positions(
+    offset: int = 0,
+    limit: int = 100,
+    search: str = "",
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
     company = context["company_code"]
-    return {"company_code": company, "positions": dashboard_prehire_positions_payload(company, limit=200)}
+    eff_limit = max(1, min(int(limit or 100), 200))
+    eff_offset = max(0, int(offset or 0))
+    positions, total_count = _dashboard_prehire_positions_query(company, limit=eff_limit, offset=eff_offset, search=search)
+    return {
+        "company_code": company,
+        "positions": positions,
+        "total_count": total_count,
+        "limit": eff_limit,
+        "offset": eff_offset,
+        "has_more": (eff_offset + len(positions)) < total_count,
+        "summary": dashboard_prehire_positions_summary(company),
+    }
+
+
+class DashboardPositionStatus(BaseModel):
+    status: str
+
+
+def require_prehire_settings_admin(context: dict[str, Any]) -> str:
+    """Gate for job-opening lifecycle changes (close/reopen): same settings.manage
+    permission already required to create a job opening via the Assistant, so
+    whoever can open a role is the one who can close it."""
+    require_entitlement(context, "pre_hiring", "settings.manage")
+    return context["company_code"]
+
+
+@app.post("/dashboard/prehire/positions/{position_code}/status")
+def dashboard_prehire_set_position_status(
+    position_code: str,
+    request: DashboardPositionStatus,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = require_prehire_settings_admin(context)
+    target = str(request.status or "").strip().lower()
+    if target not in ("open", "closed"):
+        raise HTTPException(status_code=422, detail={"error": "invalid_status", "message": "status must be 'open' or 'closed'."})
+    try:
+        result = dashboard_set_position_status(company, position_code, target)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail={"error": "position_not_found", "message": str(exc)}) from exc
+    record_admin_audit(
+        context,
+        "job_opening_closed" if target == "closed" else "job_opening_reopened",
+        summary=(
+            f"Closed {result.get('title') or position_code} to new applicants."
+            if target == "closed"
+            else f"Reopened {result.get('title') or position_code} to new applicants."
+        ),
+        target_type="position",
+        target=position_code,
+        details={"status": target},
+    )
+    return {"ok": True, "position": result}
 
 
 @app.get("/dashboard/prehire/applications")
@@ -39146,10 +38859,11 @@ def dashboard_prehire_assessments(
     status: str | None = None,
     position: str | None = None,
     limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     context: dict[str, Any] = Depends(assessments_dashboard_context),
 ):
     company = context["company_code"]
-    return dashboard_assessments_payload(company, status=status, position=position, limit=limit)
+    return dashboard_assessments_payload(company, status=status, position=position, limit=limit, offset=offset)
 
 
 @app.get("/dashboard/prehire/assessments/config")
@@ -39325,7 +39039,7 @@ def prehire_report_summary_payload(company: str) -> dict[str, Any]:
                 WHERE a.company_code=%s AND {reviewable}
                 GROUP BY COALESCE(NULLIF(a.position_title, ''), NULLIF(a.position_code, ''), 'Unassigned role')
                 ORDER BY count DESC, label
-                LIMIT 25
+                LIMIT 100
                 """,
                 (company,),
             )
@@ -41977,13 +41691,10 @@ def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(
         return run_prehire_registry_action(context, "shortlist_candidate", {}, app_key=app_key)
     update_result = update_application_status(application, "shortlisted")
     update_ok = workspace_tool_operation_ok(update_result)
-    sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-    status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+    status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
-    if update_ok and sheet_ok:
-        reply = f"{name} is shortlisted and the sheet is synced."
-    elif update_ok:
-        reply = f"{name} is shortlisted in the backend, but Google Sheets sync failed."
+    if update_ok:
+        reply = f"{name} is shortlisted."
     else:
         reply = f"I could not shortlist {name}."
     result_payload = {
@@ -42013,13 +41724,10 @@ def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(pre
         return run_prehire_registry_action(context, "reject_candidate", {}, app_key=app_key)
     update_result = update_application_status(application, "rejected")
     update_ok = workspace_tool_operation_ok(update_result)
-    sheet_ok = workspace_tool_sheet_sync_ok(update_result)
-    status = "completed" if update_ok and sheet_ok else "partial" if update_ok else "failed"
+    status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
-    if update_ok and sheet_ok:
+    if update_ok:
         reply = f"{name} was moved out of the active pipeline."
-    elif update_ok:
-        reply = f"{name} was rejected in the backend, but Google Sheets sync failed."
     else:
         reply = f"I could not reject {name}."
     result_payload = {
@@ -42124,8 +41832,9 @@ def dashboard_prehire_assessment(
     application = dashboard_application_or_404(app_key, company)
     payload = request or DashboardCandidateMessage()
     if _prehire_registry_enabled("send_assessment"):
-        return run_prehire_registry_action(context, "send_assessment", {}, app_key=app_key)
-    result = send_assessment(application, payload.account_id or "default")
+        extra = {"message_text": payload.message} if payload.message else {}
+        return run_prehire_registry_action(context, "send_assessment", extra, app_key=app_key)
+    result = send_assessment(application, payload.account_id or "default", note=payload.message)
     status = "completed" if result.get("ok") else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     send_error = (result.get("send") or {}).get("error") if isinstance(result.get("send"), dict) else None
@@ -42170,6 +41879,8 @@ def dashboard_prehire_video_interview(
         extra: dict[str, Any] = {}
         if payload.preferred_channel:
             extra["preferred_channel"] = payload.preferred_channel
+        if payload.message:
+            extra["message_text"] = payload.message
         return run_prehire_registry_action(context, "send_video_interview", extra, app_key=app_key)
     actor = actor_context_for_hr_user(context.get("hr_user"), company_code=company, hr_phone=context.get("hr_phone"))
     created = create_or_resume_async_video_interview(application, payload, actor_context={**actor, "actor_role": context.get("actor_role") or actor.get("actor_role")})
@@ -42183,6 +41894,7 @@ def dashboard_prehire_video_interview(
             account_id=payload.account_id or "default",
             preferred_channel=payload.preferred_channel,
             actor_context={**actor, "actor_role": context.get("actor_role") or actor.get("actor_role")},
+            note=payload.message,
         )
     else:
         result = {
@@ -43099,9 +42811,21 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                     (company, key),
                 )
                 leave_rows = [dict(r) for r in cur.fetchall()]
-                pending = [r for r in leave_rows if r.get("status") == "requested"]
+                # The row list above is a capped (LIMIT 10) preview for display.
+                # The pending count must be a TRUE aggregate — deriving it from the
+                # capped preview undercounts an employee with >10 pending requests
+                # and makes the "awaiting a decision" badge lie at scale.
+                cur.execute(
+                    """
+                    SELECT COUNT(*) AS pending_count
+                    FROM leave_requests
+                    WHERE company_code=%s AND employee_key=%s AND status='requested'
+                    """,
+                    (company, key),
+                )
+                pending_count = int((cur.fetchone() or {}).get("pending_count") or 0)
                 sections["leave"] = {
-                    "pending_count": len(pending),
+                    "pending_count": pending_count,
                     "items": [
                         {
                             "leave_type": r.get("leave_type"),
@@ -43117,10 +42841,10 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                 if leave_balances_enabled():
                     sections["leave"]["balances_enabled"] = True
                     sections["leave"]["balances"] = leave_balances_for_employee(company, key)
-                if pending:
+                if pending_count:
                     next_actions.append({
                         "module": "leave",
-                        "label": f"{len(pending)} leave request{'s' if len(pending) != 1 else ''} awaiting a decision",
+                        "label": f"{pending_count} leave request{'s' if pending_count != 1 else ''} awaiting a decision",
                         "page": "leave",
                     })
 
@@ -43136,8 +42860,20 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
                     (company, key),
                 )
                 shift_rows = [dict(r) for r in cur.fetchall()]
+                # The rows above are a capped (LIMIT 10) preview. The count must be
+                # a TRUE aggregate so an employee with >10 upcoming shifts isn't
+                # shown as having only 10.
+                cur.execute(
+                    """
+                    SELECT COUNT(*) AS upcoming_count
+                    FROM shift_assignments
+                    WHERE company_code=%s AND employee_key=%s AND shift_date >= CURRENT_DATE
+                    """,
+                    (company, key),
+                )
+                upcoming_count = int((cur.fetchone() or {}).get("upcoming_count") or 0)
                 sections["shifts"] = {
-                    "upcoming_count": len(shift_rows),
+                    "upcoming_count": upcoming_count,
                     "items": [
                         {
                             "date": (r.get("shift_date").isoformat() if hasattr(r.get("shift_date"), "isoformat") else r.get("shift_date")),
@@ -43346,7 +43082,6 @@ async def dashboard_posthire_employee_document_upload(
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
-    sync_employee_posthire(employee.get("phone") or "", company)
     record_admin_audit(
         context,
         "document_uploaded",
@@ -43416,20 +43151,954 @@ def dashboard_posthire_document_file(file_id: str, disposition: str = "inline", 
     return FileResponse(path, media_type=mime_type, filename=filename, content_disposition_type=mode, headers=headers)
 
 
+# ============================================================================
+# Employee App / Portal (V1) — dark-launched behind WATHEFNI_EMPLOYEE_APP.
+#
+# A thin, employee-self-scoped surface under /app/*. SAME backend, SAME database,
+# SAME tenancy as the dashboard — just a different (employee) identity and a much
+# smaller, read-mostly surface. Hard rules enforced throughout:
+#   * Identity (employee_key + company_code) ALWAYS comes from the verified
+#     session, NEVER from a client-supplied parameter (no IDOR surface).
+#   * Activation is HR-provisioned (an HR-issued, single-use code) — there is no
+#     open self-registration. The code is delivered through the existing outbound
+#     ladder (push not yet available pre-activation -> WhatsApp/email -> HR task).
+#   * Out-of-scope / not-found -> 404, never disclosing other employees' rows.
+#   * Every /app/* route is inert unless WATHEFNI_EMPLOYEE_APP is on AND the
+#     company has the `employee_app` module.
+# ============================================================================
+
+_EMPLOYEE_APP_INVITE_TTL_HOURS = 24
+_EMPLOYEE_APP_CODE_DIGITS = 6
+_EMPLOYEE_APP_MAX_CODE_ATTEMPTS = 5
+_EMPLOYEE_APP_SESSION_TTL_DAYS = 7
+_EMPLOYEE_APP_REFRESH_TTL_DAYS = 180
+_EMPLOYEE_APP_CODE_RESEND_COOLDOWN_SECONDS = 60
+_APP_DOC_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic"}
+_APP_DOC_MAX_BYTES = 15 * 1024 * 1024
+# Employee-facing flows surfaced in the app's notification inbox.
+_APP_INBOX_FLOWS = ("leave_decision", "onboarding", "compliance", "shift", "payroll", "app_activation")
+
+
+class EmployeeAppActivateRequest(BaseModel):
+    phone: str
+    code: str
+
+
+class EmployeeAppRequestCodeRequest(BaseModel):
+    phone: str
+
+
+class EmployeeAppRefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class EmployeeLeaveRequestBody(BaseModel):
+    start_date: str
+    end_date: str
+    leave_type: str | None = None
+    reason: str | None = None
+
+
+class EmployeePushRegisterBody(BaseModel):
+    push_token: str
+    platform: str | None = None
+    device_id: str | None = None
+
+
+class EmployeePushUnregisterBody(BaseModel):
+    push_token: str | None = None
+
+
+class EmployeeDeletionRequestBody(BaseModel):
+    reason: str | None = None
+
+
+def _app_code_generate() -> str:
+    return "".join(secrets.choice("0123456789") for _ in range(_EMPLOYEE_APP_CODE_DIGITS))
+
+
+def _app_code_hash(company_code: str | None, phone: str | None, code: str) -> str:
+    basis = f"{(company_code or '').upper()}:{digits(phone)}:{str(code or '').strip()}"
+    return hashlib.sha256(basis.encode("utf-8")).hexdigest()
+
+
+def _app_token_hash(token: str | None) -> str:
+    return dashboard_token_hash(token)
+
+
+def employee_app_public(employee: dict[str, Any], company_code: str) -> dict[str, Any]:
+    """Lean, employee-self profile payload (no HR-only fields)."""
+    card = posthire_employee_card(employee)
+    profile = employee.get("profile") if isinstance(employee.get("profile"), dict) else {}
+    locale = str(profile.get("locale") or profile.get("language") or "en").strip().lower() or "en"
+    return {
+        "employee_key": str(employee.get("employee_key") or ""),
+        "company_code": company_code,
+        "name": employee.get("name") or "",
+        "phone": digits(employee.get("phone")) or "",
+        "email": employee.get("email") or card.get("email") or "",
+        "position_title": card.get("position_title") or employee.get("position_title") or "",
+        "department": card.get("department") or "",
+        "onboarding_status": card.get("onboarding_status") or "not_started",
+        "locale": locale if locale in {"en", "ar"} else "en",
+    }
+
+
+def create_employee_app_invite(company_code: str, employee: dict[str, Any], *, created_by_phone: str | None = None, created_by_user_id: str | None = None) -> tuple[dict[str, Any], str]:
+    """Create a single-use activation invite, superseding any prior pending one for
+    this employee. Returns (invite_row, raw_code). Only the hash is persisted."""
+    company = (company_code or "WATHEFNI").upper()
+    phone = digits(employee.get("phone"))
+    code = _app_code_generate()
+    expires = now_utc() + timedelta(hours=_EMPLOYEE_APP_INVITE_TTL_HOURS)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE employee_app_invites SET status='superseded', updated_at=now() WHERE company_code=%s AND employee_key=%s AND status='pending'",
+                (company, employee.get("employee_key")),
+            )
+            cur.execute(
+                """
+                INSERT INTO employee_app_invites
+                  (company_code, employee_key, phone, code_hash, status, created_by_phone, created_by_user_id, expires_at, last_sent_at)
+                VALUES (%s,%s,%s,%s,'pending',%s,%s,%s, now())
+                RETURNING *
+                """,
+                (company, employee.get("employee_key"), phone, _app_code_hash(company, phone, code), digits(created_by_phone) or None, str(created_by_user_id) if created_by_user_id else None, expires),
+            )
+            invite = dict(cur.fetchone())
+        conn.commit()
+    return invite, code
+
+
+def deliver_app_activation_code(company_code: str, employee: dict[str, Any], code: str) -> dict[str, Any]:
+    """Deliver the activation code via the shared outbound ladder. metadata_only
+    sensitivity keeps the code OUT of the stored message body; if no channel lands
+    it raises a visible HR task (critical) so HR can hand the code over."""
+    company = (company_code or "WATHEFNI").upper()
+    try:
+        return deliver_employee_notification(
+            employee,
+            flow="app_activation",
+            template_key="app_activation",
+            text=f"Your {company} app activation code is {code}. It expires in {_EMPLOYEE_APP_INVITE_TTL_HOURS} hours.",
+            email_subject="Your Wathefni app activation code",
+            company_code=company,
+            variables={"code": code, "company_name": company, "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
+            subject_key=employee.get("employee_key"),
+        )
+    except Exception:
+        logger.warning("app activation code delivery failed for %s", employee.get("employee_key"), exc_info=True)
+        return {"ok": False, "delivery_status": "failed", "error": "delivery_failed"}
+
+
+def create_employee_session(company_code: str, employee_key: str, phone: str | None) -> dict[str, Any]:
+    token = secrets.token_urlsafe(32)
+    refresh = secrets.token_urlsafe(48)
+    now = now_utc()
+    expires = now + timedelta(days=_EMPLOYEE_APP_SESSION_TTL_DAYS)
+    refresh_expires = now + timedelta(days=_EMPLOYEE_APP_REFRESH_TTL_DAYS)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO employee_sessions
+                  (company_code, employee_key, phone, token_hash, refresh_hash, expires_at, refresh_expires_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+                """,
+                ((company_code or "WATHEFNI").upper(), str(employee_key), digits(phone), _app_token_hash(token), _app_token_hash(refresh), expires, refresh_expires),
+            )
+        conn.commit()
+    return {"token": token, "refresh_token": refresh, "expires_at": expires, "refresh_expires_at": refresh_expires}
+
+
+def employee_by_session(token: str | None) -> dict[str, Any] | None:
+    if not token:
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM employee_sessions WHERE token_hash=%s AND status='active' AND expires_at > now() LIMIT 1",
+                (_app_token_hash(token),),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            cur.execute("UPDATE employee_sessions SET last_seen_at=now() WHERE session_id=%s", (row["session_id"],))
+        conn.commit()
+    sess = dict(row)
+    employee = find_employee_by_key(sess["employee_key"], company_code=sess["company_code"])
+    if not employee:
+        return None
+    return {"session_id": str(sess["session_id"]), "company_code": str(sess["company_code"]).upper(), "employee_key": str(sess["employee_key"]), "employee": employee}
+
+
+def rotate_employee_session(refresh_token: str | None) -> dict[str, Any] | None:
+    if not refresh_token:
+        return None
+    now = now_utc()
+    token = secrets.token_urlsafe(32)
+    refresh = secrets.token_urlsafe(48)
+    expires = now + timedelta(days=_EMPLOYEE_APP_SESSION_TTL_DAYS)
+    refresh_expires = now + timedelta(days=_EMPLOYEE_APP_REFRESH_TTL_DAYS)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM employee_sessions WHERE refresh_hash=%s AND status='active' AND refresh_expires_at > now() LIMIT 1",
+                (_app_token_hash(refresh_token),),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            sess = dict(row)
+            cur.execute(
+                "UPDATE employee_sessions SET token_hash=%s, refresh_hash=%s, expires_at=%s, refresh_expires_at=%s, last_seen_at=now() WHERE session_id=%s",
+                (_app_token_hash(token), _app_token_hash(refresh), expires, refresh_expires, sess["session_id"]),
+            )
+        conn.commit()
+    return {"token": token, "refresh_token": refresh, "expires_at": expires, "company_code": str(sess["company_code"]).upper(), "employee_key": str(sess["employee_key"])}
+
+
+def revoke_employee_session_token(token: str | None) -> None:
+    if not token:
+        return
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE employee_sessions SET status='revoked', revoked_at=now(), revoked_reason='logout' WHERE token_hash=%s AND status='active'",
+                (_app_token_hash(token),),
+            )
+        conn.commit()
+
+
+def revoke_employee_app_access(company_code: str, employee_key: str, *, reason: str = "revoked") -> int:
+    """Hard kill switch: revoke every active session and deactivate every push
+    token for an employee. Called on logout-all and (critically) on offboarding so
+    a terminated employee instantly loses app access."""
+    company = (company_code or "WATHEFNI").upper()
+    revoked = 0
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE employee_sessions SET status='revoked', revoked_at=now(), revoked_reason=%s WHERE company_code=%s AND employee_key=%s AND status='active'",
+                (reason[:120], company, str(employee_key)),
+            )
+            revoked = cur.rowcount or 0
+            cur.execute(
+                "UPDATE employee_push_tokens SET active=FALSE, last_error=%s, updated_at=now() WHERE company_code=%s AND employee_key=%s AND active IS TRUE",
+                (reason[:120], company, str(employee_key)),
+            )
+        conn.commit()
+    return revoked
+
+
+def employee_app_context(
+    authorization: str | None = Header(default=None),
+    x_app_token: str | None = Header(default=None, alias="X-App-Token"),
+) -> dict[str, Any]:
+    """Auth dependency for /app/* (the employee equivalent of dashboard_context).
+    Resolves the verified employee session and returns an audit-compatible context
+    whose identity is fixed to that one employee."""
+    ensure_schema()
+    if not employee_app_enabled():
+        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
+    token = bearer_token(authorization) or str(x_app_token or "").strip()
+    sess = employee_by_session(token)
+    if not sess:
+        raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
+    company = sess["company_code"]
+    if not company_has_module(company, "employee_app"):
+        raise HTTPException(status_code=403, detail={"error": "employee_app_not_enabled_for_company", "message": "The app is not enabled for your company."})
+    employee = sess["employee"]
+    if normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+        # Defense in depth: offboarding already revokes sessions, but never serve a
+        # terminated employee even if a stale session slipped through.
+        revoke_employee_app_access(company, sess["employee_key"], reason="employment_inactive")
+        raise HTTPException(status_code=403, detail={"error": "account_inactive", "message": "Your account is not active."})
+    phone = digits(employee.get("phone"))
+    return {
+        "company_code": company,
+        "employee_key": sess["employee_key"],
+        "employee": employee,
+        "phone": phone,
+        "session_id": sess["session_id"],
+        # Audit-compatible keys so record_admin_audit attributes actions correctly.
+        "actor_user_id": f"employee_app:{sess['employee_key']}",
+        "actor_phone": phone,
+        "actor_email": employee.get("email") or "",
+        "actor_role": "employee",
+        "hr_phone": "",
+        "hr_user": {"role": "employee", "company_code": company, "phone": phone, "name": employee.get("name") or ""},
+    }
+
+
+# --- /app auth ---------------------------------------------------------------
+
+@app.post("/app/auth/activate")
+def app_auth_activate(req: EmployeeAppActivateRequest):
+    ensure_schema()
+    if not employee_app_enabled():
+        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
+    phone = digits(req.phone)
+    code = str(req.code or "").strip()
+    # One generic failure for every "couldn't activate" case so we never disclose
+    # whether a phone, company, employee, or invite exists.
+    generic = HTTPException(status_code=401, detail={"error": "app_activation_failed", "message": "That code didn't work. Ask your HR team for a new one."})
+    if not phone or not code:
+        raise generic
+    company = employee_company_code_for_phone(phone)
+    if not company or not company_has_module(company, "employee_app"):
+        raise generic
+    employee = find_employee_by_phone(phone, company_code=company)
+    if not employee:
+        raise generic
+    if normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+        raise generic
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM employee_app_invites WHERE company_code=%s AND phone=%s AND status='pending' AND expires_at > now() ORDER BY created_at DESC LIMIT 1",
+                (company, phone),
+            )
+            invite = cur.fetchone()
+            if not invite:
+                raise generic
+            invite = dict(invite)
+            if int(invite.get("attempts") or 0) >= _EMPLOYEE_APP_MAX_CODE_ATTEMPTS:
+                cur.execute("UPDATE employee_app_invites SET status='locked', updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
+                conn.commit()
+                raise HTTPException(status_code=429, detail={"error": "too_many_attempts", "message": "Too many attempts. Ask your HR team for a new code."})
+            if not hmac.compare_digest(str(invite.get("code_hash") or ""), _app_code_hash(company, phone, code)):
+                cur.execute("UPDATE employee_app_invites SET attempts=attempts+1, updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
+                conn.commit()
+                raise generic
+            cur.execute("UPDATE employee_app_invites SET status='redeemed', redeemed_at=now(), updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
+        conn.commit()
+    session = create_employee_session(company, str(employee.get("employee_key")), phone)
+    logger.info("employee app activated company=%s employee=%s", company, employee.get("employee_key"))
+    return json_safe({
+        "ok": True,
+        "token": session["token"],
+        "refresh_token": session["refresh_token"],
+        "expires_at": session["expires_at"],
+        "employee": employee_app_public(employee, company),
+    })
+
+
+@app.post("/app/auth/request-code")
+def app_auth_request_code(req: EmployeeAppRequestCodeRequest):
+    ensure_schema()
+    if not employee_app_enabled():
+        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
+    phone = digits(req.phone)
+    # Always generic so this endpoint never reveals whether a number is registered.
+    generic = {"ok": True, "message": "If your number is registered, you'll receive a code shortly."}
+    if not phone:
+        return generic
+    company = employee_company_code_for_phone(phone)
+    if not company or not company_has_module(company, "employee_app"):
+        return generic
+    employee = find_employee_by_phone(phone, company_code=company)
+    if not employee or normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+        return generic
+    # HR-provisioned model: only (re)issue a code if HR already invited this
+    # employee at least once. No prior invite -> stay silent (no self-registration).
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT max(last_sent_at) AS last_sent, count(*) AS n FROM employee_app_invites WHERE company_code=%s AND employee_key=%s",
+                (company, employee.get("employee_key")),
+            )
+            row = dict(cur.fetchone() or {})
+    if int(row.get("n") or 0) == 0:
+        return generic
+    last_sent = row.get("last_sent")
+    if last_sent and (now_utc() - last_sent).total_seconds() < _EMPLOYEE_APP_CODE_RESEND_COOLDOWN_SECONDS:
+        return generic
+    invite, code = create_employee_app_invite(company, employee)
+    deliver_app_activation_code(company, employee, code)
+    return generic
+
+
+@app.post("/app/auth/refresh")
+def app_auth_refresh(req: EmployeeAppRefreshRequest):
+    ensure_schema()
+    if not employee_app_enabled():
+        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
+    rotated = rotate_employee_session(req.refresh_token)
+    if not rotated:
+        raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
+    employee = find_employee_by_key(rotated["employee_key"], company_code=rotated["company_code"])
+    if not employee or normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+        raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
+    return json_safe({
+        "ok": True,
+        "token": rotated["token"],
+        "refresh_token": rotated["refresh_token"],
+        "expires_at": rotated["expires_at"],
+        "employee": employee_app_public(employee, rotated["company_code"]),
+    })
+
+
+@app.post("/app/auth/logout")
+def app_auth_logout(authorization: str | None = Header(default=None), x_app_token: str | None = Header(default=None, alias="X-App-Token")):
+    token = bearer_token(authorization) or str(x_app_token or "").strip()
+    revoke_employee_session_token(token)
+    return {"ok": True}
+
+
+# --- /app identity + profile -------------------------------------------------
+
+@app.get("/app/me")
+def app_me(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    employee = context["employee"]
+    return json_safe({
+        "ok": True,
+        **employee_app_public(employee, company),
+        "enabled_modules": sorted(configured_company_modules(company)),
+        "leave_balances_enabled": leave_balances_enabled(),
+    })
+
+
+@app.get("/app/profile")
+def app_profile(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    employee = context["employee"]
+    summary = employee_onboarding_summary(employee)
+    return json_safe({
+        "ok": True,
+        "employee": employee_app_public(employee, company),
+        "onboarding": {
+            "status": summary.get("status"),
+            "required_total": summary.get("required_total"),
+            "received_count": summary.get("received_count"),
+            "pending_count": summary.get("pending_count"),
+        },
+    })
+
+
+# --- /app self-service reads -------------------------------------------------
+
+@app.get("/app/onboarding")
+def app_onboarding(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    employee = context["employee"]
+    key = context["employee_key"]
+    summary = employee_onboarding_summary(employee)
+    index = employee_document_index(company, key)
+
+    def _decorate(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        out = []
+        for item in items or []:
+            row = dict(item)
+            file_id = index.get(str(row.get("item_id") or "")) or index.get(str(row.get("document_type") or ""))
+            row["file_id"] = file_id
+            out.append(row)
+        return out
+
+    next_item = find_next_required_onboarding_item(key)
+    return json_safe({
+        "ok": True,
+        "status": summary.get("status"),
+        "required_total": summary.get("required_total"),
+        "received_count": summary.get("received_count"),
+        "pending_count": summary.get("pending_count"),
+        "pending": _decorate(summary.get("pending") or []),
+        "received": _decorate(summary.get("received") or []),
+        "next_item": next_item,
+        "can_upload": company_has_module(company, "onboarding"),
+    })
+
+
+@app.get("/app/leave")
+def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    requests: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT leave_id, start_date, end_date, leave_type, status, reason, requested_at, decided_at
+                FROM leave_requests
+                WHERE company_code=%s AND employee_key=%s
+                ORDER BY start_date DESC
+                LIMIT 50
+                """,
+                (company, key),
+            )
+            requests = [dict(r) for r in cur.fetchall()]
+    balances = leave_balances_for_employee(company, key) if leave_balances_enabled() else []
+    return json_safe({
+        "ok": True,
+        "balances_enabled": leave_balances_enabled(),
+        "balances": balances,
+        "requests": requests,
+    })
+
+
+@app.get("/app/shifts/today")
+def app_shifts_today(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    today = kuwait_today()
+    rows: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT shift_id, shift_date, start_time, end_time, status, role, location
+                FROM shift_assignments
+                WHERE company_code=%s AND employee_key=%s AND shift_date=%s AND status <> 'cancelled'
+                ORDER BY start_time NULLS LAST
+                """,
+                (company, key, today),
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+    return json_safe({"ok": True, "date": today, "shifts": rows})
+
+
+@app.get("/app/shifts/upcoming")
+def app_shifts_upcoming(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    today = kuwait_today()
+    rows: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT shift_id, shift_date, start_time, end_time, status, role, location
+                FROM shift_assignments
+                WHERE company_code=%s AND employee_key=%s AND shift_date > %s
+                  AND shift_date <= %s AND status <> 'cancelled'
+                ORDER BY shift_date, start_time NULLS LAST
+                LIMIT 50
+                """,
+                (company, key, today, today + timedelta(days=30)),
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+    return json_safe({"ok": True, "shifts": rows})
+
+
+@app.get("/app/attendance")
+def app_attendance(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    start = kuwait_today() - timedelta(days=30)
+    rows: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT attendance_date, status
+                FROM attendance_records
+                WHERE company_code=%s AND employee_key=%s AND attendance_date >= %s
+                ORDER BY attendance_date DESC
+                LIMIT 60
+                """,
+                (company, key, start),
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+    summary = {"present": 0, "late": 0, "absent": 0}
+    for r in rows:
+        st = normalize_text(r.get("status") or "")
+        if st in summary:
+            summary[st] += 1
+    return json_safe({"ok": True, "window_days": 30, "summary": summary, "records": rows})
+
+
+@app.get("/app/documents")
+def app_documents(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    documents = employee_documents_for(company, key)
+    return json_safe({"ok": True, "count": len(documents), "documents": documents})
+
+
+@app.get("/app/documents/{file_id}")
+def app_document_file(file_id: str, disposition: str = "inline", context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    doc = resolve_employee_document_file(company, file_id)
+    # Self-scope: the document MUST belong to this employee (not just the company).
+    if not doc or str(doc.get("subject_key")) != key:
+        raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "We couldn't find that document."})
+    filename = str(doc.get("original_filename") or f"{doc.get('document_type') or 'document'}").strip()
+    mime_type = str(doc.get("mime_type") or mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    mode = "attachment" if str(disposition).lower() == "attachment" else "inline"
+    storage_url = str(doc.get("storage_url") or "").strip()
+    if storage_url and not storage_url.startswith("local://"):
+        return {"type": "external_url", "url": storage_url, "filename": filename, "mime_type": mime_type, "storage_provider": doc.get("storage_provider")}
+    path = employee_document_local_path(doc)
+    if not path:
+        raise HTTPException(status_code=404, detail={"error": "document_file_unavailable", "message": "This document's file is not available."})
+    return FileResponse(path, media_type=mime_type, filename=filename, content_disposition_type=mode, headers={"Cache-Control": "no-store"})
+
+
+@app.get("/app/notifications")
+def app_notifications(context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    items: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT m.message_id, m.flow, m.template_key, m.status, m.sensitivity,
+                       m.body_preview, m.created_at,
+                       (r.read_at IS NOT NULL) AS read
+                FROM employee_messages m
+                LEFT JOIN employee_notification_reads r
+                  ON r.employee_key = m.employee_key AND r.message_id = m.message_id
+                WHERE m.company_code=%s AND m.employee_key=%s AND m.flow = ANY(%s)
+                ORDER BY m.created_at DESC
+                LIMIT 50
+                """,
+                (company, key, list(_APP_INBOX_FLOWS)),
+            )
+            for r in cur.fetchall():
+                row = dict(r)
+                # Only surface a body for low-sensitivity messages; metadata_only /
+                # encrypted bodies show a generic label instead of any content.
+                sensitivity = str(row.get("sensitivity") or "")
+                body = row.get("body_preview") if sensitivity in {"plain", "preview"} else None
+                items.append({
+                    "id": str(row.get("message_id")),
+                    "flow": row.get("flow"),
+                    "title": _outbound_delivery.catalog_entry(str(row.get("template_key") or "")).get("label") or str(row.get("flow") or "").replace("_", " ").title(),
+                    "body": body,
+                    "status": row.get("status"),
+                    "created_at": row.get("created_at"),
+                    "read": bool(row.get("read")),
+                })
+    unread = sum(1 for i in items if not i["read"])
+    return json_safe({"ok": True, "unread": unread, "notifications": items})
+
+
+@app.post("/app/notifications/{message_id}/read")
+def app_notification_mark_read(message_id: str, context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    try:
+        uuid.UUID(str(message_id))
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=404, detail={"error": "notification_not_found", "message": "We couldn't find that notification."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM employee_messages WHERE message_id=%s AND company_code=%s AND employee_key=%s LIMIT 1",
+                (message_id, company, key),
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail={"error": "notification_not_found", "message": "We couldn't find that notification."})
+            cur.execute(
+                """
+                INSERT INTO employee_notification_reads (company_code, employee_key, message_id)
+                VALUES (%s,%s,%s)
+                ON CONFLICT (employee_key, message_id) DO UPDATE SET read_at=now()
+                """,
+                (company, key, message_id),
+            )
+        conn.commit()
+    return {"ok": True}
+
+
+# --- /app self-service writes ------------------------------------------------
+
+@app.post("/app/leave/request")
+def app_leave_request(body: EmployeeLeaveRequestBody, context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    phone = context["phone"]
+    if not company_has_module(company, "leave"):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "Leave is not enabled for your company."})
+    token = set_active_company_code(company)
+    try:
+        action = {
+            "subject_phone": phone,
+            "start_date": body.start_date,
+            "end_date": body.end_date,
+            "leave_type": (body.leave_type or "").strip() or None,
+            "reason": (body.reason or "").strip() or None,
+        }
+        result = request_leave(action, company_code=company, created_by_phone=phone)
+    finally:
+        reset_active_company_code(token)
+    if not result.get("ok"):
+        # Self-scope guard: a self request can only ever resolve to the caller.
+        raise HTTPException(status_code=400, detail={"error": result.get("error") or "leave_request_failed", "message": "We couldn't submit that leave request."})
+    resolved_key = str(((result.get("employee") or {}).get("employee_key")) or "")
+    if resolved_key and resolved_key != key:
+        raise HTTPException(status_code=400, detail={"error": "leave_request_failed", "message": "We couldn't submit that leave request."})
+    record_admin_audit(context, "employee_leave_requested", summary="Employee requested leave from the app.", target_type="employee", target=key, details={"leave_id": (result.get("leave") or {}).get("leave_id")})
+    return json_safe({"ok": True, "leave": result.get("leave")})
+
+
+@app.post("/app/leave/{leave_id}/cancel")
+def app_leave_cancel(leave_id: str, context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    phone = context["phone"]
+    # Ownership guard FIRST: the leave must belong to the caller and be cancellable.
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM leave_requests WHERE leave_id=%s AND company_code=%s AND employee_key=%s AND status IN ('requested','approved') LIMIT 1",
+                (leave_id, company, key),
+            )
+            owned = cur.fetchone() is not None
+    if not owned:
+        raise HTTPException(status_code=404, detail={"error": "leave_request_not_found", "message": "We couldn't find that leave request."})
+    token = set_active_company_code(company)
+    try:
+        result = cancel_leave_request({"leave_id": leave_id, "subject_phone": phone}, company_code=company, created_by_phone=phone)
+    finally:
+        reset_active_company_code(token)
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail={"error": result.get("error") or "leave_cancel_failed", "message": "We couldn't cancel that leave request."})
+    record_admin_audit(context, "employee_leave_cancelled", summary="Employee cancelled leave from the app.", target_type="employee", target=key, details={"leave_id": leave_id})
+    return json_safe({"ok": True, "leave": result.get("leave")})
+
+
+@app.post("/app/onboarding/documents")
+async def app_onboarding_document_upload(
+    file: UploadFile = File(...),
+    item_id: str = Form(...),
+    context: dict[str, Any] = Depends(employee_app_context),
+):
+    company = context["company_code"]
+    key = context["employee_key"]
+    employee = context["employee"]
+    if not company_has_module(company, "onboarding"):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "Onboarding is not enabled for your company."})
+    item = str(item_id or "").strip()
+    if not item:
+        raise HTTPException(status_code=400, detail={"error": "item_required", "message": "Pick the document you're uploading."})
+    # Self-scope: the checklist item MUST already exist for THIS employee. This is
+    # the ownership guard — an employee can only upload against their own items.
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM onboarding_items WHERE employee_key=%s AND item_id=%s LIMIT 1", (key, item))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail={"error": "item_not_found", "message": "We couldn't find that document on your checklist."})
+
+    filename = str(file.filename or "").strip() or "document"
+    ext = Path(filename).suffix.lower()
+    if ext not in _APP_DOC_EXTENSIONS:
+        raise HTTPException(status_code=400, detail={"error": "unsupported_file_type", "message": "Upload a PDF or an image."})
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail={"error": "empty_file", "message": "That file is empty."})
+    if len(data) > _APP_DOC_MAX_BYTES:
+        raise HTTPException(status_code=400, detail={"error": "file_too_large", "message": "Files must be 15 MB or smaller."})
+
+    mime_type = str(file.content_type or "").strip() or (mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    tmp_dir = tempfile.mkdtemp(prefix="app-doc-upload-")
+    tmp_path = str(Path(tmp_dir) / safe_storage_name(filename))
+    new_file_id: str | None = None
+    try:
+        with open(tmp_path, "wb") as fh:
+            fh.write(data)
+        media = {"path": tmp_path, "type": mime_type}
+        storage_result = store_onboarding_document(employee=employee, item_id=item, media=media)
+        if not storage_result.get("ok") or str(storage_result.get("storage_status")) == "failed":
+            raise HTTPException(status_code=502, detail={"error": "storage_failed", "message": "We couldn't store that document. Please try again."})
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE onboarding_items
+                    SET status='received', value=%s,
+                        local_path=COALESCE(%s, local_path),
+                        drive_file_id=COALESCE(%s, drive_file_id),
+                        drive_url=COALESCE(%s, drive_url),
+                        storage_provider=%s, storage_object_key=%s, external_file_id=%s,
+                        storage_url=%s, content_sha256=%s, mime_type=%s,
+                        storage_status=%s, storage_error=%s,
+                        stored_at=CASE WHEN %s IS NOT NULL THEN now() ELSE stored_at END,
+                        updated_at=now()
+                    WHERE employee_key=%s AND item_id=%s
+                    """,
+                    (
+                        filename,
+                        storage_result.get("metadata", {}).get("local_path") or tmp_path,
+                        storage_result.get("drive_file_id"),
+                        storage_result.get("drive_url"),
+                        storage_result.get("provider"),
+                        storage_result.get("storage_object_key"),
+                        storage_result.get("external_file_id"),
+                        storage_result.get("storage_url"),
+                        storage_result.get("content_sha256"),
+                        storage_result.get("mime_type"),
+                        storage_result.get("storage_status"),
+                        storage_result.get("storage_error"),
+                        storage_result.get("provider"),
+                        key,
+                        item,
+                    ),
+                )
+                record_employee_document_receipt(cur, employee=employee, item_id=item, value=filename, media=media, storage_result=storage_result, extraction={})
+                recompute_employee_onboarding_counts(cur, key)
+                cur.execute(
+                    """
+                    SELECT file_id FROM file_registry
+                    WHERE company_code=%s AND subject_type='employee' AND subject_key=%s
+                      AND file_kind='onboarding_document' AND content_sha256=%s
+                    ORDER BY updated_at DESC NULLS LAST LIMIT 1
+                    """,
+                    (company, key, storage_result.get("content_sha256")),
+                )
+                row = cur.fetchone()
+                new_file_id = str(row["file_id"]) if row else None
+            conn.commit()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    record_admin_audit(context, "employee_document_uploaded", summary=f"Employee uploaded a document for item {item}.", target_type="employee", target=key, details={"item_id": item, "file_id": new_file_id, "mime_type": mime_type, "size_bytes": len(data)})
+    return json_safe({"ok": True, "item_id": item, "file_id": new_file_id, "storage_status": storage_result.get("storage_status")})
+
+
+@app.post("/app/push/register")
+def app_push_register(body: EmployeePushRegisterBody, context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    token = str(body.push_token or "").strip()
+    if not token:
+        raise HTTPException(status_code=400, detail={"error": "push_token_required", "message": "A push token is required."})
+    platform = (body.platform or "").strip().lower()[:20] or None
+    device_id = (body.device_id or "").strip()[:128] or None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO employee_push_tokens (company_code, employee_key, push_token, platform, device_id, active)
+                VALUES (%s,%s,%s,%s,%s,TRUE)
+                ON CONFLICT (company_code, push_token) DO UPDATE
+                SET employee_key=EXCLUDED.employee_key, platform=EXCLUDED.platform,
+                    device_id=EXCLUDED.device_id, active=TRUE, last_error=NULL,
+                    last_seen_at=now(), updated_at=now()
+                """,
+                (company, key, token, platform, device_id),
+            )
+        conn.commit()
+    return {"ok": True}
+
+
+@app.post("/app/push/unregister")
+def app_push_unregister(body: EmployeePushUnregisterBody, context: dict[str, Any] = Depends(employee_app_context)):
+    company = context["company_code"]
+    key = context["employee_key"]
+    token = str(body.push_token or "").strip()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            if token:
+                cur.execute(
+                    "UPDATE employee_push_tokens SET active=FALSE, updated_at=now() WHERE company_code=%s AND employee_key=%s AND push_token=%s",
+                    (company, key, token),
+                )
+            else:
+                cur.execute(
+                    "UPDATE employee_push_tokens SET active=FALSE, updated_at=now() WHERE company_code=%s AND employee_key=%s AND active IS TRUE",
+                    (company, key),
+                )
+        conn.commit()
+    return {"ok": True}
+
+
+@app.post("/app/account/request-deletion")
+def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dict[str, Any] = Depends(employee_app_context)):
+    # Store policy requirement: an in-app account-deletion path. The employer is the
+    # data controller, so this raises a visible HR task for handling rather than
+    # self-destructing employment records.
+    company = context["company_code"]
+    key = context["employee_key"]
+    employee = context["employee"]
+    reason = (body.reason or "").strip()[:500] or None
+    _outbound_delivery.create_hr_task(
+        sys.modules[__name__],
+        company_code=company,
+        employee_key=key,
+        title=f"Account deletion requested by {employee.get('name') or 'an employee'}",
+        detail=reason or "Employee requested account/data deletion from the mobile app.",
+        source="employee_app",
+        priority="normal",
+        task_type="account_deletion_request",
+        metadata={"requested_at": now_iso(), "channel": "employee_app"},
+    )
+    record_admin_audit(context, "employee_account_deletion_requested", summary="Employee requested account deletion from the app.", target_type="employee", target=key, details={"reason_provided": bool(reason)})
+    return {"ok": True, "message": "Your request has been sent to your HR team."}
+
+
+# --- Dashboard side: HR provisions an app invite ----------------------------
+
+@app.post("/dashboard/posthire/employees/{employee_key}/app-invite")
+def dashboard_posthire_app_invite(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "onboarding", "onboarding.manage")
+    company = context["company_code"]
+    if not employee_app_enabled():
+        raise HTTPException(status_code=403, detail={"error": "feature_disabled", "message": "The employee app is not enabled."})
+    if not company_has_module(company, "employee_app"):
+        raise HTTPException(status_code=403, detail={"error": "employee_app_not_enabled_for_company", "message": "The employee app module is not enabled for your company."})
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    viewer_phone = context.get("hr_phone")
+    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    if not digits(employee.get("phone")):
+        raise HTTPException(status_code=400, detail={"error": "employee_phone_missing", "message": "This employee needs a phone number before they can be invited."})
+    invite, code = create_employee_app_invite(company, employee, created_by_phone=context.get("hr_phone"), created_by_user_id=context.get("actor_user_id"))
+    delivery = deliver_app_activation_code(company, employee, code)
+    record_admin_audit(context, "app_invite_created", summary="Issued an Employee App activation code.", target_type="employee", target=str(employee.get("employee_key")), details={"invite_id": str(invite.get("invite_id")), "delivery_status": delivery.get("delivery_status")})
+    # The raw code is returned to HR (a trusted actor performing this action) so it
+    # can be handed over directly if automated delivery didn't reach the employee.
+    return json_safe({
+        "ok": True,
+        "employee_key": employee.get("employee_key"),
+        "code": code,
+        "expires_at": invite.get("expires_at"),
+        "delivery": {"ok": bool(delivery.get("ok")), "status": delivery.get("delivery_status"), "channel": delivery.get("channel")},
+    })
+
+
 @app.get("/dashboard/posthire/employees")
-def dashboard_posthire_employees(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_employees(
+    offset: int = 0,
+    limit: int = 100,
+    search: str = "",
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     # Employees directory is the shared people view; visible when the company has
     # any post-hire module and the user can read it.
     company = context["company_code"]
     readable = [m for m in POSTHIRE_PEOPLE_MODULES if company_has_module(company, m) and dashboard_context_has_permission(context, f"{m}.read")]
     if not readable:
         raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
-    rows = company_employees(company)
-    allowed_keys = manager_scope_employee_keys(company, context.get("hr_phone"))
-    if allowed_keys is not None:
-        rows = [r for r in rows if str(r.get("employee_key")) in allowed_keys]
-    employees = [posthire_employee_card(row) for row in rows]
-    return {"company_code": company, "count": len(employees), "employees": employees}
+    # Page the directory so a company with a large workforce isn't silently
+    # truncated. Manager scope is applied in SQL, so total_count/has_more are
+    # accurate for the viewer (owners see everyone; managers see their people).
+    # `search` filters the paged rows/total in SQL; the headline stats stay
+    # workforce-wide so the stat cards don't jump around as HR types.
+    limit = max(1, min(int(limit or 100), 500))
+    offset = max(0, int(offset or 0))
+    page = list_employees_page(company, viewer_phone=context.get("hr_phone"), search=search, limit=limit, offset=offset)
+    employees = [posthire_employee_card(row) for row in page["rows"]]
+    stats = employee_directory_stats(company, viewer_phone=context.get("hr_phone"))
+    return {
+        "company_code": company,
+        "count": len(employees),
+        "employees": employees,
+        "total_count": page["total_count"],
+        "limit": page["limit"],
+        "offset": page["offset"],
+        "has_more": page["has_more"],
+        "active_count": stats["active_count"],
+        "left_count": stats["left_count"],
+        "onboarding_count": stats["onboarding_count"],
+        "department_count": stats["department_count"],
+    }
 
 
 # --- Employee roster management (Add employee / Import employees) -------------
@@ -43656,6 +44325,13 @@ def set_employee_employment_status(company_code: str, employee_key: str, status:
                 return {"status": "not_found"}
             updated = dict(row)
         conn.commit()
+    # Hard kill switch: offboarding instantly revokes Employee App sessions and
+    # deactivates push tokens so a terminated employee loses access immediately.
+    if target == "left":
+        try:
+            revoke_employee_app_access(company, employee_key, reason="offboarded")
+        except Exception:
+            logger.warning("failed to revoke employee app access on offboarding for %s", employee_key, exc_info=True)
     return {"status": "ok", "employment_status": target, "employee_key": employee_key, "employee": posthire_employee_card(updated)}
 
 
@@ -43922,23 +44598,39 @@ async def dashboard_posthire_import_employees(
     return {"ok": True, "dry_run": dry_run, "total_rows": len(rows), "counts": counts, "results": summary}
 
 
-def onboarding_counts_by_employee(company_code: str | None) -> dict[str, dict[str, int]]:
-    """One-query rollup of required-item pending/received counts per employee for
-    a company, so the onboarding list can show progress without an N+1 fan-out."""
+# onboarding_status buckets, kept in one place so the paged query, the summary
+# counts and the frontend split all agree on what "still onboarding" means.
+_ONBOARDING_IN_PROGRESS_SQL = "lower(coalesce(e.onboarding_status,'not_started')) IN ('in_progress','not_started','pending')"
+_ONBOARDING_DONE_SQL = "lower(coalesce(e.onboarding_status,'')) IN ('complete','completed','done')"
+
+
+def onboarding_counts_by_employee(company_code: str | None, employee_keys: list[str] | None = None) -> dict[str, dict[str, int]]:
+    """One-query rollup of required-item pending/received counts per employee, so
+    the onboarding list can show progress without an N+1 fan-out. When
+    `employee_keys` is given the rollup is limited to just those employees (the
+    current page), avoiding a full-company scan when only a page is displayed."""
     company = (company_code or "WATHEFNI").upper()
     out: dict[str, dict[str, int]] = {}
+    params: list[Any] = [company]
+    key_clause = ""
+    if employee_keys is not None:
+        if not employee_keys:
+            return out
+        key_clause = "AND oi.employee_key = ANY(%s)"
+        params.append(list(employee_keys))
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
+                f"""
                 SELECT oi.employee_key,
                        COUNT(*) FILTER (WHERE oi.required IS TRUE AND lower(oi.status) NOT IN ('received','complete','completed','verified')) AS pending,
                        COUNT(*) FILTER (WHERE oi.required IS TRUE AND lower(oi.status) IN ('received','complete','completed','verified')) AS received
                 FROM onboarding_items oi
                 JOIN employees e ON e.employee_key = oi.employee_key AND e.company_code=%s
+                WHERE TRUE {key_clause}
                 GROUP BY oi.employee_key
                 """,
-                (company,),
+                params,
             )
             for r in cur.fetchall():
                 out[str(r.get("employee_key"))] = {
@@ -43948,26 +44640,100 @@ def onboarding_counts_by_employee(company_code: str | None) -> dict[str, dict[st
     return out
 
 
+def list_onboarding_page(
+    company_code: str | None,
+    *,
+    viewer_phone: str | None = None,
+    search: str | None = None,
+    limit: int,
+    offset: int,
+) -> dict[str, Any]:
+    """Paged read of employees who are STILL ONBOARDING (the onboarding list's
+    primary view), scope- and search-aware in SQL so a large intake isn't
+    truncated and search reaches the whole in-progress set. Stable PK tiebreaker
+    keeps OFFSET paging deterministic."""
+    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    where_sql = f"{where_sql} AND {_ONBOARDING_IN_PROGRESS_SQL}"
+    search_clause, search_params = _employee_search_clause(search)
+    if search_clause:
+        where_sql = f"{where_sql} AND {search_clause}"
+        params.extend(search_params)
+    params.extend([limit, offset])
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT e.*, COUNT(*) OVER() AS _total_count
+                FROM employees e
+                WHERE {where_sql}
+                ORDER BY e.name NULLS LAST, e.phone, e.employee_key
+                LIMIT %s OFFSET %s
+                """,
+                params,
+            )
+            rows = [dict(row) for row in cur.fetchall()]
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
+
+
+def onboarding_directory_counts(company_code: str | None, *, viewer_phone: str | None = None) -> dict[str, int]:
+    """Scope-aware onboarding headline counts over the WHOLE workforce (total +
+    completed), so the summary numbers stay correct regardless of paging."""
+    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT count(*) AS total,
+                       count(*) FILTER (WHERE {_ONBOARDING_DONE_SQL}) AS completed,
+                       count(*) FILTER (WHERE {_ONBOARDING_IN_PROGRESS_SQL}) AS in_progress
+                FROM employees e
+                WHERE {where_sql}
+                """,
+                params,
+            )
+            row = dict(cur.fetchone() or {})
+    return {
+        "total": int(row.get("total") or 0),
+        "completed_count": int(row.get("completed") or 0),
+        "in_progress_count": int(row.get("in_progress") or 0),
+    }
+
+
 @app.get("/dashboard/posthire/onboarding")
-def dashboard_posthire_onboarding(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_onboarding(
+    offset: int = 0,
+    limit: int = 100,
+    search: str = "",
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "onboarding")
-    rows = company_employees(company)
-    allowed_keys = manager_scope_employee_keys(company, context.get("hr_phone"))
-    if allowed_keys is not None:
-        rows = [r for r in rows if str(r.get("employee_key")) in allowed_keys]
-    cards = [posthire_employee_card(row) for row in rows]
-    counts = onboarding_counts_by_employee(company)
+    # Page the "still onboarding" list so a large intake isn't silently truncated,
+    # and search it in SQL so HR can find anyone across the whole set. Headline
+    # counts (total/completed) stay workforce-wide, independent of the page/search.
+    limit = max(1, min(int(limit or 100), 500))
+    offset = max(0, int(offset or 0))
+    viewer_phone = context.get("hr_phone")
+    page = list_onboarding_page(company, viewer_phone=viewer_phone, search=search, limit=limit, offset=offset)
+    cards = [posthire_employee_card(row) for row in page["rows"]]
+    counts = onboarding_counts_by_employee(company, [c["employee_key"] for c in cards])
     for card in cards:
         c = counts.get(card["employee_key"]) or {"pending_count": 0, "received_count": 0}
         card["pending_count"] = c["pending_count"]
         card["received_count"] = c["received_count"]
-    in_progress = [c for c in cards if c["onboarding_status"] in {"in_progress", "not_started", "pending"}]
-    completed = [c for c in cards if c["onboarding_status"] in {"complete", "completed", "done"}]
+    summary = onboarding_directory_counts(company, viewer_phone=viewer_phone)
     return {
         "company_code": company,
-        "in_progress": in_progress,
-        "completed_count": len(completed),
-        "total": len(cards),
+        "in_progress": cards,
+        "completed_count": summary["completed_count"],
+        "total": summary["total"],
+        "total_count": page["total_count"],
+        "limit": page["limit"],
+        "offset": page["offset"],
+        "has_more": page["has_more"],
         "hr_mutate_enabled": onboarding_hr_mutate_enabled(),
     }
 
@@ -44009,13 +44775,18 @@ def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[dat
 def dashboard_posthire_attendance(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
+    offset: int = Query(0),
+    limit: int = Query(1000),
     context: dict[str, Any] = Depends(dashboard_context),
 ):
     company = _posthire_read_context(context, "attendance")
     start, end = _attendance_range(start_date, end_date)
     today = kuwait_today().isoformat()
+    # Paged so a busy company/window (>1000 records over up to 92 days) isn't
+    # silently truncated: the table pages via limit/offset with an accurate
+    # total_count + has_more, same pattern as shifts/leave/payroll.
     result = list_attendance(
-        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": 1000},
+        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": limit, "offset": offset},
         company_code=company,
     )
     return json_safe({
@@ -44605,17 +45376,31 @@ def attendance_import_bind_device(request: AttendanceDeviceBind, context: dict[s
 LEAVE_HISTORY_STATUSES = {"approved", "rejected", "cancelled", "requested"}
 
 
+def _leave_balances_for_rows(company: str, *row_lists: list[dict[str, Any]]) -> dict[str, Any]:
+    """Read-only leave balances (dark-launched) for the employees in the given
+    rows. Observe-only presets pending legal review; never enforced."""
+    if not leave_balances_enabled():
+        return {}
+    keys = {str(r.get("employee_key")) for rows in row_lists for r in rows if r.get("employee_key")}
+    return {k: leave_balances_for_employee(company, k) for k in keys}
+
+
 @app.get("/dashboard/posthire/leave")
 def dashboard_posthire_leave(
     view: str = Query("active"),
     status: str | None = Query(None),
+    section: str | None = Query(None),
+    offset: int = Query(0),
+    limit: int = Query(50),
     context: dict[str, Any] = Depends(dashboard_context),
 ):
     company = _posthire_read_context(context, "leave")
     viewer_phone = context.get("hr_phone")
 
     # History view: decided/past leave over a wide window. Same source of truth,
-    # same manager scope; HR keeps pending/upcoming as the default focus.
+    # same manager scope; HR keeps pending/upcoming as the default focus. Paged so
+    # a company with a long history isn't silently truncated — rows arrive
+    # recent-first from SQL, so "load more" appends older pages in order.
     if str(view).strip().lower() == "history":
         hist_start, hist_end = _posthire_window(180, 30)
         status_norm = str(status or "").strip().lower()
@@ -44627,24 +45412,53 @@ def dashboard_posthire_leave(
                 "end_date": hist_end,
                 "viewer_phone": viewer_phone,
                 "order": "recent",
-                "limit": 200,
+                "limit": limit,
+                "offset": offset,
                 "history": True,
             },
             company_code=company,
         )
         rows = result.get("leave_requests") or []
-        rows = sorted(rows, key=lambda r: str(r.get("start_date") or ""), reverse=True)
         return json_safe({
             "company_code": company,
             "view": "history",
             "history": rows,
             "status_filter": status_norm if status_norm in LEAVE_HISTORY_STATUSES else None,
             "balances_enabled": leave_balances_enabled(),
+            "history_total": result.get("total_count", len(rows)),
+            "history_has_more": result.get("has_more", False),
+            "offset": result.get("offset", offset),
+            "limit": result.get("limit", limit),
         })
 
     start, end = _posthire_window(7, 60)
-    pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
-    upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
+    section_norm = str(section or "").strip().lower()
+
+    # Load-more for a single active-view section (pending or upcoming) so each
+    # list pages independently without disturbing the other.
+    if section_norm in ("pending", "upcoming"):
+        status_for = "requested" if section_norm == "pending" else "approved"
+        res = list_leave_requests(
+            {"company_code": company, "status": status_for, "start_date": start, "end_date": end, "viewer_phone": viewer_phone, "limit": limit, "offset": offset},
+            company_code=company,
+        )
+        rows = res.get("leave_requests") or []
+        return json_safe({
+            "company_code": company,
+            "view": "active",
+            "section": section_norm,
+            section_norm: rows,
+            "balances_enabled": leave_balances_enabled(),
+            "balances": _leave_balances_for_rows(company, rows),
+            f"{section_norm}_total": res.get("total_count", len(rows)),
+            f"{section_norm}_has_more": res.get("has_more", False),
+            "offset": res.get("offset", offset),
+            "limit": res.get("limit", limit),
+        })
+
+    # Initial active load: first page of each section.
+    pending = list_leave_requests({"company_code": company, "status": "requested", "start_date": start, "end_date": end, "viewer_phone": viewer_phone, "limit": limit}, company_code=company)
+    upcoming = list_leave_requests({"company_code": company, "status": "approved", "start_date": start, "end_date": end, "viewer_phone": viewer_phone, "limit": limit}, company_code=company)
     pending_rows = pending.get("leave_requests") or []
     upcoming_rows = upcoming.get("leave_requests") or []
     payload = {
@@ -44653,18 +45467,23 @@ def dashboard_posthire_leave(
         "pending": pending_rows,
         "upcoming": upcoming_rows,
         "balances_enabled": leave_balances_enabled(),
+        "balances": _leave_balances_for_rows(company, pending_rows, upcoming_rows),
+        "pending_total": pending.get("total_count", len(pending_rows)),
+        "pending_has_more": pending.get("has_more", False),
+        "upcoming_total": upcoming.get("total_count", len(upcoming_rows)),
+        "upcoming_has_more": upcoming.get("has_more", False),
+        "limit": limit,
     }
-    # Read-only leave balances (dark-launched). Attach per-employee balances for
-    # the employees shown so the UI can render remaining days. Observe-only data;
-    # figures are configurable presets pending legal review (not enforced).
-    if leave_balances_enabled():
-        keys = {str(r.get("employee_key")) for r in (pending_rows + upcoming_rows) if r.get("employee_key")}
-        payload["balances"] = {k: leave_balances_for_employee(company, k) for k in keys}
     return json_safe(payload)
 
 
 @app.get("/dashboard/posthire/shifts")
-def dashboard_posthire_shifts(week: int = Query(0), context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_shifts(
+    week: int = Query(0),
+    offset: int = Query(0),
+    limit: int = Query(100),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "shifts")
     # week is a 7-day window offset from today (0 = current week, +/- for nav).
     week = max(-26, min(26, int(week or 0)))
@@ -44672,8 +45491,13 @@ def dashboard_posthire_shifts(week: int = Query(0), context: dict[str, Any] = De
     start, end = base.isoformat(), (base + timedelta(days=6)).isoformat()
     viewer_phone = context.get("hr_phone")
     # Pass explicit start/end (no relative "query") so the window honors the offset.
-    shifts = list_shifts({"company_code": company, "start_date": start, "end_date": end, "viewer_phone": viewer_phone}, company_code=company)
-    swaps = list_shift_swaps({"company_code": company, "status": "requested", "viewer_phone": viewer_phone}, company_code=company)
+    # limit/offset let the calendar page through a busy week instead of silently
+    # dropping shifts past the 100th row; swaps are naturally small and unpaged.
+    shifts = list_shifts(
+        {"company_code": company, "start_date": start, "end_date": end, "viewer_phone": viewer_phone, "limit": limit, "offset": offset},
+        company_code=company,
+    )
+    swaps = list_shift_swaps({"company_code": company, "status": "requested", "viewer_phone": viewer_phone, "limit": 200}, company_code=company)
     return json_safe({
         "company_code": company,
         "shifts": shifts.get("shifts") or [],
@@ -44681,6 +45505,10 @@ def dashboard_posthire_shifts(week: int = Query(0), context: dict[str, Any] = De
         "start_date": start,
         "end_date": end,
         "week": week,
+        "total_count": shifts.get("total_count", len(shifts.get("shifts") or [])),
+        "limit": shifts.get("limit", limit),
+        "offset": shifts.get("offset", offset),
+        "has_more": shifts.get("has_more", False),
     })
 
 
@@ -44753,10 +45581,6 @@ def dashboard_posthire_cancel_shift(shift_id: str, context: dict[str, Any] = Dep
         notified = bool(notification.get("ok"))
     except Exception:
         logger.warning("dashboard shift cancel notification failed", exc_info=True)
-    try:
-        sync_shift_sheet_rows(company, [cancelled])
-    except Exception:
-        logger.warning("dashboard shift cancel sheet sync failed", exc_info=True)
     record_admin_audit(
         context,
         "shift_cancelled",
@@ -44810,10 +45634,6 @@ def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleR
         notified = bool(notification.get("ok"))
     except Exception:
         logger.warning("dashboard shift reschedule notification failed", exc_info=True)
-    try:
-        sync_shift_sheet_rows(company, [updated])
-    except Exception:
-        logger.warning("dashboard shift reschedule sheet sync failed", exc_info=True)
     record_admin_audit(
         context,
         "shift_rescheduled",
@@ -44867,6 +45687,8 @@ def available_payroll_periods(company_code: str | None, selected: tuple[str, str
 def dashboard_posthire_payroll(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
+    offset: int = 0,
+    limit: int = 100,
     context: dict[str, Any] = Depends(dashboard_context),
 ):
     company = _posthire_read_context(context, "payroll")
@@ -44883,7 +45705,13 @@ def dashboard_posthire_payroll(
             start_iso, end_iso = period[0].isoformat(), period[1].isoformat()
         else:
             start_iso, end_iso = _posthire_month_window()
-    timesheets = list_timesheets({"company_code": company, "start_date": start_iso, "end_date": end_iso, "viewer_phone": context.get("hr_phone")}, company_code=company)
+    # limit/offset page the timesheet table so a large payroll period (>200
+    # employees) isn't silently truncated. Exports and policy are separate,
+    # naturally-small reads and stay unpaged.
+    timesheets = list_timesheets(
+        {"company_code": company, "start_date": start_iso, "end_date": end_iso, "viewer_phone": context.get("hr_phone"), "limit": limit, "offset": offset},
+        company_code=company,
+    )
     policy = show_payroll_policy({"company_code": company}, company_code=company)
     exports = list_payroll_exports({"company_code": company}, company_code=company)
     # The dashboard renders decimal hours, but timesheet rows store raw minutes.
@@ -44903,6 +45731,11 @@ def dashboard_posthire_payroll(
         "policy": policy.get("policy") or policy,
         "exports": exports.get("exports") or exports.get("payroll_exports") or [],
         "can_export": dashboard_context_has_permission(context, "payroll.export"),
+        "total_count": timesheets.get("total_count", len(timesheet_rows)),
+        "draft_count": timesheets.get("draft_count", 0),
+        "limit": timesheets.get("limit", limit),
+        "offset": timesheets.get("offset", offset),
+        "has_more": timesheets.get("has_more", False),
     })
 
 
@@ -44919,16 +45752,6 @@ def _dashboard_payroll_export_or_404(company_code: str, export_id: str) -> dict[
     if not row:
         raise HTTPException(status_code=404, detail={"error": "export_not_found", "message": "We couldn't find that payroll export."})
     return dict(row)
-
-
-def payroll_export_sheet_url(export: dict[str, Any]) -> str | None:
-    """Surface the Google Sheet destination for an export, if the sync recorded one."""
-    sync = export.get("sheet_sync") if isinstance(export.get("sheet_sync"), dict) else {}
-    for key in ("spreadsheet_url", "sheet_url", "url", "spreadsheetUrl"):
-        value = sync.get(key)
-        if value:
-            return str(value)
-    return None
 
 
 @app.get("/dashboard/posthire/payroll/exports/{export_id}")
@@ -44957,7 +45780,6 @@ def dashboard_posthire_payroll_export_detail(export_id: str, context: dict[str, 
         "totals": export.get("totals") or {},
         "policy": export.get("policy_snapshot") or {},
         "preview_rows": preview_rows,
-        "sheet_url": payroll_export_sheet_url(export),
     })
 
 
@@ -45012,20 +45834,32 @@ def dashboard_posthire_payroll_export_download(export_id: str, context: dict[str
 def dashboard_posthire_analytics(context: dict[str, Any] = Depends(dashboard_context)):
     company = _posthire_read_context(context, "analytics")
     start_iso, end_iso = _posthire_month_window()
-    # Dashboard reads must not write to Google Sheets; the Sheets export is owned
-    # by the WhatsApp/tool path. Skipping it here removes a ~2s round-trip.
     result = workforce_analytics(
         {"company_code": company, "start_date": start_iso, "end_date": end_iso, "query": "workforce overview", "viewer_phone": context.get("hr_phone")},
         company_code=company,
-        sync_sheet=False,
     )
     return json_safe({"company_code": company, **result})
 
 
 @app.get("/dashboard/posthire/compliance")
-def dashboard_posthire_compliance(context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_compliance(
+    offset: int = 0,
+    limit: int = 100,
+    search: str = "",
+    bucket: str = "",
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     company = _posthire_read_context(context, "compliance")
-    return json_safe(dashboard_compliance_payload(company, viewer_phone=context.get("hr_phone")))
+    return json_safe(
+        dashboard_compliance_payload(
+            company,
+            viewer_phone=context.get("hr_phone"),
+            search=search,
+            bucket_filter=bucket,
+            offset=offset,
+            limit=limit,
+        )
+    )
 
 
 @app.post("/orchestrator/whatsapp-turn", response_model=OrchestratorResponse)
@@ -45119,6 +45953,7 @@ def posthire_reminders_run(
     dry_run: bool = True,
     limit: int = 25,
     min_hours_since_last: int = 24,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     return run_onboarding_reminder_scan(
@@ -45135,6 +45970,7 @@ def posthire_compliance_run(
     dry_run: bool = True,
     limit: int = 100,
     alert_cooldown_hours: int = 24,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     return run_compliance_scan(
@@ -45150,6 +45986,7 @@ def posthire_documents_extract(
     dry_run: bool = True,
     limit: int = 25,
     force: bool = False,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     if not any_company_module_automation_enabled(["onboarding", "compliance"]):
@@ -45169,6 +46006,7 @@ def prehire_cv_process(
     limit: int = 10,
     force: bool = False,
     send_screening: bool = True,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     return run_candidate_cv_processing_worker(dry_run=dry_run, limit=limit, force=force, send_screening=send_screening)
@@ -45180,6 +46018,7 @@ def shifts_reminders_run(
     dry_run: bool = True,
     limit: int = 50,
     hours_ahead: int = 2,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     return run_shift_reminder_scan(account_id=account_id, dry_run=dry_run, limit=limit, hours_ahead=hours_ahead)
@@ -45191,13 +46030,14 @@ def attendance_absences_run(
     dry_run: bool = True,
     limit: int = 50,
     grace_minutes: int = 30,
+    _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
     return run_attendance_absence_scan(account_id=account_id, dry_run=dry_run, limit=limit, grace_minutes=grace_minutes)
 
 
 @app.get("/orchestrator/audit/turns")
-def audit_turns(limit: int = 20):
+def audit_turns(limit: int = 20, _internal: dict[str, Any] = Depends(require_internal_access)):
     limit = max(1, min(limit, 100))
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -45216,7 +46056,7 @@ def audit_turns(limit: int = 20):
 
 
 @app.get("/orchestrator/audit/pending-actions")
-def audit_pending_actions(limit: int = 20):
+def audit_pending_actions(limit: int = 20, _internal: dict[str, Any] = Depends(require_internal_access)):
     limit = max(1, min(limit, 100))
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -45235,7 +46075,7 @@ def audit_pending_actions(limit: int = 20):
 
 
 @app.get("/orchestrator/audit/action-results")
-def audit_action_results(limit: int = 20):
+def audit_action_results(limit: int = 20, _internal: dict[str, Any] = Depends(require_internal_access)):
     limit = max(1, min(limit, 100))
     with db_connect() as conn:
         with conn.cursor() as cur:

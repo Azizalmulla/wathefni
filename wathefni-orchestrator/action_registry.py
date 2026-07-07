@@ -869,7 +869,8 @@ def _send_assessment_executor(ctx: ExecutionContext) -> dict[str, Any]:
     if not app:
         return _candidate_not_found_result("send_assessment", "send an assessment to")
     account_id = getattr(ctx.request, "account_id", None)
-    result = legacy.send_assessment(app, account_id)
+    note_text = str(ctx.action.get("message_text") or "").strip() or None
+    result = legacy.send_assessment(app, account_id, note=note_text)
     ok = bool(result.get("ok") if isinstance(result, dict) else False)
     name = _candidate_name(app, ctx.action)
     delivery = result.get("delivery") if isinstance(result.get("delivery"), dict) else result.get("send") if isinstance(result.get("send"), dict) else {}
@@ -1230,11 +1231,13 @@ def _send_video_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
     text = " ".join(str(ctx.action.get(key) or "") for key in ("workflow_goal", "prompt_text", "message_text", "purpose")).lower()
     if preferred not in {"email", "whatsapp"}:
         preferred = "whatsapp" if "whatsapp" in text or not (contact or {}).get("email") else "email"
+    note_text = str(ctx.action.get("message_text") or "").strip() or None
     request = legacy.DashboardVideoInterviewRequest(
         account_id=getattr(ctx.request, "account_id", None) or "default",
         response_mode="single_video",
         send_invite=True,
         preferred_channel=preferred,
+        message=note_text,
     )
     created = legacy.create_or_resume_async_video_interview(app, request, actor_context=actor)
     result = legacy.send_async_video_interview_invite(
@@ -1244,6 +1247,7 @@ def _send_video_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
         account_id=request.account_id,
         preferred_channel=preferred,
         actor_context=actor,
+        note=note_text,
     )
     ok = bool(result.get("ok") if isinstance(result, dict) else False)
     name = _candidate_name(app, ctx.action)
@@ -2705,6 +2709,124 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
     }
 
 
+def _find_job_opening_matches(legacy: Any, company: str, *, position_code: str | None, title: str | None) -> list[dict[str, Any]]:
+    """Resolve a job opening by exact APPLY/position code or fuzzy title match,
+    over the union of real `positions` rows and inferred `applications` position
+    codes — the same universe the Jobs dashboard shows. Lets chat say "close the
+    welder job" without knowing the exact position_code."""
+    code = str(position_code or "").strip().upper()
+    term = str(title or "").strip()
+    if not code and not term:
+        return []
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            if code:
+                cur.execute(
+                    """
+                    SELECT DISTINCT COALESCE(p.position_code, a.position_code) AS position_code,
+                           COALESCE(p.title, a.position_title, p.position_code, a.position_code) AS position_title
+                    FROM positions p
+                    FULL OUTER JOIN applications a ON a.company_code=p.company_code AND a.position_code=p.position_code
+                    WHERE COALESCE(p.company_code, a.company_code)=%s
+                      AND COALESCE(p.position_code, a.position_code)=%s
+                    """,
+                    (company, code),
+                )
+            else:
+                like = f"%{legacy._ilike_escape(term)}%"
+                cur.execute(
+                    """
+                    SELECT DISTINCT COALESCE(p.position_code, a.position_code) AS position_code,
+                           COALESCE(p.title, a.position_title, p.position_code, a.position_code) AS position_title
+                    FROM positions p
+                    FULL OUTER JOIN applications a ON a.company_code=p.company_code AND a.position_code=p.position_code
+                    WHERE COALESCE(p.company_code, a.company_code)=%s
+                      AND COALESCE(p.title, a.position_title, p.position_code, a.position_code) ILIKE %s
+                    """,
+                    (company, like),
+                )
+            rows = [dict(row) for row in cur.fetchall()]
+    return rows
+
+
+def _job_opening_status_preflight(ctx: ExecutionContext, *, target_status: str) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action_name = "close_job_opening" if target_status == "closed" else "reopen_job_opening"
+    verb = "close" if target_status == "closed" else "reopen"
+    company_code = _resolve_company_code(legacy, ctx.request) or "WATHEFNI"
+    position_code = str(ctx.action.get("position_code") or "").strip()
+    title = str(ctx.action.get("title") or ctx.action.get("position_title") or "").strip()
+    if not position_code and not title:
+        return {
+            "action_type": action_name,
+            "success": False,
+            "status": "needs_clarification",
+            "needs_clarification": True,
+            "missing_fields": ["title"],
+            "message": f"Which job opening should I {verb}? Tell me the job title or its APPLY code.",
+        }
+    matches = _find_job_opening_matches(legacy, company_code, position_code=position_code, title=title)
+    if not matches:
+        return {
+            "action_type": action_name,
+            "success": False,
+            "status": "needs_clarification",
+            "needs_clarification": True,
+            "message": f"I couldn't find a job opening matching \"{position_code or title}\".",
+        }
+    if len(matches) > 1:
+        options = "; ".join(f"{m['position_title']} ({m['position_code']})" for m in matches[:8])
+        return {
+            "action_type": action_name,
+            "success": False,
+            "status": "needs_clarification",
+            "needs_clarification": True,
+            "message": f"I found more than one match — which one? {options}",
+        }
+    match = matches[0]
+    return {
+        "action_type": action_name,
+        "success": True,
+        "status": "ready",
+        "message": f"{verb.capitalize()} {match['position_title']} ({match['position_code']})?",
+        "company_code": company_code,
+        "position_code": match["position_code"],
+        "position_title": match["position_title"],
+        "target_status": target_status,
+    }
+
+
+def _job_opening_status_executor(ctx: ExecutionContext, *, target_status: str) -> dict[str, Any]:
+    legacy = ctx.legacy
+    plan = _job_opening_status_preflight(ctx, target_status=target_status)
+    if plan.get("status") != "ready":
+        return plan
+    row = legacy.dashboard_set_position_status(plan["company_code"], plan["position_code"], target_status)
+    verb = "closed to new applicants" if target_status == "closed" else "reopened to new applicants"
+    return {
+        **plan,
+        "status": "completed",
+        "message": f"{row.get('title') or plan['position_code']} is now {verb}.",
+        "position": legacy.json_safe(row),
+    }
+
+
+def _close_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_preflight(ctx, target_status="closed")
+
+
+def _close_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_executor(ctx, target_status="closed")
+
+
+def _reopen_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_preflight(ctx, target_status="open")
+
+
+def _reopen_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_executor(ctx, target_status="open")
+
+
 CANDIDATE_WORKFLOW_ALLOWED_STEPS = {
     "shortlist_candidate",
     "hire_candidate",
@@ -3262,6 +3384,49 @@ register(
     )
 )
 
+register(
+    ActionSpec(
+        name="close_job_opening",
+        description=(
+            "Close a job opening so its APPLY code / QR / link stop accepting NEW applicants. "
+            "Does NOT touch candidates already in that job's pipeline — they stay fully manageable (review, interview, decide). "
+            "Use when HR asks to close, pause, stop, or take down a role/posting. "
+            "This is a PREFLIGHT-THEN-CONFIRM workflow: call it to resolve the exact job by title or APPLY code before confirmation; it executes only after explicit approval."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("title", "position_code"),
+        module="pre_hiring",
+        requires_confirmation=True,
+        preflight=_close_job_opening_preflight,
+        executor=_close_job_opening_executor,
+        result_keys=("action_type", "success", "status", "message", "position", "position_code", "position_title"),
+        sensitive=True,
+        notes="Sets positions.status='closed'. public_role_by_apply_code already filters on status, so this takes effect immediately for new WhatsApp/QR applicants.",
+    )
+)
+
+register(
+    ActionSpec(
+        name="reopen_job_opening",
+        description=(
+            "Reopen a previously closed job opening — its existing APPLY code / QR / link start accepting new applicants again, unchanged. "
+            "Use when HR asks to reopen, resume, or restart a closed role/posting. Does NOT ask for title/salary again (unlike create_job_opening) since the job already exists. "
+            "This is a PREFLIGHT-THEN-CONFIRM workflow: call it to resolve the exact job by title or APPLY code before confirmation; it executes only after explicit approval."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("title", "position_code"),
+        module="pre_hiring",
+        requires_confirmation=True,
+        preflight=_reopen_job_opening_preflight,
+        executor=_reopen_job_opening_executor,
+        result_keys=("action_type", "success", "status", "message", "position", "position_code", "position_title"),
+        sensitive=True,
+        notes="Sets positions.status='open'. apply_code/QR are unchanged — nothing is regenerated.",
+    )
+)
+
 
 register(
     ActionSpec(
@@ -3462,7 +3627,7 @@ register(
         description="Send the standard candidate assessment link by email and WhatsApp where available. Sensitive: requires confirmation.",
         entity_type="candidate",
         required_fields=("app_key",),
-        optional_fields=(),
+        optional_fields=("message_text",),
         module="assessments",
         requires_confirmation=True,
         executor=_send_assessment_executor,
@@ -3484,7 +3649,7 @@ register(
         ),
         entity_type="candidate",
         required_fields=("app_key",),
-        optional_fields=("preferred_channel", "invite_channel"),
+        optional_fields=("preferred_channel", "invite_channel", "message_text"),
         module="video_interviews",
         requires_confirmation=True,
         executor=_send_video_interview_executor,
@@ -3739,7 +3904,6 @@ _LEAVE_RESULT_KEYS = (
     "leave_requests",
     "shift_conflicts",
     "employee_notification",
-    "sheet_sync",
 )
 
 
@@ -3894,6 +4058,36 @@ def _posthire_account_id(ctx: ExecutionContext) -> Any:
     return getattr(ctx.request, "account_id", None)
 
 
+def _posthire_scope_block(
+    ctx: ExecutionContext,
+    action: dict[str, Any],
+    employee: dict[str, Any],
+    *,
+    action_type: str,
+) -> dict[str, Any] | None:
+    """Manager-scope gate for post-hire employee-object executors.
+
+    Mirrors the leave path: the actor's phone was injected as viewer_phone by
+    _posthire_action, so a scoped manager can only act on employees inside their
+    org scope. HR admins with no manager_scopes row stay unrestricted. Returns a
+    normalized error result to short-circuit the executor, or None when allowed.
+    """
+
+    legacy = ctx.legacy
+    viewer_phone = action.get("viewer_phone")
+    if not viewer_phone or not employee:
+        return None
+    company = str(employee.get("company_code") or action.get("company_code") or "WATHEFNI").upper()
+    if legacy.manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+        return None
+    msg = "That employee is outside your manager scope."
+    return legacy.normalize_posthire_result(
+        {"ok": False, "error": "employee_outside_manager_scope", "safe_user_message": msg},
+        action_type=action_type,
+        reply=msg,
+    )
+
+
 # --- post-execute notification hooks (parity with execute_direct_action) ----
 
 def _hook_notify_shift_created(legacy: Any, ctx: ExecutionContext, result: dict[str, Any]) -> None:
@@ -4004,6 +4198,9 @@ def _send_onboarding_reminder_executor(ctx: ExecutionContext) -> dict[str, Any]:
             action_type="send_onboarding_reminder",
             reply=msg,
         )
+    blocked = _posthire_scope_block(ctx, action, employee, action_type="send_onboarding_reminder")
+    if blocked is not None:
+        return blocked
     result = legacy.send_onboarding_reminder(employee, _posthire_account_id(ctx))
     name = employee.get("name") or action.get("subject_name") or "the employee"
     if isinstance(result, dict) and result.get("ok"):
@@ -4104,6 +4301,9 @@ def _onboarding_start_executor(ctx: ExecutionContext) -> dict[str, Any]:
             action_type="start_onboarding",
             reply=msg,
         )
+    blocked = _posthire_scope_block(ctx, action, employee, action_type="start_onboarding")
+    if blocked is not None:
+        return blocked
     name = employee.get("name") or action.get("subject_name") or "the employee"
     try:
         legacy.start_onboarding(employee)
@@ -4149,7 +4349,7 @@ def _onboarding_mark_item_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 _POSTHIRE_RESULT_KEYS = (
     "action_type", "success", "status", "message", "safe_user_message",
-    "employee", "employee_notification", "hr_notification", "sheet_sync",
+    "employee", "employee_notification", "hr_notification",
     "attendance", "shift", "created", "cancelled", "conflicts",
     "swap", "timesheet", "timesheets", "policy", "export", "summaries", "analytics",
 )

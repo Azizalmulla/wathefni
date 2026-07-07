@@ -90,7 +90,6 @@ def main() -> int:
     # Neutralize external side-effects so we never message a real employee.
     app.notify_employee_shift_cancelled = lambda **k: {"ok": True, "stub": True}
     app.notify_employee_shift_created = lambda **k: {"ok": True, "stub": True}
-    app.sync_shift_sheet_rows = lambda *a, **k: {"ok": True, "stub": True}
 
     sid = str(uuid.uuid4())
     emp_key = f"{company}-SMOKESHIFT99"
