@@ -4538,7 +4538,7 @@ register(ActionSpec(
     executor=_onboarding_start_executor,
     preflight=_posthire_confirm_preflight("start_onboarding", "Start onboarding"),
     result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
-    notes="Wraps app.start_onboarding; HR-driven dashboard mutation, dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE.",
+    notes="Wraps app.start_onboarding; HR-driven dashboard mutation, dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE. Seeds the onboarding checklist from the company template (WATHEFNI_ONBOARDING_SEED, idempotent).",
 ))
 
 register(ActionSpec(

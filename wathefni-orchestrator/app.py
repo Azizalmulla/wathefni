@@ -287,6 +287,14 @@ def doc_upload_enabled() -> bool:
     return (os.environ.get("WATHEFNI_DOC_UPLOAD") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
+def onboarding_seed_enabled() -> bool:
+    """Dark-launch gate for seeding onboarding checklist items from a template
+    (on start-onboarding, opt-in roster create/import, hire top-up, and the
+    backfill route). Defaults OFF so no checklist rows are ever created in
+    production until explicitly enabled."""
+    return (os.environ.get("WATHEFNI_ONBOARDING_SEED") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
 def assistant_hr_reads_enabled() -> bool:
     """Dark-launch gate for the Assistant's onboarding/compliance/document read
     tools (list_onboarding_status, list_compliance_documents). Defaults OFF so the
@@ -2070,6 +2078,9 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS reminder_count integer NOT NULL DEFAULT 0;
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS last_reminded_at timestamptz;
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS escalated_at timestamptz;
+    ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS category text;
+    ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS owner text;
+    ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS sort_order integer;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS document_number text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS issued_date date;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS extracted_at timestamptz;
@@ -23272,7 +23283,21 @@ def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
         "--app-key",
         str(app["app_key"]),
     ]
-    return run_workspace_tool(args, timeout=90)
+    result = run_workspace_tool(args, timeout=90)
+    # Best-effort, idempotent top-up: the external tool seeds a small subset; this
+    # fills in the rest of the company template without touching what it created.
+    # No-op when the flag is off; failures never change the hire result.
+    if result.get("ok") and onboarding_seed_enabled():
+        try:
+            employee = find_employee_by_phone(app.get("phone"), company_code=app.get("company_code"))
+            if employee:
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        seed_onboarding_items(cur, employee)
+                    conn.commit()
+        except Exception:
+            logger.warning("onboarding top-up seeding after hire failed", exc_info=True)
+    return result
 
 
 def notify_candidate(app: dict[str, Any], account_id: str | None, message: str | None = None) -> dict[str, Any]:
@@ -26594,6 +26619,143 @@ def employee_root(employee: dict[str, Any]) -> Path:
     return WORKSPACE / "data" / "companies" / str(employee["company_code"]).upper() / "employees" / digits(employee["phone"])
 
 
+# === Onboarding checklist templates =========================================
+# An onboarding item is (item_id, label, category, item_type, required, owner).
+#
+# required=True is deliberately reserved for items the EMPLOYEE must provide
+# (documents / bank details), because reminders, the onboarding counts and the
+# employee app all key off `required IS TRUE`. Every HR/system readiness task is
+# seeded required=False so it is tracked and visible to HR without ever nagging
+# the employee or skewing the "documents pending" count. This is what lets us
+# seed a rich readiness checklist without changing any reminder behaviour.
+#
+# owner: 'employee' | 'hr' | 'system'. category groups items into sections.
+# item_type: 'document' | 'text' | 'task' | 'date' | 'ack'.
+ONBOARDING_ITEM_CATEGORIES = ("identity_legal", "payroll_bank", "compliance_gov", "company_readiness")
+
+DEFAULT_KUWAIT_ONBOARDING_TEMPLATE: list[tuple[str, str, str, str, bool, str]] = [
+    # 1. Identity & legal file
+    ("civil_id", "Civil ID (front and back)", "identity_legal", "document", True, "employee"),
+    ("passport", "Passport copy", "identity_legal", "document", True, "employee"),
+    ("personal_photo", "Personal photo", "identity_legal", "document", True, "employee"),
+    ("residency_iqama", "Residency / Iqama (expats)", "identity_legal", "document", False, "employee"),
+    ("work_permit", "Work permit (expats)", "identity_legal", "document", False, "employee"),
+    ("employment_contract", "Signed employment contract", "identity_legal", "document", True, "employee"),
+    ("offer_letter", "Job offer / appointment letter", "identity_legal", "document", False, "hr"),
+    ("personal_details_form", "Personal details form", "identity_legal", "text", False, "employee"),
+    ("emergency_contact", "Emergency contact", "identity_legal", "text", False, "employee"),
+    # 2. Payroll & bank setup
+    ("bank_details", "Bank name and IBAN", "payroll_bank", "text", True, "employee"),
+    ("salary_transfer_details", "Salary transfer details", "payroll_bank", "text", False, "hr"),
+    ("salary_allowances_confirmed", "Basic salary / allowances confirmed", "payroll_bank", "task", False, "hr"),
+    ("payroll_status", "Payroll status", "payroll_bank", "task", False, "system"),
+    # 3. Compliance / government tracking — lightweight checkpoints only. Real
+    #    expiry tracking lives in compliance_documents; reconciliation is Phase 5.
+    ("civil_id_expiry", "Civil ID expiry recorded", "compliance_gov", "date", False, "system"),
+    ("passport_expiry", "Passport expiry recorded", "compliance_gov", "date", False, "system"),
+    ("residency_expiry", "Residency expiry recorded", "compliance_gov", "date", False, "system"),
+    ("work_permit_expiry", "Work permit expiry recorded", "compliance_gov", "date", False, "system"),
+    ("medical_check", "Medical check status (expats)", "compliance_gov", "task", False, "system"),
+    ("visa_article_type", "Visa/residency type (e.g. Article 18)", "compliance_gov", "text", False, "hr"),
+    ("probation_end", "Probation period end date", "compliance_gov", "date", False, "hr"),
+    # 4. Company readiness
+    ("department_assigned", "Department assigned", "company_readiness", "task", False, "hr"),
+    ("job_title_confirmed", "Job title confirmed", "company_readiness", "task", False, "hr"),
+    ("reporting_manager_assigned", "Reporting manager assigned", "company_readiness", "task", False, "hr"),
+    ("work_location_assigned", "Work location / branch assigned", "company_readiness", "task", False, "hr"),
+    ("shift_group_assigned", "Shift group assigned (if applicable)", "company_readiness", "task", False, "hr"),
+    ("attendance_device_id", "Attendance device ID assigned (if applicable)", "company_readiness", "task", False, "hr"),
+    ("app_invite_sent", "Employee app invite sent (if enabled)", "company_readiness", "task", False, "system"),
+    ("account_access_created", "Email / account access created (if applicable)", "company_readiness", "task", False, "hr"),
+    ("uniform_ppe_issued", "Uniform / PPE issued (if applicable)", "company_readiness", "task", False, "hr"),
+    ("access_card_issued", "Access card / badge issued (if applicable)", "company_readiness", "task", False, "hr"),
+    ("asset_handover", "Laptop / asset handover (if applicable)", "company_readiness", "task", False, "hr"),
+    ("company_policy_ack", "Company policy acknowledged", "company_readiness", "ack", False, "employee"),
+    ("code_of_conduct_ack", "Code of conduct acknowledged", "company_readiness", "ack", False, "employee"),
+    ("nda_signed", "NDA / confidentiality signed (if applicable)", "company_readiness", "ack", False, "employee"),
+    ("training_completed", "Training completed (if applicable)", "company_readiness", "task", False, "hr"),
+    ("first_day_checklist", "First-day checklist completed", "company_readiness", "task", False, "hr"),
+]
+
+# Registry of named templates. Company-specific templates and an editor are a
+# later phase; the engine already accepts a template_id so nothing here blocks
+# that. Unknown ids fall back to Default Kuwait so seeding can never fail.
+ONBOARDING_TEMPLATES: dict[str, list[tuple[str, str, str, str, bool, str]]] = {
+    "default_kuwait": DEFAULT_KUWAIT_ONBOARDING_TEMPLATE,
+}
+DEFAULT_ONBOARDING_TEMPLATE_ID = "default_kuwait"
+
+
+def resolve_onboarding_template(
+    cur: Any, company_code: str | None, *, template_id: str | None = None
+) -> tuple[str, list[tuple[str, str, str, str, bool, str]]]:
+    """Resolve which template to seed. An explicit template_id wins; otherwise
+    read companies.metadata->>'onboarding_template'; otherwise Default Kuwait.
+    Falls back to Default Kuwait for any unknown id so seeding never fails."""
+    name = str(template_id or "").strip().lower()
+    if not name:
+        name = DEFAULT_ONBOARDING_TEMPLATE_ID
+        company = str(company_code or "").upper()
+        if company:
+            try:
+                cur.execute("SELECT metadata FROM companies WHERE company_code=%s LIMIT 1", (company,))
+                row = cur.fetchone()
+                meta = (row or {}).get("metadata") if row else None
+                if isinstance(meta, dict):
+                    candidate = str(meta.get("onboarding_template") or "").strip().lower()
+                    if candidate:
+                        name = candidate
+            except Exception:
+                name = DEFAULT_ONBOARDING_TEMPLATE_ID
+    specs = ONBOARDING_TEMPLATES.get(name)
+    if not specs:
+        name, specs = DEFAULT_ONBOARDING_TEMPLATE_ID, DEFAULT_KUWAIT_ONBOARDING_TEMPLATE
+    return name, specs
+
+
+def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: str | None = None) -> int:
+    """Idempotently seed a company's onboarding checklist for one employee.
+
+    Dark-launched behind WATHEFNI_ONBOARDING_SEED (no-op when off). Only inserts
+    item_ids the employee does not already have, so it is safe to re-run and safe
+    to call after the external hire transition — it tops up missing items and
+    never touches existing or already-received ones (application-level dedupe, so
+    no DB unique constraint is required). Runs on the caller's cursor/transaction.
+    Returns the number of newly-inserted items."""
+    if not onboarding_seed_enabled():
+        return 0
+    employee_key = str(employee.get("employee_key") or "").strip()
+    if not employee_key:
+        return 0
+    template_name, specs = resolve_onboarding_template(
+        cur, employee.get("company_code"), template_id=template_id
+    )
+    cur.execute("SELECT item_id FROM onboarding_items WHERE employee_key=%s", (employee_key,))
+    existing = {str(row["item_id"]) for row in cur.fetchall() if row.get("item_id")}
+    seeded = 0
+    for order, (item_id, label, category, item_type, required, owner) in enumerate(specs):
+        if item_id in existing:
+            continue
+        document_type = item_id if item_type == "document" else None
+        cur.execute(
+            """
+            INSERT INTO onboarding_items
+                (employee_key, item_id, label, category, item_type, required, owner,
+                 sort_order, document_type, status, raw_json, updated_at)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s, now())
+            """,
+            (
+                employee_key, item_id, label, category, item_type, bool(required), owner,
+                order, document_type,
+                Json({"seeded_by": "onboarding_template", "template": template_name}),
+            ),
+        )
+        seeded += cur.rowcount or 0
+    if seeded:
+        recompute_employee_onboarding_counts(cur, employee_key)
+    return seeded
+
+
 def start_onboarding(employee: dict[str, Any]) -> None:
     started_at = now_iso()
     root = employee_root(employee)
@@ -26614,6 +26776,10 @@ def start_onboarding(employee: dict[str, Any]) -> None:
                 "UPDATE employees SET onboarding_status='in_progress', raw_json=%s, updated_at=now() WHERE employee_key=%s",
                 (Json(raw_json), employee["employee_key"]),
             )
+            # Seed the checklist so "start onboarding" actually produces something
+            # to complete. No-op when WATHEFNI_ONBOARDING_SEED is off; idempotent
+            # when items already exist (e.g. a pipeline hire re-started).
+            seed_onboarding_items(cur, employee)
         conn.commit()
 
 
@@ -44181,6 +44347,7 @@ def create_company_employee(
     department: str | None = None,
     start_date: str | None = None,
     seed_compliance: bool = False,
+    start_onboarding: bool = False,
 ) -> dict[str, Any]:
     """Create a single employee directly in the hub (no pre-hiring pipeline).
 
@@ -44235,12 +44402,19 @@ def create_company_employee(
                 }
             employee = dict(row)
             seeded = _seed_employee_compliance_documents(cur, company, employee_key) if seed_compliance else 0
+            # Opt-in: only when the caller asks AND the flag is on, so we never
+            # leave an employee marked in_progress with an empty checklist.
+            onboarding_seeded = 0
+            if start_onboarding and onboarding_seed_enabled():
+                onboarding_seeded = seed_onboarding_items(cur, employee)
+                employee["onboarding_status"] = "in_progress"
             conn.commit()
     return {
         "status": "created",
         "employee_key": employee_key,
         "employee": posthire_employee_card(employee),
         "compliance_seeded": seeded,
+        "onboarding_seeded": onboarding_seeded,
     }
 
 
@@ -44355,6 +44529,7 @@ class DashboardEmployeeCreate(BaseModel):
     position_title: str | None = None
     department: str | None = None
     start_date: str | None = None
+    start_onboarding: bool = False
 
 
 @app.post("/dashboard/posthire/employees")
@@ -44370,6 +44545,7 @@ def dashboard_posthire_create_employee(request: DashboardEmployeeCreate, context
         department=request.department,
         start_date=request.start_date,
         seed_compliance=seed,
+        start_onboarding=request.start_onboarding,
     )
     if result["status"] == "failed":
         raise HTTPException(status_code=422, detail={"error": "invalid_employee", "message": result["reason"]})
@@ -44381,7 +44557,11 @@ def dashboard_posthire_create_employee(request: DashboardEmployeeCreate, context
         summary=f"Added employee {request.name}.",
         target_type="employee",
         target=result["employee_key"],
-        details={"phone": digits(request.phone), "compliance_seeded": result.get("compliance_seeded", 0)},
+        details={
+            "phone": digits(request.phone),
+            "compliance_seeded": result.get("compliance_seeded", 0),
+            "onboarding_seeded": result.get("onboarding_seeded", 0),
+        },
     )
     return {"ok": True, "status": "created", "employee": result.get("employee")}
 
@@ -44519,6 +44699,7 @@ def _parse_employee_import_file(raw: bytes, filename: str) -> tuple[list[dict[st
 async def dashboard_posthire_import_employees(
     file: UploadFile = File(...),
     dry_run: bool = Form(False),
+    start_onboarding: bool = Form(False),
     context: dict[str, Any] = Depends(dashboard_context),
 ):
     company = require_employee_roster_admin(context)
@@ -44573,6 +44754,7 @@ async def dashboard_posthire_import_employees(
                 department=rec.get("department"),
                 start_date=rec.get("start_date"),
                 seed_compliance=seed,
+                start_onboarding=start_onboarding,
             )
             status = result.get("status")
             if status == "created":
@@ -45962,6 +46144,75 @@ def posthire_reminders_run(
         limit=limit,
         min_hours_since_last=min_hours_since_last,
     )
+
+
+class OnboardingSeedMissingRequest(BaseModel):
+    company_code: str
+    dry_run: bool = True
+    template_id: str | None = None
+
+
+@app.post("/orchestrator/onboarding/seed-missing")
+def orchestrator_onboarding_seed_missing(
+    request: OnboardingSeedMissingRequest,
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    """Internal-only backfill: seed the onboarding checklist for existing
+    employees who are already 'in_progress' but have zero checklist items (the
+    old gap). Company-scoped, dry-run by default. No-op when the seed flag is off.
+    Never touches employees who already have items."""
+    ensure_schema()
+    if not onboarding_seed_enabled():
+        return {"ok": False, "reason": "seeding_disabled", "message": "WATHEFNI_ONBOARDING_SEED is off."}
+    company = str(request.company_code or "").strip().upper()
+    if not company:
+        raise HTTPException(status_code=422, detail={"error": "company_required", "message": "company_code is required."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT e.employee_key
+                FROM employees e
+                WHERE e.company_code=%s
+                  AND lower(coalesce(e.onboarding_status,'')) = 'in_progress'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM onboarding_items oi WHERE oi.employee_key = e.employee_key
+                  )
+                ORDER BY e.updated_at DESC
+                """,
+                (company,),
+            )
+            targets = [str(row["employee_key"]) for row in cur.fetchall() if row.get("employee_key")]
+            if request.dry_run:
+                return {
+                    "ok": True,
+                    "dry_run": True,
+                    "company_code": company,
+                    "candidates": len(targets),
+                    "employee_keys": targets,
+                }
+            employees_seeded = 0
+            items_seeded = 0
+            for key in targets:
+                cur.execute(
+                    "SELECT * FROM employees WHERE employee_key=%s AND company_code=%s LIMIT 1",
+                    (key, company),
+                )
+                row = cur.fetchone()
+                if not row:
+                    continue
+                count = seed_onboarding_items(cur, dict(row), template_id=request.template_id)
+                if count:
+                    employees_seeded += 1
+                    items_seeded += count
+            conn.commit()
+    return {
+        "ok": True,
+        "dry_run": False,
+        "company_code": company,
+        "employees_seeded": employees_seeded,
+        "items_seeded": items_seeded,
+    }
 
 
 @app.post("/orchestrator/posthire/compliance/run")

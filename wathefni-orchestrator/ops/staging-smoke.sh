@@ -108,6 +108,9 @@ log "compliance V1.1 actions (send reminder / mark reviewed: registry + RBAC + h
 log "onboarding dashboard upgrade (start/restart + mark item: registry + RBAC + flag gate + behaviour, staging DB)"
 "$VENV_PY" smoke-test-onboarding-dashboard.py | sed 's/^/    /'
 
+log "onboarding checklist seeding (template invariants + flag gate + start/roster/top-up/backfill seeding, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-onboarding-seeding.py | sed 's/^/    /'
+
 log "employee 360 profile (read-only, tenant + entitlement scoped, staging DB)"
 "$VENV_PY" smoke-test-employee-profile.py | sed 's/^/    /'
 
