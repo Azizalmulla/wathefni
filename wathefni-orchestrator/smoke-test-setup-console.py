@@ -25,6 +25,7 @@ NEVER point this at production: it creates and deletes throwaway companies.
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -37,6 +38,8 @@ TEST_CO2 = "SETUPCONSOLETEST2"
 OPERATOR_TOKEN = "smoke-setup-operator-token"
 ADMIN_PHONE = "96599338566"
 OTHER_PHONE = "96500000000"
+OTHER_OPERATOR_TOKEN = "smoke-second-operator-token"
+SHARED_DASHBOARD_TOKEN = "smoke-shared-dashboard-token"
 
 
 def check(label: str, condition: bool) -> None:
@@ -83,10 +86,20 @@ def main() -> int:
         "WATHEFNI_EMPLOYEE_APP",
         "WATHEFNI_PLATFORM_ADMINS",
         "WATHEFNI_DASHBOARD_TOKEN",
+        "WATHEFNI_SETUP_OPERATOR_CREDENTIALS",
     )}
 
     def set_env(enabled: str | None, admins: str | None, token: str | None) -> None:
-        for key, value in (("WATHEFNI_SETUP_CONSOLE_ENABLED", enabled), ("WATHEFNI_PLATFORM_ADMINS", admins), ("WATHEFNI_DASHBOARD_TOKEN", token)):
+        credentials = json.dumps({
+            ADMIN_PHONE: token,
+            OTHER_PHONE: OTHER_OPERATOR_TOKEN,
+        }) if token else None
+        for key, value in (
+            ("WATHEFNI_SETUP_CONSOLE_ENABLED", enabled),
+            ("WATHEFNI_PLATFORM_ADMINS", admins),
+            ("WATHEFNI_DASHBOARD_TOKEN", SHARED_DASHBOARD_TOKEN),
+            ("WATHEFNI_SETUP_OPERATOR_CREDENTIALS", credentials),
+        ):
             if value is None:
                 os.environ.pop(key, None)
             else:
@@ -110,7 +123,17 @@ def main() -> int:
             check("wrong operator token -> 401", e.status_code == 401)
 
         try:
-            gate(OPERATOR_TOKEN, OTHER_PHONE); raise AssertionError("non-allowlisted phone should 403")
+            gate(SHARED_DASHBOARD_TOKEN, ADMIN_PHONE); raise AssertionError("shared dashboard token should 401")
+        except app.HTTPException as e:
+            check("ordinary dashboard token cannot access Setup Console", e.status_code == 401)
+
+        try:
+            gate(OPERATOR_TOKEN, OTHER_PHONE); raise AssertionError("operator token is bound to its phone")
+        except app.HTTPException as e:
+            check("operator token cannot spoof another allowlisted identity", e.status_code == 401)
+
+        try:
+            gate(OTHER_OPERATOR_TOKEN, OTHER_PHONE); raise AssertionError("non-allowlisted phone should 403")
         except app.HTTPException as e:
             check("non-allowlisted phone -> 403", e.status_code == 403)
 
@@ -131,7 +154,7 @@ def main() -> int:
             client.get(
                 "/dashboard/superadmin/setup/companies",
                 headers={"Authorization": f"Bearer {OPERATOR_TOKEN}"},
-            ).status_code == 403,
+            ).status_code == 401,
         )
 
         original_dist = app.DASHBOARD_DIST_PATH
@@ -222,6 +245,22 @@ def main() -> int:
             ctx,
         )
         check("company profile updates validated fields", profile["profile"]["country"] == "SA" and profile["profile"]["currency"] == "SAR")
+        original_audit_writer = app.write_admin_audit
+        try:
+            app.write_admin_audit = lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("audit-smoke-failure"))
+            try:
+                app.setup_console_set_profile(
+                    TEST_CO,
+                    app.SetupCompanyProfileRequest(name="Must Roll Back", country="KW", timezone="Asia/Kuwait", currency="KWD"),
+                    ctx,
+                )
+                raise AssertionError("profile update should fail when its audit row fails")
+            except RuntimeError:
+                pass
+        finally:
+            app.write_admin_audit = original_audit_writer
+        rolled_back_profile = app.company_profile_payload(TEST_CO)
+        check("profile and audit write are atomic", rolled_back_profile["name"] == "Setup Console Test" and rolled_back_profile["country"] == "SA")
         try:
             app.setup_console_set_profile(TEST_CO, app.SetupCompanyProfileRequest(timezone="Kuwait"), ctx)
             raise AssertionError("invalid timezone should 422")
@@ -281,6 +320,9 @@ def main() -> int:
             ctx,
         )
         check("unverified active request reports pending honestly", pending["channel_account"]["status"] == "pending_verification" and pending["readiness"]["ready"] is False)
+        os.environ["WATHEFNI_COMPANY_CHANNEL_ACCOUNTS"] = "off"
+        check("pending account does not block readiness while channel feature is OFF", app.setup_console_company_readiness(TEST_CO)["ready"] is True)
+        os.environ["WATHEFNI_COMPANY_CHANNEL_ACCOUNTS"] = "on"
         verified = app.setup_console_upsert_channel_account(
             TEST_CO,
             app.SetupCompanyChannelAccountRequest(

@@ -33749,22 +33749,43 @@ def platform_admin_phones() -> set[str]:
     return {digits(part) for part in re.split(r"[,\s]+", raw) if digits(part)}
 
 
+def setup_operator_credentials() -> dict[str, str]:
+    """Return per-operator tokens keyed by normalized phone.
+
+    Credentials are intentionally separate from the ordinary dashboard token and
+    bound server-side to one allowlisted operator identity.
+    """
+    raw = (os.environ.get("WATHEFNI_SETUP_OPERATOR_CREDENTIALS") or "").strip()
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except Exception:
+        return {}
+    if not isinstance(parsed, dict):
+        return {}
+    return {
+        phone: str(token).strip()
+        for key, token in parsed.items()
+        if (phone := digits(key)) and str(token or "").strip()
+    }
+
+
 def superadmin_context(
     authorization: str | None = Header(default=None),
-    x_dashboard_token: str | None = Header(default=None, alias="X-Dashboard-Token"),
     x_hr_phone: str | None = Header(default=None, alias="X-HR-Phone"),
 ) -> dict[str, Any]:
     """Platform-admin gate for the Setup Console. Fail-closed at every step."""
     ensure_schema()
     if not setup_console_enabled():
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
-    provided = bearer_token(authorization) or str(x_dashboard_token or "").strip()
-    configured = dashboard_configured_token()
-    if not configured or not provided or provided != configured:
-        raise HTTPException(status_code=401, detail={"error": "dashboard_auth_failed", "message": "Platform admin access was rejected."})
     phone = digits(x_hr_phone)
+    provided = bearer_token(authorization)
+    configured = setup_operator_credentials().get(phone) or ""
+    if not configured or not provided or not hmac.compare_digest(provided, configured):
+        raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
     allow = platform_admin_phones()
-    if not phone or not allow or phone not in allow:
+    if not allow or phone not in allow:
         raise HTTPException(status_code=403, detail={"error": "not_platform_admin", "message": "This account is not a Wathefni platform administrator."})
     return {
         "is_platform_admin": True,
@@ -33945,7 +33966,12 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
 
     account = setup_console_channel_account(company)
     profile_complete = bool(profile.get("name") and profile.get("country") and profile.get("timezone") and profile.get("currency"))
-    account_ready = not account or account.get("status") == "disabled" or bool(account.get("verified"))
+    account_ready = (
+        not company_channel_accounts_enabled()
+        or not account
+        or account.get("status") == "disabled"
+        or bool(account.get("verified"))
+    )
     steps = [
         {"key": "profile", "label": "Company profile complete", "done": profile_complete},
         {"key": "modules", "label": "At least one module selected", "done": bool(modules)},
@@ -34217,17 +34243,26 @@ def setup_console_set_profile(
                 "UPDATE companies SET name=%s, country=%s, updated_at=now() WHERE company_code=%s",
                 (name, country, company),
             )
+            cur.execute(
+                """
+                INSERT INTO company_settings (company_code, settings)
+                VALUES (%s,%s)
+                ON CONFLICT (company_code) DO UPDATE
+                  SET settings=company_settings.settings || EXCLUDED.settings,
+                      updated_at=now()
+                """,
+                (company, Json({"timezone": timezone_value, "currency": currency})),
+            )
+            write_admin_audit(
+                cur,
+                _setup_audit_context(superadmin, company),
+                "setup_company_profile_updated",
+                summary=f"Updated the company profile for {company}.",
+                target_type="company",
+                target=company,
+                details={"company_code": company, "name": name, "country": country, "timezone": timezone_value, "currency": currency},
+            )
         conn.commit()
-    set_company_setting(company, "timezone", timezone_value)
-    set_company_setting(company, "currency", currency)
-    record_admin_audit(
-        _setup_audit_context(superadmin, company),
-        "setup_company_profile_updated",
-        summary=f"Updated the company profile for {company}.",
-        target_type="company",
-        target=company,
-        details={"company_code": company, "name": name, "country": country, "timezone": timezone_value, "currency": currency},
-    )
     return {"ok": True, "profile": company_profile_payload(company), "readiness": setup_console_company_readiness(company)}
 
 
@@ -34993,6 +35028,60 @@ def dashboard_record_action_result(action_type: str, status: str, result_payload
     return json_safe(row)
 
 
+def write_admin_audit(
+    cur: Any,
+    context: dict[str, Any],
+    action_type: str,
+    *,
+    summary: str,
+    target_type: str = "config",
+    target: str | None = None,
+    details: dict[str, Any] | None = None,
+    status: str = "completed",
+) -> None:
+    company = context.get("company_code")
+    raw_payload = {
+        "action": {"type": action_type, "target_type": target_type, "target": target},
+        "summary": summary,
+        "details": json_safe(details or {}),
+        "source": "dashboard",
+        "company_code": company,
+        "company_id": company,
+        "actor_user_id": context.get("actor_user_id"),
+        "actor_email": context.get("actor_email"),
+        "actor_phone": digits(context.get("actor_phone") or context.get("hr_phone")) or None,
+        "actor_role": context.get("actor_role"),
+        "requested_by": context.get("hr_user"),
+    }
+    actor = actor_context_from_payload(raw_payload)
+    payload = normalized_result_payload(
+        action_type=action_type,
+        status=status,
+        action=raw_payload["action"],
+        result_payload=json_safe(raw_payload),
+        template_reply=summary,
+    )
+    cur.execute(
+        """
+        INSERT INTO action_results
+        (turn_id, action_id, action_type, status, result, final_reply,
+         company_code, actor_user_id, actor_email, actor_phone, actor_role)
+        VALUES (NULL,NULL,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """,
+        (
+            action_type,
+            status,
+            Json(payload),
+            summary,
+            actor.get("company_code"),
+            actor.get("actor_user_id"),
+            actor.get("actor_email"),
+            actor.get("actor_phone"),
+            actor.get("actor_role"),
+        ),
+    )
+
+
 def record_admin_audit(
     context: dict[str, Any],
     action_type: str,
@@ -35003,15 +35092,7 @@ def record_admin_audit(
     details: dict[str, Any] | None = None,
     status: str = "completed",
 ) -> None:
-    """Best-effort audit row for admin/config mutations (team, WhatsApp identity,
-    integrations, import).
-
-    Records into the same `action_results` store the dashboard and AI action paths
-    already use, so every config change is traceable to an actor + company with one
-    consistent query surface. This is called AFTER the change has committed and must
-    never raise — a failed audit write must not break a config change that already
-    succeeded.
-    """
+    """Best-effort audit row for admin/config mutations."""
     company = context.get("company_code")
     payload = {
         "action": {"type": action_type, "target_type": target_type, "target": target},

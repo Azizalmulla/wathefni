@@ -94,6 +94,13 @@ preflight() {
   ( cd "$ORCH_SRC" && python3 smoke-test-tenant-read-hardening.py && python3 smoke-test-toolcall-orchestrator.py && python3 smoke-test-whatsapp-identity.py ) || fail "local source smokes failed"
 }
 
+artifact_sha() {
+  {
+    ( cd "$ORCH_SRC" && shasum -a 256 "${CODE_FILES[@]}" ops/deploy.sh )
+    shasum -a 256 "$DASH_SRC"/dist/*.html "$DASH_SRC"/dist/*.svg "$DASH_SRC"/dist/assets/*
+  } | shasum -a 256 | awk '{print $1}'
+}
+
 sync_code() {  # $1 = dest orchestrator dir
   rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
   rsync -az "$ORCH_SRC/ops/" "$VPS_HOST:$PROD_ORCH/ops/"
@@ -111,18 +118,18 @@ deploy_staging() {
   log "staging smoke suite"
   "${SSH[@]}" "/opt/wathefni/orchestrator/ops/staging-smoke.sh"
   log "record staging-green artifact hash"
-  local sha; sha="$(shasum -a 256 "$ORCH_SRC/app.py" | awk '{print $1}')"
+  local sha; sha="$(artifact_sha)"
   "${SSH[@]}" "printf '%s\n' '$sha' > $GREEN_FILE"
-  printf '\nStaging deploy OK. app.py sha256=%s recorded as staging-green.\n' "$sha"
+  printf '\nStaging deploy OK. artifact sha256=%s recorded as staging-green.\n' "$sha"
 }
 
 deploy_production() {
-  local sha; sha="$(shasum -a 256 "$ORCH_SRC/app.py" | awk '{print $1}')"
-  log "production gate: artifact must have passed staging"
+  preflight
+  local sha; sha="$(artifact_sha)"
+  log "production gate: complete artifact must have passed staging"
   local green; green="$("${SSH[@]}" "cat $GREEN_FILE 2>/dev/null || true")"
   [ -n "$green" ] || fail "no staging-green record found — run 'deploy.sh staging' first"
-  [ "$green" = "$sha" ] || fail "app.py ($sha) does not match staging-green ($green) — run staging for THIS build first"
-  preflight
+  [ "$green" = "$sha" ] || fail "artifact ($sha) does not match staging-green ($green) — run staging for THIS build first"
   log "pre-deploy backup + snapshot"
   "${SSH[@]}" "set -e; /usr/local/bin/backup-wathefni daily >/dev/null; \
     ts=\$(date -u +%Y%m%dT%H%M%SZ); snap=/opt/wathefni/backups/predeploy-\$ts; mkdir -p \"\$snap\"; \
