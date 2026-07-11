@@ -212,12 +212,31 @@ def main() -> int:
             and employee_app["platform_available"] is False
             and employee_app["effective"] is False
         ))
+        check("module bundles are exposed to Setup Console", len(detail.get("module_bundles") or []) >= 6)
+        check("module guidance includes app surface helpers", "app_surfaces" in (detail.get("module_guidance") or {}))
+        assessments_item = next(item for item in detail["available_modules"] if item["key"] == "assessments")
+        check("assessments advertises hard dependency on pre_hiring", assessments_item.get("depends_on") == ["pre_hiring"])
+        payroll_item = next(item for item in detail["available_modules"] if item["key"] == "payroll")
+        check("payroll soft-recommends attendance and leave", set(payroll_item.get("recommended_with") or []) == {"attendance", "leave"})
         check("channel sections separate candidates, employees, and HR", set(detail["channel_policy"]) >= {
             "pre_hiring", "post_hiring", "hr_admin",
         })
 
+        try:
+            app.setup_console_set_modules(TEST_CO, app.SetupModulesRequest(modules=["assessments"]), ctx)
+            raise AssertionError("assessments without pre_hiring should 422")
+        except app.HTTPException as e:
+            check("hard dependency missing -> 422", e.status_code == 422 and e.detail.get("error") == "missing_module_dependency")
+            check("hard dependency response suggests expanded modules", e.detail.get("suggested_modules") == ["assessments", "pre_hiring"])
+
         mod = app.setup_console_set_modules(TEST_CO, app.SetupModulesRequest(modules=["pre_hiring", "Payroll", "employee_app"]), ctx)
+        check("soft recommendations never block save", mod.get("modules") == ["employee_app", "payroll", "pre_hiring"])
         check("modules normalised + enabled", mod.get("modules") == ["employee_app", "payroll", "pre_hiring"])
+        guidance = app.setup_console_module_guidance(TEST_CO, ["employee_app", "payroll", "attendance"])
+        check(
+            "app surface preview excludes payroll and requires employee_app",
+            {item["surface_key"] for item in guidance["app_surfaces"]} == {"inbox", "attendance"},
+        )
         check(
             "company_has_module reflects the enable",
             app.company_has_module(TEST_CO, "payroll")

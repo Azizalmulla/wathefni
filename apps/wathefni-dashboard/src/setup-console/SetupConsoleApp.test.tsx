@@ -62,8 +62,8 @@ describe('setup console', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
 
     expect(await screen.findByRole('heading', { name: 'Canonical modules' })).toBeInTheDocument()
-    expect(screen.getByText('Pre Hiring')).toBeInTheDocument()
-    expect(screen.getByText('Workforce')).toBeInTheDocument()
+    expect(screen.getByText('Pre Hire')).toBeInTheDocument()
+    expect(screen.getByText('Post Hire')).toBeInTheDocument()
 
     const employeeRow = screen.getByText('Employee App').closest('label')
     expect(employeeRow).not.toBeNull()
@@ -71,6 +71,7 @@ describe('setup console', () => {
     expect(within(employeeRow!).getByText('Platform unavailable')).toBeInTheDocument()
     expect(within(employeeRow!).getByText('Not enabled')).toBeInTheDocument()
 
+    expect(screen.getByRole('button', { name: /Apply Hiring Assessment Suite/ })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Company WhatsApp Business account' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'HR-user WhatsApp identity' })).toBeInTheDocument()
     expect(screen.getByText(/shared provider account and sender/i)).toBeInTheDocument()
@@ -82,6 +83,53 @@ describe('setup console', () => {
         ([input, init]) => String(input).endsWith('/ACME/settings') && init?.method === 'PATCH',
       )
       expect(JSON.parse(String(reviewCall?.[1]?.body))).toEqual({ channel_policy_reviewed: true })
+    })
+  })
+
+  test('auto-includes hard dependencies, keeps soft recommendations optional, and previews app surfaces', async () => {
+    seedSession()
+    const fetchMock = mockSetupApi()
+    renderConsole()
+
+    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
+    await screen.findByRole('heading', { name: 'Canonical modules' })
+
+    const preHiringRow = screen.getByText('Pre-Hiring').closest('label')
+    fireEvent.click(within(preHiringRow!).getByRole('checkbox'))
+    expect(within(preHiringRow!).getByRole('checkbox')).not.toBeChecked()
+
+    const assessmentsRow = screen.getByText('Assessments').closest('label')
+    fireEvent.click(within(assessmentsRow!).getByRole('checkbox'))
+    expect(await screen.findByText(/Assessments requires Pre-Hiring, so Pre-Hiring was included/)).toBeInTheDocument()
+    expect(within(preHiringRow!).getByRole('checkbox')).toBeChecked()
+
+    fireEvent.click(screen.getByRole('button', { name: /Apply Workforce Operations/ }))
+    const shiftsRow = screen.getByText('Shifts').closest('label')
+    expect(within(shiftsRow!).getByRole('checkbox')).toBeChecked()
+    fireEvent.click(within(shiftsRow!).getByRole('checkbox'))
+    expect(within(shiftsRow!).getByRole('checkbox')).not.toBeChecked()
+    expect(screen.getByText(/Recommended with selection/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /\+ Shifts/ })).toBeInTheDocument()
+
+    const payrollRow = screen.getByText('Payroll').closest('label')
+    expect(within(payrollRow!).getByRole('checkbox')).toBeChecked()
+
+    const employeeRow = screen.getByText('Employee App').closest('label')
+    fireEvent.click(within(employeeRow!).getByRole('checkbox'))
+    expect(within(employeeRow!).getByText('Configured, awaiting platform activation')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Employee App surface preview' })).toBeInTheDocument()
+    expect(screen.getByText(/Surfaces below appear when WATHEFNI_EMPLOYEE_APP is ON/)).toBeInTheDocument()
+    expect(screen.getByText(/Attendance status/)).toBeInTheDocument()
+    expect(screen.queryByText(/Payroll/i, { selector: 'li' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save modules' }))
+    await waitFor(() => {
+      const modulesCall = fetchMock.mock.calls.find(
+        ([input, init]) => String(input).endsWith('/ACME/modules') && init?.method === 'PATCH',
+      )
+      const body = JSON.parse(String(modulesCall?.[1]?.body))
+      expect(body.modules).toEqual(expect.arrayContaining(['assessments', 'pre_hiring', 'payroll', 'attendance', 'leave', 'employee_app']))
+      expect(body.modules).not.toContain('shifts')
     })
   })
 
@@ -173,6 +221,7 @@ function mockSetupApi() {
       return jsonResponse({ invite_token: 'invite-smoke-token' })
     }
     if (path.endsWith('/profile') && init?.method === 'PATCH') return jsonResponse({ ok: true })
+    if (path.endsWith('/modules') && init?.method === 'PATCH') return jsonResponse({ ok: true, modules: [] })
     if (path.includes('/dashboard/superadmin/setup/companies/')) return jsonResponse(companyDetail(path))
     return jsonResponse({ detail: `Unexpected request: ${path}` }, 404)
   })
@@ -200,23 +249,113 @@ function companyDetail(path: string) {
     available_modules: [
       {
         key: 'pre_hiring',
-        label: 'Pre-hiring',
-        suite: 'pre_hiring',
-        audience: 'candidates',
+        label: 'Pre-Hiring',
+        suite: 'pre_hire',
+        audience: 'candidate',
         configured: true,
         platform_available: true,
         effective: true,
       },
       {
+        key: 'assessments',
+        label: 'Assessments',
+        suite: 'pre_hire',
+        audience: 'candidate',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        depends_on: ['pre_hiring'],
+        recommended_with: ['video_interviews'],
+        recommendation_copy: 'Requires Pre-Hiring. Works best with Video Interviews.',
+      },
+      {
+        key: 'video_interviews',
+        label: 'Video Interviews',
+        suite: 'pre_hire',
+        audience: 'candidate',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        depends_on: ['pre_hiring'],
+      },
+      {
+        key: 'attendance',
+        label: 'Attendance',
+        suite: 'post_hire',
+        audience: 'employee',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        recommended_with: ['shifts'],
+        recommendation_copy: 'Works alone. Recommend Shifts when the company uses scheduled shift work.',
+        app_surface_key: 'attendance',
+        app_surface_label: 'Attendance status',
+      },
+      {
+        key: 'shifts',
+        label: 'Shifts',
+        suite: 'post_hire',
+        audience: 'employee',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        app_surface_key: 'shifts',
+        app_surface_label: 'Today and upcoming shifts',
+      },
+      {
+        key: 'leave',
+        label: 'Leave',
+        suite: 'post_hire',
+        audience: 'employee',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        app_surface_key: 'leave',
+        app_surface_label: 'Leave requests and status',
+      },
+      {
+        key: 'payroll',
+        label: 'Payroll',
+        suite: 'post_hire',
+        audience: 'employee',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        recommended_with: ['attendance', 'leave'],
+        recommendation_copy: 'Works alone. Recommend Attendance and Leave. HR-dashboard-first for V1.',
+      },
+      {
         key: 'employee_app',
         label: 'Employee App',
-        suite: 'workforce',
-        audience: 'employees',
+        suite: 'post_hire',
+        audience: 'employee',
         configured: false,
         platform_available: false,
         effective: false,
+        app_surface_key: 'inbox',
+        app_surface_label: 'In-app inbox and push',
       },
     ],
+    module_bundles: [
+      {
+        id: 'hiring_assessment_suite',
+        label: 'Hiring Assessment Suite',
+        description: 'Full candidate evaluation with assessments and video interviews.',
+        modules: ['pre_hiring', 'assessments', 'video_interviews'],
+      },
+      {
+        id: 'workforce_operations',
+        label: 'Workforce Operations',
+        description: 'Suggested package for shift-based operations.',
+        modules: ['shifts', 'attendance', 'leave', 'payroll'],
+      },
+    ],
+    module_guidance: {
+      bundles: [],
+      app_surfaces: [],
+      missing_dependencies: [],
+      expanded_modules: ['pre_hiring'],
+    },
     users: [
       {
         user_id: 'owner-1',

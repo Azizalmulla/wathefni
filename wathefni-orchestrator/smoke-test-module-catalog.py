@@ -54,6 +54,40 @@ def main() -> int:
     check("tool-call gated modules derive from post-hire catalog metadata", catalog.TOOLCALL_GATED_MODULES == frozenset(catalog.POSTHIRE_MODULES))
     check("Setup Console catalog includes employee_app", "employee_app" in catalog.SETUP_CONSOLE_MODULES)
     check("legacy post_hiring alias remains backward compatible", catalog.normalize_module_key("post-hiring") == "onboarding")
+    check("assessments hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["assessments"].depends_on == ("pre_hiring",))
+    check("video_interviews hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["video_interviews"].depends_on == ("pre_hiring",))
+    check("workforce ops modules remain independently selectable", all(
+        not catalog.MODULE_BY_KEY[key].depends_on
+        for key in ("attendance", "shifts", "leave", "payroll")
+    ))
+    check("expand auto-includes pre_hiring for assessments", catalog.expand_module_dependencies(["assessments"]) == ["assessments", "pre_hiring"])
+    check("missing deps reports assessments without pre_hiring", catalog.missing_module_dependencies(["assessments"]) == [{
+        "module": "assessments",
+        "requires": "pre_hiring",
+        "message": "Assessments requires Pre-Hiring.",
+    }])
+    check("payroll soft-recommends attendance and leave without requiring them", (
+        catalog.MODULE_BY_KEY["payroll"].recommended_with == ("attendance", "leave")
+        and catalog.missing_module_dependencies(["payroll"]) == []
+        and catalog.expand_module_dependencies(["payroll"]) == ["payroll"]
+    ))
+    check("payroll has no employee-app surface in V1", catalog.MODULE_BY_KEY["payroll"].app_surface_key is None)
+    check("bundles include the six approved suites", {bundle.id for bundle in catalog.MODULE_BUNDLES} == {
+        "pre_hiring_suite",
+        "hiring_assessment_suite",
+        "core_hr_suite",
+        "workforce_operations",
+        "compliance_onboarding",
+        "employee_self_service",
+    })
+    check("hiring assessment bundle expands with pre_hiring", catalog.expand_module_dependencies(
+        catalog.BUNDLE_BY_ID["hiring_assessment_suite"].modules
+    ) == ["assessments", "pre_hiring", "video_interviews"])
+    check("app surfaces require employee_app selection", catalog.app_surfaces_for_modules(["attendance", "leave"]) == [])
+    surfaces = catalog.app_surfaces_for_modules(["employee_app", "attendance", "payroll"])
+    check("app surface preview derives from selected modules and excludes payroll", (
+        {item["surface_key"] for item in surfaces} == {"inbox", "attendance"}
+    ))
     check("GCC setup defaults are canonical", (
         company_setup.default_timezone_for_country("KW") == "Asia/Kuwait"
         and company_setup.default_currency_for_country("SA") == "SAR"

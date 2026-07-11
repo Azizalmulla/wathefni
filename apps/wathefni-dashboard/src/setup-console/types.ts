@@ -47,6 +47,34 @@ export type AvailableModule = {
   configured: boolean
   platform_available: boolean
   effective: boolean
+  depends_on?: string[]
+  recommended_with?: string[]
+  recommendation_copy?: string
+  app_surface_key?: string | null
+  app_surface_label?: string | null
+  depends_on_labels?: string[]
+  recommended_with_labels?: string[]
+}
+
+export type ModuleBundle = {
+  id: string
+  label: string
+  description: string
+  modules: string[]
+}
+
+export type ModuleAppSurface = {
+  module_key: string
+  surface_key: string
+  label: string | null
+  available_when_app_live?: boolean
+}
+
+export type ModuleGuidance = {
+  bundles?: ModuleBundle[]
+  app_surfaces?: ModuleAppSurface[]
+  missing_dependencies?: Array<{ module: string; requires: string; message: string }>
+  expanded_modules?: string[]
 }
 
 export type SetupUser = {
@@ -81,6 +109,8 @@ export type ChannelAccount = {
 export type CompanyDetailResponse = {
   readiness: SetupReadiness
   available_modules: AvailableModule[]
+  module_bundles?: ModuleBundle[]
+  module_guidance?: ModuleGuidance
   users: SetupUser[]
   channel_policy: ChannelPolicy
   channel_account: ChannelAccount | null

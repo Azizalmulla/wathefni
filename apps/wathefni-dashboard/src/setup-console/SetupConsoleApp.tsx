@@ -56,9 +56,17 @@ import type {
   CompanyDetailResponse,
   CompanyProfileInput,
   CompanySummary,
+  ModuleBundle,
   OwnerInput,
   SetupCredentials,
 } from './types'
+import {
+  applyBundleModules,
+  deriveAppSurfaces,
+  expandHardDependencies,
+  removeModuleWithDependents,
+  softRecommendations,
+} from './moduleGuidance'
 
 const TOKEN_KEY = 'wathefni_setup_operator_token'
 const PHONE_KEY = 'wathefni_setup_operator_phone'
@@ -550,6 +558,7 @@ function CompanyWorkspace({
           credentials={credentials}
           companyCode={companyCode}
           modules={detail.available_modules}
+          bundles={detail.module_bundles || detail.module_guidance?.bundles || []}
           onChanged={onChanged}
           onError={onError}
         />
@@ -714,16 +723,19 @@ function ModulesCard({
   credentials,
   companyCode,
   modules,
+  bundles,
   onChanged,
   onError,
 }: {
   credentials: SetupCredentials
   companyCode: string
   modules: AvailableModule[]
+  bundles: ModuleBundle[]
   onChanged: () => Promise<void>
   onError: (error: unknown) => void
 }) {
   const [selected, setSelected] = useState(() => modules.filter((module) => module.configured).map((module) => module.key))
+  const [notices, setNotices] = useState<string[]>([])
   const [working, setWorking] = useState(false)
 
   const grouped = useMemo(() => {
@@ -734,10 +746,45 @@ function ModulesCard({
     }, {})
   }, [modules])
 
+  const recommendations = useMemo(() => softRecommendations(selected, modules), [selected, modules])
+  const appSurfaces = useMemo(() => deriveAppSurfaces(selected, modules), [selected, modules])
+  const employeeAppSelected = selected.includes('employee_app')
+  const employeeAppModule = modules.find((module) => module.key === 'employee_app')
+
+  function toggleModule(key: string, checked: boolean) {
+    if (checked) {
+      const result = expandHardDependencies([...selected, key], modules)
+      setSelected(result.selected)
+      setNotices(result.notices)
+      return
+    }
+    const result = removeModuleWithDependents(selected, modules, key)
+    setSelected(result.selected)
+    setNotices(result.notices)
+  }
+
+  function applyBundle(bundle: ModuleBundle) {
+    const result = applyBundleModules(selected, modules, bundle)
+    setSelected(result.selected)
+    setNotices([
+      `Applied ${bundle.label}.`,
+      ...result.notices,
+    ])
+  }
+
+  function addRecommended(key: string) {
+    const result = expandHardDependencies([...selected, key], modules)
+    setSelected(result.selected)
+    setNotices(result.notices.length ? result.notices : [`Added ${modules.find((module) => module.key === key)?.label || key}.`])
+  }
+
   async function save() {
     setWorking(true)
     try {
-      await updateCompanyModules(credentials, companyCode, selected)
+      const result = expandHardDependencies(selected, modules)
+      setSelected(result.selected)
+      if (result.notices.length) setNotices(result.notices)
+      await updateCompanyModules(credentials, companyCode, result.selected)
       await onChanged()
     } catch (saveError) {
       onError(saveError)
@@ -750,9 +797,62 @@ function ModulesCard({
     <Card>
       <CardHeader>
         <CardTitle>Canonical modules</CardTitle>
-        <CardDescription>Enable the product areas included for this company.</CardDescription>
+        <CardDescription>
+          Enable product areas for this company. Hard dependencies are auto-included. Soft recommendations never block save.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
+        {bundles.length > 0 ? (
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-subtle">Module bundles</h3>
+            <div className="flex flex-wrap gap-2">
+              {bundles.map((bundle) => (
+                <Button
+                  key={bundle.id}
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={working}
+                  title={bundle.description}
+                  onClick={() => applyBundle(bundle)}
+                >
+                  Apply {bundle.label}
+                </Button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {notices.length > 0 ? (
+          <div role="status" className="space-y-1 rounded-2xl border border-amber-200/70 bg-amber-50/70 p-3 text-xs leading-5 text-amber-950">
+            {notices.map((notice) => (
+              <p key={notice}>{notice}</p>
+            ))}
+          </div>
+        ) : null}
+
+        {recommendations.length > 0 ? (
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-subtle">Recommended with selection</h3>
+            <div className="flex flex-wrap gap-2">
+              {recommendations.map((item) => (
+                <button
+                  key={`${item.from}:${item.key}`}
+                  type="button"
+                  disabled={working}
+                  className="rounded-full border border-line/70 bg-white/70 px-3 py-1.5 text-left text-xs text-text transition hover:border-accent/40"
+                  title={item.copy || `${item.fromLabel} recommends ${item.label}`}
+                  onClick={() => addRecommended(item.key)}
+                >
+                  + {item.label}
+                  <span className="ml-1 text-subtle">for {item.fromLabel}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] leading-4 text-subtle">Recommendations are optional. You can leave them off or remove them after applying a bundle.</p>
+          </section>
+        ) : null}
+
         {Object.entries(grouped).map(([suite, suiteModules]) => (
           <fieldset key={suite}>
             <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-subtle">
@@ -761,6 +861,7 @@ function ModulesCard({
             <div className="space-y-2">
               {suiteModules.map((module) => {
                 const unavailable = !module.platform_available
+                const isSelected = selected.includes(module.key)
                 return (
                   <label
                     key={module.key}
@@ -773,33 +874,47 @@ function ModulesCard({
                       <input
                         type="checkbox"
                         className="mt-1 h-4 w-4 accent-[#c89445]"
-                        checked={selected.includes(module.key)}
+                        checked={isSelected}
                         disabled={working}
-                        onChange={(event) =>
-                          setSelected((current) =>
-                            event.target.checked
-                              ? [...current, module.key]
-                              : current.filter((key) => key !== module.key),
-                          )
-                        }
+                        onChange={(event) => toggleModule(module.key, event.target.checked)}
                       />
                       <span>
                         <span className="block text-sm font-medium">{module.label || humanize(module.key)}</span>
                         <span className="mt-1 block text-xs text-subtle">
                           {module.audience ? `Audience: ${humanize(module.audience)}` : module.key}
                         </span>
+                        {module.depends_on?.length ? (
+                          <span className="mt-1 block text-xs text-amber-800">
+                            Requires {(module.depends_on_labels || module.depends_on).join(', ')}
+                          </span>
+                        ) : null}
+                        {module.recommendation_copy ? (
+                          <span className="mt-1 block text-xs text-subtle">{module.recommendation_copy}</span>
+                        ) : null}
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-wrap justify-end gap-1.5">
                       <Badge tone={module.platform_available ? 'success' : 'muted'}>
                         Platform {module.platform_available ? 'available' : 'unavailable'}
                       </Badge>
-                      <Badge tone={module.effective ? 'success' : module.configured ? 'warning' : 'muted'}>
-                        {module.effective
-                          ? 'Effective'
-                          : module.configured && unavailable
-                            ? 'Configured, awaiting activation'
-                            : 'Not enabled'}
+                      <Badge
+                        tone={
+                          module.key === 'employee_app' && isSelected && unavailable
+                            ? 'warning'
+                            : module.effective
+                              ? 'success'
+                              : module.configured && unavailable
+                                ? 'warning'
+                                : 'muted'
+                        }
+                      >
+                        {module.key === 'employee_app' && isSelected && unavailable
+                          ? 'Configured, awaiting platform activation'
+                          : module.effective
+                            ? 'Effective'
+                            : module.configured && unavailable
+                              ? 'Configured, awaiting activation'
+                              : 'Not enabled'}
                       </Badge>
                     </span>
                   </label>
@@ -808,6 +923,30 @@ function ModulesCard({
             </div>
           </fieldset>
         ))}
+
+        {employeeAppSelected ? (
+          <section className="rounded-2xl border border-sky-200/70 bg-sky-50/40 p-4">
+            <h3 className="text-sm font-semibold">Employee App surface preview</h3>
+            <p className="mt-1 text-xs leading-5 text-subtle">
+              {employeeAppModule && !employeeAppModule.platform_available
+                ? 'Configured, awaiting platform activation. Surfaces below appear when WATHEFNI_EMPLOYEE_APP is ON.'
+                : 'Surfaces implied by the currently selected modules.'}
+            </p>
+            {appSurfaces.length === 0 ? (
+              <p className="mt-3 text-xs text-subtle">No module surfaces selected yet. Payroll remains HR-dashboard-first for V1.</p>
+            ) : (
+              <ul className="mt-3 space-y-1.5">
+                {appSurfaces.map((surface) => (
+                  <li key={`${surface.module_key}:${surface.surface_key}`} className="text-xs text-text">
+                    {surface.label || humanize(surface.surface_key)}
+                    <span className="text-subtle"> · {humanize(surface.module_key)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
+
         <div className="flex justify-end">
           <Button size="sm" type="button" onClick={() => void save()} disabled={working}>
             {working ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

@@ -47,6 +47,10 @@ from module_catalog import (
     POSTHIRE_MODULES,
     POSTHIRE_PEOPLE_MODULES,
     SETUP_CONSOLE_MODULES,
+    app_surfaces_for_modules,
+    expand_module_dependencies,
+    missing_module_dependencies,
+    module_bundles_payload,
     module_catalog_payload,
     normalize_module_key,
 )
@@ -2633,9 +2637,21 @@ def dashboard_module_catalog_payload(company_code: str | None) -> list[dict[str,
                 "configured": key in configured,
                 "platform_available": available,
                 "effective": key in configured and available,
+                "depends_on_labels": [MODULE_DISPLAY_NAMES.get(dep, dep) for dep in (item.get("depends_on") or ())],
+                "recommended_with_labels": [MODULE_DISPLAY_NAMES.get(dep, dep) for dep in (item.get("recommended_with") or ())],
             }
         )
     return payload
+
+
+def setup_console_module_guidance(company_code: str | None, selected_modules: list[str] | None = None) -> dict[str, Any]:
+    selected = list(selected_modules) if selected_modules is not None else sorted(configured_company_modules(company_code))
+    return {
+        "bundles": module_bundles_payload(),
+        "app_surfaces": app_surfaces_for_modules(selected),
+        "missing_dependencies": missing_module_dependencies(selected),
+        "expanded_modules": expand_module_dependencies(selected),
+    }
 
 
 def company_has_module(company_code: str | None, module_key: str) -> bool:
@@ -34154,9 +34170,13 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
                 (company,),
             )
             users = [dashboard_user_public(dict(row)) for row in cur.fetchall()]
+    available_modules = dashboard_module_catalog_payload(company)
+    configured = [item["key"] for item in available_modules if item.get("configured")]
     return {
         "readiness": setup_console_company_readiness(company),
-        "available_modules": dashboard_module_catalog_payload(company),
+        "available_modules": available_modules,
+        "module_bundles": module_bundles_payload(),
+        "module_guidance": setup_console_module_guidance(company, configured),
         "users": users,
         "channel_policy": setup_console_channel_policy(company),
         "channel_account": setup_console_channel_account(company),
@@ -34282,6 +34302,17 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
     if invalid:
         raise HTTPException(status_code=422, detail={"error": "unknown_module", "message": f"Unknown module(s): {', '.join(invalid)}."})
     requested = sorted(set(requested))
+    dependency_gaps = missing_module_dependencies(requested)
+    if dependency_gaps:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "missing_module_dependency",
+                "message": " ".join(item["message"] for item in dependency_gaps),
+                "missing_dependencies": dependency_gaps,
+                "suggested_modules": expand_module_dependencies(requested),
+            },
+        )
     profile = company_profile_payload(company)
     if "payroll" in requested and not profile.get("currency"):
         raise HTTPException(status_code=422, detail={"error": "company_currency_required", "message": "Complete the company currency before enabling Payroll."})
