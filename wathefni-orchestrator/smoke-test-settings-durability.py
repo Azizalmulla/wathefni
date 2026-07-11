@@ -52,6 +52,7 @@ def _purge() -> None:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM company_settings WHERE company_code=%s", (TEST_CO,))
                 cur.execute("DELETE FROM company_modules WHERE company_code=%s", (TEST_CO,))
+                cur.execute("DELETE FROM company_channel_accounts WHERE company_code=%s", (TEST_CO,))
                 cur.execute("DELETE FROM companies WHERE company_code=%s", (TEST_CO,))
                 try:
                     cur.execute("DELETE FROM action_results WHERE company_code=%s", (TEST_CO,))
@@ -105,8 +106,11 @@ class Checks:
 def run_checks(checks: Checks) -> None:
     # --- 5. The allowlist matches the keys operators actually write ----------
     checks.check(
-        "OPERATOR_MANAGED_SETTING_KEYS covers timezone/notification_preset/intake_auto_admit_explicit",
-        lambda: set(app.OPERATOR_MANAGED_SETTING_KEYS) == {"timezone", "notification_preset", "intake_auto_admit_explicit"},
+        "OPERATOR_MANAGED_SETTING_KEYS covers all operator-owned setup fields",
+        lambda: set(app.OPERATOR_MANAGED_SETTING_KEYS) == {
+            "timezone", "currency", "notification_preset",
+            "channel_policy_reviewed", "intake_auto_admit_explicit",
+        },
     )
 
     # --- Arrange: create company + seed a profile WITHOUT operator keys ------
@@ -120,12 +124,18 @@ def run_checks(checks: Checks) -> None:
     app.sync_company_module_registry()
     seeded = _settings()
     checks.check("initial sync seeds profile (country=KW)", lambda: seeded.get("country") == "KW")
-    checks.check("initial sync has NO operator keys yet", lambda: "notification_preset" not in seeded and "timezone" not in seeded)
+    checks.check("new company keeps GCC timezone/currency defaults", lambda: seeded.get("timezone") == "Asia/Kuwait" and seeded.get("currency") == "KWD")
+    checks.check("initial sync has no notification/channel review yet", lambda: "notification_preset" not in seeded and "channel_policy_reviewed" not in seeded)
 
     # --- Act: set operator keys through the real API handlers / writer -------
     app.setup_console_set_settings(
         TEST_CO,
-        app.SetupSettingsRequest(timezone="Asia/Riyadh", notification_preset="office"),
+        app.SetupSettingsRequest(
+            timezone="Asia/Riyadh",
+            currency="SAR",
+            notification_preset="office",
+            channel_policy_reviewed=True,
+        ),
         superadmin=FAKE_SUPERADMIN,
     )
     # intake_auto_admit_explicit goes through PUT /dashboard/prehire/import/settings,
@@ -135,6 +145,8 @@ def run_checks(checks: Checks) -> None:
     after_set = _settings()
     checks.check("API set: timezone persisted", lambda: after_set.get("timezone") == "Asia/Riyadh")
     checks.check("API set: notification_preset persisted", lambda: after_set.get("notification_preset") == "office")
+    checks.check("API set: currency persisted", lambda: after_set.get("currency") == "SAR")
+    checks.check("API set: channel review persisted", lambda: after_set.get("channel_policy_reviewed") is True)
     checks.check("API set: intake_auto_admit_explicit persisted", lambda: after_set.get("intake_auto_admit_explicit") is False)
 
     # --- Assert: a restart/deploy-style re-sync does NOT clobber them --------
@@ -145,16 +157,30 @@ def run_checks(checks: Checks) -> None:
     after_sync = _settings()
     checks.check("after re-sync: timezone preserved", lambda: after_sync.get("timezone") == "Asia/Riyadh")
     checks.check("after re-sync: notification_preset preserved", lambda: after_sync.get("notification_preset") == "office")
+    checks.check("after re-sync: currency preserved", lambda: after_sync.get("currency") == "SAR")
+    checks.check("after re-sync: channel review preserved", lambda: after_sync.get("channel_policy_reviewed") is True)
     checks.check("after re-sync: intake_auto_admit_explicit preserved", lambda: after_sync.get("intake_auto_admit_explicit") is False)
     checks.check("after re-sync: profile field refreshed (sector=SmokeV2 — proves upsert ran)", lambda: after_sync.get("sector") == "SmokeV2")
     checks.check("after re-sync: profile field refreshed (country=BH)", lambda: after_sync.get("country") == "BH")
 
     # --- Precedence: DB operator value wins over a conflicting company.json --
-    _write_company_json({"code": TEST_CO, "name": "Durability Smoke", "sector": "SmokeV3", "country": "BH", "modules": ["shifts"], "timezone": "UTC", "notification_preset": "conservative"})
+    _write_company_json({
+        "code": TEST_CO,
+        "name": "Durability Smoke",
+        "sector": "SmokeV3",
+        "country": "BH",
+        "modules": ["shifts"],
+        "timezone": "UTC",
+        "currency": "BHD",
+        "notification_preset": "conservative",
+        "channel_policy_reviewed": False,
+    })
     app.sync_company_module_registry()
     after_conflict = _settings()
     checks.check("precedence: operator timezone wins over company.json", lambda: after_conflict.get("timezone") == "Asia/Riyadh")
     checks.check("precedence: operator notification_preset wins over company.json", lambda: after_conflict.get("notification_preset") == "office")
+    checks.check("precedence: operator currency wins over company.json", lambda: after_conflict.get("currency") == "SAR")
+    checks.check("precedence: operator channel review wins over company.json", lambda: after_conflict.get("channel_policy_reviewed") is True)
 
     # The Setup Console readiness snapshot reflects the durable explicit value.
     r = app.setup_console_company_readiness(TEST_CO)

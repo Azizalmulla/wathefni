@@ -67,6 +67,7 @@ run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 # Attendance Import V1 (upload-only, behind WATHEFNI_ATTENDANCE_IMPORT). Pure
 # pipeline lives in attendance_import.py; this module owns the DB + endpoints.
 import attendance_import as _attendance_import  # noqa: E402
+import company_setup as _company_setup  # noqa: E402
 
 logger = logging.getLogger("wathefni")
 
@@ -1178,6 +1179,15 @@ def _ensure_schema_impl() -> None:
       payload jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS companies (
+      company_code text PRIMARY KEY,
+      name text NOT NULL DEFAULT '',
+      country text,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      raw_json jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
     CREATE TABLE IF NOT EXISTS dashboard_users (
       user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
@@ -1289,6 +1299,25 @@ def _ensure_schema_impl() -> None:
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS company_channel_accounts (
+      channel_account_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL REFERENCES companies(company_code) ON DELETE CASCADE,
+      channel_key text NOT NULL DEFAULT 'whatsapp_business',
+      provider text NOT NULL,
+      provider_account_id text NOT NULL,
+      sender_phone text,
+      audiences jsonb NOT NULL DEFAULT '[]'::jsonb,
+      status text NOT NULL DEFAULT 'pending_verification',
+      verified_at timestamptz,
+      verified_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, channel_key),
+      UNIQUE (provider, provider_account_id)
+    );
+    UPDATE dashboard_user_invites
+    SET metadata = metadata - 'invite_token_preview'
+    WHERE metadata ? 'invite_token_preview';
     CREATE TABLE IF NOT EXISTS company_branches (
       branch_key text PRIMARY KEY,
       company_code text NOT NULL,
@@ -2396,6 +2425,7 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_dashboard_user_sessions_user ON dashboard_user_sessions(user_id, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_dashboard_user_invites_lookup ON dashboard_user_invites(company_code, email, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_dashboard_whatsapp_identities_phone ON dashboard_whatsapp_identities(company_code, phone, status);
+    CREATE INDEX IF NOT EXISTS idx_company_channel_accounts_status ON company_channel_accounts(company_code, status);
     CREATE INDEX IF NOT EXISTS idx_batch_actions_company ON batch_actions(company_code, status, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_batch_action_items_batch ON batch_action_items(batch_id, status, app_key);
     CREATE INDEX IF NOT EXISTS idx_outbound_delivery_events_company ON outbound_delivery_events(company_code, created_at DESC);
@@ -2657,7 +2687,9 @@ def get_company_settings(company_code: str | None) -> dict[str, Any]:
 #   - intake_auto_admit_explicit  -> PUT  /dashboard/prehire/import/settings
 OPERATOR_MANAGED_SETTING_KEYS: tuple[str, ...] = (
     "timezone",
+    "currency",
     "notification_preset",
+    "channel_policy_reviewed",
     "intake_auto_admit_explicit",
 )
 
@@ -2678,6 +2710,45 @@ def set_company_setting(company_code: str | None, key: str, value: Any) -> None:
                 (company, Json({key: value})),
             )
         conn.commit()
+
+
+def company_profile_payload(company_code: str | None) -> dict[str, Any]:
+    company = (company_code or "").strip().upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT company_code, name, country FROM companies WHERE company_code=%s LIMIT 1", (company,))
+            row = cur.fetchone()
+    if not row:
+        return {}
+    settings = get_company_settings(company)
+    country = str(row.get("country") or _company_setup.DEFAULT_COUNTRY).upper()
+    timezone_value = ""
+    currency = ""
+    if settings.get("timezone"):
+        try:
+            timezone_value = _company_setup.normalize_timezone(settings.get("timezone"), country=country)
+        except ValueError:
+            timezone_value = ""
+    elif country in _company_setup.GCC_PROFILE_DEFAULTS:
+        timezone_value = _company_setup.default_timezone_for_country(country)
+    if settings.get("currency"):
+        try:
+            currency = _company_setup.normalize_currency(settings.get("currency"), country=country)
+        except ValueError:
+            currency = ""
+    elif country in _company_setup.GCC_PROFILE_DEFAULTS:
+        currency = _company_setup.default_currency_for_country(country)
+    return {
+        "company_code": company,
+        "name": str(row.get("name") or company),
+        "country": country,
+        "timezone": timezone_value,
+        "currency": currency,
+    }
+
+
+def company_currency(company_code: str | None) -> str:
+    return str(company_profile_payload(company_code).get("currency") or _company_setup.DEFAULT_CURRENCY)
 
 
 def company_auto_admit_imports(company_code: str | None) -> bool:
@@ -14178,7 +14249,7 @@ def list_timesheets(action: dict[str, Any], *, company_code: str | None) -> dict
     }
 
 
-def default_payroll_policy() -> dict[str, Any]:
+def default_payroll_policy(company_code: str | None = None) -> dict[str, Any]:
     return {
         "employee_pay_type": "monthly",
         "leave_policy": "paid",
@@ -14188,7 +14259,7 @@ def default_payroll_policy() -> dict[str, Any]:
         "late_deduction_enabled": False,
         "early_leave_deduction_enabled": False,
         "default_hourly_rate_kwd": None,
-        "currency": "KWD",
+        "currency": company_currency(company_code) if company_code else _company_setup.DEFAULT_CURRENCY,
         "payment_processing": "disabled",
     }
 
@@ -14208,8 +14279,8 @@ def coerce_policy_bool(value: Any) -> bool | None:
     return None
 
 
-def clean_payroll_policy(settings: dict[str, Any] | None) -> dict[str, Any]:
-    policy = default_payroll_policy()
+def clean_payroll_policy(settings: dict[str, Any] | None, *, company_code: str | None = None) -> dict[str, Any]:
+    policy = default_payroll_policy(company_code)
     incoming = settings if isinstance(settings, dict) else {}
     employee_pay_type = normalized_policy_value(incoming.get("employee_pay_type"))
     if employee_pay_type in {"monthly", "hourly", "mixed"}:
@@ -14233,7 +14304,10 @@ def clean_payroll_policy(settings: dict[str, Any] | None) -> dict[str, Any]:
         policy["default_hourly_rate_kwd"] = None if rate in (None, "", "null") else max(0.0, float(rate))
     except Exception:
         policy["default_hourly_rate_kwd"] = None
-    policy["currency"] = str(incoming.get("currency") or "KWD").upper()[:8]
+    policy["currency"] = str(
+        incoming.get("currency")
+        or (company_currency(company_code) if company_code else _company_setup.DEFAULT_CURRENCY)
+    ).upper()[:8]
     policy["payment_processing"] = "disabled"
     return policy
 
@@ -14252,7 +14326,7 @@ def payroll_policy_for_company(company_code: str | None) -> dict[str, Any]:
             module_settings = module_row.get("settings") if module_row and isinstance(module_row.get("settings"), dict) else {}
             if isinstance(module_settings.get("policy"), dict):
                 settings = {**module_settings.get("policy"), **settings}
-    return clean_payroll_policy(settings)
+    return clean_payroll_policy(settings, company_code=company)
 
 
 def payroll_policy_updates_from_action(action: dict[str, Any]) -> dict[str, Any]:
@@ -31157,6 +31231,16 @@ if($('opToken').value && $('opPhone').value) loadCompanies();
 def setup_console_page():
     if not setup_console_enabled():
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
+    if setup_console_v2_enabled():
+        setup_entry = (DASHBOARD_DIST_PATH.resolve() / "setup-console.html").resolve()
+        try:
+            setup_entry.relative_to(DASHBOARD_DIST_PATH.resolve())
+        except ValueError:
+            setup_entry = Path()
+        if setup_entry.is_file():
+            response = FileResponse(setup_entry)
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            return response
     return HTMLResponse(SETUP_CONSOLE_HTML, headers={"Cache-Control": "no-store, max-age=0"})
 
 
@@ -33047,7 +33131,7 @@ def dashboard_team_invite_user(request: DashboardInviteUserRequest, context: dic
                     dashboard_token_hash(invite_token),
                     context.get("actor_user_id"),
                     expires_at,
-                    Json({"invite_token_preview": invite_token}),
+                    Json({}),
                 ),
             )
             invite = dict(cur.fetchone() or {})
@@ -33648,6 +33732,14 @@ def setup_console_enabled() -> bool:
     return os.environ.get("WATHEFNI_SETUP_CONSOLE_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def setup_console_v2_enabled() -> bool:
+    return os.environ.get("WATHEFNI_SETUP_CONSOLE_V2", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def company_channel_accounts_enabled() -> bool:
+    return os.environ.get("WATHEFNI_COMPANY_CHANNEL_ACCOUNTS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def attendance_import_enabled() -> bool:
     return os.environ.get("WATHEFNI_ATTENDANCE_IMPORT", "").strip().lower() in {"1", "true", "yes", "on"}
 
@@ -33705,23 +33797,113 @@ def _setup_normalize_company_code(raw: str | None) -> str:
     return company
 
 
-def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
-    """Read-only readiness snapshot: what's done and what's left to make a company
-    ready. Composes the existing tables; never mutates."""
+def setup_console_channel_account(company_code: str) -> dict[str, Any] | None:
     company = str(company_code or "").strip().upper()
-    name: str | None = None
-    country: str | None = None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT channel_account_id, company_code, channel_key, provider,
+                       provider_account_id, sender_phone, audiences, status,
+                       verified_at, created_at, updated_at
+                FROM company_channel_accounts
+                WHERE company_code=%s AND channel_key='whatsapp_business'
+                LIMIT 1
+                """,
+                (company,),
+            )
+            row = cur.fetchone()
+    if not row:
+        return None
+    payload = dict(row)
+    payload["audiences"] = payload.get("audiences") if isinstance(payload.get("audiences"), list) else []
+    payload["verified"] = bool(payload.get("verified_at") and payload.get("status") == "active")
+    payload["platform_available"] = company_channel_accounts_enabled()
+    return json_safe(payload)
+
+
+def setup_console_channel_policy(company_code: str) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    modules = configured_company_modules(company)
+    module_states = {item["key"]: item for item in dashboard_module_catalog_payload(company)}
+    account = setup_console_channel_account(company)
+    account_audiences = set((account or {}).get("audiences") or [])
+    settings = get_company_settings(company)
+    email_configured = bool(
+        os.environ.get("WATHEFNI_EMAIL_PROVIDER")
+        or os.environ.get("SMTP_HOST")
+        or os.environ.get("RESEND_API_KEY")
+        or os.environ.get("SENDGRID_API_KEY")
+    )
+    employee_app_state = module_states.get("employee_app") or {}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT count(*) AS n FROM dashboard_users WHERE company_code=%s AND status <> 'disabled'",
+                (company,),
+            )
+            team_count = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                "SELECT count(*) AS n FROM dashboard_whatsapp_identities WHERE company_code=%s AND status='active'",
+                (company,),
+            )
+            hr_links = int((cur.fetchone() or {}).get("n") or 0)
+    return {
+        "reviewed": bool(settings.get("channel_policy_reviewed")),
+        "pre_hiring": {
+            "label": "Candidates / pre-hiring",
+            "links": {"available": True, "description": "Interview, assessment, offer, and onboarding links"},
+            "email": {"configured": email_configured, "optional": True},
+            "company_whatsapp": {
+                "configured": bool(account and "candidate" in account_audiences),
+                "verified": bool(account and account.get("verified")),
+                "optional": True,
+            },
+        },
+        "post_hiring": {
+            "label": "Employees / post-hiring",
+            "employee_app": {
+                "configured": bool(employee_app_state.get("configured")),
+                "platform_available": bool(employee_app_state.get("platform_available")),
+                "effective": bool(employee_app_state.get("effective")),
+            },
+            "in_app_inbox": {"effective": bool(employee_app_state.get("effective"))},
+            "push": {
+                "configured": bool(os.environ.get("EXPO_ACCESS_TOKEN") or os.environ.get("WATHEFNI_PUSH_PROVIDER")),
+                "effective": bool(employee_app_state.get("effective") and (os.environ.get("EXPO_ACCESS_TOKEN") or os.environ.get("WATHEFNI_PUSH_PROVIDER"))),
+            },
+            "email_fallback": {"configured": email_configured, "optional": True},
+            "company_whatsapp": {
+                "configured": bool(account and "employee" in account_audiences),
+                "verified": bool(account and account.get("verified")),
+                "optional": True,
+            },
+            "notification_preset": str(settings.get("notification_preset") or _outbound_delivery.DEFAULT_NOTIFICATION_PRESET),
+        },
+        "hr_admin": {
+            "label": "HR, managers, and Owners",
+            "dashboard": {"available": True, "team_count": team_count},
+            "email_summaries": {"configured": email_configured, "optional": True},
+            "hr_user_whatsapp_linking": {"linked_identities": hr_links, "optional": True},
+        },
+        "company_whatsapp_account": account,
+        "runtime_routing_changed": False,
+        "company_channel_accounts_enabled": company_channel_accounts_enabled(),
+        "enabled_modules": sorted(modules),
+    }
+
+
+def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
+    """Read-only operator provisioning readiness, scoped to one company."""
+    company = str(company_code or "").strip().upper()
     modules: list[str] = []
     owners = 0
     whatsapp_links = 0
     exists = False
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT company_code, name, country FROM companies WHERE company_code=%s LIMIT 1", (company,))
-            crow = cur.fetchone()
-            exists = bool(crow)
-            name = (dict(crow).get("name") if crow else None)
-            country = (str(dict(crow).get("country") or "").strip().upper() or None) if crow else None
+            cur.execute("SELECT company_code FROM companies WHERE company_code=%s LIMIT 1", (company,))
+            exists = bool(cur.fetchone())
             cur.execute("SELECT module_key FROM company_modules WHERE company_code=%s AND enabled IS TRUE ORDER BY module_key", (company,))
             modules = [str(r["module_key"]) for r in cur.fetchall()]
             cur.execute("SELECT count(*) AS n FROM dashboard_users WHERE company_code=%s AND role='owner' AND status <> 'disabled'", (company,))
@@ -33729,33 +33911,64 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
             cur.execute("SELECT count(*) AS n FROM dashboard_whatsapp_identities WHERE company_code=%s AND status='active'", (company,))
             whatsapp_links = int((cur.fetchone() or {}).get("n") or 0)
     settings = get_company_settings(company)
-    timezone_value = str(settings.get("timezone") or "").strip()
+    profile = company_profile_payload(company) if exists else {}
     preset_saved = str(settings.get("notification_preset") or "").strip().lower()
     preset_effective = preset_saved if preset_saved in _outbound_delivery.NOTIFICATION_PRESETS else _outbound_delivery.DEFAULT_NOTIFICATION_PRESET
+
+    if not setup_console_v2_enabled():
+        timezone_value = str(settings.get("timezone") or "").strip()
+        steps = [
+            {"key": "company", "label": "Company created", "done": exists},
+            {"key": "modules", "label": "At least one module enabled", "done": bool(modules)},
+            {"key": "owner", "label": "Owner account seeded", "done": owners > 0},
+            {"key": "timezone", "label": "Timezone set", "done": bool(timezone_value)},
+            {"key": "whatsapp", "label": "Owner WhatsApp identity linked", "done": whatsapp_links > 0, "optional": True},
+        ]
+        required_done = all(step["done"] for step in steps if not step.get("optional"))
+        return {
+            **profile,
+            "company_code": company,
+            "exists": exists,
+            "modules": modules,
+            "module_display": {key: MODULE_DISPLAY_NAMES.get(key, key) for key in modules},
+            "owners": owners,
+            "whatsapp_links": whatsapp_links,
+            "timezone": timezone_value or None,
+            "notification_preset": preset_effective,
+            "notification_preset_explicit": bool(preset_saved in _outbound_delivery.NOTIFICATION_PRESETS),
+            "notification_preset_options": sorted(_outbound_delivery.NOTIFICATION_PRESETS),
+            "notification_presets_enabled": channel_presets_enabled(),
+            "steps": steps,
+            "messaging": messaging_readiness(company) if exists else None,
+            "ready": bool(exists and required_done),
+        }
+
+    account = setup_console_channel_account(company)
+    profile_complete = bool(profile.get("name") and profile.get("country") and profile.get("timezone") and profile.get("currency"))
+    account_ready = not account or account.get("status") == "disabled" or bool(account.get("verified"))
     steps = [
-        {"key": "company", "label": "Company created", "done": exists},
-        {"key": "modules", "label": "At least one module enabled", "done": bool(modules)},
-        {"key": "owner", "label": "Owner account seeded", "done": owners > 0},
-        {"key": "timezone", "label": "Timezone set", "done": bool(timezone_value)},
-        {"key": "whatsapp", "label": "Owner WhatsApp identity linked", "done": whatsapp_links > 0, "optional": True},
+        {"key": "profile", "label": "Company profile complete", "done": profile_complete},
+        {"key": "modules", "label": "At least one module selected", "done": bool(modules)},
+        {"key": "owner", "label": "First Owner created", "done": owners > 0},
+        {"key": "channel_policy", "label": "Channel policy reviewed", "done": bool(settings.get("channel_policy_reviewed"))},
+        {"key": "channel_account", "label": "Selected company channel verified", "done": account_ready},
+        {"key": "hr_whatsapp", "label": "HR-user WhatsApp identity linked", "done": whatsapp_links > 0, "optional": True},
     ]
     required_done = all(step["done"] for step in steps if not step.get("optional"))
     return {
+        **profile,
         "company_code": company,
-        "name": name,
-        "country": country,
         "exists": exists,
         "modules": modules,
         "module_display": {key: MODULE_DISPLAY_NAMES.get(key, key) for key in modules},
         "owners": owners,
         "whatsapp_links": whatsapp_links,
-        "timezone": timezone_value or None,
         "notification_preset": preset_effective,
         "notification_preset_explicit": bool(preset_saved in _outbound_delivery.NOTIFICATION_PRESETS),
         "notification_preset_options": sorted(_outbound_delivery.NOTIFICATION_PRESETS),
         "notification_presets_enabled": channel_presets_enabled(),
+        "provisioning_readiness_version": 2,
         "steps": steps,
-        "messaging": messaging_readiness(company) if exists else None,
         "ready": bool(exists and required_done),
     }
 
@@ -33763,6 +33976,16 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
 class SetupCompanyCreateRequest(BaseModel):
     company_code: str
     name: str | None = None
+    country: str | None = None
+    timezone: str | None = None
+    currency: str | None = None
+
+
+class SetupCompanyProfileRequest(BaseModel):
+    name: str | None = None
+    country: str | None = None
+    timezone: str | None = None
+    currency: str | None = None
 
 
 class SetupModulesRequest(BaseModel):
@@ -33773,6 +33996,8 @@ class SetupSettingsRequest(BaseModel):
     timezone: str | None = None
     notification_preset: str | None = None
     country: str | None = None
+    currency: str | None = None
+    channel_policy_reviewed: bool | None = None
 
 
 class SetupOwnerRequest(BaseModel):
@@ -33784,6 +34009,15 @@ class SetupOwnerRequest(BaseModel):
 class SetupWhatsAppLinkRequest(BaseModel):
     phone: str
     email: str | None = None
+
+
+class SetupCompanyChannelAccountRequest(BaseModel):
+    provider: str = "octopus"
+    provider_account_id: str
+    sender_phone: str | None = None
+    audiences: list[str] = Field(default_factory=lambda: ["candidate", "employee"])
+    status: str = "pending_verification"
+    verification_reference: str | None = None
 
 
 class WhatsAppSuppressionRequest(BaseModel):
@@ -33838,17 +34072,48 @@ def setup_console_unsuppress_whatsapp(request: WhatsAppSuppressionRequest, super
 
 
 @app.get("/dashboard/superadmin/setup/companies")
-def setup_console_list_companies(superadmin: dict[str, Any] = Depends(superadmin_context)):
+def setup_console_list_companies(
+    q: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    term = str(q or "").strip()
+    pattern = f"%{term}%"
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT company_code FROM companies ORDER BY company_code")
+            cur.execute(
+                """
+                SELECT count(*) AS n
+                FROM companies
+                WHERE %s='' OR company_code ILIKE %s OR name ILIKE %s
+                """,
+                (term, pattern, pattern),
+            )
+            total_count = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                """
+                SELECT company_code
+                FROM companies
+                WHERE %s='' OR company_code ILIKE %s OR name ILIKE %s
+                ORDER BY lower(name), company_code
+                LIMIT %s OFFSET %s
+                """,
+                (term, pattern, pattern, limit, offset),
+            )
             codes = [str(r["company_code"]) for r in cur.fetchall()]
-    return {"companies": [setup_console_company_readiness(code) for code in codes]}
+    return {
+        "companies": [setup_console_company_readiness(code) for code in codes],
+        "total_count": total_count,
+        "limit": limit,
+        "offset": offset,
+        "has_more": offset + len(codes) < total_count,
+    }
 
 
 @app.get("/dashboard/superadmin/setup/companies/{company_code}")
 def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] = Depends(superadmin_context)):
-    company = str(company_code or "").strip().upper()
+    company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
     with db_connect() as conn:
@@ -33867,6 +34132,8 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
         "readiness": setup_console_company_readiness(company),
         "available_modules": dashboard_module_catalog_payload(company),
         "users": users,
+        "channel_policy": setup_console_channel_policy(company),
+        "channel_account": setup_console_channel_account(company),
     }
 
 
@@ -33875,19 +34142,36 @@ def setup_console_create_company(request: SetupCompanyCreateRequest, superadmin:
     company = _setup_normalize_company_code(request.company_code)
     provided_name = str(request.name or "").strip()
     insert_name = provided_name or company.title()
+    try:
+        country = _company_setup.normalize_country(request.country, default=_company_setup.DEFAULT_COUNTRY)
+        if country not in _company_setup.GCC_PROFILE_DEFAULTS and (not request.timezone or not request.currency):
+            raise ValueError("non_gcc_profile_requires_timezone_currency")
+        timezone_value = _company_setup.normalize_timezone(request.timezone, country=country)
+        currency = _company_setup.normalize_currency(request.currency, country=country)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": str(exc), "message": "Check the company country, timezone, and ISO currency."}) from None
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO companies (company_code, name, metadata, raw_json, created_at, updated_at)
-                VALUES (%s,%s,%s,%s,now(),now())
+                INSERT INTO companies (company_code, name, country, metadata, raw_json, created_at, updated_at)
+                VALUES (%s,%s,%s,%s,%s,now(),now())
                 ON CONFLICT (company_code)
                 DO UPDATE SET name = COALESCE(NULLIF(%s,''), companies.name), updated_at = now()
                 RETURNING (xmax = 0) AS created
                 """,
-                (company, insert_name, Json({}), Json({}), provided_name),
+                (company, insert_name, country, Json({}), Json({}), provided_name),
             )
             created = bool((cur.fetchone() or {}).get("created"))
+            if created:
+                cur.execute(
+                    """
+                    INSERT INTO company_settings (company_code, settings)
+                    VALUES (%s,%s)
+                    ON CONFLICT (company_code) DO NOTHING
+                    """,
+                    (company, Json({"timezone": timezone_value, "currency": currency})),
+                )
         conn.commit()
     record_admin_audit(
         _setup_audit_context(superadmin, company),
@@ -33895,14 +34179,61 @@ def setup_console_create_company(request: SetupCompanyCreateRequest, superadmin:
         summary=(f"Created company {company}." if created else f"Selected existing company {company}.") + (f" Name: {provided_name}." if provided_name else ""),
         target_type="company",
         target=company,
-        details={"company_code": company, "name": provided_name or insert_name, "created": created},
+        details={"company_code": company, "name": provided_name or insert_name, "country": country, "timezone": timezone_value, "currency": currency, "created": created},
     )
     return {"ok": True, "created": created, "readiness": setup_console_company_readiness(company)}
 
 
+@app.patch("/dashboard/superadmin/setup/companies/{company_code}/profile")
+def setup_console_set_profile(
+    company_code: str,
+    request: SetupCompanyProfileRequest,
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+    current = company_profile_payload(company)
+    try:
+        country = _company_setup.normalize_country(request.country, default=str(current.get("country") or _company_setup.DEFAULT_COUNTRY))
+        if country not in _company_setup.GCC_PROFILE_DEFAULTS and not (
+            request.timezone or current.get("timezone")
+        ):
+            raise ValueError("non_gcc_profile_requires_timezone")
+        if country not in _company_setup.GCC_PROFILE_DEFAULTS and not (
+            request.currency or current.get("currency")
+        ):
+            raise ValueError("non_gcc_profile_requires_currency")
+        timezone_value = _company_setup.normalize_timezone(request.timezone or current.get("timezone"), country=country)
+        currency = _company_setup.normalize_currency(request.currency or current.get("currency"), country=country)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": str(exc), "message": "Check the company country, timezone, and ISO currency."}) from None
+    name = str(request.name if request.name is not None else current.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=422, detail={"error": "name_required", "message": "Enter the client-facing company name."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE companies SET name=%s, country=%s, updated_at=now() WHERE company_code=%s",
+                (name, country, company),
+            )
+        conn.commit()
+    set_company_setting(company, "timezone", timezone_value)
+    set_company_setting(company, "currency", currency)
+    record_admin_audit(
+        _setup_audit_context(superadmin, company),
+        "setup_company_profile_updated",
+        summary=f"Updated the company profile for {company}.",
+        target_type="company",
+        target=company,
+        details={"company_code": company, "name": name, "country": country, "timezone": timezone_value, "currency": currency},
+    )
+    return {"ok": True, "profile": company_profile_payload(company), "readiness": setup_console_company_readiness(company)}
+
+
 @app.patch("/dashboard/superadmin/setup/companies/{company_code}/modules")
 def setup_console_set_modules(company_code: str, request: SetupModulesRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
-    company = str(company_code or "").strip().upper()
+    company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
     requested: list[str] = []
@@ -33916,7 +34247,11 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
     if invalid:
         raise HTTPException(status_code=422, detail={"error": "unknown_module", "message": f"Unknown module(s): {', '.join(invalid)}."})
     requested = sorted(set(requested))
-    existing_tz = (get_company_settings(company).get("timezone") or "Asia/Kuwait")
+    profile = company_profile_payload(company)
+    if "payroll" in requested and not profile.get("currency"):
+        raise HTTPException(status_code=422, detail={"error": "company_currency_required", "message": "Complete the company currency before enabling Payroll."})
+    existing_tz = profile.get("timezone") or _company_setup.DEFAULT_TIMEZONE
+    payroll_defaults = default_payroll_policy(company) if "payroll" in requested else None
     with db_connect() as conn:
         with conn.cursor() as cur:
             for key in requested:
@@ -33935,6 +34270,15 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
                 "WHERE company_code=%s AND enabled IS TRUE AND module_key <> ALL(%s)",
                 (company, requested),
             )
+            if payroll_defaults is not None:
+                cur.execute(
+                    """
+                    INSERT INTO payroll_policies (company_code, settings, updated_at)
+                    VALUES (%s,%s,now())
+                    ON CONFLICT (company_code) DO NOTHING
+                    """,
+                    (company, Json(payroll_defaults)),
+                )
         conn.commit()
     record_admin_audit(
         _setup_audit_context(superadmin, company),
@@ -33949,16 +34293,24 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
 
 @app.patch("/dashboard/superadmin/setup/companies/{company_code}/settings")
 def setup_console_set_settings(company_code: str, request: SetupSettingsRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
-    company = str(company_code or "").strip().upper()
+    company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
     changes: list[str] = []
     if request.timezone is not None:
-        timezone_value = str(request.timezone).strip()
-        if not timezone_value:
-            raise HTTPException(status_code=422, detail={"error": "invalid_timezone", "message": "Enter a timezone, e.g. Asia/Kuwait."})
+        try:
+            timezone_value = _company_setup.normalize_timezone(request.timezone, country=company_profile_payload(company).get("country"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail={"error": "invalid_timezone", "message": "Enter a valid IANA timezone, e.g. Asia/Kuwait."}) from None
         set_company_setting(company, "timezone", timezone_value)
         changes.append(f"timezone → {timezone_value}")
+    if request.currency is not None:
+        try:
+            currency_value = _company_setup.normalize_currency(request.currency, country=company_profile_payload(company).get("country"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail={"error": "invalid_currency", "message": "Use a 3-letter ISO currency code, e.g. KWD."}) from None
+        set_company_setting(company, "currency", currency_value)
+        changes.append(f"currency → {currency_value}")
     if request.notification_preset is not None:
         preset_value = str(request.notification_preset).strip().lower()
         if preset_value not in _outbound_delivery.NOTIFICATION_PRESETS:
@@ -33973,14 +34325,18 @@ def setup_console_set_settings(company_code: str, request: SetupSettingsRequest,
         # truth), not a company_settings blob key. The registry sync never
         # overwrites companies.country, so writing it here is durable across
         # restart/deploy.
-        country_value = str(request.country).strip().upper()
-        if not re.fullmatch(r"[A-Z]{2}", country_value):
+        try:
+            country_value = _company_setup.normalize_country(request.country)
+        except ValueError:
             raise HTTPException(status_code=422, detail={"error": "invalid_country", "message": "Use a 2-letter ISO country code, e.g. KW."})
         with db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE companies SET country=%s, updated_at=now() WHERE company_code=%s", (country_value, company))
             conn.commit()
         changes.append(f"country → {country_value}")
+    if request.channel_policy_reviewed is not None:
+        set_company_setting(company, "channel_policy_reviewed", bool(request.channel_policy_reviewed))
+        changes.append(f"channel_policy_reviewed → {str(bool(request.channel_policy_reviewed)).lower()}")
     if not changes:
         raise HTTPException(status_code=422, detail={"error": "no_update", "message": "No setting was provided."})
     record_admin_audit(
@@ -33996,7 +34352,7 @@ def setup_console_set_settings(company_code: str, request: SetupSettingsRequest,
 
 @app.post("/dashboard/superadmin/setup/companies/{company_code}/owner")
 def setup_console_seed_owner(company_code: str, request: SetupOwnerRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
-    company = str(company_code or "").strip().upper()
+    company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
     email = normalize_email(request.email)
@@ -34032,7 +34388,7 @@ def setup_console_seed_owner(company_code: str, request: SetupOwnerRequest, supe
                 VALUES (%s,%s,'owner',%s,NULL,%s,%s)
                 RETURNING invite_id, company_code, email, role, status, expires_at, created_at
                 """,
-                (company, email, dashboard_token_hash(invite_token), expires_at, Json({"invite_token_preview": invite_token, "seeded_via": "setup_console"})),
+                (company, email, dashboard_token_hash(invite_token), expires_at, Json({"seeded_via": "setup_console"})),
             )
             invite = dict(cur.fetchone() or {})
         conn.commit()
@@ -34049,7 +34405,7 @@ def setup_console_seed_owner(company_code: str, request: SetupOwnerRequest, supe
 
 @app.post("/dashboard/superadmin/setup/companies/{company_code}/whatsapp-link")
 def setup_console_link_whatsapp(company_code: str, request: SetupWhatsAppLinkRequest, superadmin: dict[str, Any] = Depends(superadmin_context)):
-    company = str(company_code or "").strip().upper()
+    company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
     phone = digits(request.phone)
@@ -34093,6 +34449,125 @@ def setup_console_link_whatsapp(company_code: str, request: SetupWhatsAppLinkReq
         details={"company_code": company, "phone": phone, "user_id": str(user_id)},
     )
     return {"ok": True, "phone": phone, "user_id": str(user_id), "readiness": setup_console_company_readiness(company)}
+
+
+def require_company_channel_accounts() -> None:
+    if not company_channel_accounts_enabled():
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Company channel account registration is not enabled."})
+
+
+@app.put("/dashboard/superadmin/setup/companies/{company_code}/channel-account")
+def setup_console_upsert_channel_account(
+    company_code: str,
+    request: SetupCompanyChannelAccountRequest,
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    require_company_channel_accounts()
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+    try:
+        provider = _company_setup.normalize_channel_provider(request.provider)
+        audiences = _company_setup.normalize_channel_audiences(request.audiences)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": str(exc), "message": "Check the provider and candidate/employee audiences."}) from None
+    provider_account_id = str(request.provider_account_id or "").strip()
+    if not provider_account_id or len(provider_account_id) > 200:
+        raise HTTPException(status_code=422, detail={"error": "provider_account_id_required", "message": "Enter the provider's public account ID."})
+    sender_phone = digits(request.sender_phone) or None
+    if request.sender_phone and not sender_phone:
+        raise HTTPException(status_code=422, detail={"error": "sender_phone_invalid", "message": "Enter the public WhatsApp Business sender number."})
+    verification_reference = str(request.verification_reference or "").strip()
+    verified = bool(verification_reference)
+    try:
+        status = _company_setup.normalize_channel_status(request.status, verified=verified)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": str(exc), "message": "Choose pending_verification, active, or disabled."}) from None
+    verified_metadata = {
+        "verification_reference": verification_reference,
+        "verified_by": str(superadmin.get("actor_phone") or ""),
+    } if status == "active" else {}
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO company_channel_accounts (
+                      company_code, channel_key, provider, provider_account_id,
+                      sender_phone, audiences, status, verified_at, verified_metadata, updated_at
+                    )
+                    VALUES (%s,'whatsapp_business',%s,%s,%s,%s,%s,
+                            CASE WHEN %s='active' THEN now() ELSE NULL END,%s,now())
+                    ON CONFLICT (company_code, channel_key)
+                    DO UPDATE SET provider=EXCLUDED.provider,
+                                  provider_account_id=EXCLUDED.provider_account_id,
+                                  sender_phone=EXCLUDED.sender_phone,
+                                  audiences=EXCLUDED.audiences,
+                                  status=EXCLUDED.status,
+                                  verified_at=EXCLUDED.verified_at,
+                                  verified_metadata=EXCLUDED.verified_metadata,
+                                  updated_at=now()
+                    """,
+                    (company, provider, provider_account_id, sender_phone, Json(audiences), status, status, Json(verified_metadata)),
+                )
+            conn.commit()
+    except psycopg2.IntegrityError:
+        raise HTTPException(
+            status_code=409,
+            detail={"error": "channel_account_already_assigned", "message": "That provider account is already assigned to another company."},
+        ) from None
+    record_admin_audit(
+        _setup_audit_context(superadmin, company),
+        "setup_company_channel_account_updated",
+        summary=f"Registered {provider} WhatsApp Business account for {company} with status {status}.",
+        target_type="company_channel_account",
+        target=provider_account_id,
+        details={"company_code": company, "provider": provider, "provider_account_id": provider_account_id, "audiences": audiences, "status": status},
+    )
+    return {
+        "ok": True,
+        "channel_account": setup_console_channel_account(company),
+        "readiness": setup_console_company_readiness(company),
+    }
+
+
+@app.delete("/dashboard/superadmin/setup/companies/{company_code}/channel-account")
+def setup_console_disable_channel_account(
+    company_code: str,
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    require_company_channel_accounts()
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE company_channel_accounts
+                SET status='disabled', verified_at=NULL, verified_metadata='{}'::jsonb, updated_at=now()
+                WHERE company_code=%s AND channel_key='whatsapp_business'
+                RETURNING provider_account_id
+                """,
+                (company,),
+            )
+            row = cur.fetchone()
+        conn.commit()
+    if not row:
+        raise HTTPException(status_code=404, detail={"error": "channel_account_not_found", "message": "No company WhatsApp Business account is registered."})
+    record_admin_audit(
+        _setup_audit_context(superadmin, company),
+        "setup_company_channel_account_disabled",
+        summary=f"Disabled the company WhatsApp Business account for {company}.",
+        target_type="company_channel_account",
+        target=str(row.get("provider_account_id") or ""),
+        details={"company_code": company, "status": "disabled"},
+    )
+    return {
+        "ok": True,
+        "channel_account": setup_console_channel_account(company),
+        "readiness": setup_console_company_readiness(company),
+    }
 
 
 def bounded_limit(value: int, *, default: int = 50, maximum: int = 200) -> int:

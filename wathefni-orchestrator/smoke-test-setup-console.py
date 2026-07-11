@@ -1,4 +1,4 @@
-"""Smoke test: Setup Console V1 (A) — super-admin provisioning console.
+"""Smoke test: Setup Console operator gate and V2 provisioning control center.
 
 The Setup Console lets a Wathefni platform operator onboard a new client company
 without hand-editing DB rows or workspace config. It is a thin, fully audited
@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 PASS = 0
@@ -64,16 +65,25 @@ def main() -> int:
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 for company in (TEST_CO, TEST_CO2):
+                    cur.execute("DELETE FROM company_channel_accounts WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_whatsapp_identities WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_user_invites WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_users WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM company_modules WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM company_settings WHERE company_code=%s", (company,))
+                    cur.execute("DELETE FROM payroll_policies WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM action_results WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM companies WHERE company_code=%s", (company,))
             conn.commit()
 
-    saved_env = {k: os.environ.get(k) for k in ("WATHEFNI_SETUP_CONSOLE_ENABLED", "WATHEFNI_PLATFORM_ADMINS", "WATHEFNI_DASHBOARD_TOKEN")}
+    saved_env = {k: os.environ.get(k) for k in (
+        "WATHEFNI_SETUP_CONSOLE_ENABLED",
+        "WATHEFNI_SETUP_CONSOLE_V2",
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS",
+        "WATHEFNI_EMPLOYEE_APP",
+        "WATHEFNI_PLATFORM_ADMINS",
+        "WATHEFNI_DASHBOARD_TOKEN",
+    )}
 
     def set_env(enabled: str | None, admins: str | None, token: str | None) -> None:
         for key, value in (("WATHEFNI_SETUP_CONSOLE_ENABLED", enabled), ("WATHEFNI_PLATFORM_ADMINS", admins), ("WATHEFNI_DASHBOARD_TOKEN", token)):
@@ -113,8 +123,34 @@ def main() -> int:
         set_env("true", ADMIN_PHONE, OPERATOR_TOKEN)
         ctx = gate(OPERATOR_TOKEN, ADMIN_PHONE)
         check("allowlisted operator -> platform-admin context", ctx.get("is_platform_admin") is True and ctx.get("actor_role") == "platform_admin")
+        from fastapi.testclient import TestClient
+        client = TestClient(app.app)
+        check("Setup Console API rejects public requests", client.get("/dashboard/superadmin/setup/companies").status_code == 401)
+        check(
+            "operator token without allowlisted identity is rejected",
+            client.get(
+                "/dashboard/superadmin/setup/companies",
+                headers={"Authorization": f"Bearer {OPERATOR_TOKEN}"},
+            ).status_code == 403,
+        )
 
-        # --- 2) provisioning (staging DB) ----------------------------------
+        original_dist = app.DASHBOARD_DIST_PATH
+        os.environ["WATHEFNI_SETUP_CONSOLE_V2"] = "off"
+        legacy_page = app.setup_console_page()
+        check("V2 OFF serves the legacy rollback page", b"Setup Console" in legacy_page.body)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            dist = Path(temp_dir)
+            (dist / "setup-console.html").write_text("<div id=\"setup-console-root\">V2</div>")
+            app.DASHBOARD_DIST_PATH = dist
+            os.environ["WATHEFNI_SETUP_CONSOLE_V2"] = "on"
+            v2_page = app.setup_console_page()
+            check("V2 ON serves the dedicated React entry", Path(str(v2_page.path)).name == "setup-console.html")
+        app.DASHBOARD_DIST_PATH = original_dist
+
+        # --- 2) V2 provisioning (staging DB) -------------------------------
+        os.environ["WATHEFNI_SETUP_CONSOLE_V2"] = "on"
+        os.environ["WATHEFNI_COMPANY_CHANNEL_ACCOUNTS"] = "off"
+        os.environ["WATHEFNI_EMPLOYEE_APP"] = "off"
         cleanup()
 
         # invalid company code
@@ -123,9 +159,17 @@ def main() -> int:
         except app.HTTPException as e:
             check("invalid company code -> 422", e.status_code == 422)
 
-        created = app.setup_console_create_company(app.SetupCompanyCreateRequest(company_code=TEST_CO, name="Setup Console Test"), ctx)
+        created = app.setup_console_create_company(
+            app.SetupCompanyCreateRequest(company_code=TEST_CO, name="Setup Console Test", country="KW"),
+            ctx,
+        )
         check("create company returns created=True", created.get("created") is True)
         check("new company exists but is not ready yet", created["readiness"]["exists"] is True and created["readiness"]["ready"] is False)
+        check("GCC profile defaults are durable", (
+            created["readiness"].get("country") == "KW"
+            and created["readiness"].get("timezone") == "Asia/Kuwait"
+            and created["readiness"].get("currency") == "KWD"
+        ))
 
         again = app.setup_console_create_company(app.SetupCompanyCreateRequest(company_code=TEST_CO), ctx)
         check("second create is idempotent (created=False)", again.get("created") is False)
@@ -139,6 +183,15 @@ def main() -> int:
         detail = app.setup_console_company_detail(TEST_CO, ctx)
         available_keys = {item["key"] for item in detail.get("available_modules", [])}
         check("employee_app is a first-class Setup Console module", "employee_app" in available_keys)
+        employee_app = next(item for item in detail["available_modules"] if item["key"] == "employee_app")
+        check("employee_app is configured/effective through separate gates", (
+            employee_app["configured"] is False
+            and employee_app["platform_available"] is False
+            and employee_app["effective"] is False
+        ))
+        check("channel sections separate candidates, employees, and HR", set(detail["channel_policy"]) >= {
+            "pre_hiring", "post_hiring", "hr_admin",
+        })
 
         mod = app.setup_console_set_modules(TEST_CO, app.SetupModulesRequest(modules=["pre_hiring", "Payroll", "employee_app"]), ctx)
         check("modules normalised + enabled", mod.get("modules") == ["employee_app", "payroll", "pre_hiring"])
@@ -149,6 +202,11 @@ def main() -> int:
             and app.company_has_module(TEST_CO, "employee_app"),
         )
         check("readiness modules step done", any(s["key"] == "modules" and s["done"] for s in mod["readiness"]["steps"]))
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT settings FROM payroll_policies WHERE company_code=%s", (TEST_CO,))
+                payroll_row = cur.fetchone()
+        check("new payroll policy uses the company currency", (payroll_row or {}).get("settings", {}).get("currency") == "KWD")
 
         mod2 = app.setup_console_set_modules(TEST_CO, app.SetupModulesRequest(modules=["pre_hiring"]), ctx)
         check(
@@ -158,9 +216,24 @@ def main() -> int:
             and "pre_hiring" in app.configured_company_modules(TEST_CO),
         )
 
-        # timezone
-        st = app.setup_console_set_settings(TEST_CO, app.SetupSettingsRequest(timezone="Asia/Kuwait"), ctx)
-        check("timezone saved", st["readiness"]["timezone"] == "Asia/Kuwait")
+        profile = app.setup_console_set_profile(
+            TEST_CO,
+            app.SetupCompanyProfileRequest(name="Setup Console Test", country="SA", timezone="Asia/Riyadh", currency="SAR"),
+            ctx,
+        )
+        check("company profile updates validated fields", profile["profile"]["country"] == "SA" and profile["profile"]["currency"] == "SAR")
+        try:
+            app.setup_console_set_profile(TEST_CO, app.SetupCompanyProfileRequest(timezone="Kuwait"), ctx)
+            raise AssertionError("invalid timezone should 422")
+        except app.HTTPException as e:
+            check("non-IANA timezone rejected", e.status_code == 422)
+
+        st = app.setup_console_set_settings(
+            TEST_CO,
+            app.SetupSettingsRequest(notification_preset="office", channel_policy_reviewed=True),
+            ctx,
+        )
+        check("channel policy review saved", any(s["key"] == "channel_policy" and s["done"] for s in st["readiness"]["steps"]))
 
         # owner
         owner = app.setup_console_seed_owner(TEST_CO, app.SetupOwnerRequest(email="owner@setupconsoletest.com", name="Test Owner", phone="96599000111"), ctx)
@@ -169,6 +242,11 @@ def main() -> int:
         check("readiness owner step done", any(s["key"] == "owner" and s["done"] for s in owner["readiness"]["steps"]))
         owner_again = app.setup_console_seed_owner(TEST_CO, app.SetupOwnerRequest(email="owner@setupconsoletest.com"), ctx)
         check("re-seeding the same owner is safe", (owner_again.get("user") or {}).get("role") == "owner")
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT metadata FROM dashboard_user_invites WHERE company_code=%s ORDER BY created_at DESC LIMIT 1", (TEST_CO,))
+                invite_metadata = (cur.fetchone() or {}).get("metadata") or {}
+        check("invite token is returned once but never persisted in metadata", "invite_token_preview" not in invite_metadata and owner_again["invite_token"] not in str(invite_metadata))
 
         # whatsapp link requires an owner -> on a fresh company it should 422
         app.setup_console_create_company(app.SetupCompanyCreateRequest(company_code=TEST_CO2, name="No Owner Co"), ctx)
@@ -179,12 +257,65 @@ def main() -> int:
 
         wa = app.setup_console_link_whatsapp(TEST_CO, app.SetupWhatsAppLinkRequest(phone="96599000111"), ctx)
         check("WhatsApp link attaches to the Owner", bool(wa.get("user_id")))
-        check("readiness now fully ready", wa["readiness"]["ready"] is True)
+        check("HR-user WhatsApp identity stays optional", wa["readiness"]["ready"] is True)
+
+        try:
+            app.setup_console_upsert_channel_account(
+                TEST_CO,
+                app.SetupCompanyChannelAccountRequest(provider_account_id="wa-smoke-account"),
+                ctx,
+            )
+            raise AssertionError("channel account flag off should 404")
+        except app.HTTPException as e:
+            check("channel account mutations hidden while flag OFF", e.status_code == 404)
+
+        os.environ["WATHEFNI_COMPANY_CHANNEL_ACCOUNTS"] = "on"
+        pending = app.setup_console_upsert_channel_account(
+            TEST_CO,
+            app.SetupCompanyChannelAccountRequest(
+                provider_account_id="wa-smoke-account",
+                sender_phone="96599000111",
+                audiences=["candidate", "employee"],
+                status="active",
+            ),
+            ctx,
+        )
+        check("unverified active request reports pending honestly", pending["channel_account"]["status"] == "pending_verification" and pending["readiness"]["ready"] is False)
+        verified = app.setup_console_upsert_channel_account(
+            TEST_CO,
+            app.SetupCompanyChannelAccountRequest(
+                provider_account_id="wa-smoke-account",
+                sender_phone="96599000111",
+                audiences=["candidate", "employee"],
+                status="active",
+                verification_reference="provider-check-smoke",
+            ),
+            ctx,
+        )
+        check("verified company channel can become active", verified["channel_account"]["verified"] is True and verified["readiness"]["ready"] is True)
+        isolated_detail = app.setup_console_company_detail(TEST_CO2, ctx)
+        check("company channel account is tenant-isolated", isolated_detail.get("channel_account") is None)
+        check("company WhatsApp account is separate from HR identity", (
+            verified["channel_account"]["provider_account_id"] == "wa-smoke-account"
+            and app.setup_console_company_readiness(TEST_CO)["whatsapp_links"] == 1
+        ))
+        disabled = app.setup_console_disable_channel_account(TEST_CO, ctx)
+        check("channel account disable is soft and audited", disabled["channel_account"]["status"] == "disabled")
+
+        listing = app.setup_console_list_companies(q="SETUPCONSOLE", limit=1, offset=0, superadmin=ctx)
+        check("company list supports search and pagination", listing["total_count"] == 2 and len(listing["companies"]) == 1 and listing["has_more"] is True)
+
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT to_regclass('public.company_channel_accounts') AS table_name")
+                schema_row = cur.fetchone()
+        check("schema creates channel account table without manual SQL", bool((schema_row or {}).get("table_name")))
 
         # --- 3) boundaries: mutating a non-existent company -> 404 ---------
         for label, fn in (
             ("modules", lambda: app.setup_console_set_modules("NOSUCHCOMPANYXYZ", app.SetupModulesRequest(modules=["pre_hiring"]), ctx)),
             ("settings", lambda: app.setup_console_set_settings("NOSUCHCOMPANYXYZ", app.SetupSettingsRequest(timezone="Asia/Kuwait"), ctx)),
+            ("profile", lambda: app.setup_console_set_profile("NOSUCHCOMPANYXYZ", app.SetupCompanyProfileRequest(name="Missing"), ctx)),
             ("owner", lambda: app.setup_console_seed_owner("NOSUCHCOMPANYXYZ", app.SetupOwnerRequest(email="x@y.com"), ctx)),
         ):
             try:

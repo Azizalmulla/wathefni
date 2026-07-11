@@ -30,6 +30,7 @@ def main() -> int:
     sys.path.insert(0, str(orchestrator_dir))
 
     import module_catalog as catalog
+    import company_setup
 
     # Catalog invariants are dependency-free and run everywhere.
     keys = [module.key for module in catalog.MODULE_CATALOG]
@@ -53,6 +54,11 @@ def main() -> int:
     check("tool-call gated modules derive from post-hire catalog metadata", catalog.TOOLCALL_GATED_MODULES == frozenset(catalog.POSTHIRE_MODULES))
     check("Setup Console catalog includes employee_app", "employee_app" in catalog.SETUP_CONSOLE_MODULES)
     check("legacy post_hiring alias remains backward compatible", catalog.normalize_module_key("post-hiring") == "onboarding")
+    check("GCC setup defaults are canonical", (
+        company_setup.default_timezone_for_country("KW") == "Asia/Kuwait"
+        and company_setup.default_currency_for_country("SA") == "SAR"
+        and company_setup.default_currency_for_country("AE") == "AED"
+    ))
 
     try:
         import app
@@ -76,6 +82,8 @@ def main() -> int:
 
     saved_workspace = os.environ.get("WATHEFNI_WORKSPACE_BOOT")
     saved_employee_app = os.environ.get("WATHEFNI_EMPLOYEE_APP")
+    saved_setup_v2 = os.environ.get("WATHEFNI_SETUP_CONSOLE_V2")
+    saved_channel_accounts = os.environ.get("WATHEFNI_COMPANY_CHANNEL_ACCOUNTS")
     original_configured = app.configured_company_modules
     try:
         # Simulate a post-hire-only tenant with Employee App configured but the
@@ -96,7 +104,11 @@ def main() -> int:
 
         os.environ["WATHEFNI_WORKSPACE_BOOT"] = "off"
         os.environ["WATHEFNI_EMPLOYEE_APP"] = "off"
+        os.environ.pop("WATHEFNI_SETUP_CONSOLE_V2", None)
+        os.environ.pop("WATHEFNI_COMPANY_CHANNEL_ACCOUNTS", None)
         check("workspace boot flag defaults to fail-safe OFF semantics", app.workspace_boot_enabled() is False)
+        check("Setup Console V2 defaults OFF", app.setup_console_v2_enabled() is False)
+        check("company channel accounts default OFF", app.company_channel_accounts_enabled() is False)
         try:
             app.dashboard_workspace_bootstrap(context)
             check("bootstrap is hidden while flag OFF", False)
@@ -156,6 +168,14 @@ def main() -> int:
             os.environ.pop("WATHEFNI_EMPLOYEE_APP", None)
         else:
             os.environ["WATHEFNI_EMPLOYEE_APP"] = saved_employee_app
+        if saved_setup_v2 is None:
+            os.environ.pop("WATHEFNI_SETUP_CONSOLE_V2", None)
+        else:
+            os.environ["WATHEFNI_SETUP_CONSOLE_V2"] = saved_setup_v2
+        if saved_channel_accounts is None:
+            os.environ.pop("WATHEFNI_COMPANY_CHANNEL_ACCOUNTS", None)
+        else:
+            os.environ["WATHEFNI_COMPANY_CHANNEL_ACCOUNTS"] = saved_channel_accounts
 
     print(f"\n    {PASS} passed, {FAIL} failed")
     if FAIL:

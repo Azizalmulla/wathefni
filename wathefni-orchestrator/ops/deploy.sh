@@ -18,7 +18,7 @@ ORCH_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"          # wathefni-orchestrator/
 REPO_ROOT="$(cd "$ORCH_SRC/.." && pwd)"
 DASH_SRC="$REPO_ROOT/apps/wathefni-dashboard"
 
-CODE_FILES=(app.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py delivery-sweep-worker.py video-interview-worker.py leave-accrual-worker.py)
+CODE_FILES=(app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py delivery-sweep-worker.py video-interview-worker.py leave-accrual-worker.py)
 
 PROD_ORCH=/opt/wathefni/orchestrator
 PROD_DASH_DIST=/opt/wathefni/apps/wathefni-dashboard/dist
@@ -105,7 +105,7 @@ deploy_staging() {
   sync_code "$STAGING_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$STAGING_DASH/"
   log "compile + migrate (staging DB) + restart"
-  "${SSH[@]}" "set -e; cd $STAGING_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py; \
+  "${SSH[@]}" "set -e; cd $STAGING_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py; \
     WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.staging.env WATHEFNI_WORKSPACE=/opt/wathefni/staging/workspace /opt/wathefni/orchestrator/.venv/bin/python -c 'import app; app.ensure_schema(force=True); print(\"staging schema ok\")'; \
     systemctl restart wathefni-orchestrator-staging.service; sleep 3; systemctl is-active wathefni-orchestrator-staging.service"
   log "staging smoke suite"
@@ -133,7 +133,7 @@ deploy_production() {
   sync_code "$PROD_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$PROD_DASH_DIST/"
   log "compile + migrate + restart + publish dashboard"
-  if "${SSH[@]}" "set -e; cd $PROD_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py; \
+  if "${SSH[@]}" "set -e; cd $PROD_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py; \
     /opt/wathefni/orchestrator/.venv/bin/python -c 'import app; app.ensure_schema(force=True); print(\"prod schema ok\")'; \
     systemctl restart wathefni-orchestrator.service; sleep 3; systemctl is-active wathefni-orchestrator.service >/dev/null; \
     rm -rf $PROD_DASH_PUBLIC.new; mkdir -p $PROD_DASH_PUBLIC.new; cp -a $PROD_DASH_DIST/. $PROD_DASH_PUBLIC.new/; rsync -a --delete $PROD_DASH_PUBLIC.new/ $PROD_DASH_PUBLIC/; rm -rf $PROD_DASH_PUBLIC.new; systemctl reload caddy; \

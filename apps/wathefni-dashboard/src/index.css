@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #15120d;
+  --color-deep: #2a241c;
+  --color-slate: #3b3328;
+  --color-mauve: #7c7062;
+  --color-orchid: #b89b78;
+  --color-blossom: #dcc7a8;
+  --color-cream: #f7f3eb;
+  --color-panel: #fffdf8;
+  --color-panel-muted: #f1ebe0;
+  --color-text: #18140f;
+  --color-subtle: #756b5d;
+  --color-mist: #aaa092;
+  --color-line: #e5dccd;
+  --color-accent: #c89445;
+  --color-accent-soft: #f4e7cf;
+  --color-processing: #6f7f8e;
+  --shadow-soft: 0 1px 2px rgba(24, 20, 15, 0.04), 0 16px 42px rgba(24, 20, 15, 0.07);
+  --shadow-premium: 0 1px 0 rgba(255, 255, 255, 0.72) inset, 0 18px 60px rgba(24, 20, 15, 0.09), 0 0 0 1px rgba(200, 148, 69, 0.025);
+}
+
+:root {
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #09090b;
+  background: #f6f1e8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 50% -18%, rgba(255, 250, 240, 0.94) 0, rgba(247, 243, 235, 0.72) 34%, rgba(244, 239, 230, 0) 62%),
+    radial-gradient(circle at 82% 10%, rgba(200, 148, 69, 0.08) 0, rgba(200, 148, 69, 0.025) 26%, rgba(200, 148, 69, 0) 48%),
+    linear-gradient(180deg, #f8f3ea 0%, #f4eee3 48%, #f1eadf 100%);
+}
+
+body::selection {
+  background: #dcc7a8;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(220, 199, 168, 0.72);
+}
+
+@keyframes drawerIn {
+  from {
+    opacity: 0.82;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
