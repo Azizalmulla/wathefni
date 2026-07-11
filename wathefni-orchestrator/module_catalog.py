@@ -327,9 +327,23 @@ def app_surfaces_for_modules(modules: list[str] | tuple[str, ...] | set[str]) ->
 
 
 def module_bundles_payload() -> list[dict[str, object]]:
-    return [asdict(bundle) for bundle in MODULE_BUNDLES]
+    return [
+        {
+            "id": bundle.id,
+            "label": bundle.label,
+            "description": bundle.description,
+            "modules": list(bundle.modules),
+        }
+        for bundle in MODULE_BUNDLES
+    ]
 
 
 def module_catalog_payload() -> list[dict[str, object]]:
     """JSON-safe, stable-order metadata for Setup Console and dashboard boot."""
-    return [asdict(module) for module in MODULE_CATALOG]
+    payload: list[dict[str, object]] = []
+    for module in MODULE_CATALOG:
+        item = asdict(module)
+        item["depends_on"] = list(module.depends_on)
+        item["recommended_with"] = list(module.recommended_with)
+        payload.append(item)
+    return payload
