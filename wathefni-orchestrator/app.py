@@ -26733,10 +26733,13 @@ ONBOARDING_ITEM_CATEGORIES = ("identity_legal", "payroll_bank", "compliance_gov"
 
 DEFAULT_KUWAIT_ONBOARDING_TEMPLATE: list[tuple[str, str, str, str, bool, str]] = [
     # 1. Identity & legal file
+    # Civil ID is the primary Kuwait identity document. Passport stays optional so
+    # Kuwaiti nationals are not blocked by an inapplicable required upload.
     ("civil_id", "Civil ID (front and back)", "identity_legal", "document", True, "employee"),
-    ("passport", "Passport copy", "identity_legal", "document", True, "employee"),
+    ("passport", "Passport copy (if applicable)", "identity_legal", "document", False, "employee"),
     ("personal_photo", "Personal photo", "identity_legal", "document", True, "employee"),
-    ("residency_iqama", "Residency / Iqama (expats)", "identity_legal", "document", False, "employee"),
+    # item_id kept for compatibility; label is Kuwait/GCC residency (not Saudi-only Iqama).
+    ("residency_iqama", "Residency permit (expats)", "identity_legal", "document", False, "employee"),
     ("work_permit", "Work permit (expats)", "identity_legal", "document", False, "employee"),
     ("employment_contract", "Signed employment contract", "identity_legal", "document", True, "employee"),
     ("offer_letter", "Job offer / appointment letter", "identity_legal", "document", False, "hr"),
@@ -26748,13 +26751,13 @@ DEFAULT_KUWAIT_ONBOARDING_TEMPLATE: list[tuple[str, str, str, str, bool, str]] =
     ("salary_allowances_confirmed", "Basic salary / allowances confirmed", "payroll_bank", "task", False, "hr"),
     ("payroll_status", "Payroll status", "payroll_bank", "task", False, "system"),
     # 3. Compliance / government tracking — lightweight checkpoints only. Real
-    #    expiry tracking lives in compliance_documents; reconciliation is Phase 5.
+    #    expiry tracking lives in compliance_documents; write-path reconciliation is Phase 7C.
     ("civil_id_expiry", "Civil ID expiry recorded", "compliance_gov", "date", False, "system"),
     ("passport_expiry", "Passport expiry recorded", "compliance_gov", "date", False, "system"),
     ("residency_expiry", "Residency expiry recorded", "compliance_gov", "date", False, "system"),
     ("work_permit_expiry", "Work permit expiry recorded", "compliance_gov", "date", False, "system"),
-    ("medical_check", "Medical check status (expats)", "compliance_gov", "task", False, "system"),
-    ("visa_article_type", "Visa/residency type (e.g. Article 18)", "compliance_gov", "text", False, "hr"),
+    ("medical_check", "Medical check status (expats)", "compliance_gov", "task", False, "hr"),
+    ("visa_article_type", "Visa / residency type (e.g. Article 18)", "compliance_gov", "text", False, "hr"),
     ("probation_end", "Probation period end date", "compliance_gov", "date", False, "hr"),
     # 4. Company readiness
     ("department_assigned", "Department assigned", "company_readiness", "task", False, "hr"),
@@ -26786,14 +26789,20 @@ DEFAULT_ONBOARDING_TEMPLATE_ID = "default_kuwait"
 
 def resolve_onboarding_template(
     cur: Any, company_code: str | None, *, template_id: str | None = None
-) -> tuple[str, list[tuple[str, str, str, str, bool, str]]]:
+) -> tuple[str, list[tuple[str, str, str, str, bool, str]], str | None]:
     """Resolve which template to seed. An explicit template_id wins; otherwise
     read companies.metadata->>'onboarding_template'; otherwise Default Kuwait.
-    Falls back to Default Kuwait for any unknown id so seeding never fails."""
-    name = str(template_id or "").strip().lower()
+    Falls back to Default Kuwait for any unknown id so seeding never fails.
+
+    Returns (resolved_template_id, specs, requested_unknown_id).
+    requested_unknown_id is set when the caller/company asked for an unknown
+    template and we fell back — callers should warn/audit that signal.
+    """
+    requested = str(template_id or "").strip().lower()
+    name = requested
+    company = str(company_code or "").upper()
     if not name:
         name = DEFAULT_ONBOARDING_TEMPLATE_ID
-        company = str(company_code or "").upper()
         if company:
             try:
                 cur.execute("SELECT metadata FROM companies WHERE company_code=%s LIMIT 1", (company,))
@@ -26803,12 +26812,23 @@ def resolve_onboarding_template(
                     candidate = str(meta.get("onboarding_template") or "").strip().lower()
                     if candidate:
                         name = candidate
+                        requested = candidate
             except Exception:
                 name = DEFAULT_ONBOARDING_TEMPLATE_ID
     specs = ONBOARDING_TEMPLATES.get(name)
-    if not specs:
-        name, specs = DEFAULT_ONBOARDING_TEMPLATE_ID, DEFAULT_KUWAIT_ONBOARDING_TEMPLATE
-    return name, specs
+    if specs:
+        return name, specs, None
+    logger.warning(
+        "onboarding template fallback: requested=%r company=%s falling_back_to=%s",
+        name or requested or "(empty)",
+        company or "(none)",
+        DEFAULT_ONBOARDING_TEMPLATE_ID,
+    )
+    return (
+        DEFAULT_ONBOARDING_TEMPLATE_ID,
+        DEFAULT_KUWAIT_ONBOARDING_TEMPLATE,
+        name or requested or "(empty)",
+    )
 
 
 def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: str | None = None) -> int:
@@ -26825,9 +26845,20 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
     employee_key = str(employee.get("employee_key") or "").strip()
     if not employee_key:
         return 0
-    template_name, specs = resolve_onboarding_template(
-        cur, employee.get("company_code"), template_id=template_id
+    company_code = str(employee.get("company_code") or "").upper()
+    template_name, specs, fallback_from = resolve_onboarding_template(
+        cur, company_code, template_id=template_id
     )
+    seed_meta: dict[str, Any] = {"seeded_by": "onboarding_template", "template": template_name}
+    if fallback_from:
+        seed_meta["template_fallback"] = True
+        seed_meta["requested_template"] = fallback_from
+        logger.warning(
+            "seeding employee=%s with template fallback requested=%r resolved=%s",
+            employee_key,
+            fallback_from,
+            template_name,
+        )
     cur.execute("SELECT item_id FROM onboarding_items WHERE employee_key=%s", (employee_key,))
     existing = {str(row["item_id"]) for row in cur.fetchall() if row.get("item_id")}
     seeded = 0
@@ -26845,7 +26876,7 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
             (
                 employee_key, item_id, label, category, item_type, bool(required), owner,
                 order, document_type,
-                Json({"seeded_by": "onboarding_template", "template": template_name}),
+                Json(seed_meta),
             ),
         )
         seeded += cur.rowcount or 0

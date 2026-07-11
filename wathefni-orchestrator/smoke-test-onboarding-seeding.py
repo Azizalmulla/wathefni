@@ -221,6 +221,30 @@ def main() -> int:
                 fallback = app.seed_onboarding_items(cur, e5, template_id="does_not_exist")
             conn.commit()
         check("unknown template_id falls back to default (full seed)", fallback == TOTAL)
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT raw_json FROM onboarding_items WHERE employee_key=%s LIMIT 1",
+                    (_emp_key(P5),),
+                )
+                fallback_meta = (cur.fetchone() or {}).get("raw_json") or {}
+        check(
+            "unknown template_id records visible fallback metadata",
+            fallback_meta.get("template_fallback") is True
+            and fallback_meta.get("requested_template") == "does_not_exist"
+            and fallback_meta.get("template") == "default_kuwait",
+        )
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                resolved_name, resolved_specs, resolved_fallback = app.resolve_onboarding_template(
+                    cur, COMPANY, template_id="does_not_exist"
+                )
+        check(
+            "resolve_onboarding_template surfaces fallback_from",
+            resolved_name == "default_kuwait"
+            and len(resolved_specs) == TOTAL
+            and resolved_fallback == "does_not_exist",
+        )
 
         # --- 10) backfill route: only in_progress + zero-item employees -----
         with app.db_connect() as conn:
