@@ -172,6 +172,30 @@ export type DashboardAuthResponse = {
   is_recovery_access?: boolean
 }
 
+export type DashboardModuleDefinition = {
+  key: string
+  label: string
+  suite: 'pre_hire' | 'post_hire'
+  audience: 'candidate' | 'employee' | 'hr'
+  order: number
+  people_surface: boolean
+  toolcall_gated: boolean
+  master_flag?: string | null
+  configured: boolean
+  platform_available: boolean
+  effective: boolean
+}
+
+export type DashboardBootstrapResponse = {
+  company_code: string
+  configured_modules: string[]
+  effective_modules: string[]
+  enabled_modules: string[]
+  module_catalog: DashboardModuleDefinition[]
+  access: DashboardUserAccess
+  user: DashboardTeamUser
+}
+
 export type DashboardChatCandidateCard = {
   app_key?: string
   name?: string

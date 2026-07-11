@@ -35,6 +35,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import action_registry as _registry
+from module_catalog import TOOLCALL_GATED_MODULES
 
 
 TOOLCALL_GRAPH_VERSION = "wathefni_hr_toolcall_v1"
@@ -87,6 +88,8 @@ TOOL_PERMISSION_MAP = {
     "get_candidate_status": "prehire.read",
     "get_interview_invite_status": "prehire.read",
     "create_job_opening": "settings.manage",
+    "close_job_opening": "settings.manage",
+    "reopen_job_opening": "settings.manage",
     "execute_mixed_candidate_batch": "candidate.manage",
     "execute_candidate_batch": "candidate.manage",
     "execute_candidate_workflow": "candidate.manage",
@@ -153,9 +156,6 @@ TOOL_PERMISSION_MAP = {
 # tool's permission. This is the "careful unlock": the registry is the single
 # source of truth, but post-hire tools never reach a non-entitled company.
 # Execution is still independently gated by _require_tool_entitlements.
-TOOLCALL_GATED_MODULES = {"leave", "attendance", "shifts", "onboarding", "payroll", "analytics", "compliance"}
-
-
 TOOLCALL_SYSTEM = """
 You are Wathefni HR, a smart, opinionated HR colleague speaking to a company HR admin on WhatsApp. You operate on real candidate and employee data through tools the orchestrator exposes to you.
 
@@ -193,6 +193,7 @@ Calling a tool:
 - For multi-step candidate operations (shortlist + email, shortlist + schedule interview, schedule + notify, video interview link, assessment + notify), call execute_candidate_workflow once immediately. Do NOT ask a generic confirmation yourself first. Do NOT call multiple sensitive tools separately for one user request.
 - For "did you notify/invite/email him?" after an interview, call get_interview_invite_status. Do not start a new notification unless the user explicitly asks you to send/resend.
 - For job opening / position creation / QR-code requests, call create_job_opening immediately for backend preflight. Do NOT say job openings are unsupported.
+- For closing/pausing/stopping a job posting, use close_job_opening. For reopening/resuming a closed one, use reopen_job_opening (do not use create_job_opening for this — it would ask for salary again unnecessarily). Both are PREFLIGHT-THEN-CONFIRM: identify the exact job by title or APPLY code, then confirm before executing.
 - For employee leave requests (only when the leave tools are present in your catalog): use list_leave_requests to read leave ("show pending leave", "who is off next week"); request_leave to file a new request for an employee with their dates; approve_leave_request / reject_leave_request / cancel_leave_request for decisions. The decision tools are PREFLIGHT-THEN-CONFIRM: call the tool to let the backend identify the exact request and flag shift conflicts, then ask the user for one explicit confirmation before it executes. Identify a request by employee name/phone + dates, or by leave_id from prior state.
 - For post-hire operations, only use a tool when it is present in your catalog (it is hidden if the company has not enabled that module or you lack permission):
   * Attendance: list_attendance to read ("who was late today"); check_in_employee / check_out_employee to clock an employee in/out. mark_attendance_absent and correct_attendance_record are SENSITIVE — confirm in your own words first.

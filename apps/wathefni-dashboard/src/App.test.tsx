@@ -39,7 +39,7 @@ describe('dashboard initial load', () => {
           '/dashboard/prehire/interviews?limit=25&offset=0&status=upcoming',
           '/dashboard/prehire/notifications?limit=25',
           '/dashboard/prehire/reports',
-          '/dashboard/prehire/assessments?limit=100',
+          '/dashboard/prehire/assessments?limit=50&offset=0',
           '/dashboard/prehire/assessments/config',
         ]),
       )
@@ -49,7 +49,7 @@ describe('dashboard initial load', () => {
     expect(summaryHeaders.get('Authorization')).toBe('Bearer saved-token')
     expect(summaryHeaders.get('X-HR-Phone')).toBe('96555511122')
     expect(summaryHeaders.get('X-Company-Code')).toBe('WATHEFNI')
-    expect(screen.getByText('Quick links')).toBeInTheDocument()
+    expect(screen.getByText('Priority queue')).toBeInTheDocument()
     expect(screen.getByText('You’re viewing the latest data.')).toBeInTheDocument()
   })
 
@@ -124,10 +124,56 @@ describe('dashboard initial load', () => {
     expect(screen.queryByText('Send pending assessments')).not.toBeInTheDocument()
     expect(screen.queryByText('Ready for assessment')).not.toBeInTheDocument()
     expect(screen.queryByText('Assessment queue')).not.toBeInTheDocument()
-    expect(screen.getAllByText('Interview next steps').length).toBeGreaterThan(0)
-    expect(screen.getByText('Interview queue')).toBeInTheDocument()
-    expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/assessments?limit=100')
+    expect(screen.getAllByText('Review interview next steps').length).toBeGreaterThan(0)
+    expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/assessments?limit=50&offset=0')
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/assessments/config')
+  })
+
+  test('boots a post-hire-only workspace without calling pre-hiring data APIs', async () => {
+    localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    localStorage.removeItem('wathefni_hr_phone')
+    localStorage.setItem('wathefni_company_code', 'POSTHIREONLY')
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input)
+      if (path === '/dashboard/bootstrap') {
+        return jsonResponse({
+          company_code: 'POSTHIREONLY',
+          configured_modules: ['compliance'],
+          effective_modules: ['compliance'],
+          enabled_modules: ['compliance'],
+          module_catalog: [],
+          access: {
+            role: 'owner',
+            permissions: ['compliance.read', 'compliance.manage', 'users.manage', 'settings.manage'],
+            user: { company_code: 'POSTHIREONLY', role: 'owner', status: 'active', email: 'owner@example.com' },
+          },
+          user: { company_code: 'POSTHIREONLY', role: 'owner', status: 'active', email: 'owner@example.com' },
+        })
+      }
+      if (path === '/dashboard/prehire/notifications?limit=25') {
+        return jsonResponse({ company_code: 'POSTHIREONLY', enabled_modules: ['compliance'], notifications: [], action_items: [] })
+      }
+      if (path === '/dashboard/setup/readiness') {
+        return jsonResponse({ company_code: 'POSTHIREONLY', ready: true, steps: [] })
+      }
+      if (path.startsWith('/dashboard/posthire/employees')) {
+        return jsonResponse({ company_code: 'POSTHIREONLY', employees: [], total_count: 0, limit: 50, offset: 0 })
+      }
+      return jsonResponse({ detail: `Unexpected path ${path}` }, 404)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    expect((await screen.findAllByRole('heading', { name: 'Employees' })).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'Employees' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Compliance' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Overview' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Jobs' })).not.toBeInTheDocument()
+    await waitFor(() => expect(calledPaths(fetchMock)).toContain('/dashboard/bootstrap'))
+    expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/summary')
+    expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/applications?limit=50&offset=0&sort=newest')
   })
 })
 
@@ -185,12 +231,14 @@ function responseFor(path: string, options: { enabledModules?: string[] } = {}) 
       interviews: [],
     }
   }
-  if (path === '/dashboard/prehire/assessments?limit=100') {
+  if (path === '/dashboard/prehire/assessments?limit=50&offset=0') {
     return {
       company_code: 'WATHEFNI',
       ok: true,
       enabled: true,
       total: 0,
+      limit: 50,
+      offset: 0,
       status_counts: [],
       attempts: [],
     }

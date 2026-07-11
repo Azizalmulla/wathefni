@@ -41,6 +41,16 @@ from pydantic import BaseModel, Field
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 
+from module_catalog import (
+    MODULE_BY_KEY,
+    MODULE_DISPLAY_NAMES,
+    POSTHIRE_MODULES,
+    POSTHIRE_PEOPLE_MODULES,
+    SETUP_CONSOLE_MODULES,
+    module_catalog_payload,
+    normalize_module_key,
+)
+
 # Validate the canonical action registry at process boot. If any registered action is
 # missing an executor or required metadata, this raises and prevents the server from
 # accepting traffic — failing here is much safer than failing mid-conversation.
@@ -310,6 +320,14 @@ def employee_app_enabled() -> bool:
     until explicitly enabled. A per-company `employee_app` module row gates which
     companies can actually activate on top of this master switch."""
     return (os.environ.get("WATHEFNI_EMPLOYEE_APP") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def workspace_boot_enabled() -> bool:
+    """Dark-launch gate for the module-agnostic workspace bootstrap and for
+    removing the historical pre_hiring dependency from core workspace routes.
+    Defaults OFF so existing tenants keep the current boot path until staging
+    proves post-hire-only navigation and authorization end to end."""
+    return (os.environ.get("WATHEFNI_WORKSPACE_BOOT") or "").strip().lower() in _OUTBOUND_ON_VALUES
 
 
 def push_notifications_enabled() -> bool:
@@ -2510,62 +2528,6 @@ def _ensure_schema_impl() -> None:
     seed_assessment_item_bank()
 
 
-MODULE_ALIASES = {
-    "hiring": "pre_hiring",
-    "prehire": "pre_hiring",
-    "pre_hiring": "pre_hiring",
-    "recruiting": "pre_hiring",
-    "recruitment": "pre_hiring",
-    "assessment": "assessments",
-    "assessments": "assessments",
-    "testing": "assessments",
-    "tests": "assessments",
-    "video_interview": "video_interviews",
-    "video_interviews": "video_interviews",
-    "ai_video_interview": "video_interviews",
-    "ai_video_interviews": "video_interviews",
-    "onboarding": "onboarding",
-    "posthire": "onboarding",
-    "post_hiring": "onboarding",
-    "post-hiring": "onboarding",
-    "compliance": "compliance",
-    "pro": "compliance",
-    "shifts": "shifts",
-    "shift": "shifts",
-    "shifting": "shifts",
-    "scheduling": "shifts",
-    "attendance": "attendance",
-    "leave": "leave",
-    "payroll": "payroll",
-    "analytics": "analytics",
-    "insights": "analytics",
-    "dashboard": "analytics",
-    "reports": "analytics",
-    "employee_app": "employee_app",
-    "employee_portal": "employee_app",
-    "employee_mobile": "employee_app",
-}
-
-MODULE_DISPLAY_NAMES = {
-    "pre_hiring": "Pre-Hiring",
-    "assessments": "Assessments",
-    "video_interviews": "Video Interviews",
-    "onboarding": "Onboarding",
-    "compliance": "Compliance",
-    "shifts": "Shifts",
-    "attendance": "Attendance",
-    "leave": "Leave",
-    "payroll": "Payroll",
-    "analytics": "Analytics",
-    "employee_app": "Employee App",
-}
-
-
-def normalize_module_key(value: str | None) -> str:
-    key = re.sub(r"[^a-z0-9_ -]+", "", (value or "").strip().lower()).replace("-", "_").replace(" ", "_")
-    return MODULE_ALIASES.get(key, key)
-
-
 def company_root(company_code: str | None) -> Path:
     return WORKSPACE / "data" / "companies" / (company_code or "WATHEFNI").upper()
 
@@ -2606,6 +2568,44 @@ def configured_company_modules(company_code: str | None) -> set[str]:
         pass
     modules.update(modules_from_payload(workspace_company_config(company)))
     return modules
+
+
+def module_platform_available(module_key: str) -> bool:
+    """Whether the platform-wide runtime gate for a catalog module is open.
+
+    Most modules have no master gate and are always available once entitled.
+    Employee App deliberately retains its independent platform kill switch.
+    """
+    definition = MODULE_BY_KEY.get(normalize_module_key(module_key))
+    if not definition or not definition.master_flag:
+        return True
+    return (os.environ.get(definition.master_flag) or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def effective_company_modules(company_code: str | None) -> set[str]:
+    """Configured tenant entitlements that are currently usable platform-wide."""
+    return {
+        module
+        for module in configured_company_modules(company_code)
+        if module in MODULE_BY_KEY and module_platform_available(module)
+    }
+
+
+def dashboard_module_catalog_payload(company_code: str | None) -> list[dict[str, Any]]:
+    configured = configured_company_modules(company_code)
+    payload: list[dict[str, Any]] = []
+    for item in module_catalog_payload():
+        key = str(item["key"])
+        available = module_platform_available(key)
+        payload.append(
+            {
+                **item,
+                "configured": key in configured,
+                "platform_available": available,
+                "effective": key in configured and available,
+            }
+        )
+    return payload
 
 
 def company_has_module(company_code: str | None, module_key: str) -> bool:
@@ -26801,6 +26801,9 @@ ACTION_REQUIRED_MODULES = {
     "start_onboarding": "onboarding",
     "send_onboarding_reminder": "onboarding",
     "answer_onboarding_status": "onboarding",
+    "list_compliance_documents": "compliance",
+    "compliance_send_reminder": "compliance",
+    "compliance_mark_reviewed": "compliance",
     "create_shift_assignment": "shifts",
     "replace_conflicting_shift_assignment": "shifts",
     "list_shifts": "shifts",
@@ -32784,6 +32787,31 @@ def prehire_dashboard_context(context: dict[str, Any] = Depends(dashboard_contex
     return require_entitlement(context, "pre_hiring", "prehire.read")
 
 
+def workspace_dashboard_context(context: dict[str, Any] = Depends(dashboard_context)) -> dict[str, Any]:
+    """Core workspace authorization, independent of product modules when the
+    Phase 3 boot is enabled. With the flag off it preserves the historical
+    pre_hiring gate exactly for an instant, behavior-safe rollback."""
+    if not workspace_boot_enabled():
+        return prehire_dashboard_context(context)
+    return context
+
+
+def require_workspace_permission(context: dict[str, Any], permission: str) -> dict[str, Any]:
+    if not workspace_boot_enabled():
+        return require_entitlement(context, "pre_hiring", permission)
+    if not dashboard_context_has_permission(context, permission):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "permission_denied",
+                "message": "You do not have access to do that.",
+                "required_permission": permission,
+                "role": context.get("actor_role"),
+            },
+        )
+    return context
+
+
 def assessments_dashboard_context(context: dict[str, Any] = Depends(prehire_dashboard_context)) -> dict[str, Any]:
     return require_entitlement(context, "assessments", "prehire.read")
 
@@ -32820,6 +32848,31 @@ def dashboard_auth_me(context: dict[str, Any] = Depends(dashboard_context)):
     return {
         "company_code": company,
         "enabled_modules": sorted(configured_company_modules(company)),
+        "access": context.get("access"),
+        "user": dashboard_user_public(context.get("hr_user")),
+    }
+
+
+@app.get("/dashboard/bootstrap")
+def dashboard_workspace_bootstrap(context: dict[str, Any] = Depends(dashboard_context)):
+    """Module-agnostic workspace bootstrap.
+
+    This is the only universal dashboard boot payload. Product data remains on
+    its module-gated endpoints. Kept behind WATHEFNI_WORKSPACE_BOOT while the
+    frontend and post-hire-only tenant path are dark-launched.
+    """
+    if not workspace_boot_enabled():
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
+    company = context["company_code"]
+    configured = configured_company_modules(company)
+    effective = effective_company_modules(company)
+    return {
+        "company_code": company,
+        "configured_modules": sorted(configured),
+        "effective_modules": sorted(effective),
+        # Compatibility name used by existing dashboard module helpers.
+        "enabled_modules": sorted(effective),
+        "module_catalog": dashboard_module_catalog_payload(company),
         "access": context.get("access"),
         "user": dashboard_user_public(context.get("hr_user")),
     }
@@ -32905,8 +32958,7 @@ def dashboard_team_accept_invite(request: DashboardAcceptInviteRequest):
 
 
 @app.get("/dashboard/team")
-def dashboard_team_list(context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    # prehire.read is already enforced by prehire_dashboard_context (Depends).
+def dashboard_team_list(context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = context["company_code"]
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -32949,8 +33001,8 @@ def dashboard_team_list(context: dict[str, Any] = Depends(prehire_dashboard_cont
 
 
 @app.post("/dashboard/team/invites")
-def dashboard_team_invite_user(request: DashboardInviteUserRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    require_entitlement(context, "pre_hiring", "users.manage")
+def dashboard_team_invite_user(request: DashboardInviteUserRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
+    require_workspace_permission(context, "users.manage")
     company = context["company_code"]
     email = normalize_email(request.email)
     role = dashboard_role_key(request.role)
@@ -33012,8 +33064,8 @@ def dashboard_team_invite_user(request: DashboardInviteUserRequest, context: dic
 
 
 @app.patch("/dashboard/team/users/{user_id}")
-def dashboard_team_update_user(user_id: str, request: DashboardTeamUserUpdateRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    require_entitlement(context, "pre_hiring", "users.manage")
+def dashboard_team_update_user(user_id: str, request: DashboardTeamUserUpdateRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
+    require_workspace_permission(context, "users.manage")
     company = context["company_code"]
     updates: list[str] = []
     params: list[Any] = []
@@ -33087,8 +33139,7 @@ def dashboard_team_update_user(user_id: str, request: DashboardTeamUserUpdateReq
 
 
 @app.post("/dashboard/team/whatsapp-link")
-def dashboard_team_link_whatsapp(request: DashboardWhatsAppLinkRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    # prehire.read is already enforced by prehire_dashboard_context (Depends).
+def dashboard_team_link_whatsapp(request: DashboardWhatsAppLinkRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     phone = digits(request.phone)
     if not phone:
         raise HTTPException(status_code=422, detail={"error": "phone_required", "message": "Enter a valid WhatsApp phone."})
@@ -33145,7 +33196,7 @@ def dashboard_team_link_whatsapp(request: DashboardWhatsAppLinkRequest, context:
 def _org_admin_context(context: dict[str, Any]) -> str:
     if not org_hierarchy_enabled():
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found"})
-    require_entitlement(context, "pre_hiring", "users.manage")
+    require_workspace_permission(context, "users.manage")
     return context["company_code"]
 
 
@@ -33155,13 +33206,13 @@ def _org_error_http(result: dict[str, Any]) -> None:
 
 
 @app.get("/dashboard/org")
-def dashboard_org_overview(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_overview(context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     return {"ok": True, **org_overview(company)}
 
 
 @app.post("/dashboard/org/branches")
-def dashboard_org_create_branch(request: OrgBranchRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_create_branch(request: OrgBranchRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     result = upsert_org_branch(company, name=request.name, branch_key=request.branch_key, is_active=request.is_active)
     _org_error_http(result)
@@ -33170,7 +33221,7 @@ def dashboard_org_create_branch(request: OrgBranchRequest, context: dict[str, An
 
 
 @app.post("/dashboard/org/teams")
-def dashboard_org_create_team(request: OrgTeamRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_create_team(request: OrgTeamRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     result = upsert_org_team(company, name=request.name, branch_key=request.branch_key, team_key=request.team_key, is_active=request.is_active)
     _org_error_http(result)
@@ -33179,7 +33230,7 @@ def dashboard_org_create_team(request: OrgTeamRequest, context: dict[str, Any] =
 
 
 @app.post("/dashboard/org/assignments")
-def dashboard_org_assign_employee(request: OrgAssignmentRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_assign_employee(request: OrgAssignmentRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     result = set_employee_org_assignment(company, employee_key=request.employee_key, branch_key=request.branch_key, team_key=request.team_key)
     _org_error_http(result)
@@ -33188,7 +33239,7 @@ def dashboard_org_assign_employee(request: OrgAssignmentRequest, context: dict[s
 
 
 @app.post("/dashboard/org/managers")
-def dashboard_org_create_manager(request: OrgManagerScopeRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_create_manager(request: OrgManagerScopeRequest, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     result = upsert_manager_scope(
         company,
@@ -33205,7 +33256,7 @@ def dashboard_org_create_manager(request: OrgManagerScopeRequest, context: dict[
 
 
 @app.delete("/dashboard/org/managers/{scope_id}")
-def dashboard_org_delete_manager(scope_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_org_delete_manager(scope_id: str, context: dict[str, Any] = Depends(workspace_dashboard_context)):
     company = _org_admin_context(context)
     result = deactivate_manager_scope(company, scope_id)
     if not result.get("ok"):
@@ -33224,7 +33275,7 @@ def dashboard_org_delete_manager(scope_id: str, context: dict[str, Any] = Depend
 # with HR). Reads always work — they simply return empty until flows are wired.
 # ---------------------------------------------------------------------------
 
-_POSTHIRE_MODULES = ("onboarding", "attendance", "shifts", "payroll", "leave", "compliance")
+_POSTHIRE_MODULES = POSTHIRE_PEOPLE_MODULES
 
 
 def _hr_tasks_context(context: dict[str, Any], *, manage: bool = False) -> str:
@@ -33505,7 +33556,7 @@ def dashboard_outbound_needs_follow_up(
 # card once every required step is done.
 # ---------------------------------------------------------------------------
 
-SETUP_READINESS_POSTHIRE_MODULES = {"onboarding", "attendance", "leave", "shifts", "payroll", "analytics", "compliance"}
+SETUP_READINESS_POSTHIRE_MODULES = set(POSTHIRE_MODULES)
 
 
 @app.get("/dashboard/setup/readiness")
@@ -33590,10 +33641,6 @@ def dashboard_setup_readiness(context: dict[str, Any] = Depends(dashboard_contex
 # Every mutation writes record_admin_audit scoped to the TARGET company.
 # ---------------------------------------------------------------------------
 
-SETUP_CONSOLE_MODULES = (
-    "pre_hiring", "assessments", "video_interviews", "onboarding", "compliance",
-    "shifts", "attendance", "leave", "payroll", "analytics",
-)
 SETUP_COMPANY_CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]{1,31}$")
 
 
@@ -33818,7 +33865,7 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
             users = [dashboard_user_public(dict(row)) for row in cur.fetchall()]
     return {
         "readiness": setup_console_company_readiness(company),
-        "available_modules": [{"key": key, "label": MODULE_DISPLAY_NAMES.get(key, key)} for key in SETUP_CONSOLE_MODULES],
+        "available_modules": dashboard_module_catalog_payload(company),
         "users": users,
     }
 
@@ -34532,6 +34579,7 @@ AUDIT_MODULE_CATEGORY = {
     "assessments": "Candidates",
     "video_interviews": "Candidates",
     "onboarding": "Onboarding",
+    "compliance": "Compliance",
     "shifts": "Shifts",
     "attendance": "Attendance",
     "leave": "Leave",
@@ -39726,7 +39774,7 @@ def dashboard_prehire_rank(
 def dashboard_prehire_notifications(
     status: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    context: dict[str, Any] = Depends(prehire_dashboard_context),
+    context: dict[str, Any] = Depends(workspace_dashboard_context),
 ):
     company = context["company_code"]
     enabled_modules = notification_enabled_modules(company)
@@ -42146,7 +42194,7 @@ def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:
     })
 
 
-POSTHIRE_DASHBOARD_MODULES = ("attendance", "shifts", "onboarding", "payroll", "analytics", "leave", "compliance")
+POSTHIRE_DASHBOARD_MODULES = POSTHIRE_MODULES
 # Args the dashboard may pass through besides each action's declared registry
 # fields. Everything else (company_code, actor_*, viewer_phone, ...) is dropped
 # so the client can never widen scope or impersonate.
@@ -42495,7 +42543,7 @@ def employee_profile_accessible_modules(context: dict[str, Any], company: str) -
     so it never surfaces a module the company/user isn't allowed to see."""
     return [
         module
-        for module in ("onboarding", "compliance", "attendance", "shifts", "leave", "payroll")
+        for module in POSTHIRE_PEOPLE_MODULES
         if company_has_module(company, module) and dashboard_context_has_permission(context, f"{module}.read")
     ]
 
@@ -44274,8 +44322,6 @@ def dashboard_posthire_employees(
 # other direct writes (e.g. start_onboarding). No external workspace script and
 # no pre-hiring dependency. Onboarding stays 'not_started' and NO welcome message
 # is sent — these are existing staff, not new hires.
-POSTHIRE_PEOPLE_MODULES = ("onboarding", "attendance", "shifts", "payroll", "leave", "compliance")
-
 # Seeded as 'missing' so a newly added employee shows up on the Compliance page
 # with a clear checklist. Only seeded when the company has the compliance module.
 # Sends nothing (compliance reminders are always a manual HR action).

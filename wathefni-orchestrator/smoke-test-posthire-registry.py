@@ -66,7 +66,7 @@ POSTHIRE_ACTIONS = {
     "workforce_analytics": ("analytics", "analytics.read", "read"),
 }
 
-POSTHIRE_MODULES = {"attendance", "shifts", "onboarding", "payroll", "analytics"}
+POSTHIRE_MODULES = {module for module, _, _ in POSTHIRE_ACTIONS.values()}
 ALL_POSTHIRE_TOOLS = set(POSTHIRE_ACTIONS)
 SENSITIVE_TOOLS = {n for n, (_, _, k) in POSTHIRE_ACTIONS.items() if k == "sensitive"}
 READ_TOOLS = {n for n, (_, _, k) in POSTHIRE_ACTIONS.items() if k == "read"}

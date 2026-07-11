@@ -13,6 +13,7 @@ import type {
   AttendanceImportReverseResponse,
   DashboardAccess,
   DashboardAuthResponse,
+  DashboardBootstrapResponse,
   DashboardChatResponse,
   DashboardChatSession,
   DashboardChatStoredMessage,
@@ -47,6 +48,8 @@ import type {
   PosthirePayrollResponse,
   PayrollExportDetail,
   PosthireShiftsResponse,
+  PositionsResponse,
+  PositionSummary,
   PrehireReportsResponse,
   RankingResponse,
   SetupReadinessResponse,
@@ -204,6 +207,33 @@ export function getSummary(access: DashboardAccess) {
   return request<SummaryResponse>('/dashboard/prehire/summary', access)
 }
 
+export function getDashboardBootstrap(access: DashboardAccess) {
+  return request<DashboardBootstrapResponse>('/dashboard/bootstrap', access)
+}
+
+export function getPrehirePositions(
+  access: DashboardAccess,
+  opts?: { offset?: number; limit?: number; search?: string },
+) {
+  const params = new URLSearchParams()
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
+  if (opts?.search) params.set('search', opts.search)
+  const qs = params.toString()
+  return request<PositionsResponse>(`/dashboard/prehire/positions${qs ? `?${qs}` : ''}`, access)
+}
+
+// Close a job opening so it stops accepting new applicants, or reopen a closed
+// one. apply_code/QR are unchanged either way; existing candidates in the
+// pipeline are never affected.
+export function setPositionStatus(access: DashboardAccess, positionCode: string, status: 'open' | 'closed') {
+  return request<{ ok: boolean; position: PositionSummary }>(
+    `/dashboard/prehire/positions/${encodeURIComponent(positionCode)}/status`,
+    access,
+    { method: 'POST', body: JSON.stringify({ status }) },
+  )
+}
+
 export function getSetupReadiness(access: DashboardAccess) {
   return request<SetupReadinessResponse>('/dashboard/setup/readiness', access)
 }
@@ -328,9 +358,10 @@ export function getNotifications(access: DashboardAccess, params: { limit?: numb
   return request<NotificationsResponse>(`/dashboard/prehire/notifications?${search.toString()}`, access)
 }
 
-export function getAssessments(access: DashboardAccess, params: { status?: string; position?: string; limit?: number } = {}) {
+export function getAssessments(access: DashboardAccess, params: { status?: string; position?: string; limit?: number; offset?: number } = {}) {
   const search = new URLSearchParams()
   search.set('limit', String(params.limit || 100))
+  search.set('offset', String(params.offset || 0))
   if (params.status) search.set('status', params.status)
   if (params.position) search.set('position', params.position)
   return request<AssessmentsResponse>(`/dashboard/prehire/assessments?${search.toString()}`, access)
@@ -480,17 +511,17 @@ export function notifyCandidate(access: DashboardAccess, appKey: string, message
   })
 }
 
-export function sendAssessment(access: DashboardAccess, appKey: string) {
+export function sendAssessment(access: DashboardAccess, appKey: string, message?: string) {
   return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/assessment`, access, {
     method: 'POST',
-    body: JSON.stringify({ account_id: 'default' }),
+    body: JSON.stringify({ account_id: 'default', message: message || null }),
   })
 }
 
-export function sendVideoInterview(access: DashboardAccess, appKey: string) {
+export function sendVideoInterview(access: DashboardAccess, appKey: string, message?: string) {
   return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/video-interview`, access, {
     method: 'POST',
-    body: JSON.stringify({ account_id: 'default', send_invite: true, response_mode: 'single_video' }),
+    body: JSON.stringify({ account_id: 'default', send_invite: true, response_mode: 'single_video', message: message || null }),
   })
 }
 
@@ -623,8 +654,13 @@ export function runPosthireAction(access: DashboardAccess, body: { action_type: 
   })
 }
 
-export function getPosthireEmployees(access: DashboardAccess) {
-  return request<PosthireEmployeesResponse>('/dashboard/posthire/employees', access)
+export function getPosthireEmployees(access: DashboardAccess, opts?: { offset?: number; limit?: number; search?: string }) {
+  const params = new URLSearchParams()
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
+  if (opts?.search) params.set('search', opts.search)
+  const qs = params.toString()
+  return request<PosthireEmployeesResponse>(`/dashboard/posthire/employees${qs ? `?${qs}` : ''}`, access)
 }
 
 // Add a single employee directly to the workforce (no pre-hiring pipeline). The
@@ -699,18 +735,29 @@ export function getEmployeeProfile(access: DashboardAccess, employeeKey: string)
   return request<EmployeeProfileResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}`, access)
 }
 
-export function getPosthireOnboarding(access: DashboardAccess) {
-  return request<PosthireOnboardingResponse>('/dashboard/posthire/onboarding', access)
+export function getPosthireOnboarding(access: DashboardAccess, opts?: { offset?: number; limit?: number; search?: string }) {
+  const params = new URLSearchParams()
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
+  if (opts?.search) params.set('search', opts.search)
+  const qs = params.toString()
+  return request<PosthireOnboardingResponse>(`/dashboard/posthire/onboarding${qs ? `?${qs}` : ''}`, access)
 }
 
 export function getOnboardingDetail(access: DashboardAccess, employeeKey: string) {
   return request<OnboardingDetailResponse>(`/dashboard/posthire/onboarding/${encodeURIComponent(employeeKey)}`, access)
 }
 
-export function getPosthireAttendance(access: DashboardAccess, range?: { start_date?: string; end_date?: string }) {
+export function getPosthireAttendance(
+  access: DashboardAccess,
+  range?: { start_date?: string; end_date?: string },
+  opts?: { offset?: number; limit?: number },
+) {
   const params = new URLSearchParams()
   if (range?.start_date) params.set('start_date', range.start_date)
   if (range?.end_date) params.set('end_date', range.end_date)
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
   const qs = params.toString()
   return request<PosthireAttendanceResponse>(`/dashboard/posthire/attendance${qs ? `?${qs}` : ''}`, access)
 }
@@ -790,17 +837,27 @@ export async function exportAttendanceCsv(access: DashboardAccess, range: { star
   URL.revokeObjectURL(url)
 }
 
-export function getPosthireLeave(access: DashboardAccess, opts?: { view?: 'active' | 'history'; status?: string }) {
+export function getPosthireLeave(
+  access: DashboardAccess,
+  opts?: { view?: 'active' | 'history'; status?: string; section?: 'pending' | 'upcoming'; offset?: number; limit?: number },
+) {
   const params = new URLSearchParams()
   if (opts?.view) params.set('view', opts.view)
   if (opts?.status) params.set('status', opts.status)
+  if (opts?.section) params.set('section', opts.section)
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
   const qs = params.toString()
   return request<PosthireLeaveResponse>(`/dashboard/posthire/leave${qs ? `?${qs}` : ''}`, access)
 }
 
-export function getPosthireShifts(access: DashboardAccess, week = 0) {
-  const qs = week ? `?week=${encodeURIComponent(String(week))}` : ''
-  return request<PosthireShiftsResponse>(`/dashboard/posthire/shifts${qs}`, access)
+export function getPosthireShifts(access: DashboardAccess, week = 0, opts?: { offset?: number; limit?: number }) {
+  const params = new URLSearchParams()
+  if (week) params.set('week', String(week))
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
+  const qs = params.toString()
+  return request<PosthireShiftsResponse>(`/dashboard/posthire/shifts${qs ? `?${qs}` : ''}`, access)
 }
 
 export function cancelShift(access: DashboardAccess, shiftId: string) {
@@ -823,10 +880,15 @@ export function rescheduleShift(
   )
 }
 
-export function getPosthirePayroll(access: DashboardAccess, period?: { start_date?: string; end_date?: string }) {
+export function getPosthirePayroll(
+  access: DashboardAccess,
+  period?: { start_date?: string; end_date?: string; offset?: number; limit?: number },
+) {
   const params = new URLSearchParams()
   if (period?.start_date) params.set('start_date', period.start_date)
   if (period?.end_date) params.set('end_date', period.end_date)
+  if (period?.offset) params.set('offset', String(period.offset))
+  if (period?.limit) params.set('limit', String(period.limit))
   const qs = params.toString()
   return request<PosthirePayrollResponse>(`/dashboard/posthire/payroll${qs ? `?${qs}` : ''}`, access)
 }
@@ -859,8 +921,17 @@ export function getPosthireAnalytics(access: DashboardAccess) {
   return request<PosthireAnalyticsResponse>('/dashboard/posthire/analytics', access)
 }
 
-export function getPosthireCompliance(access: DashboardAccess) {
-  return request<PosthireComplianceResponse>('/dashboard/posthire/compliance', access)
+export function getPosthireCompliance(
+  access: DashboardAccess,
+  opts?: { offset?: number; limit?: number; search?: string; bucket?: string },
+) {
+  const params = new URLSearchParams()
+  if (opts?.offset) params.set('offset', String(opts.offset))
+  if (opts?.limit) params.set('limit', String(opts.limit))
+  if (opts?.search) params.set('search', opts.search)
+  if (opts?.bucket && opts.bucket !== 'all') params.set('bucket', opts.bucket)
+  const qs = params.toString()
+  return request<PosthireComplianceResponse>(`/dashboard/posthire/compliance${qs ? `?${qs}` : ''}`, access)
 }
 
 export function getEmployeeDocuments(access: DashboardAccess, employeeKey: string) {
@@ -937,8 +1008,12 @@ export async function openEmployeeDocument(
 // "What should HR do next?" surface for the shared outbound delivery layer.
 // Reads always succeed and simply return empty until flows are wired (Phase C+).
 
-export function getHrTasks(access: DashboardAccess, status = 'open') {
-  return request<HrTasksResponse>(`/dashboard/hr-tasks?status=${encodeURIComponent(status)}`, access)
+export function getHrTasks(access: DashboardAccess, status = 'open', params: { limit?: number; offset?: number } = {}) {
+  const search = new URLSearchParams()
+  search.set('status', status)
+  search.set('limit', String(params.limit || 100))
+  search.set('offset', String(params.offset || 0))
+  return request<HrTasksResponse>(`/dashboard/hr-tasks?${search.toString()}`, access)
 }
 
 export function resolveHrTask(access: DashboardAccess, taskId: string, status: 'done' | 'dismissed' = 'done') {
@@ -949,8 +1024,11 @@ export function resolveHrTask(access: DashboardAccess, taskId: string, status: '
   )
 }
 
-export function getOutboundNeedsFollowUp(access: DashboardAccess) {
-  return request<OutboundNeedsFollowUpResponse>('/dashboard/outbound/needs-follow-up', access)
+export function getOutboundNeedsFollowUp(access: DashboardAccess, params: { limit?: number; offset?: number } = {}) {
+  const search = new URLSearchParams()
+  search.set('limit', String(params.limit || 100))
+  search.set('offset', String(params.offset || 0))
+  return request<OutboundNeedsFollowUpResponse>(`/dashboard/outbound/needs-follow-up?${search.toString()}`, access)
 }
 
 export function generateCandidateEvaluation(access: DashboardAccess, appKey: string, force = false) {

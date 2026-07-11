@@ -38,12 +38,13 @@ import {
 import QRCode from 'qrcode'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
-import { PostHirePage, type PostHireModulePage } from '@/posthire/PostHire'
+import { PostHireDeliveryCenter, PostHirePage, type PostHireModulePage } from '@/posthire/PostHire'
 import { useConfirm } from '@/components/ConfirmDialog'
 
 import {
   acceptDashboardInvite,
   DashboardApiError,
+  getDashboardBootstrap,
   getDashboardTeam,
   getDashboardChatSession,
   getDashboardChatSessions,
@@ -53,6 +54,8 @@ import {
   getImportSettings,
   updateImportSettings,
   getPrehireReports,
+  getPrehirePositions,
+  setPositionStatus,
   getInterviews,
   getNotifications,
   getRanking,
@@ -95,6 +98,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Select, Textarea } from '@/components/ui/field'
+import { SearchInput, useDebouncedValue } from '@/components/ui/search-input'
+import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import type {
   ApplicationSummary,
   ApplicationsResponse,
@@ -103,6 +108,7 @@ import type {
   AssessmentAttempt,
   CandidateInterview,
   DashboardAccess,
+  DashboardBootstrapResponse,
   DashboardChatCandidateCard,
   DashboardChatNavigation,
   DashboardChatResponse,
@@ -117,6 +123,7 @@ import type {
   InterviewsResponse,
   NotificationActionItem,
   NotificationsResponse,
+  PositionsResponse,
   PrehireReportsResponse,
   NotificationRow,
   PositionSummary,
@@ -150,12 +157,20 @@ type NavGroup = 'prehire' | 'posthire' | 'settings'
 type DashboardNavItem = { id: Page; label: string; icon: typeof LayoutDashboard; module?: string; group: NavGroup }
 
 const POSTHIRE_PAGES: PostHireModulePage[] = ['employees', 'onboarding', 'attendance', 'leave', 'shifts', 'payroll', 'analytics', 'compliance']
-const POSTHIRE_MODULES = ['onboarding', 'attendance', 'leave', 'shifts', 'payroll', 'analytics']
+const POSTHIRE_MODULES = ['onboarding', 'compliance', 'attendance', 'shifts', 'leave', 'payroll', 'analytics']
+const POSTHIRE_PEOPLE_MODULES = ['onboarding', 'compliance', 'attendance', 'shifts', 'leave', 'payroll']
 const NAV_GROUP_LABELS: Record<NavGroup, string> = { prehire: 'Pre-Hiring', posthire: 'Post-Hire', settings: 'Workspace' }
 
-function anyPosthireModuleEnabled(summary: SummaryResponse | null | undefined): boolean {
-  if (!summary || !Array.isArray(summary.enabled_modules)) return false
-  return POSTHIRE_MODULES.some((module) => summary.enabled_modules?.includes(module))
+type DashboardModuleState = { enabled_modules?: string[]; access?: DashboardUserAccess } | null | undefined
+
+function anyPosthireModuleEnabled(state: DashboardModuleState): boolean {
+  if (!state || !Array.isArray(state.enabled_modules)) return false
+  return POSTHIRE_MODULES.some((module) => state.enabled_modules?.includes(module))
+}
+
+function anyPeopleModuleEnabled(state: DashboardModuleState): boolean {
+  if (!state || !Array.isArray(state.enabled_modules)) return false
+  return POSTHIRE_PEOPLE_MODULES.some((module) => state.enabled_modules?.includes(module))
 }
 
 function isPostHirePage(page: Page): page is PostHireModulePage {
@@ -209,7 +224,7 @@ const navItems: DashboardNavItem[] = [
   { id: 'interviews', label: 'Interviews', icon: CalendarCheck, module: 'pre_hiring', group: 'prehire' },
   { id: 'assessments', label: 'Assessments', icon: ClipboardCheck, module: 'assessments', group: 'prehire' },
   { id: 'ranking', label: 'Ranking', icon: Medal, module: 'pre_hiring', group: 'prehire' },
-  { id: 'notifications', label: 'Notifications', icon: Bell, module: 'pre_hiring', group: 'prehire' },
+  { id: 'notifications', label: 'Notifications', icon: Bell, group: 'settings' },
   { id: 'reports', label: 'Reports', icon: BarChart3, module: 'pre_hiring', group: 'prehire' },
   { id: 'employees', label: 'Employees', icon: Users, group: 'posthire' },
   { id: 'onboarding', label: 'Onboarding', icon: UserCheck, module: 'onboarding', group: 'posthire' },
@@ -289,10 +304,9 @@ function hasDashboardPermission(access: DashboardUserAccess | null | undefined, 
   return Boolean(access?.permissions?.includes(permission))
 }
 
-function dashboardModuleEnabled(summary: SummaryResponse | null | undefined, module: string) {
-  if (!summary) return true
-  if (Array.isArray(summary.enabled_modules)) return summary.enabled_modules.includes(module)
-  return true
+function dashboardModuleEnabled(state: DashboardModuleState, module: string) {
+  if (!state || !Array.isArray(state.enabled_modules)) return false
+  return state.enabled_modules.includes(module)
 }
 
 // Suggested starter prompts for the assistant, scoped to the modules the company
@@ -315,10 +329,13 @@ function assistantPromptChips(enabledModules: string[] | undefined, assessmentEn
   return chips.slice(0, 6)
 }
 
-function pageAvailableForSummary(page: Page, summary: SummaryResponse | null | undefined) {
-  if (page === 'employees') return anyPosthireModuleEnabled(summary)
+function pageAvailableForSummary(page: Page, state: DashboardModuleState) {
+  if (page === 'employees') return anyPeopleModuleEnabled(state)
+  // Notifications doubles as the Delivery Center for employee messages, so it
+  // stays available when any post-hire module is on even without pre-hiring.
+  if (page === 'notifications') return dashboardModuleEnabled(state, 'pre_hiring') || anyPosthireModuleEnabled(state)
   const item = navItems.find((nav) => nav.id === page)
-  return !item?.module || dashboardModuleEnabled(summary, item.module)
+  return !item?.module || dashboardModuleEnabled(state, item.module)
 }
 
 const PERMISSION_CAPABILITY_LABELS: Record<string, string> = {
@@ -441,6 +458,7 @@ function App() {
   const [access, setAccess] = useState<DashboardAccess>(() => normalizedAccess(storedAccess()))
   const [page, setPage] = useState<Page>(() => (new URLSearchParams(window.location.search).get('page') === 'settings' ? 'settings' : 'overview'))
   const [lastWorkPage, setLastWorkPage] = useState<Page>('overview')
+  const [workspaceBootstrap, setWorkspaceBootstrap] = useState<DashboardBootstrapResponse | null>(null)
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [applications, setApplications] = useState<ApplicationsResponse | null>(null)
   const [interviews, setInterviews] = useState<InterviewsResponse | null>(null)
@@ -464,6 +482,11 @@ function App() {
   const [selected, setSelected] = useState<ApplicationSummary | null>(null)
   const [selectedJob, setSelectedJob] = useState<PositionSummary | null>(null)
   const [jobQrDataUrl, setJobQrDataUrl] = useState('')
+  const [jobsData, setJobsData] = useState<PositionsResponse | null>(null)
+  const [allPositions, setAllPositions] = useState<PositionSummary[]>([])
+  const [jobsQuery, setJobsQuery] = useState('')
+  const debouncedJobsQuery = useDebouncedValue(jobsQuery.trim(), 350)
+  const [jobsLoadingMore, setJobsLoadingMore] = useState(false)
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('')
   const [candidateFilters, setCandidateFilters] = useState<CandidateFilters>({
@@ -484,7 +507,14 @@ function App() {
   const [interviewDate, setInterviewDate] = useState('')
   const [interviewInterviewer, setInterviewInterviewer] = useState('')
   const [interviewOffset, setInterviewOffset] = useState(0)
+  const [assessmentOffset, setAssessmentOffset] = useState(0)
   const [message, setMessage] = useState('')
+  // The candidate message box now feeds real sends (assessment, video interview,
+  // notify) — clear it whenever a different candidate is opened so a note never
+  // silently carries over and gets sent to the wrong person.
+  useEffect(() => {
+    setMessage('')
+  }, [selected?.app_key])
   const [interviewNotes, setInterviewNotes] = useState<Record<string, string>>({})
   const [chatInput, setChatInput] = useState('')
   const [chatBusy, setChatBusy] = useState(false)
@@ -524,20 +554,26 @@ function App() {
     setAccessIssue(issue)
   }, [])
 
+  const moduleState: DashboardModuleState = workspaceBootstrap || summary
+  const prehireEnabled = dashboardModuleEnabled(moduleState, 'pre_hiring')
   const allApplications = applications?.applications || summary?.recent_applications || []
   const enabledNotificationModules = notifications?.enabled_modules
   const notificationIssues = moduleScopedNotificationRows(notifications?.notifications || [], enabledNotificationModules)
-  const assessmentModuleOn = assessmentModuleEnabled(summary)
+  const assessmentModuleOn = assessmentModuleEnabled(moduleState, summary)
   const needsReview = reviewQueue(allApplications, notificationIssues, assessmentModuleOn)
-  const activePage = pageAvailableForSummary(page, summary) ? page : 'overview'
-  const pageTitle = pageLabels[activePage]
   const availableNavItems = navItems.filter((item) => {
-    if (item.id === 'employees') return anyPosthireModuleEnabled(summary)
-    if (item.id === 'activity') return hasDashboardPermission(summary?.access, 'audit.read')
-    return !item.module || dashboardModuleEnabled(summary, item.module)
+    if (item.id === 'employees') return anyPeopleModuleEnabled(moduleState)
+    if (item.id === 'notifications') return prehireEnabled || anyPosthireModuleEnabled(moduleState)
+    if (item.id === 'activity') return hasDashboardPermission(moduleState?.access, 'audit.read')
+    return !item.module || dashboardModuleEnabled(moduleState, item.module)
   })
-  const dashboardLoaded = Boolean(summary && applications && notifications && interviews && reports)
-  const userAccess = summary?.access || null
+  const defaultWorkspacePage = prehireEnabled
+    ? 'overview'
+    : availableNavItems.find((item) => item.group === 'posthire')?.id || 'settings'
+  const activePage = pageAvailableForSummary(page, moduleState) ? page : defaultWorkspacePage
+  const pageTitle = pageLabels[activePage]
+  const dashboardLoaded = Boolean(moduleState && (!prehireEnabled || (summary && applications && notifications && interviews && reports)))
+  const userAccess = moduleState?.access || null
   const showingInviteAcceptance = Boolean(inviteToken.trim())
   const canManageCandidates = hasDashboardPermission(userAccess, 'candidate.manage')
   const canImportCandidates = hasDashboardPermission(userAccess, 'candidate.import')
@@ -546,6 +582,14 @@ function App() {
   const canManageAssessments = hasDashboardPermission(userAccess, 'assessment.manage')
   const canExportReports = hasDashboardPermission(userAccess, 'report.export')
   const canManageWorkspace = hasDashboardPermission(userAccess, 'users.manage')
+  const canManageJobs = hasDashboardPermission(userAccess, 'settings.manage')
+  // Position pickers (candidate filter, CV-import assignment, ranking, overview
+  // breakdown) need the FULL roster of jobs, not just the top 25 by activity
+  // that `summary.positions` carries for the dashboard glance. Loaded via its
+  // own unsearched, unpaginated fetch (see loadAllPositions) — deliberately
+  // NOT sourced from `jobsData`, which is search-scoped to whatever the Jobs
+  // page's own search box currently holds.
+  const allPositionsForSelectors = allPositions.length ? allPositions : summary?.positions || []
 
   useEffect(() => {
     let cancelled = false
@@ -565,9 +609,9 @@ function App() {
   }, [selectedJob])
 
   function openPage(nextPage: Page) {
-    if (!pageAvailableForSummary(nextPage, summary)) {
+    if (!pageAvailableForSummary(nextPage, moduleState)) {
       setNoticeErr('This feature is not enabled for this company.')
-      setPage('overview')
+      setPage(defaultWorkspacePage)
       return
     }
     // Remember the last real module page so the assistant (its own page) knows
@@ -618,6 +662,120 @@ function App() {
     [access, query, status, candidateFilters, candidateOffset],
   )
 
+  // Jobs list: fetched on its own (not from the summary card, which only
+  // returns a capped top-N glance) so the Jobs page can search/page through
+  // every posting a company has, instead of silently truncating.
+  const loadJobs = useCallback(
+    async (nextAccess = access, opts: { silent?: boolean } = {}) => {
+      const effectiveAccess = normalizedAccess(nextAccess)
+      if (!effectiveAccess.token || !effectiveAccess.companyCode) return
+      try {
+        const data = await getPrehirePositions(effectiveAccess, {
+          limit: 100,
+          ...(debouncedJobsQuery ? { search: debouncedJobsQuery } : {}),
+        })
+        setJobsData(data)
+      } catch (error) {
+        if (opts.silent) return
+        const issue = accessIssueFromError(error)
+        if (issue) {
+          setAccessIssue(issue)
+          setNotice(issue.title)
+        } else {
+          setNoticeErr(friendlyDashboardError(error, 'Could not load jobs.'))
+        }
+      }
+    },
+    [access, debouncedJobsQuery],
+  )
+
+  // Full, unsearched, unpaginated position roster for the pickers reused
+  // elsewhere (candidate filter, CV-import assignment, ranking, overview
+  // breakdown). Deliberately independent of `jobsData`/`loadJobs`, which is
+  // scoped to whatever the Jobs page's own search box currently holds — those
+  // pickers must never go empty just because HR is mid-search on the Jobs page.
+  // 200 is the backend's own ceiling for this endpoint; a single company
+  // realistically never has more open+closed job postings than that.
+  const loadAllPositions = useCallback(async (nextAccess = access) => {
+    const effectiveAccess = normalizedAccess(nextAccess)
+    if (!effectiveAccess.token || !effectiveAccess.companyCode) return
+    try {
+      const data = await getPrehirePositions(effectiveAccess, { limit: 200 })
+      setAllPositions(data.positions)
+    } catch {
+      // Best-effort: pickers fall back to the summary glance on failure.
+    }
+  }, [access])
+
+  const loadMoreJobs = useCallback(async () => {
+    const effectiveAccess = normalizedAccess(access)
+    if (!effectiveAccess.token || !effectiveAccess.companyCode) return
+    setJobsLoadingMore(true)
+    try {
+      const data = await getPrehirePositions(effectiveAccess, {
+        limit: 100,
+        offset: jobsData?.positions.length || 0,
+        ...(debouncedJobsQuery ? { search: debouncedJobsQuery } : {}),
+      })
+      setJobsData((current) =>
+        current
+          ? { ...data, positions: [...current.positions, ...data.positions] }
+          : data,
+      )
+    } catch (error) {
+      setNoticeErr(friendlyDashboardError(error, 'Could not load more jobs.'))
+    } finally {
+      setJobsLoadingMore(false)
+    }
+  }, [access, jobsData, debouncedJobsQuery])
+
+  const [jobStatusBusy, setJobStatusBusy] = useState(false)
+
+  // Close stops new WhatsApp/QR applicants; reopen resumes the same
+  // apply_code/QR unchanged. Existing candidates in the pipeline are never
+  // affected either way.
+  const setJobStatus = useCallback(
+    async (job: PositionSummary, status: 'open' | 'closed') => {
+      if (status === 'closed') {
+        const ok = await confirm({
+          title: `Close ${job.position_title || job.position_code}?`,
+          body: Number(job.active_count || 0) > 0
+            ? `This stops new applicants from applying. ${job.active_count} candidate${Number(job.active_count) === 1 ? ' is' : 's are'} still active in this pipeline — closing won’t affect them.`
+            : 'This stops new applicants from applying. You can reopen it anytime.',
+          confirmLabel: 'Close job',
+          destructive: true,
+        })
+        if (!ok) return
+      }
+      setJobStatusBusy(true)
+      try {
+        const result = await setPositionStatus(access, job.position_code, status)
+        setJobsData((current) =>
+          current
+            ? {
+                ...current,
+                positions: current.positions.map((p) => (p.position_code === job.position_code ? { ...p, status: result.position.status } : p)),
+              }
+            : current,
+        )
+        setSelectedJob((current) => (current && current.position_code === job.position_code ? { ...current, status: result.position.status } : current))
+        setNoticeOk(status === 'closed' ? `${job.position_title || job.position_code} is closed to new applicants.` : `${job.position_title || job.position_code} is reopened.`)
+        void loadJobs(access, { silent: true })
+      } catch (error) {
+        const issue = accessIssueFromError(error)
+        if (issue) {
+          setAccessIssue(issue)
+          setNotice(issue.title)
+        } else {
+          setNoticeErr(friendlyDashboardError(error, 'Could not update this job.'))
+        }
+      } finally {
+        setJobStatusBusy(false)
+      }
+    },
+    [access, confirm, loadJobs, setNoticeErr, setNoticeOk],
+  )
+
   // Interviews list: fetched on its own so the tab/search/date filters only
   // refetch interviews.
   const loadInterviews = useCallback(
@@ -642,6 +800,37 @@ function App() {
     [access, interviewTab, interviewQuery, interviewRole, interviewDate, interviewInterviewer, interviewOffset],
   )
 
+  // Assessment attempts: fetched on its own (like interviews) so paging through
+  // history doesn't reload the whole dashboard. Company-wide status counts and
+  // average score come back from the backend regardless of the current page, so
+  // the headline metrics never drift once a company has more than one page of
+  // attempts.
+  const loadAssessments = useCallback(
+    async (nextAccess = access, opts: { silent?: boolean } = {}) => {
+      const effectiveAccess = normalizedAccess(nextAccess)
+      if (!effectiveAccess.token || !effectiveAccess.companyCode) return
+      // Wait for the summary to know whether the module is enabled at all —
+      // `assessmentModuleEnabled` defaults permissive when summary is still
+      // null, which would otherwise fire a doomed fetch before we know better.
+      if (!summary) return
+      if (!assessmentModuleEnabled(summary, summary)) {
+        setAssessments(disabledAssessmentsResponse(effectiveAccess.companyCode))
+        return
+      }
+      try {
+        const assessmentsData = await getAssessments(effectiveAccess, { limit: 50, offset: assessmentOffset })
+        setAssessments(assessmentsData)
+      } catch (error) {
+        if (isModuleDisabledError(error, 'assessments')) {
+          setAssessments(disabledAssessmentsResponse(effectiveAccess.companyCode))
+          return
+        }
+        if (!opts.silent) setNoticeErr(friendlyDashboardError(error, 'Could not load assessments.'))
+      }
+    },
+    [access, assessmentOffset, summary],
+  )
+
   // Core dashboard data (summary, notifications, reports, assessments). This is
   // independent of list filters, so navigating or filtering never reloads it.
   const refreshAll = useCallback(
@@ -660,25 +849,56 @@ function App() {
         setNotice('Refreshing hiring dashboard...')
       }
       try {
+        let bootstrapData: DashboardBootstrapResponse | null = null
+        try {
+          bootstrapData = await getDashboardBootstrap(effectiveAccess)
+        } catch (error) {
+          // WATHEFNI_WORKSPACE_BOOT defaults OFF. A 404 is the intentional
+          // dark-launch signal: preserve the existing pre-hiring boot exactly.
+          if (!(error instanceof DashboardApiError) || error.status !== 404) throw error
+        }
+
+        if (bootstrapData) {
+          setWorkspaceBootstrap(bootstrapData)
+          const hasPrehire = bootstrapData.enabled_modules.includes('pre_hiring')
+          if (!hasPrehire) {
+            const hasNotifications = POSTHIRE_MODULES.some((module) => bootstrapData.enabled_modules.includes(module))
+            const notificationsData = hasNotifications
+              ? await getNotifications(effectiveAccess)
+              : {
+                  company_code: bootstrapData.company_code,
+                  enabled_modules: bootstrapData.enabled_modules,
+                  notifications: [],
+                  action_items: [],
+                }
+            setSummary(null)
+            setApplications(null)
+            setInterviews(null)
+            setAssessments(null)
+            setAssessmentConfig(null)
+            setReports(null)
+            setNotifications(notificationsData)
+            if (!silent) setNoticeOk('You’re viewing the latest workspace data.')
+            return
+          }
+        } else {
+          setWorkspaceBootstrap(null)
+        }
+
         const [summaryData, notificationsData, reportsData] = await Promise.all([
           getSummary(effectiveAccess),
           getNotifications(effectiveAccess),
           getPrehireReports(effectiveAccess),
         ])
-        let assessmentsData = disabledAssessmentsResponse(summaryData.company_code)
         let assessmentConfigData: AssessmentConfigResponse | null = null
-        if (assessmentModuleEnabled(summaryData)) {
+        if (assessmentModuleEnabled(bootstrapData || summaryData, summaryData)) {
           try {
-            ;[assessmentsData, assessmentConfigData] = await Promise.all([
-              getAssessments(effectiveAccess),
-              getAssessmentConfig(effectiveAccess),
-            ])
+            assessmentConfigData = await getAssessmentConfig(effectiveAccess)
           } catch (error) {
             if (!isModuleDisabledError(error, 'assessments')) throw error
           }
         }
         setSummary(summaryData)
-        setAssessments(assessmentsData)
         setAssessmentConfig(assessmentConfigData)
         setNotifications(notificationsData)
         setReports(reportsData)
@@ -702,20 +922,29 @@ function App() {
 
   // Revalidate everything quietly after an action, without freezing the UI.
   const revalidatePrehire = useCallback(() => {
+    if (!prehireEnabled) return
     void refreshAll(access, { silent: true })
     void loadApplications(access, { silent: true })
     void loadInterviews(access, { silent: true })
-  }, [access, refreshAll, loadApplications, loadInterviews])
+    void loadAssessments(access, { silent: true })
+    void loadJobs(access, { silent: true })
+    void loadAllPositions(access)
+  }, [access, prehireEnabled, refreshAll, loadApplications, loadInterviews, loadAssessments, loadJobs, loadAllPositions])
 
   // Explicit "Refresh" button: reload core data (with visible feedback) and the
-  // two lists alongside it.
+  // lists alongside it.
   const refreshEverything = useCallback(
     (nextAccess = access) => {
-      void loadApplications(nextAccess, { silent: true })
-      void loadInterviews(nextAccess, { silent: true })
+      if (prehireEnabled) {
+        void loadApplications(nextAccess, { silent: true })
+        void loadInterviews(nextAccess, { silent: true })
+        void loadAssessments(nextAccess, { silent: true })
+        void loadJobs(nextAccess, { silent: true })
+        void loadAllPositions(nextAccess)
+      }
       return refreshAll(nextAccess)
     },
-    [access, refreshAll, loadApplications, loadInterviews],
+    [access, prehireEnabled, refreshAll, loadApplications, loadInterviews, loadAssessments, loadJobs, loadAllPositions],
   )
 
   useEffect(() => {
@@ -727,20 +956,44 @@ function App() {
   }, [access, accessIssue, refreshAll])
 
   useEffect(() => {
-    if (!access.token || !access.companyCode || accessIssue) return
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
     const timer = window.setTimeout(() => {
       void loadApplications(access, { silent: true })
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [access, accessIssue, loadApplications])
+  }, [access, accessIssue, prehireEnabled, loadApplications])
 
   useEffect(() => {
-    if (!access.token || !access.companyCode || accessIssue) return
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
     const timer = window.setTimeout(() => {
       void loadInterviews(access, { silent: true })
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [access, accessIssue, loadInterviews])
+  }, [access, accessIssue, prehireEnabled, loadInterviews])
+
+  useEffect(() => {
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
+    const timer = window.setTimeout(() => {
+      void loadAssessments(access, { silent: true })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [access, accessIssue, prehireEnabled, loadAssessments])
+
+  useEffect(() => {
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
+    const timer = window.setTimeout(() => {
+      void loadJobs(access, { silent: true })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [access, accessIssue, prehireEnabled, loadJobs])
+
+  useEffect(() => {
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
+    const timer = window.setTimeout(() => {
+      void loadAllPositions(access)
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [access, accessIssue, prehireEnabled, loadAllPositions])
 
   useEffect(() => {
     const nextId = dashboardChatConversationId(access)
@@ -758,9 +1011,9 @@ function App() {
   }, [access])
 
   useEffect(() => {
-    if (!access.token || !access.companyCode || accessIssue) return
+    if (!access.token || !access.companyCode || accessIssue || !prehireEnabled) return
     void loadChatSessions(access)
-  }, [access, accessIssue, loadChatSessions])
+  }, [access, accessIssue, prehireEnabled, loadChatSessions])
 
   const loadTeam = useCallback(async (effectiveAccess: DashboardAccess = access) => {
     if (!effectiveAccess.token || !effectiveAccess.companyCode) return
@@ -958,9 +1211,12 @@ function App() {
       localStorage.removeItem('wathefni_company_code')
       const nextAccess = normalizedAccess({ token: '', hrPhone: '', companyCode: 'WATHEFNI', email: '', password: '' })
       setAccess(nextAccess)
+      setWorkspaceBootstrap(null)
       setSummary(null)
       setApplications(null)
       setInterviews(null)
+      setJobsData(null)
+      setAllPositions([])
       setAssessments(null)
       setAssessmentConfig(null)
       setRanking(null)
@@ -1167,7 +1423,41 @@ function App() {
     setQuery('')
     setStatus('')
     setCandidateOffset(0)
-    setCandidateFilters((current) => ({ ...current, position: job.position_code || '' }))
+    setCandidateFilters((current) => ({ ...current, position: job.position_code || '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'newest' }))
+    openPage('candidates')
+  }
+
+  // "Review ready candidates": land straight on the exact cohort the overview
+  // card counted (screening_complete / review_pending), sorted to the top,
+  // instead of dumping HR on the generic, unfiltered candidate list.
+  function viewReadyForReviewCandidates() {
+    setQuery('')
+    setStatus('')
+    setCandidateOffset(0)
+    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'ready_for_review' }))
+    openPage('candidates')
+  }
+
+  // "Follow up with candidates": apply the real follow-up filter so the table
+  // shows exactly the cohort the overview card counted, not just the capped
+  // 6-item queue at the top of the page.
+  function viewFollowUpCandidates() {
+    setQuery('')
+    setStatus('')
+    setCandidateOffset(0)
+    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: 'needed', activityFrom: '', activityTo: '', sort: 'newest' }))
+    openPage('candidates')
+  }
+
+  // "Awaiting assessment": the Assessments page queue only ever shows the
+  // currently-loaded page of candidates. This lands HR on the exact same
+  // cohort the "pending" headline count reflects, in full, instead of a
+  // dead-end "open Candidates yourself" message.
+  function viewPendingAssessmentCandidates() {
+    setQuery('')
+    setStatus('')
+    setCandidateOffset(0)
+    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: 'awaiting', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'newest' }))
     openPage('candidates')
   }
 
@@ -1403,7 +1693,7 @@ function App() {
         <section className="p-5 lg:p-9">
           <header className="mb-9 flex flex-col gap-5 border-b border-line/50 pb-8 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' || activePage === 'activity' ? 'Workspace' : 'Pre-hiring'}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' || activePage === 'activity' || activePage === 'notifications' ? 'Workspace' : 'Pre-hiring'}</div>
               <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl">
                 {showingInviteAcceptance ? 'Complete your Wathefni invite' : accessIssue ? 'Verify your Wathefni access' : activePage === 'overview' ? 'Wathefni Pre-Hiring Control Center' : pageTitle}
               </h1>
@@ -1492,11 +1782,13 @@ function App() {
                   needsReview={needsReview}
                   notificationIssues={notificationIssues}
                   onOpenCandidate={openCandidateByKey}
-                  onOpenCandidates={() => openPage('candidates')}
+                  onOpenFollowUps={viewFollowUpCandidates}
                   onOpenInterviews={() => openPage('interviews')}
                   onOpenRanking={() => openPage('ranking')}
                   onOpenAssessments={() => openPage('assessments')}
-                  positions={summary?.positions || []}
+                  onOpenReadyForReview={viewReadyForReviewCandidates}
+                  onOpenRoleCandidates={viewJobCandidates}
+                  positions={allPositionsForSelectors}
                 />
               )}
               {activePage === 'ai' && (
@@ -1507,7 +1799,7 @@ function App() {
                   messages={chatMessages}
                   newChatConfirmOpen={newChatConfirmOpen}
                   assessmentEnabled={assessmentModuleOn}
-                  enabledModules={summary?.enabled_modules}
+                  enabledModules={moduleState?.enabled_modules}
                   onApplyNavigation={applyChatNavigation}
                   onAsk={askDashboardAssistant}
                   onConfirm={() => askDashboardAssistant('Yes, confirm it')}
@@ -1529,15 +1821,20 @@ function App() {
               {activePage === 'jobs' && (
                 <JobsPage
                   canExportReports={canExportReports}
+                  canManageJobs={canManageJobs}
+                  jobsData={jobsData}
+                  loadingMore={jobsLoadingMore}
                   onCreate={() => {
                     setPage('ai')
                     void askDashboardAssistant('I want to create a new job opening.')
                   }}
                   onExport={() => exportReport('roles', 'Role report')}
+                  onLoadMore={loadMoreJobs}
+                  onQueryChange={setJobsQuery}
                   onRefresh={() => refreshEverything()}
                   onSelect={setSelectedJob}
                   onViewCandidates={viewJobCandidates}
-                  positions={summary?.positions || []}
+                  query={jobsQuery}
                 />
               )}
               {activePage === 'candidates' && (
@@ -1546,7 +1843,7 @@ function App() {
                     canImportCandidates ? (
                       <ImportCvButton
                         access={access}
-                        positions={summary?.positions || []}
+                        positions={allPositionsForSelectors}
                         onAccessIssue={handleAccessIssue}
                         onImported={() => {
                           setImportReloadKey((value) => value + 1)
@@ -1559,7 +1856,7 @@ function App() {
                     canImportCandidates ? (
                       <ImportReviewQueue
                         access={access}
-                        positions={summary?.positions || []}
+                        positions={allPositionsForSelectors}
                         onAccessIssue={handleAccessIssue}
                         reloadKey={importReloadKey}
                         onChanged={() => {
@@ -1573,8 +1870,6 @@ function App() {
                   assessmentEnabled={assessmentModuleOn}
                   busy={busy}
                   filters={candidateFilters}
-                  enabledNotificationModules={enabledNotificationModules}
-                  notifications={notifications?.notifications || []}
                   offset={applications?.offset || 0}
                   onFilter={() => {
                     setCandidateOffset(0)
@@ -1583,7 +1878,7 @@ function App() {
                   onPage={(nextOffset) => setCandidateOffset(Math.max(0, nextOffset))}
                   onPreviewCv={previewCv}
                   onSelect={(application) => setSelected(application)}
-                  positions={summary?.positions || []}
+                  positions={allPositionsForSelectors}
                   query={query}
                   setQuery={(value) => {
                     setCandidateOffset(0)
@@ -1647,17 +1942,22 @@ function App() {
                   config={assessmentConfig}
                   attempts={assessments?.attempts || []}
                   averagePercent={assessments?.average_percent}
-                  onOpenCandidate={(appKey) => {
-                    const application = allApplications.find((item) => item.app_key === appKey)
-                    if (application) setSelected(application)
-                  }}
+                  limit={assessments?.limit || 25}
+                  offset={assessments?.offset || 0}
+                  total={assessments?.total || 0}
+                  onOpenCandidate={openCandidateByKey}
+                  onOpenFollowUpCandidates={viewPendingAssessmentCandidates}
                   onPreviewReport={previewReport}
                   onRecalculateNorms={recalculateNorms}
-                  onRefresh={() => refreshEverything()}
+                  onRefresh={() => {
+                    setAssessmentOffset(0)
+                    void refreshEverything()
+                  }}
                   onSendAssessment={async (application) => {
                     if (!(await confirm({ title: 'Send assessment?', body: `${candidateName(application)} will receive an application assessment link by message.`, confirmLabel: 'Send assessment' }))) return
                     await mutate('Sending assessment', () => sendAssessment(access, application.app_key), `send_assessment:${application.app_key}`)
                   }}
+                  onSetOffset={(value) => setAssessmentOffset(Math.max(0, value))}
                   busy={busy}
                   canManageAssessments={canManageAssessments}
                   statusCounts={assessments?.status_counts || []}
@@ -1667,7 +1967,7 @@ function App() {
               {activePage === 'ranking' && (
                 <RankingPage
                   busy={busy}
-                  positions={summary?.positions || []}
+                  positions={allPositionsForSelectors}
                   rankPosition={rankPosition}
                   ranking={ranking}
                   runRanking={runRanking}
@@ -1678,6 +1978,17 @@ function App() {
               {activePage === 'notifications' && (
                 <NotificationsPage
                   actionItems={notifications?.action_items || []}
+                  deliveryCenter={
+                    anyPosthireModuleEnabled(moduleState) ? (
+                      <PostHireDeliveryCenter
+                        access={access}
+                        permissions={userAccess?.permissions || []}
+                        role={userAccess?.role || userAccess?.user?.role}
+                        onNotice={setNotice}
+                        onAccessIssue={handleAccessIssue}
+                      />
+                    ) : null
+                  }
                   enabledModules={enabledNotificationModules}
                   notifications={notifications?.notifications || []}
                   onNavigate={openPage}
@@ -1711,6 +2022,7 @@ function App() {
                   onLogout={logout}
                   onSave={saveAccess}
                   onUpdateUser={updateTeamMember}
+                  prehireEnabled={prehireEnabled}
                   setAccess={setAccess}
                   setInviteEmail={setInviteEmail}
                   setInviteName={setInviteName}
@@ -1731,6 +2043,7 @@ function App() {
                   role={userAccess?.role || userAccess?.user?.role}
                   onNotice={setNotice}
                   onAccessIssue={handleAccessIssue}
+                  onOpenNotifications={() => openPage('notifications')}
                 />
               )}
             </>
@@ -1759,15 +2072,19 @@ function App() {
               canManageInterviews={canManageInterviews}
               canDecideCandidates={canDecideCandidates}
               setMessage={setMessage}
+              videoInterviewsEnabled={dashboardModuleEnabled(moduleState, 'video_interviews')}
             />
           ) : null}
 
           {selectedJob ? (
             <JobDrawer
               job={selectedJob}
+              canManageJobs={canManageJobs}
+              statusBusy={jobStatusBusy}
               onClose={() => setSelectedJob(null)}
               onCopy={copyToClipboard}
               onDownloadQr={() => downloadQr(jobQrDataUrl, selectedJob)}
+              onSetStatus={(status) => setJobStatus(selectedJob, status)}
               onViewCandidates={() => viewJobCandidates(selectedJob)}
               qrDataUrl={jobQrDataUrl}
             />
@@ -1858,7 +2175,7 @@ const pageSubtitles: Record<Page, string> = {
   interviews: 'Track interviews, review candidate responses, and capture feedback in one place.',
   assessments: 'Assessment sending, progress, results, and official report review.',
   ranking: 'Guidance on who HR should prioritize for a selected job.',
-  notifications: 'Grouped HR action alerts and exceptions that need attention now.',
+  notifications: 'HR alerts plus employee message delivery — see who needs another channel and follow up in one place.',
   reports: 'Hiring reports for roles, candidates, CVs, assessments, and follow-ups.',
   employees: 'Your people directory — roles, departments, and onboarding status in one place.',
   onboarding: 'New hires in progress, open documents, and reminders to keep onboarding moving.',
@@ -1881,9 +2198,11 @@ function OverviewPage({
   notificationIssues,
   onOpenAssessments,
   onOpenCandidate,
-  onOpenCandidates,
+  onOpenFollowUps,
   onOpenInterviews,
   onOpenRanking,
+  onOpenReadyForReview,
+  onOpenRoleCandidates,
   positions,
 }: {
   applications: ApplicationSummary[]
@@ -1894,9 +2213,11 @@ function OverviewPage({
   notificationIssues: NotificationRow[]
   onOpenAssessments: () => void
   onOpenCandidate: (appKey?: string) => void
-  onOpenCandidates: () => void
+  onOpenFollowUps: () => void
   onOpenInterviews: () => void
   onOpenRanking: () => void
+  onOpenReadyForReview: () => void
+  onOpenRoleCandidates: (job: PositionSummary) => void
   positions: PositionSummary[]
 }) {
   const interviewReady = applications.filter((application) => application.cv?.received && application.interview?.interview_type !== 'async_video')
@@ -1934,7 +2255,7 @@ function OverviewPage({
         : 'No candidates are waiting for HR review.',
       icon: UserCheck,
       tone: reviewCount ? ('warning' as const) : ('success' as const),
-      onClick: onOpenCandidates,
+      onClick: onOpenReadyForReview,
     },
     assessmentEnabled ? assessmentAction : interviewAction,
     {
@@ -1945,7 +2266,7 @@ function OverviewPage({
         : 'No candidate follow-ups need attention.',
       icon: Bell,
       tone: notificationIssues.length ? ('danger' as const) : ('success' as const),
-      onClick: onOpenCandidates,
+      onClick: onOpenFollowUps,
     },
     {
       label: 'Prioritize by role',
@@ -1956,76 +2277,45 @@ function OverviewPage({
       onClick: onOpenRanking,
     },
   ]
-  const commandStats = [
-    { label: 'Ready for review', value: reviewCount },
-    assessmentEnabled
-      ? { label: 'Assessment ready', value: assessmentCount }
-      : { label: 'Interview next steps', value: interviewReady.length },
-    { label: 'Candidate follow-ups', value: notificationIssues.length },
-  ]
   const nextAction = topActions.find((item) => item.value > 0) || topActions[0]
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-3xl border border-line/80 bg-ink text-white shadow-soft">
         <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full bg-[#c89445]/10 blur-3xl" />
-        <div className="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.8fr] lg:p-8">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/45">Next best action</div>
-            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{nextAction.label}</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{nextAction.detail}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-ink shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f4e7cf] hover:shadow-[0_16px_36px_rgba(0,0,0,0.25),0_0_0_1px_rgba(200,148,69,0.22)]"
-                onClick={nextAction.onClick}
-                type="button"
-              >
-                Open work queue
-              </button>
-              <button
-                className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
-                onClick={onOpenRanking}
-                type="button"
-              >
-                Check ranking
-              </button>
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {commandStats.map((item) => <CommandStat key={item.label} label={item.label} value={item.value} />)}
+        <div className="p-6 lg:p-8">
+          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/45">Next best action</div>
+          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{nextAction.label}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{nextAction.detail}</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-ink shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f4e7cf] hover:shadow-[0_16px_36px_rgba(0,0,0,0.25),0_0_0_1px_rgba(200,148,69,0.22)]"
+              onClick={nextAction.onClick}
+              type="button"
+            >
+              Open work queue
+            </button>
+            <button
+              className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
+              onClick={onOpenRanking}
+              type="button"
+            >
+              Check ranking
+            </button>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>What needs attention today</CardTitle>
-            <CardDescription>Start with the hiring actions that move candidates forward.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            {topActions.map((item) => (
-              <ActionCard item={item} key={item.label} />
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Today’s numbers</CardTitle>
-            <CardDescription>Company-wide totals that explain today’s workload.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <Info label="Ready for review" value={`${reviewCount} candidates`} />
-            {assessmentEnabled ? (
-              <Info label="Ready for assessment" value={`${assessmentCount} candidates`} />
-            ) : (
-              <Info label="Interview next steps" value={`${interviewReady.length} candidates`} />
-            )}
-            <Info label="Open roles with applicants" value={`${activeRoles.length} roles`} />
-            <Info label="Candidate follow-ups" value={`${notificationIssues.length} items`} />
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>What needs attention today</CardTitle>
+          <CardDescription>Start with the hiring actions that move candidates forward.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {topActions.map((item) => (
+            <ActionCard item={item} key={item.label} />
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>
@@ -2071,37 +2361,12 @@ function OverviewPage({
           </CardHeader>
           <CardContent className="space-y-3">
             {positions.slice(0, 5).map((position) => (
-              <RoleBottleneck assessmentEnabled={assessmentEnabled} job={position} key={position.position_code} onOpenCandidates={() => onOpenCandidates()} />
+              <RoleBottleneck assessmentEnabled={assessmentEnabled} job={position} key={position.position_code} onOpenCandidates={() => onOpenRoleCandidates(position)} />
             ))}
             {!positions.length ? <EmptyState text="No active roles to analyze yet." /> : null}
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick links</CardTitle>
-          <CardDescription>Jump straight to the part of hiring you need.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <QuickAction
-            description="Search, filter, open drawers, and manage candidate actions."
-            label="Open candidates"
-            onClick={onOpenCandidates}
-          />
-          <QuickAction description="Run AI-backed fit ranking for a selected role." label="Rank a role" onClick={onOpenRanking} />
-          {assessmentEnabled ? (
-            <QuickAction description="Send or inspect assessment reports." label="Assessment queue" onClick={onOpenAssessments} />
-          ) : (
-            <QuickAction description="Review scheduled and async video interviews." label="Interview queue" onClick={onOpenInterviews} />
-          )}
-          <QuickAction
-            description="See candidates who need HR contact from the pre-hiring queue."
-            label="Candidate follow-ups"
-            onClick={onOpenCandidates}
-          />
-        </CardContent>
-      </Card>
     </div>
   )
 }
@@ -2124,10 +2389,8 @@ function CandidatesPage({
   assessmentEnabled,
   busy,
   filters,
-  enabledNotificationModules,
   importButton,
   importReview,
-  notifications,
   offset,
   onFilter,
   onPage,
@@ -2145,10 +2408,8 @@ function CandidatesPage({
   assessmentEnabled: boolean
   busy: boolean
   filters: CandidateFilters
-  enabledNotificationModules?: string[]
   importButton?: ReactNode
   importReview?: ReactNode
-  notifications: NotificationRow[]
   offset: number
   onFilter: () => void
   onPage: (offset: number) => void
@@ -2180,7 +2441,6 @@ function CandidatesPage({
   })
   return (
     <div className="space-y-6">
-      <CandidateFollowUpQueue applications={applications} enabledModules={enabledNotificationModules} notifications={notifications} onSelect={onSelect} />
       {importReview}
       <Card>
       <CardHeader>
@@ -2229,6 +2489,7 @@ function CandidatesPage({
               {assessmentEnabled ? (
                 <Select onChange={(event) => updateFilter('assessmentStatus', event.target.value)} value={filters.assessmentStatus}>
                   <option value="">Any assessment status</option>
+                  <option value="awaiting">Awaiting assessment</option>
                   <option value="none">No assessment yet</option>
                   <option value="pending">Pending</option>
                   <option value="started">Started</option>
@@ -2315,59 +2576,6 @@ function CandidatesPage({
   )
 }
 
-function CandidateFollowUpQueue({
-  applications,
-  enabledModules,
-  notifications,
-  onSelect,
-}: {
-  applications: ApplicationSummary[]
-  enabledModules?: string[]
-  notifications: NotificationRow[]
-  onSelect: (application: ApplicationSummary) => void
-}) {
-  const followUps = uniqueNotificationFollowUps(moduleScopedNotificationRows(notifications, enabledModules)).slice(0, 6)
-  if (!followUps.length) return null
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle>Pre-hiring follow-up queue</CardTitle>
-            <CardDescription>Candidates who need HR contact before their hiring step can move forward.</CardDescription>
-          </div>
-          <Badge tone="warning">{followUps.length} need attention</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-3 md:grid-cols-2">
-        {followUps.map((item) => {
-          const application = applications.find((candidate) => candidate.app_key === item.app_key)
-          return (
-            <div className="rounded-3xl border border-white/70 bg-white/48 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_12px_30px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft" key={item.delivery_id}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="font-semibold">{item.candidate_name || item.target_phone || 'Candidate'}</div>
-                  <div className="mt-1 text-sm text-subtle">{item.position_title || item.position_code || 'Open application'}</div>
-                </div>
-                <Badge tone="warning">{deliveryLabel(item)}</Badge>
-              </div>
-              <div className="mt-3 text-sm leading-6 text-subtle">{deliveryExplanation(item)}</div>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs text-subtle">Updated {formatDateTime(item.created_at)}</span>
-                {application ? (
-                  <Button onClick={() => onSelect(application)} size="sm" variant="secondary">
-                    Open profile
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-          )
-        })}
-      </CardContent>
-    </Card>
-  )
-}
-
 function CandidateDrawer({
   access,
   assessmentEnabled,
@@ -2385,6 +2593,7 @@ function CandidateDrawer({
   onOpenInterviews,
   onPreviewCv,
   setMessage,
+  videoInterviewsEnabled,
 }: {
   access: DashboardAccess
   assessmentEnabled: boolean
@@ -2402,10 +2611,11 @@ function CandidateDrawer({
   onOpenInterviews: () => void
   onPreviewCv: (application: ApplicationSummary) => void
   setMessage: (value: string) => void
+  videoInterviewsEnabled: boolean
 }) {
   const ranking = candidate.ranking
   const evaluation = ranking?.gpt_evaluation
-  const primaryAction = candidatePrimaryAction(candidate, assessmentEnabled)
+  const primaryAction = candidatePrimaryAction(candidate, assessmentEnabled, videoInterviewsEnabled)
   const recommendationText = assessmentEnabled
     ? evaluation?.recommended_next_step
     : safeModuleRecommendation(evaluation?.recommended_next_step, primaryAction.detail)
@@ -2414,11 +2624,11 @@ function CandidateDrawer({
   const who = candidateName(candidate)
   const runSendAssessment = async () => {
     if (!(await confirm({ title: 'Send assessment?', body: `${who} will receive an application assessment link by message.`, confirmLabel: 'Send assessment' }))) return
-    await mutate('Sending assessment', () => sendAssessment(access, candidate.app_key), actionKey('send_assessment'))
+    await mutate('Sending assessment', () => sendAssessment(access, candidate.app_key, message), actionKey('send_assessment'))
   }
   const runSendVideoInterview = async () => {
     if (!(await confirm({ title: 'Send video interview?', body: `${who} will receive a video interview invite link by message.`, confirmLabel: 'Send invite' }))) return
-    await mutate('Sending video interview', () => sendVideoInterview(access, candidate.app_key), actionKey('send_video_interview'))
+    await mutate('Sending video interview', () => sendVideoInterview(access, candidate.app_key, message), actionKey('send_video_interview'))
   }
   const runNotify = async (key: string) => {
     if (!(await confirm({ title: 'Notify candidate?', body: `${who} will receive a message now.`, confirmLabel: 'Send message' }))) return
@@ -2463,16 +2673,16 @@ function CandidateDrawer({
   const primaryDisabled =
     busy ||
     (primaryAction.id === 'send_assessment' && !canManageAssessments) ||
-    (primaryAction.id === 'send_video_interview' && !canManageInterviews) ||
+    (primaryAction.id === 'send_video_interview' && (!canManageInterviews || !videoInterviewsEnabled)) ||
     (primaryAction.id === 'shortlist' && !canManageCandidates) ||
     (primaryAction.id === 'follow_up' && !canManageCandidates)
   return (
     <div className="fixed inset-0 z-30 bg-ink/25 backdrop-blur-[2px]" onClick={onClose}>
       <aside
-        className="ml-auto flex h-full w-full max-w-3xl animate-[drawerIn_220ms_ease-out] flex-col overflow-y-auto border-l border-white/70 bg-panel/92 p-7 shadow-[0_28px_90px_rgba(24,20,15,0.20)] backdrop-blur-2xl"
+        className="ml-auto flex h-full w-full max-w-3xl animate-[drawerIn_220ms_ease-out] flex-col overflow-y-auto border-l border-white/70 bg-panel/95 p-6 shadow-[0_28px_90px_rgba(24,20,15,0.18)] backdrop-blur-2xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-line/60 pb-6">
+        <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={statusTone(candidate.status)}>{stageLabel(candidate.status)}</Badge>
@@ -2488,19 +2698,24 @@ function CandidateDrawer({
 
         <DrawerStatusStrip application={candidate} assessmentEnabled={assessmentEnabled} />
 
-        <section className="mt-6 rounded-[1.75rem] border border-white/70 bg-white/55 p-5 shadow-[0_1px_0_rgba(255,255,255,0.85)_inset,0_16px_40px_rgba(24,20,15,0.07)] backdrop-blur">
-          <div className="text-xs font-semibold uppercase tracking-wide text-subtle">Recommended next action</div>
-          <div className="mt-2 text-lg font-semibold tracking-tight text-text">{primaryAction.label}</div>
-          <p className="mt-2 text-sm leading-6 text-subtle">
-            {recommendationText || primaryAction.detail}
-          </p>
-          <Textarea
-            className="mt-4"
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="Optional message to candidate"
-            value={message}
-          />
-          <div className="mt-4 flex flex-wrap gap-2">
+        <section className="mt-5 rounded-[1.45rem] border border-white/70 bg-white/58 p-4 shadow-[0_1px_0_rgba(255,255,255,0.82)_inset,0_12px_30px_rgba(24,20,15,0.055)] backdrop-blur">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">Recommended next action</div>
+              <div className="mt-1.5 text-[17px] font-semibold tracking-tight text-text">{primaryAction.label}</div>
+              <p className="mt-1.5 text-[13px] leading-5 text-subtle">
+                {recommendationText || primaryAction.detail}
+              </p>
+            </div>
+            <Textarea
+              className="min-h-16 text-[13px]"
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Optional note"
+              rows={2}
+              value={message}
+            />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
             <Button disabled={primaryDisabled} onClick={runPrimaryAction}>
               {primaryRunning ? (
                 <Loader2 className="animate-spin" size={16} />
@@ -2517,7 +2732,7 @@ function CandidateDrawer({
               <FileText size={16} /> Preview CV
             </Button>
             <details className="relative">
-              <summary className="inline-flex cursor-pointer items-center rounded-2xl border border-white/70 bg-white/55 px-4 py-2 text-sm font-semibold text-text shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_20px_rgba(24,20,15,0.045)] transition hover:bg-panel">
+              <summary className="inline-flex h-11 cursor-pointer items-center rounded-full px-4 text-sm font-semibold text-subtle transition hover:bg-[#f4e7cf]/45 hover:text-text">
                 More actions
               </summary>
               <div className="mt-2 grid gap-2 rounded-3xl border border-white/70 bg-panel/90 p-3 shadow-soft sm:grid-cols-2">
@@ -2526,9 +2741,11 @@ function CandidateDrawer({
                     {runningAction === actionKey('send_assessment') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send assessment'}
                   </Button>
                 ) : null}
-                <Button disabled={busy || !canManageInterviews} onClick={() => void runSendVideoInterview()} size="sm" variant="secondary">
-                  {runningAction === actionKey('send_video_interview') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send video interview'}
-                </Button>
+                {videoInterviewsEnabled ? (
+                  <Button disabled={busy || !canManageInterviews} onClick={() => void runSendVideoInterview()} size="sm" variant="secondary">
+                    {runningAction === actionKey('send_video_interview') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send video interview'}
+                  </Button>
+                ) : null}
                 <Button disabled={busy || !canManageCandidates} onClick={() => mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate.app_key), actionKey('shortlist'))} size="sm" variant="secondary">
                   {runningAction === actionKey('shortlist') ? <><Loader2 className="animate-spin" size={14} /> Shortlisting…</> : 'Shortlist'}
                 </Button>
@@ -2616,7 +2833,7 @@ function CandidateDrawer({
   )
 }
 
-function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabled: boolean) {
+function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabled: boolean, videoInterviewsEnabled: boolean) {
   const interview = application.interview
   const asyncStatus = interview?.interview_type === 'async_video' ? asyncVideoDisplayStatus(interview) : null
   if (asyncStatus?.label === 'Ready for review') {
@@ -2637,7 +2854,7 @@ function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabl
       icon: 'send',
     }
   }
-  if (application.cv?.received && interview?.interview_type !== 'async_video') {
+  if (videoInterviewsEnabled && application.cv?.received && interview?.interview_type !== 'async_video') {
     return {
       id: 'send_video_interview',
       label: 'Send video interview',
@@ -2706,9 +2923,7 @@ function DrawerStatusStrip({ application, assessmentEnabled }: { application: Ap
       <StatusStripItem label="Screening" tone={application.screening_status === 'complete' ? 'success' : 'warning'} value={basicScreeningLabel(application)} />
       {assessmentEnabled ? (
         <StatusStripItem label="Assessment" tone={application.assessment?.status === 'completed' ? 'success' : 'warning'} value={assessmentLabel(application)} />
-      ) : (
-        <StatusStripItem label="Assessment" tone="muted" value="Disabled" />
-      )}
+      ) : null}
       <StatusStripItem
         label={application.interview?.interview_type === 'async_video' ? 'Video interview' : 'Interview'}
         tone={application.interview?.interview_type === 'async_video' ? asyncVideoDisplayStatus(application.interview).tone : application.interview?.status === 'completed' ? 'success' : application.interview?.status ? 'warning' : 'muted'}
@@ -2728,12 +2943,24 @@ function StatusStripItem({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/70 bg-white/45 p-3 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_20px_rgba(24,20,15,0.035)]">
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-xs font-semibold uppercase tracking-wide text-subtle">{label}</div>
-        <Badge tone={tone}>{tone === 'success' ? 'Complete' : tone === 'warning' ? 'Action needed' : 'Info'}</Badge>
+    <div className="min-w-0 rounded-full border border-white/70 bg-white/48 px-3.5 py-2 shadow-[0_1px_0_rgba(255,255,255,0.75)_inset]">
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-subtle/78">{label}</div>
+          <div className="truncate text-[12.5px] font-medium text-text">{value}</div>
+        </div>
+        <span
+          aria-label={tone === 'success' ? 'Complete' : tone === 'warning' ? 'Action needed' : 'Info'}
+          className={cn(
+            'h-2.5 w-2.5 shrink-0 rounded-full',
+            tone === 'success' && 'bg-emerald-500',
+            tone === 'warning' && 'bg-amber-500',
+            tone === 'danger' && 'bg-rose-500',
+            tone === 'muted' && 'bg-ink/25',
+            tone === 'default' && 'bg-ink/35',
+          )}
+        />
       </div>
-      <div className="mt-2 text-sm font-medium text-text">{value}</div>
     </div>
   )
 }
@@ -2755,30 +2982,36 @@ function DrawerDecisionContext({
   const risks = evaluation?.risks || []
   if (!evaluation) {
     return (
-      <section className="mt-6 rounded-3xl border border-dashed border-line/80 bg-white/42 p-5 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
-        <div className="text-xs font-semibold uppercase tracking-wide text-subtle">AI decision support</div>
-        <div className="mt-2 text-lg font-semibold tracking-tight text-text">No fit summary generated yet.</div>
-        <p className="mt-2 text-sm leading-6 text-subtle">
-          Generate a fit summary for this candidate against {application.position?.title || application.position?.code || 'this role'}.
-          Use it as decision support alongside the CV, assessment, interview, and HR judgment.
-        </p>
-        <Button className="mt-4" disabled={busy || !canManageCandidates} onClick={onGenerateEvaluation}>
-          {busy ? <Loader2 className="animate-spin" size={16} /> : <Medal size={16} />} Generate fit summary
-        </Button>
+      <section className="mt-4 rounded-[1.35rem] border border-dashed border-line/70 bg-white/42 p-4 shadow-[0_1px_0_rgba(255,255,255,0.78)_inset]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">AI decision support</div>
+            <div className="mt-1 text-sm font-semibold text-text">No fit summary generated yet.</div>
+            <p className="mt-1 max-w-xl text-[12.5px] leading-5 text-subtle">
+              Generate a fit summary for {application.position?.title || application.position?.code || 'this role'} when you need deeper evidence.
+            </p>
+          </div>
+          <Button disabled={busy || !canManageCandidates} onClick={onGenerateEvaluation} size="sm" variant="secondary">
+            {busy ? <Loader2 className="animate-spin" size={14} /> : <Medal size={14} />} Generate
+          </Button>
+        </div>
       </section>
     )
   }
   return (
-    <section className="mt-6 rounded-2xl border border-ink/10 bg-panel p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="max-w-2xl">
-          <div className="text-xs font-semibold uppercase tracking-wide text-subtle">AI decision support</div>
-          <p className="mt-2 text-base font-medium leading-7 text-text">
-            {evaluation?.fit_summary || candidateSummary(application)}
-          </p>
+    <details className="mt-4 rounded-[1.35rem] border border-white/70 bg-white/42 p-4 shadow-[0_1px_0_rgba(255,255,255,0.78)_inset,0_8px_22px_rgba(24,20,15,0.035)]">
+      <summary className="cursor-pointer list-none">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">AI decision support</div>
+            <p className="mt-1 line-clamp-2 text-[13px] font-medium leading-5 text-text">
+              {evaluation?.fit_summary || candidateSummary(application)}
+            </p>
+          </div>
+          {application.ranking?.score != null ? <Badge>{Math.round(application.ranking.score)} / 100</Badge> : null}
         </div>
-        {application.ranking?.score != null ? <Badge>{Math.round(application.ranking.score)} / 100</Badge> : null}
-      </div>
+        <div className="mt-2 text-[12px] font-medium text-subtle">Open evidence details</div>
+      </summary>
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
         <EvaluationPanel label="Strengths" tone="strong" values={strengths} />
         <EvaluationPanel label="Gaps / missing evidence" tone="warning" values={gaps} />
@@ -2788,25 +3021,32 @@ function DrawerDecisionContext({
         <span className="font-semibold">Recommended next step: </span>
         {evaluation?.recommended_next_step || recommendedCandidateAction(application)}
       </div>
-    </section>
+    </details>
   )
 }
 
 function JobDrawer({
   job,
+  canManageJobs,
+  statusBusy,
   onClose,
   onCopy,
   onDownloadQr,
+  onSetStatus,
   onViewCandidates,
   qrDataUrl,
 }: {
   job: PositionSummary
+  canManageJobs: boolean
+  statusBusy: boolean
   onClose: () => void
   onCopy: (value: string | undefined, label: string) => void
   onDownloadQr: () => void
+  onSetStatus: (status: 'open' | 'closed') => void
   onViewCandidates: () => void
   qrDataUrl: string
 }) {
+  const isOpen = normalizedJobStatus(job) === 'open'
   return (
     <div className="fixed inset-0 z-30 bg-ink/30" onClick={onClose}>
       <aside
@@ -2815,13 +3055,23 @@ function JobDrawer({
       >
         <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
           <div>
-            <Badge tone={normalizedJobStatus(job) === 'open' ? 'success' : 'muted'}>{stageLabel(normalizedJobStatus(job))}</Badge>
+            <Badge tone={isOpen ? 'success' : 'muted'}>{stageLabel(normalizedJobStatus(job))}</Badge>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">{job.position_title || job.position_code}</h2>
             <p className="mt-1 text-sm text-subtle">{job.description || 'Application opening.'}</p>
           </div>
-          <Button onClick={onClose} variant="secondary">
-            Close
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={!canManageJobs || statusBusy}
+              onClick={() => onSetStatus(isOpen ? 'closed' : 'open')}
+              title={!canManageJobs ? 'Managing job openings is disabled for your role' : undefined}
+              variant="secondary"
+            >
+              {isOpen ? 'Close job' : 'Reopen job'}
+            </Button>
+            <Button onClick={onClose} variant="secondary">
+              Close
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -2925,25 +3175,35 @@ function JobDrawer({
 
 function JobsPage({
   canExportReports,
+  canManageJobs,
+  jobsData,
+  loadingMore,
   onCreate,
   onExport,
+  onLoadMore,
+  onQueryChange,
   onRefresh,
   onSelect,
   onViewCandidates,
-  positions,
+  query,
 }: {
   canExportReports: boolean
+  canManageJobs: boolean
+  jobsData: PositionsResponse | null
+  loadingMore: boolean
   onCreate: () => void
   onExport: () => void
+  onLoadMore: () => void
+  onQueryChange: (value: string) => void
   onRefresh: () => void
   onSelect: (job: PositionSummary) => void
   onViewCandidates: (job: PositionSummary) => void
-  positions: PositionSummary[]
+  query: string
 }) {
-  const openJobs = positions.filter((position) => normalizedJobStatus(position) === 'open').length
-  const totalApplications = positions.reduce((sum, position) => sum + Number(position.application_count || 0), 0)
-  const activeQrCodes = positions.filter((position) => normalizedJobStatus(position) === 'open' && position.apply_code).length
-  const closedJobs = positions.filter((position) => normalizedJobStatus(position) !== 'open').length
+  const positions = jobsData?.positions || []
+  const summary = jobsData?.summary
+  const totalCount = jobsData?.total_count ?? positions.length
+  const isSearching = query.trim().length > 0
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -2952,7 +3212,7 @@ function JobsPage({
           <p className="mt-1 text-sm text-subtle">Manage job openings, application links, QR codes, and applicant demand.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={onCreate}>
+          <Button disabled={!canManageJobs} onClick={onCreate} title={!canManageJobs ? 'Creating job openings is disabled for your role' : undefined}>
             <Plus size={16} /> Create with Assistant
           </Button>
           <Button onClick={onRefresh} variant="secondary">
@@ -2966,28 +3226,41 @@ function JobsPage({
 
       <MetricGrid
         metrics={[
-          { label: 'Open jobs', value: openJobs, icon: BriefcaseBusiness },
-          { label: 'Total applications', value: totalApplications, icon: Users },
-          { label: 'Active QR codes', value: activeQrCodes, icon: QrCode },
-          { label: 'Closed jobs', value: closedJobs, icon: PauseCircle },
+          { label: 'Open jobs', value: summary?.open_positions ?? 0, icon: BriefcaseBusiness },
+          { label: 'Total applications', value: summary?.total_applications ?? 0, icon: Users },
+          { label: 'Active QR codes', value: summary?.active_qr_codes ?? 0, icon: QrCode },
+          { label: 'Closed jobs', value: summary?.closed_positions ?? 0, icon: PauseCircle },
         ]}
       />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Job openings</CardTitle>
-          <CardDescription>Application links, QR codes, and applicant demand by role.</CardDescription>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+          <div>
+            <CardTitle>Job openings</CardTitle>
+            <CardDescription>
+              {isSearching
+                ? `${totalCount} result${totalCount === 1 ? '' : 's'} for “${query.trim()}”`
+                : 'Application links, QR codes, and applicant demand by role.'}
+            </CardDescription>
+          </div>
+          <SearchInput onChange={onQueryChange} placeholder="Search jobs by title or code…" value={query} />
         </CardHeader>
         <CardContent>
           {positions.length === 0 ? (
-            <EmptyState text="No job openings yet. Use “Create with Assistant” to add your first opening — you’ll get an application link and QR code to share." />
+            <EmptyState
+              text={
+                isSearching
+                  ? `No job openings match “${query.trim()}”.`
+                  : 'No job openings yet. Use “Create with Assistant” to add your first opening — you’ll get an application link and QR code to share.'
+              }
+            />
           ) : (
           <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                 <tr>
                   <th className="px-4 py-3">Job</th>
-                  <th className="px-4 py-3">Application link</th>
+                  <th className="px-4 py-3">Application code</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Applications</th>
                   <th className="px-4 py-3">Latest applicant</th>
@@ -3008,7 +3281,7 @@ function JobsPage({
                     </td>
                     <td className="px-4 py-2.5">
                       <Badge tone={normalizedJobStatus(job) === 'open' ? 'success' : 'muted'}>
-                        {normalizedJobStatus(job) === 'open' ? 'Open' : 'Closed'}
+                        {stageLabel(normalizedJobStatus(job))}
                       </Badge>
                     </td>
                     <td className="px-4 py-2.5">
@@ -3039,6 +3312,7 @@ function JobsPage({
                 ))}
               </tbody>
             </table>
+            <LoadMoreBar loaded={positions.length} loading={loadingMore} noun="job" onLoadMore={onLoadMore} total={totalCount} />
           </div>
           )}
         </CardContent>
@@ -3218,7 +3492,10 @@ function InterviewQueueRow({ interview, onOpen }: { interview: CandidateIntervie
   const isVideo = interview.interview_type === 'async_video'
   const videoStatus = asyncVideoDisplayStatus(interview)
   return (
-    <div className="grid grid-cols-[minmax(180px,1.2fr)_minmax(140px,1fr)_minmax(150px,0.9fr)_minmax(130px,0.8fr)_minmax(170px,1fr)_auto] items-center gap-3 border-b border-line/45 px-4 py-3.5 text-sm transition hover:bg-white/42 last:border-b-0">
+    <div
+      className="grid cursor-pointer grid-cols-[minmax(180px,1.2fr)_minmax(140px,1fr)_minmax(150px,0.9fr)_minmax(130px,0.8fr)_minmax(170px,1fr)_auto] items-center gap-3 border-b border-line/45 px-4 py-3.5 text-sm transition hover:bg-white/42 last:border-b-0"
+      onClick={onOpen}
+    >
       <div className="min-w-0">
         <div className="truncate font-semibold">{interview.candidate_name || interview.phone || 'Candidate'}</div>
         <div className="truncate text-xs text-subtle">{interview.candidate_email || interview.phone || 'No contact'}</div>
@@ -3330,23 +3607,30 @@ function InterviewDetailDrawer({
             </>
           ) : (
             <>
-              <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="secondary">
-                Open candidate
+              <Button disabled={busy || !canManageInterviews || interview.status === 'completed'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="secondary">
+                Mark completed
               </Button>
               {interview.meet_link ? (
                 <Button onClick={() => window.open(interview.meet_link, '_blank', 'noopener,noreferrer')} size="sm" variant="ghost">
                   <ExternalLink size={14} /> Meet
                 </Button>
               ) : null}
-              <Button disabled={busy || !canManageInterviews || interview.status === 'completed'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="ghost">
-                Mark completed
+              <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="ghost">
+                Open candidate
               </Button>
-              <Button disabled={busy || !canManageInterviews || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
-                No-show
-              </Button>
-              <Button disabled={busy || !canManageInterviews || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
-                Cancel
-              </Button>
+              <details className="relative">
+                <summary className="cursor-pointer rounded-full border border-line bg-panel-muted/60 px-3 py-1.5 text-sm text-subtle transition hover:border-ink/25 hover:text-text">
+                  More
+                </summary>
+                <div className="absolute right-0 z-10 mt-2 grid w-44 gap-2 rounded-xl border border-line bg-panel p-2 shadow-soft">
+                  <Button disabled={busy || !canManageInterviews || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
+                    No-show
+                  </Button>
+                  <Button disabled={busy || !canManageInterviews || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
+                    Cancel
+                  </Button>
+                </div>
+              </details>
             </>
           )}
         </div>
@@ -3591,11 +3875,16 @@ function AssessmentsPage({
   attempts,
   averagePercent,
   busy,
+  limit,
+  offset,
+  total,
   onOpenCandidate,
+  onOpenFollowUpCandidates,
   onPreviewReport,
   onRecalculateNorms,
   onRefresh,
   onSendAssessment,
+  onSetOffset,
   statusCounts,
   pendingTotal,
 }: {
@@ -3606,11 +3895,16 @@ function AssessmentsPage({
   attempts: AssessmentAttempt[]
   averagePercent?: number | null
   busy: boolean
+  limit: number
+  offset: number
+  total: number
   onOpenCandidate: (appKey: string) => void
+  onOpenFollowUpCandidates: () => void
   onPreviewReport: (attempt: AssessmentAttempt) => void
   onRecalculateNorms: () => void
   onRefresh: () => void
   onSendAssessment: (application: ApplicationSummary) => void
+  onSetOffset: (offset: number) => void
   statusCounts: Array<{ status: string; count: number }>
   pendingTotal?: number
 }) {
@@ -3622,8 +3916,9 @@ function AssessmentsPage({
   const pendingCount = typeof pendingTotal === 'number' ? pendingTotal : queue.length
   const needsReview = attempts.filter((attempt) => attempt.band === 'needs_review' || attempt.job_match?.fit_band === 'low').length
   const completedAttempts = attempts.filter((attempt) => attempt.status === 'completed')
-  const recentAttempts = attempts.slice(0, 8)
   const reports = completedAttempts.slice(0, 6)
+  const canGoBack = offset > 0
+  const canGoNext = offset + limit < total
   const itemBank = config?.item_bank
   const roleProfileCount = Object.keys(config?.role_profiles || {}).length
   const competencyCount = Object.keys(config?.framework?.competencies || {}).length
@@ -3715,8 +4010,11 @@ function AssessmentsPage({
             <EmptyState text={enabled ? 'No pending assessment queue. New candidates needing assessment will appear here.' : 'Assessments are not enabled for this company.'} />
           )}
           {queue.length && pendingCount > queue.length ? (
-            <div className="mt-3 text-sm text-subtle">
-              Showing {queue.length} of {pendingCount} pending. Open Candidates to reach the rest.
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-subtle">
+              <span>Showing {queue.length} of {pendingCount} pending.</span>
+              <Button onClick={onOpenFollowUpCandidates} size="sm" variant="secondary">
+                Open all in Candidates
+              </Button>
             </div>
           ) : null}
         </CardContent>
@@ -3728,7 +4026,7 @@ function AssessmentsPage({
           <CardDescription>Latest WhatsApp assessment attempts and score outcomes.</CardDescription>
         </CardHeader>
         <CardContent>
-          {recentAttempts.length ? (
+          {attempts.length ? (
             <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
               <table className="w-full min-w-[960px] text-left text-sm">
                 <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
@@ -3744,7 +4042,7 @@ function AssessmentsPage({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/45 bg-panel/42">
-                  {recentAttempts.map((attempt) => (
+                  {attempts.map((attempt) => (
                     <tr className="transition duration-150 hover:bg-white/55" key={attempt.attempt_id}>
                       <td className="px-4 py-3">
                         <div className="font-medium">{attempt.candidate_name || attempt.phone || 'Unknown candidate'}</div>
@@ -3777,6 +4075,21 @@ function AssessmentsPage({
           ) : (
             <EmptyState text="No assessment attempts yet." />
           )}
+          {total ? (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-subtle">
+              <div>
+                Showing {offset + 1}-{Math.min(offset + attempts.length, total)} of {total}
+              </div>
+              <div className="flex gap-2">
+                <Button disabled={busy || !canGoBack} onClick={() => onSetOffset(Math.max(0, offset - limit))} size="sm" variant="secondary">
+                  Previous
+                </Button>
+                <Button disabled={busy || !canGoNext} onClick={() => onSetOffset(offset + limit)} size="sm" variant="secondary">
+                  Next
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -3959,11 +4272,13 @@ const NOTIFICATION_ACTION_TARGETS: Record<string, Page> = {
 
 function NotificationsPage({
   actionItems,
+  deliveryCenter,
   enabledModules,
   notifications,
   onNavigate,
 }: {
   actionItems: NotificationActionItem[]
+  deliveryCenter?: ReactNode
   enabledModules?: string[]
   notifications: NotificationRow[]
   onNavigate: (page: Page) => void
@@ -3972,6 +4287,7 @@ function NotificationsPage({
   const alerts = groupedNotificationAlerts(actionItems, issues, enabledModules)
   return (
     <div className="space-y-6">
+      {deliveryCenter}
       <Card>
         <CardHeader>
           <CardTitle>Urgent HR alerts</CardTitle>
@@ -4353,12 +4669,14 @@ function ReportBreakdown({
   rows: Array<{ label: string; count: number }>
   title: string
 }) {
+  const shown = rows.slice(0, 8)
+  const remaining = rows.length - shown.length
   return (
     <div className="rounded-2xl border border-line bg-panel-muted/60 p-4">
       <div className="font-semibold">{title}</div>
       <div className="mt-3 space-y-2">
         {rows.length ? (
-          rows.slice(0, 8).map((row) => (
+          shown.map((row) => (
             <div className="flex items-center justify-between gap-3 text-sm" key={row.label}>
               <span className="text-subtle">{row.label}</span>
               <Badge>{row.count}</Badge>
@@ -4367,6 +4685,7 @@ function ReportBreakdown({
         ) : (
           <div className="text-sm text-subtle">{emptyText}</div>
         )}
+        {remaining > 0 ? <div className="pt-1 text-xs text-subtle/80">+{remaining} more — see the full export for details.</div> : null}
       </div>
     </div>
   )
@@ -4416,6 +4735,7 @@ function SettingsPage({
   onLogout,
   onSave,
   onUpdateUser,
+  prehireEnabled,
   setAccess,
   setInviteEmail,
   setInviteName,
@@ -4438,6 +4758,7 @@ function SettingsPage({
   onLogout: () => void
   onSave: () => void
   onUpdateUser: (userId: string, body: { role?: string; status?: string }) => void
+  prehireEnabled: boolean
   setAccess: (access: DashboardAccess) => void
   setInviteEmail: (value: string) => void
   setInviteName: (value: string) => void
@@ -4662,8 +4983,8 @@ function SettingsPage({
             </div>
           </CardContent>
         </Card>
-        {canManageUsers ? <IntegrationsCard access={access} /> : null}
-        {hasDashboardPermission(userAccess, 'candidate.import') ? <IntakeSettingsCard access={access} /> : null}
+        {prehireEnabled && canManageUsers ? <IntegrationsCard access={access} /> : null}
+        {prehireEnabled && hasDashboardPermission(userAccess, 'candidate.import') ? <IntakeSettingsCard access={access} /> : null}
     </div>
   )
 }
@@ -5506,15 +5827,6 @@ function ActionCard({
   )
 }
 
-function CommandStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.065] p-5 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/25 hover:bg-white/[0.09]">
-      <div className="text-sm text-white/55">{label}</div>
-      <div className="mt-2 text-3xl font-semibold tracking-tight text-white">{value}</div>
-    </div>
-  )
-}
-
 function RoleBottleneck({ assessmentEnabled, job, onOpenCandidates }: { assessmentEnabled: boolean; job: PositionSummary; onOpenCandidates: () => void }) {
   return (
     <button
@@ -5635,19 +5947,6 @@ function PipelineRow({ count, label }: { count: number; label: string }) {
         <div className="h-2 rounded-full bg-ink" style={{ width: `${width}%` }} />
       </div>
     </div>
-  )
-}
-
-function QuickAction({ description, label, onClick }: { description: string; label: string; onClick: () => void }) {
-  return (
-    <button
-      className="rounded-[1.35rem] border border-line/60 bg-white/34 p-4 text-left transition duration-200 hover:border-[#c89445]/35 hover:bg-panel/72"
-      onClick={onClick}
-      type="button"
-    >
-      <div className="font-semibold">{label}</div>
-      <div className="mt-1 text-sm text-subtle">{description}</div>
-    </button>
   )
 }
 
@@ -5871,7 +6170,10 @@ function hrNotificationText(value: string) {
 }
 
 function notificationIssueRows(notifications: NotificationRow[]) {
-  return notifications.filter((item) => !['sent', 'completed', 'recovered'].includes(normalizedDeliveryStatus(item)))
+  // "delivered" here is a Postmark delivery-confirmation event (the email
+  // reached the candidate) — a success, not something HR needs to follow up
+  // on. Treat it the same as sent/completed/recovered.
+  return notifications.filter((item) => !['sent', 'completed', 'recovered', 'delivered'].includes(normalizedDeliveryStatus(item)))
 }
 
 function moduleScopedNotificationRows(notifications: NotificationRow[], enabledModules?: string[]) {
@@ -5906,24 +6208,6 @@ function normalizedDeliveryStatus(item: NotificationRow) {
   if (raw === 'blocked_closed_conversation') return 'blocked_by_closed_conversation'
   if (raw === 'stale_conversation') return 'stale'
   return raw || 'unknown'
-}
-
-function deliveryLabel(item: NotificationRow) {
-  const normalized = normalizedDeliveryStatus(item)
-  if (normalized === 'blocked_by_closed_conversation') return 'Contact candidate'
-  if (normalized === 'stale') return 'Follow up with candidate'
-  if (normalized === 'no_usable_conversation') return 'Needs contact review'
-  if (normalized === 'failed') return 'Needs follow-up'
-  return stageLabel(normalized)
-}
-
-function deliveryExplanation(item: NotificationRow) {
-  const normalized = normalizedDeliveryStatus(item)
-  if (normalized === 'blocked_by_closed_conversation') return 'Contact the candidate or choose the best contact method.'
-  if (normalized === 'stale') return 'The candidate has not replied recently. Send a follow-up.'
-  if (normalized === 'no_usable_conversation') return 'Review the candidate phone or email before contacting them.'
-  if (normalized === 'failed') return 'The candidate was not reached. Try another contact method.'
-  return hrFollowUpDetail(item)
 }
 
 function reviewQueue(applications: ApplicationSummary[], notificationIssues: NotificationRow[], assessmentEnabled = true): OverviewQueueItem[] {
@@ -6156,10 +6440,10 @@ function roleBatteryCards(questionCount: number, sections: string) {
   ]
 }
 
-function assessmentModuleEnabled(summary: SummaryResponse | null) {
-  if (Array.isArray(summary?.enabled_modules)) return summary.enabled_modules.includes('assessments')
+function assessmentModuleEnabled(state: DashboardModuleState, summary?: SummaryResponse | null) {
+  if (Array.isArray(state?.enabled_modules)) return state.enabled_modules.includes('assessments')
   if (typeof summary?.features?.assessments_enabled === 'boolean') return summary.features.assessments_enabled
-  return dashboardModuleEnabled(summary, 'assessments')
+  return false
 }
 
 function disabledAssessmentsResponse(companyCode: string): AssessmentsResponse {

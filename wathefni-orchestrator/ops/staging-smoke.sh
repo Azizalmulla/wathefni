@@ -195,6 +195,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assistant-hr-reads.py | sed
 log "pre-hire registry migration (WATHEFNI_PREHIRE_VIA_REGISTRY: flag/parity/harness, hire->transition_hire, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-prehire-registry-parity.py | sed 's/^/    /'
 
+log "canonical module catalog + dark workspace boot (parity, effective entitlements, post-hire-only authorization)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-module-catalog.py | sed 's/^/    /'
+
 log "setup console V1 (super-admin gate fail-closed, provisioning idempotency, readiness, audit, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-setup-console.py | sed 's/^/    /'
 
