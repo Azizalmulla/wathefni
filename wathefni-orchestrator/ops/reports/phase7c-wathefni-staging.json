@@ -1,0 +1,186 @@
+{
+  "company_code": "WATHEFNI",
+  "employee_app_upload_recommendation": "**Conditionally safe for a closed pilot** if uploads stay on the existing receipt pipeline (file_registry + employee_documents + onboarding item update) and compliance dual-write gaps are accepted as known. Do not enable broad production employee-app upload until a write-path reconciliation plan is approved.",
+  "mismatch_totals": {
+    "ambiguous_type_mappings": 0,
+    "company_mismatch": 0,
+    "compliance_missing_for_synced_received": 0,
+    "compliance_without_employee_doc": 2,
+    "duplicate_compliance_docs": 0,
+    "duplicate_employee_docs": 0,
+    "employee_doc_without_file": 0,
+    "employee_doc_without_received_item": 2,
+    "expiry_status_conflicts": 1,
+    "null_expiry_on_received_compliance": 1,
+    "orphan_employee_files": 0,
+    "orphan_employee_keys": 0,
+    "received_without_employee_doc": 0
+  },
+  "mismatches": {
+    "ambiguous_type_mappings": {
+      "count": 0,
+      "samples": []
+    },
+    "company_mismatch": {
+      "count": 0,
+      "samples": []
+    },
+    "compliance_missing_for_synced_received": {
+      "count": 0,
+      "samples": []
+    },
+    "compliance_without_employee_doc": {
+      "count": 2,
+      "samples": [
+        {
+          "compliance_status": "received",
+          "document_type": "medical",
+          "sample_id": "emp_2c08123fca34"
+        },
+        {
+          "compliance_status": "valid",
+          "document_type": "passport",
+          "sample_id": "emp_2c08123fca34"
+        }
+      ]
+    },
+    "duplicate_compliance_docs": {
+      "count": 0,
+      "samples": []
+    },
+    "duplicate_employee_docs": {
+      "count": 0,
+      "samples": []
+    },
+    "employee_doc_without_file": {
+      "count": 0,
+      "samples": []
+    },
+    "employee_doc_without_received_item": {
+      "count": 2,
+      "samples": [
+        {
+          "document_type": "civil_id",
+          "onboarding_status": "pending",
+          "reason": "onboarding_not_received",
+          "sample_id": "emp_2c08123fca34"
+        },
+        {
+          "document_type": "bank_details",
+          "onboarding_status": "pending",
+          "reason": "onboarding_not_received",
+          "sample_id": "emp_2c08123fca34"
+        }
+      ]
+    },
+    "expiry_status_conflicts": {
+      "count": 1,
+      "samples": [
+        {
+          "document_type": "civil_id",
+          "kind": "expiry_date_mismatch",
+          "sample_id": "emp_2c08123fca34"
+        }
+      ]
+    },
+    "null_expiry_on_received_compliance": {
+      "count": 1,
+      "samples": [
+        {
+          "compliance_status": "received",
+          "document_type": "medical",
+          "sample_id": "emp_2c08123fca34"
+        }
+      ]
+    },
+    "orphan_employee_files": {
+      "count": 0,
+      "samples": []
+    },
+    "orphan_employee_keys": {
+      "count": 0,
+      "samples": []
+    },
+    "received_without_employee_doc": {
+      "count": 0,
+      "samples": []
+    }
+  },
+  "no_writes": true,
+  "postgres_env": "/root/.openclaw/secrets/postgres.staging.env",
+  "proposed_write_rules": [
+    "file_registry is the authority for binary/file identity (file_id, sha256, storage).",
+    "onboarding_items remains workflow authority (pending/received/waived) and must not invent files.",
+    "employee_documents is the durable receipt/metadata spine linking item_id/document_type to storage/extraction.",
+    "compliance_documents is the expiry/renewal alert surface; derive from employee_documents for compliance-relevant types only.",
+    "Never create compliance rows without a receipt or explicit HR action.",
+    "Never overwrite a newer expiry with null/older extraction values.",
+    "Never delete historical rows in reconciliation v1 \u2014 upsert/link only.",
+    "Maintain an explicit item_id \u2194 document_type \u2194 compliance_type map; do not silently alias residency_iqama\u2194residency or medical_check\u2194medical without operator-visible migration.",
+    "Keep onboarding soft expiry tasks as HR UX until a later sync from compliance_documents.",
+    "All future write paths must be company-scoped, idempotent, and dry-run first."
+  ],
+  "read_only": true,
+  "store_counts": {
+    "compliance_documents": 15,
+    "employee_documents": 4,
+    "employees": 3,
+    "file_registry_employee_docs": 4,
+    "onboarding_document_like": 15,
+    "onboarding_items": 18
+  },
+  "total_mismatch_events": 6,
+  "transaction_read_only": "on",
+  "type_map": {
+    "ambiguous_groups": {
+      "education_family": [
+        "education_cert",
+        "education",
+        "certificate"
+      ],
+      "medical_family": [
+        "medical",
+        "medical_check"
+      ],
+      "residency_family": [
+        "residency",
+        "residency_iqama"
+      ]
+    },
+    "compliance_canonical_types": [
+      "civil_id",
+      "education_cert",
+      "medical",
+      "passport",
+      "residency",
+      "work_permit"
+    ],
+    "notes": [
+      "Upload dual-write to compliance currently only for civil_id/passport/medical/education_cert.",
+      "Default Kuwait uses residency_iqama while compliance seed/UI often uses residency.",
+      "medical_check is an onboarding task; medical is a compliance/upload document type.",
+      "personal_photo/employment_contract/bank_details are employee receipts but not compliance-synced."
+    ],
+    "onboarding_document_item_ids": [
+      "civil_id",
+      "employment_contract",
+      "offer_letter",
+      "passport",
+      "personal_photo",
+      "residency_iqama",
+      "work_permit"
+    ],
+    "soft_expiry_tasks": [
+      "civil_id_expiry",
+      "passport_expiry",
+      "residency_expiry",
+      "work_permit_expiry"
+    ],
+    "upload_synced_compliance_types": [
+      "civil_id",
+      "education_cert",
+      "medical",
+      "passport"
+    ]
+  }
+}
