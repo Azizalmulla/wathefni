@@ -69,7 +69,7 @@ guard_public_routes() {
     failed=1
   fi
   # The hashed asset referenced by the shell must load as JavaScript.
-  asset="$(printf '%s' "$shell" | grep -oE '/dashboard/assets/index-[A-Za-z0-9_.-]+\.js' | head -1)"
+  asset="$(printf '%s' "$shell" | grep -oE '/dashboard/assets/(index|dashboard)-[A-Za-z0-9_.-]+\.js' | head -1)"
   if [ -n "$asset" ]; then
     out="$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$PUBLIC_BASE$asset" 2>/dev/null || echo '000 curl-error')"
     code="${out%% *}"; ct="${out#* }"
