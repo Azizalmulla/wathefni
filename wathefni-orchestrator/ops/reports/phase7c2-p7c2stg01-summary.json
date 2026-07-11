@@ -1,0 +1,41 @@
+{
+  "apply_enabled": false,
+  "by_action": {
+    "fill_compliance_expiry_from_ed": 1,
+    "insert_employee_document_from_file": 1,
+    "mark_onboarding_received": 2,
+    "report_needs_operator_map": 1,
+    "skip_compliance_orphan_no_file": 1,
+    "skip_expiry_older_than_existing": 2,
+    "skip_null_expiry_no_source": 1,
+    "sync_expiry": 2
+  },
+  "by_drift_class": {
+    "ambiguous_type_mappings": 1,
+    "compliance_without_employee_doc": 2,
+    "employee_doc_without_received_item": 2,
+    "expiry_status_conflicts": 4,
+    "null_expiry_on_received_compliance": 2
+  },
+  "by_skip_reason": {
+    "expiry_older_than_existing": 2,
+    "needs_operator_map": 1,
+    "null_expiry_no_source": 1,
+    "skip_compliance_orphan_no_file": 1
+  },
+  "company_code": "P7C2STG01",
+  "event_count": 11,
+  "manual_only": 1,
+  "mode": "dry-run",
+  "no_writes": true,
+  "planned_writes": 6,
+  "postgres_env": "/root/.openclaw/secrets/postgres.staging.env",
+  "read_only": true,
+  "skips": 4,
+  "transaction_read_only": "on",
+  "write_probe": {
+    "blocked": true,
+    "detail": "cannot execute UPDATE in a read-only transaction",
+    "error": "ReadOnlySqlTransaction"
+  }
+}
