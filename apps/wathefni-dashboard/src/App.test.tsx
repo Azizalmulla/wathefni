@@ -51,6 +51,9 @@ describe('dashboard initial load', () => {
     expect(summaryHeaders.get('X-Company-Code')).toBe('WATHEFNI')
     expect(screen.getByText('Priority queue')).toBeInTheDocument()
     expect(screen.getByText('You’re viewing the latest data.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Alerts & Delivery' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Employee App' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Employee App')).not.toBeInTheDocument()
   })
 
   test('loads saved session access without requiring HR phone', async () => {

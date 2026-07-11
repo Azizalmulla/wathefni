@@ -5007,7 +5007,7 @@ function DeliveryIssuesCard({ access, onAccessIssue }: Pick<PostHireCommonProps,
 }
 
 // Full delivery monitoring view (follow-up tasks + delivery issues + reminder
-// activity). Rendered only on the Notifications / Delivery Center page so
+// activity). Rendered only on the Alerts & Delivery page so
 // post-hire module pages stay focused on their own content.
 export function PostHireDeliveryCenter({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   return (
@@ -5019,9 +5019,9 @@ export function PostHireDeliveryCenter({ access, permissions, role, onNotice, on
 }
 
 // Compact one-line indicator shown on post-hire module pages. Summarises how
-// many employee messages need another channel and links to the Notifications
-// page, without pushing the module's own content down. Renders nothing when
-// delivery is clean.
+// many employee messages need another channel and links to Alerts & Delivery
+// (page id: notifications), without pushing the module's own content down.
+// Renders nothing when delivery is clean.
 function DeliveryStatusStrip({ access, onAccessIssue, onOpenNotifications }: Pick<PostHireProps, 'access' | 'onAccessIssue' | 'onOpenNotifications'>) {
   const tasksLoader = useCallback(() => getHrTasks(access, 'open'), [access])
   const followUpLoader = useCallback(() => getOutboundNeedsFollowUp(access), [access])
@@ -5062,7 +5062,7 @@ function DeliveryStatusStrip({ access, onAccessIssue, onOpenNotifications }: Pic
       </p>
       {onOpenNotifications ? (
         <Button size="sm" variant="secondary" className="shrink-0" onClick={onOpenNotifications}>
-          Open Notifications
+          Open Alerts & Delivery
           <ArrowRight className="h-3.5 w-3.5" />
         </Button>
       ) : null}

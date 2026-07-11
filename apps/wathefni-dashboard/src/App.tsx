@@ -40,6 +40,12 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 import { PostHireDeliveryCenter, PostHirePage, type PostHireModulePage } from '@/posthire/PostHire'
 import { useConfirm } from '@/components/ConfirmDialog'
+import {
+  anyPeopleModuleEnabled as peopleModulesEnabled,
+  anyPosthireModuleEnabled as posthireModulesEnabled,
+  isAlertsAndDeliveryRelevant,
+  isPostHireNavPage,
+} from '@/lib/moduleWorkspace'
 
 import {
   acceptDashboardInvite,
@@ -114,6 +120,7 @@ import type {
   DashboardChatResponse,
   DashboardChatSession,
   DashboardChatStoredMessage,
+  DashboardModuleDefinition,
   DashboardTeamResponse,
   DashboardTeamUser,
   DashboardUserAccess,
@@ -156,25 +163,28 @@ type Page =
 type NavGroup = 'prehire' | 'posthire' | 'settings'
 type DashboardNavItem = { id: Page; label: string; icon: typeof LayoutDashboard; module?: string; group: NavGroup }
 
-const POSTHIRE_PAGES: PostHireModulePage[] = ['employees', 'onboarding', 'attendance', 'leave', 'shifts', 'payroll', 'analytics', 'compliance']
-const POSTHIRE_MODULES = ['onboarding', 'compliance', 'attendance', 'shifts', 'leave', 'payroll', 'analytics']
-const POSTHIRE_PEOPLE_MODULES = ['onboarding', 'compliance', 'attendance', 'shifts', 'leave', 'payroll']
 const NAV_GROUP_LABELS: Record<NavGroup, string> = { prehire: 'Pre-Hiring', posthire: 'Post-Hire', settings: 'Workspace' }
 
-type DashboardModuleState = { enabled_modules?: string[]; access?: DashboardUserAccess } | null | undefined
+type DashboardModuleState = {
+  enabled_modules?: string[]
+  access?: DashboardUserAccess
+  module_catalog?: DashboardModuleDefinition[]
+} | null | undefined
+
+function workspaceCatalog(state: DashboardModuleState) {
+  return state?.module_catalog
+}
 
 function anyPosthireModuleEnabled(state: DashboardModuleState): boolean {
-  if (!state || !Array.isArray(state.enabled_modules)) return false
-  return POSTHIRE_MODULES.some((module) => state.enabled_modules?.includes(module))
+  return posthireModulesEnabled(state?.enabled_modules, workspaceCatalog(state))
 }
 
 function anyPeopleModuleEnabled(state: DashboardModuleState): boolean {
-  if (!state || !Array.isArray(state.enabled_modules)) return false
-  return POSTHIRE_PEOPLE_MODULES.some((module) => state.enabled_modules?.includes(module))
+  return peopleModulesEnabled(state?.enabled_modules, workspaceCatalog(state))
 }
 
 function isPostHirePage(page: Page): page is PostHireModulePage {
-  return (POSTHIRE_PAGES as string[]).includes(page)
+  return isPostHireNavPage(page)
 }
 type ChatMessage = {
   id: string
@@ -224,7 +234,7 @@ const navItems: DashboardNavItem[] = [
   { id: 'interviews', label: 'Interviews', icon: CalendarCheck, module: 'pre_hiring', group: 'prehire' },
   { id: 'assessments', label: 'Assessments', icon: ClipboardCheck, module: 'assessments', group: 'prehire' },
   { id: 'ranking', label: 'Ranking', icon: Medal, module: 'pre_hiring', group: 'prehire' },
-  { id: 'notifications', label: 'Notifications', icon: Bell, group: 'settings' },
+  { id: 'notifications', label: 'Alerts & Delivery', icon: Bell, group: 'settings' },
   { id: 'reports', label: 'Reports', icon: BarChart3, module: 'pre_hiring', group: 'prehire' },
   { id: 'employees', label: 'Employees', icon: Users, group: 'posthire' },
   { id: 'onboarding', label: 'Onboarding', icon: UserCheck, module: 'onboarding', group: 'posthire' },
@@ -331,9 +341,8 @@ function assistantPromptChips(enabledModules: string[] | undefined, assessmentEn
 
 function pageAvailableForSummary(page: Page, state: DashboardModuleState) {
   if (page === 'employees') return anyPeopleModuleEnabled(state)
-  // Notifications doubles as the Delivery Center for employee messages, so it
-  // stays available when any post-hire module is on even without pre-hiring.
-  if (page === 'notifications') return dashboardModuleEnabled(state, 'pre_hiring') || anyPosthireModuleEnabled(state)
+  // Alerts & Delivery is a shared Workspace surface (page id: notifications).
+  if (page === 'notifications') return isAlertsAndDeliveryRelevant(state?.enabled_modules, workspaceCatalog(state))
   const item = navItems.find((nav) => nav.id === page)
   return !item?.module || dashboardModuleEnabled(state, item.module)
 }
@@ -563,7 +572,7 @@ function App() {
   const needsReview = reviewQueue(allApplications, notificationIssues, assessmentModuleOn)
   const availableNavItems = navItems.filter((item) => {
     if (item.id === 'employees') return anyPeopleModuleEnabled(moduleState)
-    if (item.id === 'notifications') return prehireEnabled || anyPosthireModuleEnabled(moduleState)
+    if (item.id === 'notifications') return isAlertsAndDeliveryRelevant(moduleState?.enabled_modules, workspaceCatalog(moduleState))
     if (item.id === 'activity') return hasDashboardPermission(moduleState?.access, 'audit.read')
     return !item.module || dashboardModuleEnabled(moduleState, item.module)
   })
@@ -862,8 +871,11 @@ function App() {
           setWorkspaceBootstrap(bootstrapData)
           const hasPrehire = bootstrapData.enabled_modules.includes('pre_hiring')
           if (!hasPrehire) {
-            const hasNotifications = POSTHIRE_MODULES.some((module) => bootstrapData.enabled_modules.includes(module))
-            const notificationsData = hasNotifications
+            const hasAlertsAndDelivery = isAlertsAndDeliveryRelevant(
+              bootstrapData.enabled_modules,
+              bootstrapData.module_catalog,
+            )
+            const notificationsData = hasAlertsAndDelivery
               ? await getNotifications(effectiveAccess)
               : {
                   company_code: bootstrapData.company_code,
@@ -2153,7 +2165,7 @@ const pageLabels: Record<Page, string> = {
   interviews: 'Interviews',
   assessments: 'Assessments',
   ranking: 'Ranking',
-  notifications: 'Notifications',
+  notifications: 'Alerts & Delivery',
   reports: 'Reports',
   employees: 'Employees',
   onboarding: 'Onboarding',
@@ -2175,7 +2187,7 @@ const pageSubtitles: Record<Page, string> = {
   interviews: 'Track interviews, review candidate responses, and capture feedback in one place.',
   assessments: 'Assessment sending, progress, results, and official report review.',
   ranking: 'Guidance on who HR should prioritize for a selected job.',
-  notifications: 'HR alerts plus employee message delivery — see who needs another channel and follow up in one place.',
+  notifications: 'Shared workspace alerts and employee message delivery — see who needs another channel and follow up in one place.',
   reports: 'Hiring reports for roles, candidates, CVs, assessments, and follow-ups.',
   employees: 'Your people directory — roles, departments, and onboarding status in one place.',
   onboarding: 'New hires in progress, open documents, and reminders to keep onboarding moving.',
@@ -5539,9 +5551,7 @@ function AdminAIPage({
 
   const groupedSessions = groupDashboardChatSessions(sessions)
   const promptChips = assistantPromptChips(enabledModules, assessmentEnabled)
-  const posthireOn = Array.isArray(enabledModules)
-    ? POSTHIRE_MODULES.some((module) => enabledModules.includes(module))
-    : false
+  const posthireOn = posthireModulesEnabled(enabledModules)
   const emptyPrompt = posthireOn
     ? 'Ask about hiring or your team — candidates, onboarding, attendance, leave, shifts, payroll, or compliance.'
     : assessmentEnabled
