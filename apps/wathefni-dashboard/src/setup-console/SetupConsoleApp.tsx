@@ -1,4 +1,5 @@
 import {
+  Archive,
   Building2,
   Check,
   ChevronLeft,
@@ -44,6 +45,7 @@ import {
   listCompanies,
   saveChannelAccount,
   SetupConsoleApiError,
+  updateCompanyLifecycle,
   updateCompanyModules,
   updateCompanyProfile,
   updateCompanySettings,
@@ -54,6 +56,7 @@ import type {
   ChannelPolicy,
   CompanyCreateInput,
   CompanyDetailResponse,
+  CompanyLifecycleStatus,
   CompanyProfileInput,
   CompanySummary,
   ModuleBundle,
@@ -90,6 +93,24 @@ function ownerInviteLink(result: { invite_link?: string; invite_url?: string; in
   return url.toString()
 }
 
+function companyLifecycleStatus(company: { status?: string | null; lifecycle?: { status?: string | null } | null; ready?: boolean }) {
+  const status = String(company.lifecycle?.status || company.status || 'active').toLowerCase()
+  if (status === 'disabled' || status === 'archived') return status as CompanyLifecycleStatus
+  return 'active' as CompanyLifecycleStatus
+}
+
+function lifecycleBadgeTone(status: CompanyLifecycleStatus) {
+  if (status === 'archived') return 'muted' as const
+  if (status === 'disabled') return 'warning' as const
+  return 'success' as const
+}
+
+function lifecycleLabel(status: CompanyLifecycleStatus) {
+  if (status === 'archived') return 'Archived'
+  if (status === 'disabled') return 'Disabled'
+  return 'Active'
+}
+
 export default function SetupConsoleApp() {
   const confirm = useConfirm()
   const [credentials, setCredentials] = useState<SetupCredentials | null>(storedCredentials)
@@ -103,9 +124,10 @@ export default function SetupConsoleApp() {
   const [listLoading, setListLoading] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState('')
+  const [includeInactive, setIncludeInactive] = useState(false)
 
   const loadCompanies = useCallback(
-    async (access: SetupCredentials, searchQuery = query, pageOffset = offset) => {
+    async (access: SetupCredentials, searchQuery = query, pageOffset = offset, showInactive = includeInactive) => {
       setListLoading(true)
       setError('')
       try {
@@ -113,6 +135,7 @@ export default function SetupConsoleApp() {
           q: searchQuery,
           limit: PAGE_SIZE,
           offset: pageOffset,
+          includeInactive: showInactive,
         })
         setCompanies(result.companies)
         setTotal(result.total)
@@ -125,7 +148,7 @@ export default function SetupConsoleApp() {
         setListLoading(false)
       }
     },
-    [offset, query],
+    [includeInactive, offset, query],
   )
 
   useEffect(() => {
@@ -251,6 +274,18 @@ export default function SetupConsoleApp() {
               </Button>
             </form>
 
+            <label className="mt-3 flex items-center gap-2 text-xs text-subtle">
+              <input
+                type="checkbox"
+                checked={includeInactive}
+                onChange={(event) => {
+                  setOffset(0)
+                  setIncludeInactive(event.target.checked)
+                }}
+              />
+              Show disabled and archived
+            </label>
+
             <div className="mt-4 min-h-24 space-y-2" aria-busy={listLoading}>
               {listLoading ? <LoadingLine label="Loading companies" /> : null}
               {!listLoading && companies.length === 0 ? (
@@ -261,6 +296,7 @@ export default function SetupConsoleApp() {
               {!listLoading
                 ? companies.map((company) => {
                     const code = company.company_code
+                    const status = companyLifecycleStatus(company)
                     return (
                       <button
                         key={code}
@@ -278,11 +314,14 @@ export default function SetupConsoleApp() {
                             <span className="block text-sm font-semibold">{company.name || code}</span>
                             <span className="mt-0.5 block text-xs text-subtle">{code}</span>
                           </span>
-                          {typeof company.ready === 'boolean' ? (
-                            <Badge tone={company.ready ? 'success' : 'warning'}>
-                              {company.ready ? 'Ready' : 'In progress'}
-                            </Badge>
-                          ) : null}
+                          <span className="flex flex-col items-end gap-1">
+                            <Badge tone={lifecycleBadgeTone(status)}>{lifecycleLabel(status)}</Badge>
+                            {status === 'active' && typeof company.ready === 'boolean' ? (
+                              <Badge tone={company.ready ? 'success' : 'warning'}>
+                                {company.ready ? 'Ready' : 'In progress'}
+                              </Badge>
+                            ) : null}
+                          </span>
                         </span>
                       </button>
                     )
@@ -517,11 +556,13 @@ function CompanyWorkspace({
   onChanged: () => Promise<void>
   onError: (error: unknown) => void
 }) {
+  const lifecycleStatus = companyLifecycleStatus(detail.readiness)
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="mb-2 flex items-center gap-2">
+            <Badge tone={lifecycleBadgeTone(lifecycleStatus)}>{lifecycleLabel(lifecycleStatus)}</Badge>
             <Badge tone={detail.readiness.ready ? 'success' : 'warning'}>
               {detail.readiness.ready ? 'Ready' : 'Setup in progress'}
             </Badge>
@@ -536,6 +577,14 @@ function CompanyWorkspace({
           Refresh
         </Button>
       </div>
+
+      <LifecycleCard
+        credentials={credentials}
+        companyCode={companyCode}
+        detail={detail}
+        onChanged={onChanged}
+        onError={onError}
+      />
 
       <ReadinessCard detail={detail} />
       <div className="grid gap-6 xl:grid-cols-2">
@@ -605,6 +654,135 @@ function CompanyWorkspace({
         <TeamUsersCard users={detail.users || []} />
       </div>
     </div>
+  )
+}
+
+function LifecycleCard({
+  credentials,
+  companyCode,
+  detail,
+  onChanged,
+  onError,
+}: {
+  credentials: SetupCredentials
+  companyCode: string
+  detail: CompanyDetailResponse
+  onChanged: () => Promise<void>
+  onError: (error: unknown) => void
+}) {
+  const confirm = useConfirm()
+  const status = companyLifecycleStatus(detail.readiness)
+  const [reason, setReason] = useState('')
+  const [working, setWorking] = useState(false)
+  const protectedCompany = companyCode.toUpperCase() === 'WATHEFNI'
+  const reasonText = detail.readiness.lifecycle?.reason || detail.readiness.lifecycle_reason
+
+  async function transition(next: CompanyLifecycleStatus, title: string, body: string) {
+    const trimmed = reason.trim()
+    if (!trimmed) {
+      onError(new Error('Enter a reason before changing company lifecycle.'))
+      return
+    }
+    const approved = await confirm({ title, body })
+    if (!approved) return
+    setWorking(true)
+    try {
+      await updateCompanyLifecycle(credentials, companyCode, { status: next, reason: trimmed })
+      setReason('')
+      await onChanged()
+    } catch (error) {
+      onError(error)
+    } finally {
+      setWorking(false)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+        <div>
+          <CardTitle>Company lifecycle</CardTitle>
+          <CardDescription>
+            Reversible controls only. Hard delete is not available. WATHEFNI is protected from disable/archive.
+          </CardDescription>
+        </div>
+        <Badge tone={lifecycleBadgeTone(status)}>{lifecycleLabel(status)}</Badge>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {reasonText ? (
+          <p className="rounded-2xl border border-line/60 bg-white/45 px-4 py-3 text-sm leading-6 text-subtle">
+            Last reason: {String(reasonText)}
+          </p>
+        ) : null}
+        <Field label="Reason for lifecycle change" htmlFor="lifecycle-reason">
+          <Input
+            id="lifecycle-reason"
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder="Required for every Disable, Reactivate, or Archive"
+            disabled={working}
+          />
+        </Field>
+        <div className="flex flex-wrap gap-2">
+          {status === 'active' ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={working || protectedCompany}
+              onClick={() =>
+                void transition(
+                  'disabled',
+                  `Disable ${companyCode}?`,
+                  'Login, bootstrap, and invites will stop immediately. Sessions are revoked. Company data and modules stay preserved.',
+                )
+              }
+            >
+              Disable
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              disabled={working}
+              onClick={() =>
+                void transition(
+                  'active',
+                  `Reactivate ${companyCode}?`,
+                  'Company data and modules stay as they were. Existing sessions are not restored; the Owner must log in again.',
+                )
+              }
+            >
+              Reactivate
+            </Button>
+          )}
+          {status !== 'archived' ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="text-rose-700"
+              disabled={working || protectedCompany}
+              onClick={() =>
+                void transition(
+                  'archived',
+                  `Archive ${companyCode}?`,
+                  'The company will be blocked from access and hidden from the default active company list. This is reversible via Reactivate. No hard delete.',
+                )
+              }
+            >
+              <Archive className="h-4 w-4" aria-hidden="true" />
+              Archive
+            </Button>
+          ) : null}
+        </div>
+        {protectedCompany ? (
+          <p className="text-xs leading-5 text-subtle">
+            Automation and Setup Console cannot disable or archive WATHEFNI without a separate explicit approval.
+          </p>
+        ) : null}
+      </CardContent>
+    </Card>
   )
 }
 

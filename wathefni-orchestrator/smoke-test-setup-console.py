@@ -70,6 +70,7 @@ def main() -> int:
                 for company in (TEST_CO, TEST_CO2):
                     cur.execute("DELETE FROM company_channel_accounts WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_whatsapp_identities WHERE company_code=%s", (company,))
+                    cur.execute("DELETE FROM dashboard_user_sessions WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_user_invites WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM dashboard_users WHERE company_code=%s", (company,))
                     cur.execute("DELETE FROM company_modules WHERE company_code=%s", (company,))
@@ -372,24 +373,165 @@ def main() -> int:
                 schema_row = cur.fetchone()
         check("schema creates channel account table without manual SQL", bool((schema_row or {}).get("table_name")))
 
-        # --- 3) boundaries: mutating a non-existent company -> 404 ---------
+        # --- 3) company lifecycle (disable / reactivate / archive) ----------
+        fresh_owner = app.setup_console_seed_owner(
+            TEST_CO,
+            app.SetupOwnerRequest(email="owner@setupconsoletest.com", name="Lifecycle Owner", phone="96599000111"),
+            ctx,
+        )
+        invite_token = fresh_owner.get("invite_token")
+        check("fresh owner invite available for lifecycle proof", bool(invite_token))
+        accepted = app.dashboard_team_accept_invite(
+            app.DashboardAcceptInviteRequest(
+                invite_token=invite_token,
+                name="Lifecycle Owner",
+                password="LifecyclePass1",
+            )
+        )
+        session_token = accepted.get("access_token") or accepted.get("token")
+        check("owner accept creates a session for lifecycle proof", bool(session_token))
+        modules_before = sorted(app.configured_company_modules(TEST_CO))
+
+        try:
+            app.setup_console_set_company_lifecycle(
+                "WATHEFNI",
+                app.SetupCompanyLifecycleRequest(status="disabled", reason="must never happen"),
+                ctx,
+            )
+            raise AssertionError("WATHEFNI disable should be blocked")
+        except app.HTTPException as e:
+            check("WATHEFNI cannot be disabled via lifecycle control", e.status_code == 409 and e.detail.get("error") == "protected_company")
+
+        try:
+            app.setup_console_set_company_lifecycle(
+                TEST_CO,
+                app.SetupCompanyLifecycleRequest(status="disabled", reason=""),
+                ctx,
+            )
+            raise AssertionError("empty reason should 422")
+        except app.HTTPException as e:
+            check("lifecycle reason required", e.status_code == 422 and e.detail.get("error") == "lifecycle_reason_required")
+
+        disabled = app.setup_console_set_company_lifecycle(
+            TEST_CO,
+            app.SetupCompanyLifecycleRequest(status="disabled", reason="Phase 7A smoke disable"),
+            ctx,
+        )
+        check("disable returns disabled status", disabled.get("status") == "disabled")
+        check("disable revokes active sessions", int(disabled.get("revoked_sessions") or 0) >= 1)
+        check("disable keeps readiness status disabled", disabled["readiness"].get("status") == "disabled")
+        check("disable preserves modules", sorted(app.configured_company_modules(TEST_CO)) == modules_before)
+
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT count(*) AS n FROM dashboard_user_sessions WHERE company_code=%s AND status='active'",
+                    (TEST_CO,),
+                )
+                active_sessions = int((cur.fetchone() or {}).get("n") or 0)
+                cur.execute(
+                    "SELECT count(*) AS n FROM dashboard_user_invites WHERE company_code=%s AND status='pending'",
+                    (TEST_CO,),
+                )
+                pending_invites = int((cur.fetchone() or {}).get("n") or 0)
+        check("no active sessions remain after disable", active_sessions == 0)
+        check("pending invites superseded after disable", pending_invites == 0)
+
+        try:
+            app.dashboard_auth_login(app.DashboardLoginRequest(company_code=TEST_CO, email="owner@setupconsoletest.com", password="LifecyclePass1"))
+            raise AssertionError("login should fail while disabled")
+        except app.HTTPException as e:
+            check("login blocked while company disabled", e.status_code == 403 and e.detail.get("error") == "company_disabled")
+
+        try:
+            app.dashboard_context(authorization=f"Bearer {session_token}", x_company_code=TEST_CO)
+            raise AssertionError("old session should be rejected")
+        except app.HTTPException as e:
+            check("old session rejected after disable", e.status_code in (401, 403))
+
+        try:
+            app.setup_console_seed_owner(TEST_CO, app.SetupOwnerRequest(email="another@setupconsoletest.com", name="Blocked"), ctx)
+            raise AssertionError("owner seed should fail while disabled")
+        except app.HTTPException as e:
+            check("owner seed blocked while company disabled", e.status_code == 403)
+
+        active_listing = app.setup_console_list_companies(q=TEST_CO, limit=20, offset=0, superadmin=ctx)
+        check(
+            "disabled company hidden from default active list",
+            TEST_CO not in [c.get("company_code") for c in active_listing.get("companies") or []],
+        )
+        inactive_listing = app.setup_console_list_companies(
+            q=TEST_CO, limit=20, offset=0, include_inactive=True, superadmin=ctx
+        )
+        check(
+            "disabled company visible when include_inactive=true",
+            TEST_CO in [c.get("company_code") for c in inactive_listing.get("companies") or []],
+        )
+
+        reactivated = app.setup_console_set_company_lifecycle(
+            TEST_CO,
+            app.SetupCompanyLifecycleRequest(status="active", reason="Phase 7A smoke reactivate"),
+            ctx,
+        )
+        check("reactivate restores active status", reactivated.get("status") == "active")
+        check("reactivate preserves modules", sorted(app.configured_company_modules(TEST_CO)) == modules_before)
+        fresh_login = app.dashboard_auth_login(
+            app.DashboardLoginRequest(company_code=TEST_CO, email="owner@setupconsoletest.com", password="LifecyclePass1")
+        )
+        fresh_token = fresh_login.get("access_token") or fresh_login.get("token")
+        check("fresh login works after reactivate", bool(fresh_token))
+        try:
+            app.dashboard_context(authorization=f"Bearer {session_token}", x_company_code=TEST_CO)
+            raise AssertionError("old revoked session must stay dead after reactivate")
+        except app.HTTPException as e:
+            check("old session remains revoked after reactivate", e.status_code in (401, 403))
+
+        archived = app.setup_console_set_company_lifecycle(
+            TEST_CO,
+            app.SetupCompanyLifecycleRequest(status="archived", reason="Phase 7A smoke archive"),
+            ctx,
+        )
+        check("archive returns archived status", archived.get("status") == "archived")
+        try:
+            app.dashboard_auth_login(app.DashboardLoginRequest(company_code=TEST_CO, email="owner@setupconsoletest.com", password="LifecyclePass1"))
+            raise AssertionError("login should fail while archived")
+        except app.HTTPException as e:
+            check("login blocked while company archived", e.status_code == 403 and e.detail.get("error") == "company_archived")
+        archived_listing = app.setup_console_list_companies(q=TEST_CO, limit=20, offset=0, superadmin=ctx)
+        check(
+            "archived company hidden from default active list",
+            TEST_CO not in [c.get("company_code") for c in archived_listing.get("companies") or []],
+        )
+
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT count(*) AS n FROM action_results WHERE company_code=%s "
+                    "AND action_type IN ('setup_company_disabled','setup_company_reactivated','setup_company_archived')",
+                    (TEST_CO,),
+                )
+                lifecycle_audits = int((cur.fetchone() or {}).get("n") or 0)
+        check("lifecycle transitions are audited", lifecycle_audits >= 3)
+
+        # --- 4) boundaries: mutating a non-existent company -> 404 ---------
         for label, fn in (
             ("modules", lambda: app.setup_console_set_modules("NOSUCHCOMPANYXYZ", app.SetupModulesRequest(modules=["pre_hiring"]), ctx)),
             ("settings", lambda: app.setup_console_set_settings("NOSUCHCOMPANYXYZ", app.SetupSettingsRequest(timezone="Asia/Kuwait"), ctx)),
             ("profile", lambda: app.setup_console_set_profile("NOSUCHCOMPANYXYZ", app.SetupCompanyProfileRequest(name="Missing"), ctx)),
             ("owner", lambda: app.setup_console_seed_owner("NOSUCHCOMPANYXYZ", app.SetupOwnerRequest(email="x@y.com"), ctx)),
+            ("lifecycle", lambda: app.setup_console_set_company_lifecycle("NOSUCHCOMPANYXYZ", app.SetupCompanyLifecycleRequest(status="disabled", reason="missing"), ctx)),
         ):
             try:
                 fn(); raise AssertionError(f"{label} on missing company should 404")
             except app.HTTPException as e:
                 check(f"{label} on a non-existent company -> 404", e.status_code == 404)
 
-        # --- 4) audit: setup_* rows recorded for the company ---------------
+        # --- 5) audit: setup_* rows recorded for the company ---------------
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT count(*) AS n FROM action_results WHERE company_code=%s AND action_type LIKE 'setup_%%'", (TEST_CO,))
                 audit_rows = int((cur.fetchone() or {}).get("n") or 0)
-        check("setup actions are audited (>=5 rows)", audit_rows >= 5)
+        check("setup actions are audited (>=8 rows)", audit_rows >= 8)
     finally:
         try:
             cleanup()

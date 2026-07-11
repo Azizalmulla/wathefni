@@ -1187,11 +1187,19 @@ def _ensure_schema_impl() -> None:
       company_code text PRIMARY KEY,
       name text NOT NULL DEFAULT '',
       country text,
+      status text NOT NULL DEFAULT 'active',
+      lifecycle_reason text,
+      disabled_at timestamptz,
+      archived_at timestamptz,
       metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
       raw_json jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     );
+    ALTER TABLE IF EXISTS companies ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
+    ALTER TABLE IF EXISTS companies ADD COLUMN IF NOT EXISTS lifecycle_reason text;
+    ALTER TABLE IF EXISTS companies ADD COLUMN IF NOT EXISTS disabled_at timestamptz;
+    ALTER TABLE IF EXISTS companies ADD COLUMN IF NOT EXISTS archived_at timestamptz;
     CREATE TABLE IF NOT EXISTS dashboard_users (
       user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
@@ -32779,6 +32787,37 @@ def actor_context_from_payload(payload: dict[str, Any] | None) -> dict[str, Any]
     }
 
 
+COMPANY_LIFECYCLE_STATES = frozenset({"active", "disabled", "archived"})
+
+
+def company_lifecycle_status(company_code: str | None) -> str:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return "active"
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT status FROM companies WHERE company_code=%s LIMIT 1", (company,))
+            row = cur.fetchone()
+    status = str((row or {}).get("status") or "active").strip().lower()
+    return status if status in COMPANY_LIFECYCLE_STATES else "active"
+
+
+def require_active_company(company_code: str | None) -> str:
+    company = str(company_code or "").strip().upper()
+    status = company_lifecycle_status(company)
+    if status != "active":
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": f"company_{status}",
+                "message": "This company workspace is not active. Contact the Wathefni platform operator.",
+                "company_code": company,
+                "company_status": status,
+            },
+        )
+    return status
+
+
 def dashboard_context(
     authorization: str | None = Header(default=None),
     x_dashboard_token: str | None = Header(default=None, alias="X-Dashboard-Token"),
@@ -32792,6 +32831,7 @@ def dashboard_context(
     if session_user:
         public_user = dashboard_user_public(session_user)
         company = public_user["company_code"]
+        require_active_company(company)
         if requested_company and requested_company != company:
             raise HTTPException(status_code=403, detail={"error": "dashboard_company_forbidden", "message": "Access needs to be verified."})
         if public_user["status"] != "active":
@@ -32849,6 +32889,7 @@ def dashboard_context(
             },
         )
     company = requested_company or hr_company_code(hr_phone) or "WATHEFNI"
+    require_active_company(company)
     hr_user = hr_user_for_phone(hr_phone, company) if hr_phone else None
     if not hr_user:
         if hr_phone or not dashboard_service_user_allowed():
@@ -32921,6 +32962,8 @@ def dashboard_auth_login(request: DashboardLoginRequest):
     ensure_schema()
     company = str(request.company_code or "").strip().upper()
     email = normalize_email(request.email)
+    if company:
+        require_active_company(company)
     user = dashboard_user_by_email(company, email) if company and email else None
     if user and normalize_dashboard_user_status(user.get("status")) != "active":
         raise HTTPException(status_code=403, detail={"error": "account_inactive", "message": "Your account is not active."})
@@ -32932,6 +32975,7 @@ def dashboard_auth_login(request: DashboardLoginRequest):
     if request.token and configured and hmac.compare_digest(str(request.token).strip(), configured):
         phone = digits(request.hr_phone)
         legacy_company = company or hr_company_code(phone) or "WATHEFNI"
+        require_active_company(legacy_company)
         seeded = dashboard_seed_user_from_hr_phone(legacy_company, phone)
         if seeded:
             if dashboard_user_public(seeded)["status"] != "active":
@@ -33010,6 +33054,7 @@ def dashboard_team_accept_invite(request: DashboardAcceptInviteRequest):
             if not invite:
                 raise HTTPException(status_code=404, detail={"error": "invite_not_found", "message": "This invite is no longer available."})
             company = str(invite["company_code"]).upper()
+            require_active_company(company)
             email = normalize_email(invite["email"])
             role = dashboard_role_key(invite["role"])
             cur.execute(
@@ -33937,10 +33982,28 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
     owners = 0
     whatsapp_links = 0
     exists = False
+    lifecycle = {
+        "status": "active",
+        "reason": None,
+        "disabled_at": None,
+        "archived_at": None,
+    }
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT company_code FROM companies WHERE company_code=%s LIMIT 1", (company,))
-            exists = bool(cur.fetchone())
+            cur.execute(
+                "SELECT company_code, status, lifecycle_reason, disabled_at, archived_at "
+                "FROM companies WHERE company_code=%s LIMIT 1",
+                (company,),
+            )
+            company_row = cur.fetchone()
+            exists = bool(company_row)
+            if company_row:
+                lifecycle = {
+                    "status": str(company_row.get("status") or "active"),
+                    "reason": company_row.get("lifecycle_reason"),
+                    "disabled_at": company_row.get("disabled_at"),
+                    "archived_at": company_row.get("archived_at"),
+                }
             cur.execute("SELECT module_key FROM company_modules WHERE company_code=%s AND enabled IS TRUE ORDER BY module_key", (company,))
             modules = [str(r["module_key"]) for r in cur.fetchall()]
             cur.execute("SELECT count(*) AS n FROM dashboard_users WHERE company_code=%s AND role='owner' AND status <> 'disabled'", (company,))
@@ -33966,6 +34029,8 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
             **profile,
             "company_code": company,
             "exists": exists,
+            "lifecycle": json_safe(lifecycle),
+            "status": lifecycle["status"],
             "modules": modules,
             "module_display": {key: MODULE_DISPLAY_NAMES.get(key, key) for key in modules},
             "owners": owners,
@@ -33977,7 +34042,7 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
             "notification_presets_enabled": channel_presets_enabled(),
             "steps": steps,
             "messaging": messaging_readiness(company) if exists else None,
-            "ready": bool(exists and required_done),
+            "ready": bool(exists and lifecycle["status"] == "active" and required_done),
         }
 
     account = setup_console_channel_account(company)
@@ -34001,6 +34066,8 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
         **profile,
         "company_code": company,
         "exists": exists,
+        "lifecycle": json_safe(lifecycle),
+        "status": lifecycle["status"],
         "modules": modules,
         "module_display": {key: MODULE_DISPLAY_NAMES.get(key, key) for key in modules},
         "owners": owners,
@@ -34011,7 +34078,7 @@ def setup_console_company_readiness(company_code: str) -> dict[str, Any]:
         "notification_presets_enabled": channel_presets_enabled(),
         "provisioning_readiness_version": 2,
         "steps": steps,
-        "ready": bool(exists and required_done),
+        "ready": bool(exists and lifecycle["status"] == "active" and required_done),
     }
 
 
@@ -34028,6 +34095,11 @@ class SetupCompanyProfileRequest(BaseModel):
     country: str | None = None
     timezone: str | None = None
     currency: str | None = None
+
+
+class SetupCompanyLifecycleRequest(BaseModel):
+    status: str
+    reason: str
 
 
 class SetupModulesRequest(BaseModel):
@@ -34118,30 +34190,34 @@ def setup_console_list_companies(
     q: str | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    include_inactive: bool = Query(default=False),
     superadmin: dict[str, Any] = Depends(superadmin_context),
 ):
     term = str(q or "").strip()
     pattern = f"%{term}%"
+    include_inactive = include_inactive if isinstance(include_inactive, bool) else False
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 SELECT count(*) AS n
                 FROM companies
-                WHERE %s='' OR company_code ILIKE %s OR name ILIKE %s
+                WHERE (%s OR COALESCE(status,'active')='active')
+                  AND (%s='' OR company_code ILIKE %s OR name ILIKE %s)
                 """,
-                (term, pattern, pattern),
+                (include_inactive, term, pattern, pattern),
             )
             total_count = int((cur.fetchone() or {}).get("n") or 0)
             cur.execute(
                 """
                 SELECT company_code
                 FROM companies
-                WHERE %s='' OR company_code ILIKE %s OR name ILIKE %s
+                WHERE (%s OR COALESCE(status,'active')='active')
+                  AND (%s='' OR company_code ILIKE %s OR name ILIKE %s)
                 ORDER BY lower(name), company_code
                 LIMIT %s OFFSET %s
                 """,
-                (term, pattern, pattern, limit, offset),
+                (include_inactive, term, pattern, pattern, limit, offset),
             )
             codes = [str(r["company_code"]) for r in cur.fetchall()]
     return {
@@ -34149,6 +34225,7 @@ def setup_console_list_companies(
         "total_count": total_count,
         "limit": limit,
         "offset": offset,
+        "include_inactive": include_inactive,
         "has_more": offset + len(codes) < total_count,
     }
 
@@ -34180,6 +34257,125 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
         "users": users,
         "channel_policy": setup_console_channel_policy(company),
         "channel_account": setup_console_channel_account(company),
+    }
+
+
+@app.patch("/dashboard/superadmin/setup/companies/{company_code}/lifecycle")
+def setup_console_set_company_lifecycle(
+    company_code: str,
+    request: SetupCompanyLifecycleRequest,
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    company = _setup_normalize_company_code(company_code)
+    desired = str(request.status or "").strip().lower()
+    reason = str(request.reason or "").strip()
+    if desired not in COMPANY_LIFECYCLE_STATES:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "company_status_invalid", "message": "Choose active, disabled, or archived."},
+        )
+    if not reason:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "lifecycle_reason_required", "message": "Enter a reason for this lifecycle change."},
+        )
+    if company == "WATHEFNI" and desired != "active":
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "protected_company",
+                "message": "WATHEFNI cannot be disabled or archived through this control.",
+            },
+        )
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT status FROM companies WHERE company_code=%s FOR UPDATE",
+                (company,),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(
+                    status_code=404,
+                    detail={"error": "company_not_found", "message": "That company does not exist yet."},
+                )
+            previous = str(row.get("status") or "active").strip().lower()
+            if previous not in COMPANY_LIFECYCLE_STATES:
+                previous = "active"
+            if previous == desired:
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "company_status_unchanged",
+                        "message": f"{company} is already {desired}.",
+                    },
+                )
+
+            cur.execute(
+                """
+                UPDATE companies
+                SET status=%s,
+                    lifecycle_reason=%s,
+                    disabled_at=CASE
+                      WHEN %s='disabled' THEN now()
+                      WHEN %s='archived' THEN COALESCE(disabled_at, now())
+                      ELSE NULL
+                    END,
+                    archived_at=CASE WHEN %s='archived' THEN now() ELSE NULL END,
+                    updated_at=now()
+                WHERE company_code=%s
+                """,
+                (desired, reason, desired, desired, desired, company),
+            )
+
+            revoked_sessions = 0
+            superseded_invites = 0
+            if desired in {"disabled", "archived"}:
+                cur.execute(
+                    "UPDATE dashboard_user_sessions SET status='revoked' "
+                    "WHERE company_code=%s AND status='active'",
+                    (company,),
+                )
+                revoked_sessions = cur.rowcount
+                cur.execute(
+                    "UPDATE dashboard_user_invites SET status='superseded' "
+                    "WHERE company_code=%s AND status='pending'",
+                    (company,),
+                )
+                superseded_invites = cur.rowcount
+
+            action_type = {
+                "active": "setup_company_reactivated",
+                "disabled": "setup_company_disabled",
+                "archived": "setup_company_archived",
+            }[desired]
+            write_admin_audit(
+                cur,
+                _setup_audit_context(superadmin, company),
+                action_type,
+                summary=f"Changed {company} lifecycle from {previous} to {desired}.",
+                target_type="company",
+                target=company,
+                details={
+                    "company_code": company,
+                    "previous_status": previous,
+                    "new_status": desired,
+                    "reason": reason,
+                    "revoked_sessions": revoked_sessions,
+                    "superseded_invites": superseded_invites,
+                },
+            )
+        conn.commit()
+
+    return {
+        "ok": True,
+        "company_code": company,
+        "previous_status": previous,
+        "status": desired,
+        "revoked_sessions": revoked_sessions,
+        "superseded_invites": superseded_invites,
+        "readiness": setup_console_company_readiness(company),
     }
 
 
@@ -34421,6 +34617,7 @@ def setup_console_seed_owner(company_code: str, request: SetupOwnerRequest, supe
     company = _setup_normalize_company_code(company_code)
     if not _setup_company_exists(company):
         raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+    require_active_company(company)
     email = normalize_email(request.email)
     if not email or "@" not in email:
         raise HTTPException(status_code=422, detail={"error": "invalid_email", "message": "Enter a valid email address."})

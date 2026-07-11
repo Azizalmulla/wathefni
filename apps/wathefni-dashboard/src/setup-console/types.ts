@@ -3,6 +3,15 @@ export type SetupCredentials = {
   phone: string
 }
 
+export type CompanyLifecycleStatus = 'active' | 'disabled' | 'archived'
+
+export type CompanyLifecycle = {
+  status?: CompanyLifecycleStatus | string | null
+  reason?: string | null
+  disabled_at?: string | null
+  archived_at?: string | null
+}
+
 export type CompanySummary = {
   company_code: string
   name?: string | null
@@ -10,6 +19,8 @@ export type CompanySummary = {
   timezone?: string | null
   currency?: string | null
   ready?: boolean
+  status?: CompanyLifecycleStatus | string | null
+  lifecycle?: CompanyLifecycle
 }
 
 export type CompanyListResponse = {
@@ -36,6 +47,8 @@ export type SetupReadiness = {
   modules: string[]
   steps: ReadinessStep[]
   ready: boolean
+  status?: CompanyLifecycleStatus | string | null
+  lifecycle?: CompanyLifecycle
   [key: string]: unknown
 }
 
@@ -142,6 +155,21 @@ export type OwnerResponse = {
   invite_url?: string
   invite_token?: string
   user?: SetupUser
+  readiness?: SetupReadiness
+}
+
+export type CompanyLifecycleInput = {
+  status: CompanyLifecycleStatus
+  reason: string
+}
+
+export type CompanyLifecycleResponse = {
+  ok?: boolean
+  company_code?: string
+  previous_status?: CompanyLifecycleStatus | string | null
+  status?: CompanyLifecycleStatus | string | null
+  revoked_sessions?: number
+  superseded_invites?: number
   readiness?: SetupReadiness
 }
 

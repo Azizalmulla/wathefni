@@ -2,6 +2,8 @@ import type {
   ChannelAccountInput,
   CompanyCreateInput,
   CompanyDetailResponse,
+  CompanyLifecycleInput,
+  CompanyLifecycleResponse,
   CompanyListResponse,
   CompanyProfileInput,
   CompanySummary,
@@ -54,13 +56,14 @@ async function request<T>(path: string, credentials: SetupCredentials, init: Req
 
 export async function listCompanies(
   credentials: SetupCredentials,
-  options: { q: string; limit: number; offset: number },
+  options: { q: string; limit: number; offset: number; includeInactive?: boolean },
 ): Promise<CompanyListResponse> {
   const search = new URLSearchParams({
     q: options.q,
     limit: String(options.limit),
     offset: String(options.offset),
   })
+  if (options.includeInactive) search.set('include_inactive', 'true')
   const payload = await request<
     CompanyListResponse | CompanySummary[] | { items?: CompanySummary[]; total?: number; total_count?: number }
   >(`${SETUP_ROOT}/companies?${search.toString()}`, credentials)
@@ -142,6 +145,18 @@ export function createOwner(credentials: SetupCredentials, companyCode: string, 
     `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/owner`,
     credentials,
     { method: 'POST', body: JSON.stringify(input) },
+  )
+}
+
+export function updateCompanyLifecycle(
+  credentials: SetupCredentials,
+  companyCode: string,
+  input: CompanyLifecycleInput,
+) {
+  return request<CompanyLifecycleResponse>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/lifecycle`,
+    credentials,
+    { method: 'PATCH', body: JSON.stringify(input) },
   )
 }
 

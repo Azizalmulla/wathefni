@@ -196,6 +196,40 @@ describe('setup console', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy invite link' }))
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(expect.stringContaining('?invite=invite-smoke-token')))
   })
+
+  test('shows lifecycle state and requires a reason to disable', async () => {
+    seedSession()
+    const fetchMock = mockSetupApi()
+    renderConsole()
+
+    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
+    const lifecycleHeading = await screen.findByRole('heading', { name: 'Company lifecycle' })
+    const lifecycleCard = lifecycleHeading.closest('section')
+    expect(lifecycleCard).not.toBeNull()
+    expect(within(lifecycleCard!).getAllByText('Active').length).toBeGreaterThan(0)
+    expect(within(lifecycleCard!).getByRole('button', { name: 'Disable' })).toBeEnabled()
+    expect(within(lifecycleCard!).getByRole('button', { name: 'Archive' })).toBeEnabled()
+
+    fireEvent.click(within(lifecycleCard!).getByRole('button', { name: 'Disable' }))
+    expect(screen.queryByText('Disable ACME?')).not.toBeInTheDocument()
+
+    fireEvent.change(within(lifecycleCard!).getByLabelText('Reason for lifecycle change'), {
+      target: { value: 'Staging dress rehearsal disable' },
+    })
+    fireEvent.click(within(lifecycleCard!).getByRole('button', { name: 'Disable' }))
+    expect(await screen.findByText('Disable ACME?')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+
+    await waitFor(() => {
+      const lifecycleCall = fetchMock.mock.calls.find(
+        ([input, init]) => String(input).endsWith('/ACME/lifecycle') && init?.method === 'PATCH',
+      )
+      expect(JSON.parse(String(lifecycleCall?.[1]?.body))).toEqual({
+        status: 'disabled',
+        reason: 'Staging dress rehearsal disable',
+      })
+    })
+  })
 })
 
 function seedSession() {
@@ -208,7 +242,15 @@ function mockSetupApi() {
     const path = String(input)
     if (path.includes('/dashboard/superadmin/setup/companies?')) {
       return jsonResponse({
-        companies: [{ company_code: 'ACME', name: 'Acme Company', ready: false }],
+        companies: [
+          {
+            company_code: 'ACME',
+            name: 'Acme Company',
+            ready: false,
+            status: 'active',
+            lifecycle: { status: 'active' },
+          },
+        ],
         total_count: 1,
         limit: 20,
         offset: 0,
@@ -222,6 +264,9 @@ function mockSetupApi() {
     }
     if (path.endsWith('/profile') && init?.method === 'PATCH') return jsonResponse({ ok: true })
     if (path.endsWith('/modules') && init?.method === 'PATCH') return jsonResponse({ ok: true, modules: [] })
+    if (path.endsWith('/lifecycle') && init?.method === 'PATCH') {
+      return jsonResponse({ ok: true, status: 'disabled', readiness: { ...companyDetail(path).readiness, status: 'disabled', ready: false } })
+    }
     if (path.includes('/dashboard/superadmin/setup/companies/')) return jsonResponse(companyDetail(path))
     return jsonResponse({ detail: `Unexpected request: ${path}` }, 404)
   })
@@ -239,6 +284,8 @@ function companyDetail(path: string) {
       timezone: 'Asia/Kuwait',
       currency: 'KWD',
       modules: ['pre_hiring'],
+      status: 'active',
+      lifecycle: { status: 'active', reason: null },
       steps: [
         { key: 'company', label: 'Company created', done: true },
         { key: 'modules', label: 'Modules selected', done: true },
