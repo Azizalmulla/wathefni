@@ -71,6 +71,7 @@ run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 # Attendance Import V1 (upload-only, behind WATHEFNI_ATTENDANCE_IMPORT). Pure
 # pipeline lives in attendance_import.py; this module owns the DB + endpoints.
 import attendance_import as _attendance_import  # noqa: E402
+import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
 
 logger = logging.getLogger("wathefni")
@@ -22883,9 +22884,31 @@ def send_octopus_whatsapp(
     subject_type: str | None = None,
     subject_key: str | None = None,
     message_kind: str = "text",
+    company_code: str | None = None,
+    audience: str | None = None,
 ) -> dict[str, Any]:
+    # Optional company_code enables Phase 7D account selection. When omitted (all
+    # legacy callers) or when WATHEFNI_COMPANY_CHANNEL_ACCOUNTS is OFF, routing is
+    # unchanged: use the caller-supplied account_id / shared default.
+    route_meta: dict[str, Any] | None = None
+    if company_code is not None:
+        route_meta = resolve_company_outbound_whatsapp_route(
+            company_code=company_code,
+            audience=audience,
+            shared_account_id=account_id or _channel_account_routing.SHARED_ACCOUNT_ID,
+        )
+        account_id = route_meta.get("account_id") or account_id or _channel_account_routing.SHARED_ACCOUNT_ID
     if delivery_is_dry_run():
-        result = {"ok": True, "dry_run": True, "status": 200, "phone": digits(phone), "simulated": True}
+        result = {
+            "ok": True,
+            "dry_run": True,
+            "status": 200,
+            "phone": digits(phone),
+            "simulated": True,
+            "account_id": account_id or _channel_account_routing.SHARED_ACCOUNT_ID,
+        }
+        if route_meta is not None:
+            result["channel_route"] = route_meta
         record_outbound_delivery_event(
             account_id=account_id,
             target_phone=phone,
@@ -22893,7 +22916,7 @@ def send_octopus_whatsapp(
             status="dry_run",
             message_text=text,
             last_error=None,
-            payload={"send_result": result, "dry_run": True},
+            payload={"send_result": result, "dry_run": True, "channel_route": route_meta},
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=message_kind,
@@ -33935,6 +33958,74 @@ def setup_console_channel_account(company_code: str) -> dict[str, Any] | None:
     return json_safe(payload)
 
 
+def _known_octopus_provider_account_ids() -> set[str]:
+    """Account ids present in local octopus sender config (never invent secrets)."""
+    try:
+        channel = octopus_channel_config()
+    except Exception:
+        return {_channel_account_routing.SHARED_ACCOUNT_ID}
+    accounts = channel.get("accounts") if isinstance(channel.get("accounts"), dict) else {}
+    return {str(key) for key in accounts.keys()} | {_channel_account_routing.SHARED_ACCOUNT_ID}
+
+
+def resolve_company_outbound_whatsapp_route(
+    *,
+    company_code: str | None,
+    audience: str | None,
+    shared_account_id: str | None = None,
+    known_provider_account_ids: set[str] | frozenset[str] | None = None,
+) -> dict[str, Any]:
+    """Select outbound WhatsApp account for a company+audience.
+
+    Flag OFF or missing company → shared default. Active verified company account
+    with matching audience and known provider id → company-owned. Otherwise
+    fail-closed to shared default (never invent credentials).
+    """
+    flag = company_channel_accounts_enabled()
+    account = setup_console_channel_account(company_code) if flag and company_code else None
+    known = known_provider_account_ids
+    if flag and known is None:
+        known = _known_octopus_provider_account_ids()
+    return _channel_account_routing.resolve_outbound_whatsapp_route(
+        flag_enabled=flag,
+        company_code=company_code,
+        audience=audience,
+        account=account,
+        shared_account_id=shared_account_id or _channel_account_routing.SHARED_ACCOUNT_ID,
+        known_provider_account_ids=known,
+    )
+
+
+def resolve_inbound_company_from_whatsapp_account(
+    *,
+    provider: str | None,
+    provider_account_id: str | None,
+) -> dict[str, Any]:
+    """Map inbound provider account → company when flag ON; else shared/phone path."""
+
+    def _lookup(provider_norm: str, account_id: str) -> dict[str, Any] | None:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT company_code, provider, provider_account_id, status, audiences
+                    FROM company_channel_accounts
+                    WHERE provider=%s AND provider_account_id=%s
+                    LIMIT 1
+                    """,
+                    (provider_norm, account_id),
+                )
+                row = cur.fetchone()
+        return dict(row) if row else None
+
+    return _channel_account_routing.resolve_inbound_company_from_account(
+        flag_enabled=company_channel_accounts_enabled(),
+        provider=provider,
+        provider_account_id=provider_account_id,
+        lookup=_lookup,
+    )
+
+
 def setup_console_channel_policy(company_code: str) -> dict[str, Any]:
     company = str(company_code or "").strip().upper()
     modules = configured_company_modules(company)
@@ -33949,6 +34040,27 @@ def setup_console_channel_policy(company_code: str) -> dict[str, Any]:
         or os.environ.get("SENDGRID_API_KEY")
     )
     employee_app_state = module_states.get("employee_app") or {}
+    # Policy reports eligibility (flag ON + active + audience). Send-time still
+    # fail-closes when provider_account_id is absent from local sender config.
+    routing_changed = False
+    if company_channel_accounts_enabled() and account and account.get("status") == "active":
+        provider_account_id = str(account.get("provider_account_id") or "").strip()
+        policy_known = frozenset(
+            {provider_account_id, _channel_account_routing.SHARED_ACCOUNT_ID}
+            if provider_account_id
+            else {_channel_account_routing.SHARED_ACCOUNT_ID}
+        )
+        for aud in ("candidate", "employee"):
+            if aud not in account_audiences:
+                continue
+            route = resolve_company_outbound_whatsapp_route(
+                company_code=company,
+                audience=aud,
+                known_provider_account_ids=policy_known,
+            )
+            if route.get("runtime_routing_changed"):
+                routing_changed = True
+                break
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -34000,7 +34112,7 @@ def setup_console_channel_policy(company_code: str) -> dict[str, Any]:
             "hr_user_whatsapp_linking": {"linked_identities": hr_links, "optional": True},
         },
         "company_whatsapp_account": account,
-        "runtime_routing_changed": False,
+        "runtime_routing_changed": routing_changed,
         "company_channel_accounts_enabled": company_channel_accounts_enabled(),
         "enabled_modules": sorted(modules),
     }

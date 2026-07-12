@@ -1294,10 +1294,23 @@ function CompanyChannelAccountCard({
           <Input id="channel-provider" value={form.provider} readOnly required />
         </Field>
         <Field label="Provider account ID" htmlFor="channel-account-id">
-          <Input id="channel-account-id" value={form.provider_account_id} onChange={(event) => setForm({ ...form, provider_account_id: event.target.value })} required />
+          <Input
+            id="channel-account-id"
+            value={form.provider_account_id}
+            disabled={!platformAvailable || working}
+            onChange={(event) => setForm({ ...form, provider_account_id: event.target.value })}
+            required
+          />
         </Field>
         <Field label="Company sender phone" htmlFor="channel-sender-phone">
-          <Input id="channel-sender-phone" type="tel" value={form.sender_phone} onChange={(event) => setForm({ ...form, sender_phone: event.target.value })} required />
+          <Input
+            id="channel-sender-phone"
+            type="tel"
+            value={form.sender_phone}
+            disabled={!platformAvailable || working}
+            onChange={(event) => setForm({ ...form, sender_phone: event.target.value })}
+            required
+          />
         </Field>
         <fieldset className="space-y-2">
           <legend className="text-xs font-semibold text-text/85">Audiences</legend>
