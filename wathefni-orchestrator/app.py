@@ -1296,6 +1296,35 @@ def _ensure_schema_impl() -> None:
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS document_storage_operations (
+      operation_id uuid PRIMARY KEY,
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      item_id text NOT NULL,
+      provider text NOT NULL,
+      provider_scope text,
+      trace_key text NOT NULL,
+      storage_object_key text,
+      external_file_id text,
+      content_sha256 text,
+      status text NOT NULL DEFAULT 'prepared',
+      failure_reason text,
+      attempt_count integer NOT NULL DEFAULT 0,
+      next_attempt_at timestamptz,
+      lease_owner text,
+      lease_expires_at timestamptz,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      stored_at timestamptz,
+      canonical_committed_at timestamptz,
+      compensated_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, trace_key),
+      CHECK (status IN (
+        'prepared', 'stored', 'deleting', 'canonical_committed',
+        'compensation_pending', 'compensated', 'storage_failed', 'manual_review'
+      ))
+    );
     CREATE TABLE IF NOT EXISTS company_modules (
       company_code text NOT NULL,
       module_key text NOT NULL,
@@ -2374,6 +2403,14 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_hr_turns_phone_created ON hr_turns(sender_phone, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_file_registry_subject ON file_registry(subject_type, subject_key, file_kind, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_file_registry_checksum ON file_registry(content_sha256);
+    CREATE INDEX IF NOT EXISTS idx_document_storage_operations_due
+      ON document_storage_operations(next_attempt_at, created_at)
+      WHERE status IN ('prepared', 'stored', 'compensation_pending', 'deleting');
+    CREATE INDEX IF NOT EXISTS idx_document_storage_operations_company
+      ON document_storage_operations(company_code, status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_document_storage_operations_object
+      ON document_storage_operations(provider, storage_object_key)
+      WHERE storage_object_key IS NOT NULL;
     CREATE INDEX IF NOT EXISTS idx_company_modules_enabled ON company_modules(company_code, enabled, module_key);
     CREATE INDEX IF NOT EXISTS idx_candidate_rank_evaluations_app ON candidate_rank_evaluations(company_code, app_key, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_company_branches_company ON company_branches(company_code, is_active, branch_name);
@@ -18425,11 +18462,13 @@ def store_document_local(
     mime_type: str,
     checksum: str | None,
     config: dict[str, Any],
+    operation_trace: str | None = None,
 ) -> dict[str, Any]:
     phone = digits(employee.get("phone")) or "unknown-phone"
     company = str(config.get("company_code") or employee.get("company_code") or "WATHEFNI").upper()
     ext = source_path.suffix or mimetypes.guess_extension(mime_type) or ".bin"
-    file_name = f"{safe_storage_name(item_id)}-{(checksum or uuid.uuid4().hex)[:12]}{ext}"
+    trace_suffix = f"-{safe_storage_name(operation_trace)[:32]}" if operation_trace else ""
+    file_name = f"{safe_storage_name(item_id)}-{(checksum or uuid.uuid4().hex)[:12]}{trace_suffix}{ext}"
     destination_dir = Path(str(config.get("local_root") or "")) / phone / "documents" / safe_storage_name(item_id)
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination_path = destination_dir / file_name
@@ -18463,6 +18502,7 @@ def store_document_google_drive(
     mime_type: str,
     checksum: str | None,
     config: dict[str, Any],
+    operation_trace: str | None = None,
 ) -> dict[str, Any]:
     folder_id = config.get("drive_folder_id")
     if not folder_id:
@@ -18470,7 +18510,8 @@ def store_document_google_drive(
     phone = digits(employee.get("phone")) or "unknown-phone"
     company = str(config.get("company_code") or employee.get("company_code") or "WATHEFNI").upper()
     ext = source_path.suffix or mimetypes.guess_extension(mime_type) or ".bin"
-    upload_name = f"{company}-{phone}-{safe_storage_name(item_id)}-{(checksum or uuid.uuid4().hex)[:12]}{ext}"
+    trace_suffix = f"-{safe_storage_name(operation_trace)[:32]}" if operation_trace else ""
+    upload_name = f"{company}-{phone}-{safe_storage_name(item_id)}-{(checksum or uuid.uuid4().hex)[:12]}{trace_suffix}{ext}"
     result = run_gog_wathefni(
         [
             "drive",
@@ -18517,6 +18558,7 @@ def store_onboarding_document(
     employee: dict[str, Any],
     item_id: str,
     media: dict[str, Any] | None,
+    operation_trace: str | None = None,
 ) -> dict[str, Any]:
     if not has_current_media_upload(media):
         return {"ok": True, "provider": "metadata_only", "storage_status": "not_required", "metadata": {}}
@@ -18530,17 +18572,625 @@ def store_onboarding_document(
     config = document_storage_config(employee.get("company_code"))
     provider = str(config.get("provider") or "local")
     if provider == "google_drive":
-        primary = store_document_google_drive(employee=employee, item_id=item_id, source_path=source, mime_type=mime_type, checksum=checksum, config=config)
+        primary = store_document_google_drive(
+            employee=employee,
+            item_id=item_id,
+            source_path=source,
+            mime_type=mime_type,
+            checksum=checksum,
+            config=config,
+            operation_trace=operation_trace,
+        )
         if primary.get("ok"):
             return primary
         if config.get("fallback_provider") == "local":
-            fallback = store_document_local(employee=employee, item_id=item_id, source_path=source, mime_type=mime_type, checksum=checksum, config=config)
+            fallback = store_document_local(
+                employee=employee,
+                item_id=item_id,
+                source_path=source,
+                mime_type=mime_type,
+                checksum=checksum,
+                config=config,
+                operation_trace=operation_trace,
+            )
             fallback["storage_status"] = "stored_with_fallback"
             fallback["primary_provider"] = "google_drive"
             fallback["storage_error"] = primary.get("storage_error")
             return fallback
         return primary
-    return store_document_local(employee=employee, item_id=item_id, source_path=source, mime_type=mime_type, checksum=checksum, config=config)
+    return store_document_local(
+        employee=employee,
+        item_id=item_id,
+        source_path=source,
+        mime_type=mime_type,
+        checksum=checksum,
+        config=config,
+        operation_trace=operation_trace,
+    )
+
+
+_DOCUMENT_STORAGE_MAX_ATTEMPTS = 8
+_DOCUMENT_STORAGE_BACKOFF_SECONDS = (60, 300, 900, 3600, 21600, 86400, 86400, 86400)
+_DOCUMENT_STORAGE_TERMINAL = {"canonical_committed", "compensated", "storage_failed", "manual_review"}
+
+
+def prepare_document_storage_operation(
+    *,
+    employee: dict[str, Any],
+    item_id: str,
+) -> dict[str, Any]:
+    company = str(employee.get("company_code") or "").strip().upper()
+    employee_key = str(employee.get("employee_key") or "").strip()
+    operation_id = str(uuid.uuid4())
+    trace_key = operation_id.replace("-", "")
+    config = document_storage_config(company)
+    provider = str(config.get("provider") or "local")
+    provider_scope = (
+        str(config.get("drive_folder_id") or "")
+        if provider == "google_drive"
+        else str(Path(str(config.get("local_root") or "")).resolve())
+    )
+    metadata = {
+        "planned_provider": provider,
+        "fallback_provider": config.get("fallback_provider"),
+        "planned_drive_folder_id": config.get("drive_folder_id"),
+        "planned_local_root": str(Path(str(config.get("local_root") or "")).resolve()),
+    }
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO document_storage_operations (
+                    operation_id, company_code, employee_key, item_id, provider,
+                    provider_scope, trace_key, status, next_attempt_at, metadata
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,'prepared',now() + interval '5 minutes',%s)
+                RETURNING *
+                """,
+                (
+                    operation_id,
+                    company,
+                    employee_key,
+                    str(item_id),
+                    provider,
+                    provider_scope or None,
+                    trace_key,
+                    Json(metadata),
+                ),
+            )
+            row = dict(cur.fetchone())
+        conn.commit()
+    return row
+
+
+def update_document_storage_operation_after_store(
+    operation_id: str,
+    *,
+    storage_result: dict[str, Any],
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    provider = str(storage_result.get("provider") or config.get("provider") or "local")
+    provider_scope = (
+        str(config.get("drive_folder_id") or "")
+        if provider == "google_drive"
+        else str(Path(str(config.get("local_root") or "")).resolve())
+    )
+    ok = bool(storage_result.get("ok")) and str(storage_result.get("storage_status") or "") != "failed"
+    status = "stored" if ok else "storage_failed"
+    failure = None if ok else str(storage_result.get("storage_error") or "storage_failed")[:500]
+    metadata = {
+        "storage_status": storage_result.get("storage_status"),
+        "primary_provider": storage_result.get("primary_provider"),
+        "upload_name": (storage_result.get("metadata") or {}).get("upload_name"),
+    }
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE document_storage_operations
+                SET provider=%s, provider_scope=%s, storage_object_key=%s,
+                    external_file_id=%s, content_sha256=%s, status=%s,
+                    failure_reason=%s, metadata=metadata || %s::jsonb,
+                    stored_at=CASE WHEN %s THEN now() ELSE stored_at END,
+                    next_attempt_at=CASE WHEN %s THEN now() + interval '5 minutes' ELSE NULL END,
+                    updated_at=now()
+                WHERE operation_id=%s AND status='prepared'
+                RETURNING *
+                """,
+                (
+                    provider,
+                    provider_scope or None,
+                    storage_result.get("storage_object_key"),
+                    storage_result.get("external_file_id"),
+                    storage_result.get("content_sha256"),
+                    status,
+                    failure,
+                    Json(metadata),
+                    ok,
+                    ok,
+                    operation_id,
+                ),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise RuntimeError("document_storage_operation_not_prepared")
+            result = dict(row)
+        conn.commit()
+    return result
+
+
+def document_storage_operation(operation_id: str) -> dict[str, Any] | None:
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM document_storage_operations WHERE operation_id=%s", (operation_id,))
+            row = cur.fetchone()
+    return dict(row) if row else None
+
+
+def document_storage_canonical_references(cur: Any, operation: dict[str, Any]) -> list[dict[str, Any]]:
+    company = str(operation.get("company_code") or "").upper()
+    provider = str(operation.get("provider") or "")
+    object_key = str(operation.get("storage_object_key") or "")
+    external_id = str(operation.get("external_file_id") or "")
+    if not object_key and not external_id:
+        return []
+    refs: list[dict[str, Any]] = []
+    object_params = (provider, object_key, object_key, external_id, external_id)
+    direct_queries = (
+        (
+            "onboarding_items",
+            """
+            SELECT e.company_code
+            FROM onboarding_items oi
+            JOIN employees e ON e.employee_key=oi.employee_key
+            WHERE COALESCE(oi.storage_provider,'')=%s
+              AND ((%s <> '' AND COALESCE(oi.storage_object_key,'')=%s)
+                   OR (%s <> '' AND COALESCE(oi.external_file_id,'')=%s))
+            LIMIT 5
+            """,
+        ),
+        (
+            "employee_documents",
+            """
+            SELECT company_code
+            FROM employee_documents
+            WHERE COALESCE(storage_provider,'')=%s
+              AND ((%s <> '' AND COALESCE(storage_object_key,'')=%s)
+                   OR (%s <> '' AND COALESCE(external_file_id,'')=%s))
+            LIMIT 5
+            """,
+        ),
+        (
+            "file_registry",
+            """
+            SELECT company_code
+            FROM file_registry
+            WHERE COALESCE(storage_provider,'')=%s
+              AND ((%s <> '' AND COALESCE(storage_object_key,'')=%s)
+                   OR (%s <> '' AND COALESCE(external_file_id,'')=%s))
+            LIMIT 5
+            """,
+        ),
+    )
+    for table, query in direct_queries:
+        cur.execute(query, object_params)
+        for row in cur.fetchall() or []:
+            refs.append({"table": table, "company_code": row.get("company_code"), "expected_company": company})
+    needle = external_id or object_key
+    if needle:
+        cur.execute(
+            """
+            SELECT company_code
+            FROM compliance_documents
+            WHERE raw_json::text LIKE %s
+            LIMIT 5
+            """,
+            (f"%{needle}%",),
+        )
+        for row in cur.fetchall() or []:
+            refs.append({"table": "compliance_documents", "company_code": row.get("company_code"), "expected_company": company})
+    return refs
+
+
+def _document_storage_drive_file(result: dict[str, Any]) -> dict[str, Any]:
+    payload = result.get("json")
+    if not isinstance(payload, dict):
+        return {}
+    candidate = payload.get("file") if isinstance(payload.get("file"), dict) else payload
+    return dict(candidate) if isinstance(candidate, dict) else {}
+
+
+def _document_storage_already_missing(result: dict[str, Any]) -> bool:
+    text = f"{result.get('stderr') or ''} {result.get('stdout') or ''}".lower()
+    return any(marker in text for marker in ("not found", "404", "file not found"))
+
+
+def delete_document_storage_object(operation: dict[str, Any]) -> dict[str, Any]:
+    provider = str(operation.get("provider") or "")
+    company = str(operation.get("company_code") or "").upper()
+    trace = str(operation.get("trace_key") or "")
+    object_key = str(operation.get("storage_object_key") or "")
+    recorded_scope = str(operation.get("provider_scope") or "")
+    config = document_storage_config(company)
+    if provider == "local":
+        current_scope = Path(str(config.get("local_root") or "")).resolve()
+        recorded_root = Path("/")
+        try:
+            recorded_root = Path(recorded_scope).resolve()
+            object_path = Path(object_key)
+            object_path = object_path.resolve() if object_path.is_absolute() else (WORKSPACE / object_path).resolve()
+            in_scope = object_path.is_relative_to(recorded_root) and object_path.is_relative_to(current_scope)
+        except Exception:
+            in_scope = False
+            object_path = Path("/")
+        item_component = safe_storage_name(str(operation.get("item_id") or ""))
+        if recorded_root != current_scope or not in_scope or trace not in object_path.name or item_component not in object_path.parts:
+            return {"ok": False, "outcome": "ownership_mismatch", "terminal": True}
+        if not object_path.exists():
+            return {"ok": True, "outcome": "already_missing"}
+        try:
+            object_path.unlink()
+            return {"ok": True, "outcome": "deleted"}
+        except FileNotFoundError:
+            return {"ok": True, "outcome": "already_missing"}
+        except Exception as exc:
+            return {"ok": False, "outcome": "delete_failed", "error": type(exc).__name__}
+    if provider == "google_drive":
+        current_scope = str(config.get("drive_folder_id") or "")
+        if not object_key or not recorded_scope or recorded_scope != current_scope:
+            return {"ok": False, "outcome": "ownership_mismatch", "terminal": True}
+        inspected = run_gog_wathefni(["drive", "get", object_key], timeout=45)
+        if not inspected.get("ok"):
+            if _document_storage_already_missing(inspected):
+                return {"ok": True, "outcome": "already_missing"}
+            return {"ok": False, "outcome": "inspect_unknown", "error": "drive_get_failed"}
+        file_obj = _document_storage_drive_file(inspected)
+        parents = file_obj.get("parents") if isinstance(file_obj.get("parents"), list) else []
+        name = str(file_obj.get("name") or "")
+        if (
+            str(file_obj.get("id") or file_obj.get("fileId") or "") != object_key
+            or recorded_scope not in parents
+            or trace not in name
+            or company not in name.upper()
+            or safe_storage_name(str(operation.get("item_id") or "")) not in name
+        ):
+            return {"ok": False, "outcome": "ownership_mismatch", "terminal": True}
+        deleted = run_gog_wathefni(["drive", "delete", object_key, "--permanent", "--force"], timeout=60)
+        if deleted.get("ok") or _document_storage_already_missing(deleted):
+            return {"ok": True, "outcome": "deleted" if deleted.get("ok") else "already_missing"}
+        return {"ok": False, "outcome": "delete_unknown", "error": "drive_delete_failed"}
+    return {"ok": False, "outcome": "unsupported_provider", "terminal": True}
+
+
+def _document_storage_next_attempt(attempt_count: int) -> datetime:
+    index = min(max(attempt_count - 1, 0), len(_DOCUMENT_STORAGE_BACKOFF_SECONDS) - 1)
+    return now_utc() + timedelta(seconds=_DOCUMENT_STORAGE_BACKOFF_SECONDS[index])
+
+
+def _record_document_storage_operator_event(operation: dict[str, Any], outcome: str) -> None:
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO action_results (
+                        action_type, status, result, final_reply, company_code,
+                        actor_user_id, actor_role
+                    )
+                    VALUES ('document_storage_reconciliation',%s,%s,%s,%s,'system:document-storage-reconcile','system')
+                    """,
+                    (
+                        "failed" if outcome == "manual_review" else "completed",
+                        Json(
+                            {
+                                "operation_id": str(operation.get("operation_id")),
+                                "company_code": operation.get("company_code"),
+                                "employee_key": operation.get("employee_key"),
+                                "item_id": operation.get("item_id"),
+                                "provider": operation.get("provider"),
+                                "outcome": outcome,
+                            }
+                        ),
+                        f"Document storage reconciliation {outcome}.",
+                        operation.get("company_code"),
+                    ),
+                )
+            conn.commit()
+    except Exception:
+        logger.warning("document storage operator audit failed", exc_info=True)
+
+
+def recover_prepared_document_storage_operation(operation: dict[str, Any]) -> dict[str, Any]:
+    trace = str(operation.get("trace_key") or "")
+    company = str(operation.get("company_code") or "").upper()
+    metadata = operation.get("metadata") if isinstance(operation.get("metadata"), dict) else {}
+    candidates: list[dict[str, Any]] = []
+    local_root = Path(str(metadata.get("planned_local_root") or ""))
+    if local_root.is_dir():
+        matches = [path for path in local_root.rglob(f"*{trace}*") if path.is_file()]
+        if len(matches) == 1:
+            path = matches[0]
+            candidates.append(
+                {
+                    "provider": "local",
+                    "provider_scope": str(local_root.resolve()),
+                    "storage_object_key": storage_object_key_for_path(path),
+                    "external_file_id": None,
+                }
+            )
+        elif len(matches) > 1:
+            return {"ok": False, "outcome": "ambiguous_trace", "terminal": True}
+    drive_folder = str(metadata.get("planned_drive_folder_id") or "")
+    if drive_folder:
+        searched = run_gog_wathefni(["drive", "search", trace], timeout=45)
+        if not searched.get("ok"):
+            return {"ok": False, "outcome": "recovery_unknown", "terminal": False}
+        payload = searched.get("json")
+        files = []
+        if isinstance(payload, dict):
+            files = payload.get("files") or payload.get("items") or []
+        if isinstance(files, list):
+            drive_matches = [
+                item
+                for item in files
+                if isinstance(item, dict)
+                and trace in str(item.get("name") or "")
+                and drive_folder in (item.get("parents") or [])
+            ]
+            if len(drive_matches) == 1:
+                drive_file = drive_matches[0]
+                file_id = drive_file.get("id") or drive_file.get("fileId")
+                candidates.append(
+                    {
+                        "provider": "google_drive",
+                        "provider_scope": drive_folder,
+                        "storage_object_key": file_id,
+                        "external_file_id": file_id,
+                    }
+                )
+            elif len(drive_matches) > 1:
+                return {"ok": False, "outcome": "ambiguous_trace", "terminal": True}
+    if not candidates:
+        return {"ok": True, "outcome": "already_missing"}
+    if len(candidates) != 1:
+        return {"ok": False, "outcome": "ambiguous_trace", "terminal": True}
+    candidate = candidates[0]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE document_storage_operations
+                SET provider=%s, provider_scope=%s, storage_object_key=%s,
+                    external_file_id=%s, status='stored', stored_at=COALESCE(stored_at,now()),
+                    next_attempt_at=now(), updated_at=now()
+                WHERE operation_id=%s AND status='prepared'
+                RETURNING *
+                """,
+                (
+                    candidate["provider"],
+                    candidate["provider_scope"],
+                    candidate["storage_object_key"],
+                    candidate["external_file_id"],
+                    operation["operation_id"],
+                ),
+            )
+            row = cur.fetchone()
+        conn.commit()
+    return {"ok": True, "outcome": "recovered", "operation": dict(row) if row else operation}
+
+
+def reconcile_document_storage_operation(operation_id: str, *, lease_owner: str | None = None) -> dict[str, Any]:
+    worker = str(lease_owner or f"pid-{os.getpid()}")[:120]
+    operation: dict[str, Any] | None = None
+    try:
+        operation = document_storage_operation(operation_id)
+        if not operation:
+            return {"ok": True, "outcome": "operation_missing"}
+        if operation.get("status") in _DOCUMENT_STORAGE_TERMINAL:
+            return {"ok": True, "outcome": operation.get("status")}
+        if operation.get("status") == "prepared":
+            recovered = recover_prepared_document_storage_operation(operation)
+            if recovered.get("terminal"):
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            UPDATE document_storage_operations
+                            SET status='manual_review', failure_reason=%s, next_attempt_at=NULL, updated_at=now()
+                            WHERE operation_id=%s AND status='prepared'
+                            RETURNING *
+                            """,
+                            (recovered.get("outcome"), operation_id),
+                        )
+                        row = cur.fetchone()
+                    conn.commit()
+                if row:
+                    _record_document_storage_operator_event(dict(row), "manual_review")
+                return {"ok": False, **recovered}
+            if not recovered.get("ok"):
+                recovery_attempt = int(operation.get("attempt_count") or 0) + 1
+                recovery_terminal = recovery_attempt >= _DOCUMENT_STORAGE_MAX_ATTEMPTS
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            UPDATE document_storage_operations
+                            SET status=%s, failure_reason=%s, attempt_count=%s,
+                                next_attempt_at=%s, updated_at=now()
+                            WHERE operation_id=%s AND status='prepared'
+                            RETURNING *
+                            """,
+                            (
+                                "manual_review" if recovery_terminal else "prepared",
+                                recovered.get("outcome"),
+                                recovery_attempt,
+                                None if recovery_terminal else _document_storage_next_attempt(recovery_attempt),
+                                operation_id,
+                            ),
+                        )
+                        row = cur.fetchone()
+                    conn.commit()
+                if recovery_terminal and row:
+                    _record_document_storage_operator_event(dict(row), "manual_review")
+                return {"ok": False, **recovered}
+            if recovered.get("outcome") == "already_missing":
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            UPDATE document_storage_operations
+                            SET status='compensated', compensated_at=now(), next_attempt_at=NULL, updated_at=now()
+                            WHERE operation_id=%s AND status='prepared'
+                            """,
+                            (operation_id,),
+                        )
+                    conn.commit()
+                return {"ok": True, "outcome": "already_missing"}
+            operation = recovered.get("operation") or document_storage_operation(operation_id)
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM document_storage_operations WHERE operation_id=%s FOR UPDATE",
+                    (operation_id,),
+                )
+                locked = cur.fetchone()
+                if not locked:
+                    return {"ok": True, "outcome": "operation_missing"}
+                operation = dict(locked)
+                if operation.get("status") in _DOCUMENT_STORAGE_TERMINAL:
+                    return {"ok": True, "outcome": operation.get("status")}
+                lease_expires = operation.get("lease_expires_at")
+                if operation.get("status") == "deleting" and lease_expires and lease_expires > now_utc():
+                    return {"ok": False, "outcome": "leased"}
+                refs = document_storage_canonical_references(cur, operation)
+                if refs:
+                    cur.execute(
+                        """
+                        UPDATE document_storage_operations
+                        SET status='canonical_committed', canonical_committed_at=COALESCE(canonical_committed_at,now()),
+                            failure_reason=NULL, next_attempt_at=NULL, lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                        WHERE operation_id=%s
+                        """,
+                        (operation_id,),
+                    )
+                    conn.commit()
+                    return {"ok": True, "outcome": "canonical_reference_found", "references": refs}
+                attempt_count = int(operation.get("attempt_count") or 0) + 1
+                cur.execute(
+                    """
+                    UPDATE document_storage_operations
+                    SET status='deleting', attempt_count=%s, lease_owner=%s,
+                        lease_expires_at=now() + interval '5 minutes', updated_at=now()
+                    WHERE operation_id=%s
+                    RETURNING *
+                    """,
+                    (attempt_count, worker, operation_id),
+                )
+                operation = dict(cur.fetchone())
+            conn.commit()
+        deletion = delete_document_storage_object(operation)
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                if deletion.get("ok"):
+                    cur.execute(
+                        """
+                        UPDATE document_storage_operations
+                        SET status='compensated', failure_reason=NULL, compensated_at=now(),
+                            next_attempt_at=NULL, lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                        WHERE operation_id=%s AND status='deleting'
+                        RETURNING *
+                        """,
+                        (operation_id,),
+                    )
+                else:
+                    terminal = bool(deletion.get("terminal")) or int(operation.get("attempt_count") or 0) >= _DOCUMENT_STORAGE_MAX_ATTEMPTS
+                    next_attempt = None if terminal else _document_storage_next_attempt(int(operation.get("attempt_count") or 0))
+                    cur.execute(
+                        """
+                        UPDATE document_storage_operations
+                        SET status=%s, failure_reason=%s, next_attempt_at=%s,
+                            lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                        WHERE operation_id=%s AND status='deleting'
+                        RETURNING *
+                        """,
+                        (
+                            "manual_review" if terminal else "compensation_pending",
+                            str(deletion.get("outcome") or "delete_failed")[:500],
+                            next_attempt,
+                            operation_id,
+                        ),
+                    )
+                row = cur.fetchone()
+            conn.commit()
+        updated = dict(row) if row else (document_storage_operation(operation_id) or operation)
+        if updated.get("status") == "manual_review":
+            _record_document_storage_operator_event(updated, "manual_review")
+        return {"ok": bool(deletion.get("ok")), **deletion, "status": updated.get("status"), "attempt_count": updated.get("attempt_count")}
+    except Exception as exc:
+        logger.warning("document storage reconciliation failed for %s", operation_id, exc_info=True)
+        return {"ok": False, "outcome": "reconciliation_error", "error": type(exc).__name__}
+
+
+def mark_document_storage_compensation_pending(operation_id: str, reason: str) -> None:
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE document_storage_operations
+                    SET status='compensation_pending', failure_reason=%s,
+                        next_attempt_at=now(), lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                    WHERE operation_id=%s
+                      AND status IN ('stored','deleting','compensation_pending')
+                    """,
+                    (str(reason or "canonical_transaction_failed")[:500], operation_id),
+                )
+            conn.commit()
+    except Exception:
+        logger.error("could not mark document storage compensation pending", exc_info=True)
+
+
+def run_document_storage_reconciliation(limit: int = 50, *, company_code: str | None = None) -> dict[str, Any]:
+    params: list[Any] = []
+    company_sql = ""
+    if company_code:
+        company_sql = " AND company_code=%s"
+        params.append(str(company_code).upper())
+    params.append(max(1, min(int(limit), 200)))
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT operation_id
+                FROM document_storage_operations
+                WHERE status IN ('prepared','stored','compensation_pending','deleting')
+                  AND (next_attempt_at IS NULL OR next_attempt_at <= now()
+                       OR (status='deleting' AND lease_expires_at <= now()))
+                  {company_sql}
+                ORDER BY next_attempt_at NULLS FIRST, created_at
+                LIMIT %s
+                """,
+                tuple(params),
+            )
+            operation_ids = [str(row["operation_id"]) for row in cur.fetchall() or []]
+    results = [reconcile_document_storage_operation(item, lease_owner=f"sweep-{os.getpid()}") for item in operation_ids]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                DELETE FROM document_storage_operations
+                WHERE status IN ('canonical_committed','compensated')
+                  AND updated_at < now() - interval '90 days'
+                """
+            )
+            pruned = int(cur.rowcount or 0)
+        conn.commit()
+    return {
+        "ok": all(result.get("ok") or result.get("outcome") == "leased" for result in results),
+        "processed": len(results),
+        "pruned": pruned,
+        "results": results,
+    }
 
 
 def source_file_details(path_value: str | None, mime_value: str | None = None) -> tuple[Path | None, str | None, str | None, int | None]:
@@ -45375,9 +46025,9 @@ async def app_onboarding_document_upload(
 
     filename = str(file.filename or "").strip() or "document"
     ext = Path(filename).suffix.lower()
+    data = await file.read()
     if ext not in _APP_DOC_EXTENSIONS:
         raise HTTPException(status_code=400, detail={"error": "unsupported_file_type", "message": "Upload a PDF or an image."})
-    data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail={"error": "empty_file", "message": "That file is empty."})
     if len(data) > _APP_DOC_MAX_BYTES:
@@ -45404,15 +46054,41 @@ async def app_onboarding_document_upload(
     tmp_dir = tempfile.mkdtemp(prefix="app-doc-upload-")
     tmp_path = str(Path(tmp_dir) / safe_storage_name(filename))
     new_file_id: str | None = None
+    operation: dict[str, Any] | None = None
+    storage_result: dict[str, Any] | None = None
     try:
         with open(tmp_path, "wb") as fh:
             fh.write(data)
         media = {"path": tmp_path, "type": mime_type}
-        storage_result = store_onboarding_document(employee=employee, item_id=item, media=media)
+        operation = prepare_document_storage_operation(employee=employee, item_id=item)
+        config = document_storage_config(company)
+        storage_result = store_onboarding_document(
+            employee=employee,
+            item_id=item,
+            media=media,
+            operation_trace=str(operation["trace_key"]),
+        )
+        update_document_storage_operation_after_store(
+            str(operation["operation_id"]),
+            storage_result=storage_result,
+            config=config,
+        )
         if not storage_result.get("ok") or str(storage_result.get("storage_status")) == "failed":
             raise HTTPException(status_code=502, detail={"error": "storage_failed", "message": "We couldn't store that document. Please try again."})
         with db_connect() as conn:
             with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT status
+                    FROM document_storage_operations
+                    WHERE operation_id=%s
+                    FOR UPDATE
+                    """,
+                    (operation["operation_id"],),
+                )
+                operation_state = cur.fetchone()
+                if not operation_state or operation_state.get("status") != "stored":
+                    raise RuntimeError("document_storage_operation_not_stored")
                 cur.execute(
                     """
                     UPDATE onboarding_items
@@ -45458,7 +46134,36 @@ async def app_onboarding_document_upload(
                 )
                 row = cur.fetchone()
                 new_file_id = str(row["file_id"]) if row else None
+                cur.execute(
+                    """
+                    UPDATE document_storage_operations
+                    SET status='canonical_committed', canonical_committed_at=now(),
+                        failure_reason=NULL, next_attempt_at=NULL,
+                        lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                    WHERE operation_id=%s AND status='stored'
+                    """,
+                    (operation["operation_id"],),
+                )
+                if cur.rowcount != 1:
+                    raise RuntimeError("document_storage_operation_commit_conflict")
             conn.commit()
+    except Exception as exc:
+        if operation:
+            try:
+                operation_id = str(operation["operation_id"])
+                current = document_storage_operation(operation_id)
+                if current and current.get("status") == "prepared":
+                    reconcile_document_storage_operation(operation_id, lease_owner=f"request-{os.getpid()}")
+                elif current and current.get("status") not in _DOCUMENT_STORAGE_TERMINAL:
+                    mark_document_storage_compensation_pending(operation_id, type(exc).__name__)
+                    reconcile_document_storage_operation(operation_id, lease_owner=f"request-{os.getpid()}")
+            except Exception:
+                logger.error(
+                    "immediate document compensation unavailable operation_id=%s",
+                    operation.get("operation_id"),
+                    exc_info=True,
+                )
+        raise
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
