@@ -1,0 +1,33 @@
+{
+  "active_recovery_sessions_reread": 0,
+  "captured_at": "2026-07-12T15:12:12+00:00",
+  "fail_closed_fallback_doc_present": true,
+  "ok": true,
+  "old_fail_open_artifact_hash": "b452a64d2fdf1fdb4d192b99e958877e45522ce56a4cb0134fbc131bed15a0bd",
+  "preflight": {
+    "active_recovery_sessions": 0,
+    "company_code": "WATHEFNI",
+    "error": null,
+    "ok": true,
+    "required_permissions": [
+      "employees.manage",
+      "employees.read",
+      "employees.status.approve"
+    ],
+    "reviewed_owner_user_ids": [
+      "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    ]
+  },
+  "protected_flags": {
+    "app_hash": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2",
+    "captured_at": "2026-07-12T15:12:12+00:00",
+    "fail_open_absent": true,
+    "flags": {
+      "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off/unset",
+      "WATHEFNI_EMPLOYEE_APP": "off/unset",
+      "WATHEFNI_ONBOARDING_SEED": "off/unset"
+    }
+  },
+  "rollback_target_is_old_fail_open": false,
+  "selected_artifact_hash": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2"
+}

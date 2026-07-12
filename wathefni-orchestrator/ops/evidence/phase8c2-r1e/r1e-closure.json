@@ -1,0 +1,33 @@
+{
+  "artifact_hash": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2",
+  "canary_readiness_blockers": [
+    "WATHEFNI_EMPLOYEE_APP remains OFF by design",
+    "employee_app company module remains disabled",
+    "no canary employee selected",
+    "no onboarding/privacy/activation canary package executed",
+    "Phase 8C canary execution not authorized by R1E"
+  ],
+  "captured_at": "2026-07-12T15:12:55+00:00",
+  "deployed_commits": [
+    "b312d05",
+    "93720ed",
+    "b0ec347",
+    "8ff5061"
+  ],
+  "employee_app_zero": {
+    "employee_app_invites": 0,
+    "employee_app_modules_enabled": 0,
+    "employee_sessions": 0,
+    "ok": true
+  },
+  "fallback": {
+    "doc": "/opt/wathefni/orchestrator/ops/PHASE8C2_R1D_FAIL_CLOSED_FALLBACK.md",
+    "old_fail_open_hash": "b452a64d2fdf1fdb4d192b99e958877e45522ce56a4cb0134fbc131bed15a0bd",
+    "old_fail_open_not_approved_rollback": true
+  },
+  "ok": true,
+  "phase": "8C2-R1E",
+  "protected_flags": "off",
+  "r1d_docs_commit": "684b16f",
+  "recommendation": "production fail-closed green"
+}

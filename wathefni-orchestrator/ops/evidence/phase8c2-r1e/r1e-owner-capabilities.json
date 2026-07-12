@@ -1,0 +1,11 @@
+{
+  "captured_at": "2026-07-12T15:12:53+00:00",
+  "employee_scopes_present": [
+    "employees.manage",
+    "employees.read",
+    "employees.status.approve"
+  ],
+  "permission_authority": "backend_current",
+  "permissions_count": 28,
+  "role": "owner"
+}

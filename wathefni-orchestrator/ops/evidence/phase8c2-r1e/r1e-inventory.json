@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-07-12T15:11:06+00:00",
+  "company_code": "WATHEFNI",
+  "employee_permission_scopes": [
+    "employees.manage",
+    "employees.read",
+    "employees.status.approve"
+  ],
+  "user_count": 3,
+  "users": [
+    {
+      "active_sessions": 0,
+      "auth_source": "legacy_hr_phone_bootstrap",
+      "email_redacted": "az***@gmail.com",
+      "explicit_permissions": [],
+      "normal_operator_candidate": false,
+      "role": "owner",
+      "status": "active",
+      "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f"
+    },
+    {
+      "active_sessions": 0,
+      "auth_source": "workspace",
+      "email_redacted": "f.***@disruptv.tech",
+      "explicit_permissions": [],
+      "normal_operator_candidate": true,
+      "role": "owner",
+      "status": "active",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    },
+    {
+      "active_sessions": 0,
+      "auth_source": "workspace",
+      "email_redacted": "h.***@almulla-media.com",
+      "explicit_permissions": [],
+      "normal_operator_candidate": true,
+      "role": "viewer",
+      "status": "active",
+      "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6"
+    }
+  ]
+}

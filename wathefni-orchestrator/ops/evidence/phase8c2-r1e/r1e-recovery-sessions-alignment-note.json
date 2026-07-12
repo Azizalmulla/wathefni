@@ -1,0 +1,12 @@
+{
+  "captured_at": "2026-07-12T15:12:10+00:00",
+  "first_pass": {
+    "captured_at": "2026-07-12T15:11:30+00:00",
+    "ok": false,
+    "remaining_count": 0,
+    "remaining_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reviewed_count": 0,
+    "revoked_count": 7
+  },
+  "note": "Initial revoke used audited revoke path and cleared 7 status=active bootstrap sessions that were already expired; reviewed inventory initially filtered unexpired-only and saw 0. Criteria aligned to revoke SQL; remaining active recovery sessions are now 0."
+}

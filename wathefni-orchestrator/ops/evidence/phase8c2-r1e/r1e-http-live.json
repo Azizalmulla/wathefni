@@ -1,0 +1,19 @@
+{
+  "auth_me": 200,
+  "compliance": 200,
+  "employee_scopes": [
+    "employees.manage",
+    "employees.read",
+    "employees.status.approve"
+  ],
+  "employees_auth": 200,
+  "employees_unauth": 401,
+  "fail_open_absent": true,
+  "health": 200,
+  "hr_tasks": 200,
+  "ok": true,
+  "payroll": 200,
+  "permission_authority": "backend_current",
+  "role": "owner",
+  "team": 200
+}

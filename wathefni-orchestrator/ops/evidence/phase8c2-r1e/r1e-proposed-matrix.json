@@ -1,0 +1,41 @@
+{
+  "captured_at": "2026-07-12T15:11:06+00:00",
+  "company_code": "WATHEFNI",
+  "grants": [
+    {
+      "company_code": "WATHEFNI",
+      "email_redacted": "f.***@disruptv.tech",
+      "permission": "employees.manage",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "email_redacted": "f.***@disruptv.tech",
+      "permission": "employees.read",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "email_redacted": "f.***@disruptv.tech",
+      "permission": "employees.status.approve",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    }
+  ],
+  "notes": "Employee scopes are grant-only. Non-owner roles are not auto-included. Legacy bootstrap owners are excluded from both actor and recipient selection.",
+  "policy": "explicit_grant_only_no_role_auto_grant",
+  "selected_owner_count": 1,
+  "selected_owners": [
+    {
+      "auth_source": "workspace",
+      "email_redacted": "f.***@disruptv.tech",
+      "role": "owner",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "captured_at": "2026-07-12T15:11:06+00:00",
+  "ok": true,
+  "tables": [
+    "dashboard_user_permission_grants",
+    "employee_status_changes"
+  ]
+}

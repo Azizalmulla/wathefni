@@ -1,0 +1,39 @@
+{
+  "captured_at": "2026-07-12T15:11:29+00:00",
+  "grants": [
+    {
+      "actor_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+      "email_redacted": "f.***@disruptv.tech",
+      "grant_id": "646a6ed8-b6f9-435e-8574-af68cd5d9765",
+      "permission": "employees.manage",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "status": "active",
+      "timestamp": "2026-07-12T15:11:29+00:00",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    },
+    {
+      "actor_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+      "email_redacted": "f.***@disruptv.tech",
+      "grant_id": "dcc883ea-45d6-482a-86cd-b8911add7cec",
+      "permission": "employees.read",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "status": "active",
+      "timestamp": "2026-07-12T15:11:29+00:00",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    },
+    {
+      "actor_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+      "email_redacted": "f.***@disruptv.tech",
+      "grant_id": "a5e2b9ad-17f4-4ce9-bb4d-a31489b0c08d",
+      "permission": "employees.status.approve",
+      "reason": "Reviewed production fail-closed dashboard permission-authority cutover for Phase 8C2-R1E",
+      "review_reference": "phase8c2-r1e-production-security-cutover",
+      "status": "active",
+      "timestamp": "2026-07-12T15:11:29+00:00",
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c"
+    }
+  ],
+  "ok": true
+}

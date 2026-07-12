@@ -1,0 +1,40 @@
+{
+  "capabilities": {
+    "captured_at": "2026-07-12T15:12:53+00:00",
+    "employee_scopes_present": [
+      "employees.manage",
+      "employees.read",
+      "employees.status.approve"
+    ],
+    "permission_authority": "backend_current",
+    "permissions_count": 28,
+    "role": "owner"
+  },
+  "ok": true,
+  "open_session_revocation": {
+    "failed": 0,
+    "passed": 4
+  },
+  "protected": {
+    "app_hash": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2",
+    "captured_at": "2026-07-12T15:12:53+00:00",
+    "fail_open_absent": true,
+    "flags": {
+      "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+      "WATHEFNI_EMPLOYEE_APP": "off",
+      "WATHEFNI_ONBOARDING_SEED": "off"
+    }
+  },
+  "r1b": {
+    "failed": 0,
+    "passed": 8
+  },
+  "r1c": {
+    "failed": 0,
+    "passed": 8
+  },
+  "route_matrix": {
+    "failed": 0,
+    "passed": 28
+  }
+}
