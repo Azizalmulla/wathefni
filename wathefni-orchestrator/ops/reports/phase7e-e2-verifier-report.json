@@ -1,0 +1,2909 @@
+{
+  "blockers": [
+    {
+      "case_id": "C05e",
+      "category": "invite_security",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "new_sessions_for_wrong_employee": 0,
+        "status_code": 401
+      },
+      "label": "invite employee_key/phone mismatch cannot activate the wrong employee",
+      "observed": {
+        "response": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-d@synthetic.invalid",
+              "employee_key": "p7e-app-d",
+              "locale": "en",
+              "name": "Synthetic Employee D",
+              "onboarding_status": "in_progress",
+              "phone": "96555557804",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.108805+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "sessions_after": 1,
+        "sessions_before": 0
+      },
+      "smallest_durable_remediation_scope": "Bind activation lookup to invite.employee_key and verify it equals the resolved employee before redeeming or creating a session.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05g",
+      "category": "company_lifecycle",
+      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
+      "expected": {
+        "activation_denied": true,
+        "invite_denied": true
+      },
+      "label": "disabled company blocks invite and activation",
+      "observed": {
+        "activation": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-e@synthetic.invalid",
+              "employee_key": "p7e-app-e",
+              "locale": "en",
+              "name": "Synthetic Employee E",
+              "onboarding_status": "in_progress",
+              "phone": "96555557805",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.136144+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "invite": {
+          "body": {
+            "code": "[redacted]",
+            "delivery": {
+              "channel": null,
+              "ok": false,
+              "status": "failed"
+            },
+            "employee_key": "p7e-app-e",
+            "expires_at": "2026-07-13T08:49:34.129485+00:00",
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "smallest_durable_remediation_scope": "Enforce active company lifecycle in the HR invite route and activation path before issuing/redeeming an invite.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05h",
+      "category": "company_lifecycle",
+      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
+      "expected": {
+        "activation_denied": true,
+        "invite_denied": true
+      },
+      "label": "archived company blocks invite and activation",
+      "observed": {
+        "activation": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-f@synthetic.invalid",
+              "employee_key": "p7e-app-f",
+              "locale": "en",
+              "name": "Synthetic Employee F",
+              "onboarding_status": "in_progress",
+              "phone": "96555557806",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.148167+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "invite": {
+          "body": {
+            "code": "[redacted]",
+            "delivery": {
+              "channel": null,
+              "ok": false,
+              "status": "failed"
+            },
+            "employee_key": "p7e-app-f",
+            "expires_at": "2026-07-13T08:49:34.143146+00:00",
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "smallest_durable_remediation_scope": "Enforce active company lifecycle in the HR invite route and activation path before issuing/redeeming an invite.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05i",
+      "category": "invite_security",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "active_session_count_growth": 0,
+        "rejected_or_idempotent": true
+      },
+      "label": "already-activated employee does not receive an additional privileged session",
+      "observed": {
+        "response": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-a@synthetic.invalid",
+              "employee_key": "p7e-app-a",
+              "locale": "en",
+              "name": "Synthetic Employee A",
+              "onboarding_status": "in_progress",
+              "phone": "96555557801",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.159139+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "sessions_after": 2,
+        "sessions_before": 1
+      },
+      "smallest_durable_remediation_scope": "Define activation idempotency and reject or atomically replace existing active sessions instead of accumulating privileged sessions.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C07i",
+      "category": "document_validation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "error": "mime_mismatch_or_invalid_content",
+        "status_code": "400/415"
+      },
+      "label": "server rejects extension/MIME mismatch",
+      "observed": {
+        "body": {
+          "file_id": "0684fa74-511d-47fd-84c2-80665745902c",
+          "item_id": "personal_photo",
+          "ok": true,
+          "storage_status": "stored"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Add server-side MIME allowlist and extension-to-MIME/content-signature consistency validation before storage.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C07k",
+      "category": "orphan_safety",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "database_state_unchanged": true,
+        "permanent_orphans": [],
+        "request_failed": true
+      },
+      "label": "DB failure after successful storage leaves no permanent orphan",
+      "observed": {
+        "database_after": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "database_before": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "permanent_orphans": [
+          "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"
+        ],
+        "response": {
+          "body": "synthetic_db_failure_after_storage",
+          "exception": "RuntimeError",
+          "returned": false,
+          "status_code": 500
+        }
+      },
+      "smallest_durable_remediation_scope": "Add compensating deletion for the stored local/Drive object when the post-storage database transaction fails, or make storage finalization transactional.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C07l",
+      "category": "audit",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "rejection_audit_growth": 1,
+        "request_denied": true
+      },
+      "label": "rejected employee upload is auditable",
+      "observed": {
+        "audit_after": 0,
+        "audit_before": 0,
+        "response": {
+          "body": {
+            "error": "unsupported_file_type",
+            "message": "Upload a PDF or an image."
+          },
+          "returned": false,
+          "status_code": 400
+        }
+      },
+      "smallest_durable_remediation_scope": "Write an HR-safe, company/employee-scoped audit event for rejected upload attempts without recording document bytes or secrets.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10c",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "company module removal blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.360352+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Apply company lifecycle/module/employee eligibility gates before rotating a refresh token; revoke the session when a gate fails.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Add an active-company lifecycle check to employee_app_context and all unauthenticated auth/invite paths.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.365767+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Check active company lifecycle and effective employee_app module before rotating refresh credentials.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Add an active-company lifecycle check to employee_app_context and all unauthenticated auth/invite paths.",
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.370987+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "smallest_durable_remediation_scope": "Check active company lifecycle and effective employee_app module before rotating refresh credentials.",
+      "status": "FAIL"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "C01a",
+      "category": "authorization",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "error": "employee_app_disabled",
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks authenticated app context",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C01b",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks activation",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C02a",
+      "category": "authorization",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "error": "employee_app_not_enabled_for_company",
+        "status_code": 403
+      },
+      "label": "module OFF blocks an existing session",
+      "observed": {
+        "body": {
+          "error": "employee_app_not_enabled_for_company",
+          "message": "The app is not enabled for your company."
+        },
+        "returned": false,
+        "status_code": 403
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C02b",
+      "category": "invite",
+      "endpoint": "POST /dashboard/posthire/employees/{employee_key}/app-invite",
+      "expected": {
+        "status_code": 403
+      },
+      "label": "module OFF blocks HR invite",
+      "observed": {
+        "body": {
+          "error": "employee_app_not_enabled_for_company",
+          "message": "The employee app module is not enabled for your company."
+        },
+        "returned": false,
+        "status_code": 403
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03a",
+      "category": "delivery",
+      "endpoint": "POST /dashboard/posthire/employees/{employee_key}/app-invite",
+      "expected": {
+        "attempted": true,
+        "channel": "whatsapp_session",
+        "created": true,
+        "status": "delivered_whatsapp"
+      },
+      "label": "mocked activation delivery exposes backend-owned delivered outcome",
+      "observed": {
+        "attempted": true,
+        "created": true,
+        "semantic": "delivered",
+        "server_channel": "whatsapp_session",
+        "server_status": "delivered_whatsapp"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03b",
+      "category": "delivery",
+      "endpoint": "POST /dashboard/posthire/employees/{employee_key}/app-invite",
+      "expected": {
+        "attempted": true,
+        "channel": null,
+        "created": true,
+        "status": "failed"
+      },
+      "label": "mocked activation delivery exposes backend-owned failed outcome",
+      "observed": {
+        "attempted": true,
+        "created": true,
+        "semantic": "failed",
+        "server_channel": null,
+        "server_status": "failed"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03c",
+      "category": "delivery",
+      "endpoint": "POST /dashboard/posthire/employees/{employee_key}/app-invite",
+      "expected": {
+        "attempted": true,
+        "channel": null,
+        "created": true,
+        "status": "suppressed"
+      },
+      "label": "mocked activation delivery exposes backend-owned suppressed outcome",
+      "observed": {
+        "attempted": true,
+        "created": true,
+        "semantic": "suppressed",
+        "server_channel": null,
+        "server_status": "suppressed"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03d",
+      "category": "delivery",
+      "endpoint": "POST /dashboard/posthire/employees/{employee_key}/app-invite",
+      "expected": {
+        "attempted": true,
+        "channel": "email",
+        "created": true,
+        "status": "sent_email_fallback"
+      },
+      "label": "mocked activation delivery exposes backend-owned fallback outcome",
+      "observed": {
+        "attempted": true,
+        "created": true,
+        "semantic": "fallback",
+        "server_channel": "email",
+        "server_status": "sent_email_fallback"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03e",
+      "category": "delivery",
+      "endpoint": "deliver_app_activation_code → outbound_delivery",
+      "expected": {
+        "attempts": 1,
+        "created_row": true,
+        "status": "delivered_whatsapp",
+        "terminal_event": true
+      },
+      "label": "real ladder persists created/attempted/delivered state",
+      "observed": {
+        "event": [
+          {
+            "channel": "outbound_layer",
+            "payload": {
+              "attempt_reasons": [],
+              "channel_used": "whatsapp_session",
+              "delivery_status": "delivered_whatsapp",
+              "employee_message_id": "829f9dfa-75f7-4ac9-bc52-afcd55617490",
+              "flow": "app_activation",
+              "outbound_layer": true,
+              "recipient_email": "p7e-app-a@synthetic.invalid",
+              "template_key": "app_activation"
+            },
+            "status": "sent"
+          }
+        ],
+        "message": [
+          {
+            "attempt_log": [
+              {
+                "at": "2026-07-12T08:49:33.906175+00:00",
+                "attempt": 1,
+                "channel": "whatsapp_session",
+                "reasons": [],
+                "status": "delivered_whatsapp"
+              }
+            ],
+            "attempts": 1,
+            "channel_used": "whatsapp_session",
+            "message_id": "829f9dfa-75f7-4ac9-bc52-afcd55617490",
+            "status": "delivered_whatsapp"
+          }
+        ],
+        "provider_calls": {
+          "email": 0,
+          "session": 1,
+          "template": 0
+        },
+        "result": {
+          "channel": "whatsapp_session",
+          "delivery_status": "delivered_whatsapp",
+          "hr_task_id": null,
+          "ok": true
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03f",
+      "category": "delivery",
+      "endpoint": "deliver_app_activation_code → outbound_delivery",
+      "expected": {
+        "channel": "email",
+        "prior_rung_reason": true,
+        "status": "sent_email_fallback"
+      },
+      "label": "real ladder records fallback as later-rung success plus reason trail",
+      "observed": {
+        "message": [
+          {
+            "attempt_log": [
+              {
+                "at": "2026-07-12T08:49:33.911014+00:00",
+                "attempt": 1,
+                "channel": "email",
+                "reasons": [
+                  "session:conversation_closed",
+                  "template:template_unmapped"
+                ],
+                "status": "sent_email_fallback"
+              }
+            ],
+            "attempts": 1,
+            "channel_used": "email",
+            "status": "sent_email_fallback"
+          }
+        ],
+        "provider_calls": {
+          "email": 1,
+          "session": 1,
+          "template": 1
+        },
+        "result": {
+          "channel": "email",
+          "delivery_status": "sent_email_fallback",
+          "hr_task_id": null,
+          "ok": true
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03g",
+      "category": "delivery",
+      "endpoint": "deliver_app_activation_code → outbound_delivery",
+      "expected": {
+        "hr_task": "open",
+        "status": "needs_hr_action"
+      },
+      "label": "real ladder all-failed activation creates visible HR task",
+      "observed": {
+        "hr_task_count": 1,
+        "message": [
+          {
+            "attempt_log": [
+              {
+                "at": "2026-07-12T08:49:33.915582+00:00",
+                "attempt": 1,
+                "channel": null,
+                "reasons": [
+                  "session:conversation_closed",
+                  "template:template_unmapped",
+                  "email:synthetic_email_failure"
+                ],
+                "status": "needs_hr_action"
+              }
+            ],
+            "attempts": 1,
+            "channel_used": null,
+            "hr_task_id": "f1b43ffe-7f51-469a-a472-1cb59da654c0",
+            "status": "needs_hr_action"
+          }
+        ],
+        "result": {
+          "channel": null,
+          "delivery_status": "needs_hr_action",
+          "hr_task_id": "f1b43ffe-7f51-469a-a472-1cb59da654c0",
+          "ok": false
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C03h",
+      "category": "delivery",
+      "endpoint": "deliver_app_activation_code → outbound_delivery",
+      "expected": {
+        "hr_task": null,
+        "provider_calls": 0,
+        "status": "suppressed"
+      },
+      "label": "real ladder persists suppressed without provider calls or HR task",
+      "observed": {
+        "message": [
+          {
+            "attempt_log": [
+              {
+                "at": "2026-07-12T08:49:33.921601+00:00",
+                "attempt": 1,
+                "channel": null,
+                "reasons": [
+                  "push:suppressed_opt_out",
+                  "session:suppressed_opt_out",
+                  "template:suppressed_opt_out",
+                  "email:suppressed_opt_out"
+                ],
+                "status": "suppressed"
+              }
+            ],
+            "attempts": 1,
+            "channel_used": null,
+            "hr_task_id": null,
+            "status": "suppressed"
+          }
+        ],
+        "provider_calls": {
+          "email": 0,
+          "session": 0,
+          "template": 0
+        },
+        "result": {
+          "channel": null,
+          "delivery_status": "suppressed",
+          "hr_task_id": null,
+          "ok": false
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C04a",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "employee_key": "p7e-app-a",
+        "session": true,
+        "status_code": 200
+      },
+      "label": "valid single-use invite activates the intended employee",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:33.933000+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C04b",
+      "category": "tenant_isolation",
+      "endpoint": "GET /app/me",
+      "expected": {
+        "company_code": "P7ESTG01",
+        "employee_key": "p7e-app-a"
+      },
+      "label": "authenticated identity is self-scoped",
+      "observed": {
+        "body": {
+          "company_code": "P7ESTG01",
+          "department": "",
+          "email": "p7e-app-a@synthetic.invalid",
+          "employee_key": "p7e-app-a",
+          "enabled_modules": [
+            "employee_app",
+            "leave",
+            "onboarding"
+          ],
+          "leave_balances_enabled": false,
+          "locale": "en",
+          "name": "Synthetic Employee A",
+          "ok": true,
+          "onboarding_status": "in_progress",
+          "phone": "96555557801",
+          "position_title": ""
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05a",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 401
+      },
+      "label": "superseded invite is rejected",
+      "observed": {
+        "body": {
+          "error": "app_activation_failed",
+          "message": "That code didn't work. Ask your HR team for a new one."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05b",
+      "category": "abuse_protection",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "after_limit": 429,
+        "first_invalid": 401,
+        "max_attempts": 5
+      },
+      "label": "repeated invalid activation attempts trigger abuse protection",
+      "observed": {
+        "invalid_statuses": [
+          401,
+          401,
+          401,
+          401,
+          401
+        ],
+        "locked": {
+          "body": {
+            "error": "too_many_attempts",
+            "message": "Too many attempts. Ask your HR team for a new code."
+          },
+          "returned": false,
+          "status_code": 429
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05c",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "first": 200,
+        "second": 401
+      },
+      "label": "redeemed invite cannot be reused",
+      "observed": {
+        "first": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-b@synthetic.invalid",
+              "employee_key": "p7e-app-b",
+              "locale": "en",
+              "name": "Synthetic Employee B",
+              "onboarding_status": "in_progress",
+              "phone": "96555557802",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.052354+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "second": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05d",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 401
+      },
+      "label": "expired invite is rejected",
+      "observed": {
+        "body": {
+          "error": "app_activation_failed",
+          "message": "That code didn't work. Ask your HR team for a new one."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05d2",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 401
+      },
+      "label": "explicitly revoked invite is rejected",
+      "observed": {
+        "body": {
+          "error": "app_activation_failed",
+          "message": "That code didn't work. Ask your HR team for a new one."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05e",
+      "category": "invite_security",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "new_sessions_for_wrong_employee": 0,
+        "status_code": 401
+      },
+      "label": "invite employee_key/phone mismatch cannot activate the wrong employee",
+      "observed": {
+        "response": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-d@synthetic.invalid",
+              "employee_key": "p7e-app-d",
+              "locale": "en",
+              "name": "Synthetic Employee D",
+              "onboarding_status": "in_progress",
+              "phone": "96555557804",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.108805+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "sessions_after": 1,
+        "sessions_before": 0
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05f",
+      "category": "tenant_isolation",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 401
+      },
+      "label": "cross-company invite cannot activate an employee",
+      "observed": {
+        "body": {
+          "error": "app_activation_failed",
+          "message": "That code didn't work. Ask your HR team for a new one."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C05g",
+      "category": "company_lifecycle",
+      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
+      "expected": {
+        "activation_denied": true,
+        "invite_denied": true
+      },
+      "label": "disabled company blocks invite and activation",
+      "observed": {
+        "activation": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-e@synthetic.invalid",
+              "employee_key": "p7e-app-e",
+              "locale": "en",
+              "name": "Synthetic Employee E",
+              "onboarding_status": "in_progress",
+              "phone": "96555557805",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.136144+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "invite": {
+          "body": {
+            "code": "[redacted]",
+            "delivery": {
+              "channel": null,
+              "ok": false,
+              "status": "failed"
+            },
+            "employee_key": "p7e-app-e",
+            "expires_at": "2026-07-13T08:49:34.129485+00:00",
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05h",
+      "category": "company_lifecycle",
+      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
+      "expected": {
+        "activation_denied": true,
+        "invite_denied": true
+      },
+      "label": "archived company blocks invite and activation",
+      "observed": {
+        "activation": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-f@synthetic.invalid",
+              "employee_key": "p7e-app-f",
+              "locale": "en",
+              "name": "Synthetic Employee F",
+              "onboarding_status": "in_progress",
+              "phone": "96555557806",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.148167+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "invite": {
+          "body": {
+            "code": "[redacted]",
+            "delivery": {
+              "channel": null,
+              "ok": false,
+              "status": "failed"
+            },
+            "employee_key": "p7e-app-f",
+            "expires_at": "2026-07-13T08:49:34.143146+00:00",
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C05i",
+      "category": "invite_security",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "active_session_count_growth": 0,
+        "rejected_or_idempotent": true
+      },
+      "label": "already-activated employee does not receive an additional privileged session",
+      "observed": {
+        "response": {
+          "body": {
+            "employee": {
+              "company_code": "P7ESTG01",
+              "department": "",
+              "email": "p7e-app-a@synthetic.invalid",
+              "employee_key": "p7e-app-a",
+              "locale": "en",
+              "name": "Synthetic Employee A",
+              "onboarding_status": "in_progress",
+              "phone": "96555557801",
+              "position_title": ""
+            },
+            "expires_at": "2026-07-19T08:49:34.159139+00:00",
+            "ok": true,
+            "refresh_token": "[redacted]",
+            "token": "[redacted]"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "sessions_after": 2,
+        "sessions_before": 1
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C06a",
+      "category": "onboarding",
+      "endpoint": "GET /app/onboarding",
+      "expected": {
+        "items": [],
+        "required_total": 0,
+        "status_not_complete": true
+      },
+      "label": "unseeded employee does not crash, invent items, or appear completed",
+      "observed": {
+        "body": {
+          "can_upload": true,
+          "next_item": null,
+          "ok": true,
+          "pending": [],
+          "pending_count": 0,
+          "received": [],
+          "received_count": 0,
+          "required_total": 0,
+          "status": "in_progress"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C06b",
+      "category": "onboarding",
+      "endpoint": "GET /app/onboarding",
+      "expected": {
+        "onboarding_seed": false,
+        "pending_item_ids": [
+          "bank_details",
+          "civil_id",
+          "employment_contract",
+          "personal_photo"
+        ]
+      },
+      "label": "Option A exposes exactly four manually provisioned canonical items",
+      "observed": {
+        "response": {
+          "body": {
+            "can_upload": true,
+            "next_item": {
+              "document_type": "civil_id",
+              "item_id": "civil_id",
+              "item_type": "document",
+              "label": "Civil ID",
+              "status": "pending"
+            },
+            "ok": true,
+            "pending": [
+              {
+                "document_type": "civil_id",
+                "drive_url": null,
+                "escalated_at": null,
+                "file_id": null,
+                "item_id": "civil_id",
+                "item_type": "document",
+                "label": "Civil ID",
+                "last_reminded_at": null,
+                "reminder_count": 0,
+                "required": true,
+                "status": "pending",
+                "storage_provider": null,
+                "storage_status": null,
+                "storage_url": null,
+                "updated_at": "2026-07-12T08:49:34.171749+00:00",
+                "value": null
+              },
+              {
+                "document_type": "personal_photo",
+                "drive_url": null,
+                "escalated_at": null,
+                "file_id": null,
+                "item_id": "personal_photo",
+                "item_type": "document",
+                "label": "Personal Photo",
+                "last_reminded_at": null,
+                "reminder_count": 0,
+                "required": true,
+                "status": "pending",
+                "storage_provider": null,
+                "storage_status": null,
+                "storage_url": null,
+                "updated_at": "2026-07-12T08:49:34.174995+00:00",
+                "value": null
+              },
+              {
+                "document_type": "employment_contract",
+                "drive_url": null,
+                "escalated_at": null,
+                "file_id": null,
+                "item_id": "employment_contract",
+                "item_type": "document",
+                "label": "Employment Contract",
+                "last_reminded_at": null,
+                "reminder_count": 0,
+                "required": true,
+                "status": "pending",
+                "storage_provider": null,
+                "storage_status": null,
+                "storage_url": null,
+                "updated_at": "2026-07-12T08:49:34.177882+00:00",
+                "value": null
+              },
+              {
+                "document_type": "bank_details",
+                "drive_url": null,
+                "escalated_at": null,
+                "file_id": null,
+                "item_id": "bank_details",
+                "item_type": "document",
+                "label": "Bank Details",
+                "last_reminded_at": null,
+                "reminder_count": 0,
+                "required": true,
+                "status": "pending",
+                "storage_provider": null,
+                "storage_status": null,
+                "storage_url": null,
+                "updated_at": "2026-07-12T08:49:34.180523+00:00",
+                "value": null
+              }
+            ],
+            "pending_count": 4,
+            "received": [],
+            "received_count": 0,
+            "required_total": 4,
+            "status": "in_progress"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "seed_enabled": false
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07a",
+      "category": "document_upload",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "employee_documents": true,
+        "file_registry": true,
+        "onboarding_item": "received"
+      },
+      "label": "valid synthetic upload creates canonical Document Hub linkage",
+      "observed": {
+        "canonical": {
+          "employee_documents": [
+            {
+              "company_code": "P7ESTG01",
+              "document_type": "civil_id",
+              "employee_key": "p7e-app-a",
+              "item_id": "civil_id",
+              "metadata": {
+                "item_id": "civil_id",
+                "label": "Civil ID",
+                "received_at": "2026-07-12T08:49:34Z",
+                "storage": {
+                  "content_sha256": "761955553e6b9cf0f8926d05ddc9e56e775d8ac48146c51453f2bc7e4b42db4a",
+                  "drive_file_id": null,
+                  "drive_url": null,
+                  "external_file_id": null,
+                  "metadata": {
+                    "company_code": "P7ESTG01",
+                    "local_path": "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf"
+                  },
+                  "mime_type": "application/pdf",
+                  "ok": true,
+                  "provider": "local",
+                  "storage_object_key": "data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
+                  "storage_status": "stored",
+                  "storage_url": "local://data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
+                  "stored_at": "2026-07-12T08:49:34Z"
+                },
+                "value": "civil-id.pdf"
+              },
+              "status": "received",
+              "storage_status": "stored"
+            }
+          ],
+          "file_registry": [
+            {
+              "company_code": "P7ESTG01",
+              "document_type": "civil_id",
+              "metadata": {
+                "employee_key": "p7e-app-a",
+                "item_id": "civil_id",
+                "label": "Civil ID",
+                "value": "civil-id.pdf"
+              },
+              "mime_type": "application/pdf",
+              "storage_status": "stored",
+              "subject_key": "p7e-app-a"
+            }
+          ],
+          "onboarding_item": [
+            {
+              "document_type": "civil_id",
+              "mime_type": "application/pdf",
+              "status": "received",
+              "storage_status": "stored"
+            }
+          ]
+        },
+        "response": {
+          "body": {
+            "file_id": "0e85af0a-9268-47bd-8d38-5119ffa36c99",
+            "item_id": "civil_id",
+            "ok": true,
+            "storage_status": "stored"
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07b",
+      "category": "audit",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "action_type": "employee_document_uploaded",
+        "status": "completed"
+      },
+      "label": "successful upload is auditable",
+      "observed": [
+        {
+          "action_type": "employee_document_uploaded",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "status": "completed"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07c",
+      "category": "employee_isolation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "status_code": 404
+      },
+      "label": "cross-employee item upload is denied",
+      "observed": {
+        "body": {
+          "error": "item_not_found",
+          "message": "We couldn't find that document on your checklist."
+        },
+        "returned": false,
+        "status_code": 404
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07d",
+      "category": "tenant_isolation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "status_code": 404
+      },
+      "label": "cross-tenant item upload is denied",
+      "observed": {
+        "body": {
+          "error": "item_not_found",
+          "message": "We couldn't find that document on your checklist."
+        },
+        "returned": false,
+        "status_code": 404
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07e",
+      "category": "tenant_isolation",
+      "endpoint": "GET /app/documents/{file_id}",
+      "expected": {
+        "status_code": 404
+      },
+      "label": "cross-tenant document read is denied",
+      "observed": {
+        "body": {
+          "error": "document_not_found",
+          "message": "We couldn't find that document."
+        },
+        "returned": false,
+        "status_code": 404
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07f",
+      "category": "employee_isolation",
+      "endpoint": "GET /app/documents/{file_id}",
+      "expected": {
+        "status_code": 404
+      },
+      "label": "cross-employee document read is denied",
+      "observed": {
+        "body": {
+          "error": "document_not_found",
+          "message": "We couldn't find that document."
+        },
+        "returned": false,
+        "status_code": 404
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07g",
+      "category": "document_validation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "error": "unsupported_file_type",
+        "status_code": 400
+      },
+      "label": "server rejects disallowed extension",
+      "observed": {
+        "body": {
+          "error": "unsupported_file_type",
+          "message": "Upload a PDF or an image."
+        },
+        "returned": false,
+        "status_code": 400
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07h",
+      "category": "document_validation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "error": "file_too_large",
+        "status_code": 400
+      },
+      "label": "server rejects file over 15 MiB cap",
+      "observed": {
+        "body": {
+          "error": "file_too_large",
+          "message": "Files must be 15 MB or smaller."
+        },
+        "returned": false,
+        "status_code": 400
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07i",
+      "category": "document_validation",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "error": "mime_mismatch_or_invalid_content",
+        "status_code": "400/415"
+      },
+      "label": "server rejects extension/MIME mismatch",
+      "observed": {
+        "body": {
+          "file_id": "0684fa74-511d-47fd-84c2-80665745902c",
+          "item_id": "personal_photo",
+          "ok": true,
+          "storage_status": "stored"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C07j",
+      "category": "orphan_safety",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "database_state_unchanged": true,
+        "status_code": 502
+      },
+      "label": "failed storage does not create canonical rows or mark item received",
+      "observed": {
+        "after": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "storage_failed",
+            "message": "We couldn't store that document. Please try again."
+          },
+          "returned": false,
+          "status_code": 502
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C07k",
+      "category": "orphan_safety",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "database_state_unchanged": true,
+        "permanent_orphans": [],
+        "request_failed": true
+      },
+      "label": "DB failure after successful storage leaves no permanent orphan",
+      "observed": {
+        "database_after": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "database_before": {
+          "docs": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "permanent_orphans": [
+          "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"
+        ],
+        "response": {
+          "body": "synthetic_db_failure_after_storage",
+          "exception": "RuntimeError",
+          "returned": false,
+          "status_code": 500
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C07l",
+      "category": "audit",
+      "endpoint": "POST /app/onboarding/documents",
+      "expected": {
+        "rejection_audit_growth": 1,
+        "request_denied": true
+      },
+      "label": "rejected employee upload is auditable",
+      "observed": {
+        "audit_after": 0,
+        "audit_before": 0,
+        "response": {
+          "body": {
+            "error": "unsupported_file_type",
+            "message": "Upload a PDF or an image."
+          },
+          "returned": false,
+          "status_code": 400
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C08",
+      "category": "employee_isolation",
+      "endpoint": "POST /app/leave/request + POST /app/leave/{id}/cancel",
+      "expected": {
+        "create": 200,
+        "cross_employee_cancel": 404,
+        "own_cancel": 200
+      },
+      "label": "leave request/cancel remains employee-owned",
+      "observed": {
+        "create": {
+          "body": {
+            "leave": {
+              "company_code": "P7ESTG01",
+              "created_at": "2026-07-12T08:49:34.332723+00:00",
+              "decided_at": null,
+              "decided_by_phone": null,
+              "decision_note": null,
+              "employee_key": "p7e-app-a",
+              "employee_name": "Synthetic Employee A",
+              "employee_phone": "96555557801",
+              "end_date": "2099-01-12",
+              "leave_id": "5c7e0315-56d4-4457-9341-4a128ee243cd",
+              "leave_type": "annual",
+              "metadata": {
+                "action": {
+                  "end_date": "2099-01-12",
+                  "leave_type": "annual",
+                  "reason": null,
+                  "start_date": "2099-01-10",
+                  "subject_phone": "96555557801"
+                },
+                "shift_conflicts": [],
+                "source": "whatsapp"
+              },
+              "reason": null,
+              "requested_at": "2026-07-12T08:49:34.332723+00:00",
+              "requested_by_phone": "96555557801",
+              "source_text": "",
+              "start_date": "2099-01-10",
+              "status": "requested",
+              "updated_at": "2026-07-12T08:49:34.332723+00:00"
+            },
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "cross": {
+          "body": {
+            "error": "leave_request_not_found",
+            "message": "We couldn't find that leave request."
+          },
+          "returned": false,
+          "status_code": 404
+        },
+        "own": {
+          "body": {
+            "leave": {
+              "company_code": "P7ESTG01",
+              "created_at": "2026-07-12T08:49:34.332723+00:00",
+              "decided_at": "2026-07-12T08:49:34.345881+00:00",
+              "decided_by_phone": "96555557801",
+              "decision_note": null,
+              "employee_key": "p7e-app-a",
+              "employee_name": "Synthetic Employee A",
+              "employee_phone": "96555557801",
+              "end_date": "2099-01-12",
+              "leave_id": "5c7e0315-56d4-4457-9341-4a128ee243cd",
+              "leave_type": "annual",
+              "metadata": {
+                "action": {
+                  "end_date": "2099-01-12",
+                  "leave_type": "annual",
+                  "reason": null,
+                  "start_date": "2099-01-10",
+                  "subject_phone": "96555557801"
+                },
+                "shift_conflicts": [],
+                "source": "whatsapp"
+              },
+              "reason": null,
+              "requested_at": "2026-07-12T08:49:34.332723+00:00",
+              "requested_by_phone": "96555557801",
+              "source_text": "",
+              "start_date": "2099-01-10",
+              "status": "cancelled",
+              "updated_at": "2026-07-12T08:49:34.345881+00:00"
+            },
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C09",
+      "category": "delivery",
+      "endpoint": "GET /app/notifications + POST /app/notifications/{id}/read",
+      "expected": {
+        "push_enabled": false,
+        "read_marked": true,
+        "server_status": "pending"
+      },
+      "label": "inbox exposes backend-owned status without push",
+      "observed": {
+        "item": {
+          "body": "Synthetic onboarding reminder",
+          "created_at": "2026-07-12T08:49:34.353540+00:00",
+          "flow": "onboarding",
+          "id": "9207f0e9-a2ff-48f6-a217-e26ae504b9f1",
+          "read": false,
+          "status": "pending",
+          "title": "Onboarding reminder"
+        },
+        "mark": {
+          "body": {
+            "ok": true
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "push_enabled": false
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10a",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks a previously valid bearer",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10a2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks refresh",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10b",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": 403
+      },
+      "label": "company module removal blocks a previously valid bearer",
+      "observed": {
+        "body": {
+          "error": "employee_app_not_enabled_for_company",
+          "message": "The app is not enabled for your company."
+        },
+        "returned": false,
+        "status_code": 403
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10c",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "company module removal blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.360352+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.365767+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.370987+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10f",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "per-employee revoke blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10f2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "per-employee revoke blocks refresh",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10g",
+      "category": "rollback",
+      "endpoint": "GET /app/documents/{file_id}",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "revoked employee cannot download a previously owned document",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10h",
+      "category": "rollback",
+      "endpoint": "shared send helper (dry-run)",
+      "expected": {
+        "company_route": false,
+        "dry_run": true,
+        "shared_account": "default"
+      },
+      "label": "rollback does not require company channel routing or live delivery",
+      "observed": {
+        "account_id": "default",
+        "dry_run": true,
+        "ok": true,
+        "phone": "96555557801",
+        "simulated": true,
+        "status": 200
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11a",
+      "category": "production_protection",
+      "endpoint": "systemd wathefni-orchestrator.service",
+      "expected": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off/unset",
+        "WATHEFNI_EMPLOYEE_APP": "off/unset",
+        "WATHEFNI_ONBOARDING_SEED": "off/unset"
+      },
+      "label": "production protected flags remained OFF",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11b",
+      "category": "production_protection",
+      "endpoint": "systemd wathefni-orchestrator-staging.service",
+      "expected": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off/unset",
+        "WATHEFNI_EMPLOYEE_APP": "off/unset",
+        "WATHEFNI_ONBOARDING_SEED": "off/unset"
+      },
+      "label": "staging systemd protected flags remained OFF",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11c",
+      "category": "production_protection",
+      "endpoint": "production DB read-only fingerprint",
+      "expected": {
+        "before": "df7c817b569012e99244222451f1d0fe024a61f943212fc830a6b797a9f5f663",
+        "unchanged": true
+      },
+      "label": "production WATHEFNI data snapshot remained unchanged",
+      "observed": {
+        "after": "df7c817b569012e99244222451f1d0fe024a61f943212fc830a6b797a9f5f663",
+        "unchanged": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11d",
+      "category": "tenant_isolation",
+      "endpoint": "staging DB protected-tenant fingerprint",
+      "expected": {
+        "before": "053af662b49776d2896bbd125cbcfed05319e64a4dac0f28696328ec2e5c1445",
+        "unchanged": true
+      },
+      "label": "staging WATHEFNI protected tenant remained unchanged",
+      "observed": {
+        "after": "053af662b49776d2896bbd125cbcfed05319e64a4dac0f28696328ec2e5c1445",
+        "unchanged": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11e",
+      "category": "rollback",
+      "endpoint": "staging DB cleanup",
+      "expected": {
+        "remaining_fixture_companies": 0
+      },
+      "label": "throwaway staging fixtures were removed after evidence capture",
+      "observed": {
+        "remaining_fixture_companies": 0
+      },
+      "status": "PASS"
+    }
+  ],
+  "fixture_cleanup_remaining": 0,
+  "last_token_hash": "c44d8e52f2d3",
+  "meta": {
+    "application_code_patched": false,
+    "company": "P7ESTG01",
+    "mocked_outbound_only": true,
+    "other_company": "P7ESTG02",
+    "phase": "7E-E2",
+    "synthetic_only": true
+  },
+  "production_flags_after": {
+    "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_ONBOARDING_SEED": "off"
+  },
+  "production_flags_before": {
+    "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_ONBOARDING_SEED": "off"
+  },
+  "production_snapshot_after": {
+    "payload": {
+      "company": {
+        "company_code": "WATHEFNI",
+        "name": "Wathefni",
+        "status": "active",
+        "updated_at": "2026-05-15T14:57:09.803865+00:00"
+      },
+      "employee_app_invites": 0,
+      "employee_sessions": 0,
+      "employees": 3,
+      "modules": [
+        {
+          "enabled": true,
+          "module_key": "analytics"
+        },
+        {
+          "enabled": true,
+          "module_key": "assessments"
+        },
+        {
+          "enabled": true,
+          "module_key": "attendance"
+        },
+        {
+          "enabled": true,
+          "module_key": "compliance"
+        },
+        {
+          "enabled": true,
+          "module_key": "leave"
+        },
+        {
+          "enabled": true,
+          "module_key": "onboarding"
+        },
+        {
+          "enabled": true,
+          "module_key": "payroll"
+        },
+        {
+          "enabled": true,
+          "module_key": "pre_hiring"
+        },
+        {
+          "enabled": true,
+          "module_key": "shifts"
+        },
+        {
+          "enabled": true,
+          "module_key": "video_interviews"
+        }
+      ]
+    },
+    "sha256": "df7c817b569012e99244222451f1d0fe024a61f943212fc830a6b797a9f5f663"
+  },
+  "production_snapshot_before": {
+    "payload": {
+      "company": {
+        "company_code": "WATHEFNI",
+        "name": "Wathefni",
+        "status": "active",
+        "updated_at": "2026-05-15T14:57:09.803865+00:00"
+      },
+      "employee_app_invites": 0,
+      "employee_sessions": 0,
+      "employees": 3,
+      "modules": [
+        {
+          "enabled": true,
+          "module_key": "analytics"
+        },
+        {
+          "enabled": true,
+          "module_key": "assessments"
+        },
+        {
+          "enabled": true,
+          "module_key": "attendance"
+        },
+        {
+          "enabled": true,
+          "module_key": "compliance"
+        },
+        {
+          "enabled": true,
+          "module_key": "leave"
+        },
+        {
+          "enabled": true,
+          "module_key": "onboarding"
+        },
+        {
+          "enabled": true,
+          "module_key": "payroll"
+        },
+        {
+          "enabled": true,
+          "module_key": "pre_hiring"
+        },
+        {
+          "enabled": true,
+          "module_key": "shifts"
+        },
+        {
+          "enabled": true,
+          "module_key": "video_interviews"
+        }
+      ]
+    },
+    "sha256": "df7c817b569012e99244222451f1d0fe024a61f943212fc830a6b797a9f5f663"
+  },
+  "production_snapshot_unchanged": true,
+  "rollback_evidence": [
+    {
+      "case_id": "C01a",
+      "category": "authorization",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "error": "employee_app_disabled",
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks authenticated app context",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C01b",
+      "category": "invite",
+      "endpoint": "POST /app/auth/activate",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks activation",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C02a",
+      "category": "authorization",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "error": "employee_app_not_enabled_for_company",
+        "status_code": 403
+      },
+      "label": "module OFF blocks an existing session",
+      "observed": {
+        "body": {
+          "error": "employee_app_not_enabled_for_company",
+          "message": "The app is not enabled for your company."
+        },
+        "returned": false,
+        "status_code": 403
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10a",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks a previously valid bearer",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10a2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": 503
+      },
+      "label": "global flag OFF blocks refresh",
+      "observed": {
+        "body": {
+          "error": "employee_app_disabled",
+          "message": "The employee app is not available right now."
+        },
+        "returned": false,
+        "status_code": 503
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10b",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": 403
+      },
+      "label": "company module removal blocks a previously valid bearer",
+      "observed": {
+        "body": {
+          "error": "employee_app_not_enabled_for_company",
+          "message": "The app is not enabled for your company."
+        },
+        "returned": false,
+        "status_code": 403
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10c",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "company module removal blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.360352+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10d2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "disabled",
+        "status_code": "401/403"
+      },
+      "label": "company disabled blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.365767+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "actor_email": "p7e-app-a@synthetic.invalid",
+          "actor_phone": "96555557801",
+          "actor_role": "employee",
+          "actor_user_id": "employee_app:p7e-app-a",
+          "company_code": "P7ESTG01",
+          "employee": {
+            "app_key": null,
+            "company_code": "P7ESTG01",
+            "compliance_status": "pending",
+            "created_at": "2026-07-12T08:49:33.818373+00:00",
+            "device_user_id": null,
+            "documents_complete": 2,
+            "documents_pending": 2,
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "employment_status": "active",
+            "hire_date": null,
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": null,
+            "profile": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "raw_json": {
+              "marker": "phase7e_e2_verifier",
+              "synthetic": true
+            },
+            "start_date": null,
+            "updated_at": "2026-07-12T08:49:34.268565+00:00"
+          },
+          "employee_key": "p7e-app-a",
+          "hr_phone": "",
+          "hr_user": {
+            "company_code": "P7ESTG01",
+            "name": "Synthetic Employee A",
+            "phone": "96555557801",
+            "role": "employee"
+          },
+          "phone": "96555557801",
+          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10e2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "company_status": "archived",
+        "status_code": "401/403"
+      },
+      "label": "company archived blocks refresh",
+      "observed": {
+        "body": {
+          "employee": {
+            "company_code": "P7ESTG01",
+            "department": "",
+            "email": "p7e-app-a@synthetic.invalid",
+            "employee_key": "p7e-app-a",
+            "locale": "en",
+            "name": "Synthetic Employee A",
+            "onboarding_status": "in_progress",
+            "phone": "96555557801",
+            "position_title": ""
+          },
+          "expires_at": "2026-07-19T08:49:34.370987+00:00",
+          "ok": true,
+          "refresh_token": "[redacted]",
+          "token": "[redacted]"
+        },
+        "returned": true,
+        "status_code": 200
+      },
+      "status": "FAIL"
+    },
+    {
+      "case_id": "C10f",
+      "category": "rollback",
+      "endpoint": "GET /app/me (employee_app_context)",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "per-employee revoke blocks subsequent authenticated API access",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10f2",
+      "category": "rollback",
+      "endpoint": "POST /app/auth/refresh",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "per-employee revoke blocks refresh",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10g",
+      "category": "rollback",
+      "endpoint": "GET /app/documents/{file_id}",
+      "expected": {
+        "status_code": "401/403"
+      },
+      "label": "revoked employee cannot download a previously owned document",
+      "observed": {
+        "body": {
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
+        },
+        "returned": false,
+        "status_code": 401
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C10h",
+      "category": "rollback",
+      "endpoint": "shared send helper (dry-run)",
+      "expected": {
+        "company_route": false,
+        "dry_run": true,
+        "shared_account": "default"
+      },
+      "label": "rollback does not require company channel routing or live delivery",
+      "observed": {
+        "account_id": "default",
+        "dry_run": true,
+        "ok": true,
+        "phone": "96555557801",
+        "simulated": true,
+        "status": 200
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11a",
+      "category": "production_protection",
+      "endpoint": "systemd wathefni-orchestrator.service",
+      "expected": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off/unset",
+        "WATHEFNI_EMPLOYEE_APP": "off/unset",
+        "WATHEFNI_ONBOARDING_SEED": "off/unset"
+      },
+      "label": "production protected flags remained OFF",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11b",
+      "category": "production_protection",
+      "endpoint": "systemd wathefni-orchestrator-staging.service",
+      "expected": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off/unset",
+        "WATHEFNI_EMPLOYEE_APP": "off/unset",
+        "WATHEFNI_ONBOARDING_SEED": "off/unset"
+      },
+      "label": "staging systemd protected flags remained OFF",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "C11e",
+      "category": "rollback",
+      "endpoint": "staging DB cleanup",
+      "expected": {
+        "remaining_fixture_companies": 0
+      },
+      "label": "throwaway staging fixtures were removed after evidence capture",
+      "observed": {
+        "remaining_fixture_companies": 0
+      },
+      "status": "PASS"
+    }
+  ],
+  "staging_flags_after": {
+    "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_ONBOARDING_SEED": "off"
+  },
+  "staging_flags_before": {
+    "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_ONBOARDING_SEED": "off"
+  },
+  "staging_protected_snapshot_after": {
+    "payload": {
+      "company": {
+        "company_code": "WATHEFNI",
+        "name": "Wathefni",
+        "status": "active",
+        "updated_at": "2026-05-15T14:57:09.803865+00:00"
+      },
+      "employee_app_invites": 0,
+      "employee_sessions": 0,
+      "employees": 3,
+      "modules": [
+        {
+          "enabled": true,
+          "module_key": "analytics"
+        },
+        {
+          "enabled": true,
+          "module_key": "assessments"
+        },
+        {
+          "enabled": true,
+          "module_key": "attendance"
+        },
+        {
+          "enabled": true,
+          "module_key": "compliance"
+        },
+        {
+          "enabled": true,
+          "module_key": "leave"
+        },
+        {
+          "enabled": true,
+          "module_key": "onboarding"
+        },
+        {
+          "enabled": true,
+          "module_key": "payroll"
+        },
+        {
+          "enabled": true,
+          "module_key": "pre_hiring"
+        },
+        {
+          "enabled": true,
+          "module_key": "shifts"
+        }
+      ]
+    },
+    "sha256": "053af662b49776d2896bbd125cbcfed05319e64a4dac0f28696328ec2e5c1445"
+  },
+  "staging_protected_snapshot_before": {
+    "payload": {
+      "company": {
+        "company_code": "WATHEFNI",
+        "name": "Wathefni",
+        "status": "active",
+        "updated_at": "2026-05-15T14:57:09.803865+00:00"
+      },
+      "employee_app_invites": 0,
+      "employee_sessions": 0,
+      "employees": 3,
+      "modules": [
+        {
+          "enabled": true,
+          "module_key": "analytics"
+        },
+        {
+          "enabled": true,
+          "module_key": "assessments"
+        },
+        {
+          "enabled": true,
+          "module_key": "attendance"
+        },
+        {
+          "enabled": true,
+          "module_key": "compliance"
+        },
+        {
+          "enabled": true,
+          "module_key": "leave"
+        },
+        {
+          "enabled": true,
+          "module_key": "onboarding"
+        },
+        {
+          "enabled": true,
+          "module_key": "payroll"
+        },
+        {
+          "enabled": true,
+          "module_key": "pre_hiring"
+        },
+        {
+          "enabled": true,
+          "module_key": "shifts"
+        }
+      ]
+    },
+    "sha256": "053af662b49776d2896bbd125cbcfed05319e64a4dac0f28696328ec2e5c1445"
+  },
+  "staging_protected_snapshot_unchanged": true,
+  "summary": {
+    "blockers": 12,
+    "failed": 12,
+    "passed": 45,
+    "recommendation": "not-staging-green",
+    "total": 57
+  }
+}

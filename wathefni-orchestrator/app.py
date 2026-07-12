@@ -32872,6 +32872,48 @@ def require_active_company(company_code: str | None) -> str:
     return status
 
 
+def invalidate_company_employee_app_credentials(
+    cur: Any,
+    company_code: str,
+    *,
+    reason: str,
+) -> dict[str, int]:
+    """Irreversibly invalidate employee-app credentials for a company transition.
+
+    Called inside the same transaction that disables/archives a company or removes
+    the employee_app module. Reactivation/re-enablement intentionally has no inverse:
+    old sessions and invites stay revoked/superseded.
+    """
+    company = str(company_code or "").strip().upper()
+    cur.execute(
+        """
+        UPDATE employee_sessions
+        SET status='revoked',
+            refresh_hash=NULL,
+            revoked_at=now(),
+            revoked_reason=%s,
+            expires_at=LEAST(expires_at, now()),
+            refresh_expires_at=LEAST(refresh_expires_at, now())
+        WHERE company_code=%s AND status='active'
+        """,
+        (str(reason or "company_access_revoked")[:120], company),
+    )
+    revoked_sessions = int(cur.rowcount or 0)
+    cur.execute(
+        """
+        UPDATE employee_app_invites
+        SET status='superseded', updated_at=now()
+        WHERE company_code=%s AND status='pending'
+        """,
+        (company,),
+    )
+    superseded_invites = int(cur.rowcount or 0)
+    return {
+        "revoked_employee_app_sessions": revoked_sessions,
+        "superseded_employee_app_invites": superseded_invites,
+    }
+
+
 def dashboard_context(
     authorization: str | None = Header(default=None),
     x_dashboard_token: str | None = Header(default=None, alias="X-Dashboard-Token"),
@@ -34474,6 +34516,10 @@ def setup_console_set_company_lifecycle(
 
             revoked_sessions = 0
             superseded_invites = 0
+            employee_app_invalidated = {
+                "revoked_employee_app_sessions": 0,
+                "superseded_employee_app_invites": 0,
+            }
             if desired in {"disabled", "archived"}:
                 cur.execute(
                     "UPDATE dashboard_user_sessions SET status='revoked' "
@@ -34487,6 +34533,11 @@ def setup_console_set_company_lifecycle(
                     (company,),
                 )
                 superseded_invites = cur.rowcount
+                employee_app_invalidated = invalidate_company_employee_app_credentials(
+                    cur,
+                    company,
+                    reason=f"company_{desired}",
+                )
 
             action_type = {
                 "active": "setup_company_reactivated",
@@ -34507,6 +34558,7 @@ def setup_console_set_company_lifecycle(
                     "reason": reason,
                     "revoked_sessions": revoked_sessions,
                     "superseded_invites": superseded_invites,
+                    **employee_app_invalidated,
                 },
             )
         conn.commit()
@@ -34518,6 +34570,7 @@ def setup_console_set_company_lifecycle(
         "status": desired,
         "revoked_sessions": revoked_sessions,
         "superseded_invites": superseded_invites,
+        **employee_app_invalidated,
         "readiness": setup_console_company_readiness(company),
     }
 
@@ -34657,8 +34710,26 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
         raise HTTPException(status_code=422, detail={"error": "company_currency_required", "message": "Complete the company currency before enabling Payroll."})
     existing_tz = profile.get("timezone") or _company_setup.DEFAULT_TIMEZONE
     payroll_defaults = default_payroll_policy(company) if "payroll" in requested else None
+    employee_app_invalidated = {
+        "revoked_employee_app_sessions": 0,
+        "superseded_employee_app_invites": 0,
+    }
     with db_connect() as conn:
         with conn.cursor() as cur:
+            # Serialize module changes with activation/refresh, which take a shared
+            # lock on this company row before issuing or rotating credentials.
+            cur.execute(
+                "SELECT status FROM companies WHERE company_code=%s FOR UPDATE",
+                (company,),
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+            cur.execute(
+                "SELECT enabled FROM company_modules WHERE company_code=%s AND module_key='employee_app' LIMIT 1",
+                (company,),
+            )
+            employee_app_row = cur.fetchone()
+            employee_app_was_enabled = bool(employee_app_row and employee_app_row.get("enabled"))
             for key in requested:
                 settings = {"timezone": existing_tz, "reminder_hours_before": 2} if key == "shifts" else {}
                 cur.execute(
@@ -34675,6 +34746,12 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
                 "WHERE company_code=%s AND enabled IS TRUE AND module_key <> ALL(%s)",
                 (company, requested),
             )
+            if employee_app_was_enabled and "employee_app" not in requested:
+                employee_app_invalidated = invalidate_company_employee_app_credentials(
+                    cur,
+                    company,
+                    reason="employee_app_module_removed",
+                )
             if payroll_defaults is not None:
                 cur.execute(
                     """
@@ -34691,9 +34768,14 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
         summary=f"Enabled modules for {company}: {', '.join(requested) or 'none'}.",
         target_type="company",
         target=company,
-        details={"company_code": company, "modules": requested},
+        details={"company_code": company, "modules": requested, **employee_app_invalidated},
     )
-    return {"ok": True, "modules": requested, "readiness": setup_console_company_readiness(company)}
+    return {
+        "ok": True,
+        "modules": requested,
+        **employee_app_invalidated,
+        "readiness": setup_console_company_readiness(company),
+    }
 
 
 @app.patch("/dashboard/superadmin/setup/companies/{company_code}/settings")
@@ -44320,6 +44402,48 @@ _APP_DOC_MAX_BYTES = 15 * 1024 * 1024
 _APP_INBOX_FLOWS = ("leave_decision", "onboarding", "compliance", "shift", "payroll", "app_activation")
 
 
+class EmployeeAppInviteDenied(Exception):
+    """Internal non-disclosing invite-creation denial."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+def _employee_app_employee_eligible(employee: dict[str, Any] | None) -> bool:
+    return bool(employee) and normalize_text((employee or {}).get("employment_status") or "active") in ("", "active")
+
+
+def _employee_app_company_gate(
+    cur: Any,
+    company_code: str,
+    *,
+    lock_company: bool = True,
+) -> tuple[bool, str | None]:
+    """Current lifecycle + module gate, serialized with Setup Console changes."""
+    company = str(company_code or "").strip().upper()
+    lock_sql = " FOR SHARE" if lock_company else ""
+    cur.execute(
+        f"SELECT status FROM companies WHERE company_code=%s{lock_sql}",
+        (company,),
+    )
+    row = cur.fetchone()
+    status = str((row or {}).get("status") or "").strip().lower()
+    if status != "active":
+        return False, f"company_{status or 'unavailable'}"
+    cur.execute(
+        """
+        SELECT 1 FROM company_modules
+        WHERE company_code=%s AND module_key='employee_app' AND enabled IS TRUE
+        LIMIT 1
+        """,
+        (company,),
+    )
+    if not cur.fetchone():
+        return False, "employee_app_not_enabled_for_company"
+    return True, None
+
+
 class EmployeeAppActivateRequest(BaseModel):
     phone: str
     code: str
@@ -44390,13 +44514,33 @@ def create_employee_app_invite(company_code: str, employee: dict[str, Any], *, c
     this employee. Returns (invite_row, raw_code). Only the hash is persisted."""
     company = (company_code or "WATHEFNI").upper()
     phone = digits(employee.get("phone"))
+    employee_key = str(employee.get("employee_key") or "").strip()
+    if not phone or not employee_key:
+        raise EmployeeAppInviteDenied("employee_identity_invalid")
     code = _app_code_generate()
     expires = now_utc() + timedelta(hours=_EMPLOYEE_APP_INVITE_TTL_HOURS)
     with db_connect() as conn:
         with conn.cursor() as cur:
+            allowed, reason = _employee_app_company_gate(cur, company)
+            if not allowed:
+                raise EmployeeAppInviteDenied(reason or "company_not_eligible")
+            cur.execute(
+                """
+                SELECT * FROM employees
+                WHERE company_code=%s AND employee_key=%s
+                LIMIT 1 FOR SHARE
+                """,
+                (company, employee_key),
+            )
+            canonical_employee = dict(cur.fetchone() or {})
+            if (
+                not _employee_app_employee_eligible(canonical_employee)
+                or digits(canonical_employee.get("phone")) != phone
+            ):
+                raise EmployeeAppInviteDenied("employee_not_eligible")
             cur.execute(
                 "UPDATE employee_app_invites SET status='superseded', updated_at=now() WHERE company_code=%s AND employee_key=%s AND status='pending'",
-                (company, employee.get("employee_key")),
+                (company, employee_key),
             )
             cur.execute(
                 """
@@ -44405,7 +44549,7 @@ def create_employee_app_invite(company_code: str, employee: dict[str, Any], *, c
                 VALUES (%s,%s,%s,%s,'pending',%s,%s,%s, now())
                 RETURNING *
                 """,
-                (company, employee.get("employee_key"), phone, _app_code_hash(company, phone, code), digits(created_by_phone) or None, str(created_by_user_id) if created_by_user_id else None, expires),
+                (company, employee_key, phone, _app_code_hash(company, phone, code), digits(created_by_phone) or None, str(created_by_user_id) if created_by_user_id else None, expires),
             )
             invite = dict(cur.fetchone())
         conn.commit()
@@ -44433,24 +44577,29 @@ def deliver_app_activation_code(company_code: str, employee: dict[str, Any], cod
         return {"ok": False, "delivery_status": "failed", "error": "delivery_failed"}
 
 
-def create_employee_session(company_code: str, employee_key: str, phone: str | None) -> dict[str, Any]:
+def _create_employee_session_with_cursor(cur: Any, company_code: str, employee_key: str, phone: str | None) -> dict[str, Any]:
     token = secrets.token_urlsafe(32)
     refresh = secrets.token_urlsafe(48)
     now = now_utc()
     expires = now + timedelta(days=_EMPLOYEE_APP_SESSION_TTL_DAYS)
     refresh_expires = now + timedelta(days=_EMPLOYEE_APP_REFRESH_TTL_DAYS)
+    cur.execute(
+        """
+        INSERT INTO employee_sessions
+          (company_code, employee_key, phone, token_hash, refresh_hash, expires_at, refresh_expires_at)
+        VALUES (%s,%s,%s,%s,%s,%s,%s)
+        """,
+        ((company_code or "WATHEFNI").upper(), str(employee_key), digits(phone), _app_token_hash(token), _app_token_hash(refresh), expires, refresh_expires),
+    )
+    return {"token": token, "refresh_token": refresh, "expires_at": expires, "refresh_expires_at": refresh_expires}
+
+
+def create_employee_session(company_code: str, employee_key: str, phone: str | None) -> dict[str, Any]:
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO employee_sessions
-                  (company_code, employee_key, phone, token_hash, refresh_hash, expires_at, refresh_expires_at)
-                VALUES (%s,%s,%s,%s,%s,%s,%s)
-                """,
-                ((company_code or "WATHEFNI").upper(), str(employee_key), digits(phone), _app_token_hash(token), _app_token_hash(refresh), expires, refresh_expires),
-            )
+            session = _create_employee_session_with_cursor(cur, company_code, employee_key, phone)
         conn.commit()
-    return {"token": token, "refresh_token": refresh, "expires_at": expires, "refresh_expires_at": refresh_expires}
+    return session
 
 
 def employee_by_session(token: str | None) -> dict[str, Any] | None:
@@ -44477,27 +44626,68 @@ def employee_by_session(token: str | None) -> dict[str, Any] | None:
 def rotate_employee_session(refresh_token: str | None) -> dict[str, Any] | None:
     if not refresh_token:
         return None
-    now = now_utc()
-    token = secrets.token_urlsafe(32)
-    refresh = secrets.token_urlsafe(48)
-    expires = now + timedelta(days=_EMPLOYEE_APP_SESSION_TTL_DAYS)
-    refresh_expires = now + timedelta(days=_EMPLOYEE_APP_REFRESH_TTL_DAYS)
+    presented_hash = _app_token_hash(refresh_token)
     with db_connect() as conn:
         with conn.cursor() as cur:
+            # First resolve the owning company without mutation. Company transitions
+            # lock that row exclusively; refresh holds it shared until commit.
             cur.execute(
-                "SELECT * FROM employee_sessions WHERE refresh_hash=%s AND status='active' AND refresh_expires_at > now() LIMIT 1",
-                (_app_token_hash(refresh_token),),
+                "SELECT session_id, company_code FROM employee_sessions WHERE refresh_hash=%s LIMIT 1",
+                (presented_hash,),
+            )
+            initial = cur.fetchone()
+            if not initial:
+                return None
+            allowed, _reason = _employee_app_company_gate(cur, str(initial["company_code"]))
+            if not allowed:
+                return None
+            cur.execute(
+                """
+                SELECT * FROM employee_sessions
+                WHERE session_id=%s AND refresh_hash=%s
+                LIMIT 1 FOR UPDATE
+                """,
+                (initial["session_id"], presented_hash),
             )
             row = cur.fetchone()
             if not row:
                 return None
             sess = dict(row)
+            if (
+                str(sess.get("status") or "") != "active"
+                or not sess.get("refresh_expires_at")
+                or sess["refresh_expires_at"] <= now_utc()
+            ):
+                return None
+            cur.execute(
+                """
+                SELECT * FROM employees
+                WHERE company_code=%s AND employee_key=%s
+                LIMIT 1 FOR SHARE
+                """,
+                (sess["company_code"], sess["employee_key"]),
+            )
+            employee = dict(cur.fetchone() or {})
+            if not _employee_app_employee_eligible(employee):
+                return None
+            now = now_utc()
+            token = secrets.token_urlsafe(32)
+            refresh = secrets.token_urlsafe(48)
+            expires = now + timedelta(days=_EMPLOYEE_APP_SESSION_TTL_DAYS)
+            refresh_expires = now + timedelta(days=_EMPLOYEE_APP_REFRESH_TTL_DAYS)
             cur.execute(
                 "UPDATE employee_sessions SET token_hash=%s, refresh_hash=%s, expires_at=%s, refresh_expires_at=%s, last_seen_at=now() WHERE session_id=%s",
                 (_app_token_hash(token), _app_token_hash(refresh), expires, refresh_expires, sess["session_id"]),
             )
         conn.commit()
-    return {"token": token, "refresh_token": refresh, "expires_at": expires, "company_code": str(sess["company_code"]).upper(), "employee_key": str(sess["employee_key"])}
+    return {
+        "token": token,
+        "refresh_token": refresh,
+        "expires_at": expires,
+        "company_code": str(sess["company_code"]).upper(),
+        "employee_key": str(sess["employee_key"]),
+        "employee": employee,
+    }
 
 
 def revoke_employee_session_token(token: str | None) -> None:
@@ -44548,10 +44738,19 @@ def employee_app_context(
     if not sess:
         raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
     company = sess["company_code"]
+    lifecycle = company_lifecycle_status(company)
+    if lifecycle != "active":
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": f"company_{lifecycle}",
+                "message": "Your company workspace is not active.",
+            },
+        )
     if not company_has_module(company, "employee_app"):
         raise HTTPException(status_code=403, detail={"error": "employee_app_not_enabled_for_company", "message": "The app is not enabled for your company."})
     employee = sess["employee"]
-    if normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+    if not _employee_app_employee_eligible(employee):
         # Defense in depth: offboarding already revokes sessions, but never serve a
         # terminated employee even if a stale session slipped through.
         revoke_employee_app_access(company, sess["employee_key"], reason="employment_inactive")
@@ -44587,24 +44786,32 @@ def app_auth_activate(req: EmployeeAppActivateRequest):
     generic = HTTPException(status_code=401, detail={"error": "app_activation_failed", "message": "That code didn't work. Ask your HR team for a new one."})
     if not phone or not code:
         raise generic
-    company = employee_company_code_for_phone(phone)
-    if not company or not company_has_module(company, "employee_app"):
+    bootstrap_company = employee_company_code_for_phone(phone)
+    if not bootstrap_company:
         raise generic
-    employee = find_employee_by_phone(phone, company_code=company)
-    if not employee:
-        raise generic
-    if normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
-        raise generic
+    session: dict[str, Any] | None = None
+    employee: dict[str, Any] | None = None
+    company = str(bootstrap_company).upper()
     with db_connect() as conn:
         with conn.cursor() as cur:
+            allowed, _reason = _employee_app_company_gate(cur, company)
+            if not allowed:
+                raise generic
             cur.execute(
-                "SELECT * FROM employee_app_invites WHERE company_code=%s AND phone=%s AND status='pending' AND expires_at > now() ORDER BY created_at DESC LIMIT 1",
+                """
+                SELECT * FROM employee_app_invites
+                WHERE company_code=%s AND phone=%s AND status='pending'
+                ORDER BY created_at DESC
+                LIMIT 1 FOR UPDATE
+                """,
                 (company, phone),
             )
             invite = cur.fetchone()
             if not invite:
                 raise generic
             invite = dict(invite)
+            if not invite.get("expires_at") or invite["expires_at"] <= now_utc():
+                raise generic
             if int(invite.get("attempts") or 0) >= _EMPLOYEE_APP_MAX_CODE_ATTEMPTS:
                 cur.execute("UPDATE employee_app_invites SET status='locked', updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
                 conn.commit()
@@ -44613,9 +44820,58 @@ def app_auth_activate(req: EmployeeAppActivateRequest):
                 cur.execute("UPDATE employee_app_invites SET attempts=attempts+1, updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
                 conn.commit()
                 raise generic
-            cur.execute("UPDATE employee_app_invites SET status='redeemed', redeemed_at=now(), updated_at=now() WHERE invite_id=%s", (invite["invite_id"],))
+            canonical_company = str(invite.get("company_code") or "").strip().upper()
+            invite_employee_key = str(invite.get("employee_key") or "").strip()
+            if canonical_company != company or not invite_employee_key:
+                raise generic
+            # Lock the canonical employee row: this serializes simultaneous valid
+            # invites for one employee as well as the same-invite double-submit.
+            cur.execute(
+                """
+                SELECT * FROM employees
+                WHERE company_code=%s AND phone=%s
+                ORDER BY updated_at DESC
+                LIMIT 1 FOR UPDATE
+                """,
+                (canonical_company, phone),
+            )
+            employee = dict(cur.fetchone() or {})
+            if (
+                not _employee_app_employee_eligible(employee)
+                or str(employee.get("company_code") or "").strip().upper() != canonical_company
+                or str(employee.get("employee_key") or "").strip() != invite_employee_key
+            ):
+                raise generic
+            cur.execute(
+                """
+                SELECT session_id FROM employee_sessions
+                WHERE company_code=%s AND employee_key=%s AND status='active'
+                LIMIT 1 FOR UPDATE
+                """,
+                (canonical_company, invite_employee_key),
+            )
+            if cur.fetchone():
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "already_activated",
+                        "message": "This employee app account is already activated. Sign in or use account recovery.",
+                    },
+                )
+            session = _create_employee_session_with_cursor(cur, canonical_company, invite_employee_key, phone)
+            cur.execute(
+                """
+                UPDATE employee_app_invites
+                SET status='redeemed', redeemed_at=now(), updated_at=now()
+                WHERE invite_id=%s AND status='pending'
+                """,
+                (invite["invite_id"],),
+            )
+            if int(cur.rowcount or 0) != 1:
+                raise generic
         conn.commit()
-    session = create_employee_session(company, str(employee.get("employee_key")), phone)
+    if not session or not employee:
+        raise generic
     logger.info("employee app activated company=%s employee=%s", company, employee.get("employee_key"))
     return json_safe({
         "ok": True,
@@ -44639,8 +44895,10 @@ def app_auth_request_code(req: EmployeeAppRequestCodeRequest):
     company = employee_company_code_for_phone(phone)
     if not company or not company_has_module(company, "employee_app"):
         return generic
+    if company_lifecycle_status(company) != "active":
+        return generic
     employee = find_employee_by_phone(phone, company_code=company)
-    if not employee or normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
+    if not _employee_app_employee_eligible(employee):
         return generic
     # HR-provisioned model: only (re)issue a code if HR already invited this
     # employee at least once. No prior invite -> stay silent (no self-registration).
@@ -44656,7 +44914,10 @@ def app_auth_request_code(req: EmployeeAppRequestCodeRequest):
     last_sent = row.get("last_sent")
     if last_sent and (now_utc() - last_sent).total_seconds() < _EMPLOYEE_APP_CODE_RESEND_COOLDOWN_SECONDS:
         return generic
-    invite, code = create_employee_app_invite(company, employee)
+    try:
+        invite, code = create_employee_app_invite(company, employee)
+    except EmployeeAppInviteDenied:
+        return generic
     deliver_app_activation_code(company, employee, code)
     return generic
 
@@ -44669,9 +44930,7 @@ def app_auth_refresh(req: EmployeeAppRefreshRequest):
     rotated = rotate_employee_session(req.refresh_token)
     if not rotated:
         raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
-    employee = find_employee_by_key(rotated["employee_key"], company_code=rotated["company_code"])
-    if not employee or normalize_text(employee.get("employment_status") or "active") not in ("", "active"):
-        raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
+    employee = rotated["employee"]
     return json_safe({
         "ok": True,
         "token": rotated["token"],
@@ -45178,6 +45437,7 @@ def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dic
 def dashboard_posthire_app_invite(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
     require_entitlement(context, "onboarding", "onboarding.manage")
     company = context["company_code"]
+    require_active_company(company)
     if not employee_app_enabled():
         raise HTTPException(status_code=403, detail={"error": "feature_disabled", "message": "The employee app is not enabled."})
     if not company_has_module(company, "employee_app"):
@@ -45190,7 +45450,12 @@ def dashboard_posthire_app_invite(employee_key: str, context: dict[str, Any] = D
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     if not digits(employee.get("phone")):
         raise HTTPException(status_code=400, detail={"error": "employee_phone_missing", "message": "This employee needs a phone number before they can be invited."})
-    invite, code = create_employee_app_invite(company, employee, created_by_phone=context.get("hr_phone"), created_by_user_id=context.get("actor_user_id"))
+    try:
+        invite, code = create_employee_app_invite(company, employee, created_by_phone=context.get("hr_phone"), created_by_user_id=context.get("actor_user_id"))
+    except EmployeeAppInviteDenied as exc:
+        if exc.reason.startswith("company_"):
+            raise HTTPException(status_code=403, detail={"error": exc.reason, "message": "This company workspace is not active."}) from None
+        raise HTTPException(status_code=403, detail={"error": "employee_app_invite_denied", "message": "This employee cannot be invited right now."}) from None
     delivery = deliver_app_activation_code(company, employee, code)
     record_admin_audit(context, "app_invite_created", summary="Issued an Employee App activation code.", target_type="employee", target=str(employee.get("employee_key")), details={"invite_id": str(invite.get("invite_id")), "delivery_status": delivery.get("delivery_status")})
     # The raw code is returned to HR (a trusted actor performing this action) so it

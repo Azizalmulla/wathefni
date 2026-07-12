@@ -1,0 +1,557 @@
+{
+  "checks": [
+    {
+      "case_id": "R1A-I1",
+      "observed": {
+        "active_sessions_after": 0,
+        "active_sessions_before": 0,
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "identity mismatch is generic and leaves invite/session unchanged"
+    },
+    {
+      "case_id": "R1A-L1",
+      "observed": {
+        "active_sessions": 0,
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "disabled activation denial leaves invite pending"
+    },
+    {
+      "case_id": "R1A-L2",
+      "observed": {
+        "active_sessions": 0,
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "archived activation denial leaves invite pending"
+    },
+    {
+      "case_id": "R1A-M1",
+      "observed": {
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "module denial leaves invite pending"
+    },
+    {
+      "case_id": "R1A-E1",
+      "observed": {
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "ineligible employee denial leaves invite pending"
+    },
+    {
+      "case_id": "R1A-C1",
+      "observed": {
+        "active_sessions": 1,
+        "invite_status": "redeemed",
+        "statuses": [
+          401,
+          200
+        ],
+        "successes": 1
+      },
+      "passed": true,
+      "title": "concurrent double activation yields one success and one session"
+    },
+    {
+      "case_id": "R1A-A1",
+      "observed": {
+        "active_sessions_after": 1,
+        "active_sessions_before": 1,
+        "invite_status": "pending",
+        "response": {
+          "body": {
+            "error": "already_activated",
+            "message": "This employee app account is already activated. Sign in or use account recovery."
+          },
+          "returned": false,
+          "status_code": 409
+        }
+      },
+      "passed": true,
+      "title": "already activated returns deterministic 409 without consuming invite"
+    },
+    {
+      "case_id": "R1A-R1",
+      "observed": {
+        "active_sessions": 1,
+        "refresh_hash_unchanged": true,
+        "response": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "module-denied refresh creates no replacement hash or credentials"
+    },
+    {
+      "case_id": "R1A-R2",
+      "observed": {
+        "refresh_hash_unchanged": true,
+        "response": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "disabled refresh creates no replacement hash or credentials"
+    },
+    {
+      "case_id": "R1A-R3",
+      "observed": {
+        "refresh_hash_unchanged": true,
+        "response": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "archived refresh creates no replacement hash or credentials"
+    },
+    {
+      "case_id": "R1A-R4",
+      "observed": {
+        "refresh_hash_unchanged": true,
+        "response": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "employee-ineligible refresh creates no replacement hash or credentials"
+    },
+    {
+      "case_id": "R1A-R5",
+      "observed": {
+        "active_sessions": 1
+      },
+      "passed": true,
+      "title": "pre-transition bearer still maps to exactly one employee"
+    },
+    {
+      "case_id": "R1A-M2",
+      "observed": {
+        "invite_status": "superseded",
+        "refresh_hash_cleared": true,
+        "session_status": "revoked",
+        "transition": {
+          "modules": [
+            "leave",
+            "onboarding"
+          ],
+          "ok": true,
+          "readiness": {
+            "company_code": "P7ESTG01",
+            "country": "KW",
+            "currency": "KWD",
+            "exists": true,
+            "lifecycle": {
+              "archived_at": null,
+              "disabled_at": null,
+              "reason": null,
+              "status": "active"
+            },
+            "messaging": {
+              "email_fallback": true,
+              "employees_missing_email": 0,
+              "employees_total": 5,
+              "employees_with_email": 5,
+              "summary": "Proactive WhatsApp templates are not configured yet. Employees can still be reached by an open WhatsApp chat or by email fallback.",
+              "templates_configured": false,
+              "whatsapp_connected": false,
+              "whatsapp_links": 0
+            },
+            "module_display": {
+              "leave": "Leave",
+              "onboarding": "Onboarding"
+            },
+            "modules": [
+              "leave",
+              "onboarding"
+            ],
+            "name": "Phase 7E E2 Synthetic Tenant",
+            "notification_preset": "frontline",
+            "notification_preset_explicit": false,
+            "notification_preset_options": [
+              "conservative",
+              "frontline",
+              "office"
+            ],
+            "notification_presets_enabled": false,
+            "owners": 0,
+            "ready": false,
+            "status": "active",
+            "steps": [
+              {
+                "done": true,
+                "key": "company",
+                "label": "Company created"
+              },
+              {
+                "done": true,
+                "key": "modules",
+                "label": "At least one module enabled"
+              },
+              {
+                "done": false,
+                "key": "owner",
+                "label": "Owner account seeded"
+              },
+              {
+                "done": false,
+                "key": "timezone",
+                "label": "Timezone set"
+              },
+              {
+                "done": false,
+                "key": "whatsapp",
+                "label": "Owner WhatsApp identity linked",
+                "optional": true
+              }
+            ],
+            "timezone": null,
+            "whatsapp_links": 0
+          },
+          "revoked_employee_app_sessions": 1,
+          "superseded_employee_app_invites": 5
+        }
+      },
+      "passed": true,
+      "title": "module removal revokes sessions/refresh and supersedes pending invites"
+    },
+    {
+      "case_id": "R1A-M3",
+      "observed": {
+        "invite_status": "superseded",
+        "session": {
+          "refresh_hash": "[redacted]",
+          "revoked_reason": "employee_app_module_removed",
+          "session_id": "22245c82-734d-4ae7-adba-e39fe69318b8",
+          "status": "revoked"
+        }
+      },
+      "passed": true,
+      "title": "module re-addition does not revive old sessions, refresh, or invites"
+    },
+    {
+      "case_id": "R1A-D1",
+      "observed": {
+        "invite_status": "superseded",
+        "refresh_hash_cleared": true,
+        "session_status": "revoked",
+        "transition": {
+          "company_code": "P7ESTG01",
+          "ok": true,
+          "previous_status": "active",
+          "readiness": {
+            "company_code": "P7ESTG01",
+            "country": "KW",
+            "currency": "KWD",
+            "exists": true,
+            "lifecycle": {
+              "archived_at": null,
+              "disabled_at": "2026-07-12T09:29:51.564353+00:00",
+              "reason": "phase7e_e2_verifier:disabled",
+              "status": "disabled"
+            },
+            "messaging": {
+              "email_fallback": true,
+              "employees_missing_email": 0,
+              "employees_total": 5,
+              "employees_with_email": 5,
+              "summary": "Proactive WhatsApp templates are not configured yet. Employees can still be reached by an open WhatsApp chat or by email fallback.",
+              "templates_configured": false,
+              "whatsapp_connected": false,
+              "whatsapp_links": 0
+            },
+            "module_display": {
+              "employee_app": "Employee App",
+              "leave": "Leave",
+              "onboarding": "Onboarding"
+            },
+            "modules": [
+              "employee_app",
+              "leave",
+              "onboarding"
+            ],
+            "name": "Phase 7E E2 Synthetic Tenant",
+            "notification_preset": "frontline",
+            "notification_preset_explicit": false,
+            "notification_preset_options": [
+              "conservative",
+              "frontline",
+              "office"
+            ],
+            "notification_presets_enabled": false,
+            "owners": 0,
+            "ready": false,
+            "status": "disabled",
+            "steps": [
+              {
+                "done": true,
+                "key": "company",
+                "label": "Company created"
+              },
+              {
+                "done": true,
+                "key": "modules",
+                "label": "At least one module enabled"
+              },
+              {
+                "done": false,
+                "key": "owner",
+                "label": "Owner account seeded"
+              },
+              {
+                "done": false,
+                "key": "timezone",
+                "label": "Timezone set"
+              },
+              {
+                "done": false,
+                "key": "whatsapp",
+                "label": "Owner WhatsApp identity linked",
+                "optional": true
+              }
+            ],
+            "timezone": null,
+            "whatsapp_links": 0
+          },
+          "revoked_employee_app_sessions": 1,
+          "revoked_sessions": 0,
+          "status": "disabled",
+          "superseded_employee_app_invites": 1,
+          "superseded_invites": 0
+        }
+      },
+      "passed": true,
+      "title": "disabled transition revokes employee sessions/refresh and supersedes invites"
+    },
+    {
+      "case_id": "R1A-D2",
+      "observed": {
+        "bearer": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        },
+        "invite_status": "superseded",
+        "refresh": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "reactivation after disabled does not revive credentials or invite"
+    },
+    {
+      "case_id": "R1A-X1",
+      "observed": {
+        "invite_status": "superseded",
+        "refresh_hash_cleared": true,
+        "session_status": "revoked",
+        "transition": {
+          "company_code": "P7ESTG01",
+          "ok": true,
+          "previous_status": "active",
+          "readiness": {
+            "company_code": "P7ESTG01",
+            "country": "KW",
+            "currency": "KWD",
+            "exists": true,
+            "lifecycle": {
+              "archived_at": "2026-07-12T09:29:51.587566+00:00",
+              "disabled_at": "2026-07-12T09:29:51.587566+00:00",
+              "reason": "phase7e_e2_verifier:archived",
+              "status": "archived"
+            },
+            "messaging": {
+              "email_fallback": true,
+              "employees_missing_email": 0,
+              "employees_total": 5,
+              "employees_with_email": 5,
+              "summary": "Proactive WhatsApp templates are not configured yet. Employees can still be reached by an open WhatsApp chat or by email fallback.",
+              "templates_configured": false,
+              "whatsapp_connected": false,
+              "whatsapp_links": 0
+            },
+            "module_display": {
+              "employee_app": "Employee App",
+              "leave": "Leave",
+              "onboarding": "Onboarding"
+            },
+            "modules": [
+              "employee_app",
+              "leave",
+              "onboarding"
+            ],
+            "name": "Phase 7E E2 Synthetic Tenant",
+            "notification_preset": "frontline",
+            "notification_preset_explicit": false,
+            "notification_preset_options": [
+              "conservative",
+              "frontline",
+              "office"
+            ],
+            "notification_presets_enabled": false,
+            "owners": 0,
+            "ready": false,
+            "status": "archived",
+            "steps": [
+              {
+                "done": true,
+                "key": "company",
+                "label": "Company created"
+              },
+              {
+                "done": true,
+                "key": "modules",
+                "label": "At least one module enabled"
+              },
+              {
+                "done": false,
+                "key": "owner",
+                "label": "Owner account seeded"
+              },
+              {
+                "done": false,
+                "key": "timezone",
+                "label": "Timezone set"
+              },
+              {
+                "done": false,
+                "key": "whatsapp",
+                "label": "Owner WhatsApp identity linked",
+                "optional": true
+              }
+            ],
+            "timezone": null,
+            "whatsapp_links": 0
+          },
+          "revoked_employee_app_sessions": 1,
+          "revoked_sessions": 0,
+          "status": "archived",
+          "superseded_employee_app_invites": 1,
+          "superseded_invites": 0
+        }
+      },
+      "passed": true,
+      "title": "archived transition revokes employee sessions/refresh and supersedes invites"
+    },
+    {
+      "case_id": "R1A-X2",
+      "observed": {
+        "bearer": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        },
+        "invite_status": "superseded",
+        "refresh": {
+          "body": {
+            "error": "app_auth_failed",
+            "message": "Please sign in again."
+          },
+          "returned": false,
+          "status_code": 401
+        }
+      },
+      "passed": true,
+      "title": "reactivation after archived does not revive credentials or invite"
+    },
+    {
+      "case_id": "R1A-S1",
+      "observed": {
+        "production_unchanged": true,
+        "staging_protected_unchanged": true
+      },
+      "passed": true,
+      "title": "production and protected staging snapshots remain unchanged"
+    },
+    {
+      "case_id": "R1A-S2",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "passed": true,
+      "title": "protected staging service flags remain off"
+    }
+  ],
+  "failed": 0,
+  "passed": 20,
+  "phase": "7E-R1A",
+  "recommendation": "r1a-green"
+}
