@@ -10,6 +10,7 @@ No production flag was enabled. No production tenant or employee was mutated. Ph
 |-------|--------|------------|--------|
 | R1A — identity/lifecycle/session | `79a2bf9` | `ops/staging-phase7e-r1a-checkpoint.py` | **20/20 pass** |
 | R1B — upload content consistency | `3f50e8b` | `ops/staging-phase7e-r1b-checkpoint.py` | **9/9 pass** |
+| R1B deployment safeguard | `a714419` | deploy-script syntax check | pinned dependency included in artifact/install gate |
 | Expanded E2 | evidence refresh after both commits | `ops/staging-phase7e-employee-app-verify.py` | **55/57 pass** |
 
 Evidence:
@@ -120,6 +121,7 @@ Safety evidence:
 
 - Database migration: none.
 - Runtime dependency: `puremagic==2.2.0` installed in the existing orchestrator venv and pinned in `requirements.txt`.
+- Future deploys sync `requirements.txt`, require the exact `puremagic==2.2.0` pin, install only that package before restart, and include the requirements/deploy script in the staging-green artifact hash. No production deploy was run for this follow-up.
 - Rollback: revert `3f50e8b` then `79a2bf9`; reinstall the prior requirements set if removing `puremagic`. No schema down-migration.
 - Revoked/superseded credentials are intentionally not resurrected by rollback.
 
