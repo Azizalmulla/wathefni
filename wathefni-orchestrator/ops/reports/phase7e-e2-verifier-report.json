@@ -1,64 +1,5 @@
 {
-  "blockers": [
-    {
-      "case_id": "C07k",
-      "category": "orphan_safety",
-      "endpoint": "POST /app/onboarding/documents",
-      "expected": {
-        "database_state_unchanged": true,
-        "permanent_orphans": [],
-        "request_failed": true
-      },
-      "label": "DB failure after successful storage leaves no permanent orphan",
-      "observed": {
-        "database_after": {
-          "docs": 0,
-          "files": 0,
-          "status": "pending"
-        },
-        "database_before": {
-          "docs": 0,
-          "files": 0,
-          "status": "pending"
-        },
-        "permanent_orphans": [
-          "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"
-        ],
-        "response": {
-          "body": "synthetic_db_failure_after_storage",
-          "exception": "RuntimeError",
-          "returned": false,
-          "status_code": 500
-        }
-      },
-      "smallest_durable_remediation_scope": "Add compensating deletion for the stored local/Drive object when the post-storage database transaction fails, or make storage finalization transactional.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C07l",
-      "category": "audit",
-      "endpoint": "POST /app/onboarding/documents",
-      "expected": {
-        "rejection_audit_growth": 1,
-        "request_denied": true
-      },
-      "label": "rejected employee upload is auditable",
-      "observed": {
-        "audit_after": 0,
-        "audit_before": 0,
-        "response": {
-          "body": {
-            "error": "unsupported_file_type",
-            "message": "Upload a PDF or an image."
-          },
-          "returned": false,
-          "status_code": 400
-        }
-      },
-      "smallest_durable_remediation_scope": "Write an HR-safe, company/employee-scoped audit event for rejected upload attempts without recording document bytes or secrets.",
-      "status": "FAIL"
-    }
-  ],
+  "blockers": [],
   "cases": [
     {
       "case_id": "C01a",
@@ -233,7 +174,7 @@
               "attempt_reasons": [],
               "channel_used": "whatsapp_session",
               "delivery_status": "delivered_whatsapp",
-              "employee_message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a",
+              "employee_message_id": "a646740c-6fc9-44fd-a96d-5b1f8bf5a76a",
               "flow": "app_activation",
               "outbound_layer": true,
               "recipient_email": "p7e-app-a@synthetic.invalid",
@@ -246,7 +187,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T09:35:13.413039+00:00",
+                "at": "2026-07-12T10:18:28.675715+00:00",
                 "attempt": 1,
                 "channel": "whatsapp_session",
                 "reasons": [],
@@ -255,7 +196,7 @@
             ],
             "attempts": 1,
             "channel_used": "whatsapp_session",
-            "message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a",
+            "message_id": "a646740c-6fc9-44fd-a96d-5b1f8bf5a76a",
             "status": "delivered_whatsapp"
           }
         ],
@@ -288,7 +229,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T09:35:13.421709+00:00",
+                "at": "2026-07-12T10:18:28.686643+00:00",
                 "attempt": 1,
                 "channel": "email",
                 "reasons": [
@@ -332,7 +273,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T09:35:13.429164+00:00",
+                "at": "2026-07-12T10:18:28.694999+00:00",
                 "attempt": 1,
                 "channel": null,
                 "reasons": [
@@ -345,14 +286,14 @@
             ],
             "attempts": 1,
             "channel_used": null,
-            "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988",
+            "hr_task_id": "6a9ff24e-5a48-4370-96c1-12a70d85efae",
             "status": "needs_hr_action"
           }
         ],
         "result": {
           "channel": null,
           "delivery_status": "needs_hr_action",
-          "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988",
+          "hr_task_id": "6a9ff24e-5a48-4370-96c1-12a70d85efae",
           "ok": false
         }
       },
@@ -373,7 +314,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T09:35:13.439598+00:00",
+                "at": "2026-07-12T10:18:28.701500+00:00",
                 "attempt": 1,
                 "channel": null,
                 "reasons": [
@@ -428,7 +369,7 @@
             "phone": "96555557801",
             "position_title": ""
           },
-          "expires_at": "2026-07-19T09:35:13.452170+00:00",
+          "expires_at": "2026-07-19T10:18:28.718735+00:00",
           "ok": true,
           "refresh_token": "[redacted]",
           "token": "[redacted]"
@@ -541,7 +482,7 @@
               "phone": "96555557802",
               "position_title": ""
             },
-            "expires_at": "2026-07-19T09:35:13.580922+00:00",
+            "expires_at": "2026-07-19T10:18:28.854735+00:00",
             "ok": true,
             "refresh_token": "[redacted]",
             "token": "[redacted]"
@@ -783,7 +724,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T09:35:13.717835+00:00",
+                "updated_at": "2026-07-12T10:18:28.986721+00:00",
                 "value": null
               },
               {
@@ -801,7 +742,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T09:35:13.721217+00:00",
+                "updated_at": "2026-07-12T10:18:28.990114+00:00",
                 "value": null
               },
               {
@@ -819,7 +760,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T09:35:13.723599+00:00",
+                "updated_at": "2026-07-12T10:18:28.993005+00:00",
                 "value": null
               },
               {
@@ -837,7 +778,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T09:35:13.726662+00:00",
+                "updated_at": "2026-07-12T10:18:28.995603+00:00",
                 "value": null
               }
             ],
@@ -875,7 +816,7 @@
               "metadata": {
                 "item_id": "civil_id",
                 "label": "Civil ID",
-                "received_at": "2026-07-12T09:35:13Z",
+                "received_at": "2026-07-12T10:18:29Z",
                 "storage": {
                   "content_sha256": "761955553e6b9cf0f8926d05ddc9e56e775d8ac48146c51453f2bc7e4b42db4a",
                   "drive_file_id": null,
@@ -883,15 +824,15 @@
                   "external_file_id": null,
                   "metadata": {
                     "company_code": "P7ESTG01",
-                    "local_path": "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf"
+                    "local_path": "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b-024238c4b92d46aaa11f89338a51c871.pdf"
                   },
                   "mime_type": "application/pdf",
                   "ok": true,
                   "provider": "local",
-                  "storage_object_key": "data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
+                  "storage_object_key": "data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b-024238c4b92d46aaa11f89338a51c871.pdf",
                   "storage_status": "stored",
-                  "storage_url": "local://data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
-                  "stored_at": "2026-07-12T09:35:13Z"
+                  "storage_url": "local://data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b-024238c4b92d46aaa11f89338a51c871.pdf",
+                  "stored_at": "2026-07-12T10:18:29Z"
                 },
                 "value": "civil-id.pdf"
               },
@@ -925,7 +866,7 @@
         },
         "response": {
           "body": {
-            "file_id": "2b54d2cc-3879-43b6-a6ba-96299cea14f2",
+            "file_id": "e585dbb0-f639-4635-a7b9-22b224cf3616",
             "item_id": "civil_id",
             "ok": true,
             "storage_status": "stored"
@@ -1136,9 +1077,7 @@
           "files": 0,
           "status": "pending"
         },
-        "permanent_orphans": [
-          "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"
-        ],
+        "permanent_orphans": [],
         "response": {
           "body": "synthetic_db_failure_after_storage",
           "exception": "RuntimeError",
@@ -1146,7 +1085,7 @@
           "status_code": 500
         }
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C07l",
@@ -1158,8 +1097,8 @@
       },
       "label": "rejected employee upload is auditable",
       "observed": {
-        "audit_after": 0,
-        "audit_before": 0,
+        "audit_after": 4,
+        "audit_before": 3,
         "response": {
           "body": {
             "error": "unsupported_file_type",
@@ -1169,7 +1108,7 @@
           "status_code": 400
         }
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C08",
@@ -1186,7 +1125,7 @@
           "body": {
             "leave": {
               "company_code": "P7ESTG01",
-              "created_at": "2026-07-12T09:35:13.895138+00:00",
+              "created_at": "2026-07-12T10:18:29.141620+00:00",
               "decided_at": null,
               "decided_by_phone": null,
               "decision_note": null,
@@ -1194,7 +1133,7 @@
               "employee_name": "Synthetic Employee A",
               "employee_phone": "96555557801",
               "end_date": "2099-01-12",
-              "leave_id": "df0aa128-ac39-40b7-9f51-15c7aba65ee3",
+              "leave_id": "9c94cc1f-64a0-4bb2-bc6d-60ac7d8161c1",
               "leave_type": "annual",
               "metadata": {
                 "action": {
@@ -1208,12 +1147,12 @@
                 "source": "whatsapp"
               },
               "reason": null,
-              "requested_at": "2026-07-12T09:35:13.895138+00:00",
+              "requested_at": "2026-07-12T10:18:29.141620+00:00",
               "requested_by_phone": "96555557801",
               "source_text": "",
               "start_date": "2099-01-10",
               "status": "requested",
-              "updated_at": "2026-07-12T09:35:13.895138+00:00"
+              "updated_at": "2026-07-12T10:18:29.141620+00:00"
             },
             "ok": true
           },
@@ -1232,15 +1171,15 @@
           "body": {
             "leave": {
               "company_code": "P7ESTG01",
-              "created_at": "2026-07-12T09:35:13.895138+00:00",
-              "decided_at": "2026-07-12T09:35:13.903755+00:00",
+              "created_at": "2026-07-12T10:18:29.141620+00:00",
+              "decided_at": "2026-07-12T10:18:29.150361+00:00",
               "decided_by_phone": "96555557801",
               "decision_note": null,
               "employee_key": "p7e-app-a",
               "employee_name": "Synthetic Employee A",
               "employee_phone": "96555557801",
               "end_date": "2099-01-12",
-              "leave_id": "df0aa128-ac39-40b7-9f51-15c7aba65ee3",
+              "leave_id": "9c94cc1f-64a0-4bb2-bc6d-60ac7d8161c1",
               "leave_type": "annual",
               "metadata": {
                 "action": {
@@ -1254,12 +1193,12 @@
                 "source": "whatsapp"
               },
               "reason": null,
-              "requested_at": "2026-07-12T09:35:13.895138+00:00",
+              "requested_at": "2026-07-12T10:18:29.141620+00:00",
               "requested_by_phone": "96555557801",
               "source_text": "",
               "start_date": "2099-01-10",
               "status": "cancelled",
-              "updated_at": "2026-07-12T09:35:13.903755+00:00"
+              "updated_at": "2026-07-12T10:18:29.150361+00:00"
             },
             "ok": true
           },
@@ -1282,9 +1221,9 @@
       "observed": {
         "item": {
           "body": "Synthetic onboarding reminder",
-          "created_at": "2026-07-12T09:35:13.909991+00:00",
+          "created_at": "2026-07-12T10:18:29.155908+00:00",
           "flow": "onboarding",
-          "id": "7158e86a-927c-4d75-ab0c-19f89709512b",
+          "id": "08e66a85-735a-4254-af2f-6d900beb2493",
           "read": false,
           "status": "pending",
           "title": "Onboarding reminder"
@@ -1601,9 +1540,9 @@
     }
   ],
   "fixture_cleanup_remaining": 0,
-  "last_token_hash": "726ed3b8ea04",
+  "last_token_hash": "da90459bea63",
   "meta": {
-    "application_code_patched": false,
+    "application_code_patched": true,
     "company": "P7ESTG01",
     "mocked_outbound_only": true,
     "other_company": "P7ESTG02",
@@ -2176,10 +2115,10 @@
   },
   "staging_protected_snapshot_unchanged": true,
   "summary": {
-    "blockers": 2,
-    "failed": 2,
-    "passed": 55,
-    "recommendation": "not-staging-green",
+    "blockers": 0,
+    "failed": 0,
+    "passed": 57,
+    "recommendation": "staging-green",
     "total": 57
   }
 }

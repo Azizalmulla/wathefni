@@ -118,7 +118,7 @@ class Evidence:
             "other_company": OTHER_COMPANY,
             "synthetic_only": True,
             "mocked_outbound_only": True,
-            "application_code_patched": False,
+            "application_code_patched": True,
         }
 
     def record(
@@ -184,7 +184,7 @@ class Evidence:
             f"- Recommendation: **{payload['summary']['recommendation']}**",
             f"- Fixture: `{COMPANY}` (+ `{OTHER_COMPANY}` for isolation)",
             "- Outbound: mocked only; synthetic documents only",
-            "- Application remediation: none performed",
+            "- Application remediation: R1/R2 backend remediation present",
             "",
             "## Exact case evidence",
             "",
@@ -408,6 +408,10 @@ def cleanup() -> None:
         ("DELETE FROM hr_tasks WHERE company_code = ANY(%s)", (companies,)),
         ("DELETE FROM employee_messages WHERE company_code = ANY(%s)", (companies,)),
         ("DELETE FROM action_results WHERE company_code = ANY(%s)", (companies,)),
+        (
+            "DELETE FROM document_storage_operations WHERE company_code = ANY(%s) AND status IN ('canonical_committed','compensated','storage_failed')",
+            (companies,),
+        ),
         ("DELETE FROM leave_events WHERE company_code = ANY(%s)", (companies,)),
         ("DELETE FROM leave_requests WHERE company_code = ANY(%s)", (companies,)),
         ("DELETE FROM employee_documents WHERE company_code = ANY(%s)", (companies,)),

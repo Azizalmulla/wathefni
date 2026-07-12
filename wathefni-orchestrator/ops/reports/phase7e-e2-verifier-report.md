@@ -1,10 +1,10 @@
 # Phase 7E E2 staging verifier report
 
-- Result: **55/57 passed; 2 failed**
-- Recommendation: **not-staging-green**
+- Result: **57/57 passed; 0 failed**
+- Recommendation: **staging-green**
 - Fixture: `P7ESTG01` (+ `P7ESTG02` for isolation)
 - Outbound: mocked only; synthetic documents only
-- Application remediation: none performed
+- Application remediation: R1/R2 backend remediation present
 
 ## Exact case evidence
 
@@ -51,27 +51,27 @@
 ### PASS — C03e real ladder persists created/attempted/delivered state
 - Endpoint: `deliver_app_activation_code → outbound_delivery`
 - Expected: `{"attempts": 1, "created_row": true, "status": "delivered_whatsapp", "terminal_event": true}`
-- Observed: `{"event": [{"channel": "outbound_layer", "payload": {"attempt_reasons": [], "channel_used": "whatsapp_session", "delivery_status": "delivered_whatsapp", "employee_message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a", "flow": "app_activation", "outbound_layer": true, "recipient_email": "p7e-app-a@synthetic.invalid", "template_key": "app_activation"}, "status": "sent"}], "message": [{"attempt_log": [{"at": "2026-07-12T09:35:13.413039+00:00", "attempt": 1, "channel": "whatsapp_session", "reasons": [], "status": "delivered_whatsapp"}], "attempts": 1, "channel_used": "whatsapp_session", "message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a", "status": "delivered_whatsapp"}], "provider_calls": {"emai…`
+- Observed: `{"event": [{"channel": "outbound_layer", "payload": {"attempt_reasons": [], "channel_used": "whatsapp_session", "delivery_status": "delivered_whatsapp", "employee_message_id": "a646740c-6fc9-44fd-a96d-5b1f8bf5a76a", "flow": "app_activation", "outbound_layer": true, "recipient_email": "p7e-app-a@synthetic.invalid", "template_key": "app_activation"}, "status": "sent"}], "message": [{"attempt_log": [{"at": "2026-07-12T10:18:28.675715+00:00", "attempt": 1, "channel": "whatsapp_session", "reasons": [], "status": "delivered_whatsapp"}], "attempts": 1, "channel_used": "whatsapp_session", "message_id": "a646740c-6fc9-44fd-a96d-5b1f8bf5a76a", "status": "delivered_whatsapp"}], "provider_calls": {"emai…`
 
 ### PASS — C03f real ladder records fallback as later-rung success plus reason trail
 - Endpoint: `deliver_app_activation_code → outbound_delivery`
 - Expected: `{"channel": "email", "prior_rung_reason": true, "status": "sent_email_fallback"}`
-- Observed: `{"message": [{"attempt_log": [{"at": "2026-07-12T09:35:13.421709+00:00", "attempt": 1, "channel": "email", "reasons": ["session:conversation_closed", "template:template_unmapped"], "status": "sent_email_fallback"}], "attempts": 1, "channel_used": "email", "status": "sent_email_fallback"}], "provider_calls": {"email": 1, "session": 1, "template": 1}, "result": {"channel": "email", "delivery_status": "sent_email_fallback", "hr_task_id": null, "ok": true}}`
+- Observed: `{"message": [{"attempt_log": [{"at": "2026-07-12T10:18:28.686643+00:00", "attempt": 1, "channel": "email", "reasons": ["session:conversation_closed", "template:template_unmapped"], "status": "sent_email_fallback"}], "attempts": 1, "channel_used": "email", "status": "sent_email_fallback"}], "provider_calls": {"email": 1, "session": 1, "template": 1}, "result": {"channel": "email", "delivery_status": "sent_email_fallback", "hr_task_id": null, "ok": true}}`
 
 ### PASS — C03g real ladder all-failed activation creates visible HR task
 - Endpoint: `deliver_app_activation_code → outbound_delivery`
 - Expected: `{"hr_task": "open", "status": "needs_hr_action"}`
-- Observed: `{"hr_task_count": 1, "message": [{"attempt_log": [{"at": "2026-07-12T09:35:13.429164+00:00", "attempt": 1, "channel": null, "reasons": ["session:conversation_closed", "template:template_unmapped", "email:synthetic_email_failure"], "status": "needs_hr_action"}], "attempts": 1, "channel_used": null, "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988", "status": "needs_hr_action"}], "result": {"channel": null, "delivery_status": "needs_hr_action", "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988", "ok": false}}`
+- Observed: `{"hr_task_count": 1, "message": [{"attempt_log": [{"at": "2026-07-12T10:18:28.694999+00:00", "attempt": 1, "channel": null, "reasons": ["session:conversation_closed", "template:template_unmapped", "email:synthetic_email_failure"], "status": "needs_hr_action"}], "attempts": 1, "channel_used": null, "hr_task_id": "6a9ff24e-5a48-4370-96c1-12a70d85efae", "status": "needs_hr_action"}], "result": {"channel": null, "delivery_status": "needs_hr_action", "hr_task_id": "6a9ff24e-5a48-4370-96c1-12a70d85efae", "ok": false}}`
 
 ### PASS — C03h real ladder persists suppressed without provider calls or HR task
 - Endpoint: `deliver_app_activation_code → outbound_delivery`
 - Expected: `{"hr_task": null, "provider_calls": 0, "status": "suppressed"}`
-- Observed: `{"message": [{"attempt_log": [{"at": "2026-07-12T09:35:13.439598+00:00", "attempt": 1, "channel": null, "reasons": ["push:suppressed_opt_out", "session:suppressed_opt_out", "template:suppressed_opt_out", "email:suppressed_opt_out"], "status": "suppressed"}], "attempts": 1, "channel_used": null, "hr_task_id": null, "status": "suppressed"}], "provider_calls": {"email": 0, "session": 0, "template": 0}, "result": {"channel": null, "delivery_status": "suppressed", "hr_task_id": null, "ok": false}}`
+- Observed: `{"message": [{"attempt_log": [{"at": "2026-07-12T10:18:28.701500+00:00", "attempt": 1, "channel": null, "reasons": ["push:suppressed_opt_out", "session:suppressed_opt_out", "template:suppressed_opt_out", "email:suppressed_opt_out"], "status": "suppressed"}], "attempts": 1, "channel_used": null, "hr_task_id": null, "status": "suppressed"}], "provider_calls": {"email": 0, "session": 0, "template": 0}, "result": {"channel": null, "delivery_status": "suppressed", "hr_task_id": null, "ok": false}}`
 
 ### PASS — C04a valid single-use invite activates the intended employee
 - Endpoint: `POST /app/auth/activate`
 - Expected: `{"employee_key": "p7e-app-a", "session": true, "status_code": 200}`
-- Observed: `{"body": {"employee": {"company_code": "P7ESTG01", "department": "", "email": "p7e-app-a@synthetic.invalid", "employee_key": "p7e-app-a", "locale": "en", "name": "Synthetic Employee A", "onboarding_status": "in_progress", "phone": "96555557801", "position_title": ""}, "expires_at": "2026-07-19T09:35:13.452170+00:00", "ok": true, "refresh_token": "[redacted]", "token": "[redacted]"}, "returned": true, "status_code": 200}`
+- Observed: `{"body": {"employee": {"company_code": "P7ESTG01", "department": "", "email": "p7e-app-a@synthetic.invalid", "employee_key": "p7e-app-a", "locale": "en", "name": "Synthetic Employee A", "onboarding_status": "in_progress", "phone": "96555557801", "position_title": ""}, "expires_at": "2026-07-19T10:18:28.718735+00:00", "ok": true, "refresh_token": "[redacted]", "token": "[redacted]"}, "returned": true, "status_code": 200}`
 
 ### PASS — C04b authenticated identity is self-scoped
 - Endpoint: `GET /app/me`
@@ -91,7 +91,7 @@
 ### PASS — C05c redeemed invite cannot be reused
 - Endpoint: `POST /app/auth/activate`
 - Expected: `{"first": 200, "second": 401}`
-- Observed: `{"first": {"body": {"employee": {"company_code": "P7ESTG01", "department": "", "email": "p7e-app-b@synthetic.invalid", "employee_key": "p7e-app-b", "locale": "en", "name": "Synthetic Employee B", "onboarding_status": "in_progress", "phone": "96555557802", "position_title": ""}, "expires_at": "2026-07-19T09:35:13.580922+00:00", "ok": true, "refresh_token": "[redacted]", "token": "[redacted]"}, "returned": true, "status_code": 200}, "second": {"body": {"error": "app_activation_failed", "message": "That code didn't work. Ask your HR team for a new one."}, "returned": false, "status_code": 401}}`
+- Observed: `{"first": {"body": {"employee": {"company_code": "P7ESTG01", "department": "", "email": "p7e-app-b@synthetic.invalid", "employee_key": "p7e-app-b", "locale": "en", "name": "Synthetic Employee B", "onboarding_status": "in_progress", "phone": "96555557802", "position_title": ""}, "expires_at": "2026-07-19T10:18:28.854735+00:00", "ok": true, "refresh_token": "[redacted]", "token": "[redacted]"}, "returned": true, "status_code": 200}, "second": {"body": {"error": "app_activation_failed", "message": "That code didn't work. Ask your HR team for a new one."}, "returned": false, "status_code": 401}}`
 
 ### PASS — C05d expired invite is rejected
 - Endpoint: `POST /app/auth/activate`
@@ -136,12 +136,12 @@
 ### PASS — C06b Option A exposes exactly four manually provisioned canonical items
 - Endpoint: `GET /app/onboarding`
 - Expected: `{"onboarding_seed": false, "pending_item_ids": ["bank_details", "civil_id", "employment_contract", "personal_photo"]}`
-- Observed: `{"response": {"body": {"can_upload": true, "next_item": {"document_type": "civil_id", "item_id": "civil_id", "item_type": "document", "label": "Civil ID", "status": "pending"}, "ok": true, "pending": [{"document_type": "civil_id", "drive_url": null, "escalated_at": null, "file_id": null, "item_id": "civil_id", "item_type": "document", "label": "Civil ID", "last_reminded_at": null, "reminder_count": 0, "required": true, "status": "pending", "storage_provider": null, "storage_status": null, "storage_url": null, "updated_at": "2026-07-12T09:35:13.717835+00:00", "value": null}, {"document_type": "personal_photo", "drive_url": null, "escalated_at": null, "file_id": null, "item_id": "personal_phot…`
+- Observed: `{"response": {"body": {"can_upload": true, "next_item": {"document_type": "civil_id", "item_id": "civil_id", "item_type": "document", "label": "Civil ID", "status": "pending"}, "ok": true, "pending": [{"document_type": "civil_id", "drive_url": null, "escalated_at": null, "file_id": null, "item_id": "civil_id", "item_type": "document", "label": "Civil ID", "last_reminded_at": null, "reminder_count": 0, "required": true, "status": "pending", "storage_provider": null, "storage_status": null, "storage_url": null, "updated_at": "2026-07-12T10:18:28.986721+00:00", "value": null}, {"document_type": "personal_photo", "drive_url": null, "escalated_at": null, "file_id": null, "item_id": "personal_phot…`
 
 ### PASS — C07a valid synthetic upload creates canonical Document Hub linkage
 - Endpoint: `POST /app/onboarding/documents`
 - Expected: `{"employee_documents": true, "file_registry": true, "onboarding_item": "received"}`
-- Observed: `{"canonical": {"employee_documents": [{"company_code": "P7ESTG01", "document_type": "civil_id", "employee_key": "p7e-app-a", "item_id": "civil_id", "metadata": {"item_id": "civil_id", "label": "Civil ID", "received_at": "2026-07-12T09:35:13Z", "storage": {"content_sha256": "761955553e6b9cf0f8926d05ddc9e56e775d8ac48146c51453f2bc7e4b42db4a", "drive_file_id": null, "drive_url": null, "external_file_id": null, "metadata": {"company_code": "P7ESTG01", "local_path": "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf"}, "mime_type": "application/pdf", "ok": true, "provider": "local", "storage_object_key": "data/companies/P7EST…`
+- Observed: `{"canonical": {"employee_documents": [{"company_code": "P7ESTG01", "document_type": "civil_id", "employee_key": "p7e-app-a", "item_id": "civil_id", "metadata": {"item_id": "civil_id", "label": "Civil ID", "received_at": "2026-07-12T10:18:29Z", "storage": {"content_sha256": "761955553e6b9cf0f8926d05ddc9e56e775d8ac48146c51453f2bc7e4b42db4a", "drive_file_id": null, "drive_url": null, "external_file_id": null, "metadata": {"company_code": "P7ESTG01", "local_path": "/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b-024238c4b92d46aaa11f89338a51c871.pdf"}, "mime_type": "application/pdf", "ok": true, "provider": "local", "storage_o…`
 
 ### PASS — C07b successful upload is auditable
 - Endpoint: `POST /app/onboarding/documents`
@@ -188,25 +188,25 @@
 - Expected: `{"database_state_unchanged": true, "status_code": 502}`
 - Observed: `{"after": {"docs": 0, "files": 0, "status": "pending"}, "before": {"docs": 0, "files": 0, "status": "pending"}, "response": {"body": {"error": "storage_failed", "message": "We couldn't store that document. Please try again."}, "returned": false, "status_code": 502}}`
 
-### FAIL — C07k DB failure after successful storage leaves no permanent orphan
+### PASS — C07k DB failure after successful storage leaves no permanent orphan
 - Endpoint: `POST /app/onboarding/documents`
 - Expected: `{"database_state_unchanged": true, "permanent_orphans": [], "request_failed": true}`
-- Observed: `{"database_after": {"docs": 0, "files": 0, "status": "pending"}, "database_before": {"docs": 0, "files": 0, "status": "pending"}, "permanent_orphans": ["/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"], "response": {"body": "synthetic_db_failure_after_storage", "exception": "RuntimeError", "returned": false, "status_code": 500}}`
+- Observed: `{"database_after": {"docs": 0, "files": 0, "status": "pending"}, "database_before": {"docs": 0, "files": 0, "status": "pending"}, "permanent_orphans": [], "response": {"body": "synthetic_db_failure_after_storage", "exception": "RuntimeError", "returned": false, "status_code": 500}}`
 
-### FAIL — C07l rejected employee upload is auditable
+### PASS — C07l rejected employee upload is auditable
 - Endpoint: `POST /app/onboarding/documents`
 - Expected: `{"rejection_audit_growth": 1, "request_denied": true}`
-- Observed: `{"audit_after": 0, "audit_before": 0, "response": {"body": {"error": "unsupported_file_type", "message": "Upload a PDF or an image."}, "returned": false, "status_code": 400}}`
+- Observed: `{"audit_after": 4, "audit_before": 3, "response": {"body": {"error": "unsupported_file_type", "message": "Upload a PDF or an image."}, "returned": false, "status_code": 400}}`
 
 ### PASS — C08 leave request/cancel remains employee-owned
 - Endpoint: `POST /app/leave/request + POST /app/leave/{id}/cancel`
 - Expected: `{"create": 200, "cross_employee_cancel": 404, "own_cancel": 200}`
-- Observed: `{"create": {"body": {"leave": {"company_code": "P7ESTG01", "created_at": "2026-07-12T09:35:13.895138+00:00", "decided_at": null, "decided_by_phone": null, "decision_note": null, "employee_key": "p7e-app-a", "employee_name": "Synthetic Employee A", "employee_phone": "96555557801", "end_date": "2099-01-12", "leave_id": "df0aa128-ac39-40b7-9f51-15c7aba65ee3", "leave_type": "annual", "metadata": {"action": {"end_date": "2099-01-12", "leave_type": "annual", "reason": null, "start_date": "2099-01-10", "subject_phone": "96555557801"}, "shift_conflicts": [], "source": "whatsapp"}, "reason": null, "requested_at": "2026-07-12T09:35:13.895138+00:00", "requested_by_phone": "96555557801", "source_text": …`
+- Observed: `{"create": {"body": {"leave": {"company_code": "P7ESTG01", "created_at": "2026-07-12T10:18:29.141620+00:00", "decided_at": null, "decided_by_phone": null, "decision_note": null, "employee_key": "p7e-app-a", "employee_name": "Synthetic Employee A", "employee_phone": "96555557801", "end_date": "2099-01-12", "leave_id": "9c94cc1f-64a0-4bb2-bc6d-60ac7d8161c1", "leave_type": "annual", "metadata": {"action": {"end_date": "2099-01-12", "leave_type": "annual", "reason": null, "start_date": "2099-01-10", "subject_phone": "96555557801"}, "shift_conflicts": [], "source": "whatsapp"}, "reason": null, "requested_at": "2026-07-12T10:18:29.141620+00:00", "requested_by_phone": "96555557801", "source_text": …`
 
 ### PASS — C09 inbox exposes backend-owned status without push
 - Endpoint: `GET /app/notifications + POST /app/notifications/{id}/read`
 - Expected: `{"push_enabled": false, "read_marked": true, "server_status": "pending"}`
-- Observed: `{"item": {"body": "Synthetic onboarding reminder", "created_at": "2026-07-12T09:35:13.909991+00:00", "flow": "onboarding", "id": "7158e86a-927c-4d75-ab0c-19f89709512b", "read": false, "status": "pending", "title": "Onboarding reminder"}, "mark": {"body": {"ok": true}, "returned": true, "status_code": 200}, "push_enabled": false}`
+- Observed: `{"item": {"body": "Synthetic onboarding reminder", "created_at": "2026-07-12T10:18:29.155908+00:00", "flow": "onboarding", "id": "08e66a85-735a-4254-af2f-6d900beb2493", "read": false, "status": "pending", "title": "Onboarding reminder"}, "mark": {"body": {"ok": true}, "returned": true, "status_code": 200}, "push_enabled": false}`
 
 ### PASS — C10a global flag OFF blocks a previously valid bearer
 - Endpoint: `GET /app/me (employee_app_context)`
@@ -295,17 +295,7 @@
 
 ## Blockers
 
-### C07k — DB failure after successful storage leaves no permanent orphan
-- Endpoint: `POST /app/onboarding/documents`
-- Observed: `{"database_after": {"docs": 0, "files": 0, "status": "pending"}, "database_before": {"docs": 0, "files": 0, "status": "pending"}, "permanent_orphans": ["/opt/wathefni/staging/workspace/data/companies/P7ESTG01/employees/96555557801/documents/employment_contract/employment_contract-1564384d80b7.pdf"], "response": {"body": "synthetic_db_failure_after_storage", "exception": "RuntimeError", "returned": false, "status_code": 500}}`
-- Expected: `{"database_state_unchanged": true, "permanent_orphans": [], "request_failed": true}`
-- Smallest durable remediation: Add compensating deletion for the stored local/Drive object when the post-storage database transaction fails, or make storage finalization transactional.
-
-### C07l — rejected employee upload is auditable
-- Endpoint: `POST /app/onboarding/documents`
-- Observed: `{"audit_after": 0, "audit_before": 0, "response": {"body": {"error": "unsupported_file_type", "message": "Upload a PDF or an image."}, "returned": false, "status_code": 400}}`
-- Expected: `{"rejection_audit_growth": 1, "request_denied": true}`
-- Smallest durable remediation: Write an HR-safe, company/employee-scoped audit event for rejected upload attempts without recording document bytes or secrets.
+No blockers.
 
 ## Rollback evidence
 

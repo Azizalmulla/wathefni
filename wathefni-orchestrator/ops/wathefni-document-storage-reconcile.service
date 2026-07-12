@@ -1,0 +1,17 @@
+[Unit]
+Description=Wathefni document storage reconciliation
+After=network-online.target postgresql.service wathefni-orchestrator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
+EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python document-storage-reconcile-worker.py --limit 50
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
