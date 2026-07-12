@@ -96,20 +96,29 @@ preflight() {
 
 artifact_sha() {
   {
-    ( cd "$ORCH_SRC" && shasum -a 256 "${CODE_FILES[@]}" ops/deploy.sh )
+    ( cd "$ORCH_SRC" && shasum -a 256 "${CODE_FILES[@]}" requirements.txt ops/deploy.sh )
     shasum -a 256 "$DASH_SRC"/dist/*.html "$DASH_SRC"/dist/*.svg "$DASH_SRC"/dist/assets/*
   } | shasum -a 256 | awk '{print $1}'
 }
 
 sync_code() {  # $1 = dest orchestrator dir
-  rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
+  rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC/requirements.txt" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
   rsync -az "$ORCH_SRC/ops/" "$VPS_HOST:$PROD_ORCH/ops/"
+}
+
+install_pinned_runtime_dependencies() {  # $1 = remote orchestrator dir
+  local dest="$1"
+  "${SSH[@]}" "set -e; pin=\$(awk '/^puremagic==/{print; exit}' '$dest/requirements.txt'); \
+    [ \"\$pin\" = 'puremagic==2.2.0' ] || { echo 'missing or unexpected puremagic pin' >&2; exit 1; }; \
+    /opt/wathefni/orchestrator/.venv/bin/pip install --disable-pip-version-check --no-deps \"\$pin\""
 }
 
 deploy_staging() {
   preflight
   log "sync code -> staging"
   sync_code "$STAGING_ORCH"
+  log "install pinned runtime dependencies"
+  install_pinned_runtime_dependencies "$STAGING_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$STAGING_DASH/"
   log "compile + migrate (staging DB) + restart"
   "${SSH[@]}" "set -e; cd $STAGING_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py; \
@@ -138,6 +147,8 @@ deploy_production() {
     printf '%s\n' \"\$snap\" > /opt/wathefni/backups/.last-predeploy; echo snapshot \"\$snap\""
   log "sync code + dashboard -> production"
   sync_code "$PROD_ORCH"
+  log "install pinned runtime dependencies"
+  install_pinned_runtime_dependencies "$PROD_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$PROD_DASH_DIST/"
   log "compile + migrate + restart + publish dashboard"
   if "${SSH[@]}" "set -e; cd $PROD_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py; \
