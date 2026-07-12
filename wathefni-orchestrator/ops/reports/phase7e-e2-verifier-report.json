@@ -1,202 +1,6 @@
 {
   "blockers": [
     {
-      "case_id": "C05e",
-      "category": "invite_security",
-      "endpoint": "POST /app/auth/activate",
-      "expected": {
-        "new_sessions_for_wrong_employee": 0,
-        "status_code": 401
-      },
-      "label": "invite employee_key/phone mismatch cannot activate the wrong employee",
-      "observed": {
-        "response": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-d@synthetic.invalid",
-              "employee_key": "p7e-app-d",
-              "locale": "en",
-              "name": "Synthetic Employee D",
-              "onboarding_status": "in_progress",
-              "phone": "96555557804",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.108805+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
-        },
-        "sessions_after": 1,
-        "sessions_before": 0
-      },
-      "smallest_durable_remediation_scope": "Bind activation lookup to invite.employee_key and verify it equals the resolved employee before redeeming or creating a session.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C05g",
-      "category": "company_lifecycle",
-      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
-      "expected": {
-        "activation_denied": true,
-        "invite_denied": true
-      },
-      "label": "disabled company blocks invite and activation",
-      "observed": {
-        "activation": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-e@synthetic.invalid",
-              "employee_key": "p7e-app-e",
-              "locale": "en",
-              "name": "Synthetic Employee E",
-              "onboarding_status": "in_progress",
-              "phone": "96555557805",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.136144+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
-        },
-        "invite": {
-          "body": {
-            "code": "[redacted]",
-            "delivery": {
-              "channel": null,
-              "ok": false,
-              "status": "failed"
-            },
-            "employee_key": "p7e-app-e",
-            "expires_at": "2026-07-13T08:49:34.129485+00:00",
-            "ok": true
-          },
-          "returned": true,
-          "status_code": 200
-        }
-      },
-      "smallest_durable_remediation_scope": "Enforce active company lifecycle in the HR invite route and activation path before issuing/redeeming an invite.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C05h",
-      "category": "company_lifecycle",
-      "endpoint": "POST /dashboard/.../app-invite + POST /app/auth/activate",
-      "expected": {
-        "activation_denied": true,
-        "invite_denied": true
-      },
-      "label": "archived company blocks invite and activation",
-      "observed": {
-        "activation": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-f@synthetic.invalid",
-              "employee_key": "p7e-app-f",
-              "locale": "en",
-              "name": "Synthetic Employee F",
-              "onboarding_status": "in_progress",
-              "phone": "96555557806",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.148167+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
-        },
-        "invite": {
-          "body": {
-            "code": "[redacted]",
-            "delivery": {
-              "channel": null,
-              "ok": false,
-              "status": "failed"
-            },
-            "employee_key": "p7e-app-f",
-            "expires_at": "2026-07-13T08:49:34.143146+00:00",
-            "ok": true
-          },
-          "returned": true,
-          "status_code": 200
-        }
-      },
-      "smallest_durable_remediation_scope": "Enforce active company lifecycle in the HR invite route and activation path before issuing/redeeming an invite.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C05i",
-      "category": "invite_security",
-      "endpoint": "POST /app/auth/activate",
-      "expected": {
-        "active_session_count_growth": 0,
-        "rejected_or_idempotent": true
-      },
-      "label": "already-activated employee does not receive an additional privileged session",
-      "observed": {
-        "response": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-a@synthetic.invalid",
-              "employee_key": "p7e-app-a",
-              "locale": "en",
-              "name": "Synthetic Employee A",
-              "onboarding_status": "in_progress",
-              "phone": "96555557801",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.159139+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
-        },
-        "sessions_after": 2,
-        "sessions_before": 1
-      },
-      "smallest_durable_remediation_scope": "Define activation idempotency and reject or atomically replace existing active sessions instead of accumulating privileged sessions.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C07i",
-      "category": "document_validation",
-      "endpoint": "POST /app/onboarding/documents",
-      "expected": {
-        "error": "mime_mismatch_or_invalid_content",
-        "status_code": "400/415"
-      },
-      "label": "server rejects extension/MIME mismatch",
-      "observed": {
-        "body": {
-          "file_id": "0684fa74-511d-47fd-84c2-80665745902c",
-          "item_id": "personal_photo",
-          "ok": true,
-          "storage_status": "stored"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Add server-side MIME allowlist and extension-to-MIME/content-signature consistency validation before storage.",
-      "status": "FAIL"
-    },
-    {
       "case_id": "C07k",
       "category": "orphan_safety",
       "endpoint": "POST /app/onboarding/documents",
@@ -252,224 +56,6 @@
         }
       },
       "smallest_durable_remediation_scope": "Write an HR-safe, company/employee-scoped audit event for rejected upload attempts without recording document bytes or secrets.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C10c",
-      "category": "rollback",
-      "endpoint": "POST /app/auth/refresh",
-      "expected": {
-        "status_code": "401/403"
-      },
-      "label": "company module removal blocks refresh",
-      "observed": {
-        "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.360352+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Apply company lifecycle/module/employee eligibility gates before rotating a refresh token; revoke the session when a gate fails.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C10d",
-      "category": "rollback",
-      "endpoint": "GET /app/me (employee_app_context)",
-      "expected": {
-        "company_status": "disabled",
-        "status_code": "401/403"
-      },
-      "label": "company disabled blocks subsequent authenticated API access",
-      "observed": {
-        "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Add an active-company lifecycle check to employee_app_context and all unauthenticated auth/invite paths.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C10d2",
-      "category": "rollback",
-      "endpoint": "POST /app/auth/refresh",
-      "expected": {
-        "company_status": "disabled",
-        "status_code": "401/403"
-      },
-      "label": "company disabled blocks refresh",
-      "observed": {
-        "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.365767+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Check active company lifecycle and effective employee_app module before rotating refresh credentials.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C10e",
-      "category": "rollback",
-      "endpoint": "GET /app/me (employee_app_context)",
-      "expected": {
-        "company_status": "archived",
-        "status_code": "401/403"
-      },
-      "label": "company archived blocks subsequent authenticated API access",
-      "observed": {
-        "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Add an active-company lifecycle check to employee_app_context and all unauthenticated auth/invite paths.",
-      "status": "FAIL"
-    },
-    {
-      "case_id": "C10e2",
-      "category": "rollback",
-      "endpoint": "POST /app/auth/refresh",
-      "expected": {
-        "company_status": "archived",
-        "status_code": "401/403"
-      },
-      "label": "company archived blocks refresh",
-      "observed": {
-        "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.370987+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
-        },
-        "returned": true,
-        "status_code": 200
-      },
-      "smallest_durable_remediation_scope": "Check active company lifecycle and effective employee_app module before rotating refresh credentials.",
       "status": "FAIL"
     }
   ],
@@ -647,7 +233,7 @@
               "attempt_reasons": [],
               "channel_used": "whatsapp_session",
               "delivery_status": "delivered_whatsapp",
-              "employee_message_id": "829f9dfa-75f7-4ac9-bc52-afcd55617490",
+              "employee_message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a",
               "flow": "app_activation",
               "outbound_layer": true,
               "recipient_email": "p7e-app-a@synthetic.invalid",
@@ -660,7 +246,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T08:49:33.906175+00:00",
+                "at": "2026-07-12T09:35:13.413039+00:00",
                 "attempt": 1,
                 "channel": "whatsapp_session",
                 "reasons": [],
@@ -669,7 +255,7 @@
             ],
             "attempts": 1,
             "channel_used": "whatsapp_session",
-            "message_id": "829f9dfa-75f7-4ac9-bc52-afcd55617490",
+            "message_id": "b19faf1d-92a0-4418-b17e-1d275672a77a",
             "status": "delivered_whatsapp"
           }
         ],
@@ -702,7 +288,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T08:49:33.911014+00:00",
+                "at": "2026-07-12T09:35:13.421709+00:00",
                 "attempt": 1,
                 "channel": "email",
                 "reasons": [
@@ -746,7 +332,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T08:49:33.915582+00:00",
+                "at": "2026-07-12T09:35:13.429164+00:00",
                 "attempt": 1,
                 "channel": null,
                 "reasons": [
@@ -759,14 +345,14 @@
             ],
             "attempts": 1,
             "channel_used": null,
-            "hr_task_id": "f1b43ffe-7f51-469a-a472-1cb59da654c0",
+            "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988",
             "status": "needs_hr_action"
           }
         ],
         "result": {
           "channel": null,
           "delivery_status": "needs_hr_action",
-          "hr_task_id": "f1b43ffe-7f51-469a-a472-1cb59da654c0",
+          "hr_task_id": "34be8500-9761-4ac3-9fe8-6cc3eb8e7988",
           "ok": false
         }
       },
@@ -787,7 +373,7 @@
           {
             "attempt_log": [
               {
-                "at": "2026-07-12T08:49:33.921601+00:00",
+                "at": "2026-07-12T09:35:13.439598+00:00",
                 "attempt": 1,
                 "channel": null,
                 "reasons": [
@@ -842,7 +428,7 @@
             "phone": "96555557801",
             "position_title": ""
           },
-          "expires_at": "2026-07-19T08:49:33.933000+00:00",
+          "expires_at": "2026-07-19T09:35:13.452170+00:00",
           "ok": true,
           "refresh_token": "[redacted]",
           "token": "[redacted]"
@@ -955,7 +541,7 @@
               "phone": "96555557802",
               "position_title": ""
             },
-            "expires_at": "2026-07-19T08:49:34.052354+00:00",
+            "expires_at": "2026-07-19T09:35:13.580922+00:00",
             "ok": true,
             "refresh_token": "[redacted]",
             "token": "[redacted]"
@@ -1022,29 +608,16 @@
       "observed": {
         "response": {
           "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-d@synthetic.invalid",
-              "employee_key": "p7e-app-d",
-              "locale": "en",
-              "name": "Synthetic Employee D",
-              "onboarding_status": "in_progress",
-              "phone": "96555557804",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.108805+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
+            "error": "app_activation_failed",
+            "message": "That code didn't work. Ask your HR team for a new one."
           },
-          "returned": true,
-          "status_code": 200
+          "returned": false,
+          "status_code": 401
         },
-        "sessions_after": 1,
+        "sessions_after": 0,
         "sessions_before": 0
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C05f",
@@ -1075,43 +648,21 @@
       "label": "disabled company blocks invite and activation",
       "observed": {
         "activation": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-e@synthetic.invalid",
-              "employee_key": "p7e-app-e",
-              "locale": "en",
-              "name": "Synthetic Employee E",
-              "onboarding_status": "in_progress",
-              "phone": "96555557805",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.136144+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
+          "reason": "invite correctly denied",
+          "skipped": true
         },
         "invite": {
           "body": {
-            "code": "[redacted]",
-            "delivery": {
-              "channel": null,
-              "ok": false,
-              "status": "failed"
-            },
-            "employee_key": "p7e-app-e",
-            "expires_at": "2026-07-13T08:49:34.129485+00:00",
-            "ok": true
+            "company_code": "P7ESTG01",
+            "company_status": "disabled",
+            "error": "company_disabled",
+            "message": "This company workspace is not active. Contact the Wathefni platform operator."
           },
-          "returned": true,
-          "status_code": 200
+          "returned": false,
+          "status_code": 403
         }
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C05h",
@@ -1124,43 +675,21 @@
       "label": "archived company blocks invite and activation",
       "observed": {
         "activation": {
-          "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-f@synthetic.invalid",
-              "employee_key": "p7e-app-f",
-              "locale": "en",
-              "name": "Synthetic Employee F",
-              "onboarding_status": "in_progress",
-              "phone": "96555557806",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.148167+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
-          },
-          "returned": true,
-          "status_code": 200
+          "reason": "invite correctly denied",
+          "skipped": true
         },
         "invite": {
           "body": {
-            "code": "[redacted]",
-            "delivery": {
-              "channel": null,
-              "ok": false,
-              "status": "failed"
-            },
-            "employee_key": "p7e-app-f",
-            "expires_at": "2026-07-13T08:49:34.143146+00:00",
-            "ok": true
+            "company_code": "P7ESTG01",
+            "company_status": "archived",
+            "error": "company_archived",
+            "message": "This company workspace is not active. Contact the Wathefni platform operator."
           },
-          "returned": true,
-          "status_code": 200
+          "returned": false,
+          "status_code": 403
         }
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C05i",
@@ -1174,29 +703,16 @@
       "observed": {
         "response": {
           "body": {
-            "employee": {
-              "company_code": "P7ESTG01",
-              "department": "",
-              "email": "p7e-app-a@synthetic.invalid",
-              "employee_key": "p7e-app-a",
-              "locale": "en",
-              "name": "Synthetic Employee A",
-              "onboarding_status": "in_progress",
-              "phone": "96555557801",
-              "position_title": ""
-            },
-            "expires_at": "2026-07-19T08:49:34.159139+00:00",
-            "ok": true,
-            "refresh_token": "[redacted]",
-            "token": "[redacted]"
+            "error": "already_activated",
+            "message": "This employee app account is already activated. Sign in or use account recovery."
           },
-          "returned": true,
-          "status_code": 200
+          "returned": false,
+          "status_code": 409
         },
-        "sessions_after": 2,
+        "sessions_after": 1,
         "sessions_before": 1
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C06a",
@@ -1267,7 +783,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T08:49:34.171749+00:00",
+                "updated_at": "2026-07-12T09:35:13.717835+00:00",
                 "value": null
               },
               {
@@ -1285,7 +801,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T08:49:34.174995+00:00",
+                "updated_at": "2026-07-12T09:35:13.721217+00:00",
                 "value": null
               },
               {
@@ -1303,7 +819,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T08:49:34.177882+00:00",
+                "updated_at": "2026-07-12T09:35:13.723599+00:00",
                 "value": null
               },
               {
@@ -1321,7 +837,7 @@
                 "storage_provider": null,
                 "storage_status": null,
                 "storage_url": null,
-                "updated_at": "2026-07-12T08:49:34.180523+00:00",
+                "updated_at": "2026-07-12T09:35:13.726662+00:00",
                 "value": null
               }
             ],
@@ -1359,7 +875,7 @@
               "metadata": {
                 "item_id": "civil_id",
                 "label": "Civil ID",
-                "received_at": "2026-07-12T08:49:34Z",
+                "received_at": "2026-07-12T09:35:13Z",
                 "storage": {
                   "content_sha256": "761955553e6b9cf0f8926d05ddc9e56e775d8ac48146c51453f2bc7e4b42db4a",
                   "drive_file_id": null,
@@ -1375,7 +891,7 @@
                   "storage_object_key": "data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
                   "storage_status": "stored",
                   "storage_url": "local://data/companies/P7ESTG01/employees/96555557801/documents/civil_id/civil_id-761955553e6b.pdf",
-                  "stored_at": "2026-07-12T08:49:34Z"
+                  "stored_at": "2026-07-12T09:35:13Z"
                 },
                 "value": "civil-id.pdf"
               },
@@ -1409,7 +925,7 @@
         },
         "response": {
           "body": {
-            "file_id": "0e85af0a-9268-47bd-8d38-5119ffa36c99",
+            "file_id": "2b54d2cc-3879-43b6-a6ba-96299cea14f2",
             "item_id": "civil_id",
             "ok": true,
             "storage_status": "stored"
@@ -1560,15 +1076,13 @@
       "label": "server rejects extension/MIME mismatch",
       "observed": {
         "body": {
-          "file_id": "0684fa74-511d-47fd-84c2-80665745902c",
-          "item_id": "personal_photo",
-          "ok": true,
-          "storage_status": "stored"
+          "error": "mime_mismatch_or_invalid_content",
+          "message": "The file content does not match an allowed PDF or image type."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 415
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C07j",
@@ -1672,7 +1186,7 @@
           "body": {
             "leave": {
               "company_code": "P7ESTG01",
-              "created_at": "2026-07-12T08:49:34.332723+00:00",
+              "created_at": "2026-07-12T09:35:13.895138+00:00",
               "decided_at": null,
               "decided_by_phone": null,
               "decision_note": null,
@@ -1680,7 +1194,7 @@
               "employee_name": "Synthetic Employee A",
               "employee_phone": "96555557801",
               "end_date": "2099-01-12",
-              "leave_id": "5c7e0315-56d4-4457-9341-4a128ee243cd",
+              "leave_id": "df0aa128-ac39-40b7-9f51-15c7aba65ee3",
               "leave_type": "annual",
               "metadata": {
                 "action": {
@@ -1694,12 +1208,12 @@
                 "source": "whatsapp"
               },
               "reason": null,
-              "requested_at": "2026-07-12T08:49:34.332723+00:00",
+              "requested_at": "2026-07-12T09:35:13.895138+00:00",
               "requested_by_phone": "96555557801",
               "source_text": "",
               "start_date": "2099-01-10",
               "status": "requested",
-              "updated_at": "2026-07-12T08:49:34.332723+00:00"
+              "updated_at": "2026-07-12T09:35:13.895138+00:00"
             },
             "ok": true
           },
@@ -1718,15 +1232,15 @@
           "body": {
             "leave": {
               "company_code": "P7ESTG01",
-              "created_at": "2026-07-12T08:49:34.332723+00:00",
-              "decided_at": "2026-07-12T08:49:34.345881+00:00",
+              "created_at": "2026-07-12T09:35:13.895138+00:00",
+              "decided_at": "2026-07-12T09:35:13.903755+00:00",
               "decided_by_phone": "96555557801",
               "decision_note": null,
               "employee_key": "p7e-app-a",
               "employee_name": "Synthetic Employee A",
               "employee_phone": "96555557801",
               "end_date": "2099-01-12",
-              "leave_id": "5c7e0315-56d4-4457-9341-4a128ee243cd",
+              "leave_id": "df0aa128-ac39-40b7-9f51-15c7aba65ee3",
               "leave_type": "annual",
               "metadata": {
                 "action": {
@@ -1740,12 +1254,12 @@
                 "source": "whatsapp"
               },
               "reason": null,
-              "requested_at": "2026-07-12T08:49:34.332723+00:00",
+              "requested_at": "2026-07-12T09:35:13.895138+00:00",
               "requested_by_phone": "96555557801",
               "source_text": "",
               "start_date": "2099-01-10",
               "status": "cancelled",
-              "updated_at": "2026-07-12T08:49:34.345881+00:00"
+              "updated_at": "2026-07-12T09:35:13.903755+00:00"
             },
             "ok": true
           },
@@ -1768,9 +1282,9 @@
       "observed": {
         "item": {
           "body": "Synthetic onboarding reminder",
-          "created_at": "2026-07-12T08:49:34.353540+00:00",
+          "created_at": "2026-07-12T09:35:13.909991+00:00",
           "flow": "onboarding",
-          "id": "9207f0e9-a2ff-48f6-a217-e26ae504b9f1",
+          "id": "7158e86a-927c-4d75-ab0c-19f89709512b",
           "read": false,
           "status": "pending",
           "title": "Onboarding reminder"
@@ -1850,26 +1364,13 @@
       "label": "company module removal blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.360352+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10d",
@@ -1882,53 +1383,13 @@
       "label": "company disabled blocks subsequent authenticated API access",
       "observed": {
         "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+          "error": "company_disabled",
+          "message": "Your company workspace is not active."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 403
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10d2",
@@ -1941,26 +1402,13 @@
       "label": "company disabled blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.365767+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10e",
@@ -1973,53 +1421,13 @@
       "label": "company archived blocks subsequent authenticated API access",
       "observed": {
         "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+          "error": "company_archived",
+          "message": "Your company workspace is not active."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 403
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10e2",
@@ -2032,26 +1440,13 @@
       "label": "company archived blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.370987+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10f",
@@ -2206,7 +1601,7 @@
     }
   ],
   "fixture_cleanup_remaining": 0,
-  "last_token_hash": "c44d8e52f2d3",
+  "last_token_hash": "726ed3b8ea04",
   "meta": {
     "application_code_patched": false,
     "company": "P7ESTG01",
@@ -2459,26 +1854,13 @@
       "label": "company module removal blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.360352+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10d",
@@ -2491,53 +1873,13 @@
       "label": "company disabled blocks subsequent authenticated API access",
       "observed": {
         "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+          "error": "company_disabled",
+          "message": "Your company workspace is not active."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 403
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10d2",
@@ -2550,26 +1892,13 @@
       "label": "company disabled blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.365767+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10e",
@@ -2582,53 +1911,13 @@
       "label": "company archived blocks subsequent authenticated API access",
       "observed": {
         "body": {
-          "actor_email": "p7e-app-a@synthetic.invalid",
-          "actor_phone": "96555557801",
-          "actor_role": "employee",
-          "actor_user_id": "employee_app:p7e-app-a",
-          "company_code": "P7ESTG01",
-          "employee": {
-            "app_key": null,
-            "company_code": "P7ESTG01",
-            "compliance_status": "pending",
-            "created_at": "2026-07-12T08:49:33.818373+00:00",
-            "device_user_id": null,
-            "documents_complete": 2,
-            "documents_pending": 2,
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "employment_status": "active",
-            "hire_date": null,
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": null,
-            "profile": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "raw_json": {
-              "marker": "phase7e_e2_verifier",
-              "synthetic": true
-            },
-            "start_date": null,
-            "updated_at": "2026-07-12T08:49:34.268565+00:00"
-          },
-          "employee_key": "p7e-app-a",
-          "hr_phone": "",
-          "hr_user": {
-            "company_code": "P7ESTG01",
-            "name": "Synthetic Employee A",
-            "phone": "96555557801",
-            "role": "employee"
-          },
-          "phone": "96555557801",
-          "session_id": "323d75e6-5d2f-4c76-a529-e41928249222"
+          "error": "company_archived",
+          "message": "Your company workspace is not active."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 403
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10e2",
@@ -2641,26 +1930,13 @@
       "label": "company archived blocks refresh",
       "observed": {
         "body": {
-          "employee": {
-            "company_code": "P7ESTG01",
-            "department": "",
-            "email": "p7e-app-a@synthetic.invalid",
-            "employee_key": "p7e-app-a",
-            "locale": "en",
-            "name": "Synthetic Employee A",
-            "onboarding_status": "in_progress",
-            "phone": "96555557801",
-            "position_title": ""
-          },
-          "expires_at": "2026-07-19T08:49:34.370987+00:00",
-          "ok": true,
-          "refresh_token": "[redacted]",
-          "token": "[redacted]"
+          "error": "app_auth_failed",
+          "message": "Please sign in again."
         },
-        "returned": true,
-        "status_code": 200
+        "returned": false,
+        "status_code": 401
       },
-      "status": "FAIL"
+      "status": "PASS"
     },
     {
       "case_id": "C10f",
@@ -2900,9 +2176,9 @@
   },
   "staging_protected_snapshot_unchanged": true,
   "summary": {
-    "blockers": 12,
-    "failed": 12,
-    "passed": 45,
+    "blockers": 2,
+    "failed": 2,
+    "passed": 55,
     "recommendation": "not-staging-green",
     "total": 57
   }

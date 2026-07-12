@@ -1,9 +1,9 @@
 # Phase 7E — Employee app readiness checklist (plan only)
 
-**Status:** E2 evidence accepted — **not staging-green**. Phase 7E remains open. Phase 8 must not begin. No production enablement authorized. Next gate: **Phase 7E-R1 remediation plan** (`ops/PHASE7E_R1_REMEDIATION_PLAN.md`) — plan only until approved; no application patches yet.  
+**Status:** R1A and R1B implemented and checkpoint-green. The full expanded E2 matrix is **55/57**; all original 51 cases pass, while deferred C07k/C07l remain failed. Per the locked full-matrix rule, Phase 7E remains **not staging-green** and open. Phase 8 must not begin. No production enablement authorized.  
 **E1 artifacts:** `ops/PHASE7E_E1A_PILOT_SHEET.md`, `ops/PHASE7E_E1B_PRIVACY_CHECKLIST.md`.  
 **E2 artifacts:** `ops/staging-phase7e-employee-app-verify.py`, `ops/reports/phase7e-e2-verifier-report.json`, `ops/reports/phase7e-e2-verifier-report.md`.  
-**R1 plan:** `ops/PHASE7E_R1_REMEDIATION_PLAN.md` (R1A identity/lifecycle/session; R1B upload content validation). C07k/C07l deferred out of R1.
+**R1 artifacts:** `ops/PHASE7E_R1_REMEDIATION_PLAN.md`, `ops/PHASE7E_R1_IMPLEMENTATION_REPORT.md`, `ops/staging-phase7e-r1a-checkpoint.py`, `ops/staging-phase7e-r1b-checkpoint.py`. C07k/C07l are documented R2 candidates and are not authorization/tenant-isolation findings.
 
 **Prerequisites closed:** Phase 7A–7D (Setup Console / workspace boot, onboarding-seed staging pack, compliance docs reconcile series, company channel accounts **staging-ready / production-dark**).
 
