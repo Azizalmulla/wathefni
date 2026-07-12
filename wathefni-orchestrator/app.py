@@ -36,6 +36,7 @@ from xml.etree import ElementTree
 
 import psycopg2
 import psycopg2.pool
+import puremagic
 from psycopg2.extras import RealDictCursor, Json
 from pydantic import BaseModel, Field
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
@@ -44398,6 +44399,38 @@ _EMPLOYEE_APP_REFRESH_TTL_DAYS = 180
 _EMPLOYEE_APP_CODE_RESEND_COOLDOWN_SECONDS = 60
 _APP_DOC_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic"}
 _APP_DOC_MAX_BYTES = 15 * 1024 * 1024
+_APP_DOC_TYPE_RULES: dict[str, dict[str, Any]] = {
+    ".pdf": {
+        "canonical": "application/pdf",
+        "declared": {"application/pdf"},
+        "detected": {"application/pdf"},
+    },
+    ".jpg": {
+        "canonical": "image/jpeg",
+        "declared": {"image/jpeg"},
+        "detected": {"image/jpeg"},
+    },
+    ".jpeg": {
+        "canonical": "image/jpeg",
+        "declared": {"image/jpeg"},
+        "detected": {"image/jpeg"},
+    },
+    ".png": {
+        "canonical": "image/png",
+        "declared": {"image/png"},
+        "detected": {"image/png"},
+    },
+    ".webp": {
+        "canonical": "image/webp",
+        "declared": {"image/webp"},
+        "detected": {"image/webp"},
+    },
+    ".heic": {
+        "canonical": "image/heic",
+        "declared": {"image/heic", "image/heif"},
+        "detected": {"image/heic", "image/heif"},
+    },
+}
 # Employee-facing flows surfaced in the app's notification inbox.
 _APP_INBOX_FLOWS = ("leave_decision", "onboarding", "compliance", "shift", "payroll", "app_activation")
 
@@ -44408,6 +44441,62 @@ class EmployeeAppInviteDenied(Exception):
     def __init__(self, reason: str):
         super().__init__(reason)
         self.reason = reason
+
+
+class EmployeeAppUploadTypeDenied(Exception):
+    """Fail-closed employee upload type validation error."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+def _detect_employee_app_upload_matches(data: bytes) -> list[Any]:
+    """Detect from bytes only. Never pass the submitted filename to puremagic."""
+    return list(puremagic.magic_string(data))
+
+
+def validate_employee_app_upload_type(
+    *,
+    extension: str,
+    declared_mime: str | None,
+    data: bytes,
+) -> str:
+    """Require extension, client MIME, and server byte signature to agree.
+
+    This is a narrow content-type consistency gate, not antivirus scanning.
+    Unknown, unsupported, ambiguous, detector-error, and mismatched input fails
+    closed before storage or canonical metadata writes.
+    """
+    ext = str(extension or "").strip().lower()
+    rule = _APP_DOC_TYPE_RULES.get(ext)
+    if not rule:
+        raise EmployeeAppUploadTypeDenied("unsupported_extension")
+    declared = str(declared_mime or "").split(";", 1)[0].strip().lower()
+    if declared not in rule["declared"]:
+        raise EmployeeAppUploadTypeDenied("declared_mime_mismatch")
+    try:
+        matches = _detect_employee_app_upload_matches(bytes(data))
+    except Exception as exc:
+        logger.warning("employee app upload type detector failed: %s", type(exc).__name__)
+        raise EmployeeAppUploadTypeDenied("detector_error") from None
+    detected_allowed_families: set[str] = set()
+    expected_family = str(rule["canonical"])
+    for match in matches:
+        detected_mime = str(getattr(match, "mime_type", "") or "").strip().lower()
+        for candidate in _APP_DOC_TYPE_RULES.values():
+            if detected_mime in candidate["detected"]:
+                detected_allowed_families.add(str(candidate["canonical"]))
+    if not detected_allowed_families:
+        raise EmployeeAppUploadTypeDenied("unknown_signature")
+    if detected_allowed_families != {expected_family}:
+        raise EmployeeAppUploadTypeDenied("signature_mismatch_or_ambiguous")
+    if not any(
+        str(getattr(match, "mime_type", "") or "").strip().lower() in rule["detected"]
+        for match in matches
+    ):
+        raise EmployeeAppUploadTypeDenied("signature_mismatch")
+    return expected_family
 
 
 def _employee_app_employee_eligible(employee: dict[str, Any] | None) -> bool:
@@ -45294,7 +45383,24 @@ async def app_onboarding_document_upload(
     if len(data) > _APP_DOC_MAX_BYTES:
         raise HTTPException(status_code=400, detail={"error": "file_too_large", "message": "Files must be 15 MB or smaller."})
 
-    mime_type = str(file.content_type or "").strip() or (mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    try:
+        mime_type = validate_employee_app_upload_type(
+            extension=ext,
+            declared_mime=file.content_type,
+            data=data,
+        )
+    except EmployeeAppUploadTypeDenied:
+        raise HTTPException(
+            status_code=415,
+            detail={
+                "error": "mime_mismatch_or_invalid_content",
+                "message": "The file content does not match an allowed PDF or image type.",
+            },
+        ) from None
+    # The detector consumed only the in-memory bytes, never the submitted
+    # filename. Rewind the upload defensively before reopening those validated
+    # bytes into the server-owned temporary file used by storage.
+    await file.seek(0)
     tmp_dir = tempfile.mkdtemp(prefix="app-doc-upload-")
     tmp_path = str(Path(tmp_dir) / safe_storage_name(filename))
     new_file_id: str | None = None

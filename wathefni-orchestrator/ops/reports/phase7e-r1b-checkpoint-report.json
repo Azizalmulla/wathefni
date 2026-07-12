@@ -1,0 +1,215 @@
+{
+  "checks": [
+    {
+      "case_id": "R1B-V1",
+      "observed": {
+        "response": {
+          "body": {
+            "file_id": "9370b08e-e450-49c9-90d3-d8778b456bc1",
+            "item_id": "r1b_valid_pdf",
+            "ok": true,
+            "storage_status": "stored"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "state": {
+          "completion_audits": 1,
+          "documents": 1,
+          "files": 1,
+          "status": "received"
+        },
+        "stored_mime": "application/pdf"
+      },
+      "passed": true,
+      "title": "valid PDF extension, MIME, and signature is accepted"
+    },
+    {
+      "case_id": "R1B-V2",
+      "observed": {
+        "response": {
+          "body": {
+            "file_id": "5b601073-0273-4348-b250-300c923e37ad",
+            "item_id": "r1b_valid_png",
+            "ok": true,
+            "storage_status": "stored"
+          },
+          "returned": true,
+          "status_code": 200
+        },
+        "state": {
+          "completion_audits": 1,
+          "documents": 1,
+          "files": 1,
+          "status": "received"
+        },
+        "stored_mime": "image/png"
+      },
+      "passed": true,
+      "title": "valid PNG extension, MIME, and signature is accepted"
+    },
+    {
+      "case_id": "R1B-N1",
+      "observed": {
+        "after": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "mime_mismatch_or_invalid_content",
+            "message": "The file content does not match an allowed PDF or image type."
+          },
+          "returned": false,
+          "status_code": 415
+        }
+      },
+      "passed": true,
+      "title": "filename extension mismatch fails closed before canonical writes"
+    },
+    {
+      "case_id": "R1B-N2",
+      "observed": {
+        "after": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "mime_mismatch_or_invalid_content",
+            "message": "The file content does not match an allowed PDF or image type."
+          },
+          "returned": false,
+          "status_code": 415
+        }
+      },
+      "passed": true,
+      "title": "declared MIME mismatch fails closed before canonical writes"
+    },
+    {
+      "case_id": "R1B-N3",
+      "observed": {
+        "after": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "mime_mismatch_or_invalid_content",
+            "message": "The file content does not match an allowed PDF or image type."
+          },
+          "returned": false,
+          "status_code": 415
+        }
+      },
+      "passed": true,
+      "title": "signature mismatch fails closed before canonical writes"
+    },
+    {
+      "case_id": "R1B-N4",
+      "observed": {
+        "after": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "mime_mismatch_or_invalid_content",
+            "message": "The file content does not match an allowed PDF or image type."
+          },
+          "returned": false,
+          "status_code": 415
+        }
+      },
+      "passed": true,
+      "title": "unknown signature fails closed before canonical writes"
+    },
+    {
+      "case_id": "R1B-N5",
+      "observed": {
+        "after": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "before": {
+          "completion_audits": 0,
+          "documents": 0,
+          "files": 0,
+          "status": "pending"
+        },
+        "response": {
+          "body": {
+            "error": "mime_mismatch_or_invalid_content",
+            "message": "The file content does not match an allowed PDF or image type."
+          },
+          "returned": false,
+          "status_code": 415
+        }
+      },
+      "passed": true,
+      "title": "detector error fails closed before canonical writes"
+    },
+    {
+      "case_id": "R1B-S1",
+      "observed": {
+        "production_unchanged": true,
+        "staging_protected_unchanged": true
+      },
+      "passed": true,
+      "title": "production and protected staging snapshots remain unchanged"
+    },
+    {
+      "case_id": "R1B-S2",
+      "observed": {
+        "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+        "WATHEFNI_EMPLOYEE_APP": "off",
+        "WATHEFNI_ONBOARDING_SEED": "off"
+      },
+      "passed": true,
+      "title": "protected staging service flags remain off"
+    }
+  ],
+  "detector": {
+    "library": "puremagic",
+    "purpose": "content-type consistency, not antivirus",
+    "version": "2.2.0"
+  },
+  "failed": 0,
+  "passed": 9,
+  "phase": "7E-R1B",
+  "recommendation": "r1b-green"
+}
