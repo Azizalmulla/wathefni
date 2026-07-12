@@ -79,17 +79,20 @@ class Checks:
 
 
 def _ctx(viewer_phone: str | None) -> dict[str, Any]:
-    # Owner identity so the strict require_entitlement reads (onboarding) pass on
-    # role; the manager scope being exercised is carried purely by hr_phone, which
-    # is what every post-hire read now threads through to the scope resolver.
+    # Synthetic backend-authoritative owner capability set. Manager scope is
+    # carried independently by hr_phone, as every post-hire read requires.
+    permissions = [*app.hr_role_permissions("owner"), "employees.read"]
     return {
         "company_code": COMPANY,
-        "permissions": [],
+        "permissions": permissions,
         "hr_phone": viewer_phone,
-        "access": {"role": "owner", "permissions": []},
+        "access": {"role": "owner", "permissions": permissions},
         "actor_role": "owner",
         "actor_user_id": "smoke-mgr-read",
         "hr_user": {"role": "owner", "status": "active", "company_code": COMPANY},
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": "smoke-mgr-read",
+        "permission_subject_company": COMPANY,
     }
 
 
@@ -169,12 +172,16 @@ def teardown() -> None:
 
 
 def _employees_seen(viewer_phone: str | None) -> set[str]:
-    res = app.dashboard_posthire_employees(_ctx(viewer_phone))
+    # Directory is paginated now; request a large page so scope assertions see the
+    # whole in-scope set (the test companies are tiny, so one page covers them).
+    res = app.dashboard_posthire_employees(limit=500, context=_ctx(viewer_phone))
     return {str(e.get("employee_key")) for e in (res.get("employees") or [])}
 
 
 def _onboarding_seen(viewer_phone: str | None) -> set[str]:
-    res = app.dashboard_posthire_onboarding(_ctx(viewer_phone))
+    # in_progress is paginated now; request a large page so scope assertions see
+    # the whole in-scope set (the test companies are tiny, one page covers them).
+    res = app.dashboard_posthire_onboarding(limit=500, context=_ctx(viewer_phone))
     return {str(e.get("employee_key")) for e in (res.get("in_progress") or [])}
 
 

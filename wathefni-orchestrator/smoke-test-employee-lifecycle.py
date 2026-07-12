@@ -6,7 +6,7 @@ rosters WITHOUT deleting history. This pins the NEW surface for the batch:
   - edit: update_company_employee changes name/title/department/email/start/phone
     in place; the employee_key (history anchor) never changes; a phone collision
     with another employee is rejected as 'duplicate'.
-  - PATCH endpoint: gated on settings.manage (a role without it is denied), audited
+  - PATCH endpoint: gated on employees.manage (a role without it is denied), audited
     as 'employee_updated', company-scoped (cross-company edit is not_found).
   - mark as left: status endpoint sets employment_status='left' (no row delete,
     child history preserved), audited as 'employee_marked_left'; the directory still
@@ -76,9 +76,12 @@ def main() -> int:
             "actor_role": role,
             "hr_phone": "99900000066",
             "hr_user": {"role": role, "status": "active", "company_code": company},
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "smoke-lifecycle",
+            "permission_subject_company": company,
         }
 
-    owner = ctx(["settings.manage", "onboarding.read", "attendance.read"])
+    owner: dict = {}
 
     audits: list[dict] = []
     real_audit = app.record_admin_audit
@@ -89,16 +92,64 @@ def main() -> int:
     phone_c = "96599000063"
     key_a = f"{company}-{app.canonical_employee_phone(phone_a)}"
     key_b = f"{company}-{app.canonical_employee_phone(phone_b)}"
+    smoke_email = f"smoke-lifecycle@{company.lower()}.invalid"
 
     def cleanup():
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM attendance_records WHERE employee_key IN (%s,%s)", (key_a, key_b))
+                cur.execute("DELETE FROM employee_status_changes WHERE company_code=%s AND employee_key IN (%s,%s)", (company, key_a, key_b))
                 cur.execute("DELETE FROM employees WHERE employee_key IN (%s,%s)", (key_a, key_b))
+                cur.execute(
+                    "DELETE FROM dashboard_user_permission_grants WHERE user_id IN (SELECT user_id FROM dashboard_users WHERE company_code=%s AND email=%s)",
+                    (company, smoke_email),
+                )
+                cur.execute(
+                    "DELETE FROM dashboard_user_sessions WHERE user_id IN (SELECT user_id FROM dashboard_users WHERE company_code=%s AND email=%s)",
+                    (company, smoke_email),
+                )
+                cur.execute(
+                    "DELETE FROM action_results WHERE company_code=%s AND actor_user_id IN (SELECT user_id::text FROM dashboard_users WHERE company_code=%s AND email=%s)",
+                    (company, company, smoke_email),
+                )
+                cur.execute("DELETE FROM dashboard_users WHERE company_code=%s AND email=%s", (company, smoke_email))
             conn.commit()
 
     cleanup()
     try:
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO dashboard_users
+                      (company_code,email,name,role,status,accepted_at,metadata)
+                    VALUES (%s,%s,'Lifecycle Smoke Owner','owner','active',now(),%s)
+                    RETURNING *
+                    """,
+                    (company, smoke_email, app.Json({"source": "lifecycle_smoke"})),
+                )
+                smoke_user = dict(cur.fetchone())
+            conn.commit()
+        token, _ = app.create_dashboard_session(smoke_user)
+        for permission in sorted(app.EMPLOYEE_PERMISSION_SCOPES):
+            granted = app.set_dashboard_user_permission_grant(
+                company,
+                str(smoke_user["user_id"]),
+                permission,
+                active=True,
+                actor_user_id=str(smoke_user["user_id"]),
+                reason="synthetic employee lifecycle regression",
+                review_reference="employee-lifecycle-smoke",
+            )
+            if not granted.get("ok"):
+                raise RuntimeError(granted)
+        owner = app.dashboard_context(
+            authorization=f"Bearer {token}",
+            x_dashboard_token=None,
+            x_hr_phone=None,
+            x_company_code=company,
+        )
+
         app.create_company_employee(company, name="Lifecycle Alpha", phone=phone_a, position_title="Cashier", department="Front")
         app.create_company_employee(company, name="Lifecycle Beta", phone=phone_b, position_title="Stock")
         # Seed a child history row so we can prove deactivation preserves history.
@@ -148,15 +199,37 @@ def main() -> int:
         check("edit recorded an 'employee_updated' audit", any(a["action_type"] == "employee_updated" for a in audits))
         try:
             app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="X"), context=ctx(["attendance.read"], role="viewer"))
-            check("role without settings.manage cannot edit", False)
+            check("role without employees.manage cannot edit", False)
         except app.HTTPException as exc:
-            check("role without settings.manage cannot edit", exc.status_code in (401, 403))
+            check("role without employees.manage cannot edit", exc.status_code in (401, 403))
+
+        def status_request(target: str):
+            with app.db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT employment_status, updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
+                    current = dict(cur.fetchone())
+            return app.DashboardEmployeeStatus(
+                status=target,
+                reason="synthetic employee lifecycle regression",
+                idempotency_key=str(uuid.uuid4()),
+                expected_status=app._canonical_employee_status(current.get("employment_status")),
+                expected_updated_at=current["updated_at"],
+                approver_user_id="self",
+                approval_reference="employee-lifecycle-smoke",
+                approval_mode="self_approved_internal_canary",
+            )
+
+        def durable_audit_is(result_id: str, action_type: str) -> bool:
+            with app.db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT action_type FROM action_results WHERE result_id=%s", (result_id,))
+                    row = cur.fetchone()
+            return bool(row and row["action_type"] == action_type)
 
         # --- mark as left: no delete, history preserved ------------------
-        audits.clear()
-        left = app.dashboard_posthire_set_employee_status(employee_key=key_a, request=app.DashboardEmployeeStatus(status="left"), context=owner)
+        left = app.dashboard_posthire_set_employee_status(employee_key=key_a, request=status_request("left"), context=owner)
         check("mark-as-left returns left", left.get("employment_status") == "left")
-        check("mark-as-left recorded an 'employee_marked_left' audit", any(a["action_type"] == "employee_marked_left" for a in audits))
+        check("mark-as-left recorded a durable audit", durable_audit_is(left.get("result_id"), "employee_marked_left"))
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT employment_status FROM employees WHERE employee_key=%s", (key_a,))
@@ -166,24 +239,25 @@ def main() -> int:
         check("employee row is NOT deleted", row is not None and str(dict(row).get("employment_status")) == "left")
         check("child history is preserved after offboard", int(hist.get("n") or 0) >= 1)
 
-        # directory still returns the left employee (searchable), carrying status
-        directory = app.dashboard_posthire_employees(context=owner)
+        # directory still returns the left employee (searchable), carrying status.
+        # Request a large page so this holds regardless of company headcount now
+        # that the directory is paginated.
+        directory = app.dashboard_posthire_employees(limit=500, context=owner)
         mine = next((e for e in directory.get("employees", []) if e.get("employee_key") == key_a), None)
         check("directory still lists the left employee (searchable)", mine is not None)
         check("directory card exposes employment_status for roster exclusion", (mine or {}).get("employment_status") == "left")
 
         # RBAC on status endpoint
         try:
-            app.dashboard_posthire_set_employee_status(employee_key=key_a, request=app.DashboardEmployeeStatus(status="left"), context=ctx(["attendance.read"], role="viewer"))
-            check("role without settings.manage cannot mark as left", False)
+            app.dashboard_posthire_set_employee_status(employee_key=key_a, request=status_request("left"), context=ctx(["attendance.read"], role="viewer"))
+            check("role without employees.manage cannot mark as left", False)
         except app.HTTPException as exc:
-            check("role without settings.manage cannot mark as left", exc.status_code in (401, 403))
+            check("role without employees.manage cannot mark as left", exc.status_code in (401, 403))
 
         # --- reactivate --------------------------------------------------
-        audits.clear()
-        back = app.dashboard_posthire_set_employee_status(employee_key=key_a, request=app.DashboardEmployeeStatus(status="active"), context=owner)
+        back = app.dashboard_posthire_set_employee_status(employee_key=key_a, request=status_request("active"), context=owner)
         check("reactivate returns active", back.get("employment_status") == "active")
-        check("reactivate recorded an 'employee_reactivated' audit", any(a["action_type"] == "employee_reactivated" for a in audits))
+        check("reactivate recorded a durable audit", durable_audit_is(back.get("result_id"), "employee_reactivated"))
 
         # cross-company status change => not_found
         scoped = app.set_employee_employment_status("ZZZOTHERCO", key_a, "left")
