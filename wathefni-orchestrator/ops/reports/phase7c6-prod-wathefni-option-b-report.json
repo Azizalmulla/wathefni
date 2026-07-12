@@ -1,0 +1,143 @@
+{
+  "after": {
+    "counts": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 26,
+      "onboarding_items": 18
+    },
+    "fingerprints": {
+      "compliance_documents": "dcff680327d7a6b4aa24e30577abfd01",
+      "employee_documents": "1f121bc3fbe623894ff281ed4ff4c7c3",
+      "onboarding_items": "3a3e1006c8ee6aac248c353a82ce87ac"
+    },
+    "transaction_read_only": "on",
+    "write_probe_blocked": true,
+    "write_probe_error": "ReadOnlySqlTransaction: cannot execute UPDATE in a read-only transaction"
+  },
+  "apply_attempted": false,
+  "apply_still_refused": {
+    "ok": true,
+    "output": "Phase 7C.4 refuses --allow-production-dsn for apply\n"
+  },
+  "audit_transaction_read_only": "on",
+  "before": {
+    "counts": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 26,
+      "onboarding_items": 18
+    },
+    "fingerprints": {
+      "compliance_documents": "dcff680327d7a6b4aa24e30577abfd01",
+      "employee_documents": "1f121bc3fbe623894ff281ed4ff4c7c3",
+      "onboarding_items": "3a3e1006c8ee6aac248c353a82ce87ac"
+    },
+    "transaction_read_only": "on",
+    "write_probe_blocked": true,
+    "write_probe_error": "ReadOnlySqlTransaction: cannot execute UPDATE in a read-only transaction"
+  },
+  "company_code": "WATHEFNI",
+  "dry_run_summary": {
+    "apply_enabled": false,
+    "by_action": {
+      "mark_onboarding_received": 2,
+      "skip_compliance_orphan_no_file": 2,
+      "skip_expiry_older_than_existing": 1,
+      "sync_expiry": 1
+    },
+    "by_drift_class": {
+      "compliance_without_employee_doc": 2,
+      "employee_doc_without_received_item": 2,
+      "expiry_status_conflicts": 2
+    },
+    "by_skip_reason": {
+      "expiry_older_than_existing": 1,
+      "skip_compliance_orphan_no_file": 2
+    },
+    "event_count": 6,
+    "manual_only": 0,
+    "no_writes": true,
+    "plan_hash": "d38e41342f7e15675bd8700d8521ed9052b67afee14a9282666dd09410680571",
+    "planned_writes": 3,
+    "planned_writes_by_W1_W4": {
+      "W1": 2,
+      "W2": 0,
+      "W3": 1,
+      "W4": 0,
+      "other_plan": 0
+    },
+    "read_only": true,
+    "redacted_plan_samples": {
+      "mark_onboarding_received": [
+        {
+          "document_type": "civil_id",
+          "sample_id": "emp_2c08123fca34",
+          "table": "onboarding_items"
+        },
+        {
+          "document_type": "bank_details",
+          "sample_id": "emp_2c08123fca34",
+          "table": "onboarding_items"
+        }
+      ],
+      "sync_expiry": [
+        {
+          "document_type": "civil_id",
+          "sample_id": "emp_2c08123fca34",
+          "table": "compliance_documents"
+        }
+      ]
+    },
+    "skips": 3
+  },
+  "health_after": {
+    "body": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\"}",
+    "ok": true,
+    "status": 200
+  },
+  "health_before": {
+    "body": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\"}",
+    "ok": true,
+    "status": 200
+  },
+  "mismatch_totals": {
+    "ambiguous_type_mappings": 0,
+    "company_mismatch": 0,
+    "compliance_missing_for_synced_received": 0,
+    "compliance_without_employee_doc": 2,
+    "duplicate_compliance_docs": 0,
+    "duplicate_employee_docs": 0,
+    "employee_doc_without_file": 0,
+    "employee_doc_without_received_item": 2,
+    "expiry_status_conflicts": 1,
+    "null_expiry_on_received_compliance": 1,
+    "orphan_employee_files": 0,
+    "orphan_employee_keys": 0,
+    "received_without_employee_doc": 0
+  },
+  "mode": "dry-run-only",
+  "no_data_changed": true,
+  "phase": "7C.6-option-B",
+  "production_apply_authorized": false,
+  "protected_flags": {
+    "CHANNEL_ACCOUNTS": "off",
+    "EMPLOYEE_APP": "off"
+  },
+  "recommendation": {
+    "code": "optional_later_w1_canary_after_review",
+    "text": "Production has mixed planned writes including W1. If a canary is ever approved, restrict to one W1 row first (like staging 7C.5). Prefer stop/defer for now unless prod checklist healing is an explicit goal."
+  },
+  "store_counts": {
+    "compliance_documents": 15,
+    "employee_documents": 4,
+    "employees": 3,
+    "file_registry_employee_docs": 4,
+    "onboarding_document_like": 15,
+    "onboarding_items": 18
+  },
+  "ts": "2026-07-12T07:31:32.840221Z",
+  "wathefni_reconcile_apply_set": false
+}

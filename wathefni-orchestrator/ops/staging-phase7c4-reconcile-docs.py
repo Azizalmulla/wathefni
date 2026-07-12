@@ -398,7 +398,7 @@ def build_apply_audit(
 
 
 def run_dry_run(args: argparse.Namespace, company: str) -> tuple[list[dict], dict]:
-    conn = connect_readonly(allow_production_dsn=False)
+    conn = connect_readonly(allow_production_dsn=bool(getattr(args, "allow_production_dsn", False)))
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT 1 AS ok FROM companies WHERE company_code=%s LIMIT 1", (company,))

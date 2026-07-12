@@ -1,0 +1,34 @@
+{
+  "apply_enabled": false,
+  "apply_token": "691fe3725784b35173284dc9",
+  "apply_token_expires_at": "2026-07-12T08:01:32Z",
+  "by_action": {
+    "mark_onboarding_received": 2,
+    "skip_compliance_orphan_no_file": 2,
+    "skip_expiry_older_than_existing": 1,
+    "sync_expiry": 1
+  },
+  "by_drift_class": {
+    "compliance_without_employee_doc": 2,
+    "employee_doc_without_received_item": 2,
+    "expiry_status_conflicts": 2
+  },
+  "by_skip_reason": {
+    "expiry_older_than_existing": 1,
+    "skip_compliance_orphan_no_file": 2
+  },
+  "canary": {
+    "document_type": null,
+    "employee_sample_id": null
+  },
+  "company_code": "WATHEFNI",
+  "event_count": 6,
+  "manual_only": 0,
+  "mode": "dry-run",
+  "no_writes": true,
+  "plan_hash": "d38e41342f7e15675bd8700d8521ed9052b67afee14a9282666dd09410680571",
+  "planned_writes": 3,
+  "production_apply_authorized": false,
+  "read_only": true,
+  "skips": 3
+}
