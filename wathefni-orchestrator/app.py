@@ -46001,6 +46001,92 @@ def app_leave_cancel(leave_id: str, context: dict[str, Any] = Depends(employee_a
     return json_safe({"ok": True, "leave": result.get("leave")})
 
 
+def record_employee_upload_rejection_audit(
+    context: dict[str, Any],
+    *,
+    item_id: str,
+    rejection_code: str,
+    declared_mime: str | None,
+    extension: str,
+    attempted_byte_size: int,
+    event_id: str,
+) -> bool:
+    """Best-effort metadata-only audit; validation remains fail-closed."""
+    company = str(context.get("company_code") or "").upper()
+    employee_key = str(context.get("employee_key") or "")
+    employee = context.get("employee") if isinstance(context.get("employee"), dict) else {}
+    safe_extension = re.sub(r"[^a-z0-9.]", "", str(extension or "").lower())[:16]
+    safe_mime = str(declared_mime or "").split(";", 1)[0].strip().lower()[:120]
+    payload = {
+        "event_id": str(event_id),
+        "company_code": company,
+        "employee_key": employee_key,
+        "item_id": str(item_id)[:120],
+        "actor_context": {
+            "source": "employee_app",
+            "route": "/app/onboarding/documents",
+            "method": "POST",
+        },
+        "rejection_code": str(rejection_code)[:120],
+        "declared_mime": safe_mime,
+        "extension": safe_extension,
+        "attempted_byte_size": max(0, int(attempted_byte_size)),
+    }
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO action_results (
+                        action_type, status, result, final_reply, company_code,
+                        actor_user_id, actor_phone, actor_role
+                    )
+                    VALUES ('employee_document_upload_rejected','rejected',%s,
+                            'Employee document upload rejected.',%s,%s,%s,'employee')
+                    """,
+                    (
+                        Json(payload),
+                        company,
+                        f"employee:{employee_key}",
+                        digits(employee.get("phone")) or None,
+                    ),
+                )
+            conn.commit()
+        return True
+    except Exception:
+        logger.error(
+            "employee upload rejection audit unavailable event_id=%s category=document_validation",
+            event_id,
+            exc_info=True,
+        )
+        return False
+
+
+def reject_employee_document_upload(
+    context: dict[str, Any],
+    *,
+    item_id: str,
+    rejection_code: str,
+    declared_mime: str | None,
+    extension: str,
+    attempted_byte_size: int,
+    status_code: int,
+    api_error: str,
+    message: str,
+) -> None:
+    event_id = str(uuid.uuid4())
+    record_employee_upload_rejection_audit(
+        context,
+        item_id=item_id,
+        rejection_code=rejection_code,
+        declared_mime=declared_mime,
+        extension=extension,
+        attempted_byte_size=attempted_byte_size,
+        event_id=event_id,
+    )
+    raise HTTPException(status_code=status_code, detail={"error": api_error, "message": message})
+
+
 @app.post("/app/onboarding/documents")
 async def app_onboarding_document_upload(
     file: UploadFile = File(...),
@@ -46027,11 +46113,41 @@ async def app_onboarding_document_upload(
     ext = Path(filename).suffix.lower()
     data = await file.read()
     if ext not in _APP_DOC_EXTENSIONS:
-        raise HTTPException(status_code=400, detail={"error": "unsupported_file_type", "message": "Upload a PDF or an image."})
+        reject_employee_document_upload(
+            context,
+            item_id=item,
+            rejection_code="unsupported_extension",
+            declared_mime=file.content_type,
+            extension=ext,
+            attempted_byte_size=len(data),
+            status_code=400,
+            api_error="unsupported_file_type",
+            message="Upload a PDF or an image.",
+        )
     if not data:
-        raise HTTPException(status_code=400, detail={"error": "empty_file", "message": "That file is empty."})
+        reject_employee_document_upload(
+            context,
+            item_id=item,
+            rejection_code="empty_file",
+            declared_mime=file.content_type,
+            extension=ext,
+            attempted_byte_size=0,
+            status_code=400,
+            api_error="empty_file",
+            message="That file is empty.",
+        )
     if len(data) > _APP_DOC_MAX_BYTES:
-        raise HTTPException(status_code=400, detail={"error": "file_too_large", "message": "Files must be 15 MB or smaller."})
+        reject_employee_document_upload(
+            context,
+            item_id=item,
+            rejection_code="file_too_large",
+            declared_mime=file.content_type,
+            extension=ext,
+            attempted_byte_size=len(data),
+            status_code=400,
+            api_error="file_too_large",
+            message="Files must be 15 MB or smaller.",
+        )
 
     try:
         mime_type = validate_employee_app_upload_type(
@@ -46039,14 +46155,18 @@ async def app_onboarding_document_upload(
             declared_mime=file.content_type,
             data=data,
         )
-    except EmployeeAppUploadTypeDenied:
-        raise HTTPException(
+    except EmployeeAppUploadTypeDenied as exc:
+        reject_employee_document_upload(
+            context,
+            item_id=item,
+            rejection_code=exc.reason,
+            declared_mime=file.content_type,
+            extension=ext,
+            attempted_byte_size=len(data),
             status_code=415,
-            detail={
-                "error": "mime_mismatch_or_invalid_content",
-                "message": "The file content does not match an allowed PDF or image type.",
-            },
-        ) from None
+            api_error="mime_mismatch_or_invalid_content",
+            message="The file content does not match an allowed PDF or image type.",
+        )
     # The detector consumed only the in-memory bytes, never the submitted
     # filename. Rewind the upload defensively before reopening those validated
     # bytes into the server-owned temporary file used by storage.
