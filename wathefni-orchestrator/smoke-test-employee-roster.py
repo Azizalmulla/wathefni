@@ -4,7 +4,7 @@ A company that buys only a post-hire module must be able to load its workforce
 without the pre-hiring pipeline. These endpoints INSERT directly into the
 `employees` hub (app_key left NULL). This test pins:
 
-  - RBAC: roster management requires settings.manage + an enabled post-hire
+  - RBAC: roster management requires employees.manage + an enabled post-hire
     module; viewers/recruiters are denied.
   - create core: deterministic key {COMPANY}-{digits(phone)}, phone/name
     required, idempotent dedupe (second create -> 'exists'), app_key stays NULL.
@@ -98,6 +98,9 @@ def main() -> int:
             "actor_user_id": "smoke-roster",
             "actor_role": role,
             "hr_user": {"role": role, "status": "active", "company_code": company},
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "smoke-roster",
+            "permission_subject_company": company,
         }
 
     has_module = any(app.company_has_module(company, m) for m in app.POSTHIRE_PEOPLE_MODULES)
@@ -106,14 +109,14 @@ def main() -> int:
     if has_module:
         try:
             app.require_employee_roster_admin(ctx(["onboarding.read"], role="viewer"))
-            check("viewer without settings.manage is denied", False)
+            check("viewer without employees.manage is denied", False)
         except app.HTTPException as exc:
-            check("viewer without settings.manage is denied", exc.status_code == 403)
+            check("viewer without employees.manage is denied", exc.status_code == 403)
         try:
-            resolved = app.require_employee_roster_admin(ctx(["settings.manage"]))
-            check("settings.manage + enabled module is allowed", resolved == company)
+            resolved = app.require_employee_roster_admin(ctx(["employees.manage"]))
+            check("employees.manage + enabled module is allowed", resolved == company)
         except app.HTTPException:
-            check("settings.manage + enabled module is allowed", False)
+            check("employees.manage + enabled module is allowed", False)
     else:
         print(f"    ({company} has no post-hire module enabled — skipping RBAC module gate)")
 

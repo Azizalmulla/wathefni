@@ -106,7 +106,6 @@ export type PostHireModulePage =
 
 export type NoticeFn = (message: string, tone?: 'success' | 'error' | 'info') => void
 
-const PRIVILEGED_ROLES = new Set(['owner', 'hr_manager', 'admin'])
 const MAX_EMPLOYEE_DOC_BYTES = 15 * 1024 * 1024
 const SENSITIVE_DOC_KEYS = new Set(['civil_id', 'passport', 'residency', 'work_permit', 'medical', 'personal_photo', 'iqama'])
 
@@ -124,18 +123,8 @@ type PostHireCommonProps = Pick<PostHireProps, 'access' | 'permissions' | 'role'
 
 // --- helpers ---------------------------------------------------------------
 
-function normalizeRole(role?: string | null): string {
-  return String(role || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, '_')
-}
-
-function can(permissions: string[], permission: string, role?: string | null): boolean {
-  if (permissions.includes(permission)) return true
-  // Fail closed when permissions weren't loaded — except known owner/admin roles.
-  if (!permissions.length) return PRIVILEGED_ROLES.has(normalizeRole(role))
-  return false
+function can(permissions: string[], permission: string, _role?: string | null): boolean {
+  return permissions.includes(permission)
 }
 
 function isSensitiveIdentityDocument(itemId: string, label?: string | null): boolean {
@@ -882,7 +871,7 @@ function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue }: P
   const [showAdd, setShowAdd] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showLeft, setShowLeft] = useState(false)
-  const canManageRoster = can(permissions, 'settings.manage', role)
+  const canManageRoster = can(permissions, 'employees.manage', role)
 
   // All hooks (including this useMemo) must run unconditionally on every
   // render — the "open a profile" early return below must come after every
@@ -1258,7 +1247,8 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   const canComplianceManage = can(permissions, 'compliance.manage', role)
   const canLeaveDecide = can(permissions, 'leave.decide', role)
   const canPayrollManage = can(permissions, 'payroll.manage', role)
-  const canManageRoster = can(permissions, 'settings.manage', role)
+  const canManageRoster = can(permissions, 'employees.manage', role)
+  const canApproveStatus = canManageRoster && can(permissions, 'employees.status.approve', role)
   const [showEdit, setShowEdit] = useState(false)
   const [statusBusy, setStatusBusy] = useState(false)
 
@@ -1384,15 +1374,17 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                     <Button variant="secondary" size="sm" disabled={statusBusy} onClick={() => setShowEdit(true)}>
                       Edit
                     </Button>
-                    {hasLeft ? (
-                      <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('active')}>
-                        {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Reactivate
-                      </Button>
-                    ) : (
-                      <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('left')}>
-                        {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Mark as left
-                      </Button>
-                    )}
+                    {canApproveStatus ? (
+                      hasLeft ? (
+                        <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('active')}>
+                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Reactivate
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('left')}>
+                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Mark as left
+                        </Button>
+                      )
+                    ) : null}
                   </div>
                 ) : null}
               </div>

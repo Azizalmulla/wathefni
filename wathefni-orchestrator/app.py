@@ -1231,6 +1231,22 @@ def _ensure_schema_impl() -> None:
       last_seen_at timestamptz NOT NULL DEFAULT now(),
       expires_at timestamptz NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS dashboard_user_permission_grants (
+      grant_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      user_id uuid NOT NULL REFERENCES dashboard_users(user_id) ON DELETE CASCADE,
+      permission text NOT NULL,
+      status text NOT NULL DEFAULT 'active',
+      review_reference text NOT NULL,
+      granted_by_user_id uuid NOT NULL REFERENCES dashboard_users(user_id),
+      granted_reason text NOT NULL,
+      granted_at timestamptz NOT NULL DEFAULT now(),
+      revoked_by_user_id uuid REFERENCES dashboard_users(user_id),
+      revoked_reason text,
+      revoked_at timestamptz,
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (company_code, user_id, permission)
+    );
     CREATE TABLE IF NOT EXISTS dashboard_user_invites (
       invite_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
@@ -2474,6 +2490,9 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_dashboard_users_company_status ON dashboard_users(company_code, status, role);
     CREATE INDEX IF NOT EXISTS idx_dashboard_users_phone ON dashboard_users(company_code, phone) WHERE phone IS NOT NULL;
     CREATE INDEX IF NOT EXISTS idx_dashboard_user_sessions_user ON dashboard_user_sessions(user_id, status, expires_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_dashboard_permission_grants_active
+      ON dashboard_user_permission_grants(company_code, user_id, permission)
+      WHERE status='active';
     CREATE INDEX IF NOT EXISTS idx_dashboard_user_invites_lookup ON dashboard_user_invites(company_code, email, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_dashboard_whatsapp_identities_phone ON dashboard_whatsapp_identities(company_code, phone, status);
     CREATE INDEX IF NOT EXISTS idx_company_channel_accounts_status ON company_channel_accounts(company_code, status);
@@ -5621,6 +5640,13 @@ ROLE_PERMISSIONS = {
     "viewer": {"prehire.read", *_POSTHIRE_PERMS_VIEWER},
 }
 
+EMPLOYEE_PERMISSION_SCOPES = {
+    "employees.read",
+    "employees.manage",
+    "employees.status.approve",
+}
+KNOWN_DASHBOARD_PERMISSIONS = set().union(*ROLE_PERMISSIONS.values(), EMPLOYEE_PERMISSION_SCOPES)
+
 
 def normalize_hr_role(role: str | None) -> str:
     key = re.sub(r"[\s-]+", "_", str(role or "").strip().lower())
@@ -5629,6 +5655,54 @@ def normalize_hr_role(role: str | None) -> str:
 
 def hr_role_permissions(role: str | None) -> list[str]:
     return sorted(ROLE_PERMISSIONS.get(normalize_hr_role(role), ROLE_PERMISSIONS["viewer"]))
+
+
+def dashboard_effective_permissions_for_user(
+    user: dict[str, Any] | None,
+    *,
+    cur: Any | None = None,
+) -> list[str]:
+    """Resolve permissions from current backend state.
+
+    Role permissions remain the canonical authority for existing scopes. The
+    employee scopes are grant-only and are never inferred from a role.
+    """
+    data = user if isinstance(user, dict) else {}
+    role_key = normalize_hr_role(data.get("role"))
+    permissions = set(ROLE_PERMISSIONS.get(role_key, ROLE_PERMISSIONS["viewer"]))
+    permissions.difference_update(EMPLOYEE_PERMISSION_SCOPES)
+    company = str(data.get("company_code") or "").strip().upper()
+    user_id = str(data.get("user_id") or "").strip()
+    if not company or not user_id:
+        return sorted(permissions)
+
+    def _load(cursor: Any) -> None:
+        cursor.execute(
+            """
+            SELECT permission
+            FROM dashboard_user_permission_grants
+            WHERE company_code=%s AND user_id=%s AND status='active'
+            """,
+            (company, user_id),
+        )
+        permissions.update(
+            str(row["permission"])
+            for row in cursor.fetchall()
+            if str(row.get("permission") or "") in KNOWN_DASHBOARD_PERMISSIONS
+        )
+
+    try:
+        if cur is not None:
+            _load(cur)
+        else:
+            with db_connect() as conn:
+                with conn.cursor() as query_cur:
+                    _load(query_cur)
+    except Exception:
+        # An unavailable/malformed grant store must never manufacture employee
+        # authority. Existing role scopes remain available for compatibility.
+        logger.warning("dashboard permission grant lookup failed closed", exc_info=True)
+    return sorted(permissions)
 
 
 def dashboard_access_payload(hr_user: dict[str, Any] | None) -> dict[str, Any]:
@@ -5666,14 +5740,30 @@ def known_hr_role(role: str | None) -> bool:
 
 def context_permissions(context: dict[str, Any] | None, role_key: str | None = None) -> set[str]:
     data = context or {}
+    access = data.get("access") if isinstance(data.get("access"), dict) else {}
+    authority = str(data.get("permission_authority") or access.get("permission_authority") or "")
+    if authority != "backend_current":
+        return set()
+    subject_user_id = str(
+        data.get("permission_subject_user_id")
+        or access.get("permission_subject_user_id")
+        or ""
+    ).strip()
+    actor_user_id = str(data.get("actor_user_id") or "").strip()
+    if not subject_user_id or (actor_user_id and subject_user_id != actor_user_id):
+        return set()
+    subject_company = str(
+        data.get("permission_subject_company")
+        or access.get("permission_subject_company")
+        or ""
+    ).strip().upper()
+    context_company = str(data.get("company_code") or data.get("company_id") or "").strip().upper()
+    if not subject_company or (context_company and subject_company != context_company):
+        return set()
     permissions = data.get("permissions")
     if not isinstance(permissions, list):
-        access = data.get("access") if isinstance(data.get("access"), dict) else {}
         permissions = access.get("permissions") if isinstance(access.get("permissions"), list) else []
-    out = {str(item) for item in permissions or [] if str(item).strip()}
-    if not out and role_key in ROLE_PERMISSIONS:
-        out = set(ROLE_PERMISSIONS[str(role_key)])
-    return out
+    return {str(item) for item in permissions or [] if str(item).strip()}
 
 
 def entitlement_denied(
@@ -33217,6 +33307,12 @@ def dashboard_user_public(user: dict[str, Any] | None) -> dict[str, Any]:
     auth_source = str(metadata.get("source") or "").strip()
     email = normalize_email(data.get("email"))
     is_recovery_access = auth_source == "legacy_hr_phone_bootstrap" or email.endswith(".wathefni.local")
+    supplied_effective = data.get("_effective_permissions")
+    permissions = (
+        sorted({str(item) for item in supplied_effective if str(item).strip()})
+        if isinstance(supplied_effective, list)
+        else dashboard_effective_permissions_for_user(data)
+    )
     return json_safe(
         {
             "user_id": str(data.get("user_id") or ""),
@@ -33228,7 +33324,7 @@ def dashboard_user_public(user: dict[str, Any] | None) -> dict[str, Any]:
             "role_label": ROLE_LABELS.get(role_key, "Viewer"),
             "status": normalize_dashboard_user_status(data.get("status"), default="invited"),
             "last_active_at": data.get("last_active_at"),
-            "permissions": hr_role_permissions(role_key),
+            "permissions": permissions,
             "auth_source": auth_source or ("recovery" if is_recovery_access else "workspace"),
             "is_recovery_access": is_recovery_access,
         }
@@ -33244,6 +33340,9 @@ def dashboard_access_payload_for_user(user: dict[str, Any] | None) -> dict[str, 
         "user": public,
         "auth_source": public.get("auth_source"),
         "is_recovery_access": public.get("is_recovery_access"),
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": public["user_id"],
+        "permission_subject_company": public["company_code"],
     }
 
 
@@ -33256,6 +33355,247 @@ def dashboard_user_by_email(company_code: str, email: str) -> dict[str, Any] | N
             )
             row = cur.fetchone()
     return dict(row) if row else None
+
+
+def _normal_dashboard_operator(user: dict[str, Any] | None) -> bool:
+    data = user if isinstance(user, dict) else {}
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
+    return (
+        normalize_dashboard_user_status(data.get("status"), default="invited") == "active"
+        and str(metadata.get("source") or "") != "legacy_hr_phone_bootstrap"
+        and not normalize_email(data.get("email")).endswith(".wathefni.local")
+    )
+
+
+def _permission_operator_context(user: dict[str, Any], permissions: list[str]) -> dict[str, Any]:
+    company = str(user.get("company_code") or "").upper()
+    user_id = str(user.get("user_id") or "")
+    return {
+        "company_code": company,
+        "actor_user_id": user_id,
+        "actor_email": normalize_email(user.get("email")),
+        "actor_phone": digits(user.get("phone")) or "",
+        "actor_role": dashboard_role_key(user.get("role")),
+        "hr_user": dashboard_user_public({**user, "_effective_permissions": permissions}),
+        "permissions": permissions,
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": user_id,
+        "permission_subject_company": company,
+    }
+
+
+def set_dashboard_user_permission_grant(
+    company_code: str,
+    user_id: str,
+    permission: str,
+    *,
+    active: bool,
+    actor_user_id: str,
+    reason: str,
+    review_reference: str,
+) -> dict[str, Any]:
+    """Audited current-state grant/revoke operation used by the cutover CLI."""
+    ensure_schema()
+    company = str(company_code or "").strip().upper()
+    permission_key = str(permission or "").strip()
+    reason_text = str(reason or "").strip()
+    review_text = str(review_reference or "").strip()
+    if permission_key not in KNOWN_DASHBOARD_PERMISSIONS:
+        return {"ok": False, "error": "unknown_permission"}
+    if not reason_text or not review_text:
+        return {"ok": False, "error": "reason_and_review_required"}
+
+    with db_connect() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR UPDATE",
+                    (company, str(actor_user_id)),
+                )
+                actor = dict(cur.fetchone() or {})
+                if not actor or not _normal_dashboard_operator(actor):
+                    return {"ok": False, "error": "normal_active_actor_required"}
+                actor_permissions = dashboard_effective_permissions_for_user(actor, cur=cur)
+                if "users.manage" not in actor_permissions:
+                    return {"ok": False, "error": "permission_denied"}
+
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR UPDATE",
+                    (company, str(user_id)),
+                )
+                target = dict(cur.fetchone() or {})
+                if not target:
+                    return {"ok": False, "error": "user_not_found"}
+                if active and normalize_dashboard_user_status(target.get("status"), default="invited") != "active":
+                    return {"ok": False, "error": "target_user_not_active"}
+
+                cur.execute(
+                    """
+                    INSERT INTO dashboard_user_permission_grants
+                      (company_code, user_id, permission, status, review_reference,
+                       granted_by_user_id, granted_reason, granted_at,
+                       revoked_by_user_id, revoked_reason, revoked_at, updated_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,now(),%s,%s,
+                            CASE WHEN %s THEN NULL ELSE now() END,now())
+                    ON CONFLICT (company_code, user_id, permission)
+                    DO UPDATE SET
+                      status=EXCLUDED.status,
+                      review_reference=EXCLUDED.review_reference,
+                      granted_by_user_id=CASE WHEN EXCLUDED.status='active' THEN EXCLUDED.granted_by_user_id ELSE dashboard_user_permission_grants.granted_by_user_id END,
+                      granted_reason=CASE WHEN EXCLUDED.status='active' THEN EXCLUDED.granted_reason ELSE dashboard_user_permission_grants.granted_reason END,
+                      granted_at=CASE WHEN EXCLUDED.status='active' THEN now() ELSE dashboard_user_permission_grants.granted_at END,
+                      revoked_by_user_id=EXCLUDED.revoked_by_user_id,
+                      revoked_reason=EXCLUDED.revoked_reason,
+                      revoked_at=EXCLUDED.revoked_at,
+                      updated_at=now()
+                    RETURNING grant_id, company_code, user_id, permission, status,
+                              review_reference, granted_at, revoked_at
+                    """,
+                    (
+                        company,
+                        str(user_id),
+                        permission_key,
+                        "active" if active else "revoked",
+                        review_text,
+                        str(actor_user_id),
+                        reason_text,
+                        None if active else str(actor_user_id),
+                        None if active else reason_text,
+                        active,
+                    ),
+                )
+                grant = dict(cur.fetchone())
+                write_admin_audit(
+                    cur,
+                    _permission_operator_context(actor, actor_permissions),
+                    "dashboard_permission_granted" if active else "dashboard_permission_revoked",
+                    summary=f"{'Granted' if active else 'Revoked'} reviewed dashboard permission.",
+                    target_type="dashboard_user",
+                    target=str(user_id),
+                    details={
+                        "permission": permission_key,
+                        "reason": reason_text,
+                        "review_reference": review_text,
+                    },
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+    return {"ok": True, "grant": json_safe(grant)}
+
+
+def revoke_dashboard_recovery_sessions(
+    company_code: str,
+    *,
+    actor_user_id: str,
+    reason: str,
+    review_reference: str,
+) -> dict[str, Any]:
+    ensure_schema()
+    company = str(company_code or "").strip().upper()
+    reason_text = str(reason or "").strip()
+    review_text = str(review_reference or "").strip()
+    if not reason_text or not review_text:
+        return {"ok": False, "error": "reason_and_review_required"}
+    with db_connect() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR UPDATE",
+                    (company, str(actor_user_id)),
+                )
+                actor = dict(cur.fetchone() or {})
+                actor_permissions = dashboard_effective_permissions_for_user(actor, cur=cur) if actor else []
+                if not _normal_dashboard_operator(actor) or "users.manage" not in actor_permissions:
+                    return {"ok": False, "error": "permission_denied"}
+                cur.execute(
+                    """
+                    UPDATE dashboard_user_sessions s
+                    SET status='revoked'
+                    FROM dashboard_users u
+                    WHERE s.user_id=u.user_id
+                      AND s.company_code=%s
+                      AND s.status='active'
+                      AND (
+                        COALESCE(u.metadata->>'source','')='legacy_hr_phone_bootstrap'
+                        OR lower(u.email) LIKE '%%.wathefni.local'
+                      )
+                    RETURNING s.session_id
+                    """,
+                    (company,),
+                )
+                revoked_count = len(cur.fetchall())
+                write_admin_audit(
+                    cur,
+                    _permission_operator_context(actor, actor_permissions),
+                    "dashboard_recovery_sessions_revoked",
+                    summary="Revoked legacy dashboard recovery sessions for permission cutover.",
+                    target_type="company",
+                    target=company,
+                    details={
+                        "revoked_count": revoked_count,
+                        "reason": reason_text,
+                        "review_reference": review_text,
+                    },
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+    return {"ok": True, "revoked_count": revoked_count}
+
+
+def permission_authority_preflight(company_code: str) -> dict[str, Any]:
+    """Fail-closed cutover check: require one reviewed normal owner matrix."""
+    ensure_schema()
+    company = str(company_code or "").strip().upper()
+    required = sorted(EMPLOYEE_PERMISSION_SCOPES)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT u.user_id, u.role, array_agg(g.permission ORDER BY g.permission) AS permissions
+                FROM dashboard_users u
+                JOIN dashboard_user_permission_grants g
+                  ON g.company_code=u.company_code AND g.user_id=u.user_id
+                WHERE u.company_code=%s
+                  AND u.status='active'
+                  AND u.role='owner'
+                  AND COALESCE(u.metadata->>'source','') <> 'legacy_hr_phone_bootstrap'
+                  AND lower(u.email) NOT LIKE '%%.wathefni.local'
+                  AND g.status='active'
+                  AND COALESCE(g.review_reference,'') <> ''
+                  AND g.permission = ANY(%s)
+                GROUP BY u.user_id, u.role
+                HAVING count(DISTINCT g.permission)=%s
+                ORDER BY u.user_id
+                """,
+                (company, required, len(required)),
+            )
+            owners = [dict(row) for row in cur.fetchall()]
+            cur.execute(
+                """
+                SELECT count(*) AS n
+                FROM dashboard_user_sessions s
+                JOIN dashboard_users u ON u.user_id=s.user_id
+                WHERE s.company_code=%s AND s.status='active'
+                  AND (
+                    COALESCE(u.metadata->>'source','')='legacy_hr_phone_bootstrap'
+                    OR lower(u.email) LIKE '%%.wathefni.local'
+                  )
+                """,
+                (company,),
+            )
+            recovery_sessions = int(cur.fetchone()["n"])
+    return {
+        "ok": bool(owners),
+        "company_code": company,
+        "required_permissions": required,
+        "reviewed_owner_user_ids": [str(row["user_id"]) for row in owners],
+        "active_recovery_sessions": recovery_sessions,
+        "error": None if owners else "no_reviewed_active_owner_grant",
+    }
 
 
 def dashboard_user_by_session(token: str | None) -> dict[str, Any] | None:
@@ -33312,8 +33652,8 @@ def create_dashboard_session(user: dict[str, Any]) -> tuple[str, datetime]:
 
 def dashboard_auth_response(user: dict[str, Any], token: str, expires_at: datetime) -> dict[str, Any]:
     company = str(user.get("company_code") or "").upper()
-    public = dashboard_user_public(user)
     access = dashboard_access_payload_for_user(user)
+    public = access["user"]
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -33435,7 +33775,8 @@ def dashboard_user_by_whatsapp_phone(phone: str | None, company_code: str | None
 def whatsapp_actor_context_for_phone(phone: str | None, company_code: str | None = None) -> dict[str, Any] | None:
     user = dashboard_user_by_whatsapp_phone(phone, company_code)
     if user:
-        public = dashboard_user_public(user)
+        access = dashboard_access_payload_for_user(user)
+        public = access["user"]
         if public["status"] != "active":
             return {
                 "company_code": public["company_code"],
@@ -33453,6 +33794,9 @@ def whatsapp_actor_context_for_phone(phone: str | None, company_code: str | None
             "actor_phone": public["phone"],
             "actor_role": public["role"],
             "permissions": public["permissions"],
+            "permission_authority": access["permission_authority"],
+            "permission_subject_user_id": access["permission_subject_user_id"],
+            "permission_subject_company": access["permission_subject_company"],
             "status": public["status"],
         }
     return None
@@ -33590,6 +33934,9 @@ def dashboard_context(
             "hr_user": public_user,
             "access": access,
             "permissions": access["permissions"],
+            "permission_authority": access["permission_authority"],
+            "permission_subject_user_id": access["permission_subject_user_id"],
+            "permission_subject_company": access["permission_subject_company"],
             "actor_user_id": public_user["user_id"],
             "actor_email": public_user["email"],
             "actor_phone": public_user.get("phone") or "",
@@ -33665,6 +34012,9 @@ def dashboard_context(
         "hr_user": hr_user,
         "access": access,
         "permissions": access["permissions"],
+        "permission_authority": access.get("permission_authority") if seeded_user else "legacy_untrusted",
+        "permission_subject_user_id": access.get("permission_subject_user_id") if seeded_user else "",
+        "permission_subject_company": access.get("permission_subject_company") if seeded_user else "",
         **actor,
         "actor_role": access["role"],
         "scope": manager_scope_context(hr_phone, company) if hr_phone else {"restricted": False, "company_code": company, "manager_phone": ""},
@@ -43819,12 +44169,9 @@ def dashboard_prehire_video_interview(
 # ---------------------------------------------------------------------------
 
 def dashboard_context_has_permission(context: dict[str, Any], permission: str) -> bool:
-    """Soft permission check (no raise). Mirrors the orchestrator's behaviour:
-    legacy admins with no explicit permission set stay admin-capable."""
-    perms = {str(p) for p in (context.get("permissions") or []) if str(p).strip()}
-    if not perms:
-        return True
-    return str(permission) in perms
+    """Soft, fail-closed check against a backend-authoritative permission set."""
+    requested = str(permission or "").strip()
+    return bool(requested and requested in context_permissions(context))
 
 
 def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:
@@ -44201,6 +44548,8 @@ def employee_profile_accessible_modules(context: dict[str, Any], company: str) -
     """Post-hire modules whose section should appear on the 360 profile: enabled
     for the company AND readable by this user. Keeps the profile entitlement-aware
     so it never surfaces a module the company/user isn't allowed to see."""
+    if not dashboard_context_has_permission(context, "employees.read"):
+        return []
     return [
         module
         for module in POSTHIRE_PEOPLE_MODULES
@@ -46410,6 +46759,8 @@ def dashboard_posthire_employees(
     # Employees directory is the shared people view; visible when the company has
     # any post-hire module and the user can read it.
     company = context["company_code"]
+    if not dashboard_context_has_permission(context, "employees.read"):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
     readable = [m for m in POSTHIRE_PEOPLE_MODULES if company_has_module(company, m) and dashboard_context_has_permission(context, f"{m}.read")]
     if not readable:
         raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
@@ -46678,15 +47029,15 @@ def set_employee_employment_status(company_code: str, employee_key: str, status:
     return {"status": "ok", "employment_status": target, "employee_key": employee_key, "employee": posthire_employee_card(updated)}
 
 
-def require_employee_roster_admin(context: dict[str, Any]) -> str:
+def require_employee_roster_admin(context: dict[str, Any], permission: str = "employees.manage") -> str:
     """Gate for roster management: company must have at least one post-hire people
     module enabled (module-agnostic, so an attendance-only or compliance-only
-    company qualifies) and the user must hold settings.manage (owner / HR manager).
-    Managers and recruiters cannot add employees. Server RBAC remains authority."""
+    company qualifies) and the current backend user must hold the requested
+    explicit employee authority."""
     company = context["company_code"]
     if not any(company_has_module(company, m) for m in POSTHIRE_PEOPLE_MODULES):
         raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
-    if not dashboard_context_has_permission(context, "settings.manage"):
+    if not dashboard_context_has_permission(context, permission):
         raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
     return company
 
@@ -46785,7 +47136,9 @@ def dashboard_posthire_set_employee_status(
     request: DashboardEmployeeStatus,
     context: dict[str, Any] = Depends(dashboard_context),
 ):
-    company = require_employee_roster_admin(context)
+    company = require_employee_roster_admin(context, "employees.manage")
+    if not dashboard_context_has_permission(context, "employees.status.approve"):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
     target = "left" if str(request.status or "").strip().lower() in {"left", "inactive", "terminated"} else "active"
     result = set_employee_employment_status(company, employee_key, target)
     if result["status"] == "not_found":
