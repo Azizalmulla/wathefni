@@ -1,0 +1,184 @@
+{
+  "results": [
+    {
+      "label": "w1_before_pending",
+      "ok": true,
+      "detail": "{'status': 'pending'}"
+    },
+    {
+      "label": "A1_w1_dryrun",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "label": "A1_w1_apply",
+      "ok": true,
+      "detail": "{\"sum\": {\"applied\": 1, \"canary\": {\"document_type\": \"civil_id\", \"employee_sample_id\": \"emp_b0e7e0b9775b\"}, \"company_code\": \"P7C4STG01\", \"dry_run_planned_writes\": 1, \"failed\": 0, \"max_writes\": 1, \"mode\": \"apply\", \"no_deletes\": true, \"plan_has"
+    },
+    {
+      "label": "A1_w1_audit",
+      "ok": true,
+      "detail": "{\"action\": \"mark_onboarding_received\", \"actor\": \"phase7c3-reconcile-apply\", \"after\": {\"status\": \"received\"}, \"before\": {\"status\": \"pending\"}, \"company_code\": \"P7C4STG01\", \"decision\": \"applied\", \"document_type\": \"civil_id\", \"drift_class\": \"employee_doc_without_"
+    },
+    {
+      "label": "A1_w1_before_after",
+      "ok": true,
+      "detail": "{'status': 'pending'}->{'status': 'received'}"
+    },
+    {
+      "label": "A1_w1_redryrun",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "label": "w2_before_no_ed",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "label": "A2_w2_dryrun",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "label": "A2_w2_apply",
+      "ok": true,
+      "detail": "{\"applied\": 1, \"canary\": {\"document_type\": \"medical\", \"employee_sample_id\": \"emp_357017624bb2\"}, \"company_code\": \"P7C4STG01\", \"dry_run_planned_writes\": 1, \"failed\": 0, \"max_writes\": 1, \"mode\": \"apply\""
+    },
+    {
+      "label": "A2_w2_audit",
+      "ok": true,
+      "detail": "{\"action\": \"insert_employee_document_from_file\", \"actor\": \"phase7c3-reconcile-apply\", \"after\": {\"content_sha256\": \"2222222222222222\\u2026\", \"document_type\": \"medical\", \"expiry_date\": null, \"item_id\": null, \"status\": \"received\", \"storage_status\": \"stored\"}, \"be"
+    },
+    {
+      "label": "A2_w2_counts",
+      "ok": true,
+      "detail": "{'employees': 8, 'employee_documents': 7, 'compliance_documents': 7, 'file_registry': 8, 'onboarding_items': 7}->{'employees': 8, 'employee_documents': 8, 'compliance_documents': 7, 'file_registry': 8, 'onboarding_items': 7}"
+    },
+    {
+      "label": "A2_w2_redryrun",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "label": "A3_w3_dryrun",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "label": "A3_w3_apply",
+      "ok": true,
+      "detail": "{'status': 'received', 'expiry_date': '2026-08-11'}->{'status': 'received', 'expiry_date': '2027-08-16'} sum={'applied': 1, 'canary': {'document_type': 'passport', 'employee_sample_id': 'emp_26e098961e1f'}, 'company_code': 'P7C4STG01', 'dry_run_planned_writes': 1, 'failed': 0, 'max_writes': 1, 'mode': 'apply', 'no_deletes': True, 'plan_hash': '364406c516ba7aae1f601fd5c9055102a58c5c22aa422a8b74400aca56cea192', 'production_apply_authorized': False, 'skipped': 0}"
+    },
+    {
+      "label": "A3_w3_audit",
+      "ok": true,
+      "detail": "{\"action\": \"sync_expiry\", \"actor\": \"phase7c3-reconcile-apply\", \"after\": {\"expiry_date\": \"2027-08-16\"}, \"before\": {\"expiry_date\": \"2026-08-11\"}, \"company_code\": \"P7C4STG01\", \"decision\": \"applied\", \"document_type\": \"passport\", \"drift_class\": \"expiry_status_confl"
+    },
+    {
+      "label": "A3_w3_redryrun",
+      "ok": true,
+      "detail": "planned=0 sync_left=0"
+    },
+    {
+      "label": "A4_w4_dryrun",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "label": "A4_w4_apply",
+      "ok": true,
+      "detail": "{'status': 'received', 'expiry_date': None}->{'status': 'received', 'expiry_date': '2027-08-16'}"
+    },
+    {
+      "label": "A4_w4_audit",
+      "ok": true,
+      "detail": "{\"action\": \"fill_compliance_expiry_from_ed\", \"actor\": \"phase7c3-reconcile-apply\", \"after\": {\"days_until_expiry\": 400, \"expiry_date\": \"2027-08-16\"}, \"before\": {\"expiry_date\": null, \"status\": \"received\"}, \"company_code\": \"P7C4STG01\", \"decision\": \"applied\", \"docu"
+    },
+    {
+      "label": "A4_w4_redryrun",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "label": "A5_idempotent_dryrun_empty",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "label": "A5_idempotent_apply_zero",
+      "ok": true,
+      "detail": "{\"applied\": 0, \"canary\": {\"document_type\": \"civil_id\", \"employee_sample_id\": \"emp_b0e7e0b9775b\"}, \"company_code\": \"P7C4STG01\", \"dry_run_planned_writes\": 0, \"failed\": 0, \"max_writes\": 1, \"mode\": \"apply"
+    },
+    {
+      "label": "B5_setup_two_plans",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "label": "B5_max_writes_exceeded",
+      "ok": true,
+      "detail": "max-writes exceeded: filtered plan has 2 events > max-writes=1\n"
+    },
+    {
+      "label": "B1_missing_env_gate",
+      "ok": true,
+      "detail": "missing env gate: WATHEFNI_RECONCILE_APPLY=1 required for apply\n"
+    },
+    {
+      "label": "B2_wrong_token",
+      "ok": true,
+      "detail": "wrong apply token\n"
+    },
+    {
+      "label": "B3_wrong_plan_hash",
+      "ok": true,
+      "detail": "wrong plan hash\n"
+    },
+    {
+      "label": "B4_missing_confirm_flags",
+      "ok": true,
+      "detail": "missing confirm flag: --i-understand-writes\n"
+    },
+    {
+      "label": "B4b_refuse_ALL",
+      "ok": true,
+      "detail": "refusing broad ALL-company run\n"
+    },
+    {
+      "label": "B6_alias_no_merge",
+      "ok": true,
+      "detail": "map=1 merge=0"
+    },
+    {
+      "label": "B7_older_expiry_overwrite_blocked",
+      "ok": true,
+      "detail": "expiry_older_than_existing"
+    },
+    {
+      "label": "B8_null_overwrite_blocked",
+      "ok": true,
+      "detail": "expiry_candidate_null"
+    },
+    {
+      "label": "B9_refuse_staging_WATHEFNI",
+      "ok": true,
+      "detail": "refusing apply on forbidden company WATHEFNI (Phase 7C.4 throwaway only)\n"
+    },
+    {
+      "label": "B10_refuse_production_dsn",
+      "ok": true,
+      "detail": "refusing production DSN for apply (Phase 7C.4)\n"
+    },
+    {
+      "label": "scope_only_P7C4STG01",
+      "ok": true,
+      "detail": "other_baseline=19 other_final=19 local={'employees': 8, 'employee_documents': 8, 'compliance_documents': 7, 'file_registry': 8, 'onboarding_items': 7}"
+    },
+    {
+      "label": "F1_protected_flags_off",
+      "ok": true,
+      "detail": "WATHEFNI_EMPLOYEE_APP=off; WATHEFNI_COMPANY_CHANNEL_ACCOUNTS=off"
+    }
+  ]
+}

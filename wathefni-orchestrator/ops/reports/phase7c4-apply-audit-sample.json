@@ -1,0 +1,37 @@
+{
+  "action": "mark_onboarding_received",
+  "actor": "phase7c3-reconcile-apply",
+  "after": {
+    "status": "received"
+  },
+  "before": {
+    "status": "pending"
+  },
+  "company_code": "P7C4STG01",
+  "decision": "applied",
+  "document_type": "civil_id",
+  "drift_class": "employee_doc_without_received_item",
+  "error": null,
+  "event_id": "d0f61bbb-5ca7-48c2-88b2-907cdcefeec9",
+  "guards": {
+    "alias_merge": false,
+    "expiry_rule": null,
+    "no_delete": true
+  },
+  "host": "srv1419988",
+  "mode": "apply",
+  "natural_key": {
+    "item_id": "civil_id",
+    "sample_id": "emp_b0e7e0b9775b"
+  },
+  "op": "UPDATE",
+  "operator": "root",
+  "plan_event_id": "6a8f63a3-edfa-4b7d-8b97-cdd2b7cdfa10",
+  "plan_hash": "ec9863a34bc266c248955814f3f931727936bc159e1dd5f0e18cb563b25315fa",
+  "rowcount": 1,
+  "sample_id": "emp_b0e7e0b9775b",
+  "schema_version": 1,
+  "skip_reason": null,
+  "table": "onboarding_items",
+  "ts": "2026-07-12T06:57:59Z"
+}
