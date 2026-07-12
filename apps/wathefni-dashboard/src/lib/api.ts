@@ -722,12 +722,37 @@ export function updateEmployee(
   )
 }
 
-// Mark an employee as left (inactive) or reactivate them. Never deletes history.
-export function setEmployeeStatus(access: DashboardAccess, employeeKey: string, status: 'left' | 'active') {
-  return request<{ ok: boolean; status: string; employment_status: string; employee: PosthireEmployee | null }>(
+// Mark an employee as left (inactive) or reactivate them through the durable,
+// idempotent status-change workflow. Never deletes history.
+export function setEmployeeStatus(
+  access: DashboardAccess,
+  employeeKey: string,
+  body: {
+    status: 'left' | 'active'
+    reason: string
+    idempotency_key: string
+    expected_status: 'left' | 'active'
+    expected_updated_at: string
+    approver_user_id: string
+    approval_reference: string
+    approval_mode: 'separate_approval' | 'self_approved_internal_canary'
+  },
+) {
+  return request<{
+    ok: boolean
+    committed: boolean
+    verified: boolean
+    status: 'updated' | 'committed_verification_pending'
+    operator_verification_required: boolean
+    result_id: string
+    change_id: string
+    idempotency_key: string
+    employment_status: string
+    employee: PosthireEmployee | null
+  }>(
     `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/status`,
     access,
-    { method: 'POST', body: JSON.stringify({ status }) },
+    { method: 'POST', body: JSON.stringify(body) },
   )
 }
 

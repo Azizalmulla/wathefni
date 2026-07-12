@@ -31,7 +31,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 from xml.etree import ElementTree
 
 import psycopg2
@@ -2551,6 +2551,31 @@ def _ensure_schema_impl() -> None:
       last_seen_at timestamptz NOT NULL DEFAULT now(),
       UNIQUE (company_code, push_token)
     );
+    CREATE TABLE IF NOT EXISTS employee_status_changes (
+      change_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      company_code text NOT NULL,
+      employee_key text NOT NULL,
+      idempotency_key text NOT NULL,
+      request_hash text NOT NULL,
+      previous_status text NOT NULL,
+      requested_status text NOT NULL,
+      previous_updated_at timestamptz NOT NULL,
+      resulting_updated_at timestamptz NOT NULL,
+      requester_user_id uuid NOT NULL REFERENCES dashboard_users(user_id),
+      approver_user_id uuid NOT NULL REFERENCES dashboard_users(user_id),
+      reason text NOT NULL,
+      approval_reference text NOT NULL,
+      approval_mode text NOT NULL,
+      changed_fields jsonb NOT NULL DEFAULT '[]'::jsonb,
+      action_result_id uuid NOT NULL UNIQUE REFERENCES action_results(result_id),
+      operation_status text NOT NULL DEFAULT 'committed',
+      verification_status text NOT NULL DEFAULT 'pending',
+      verification_error text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      committed_at timestamptz NOT NULL DEFAULT now(),
+      verified_at timestamptz,
+      UNIQUE (company_code, idempotency_key)
+    );
     CREATE TABLE IF NOT EXISTS employee_notification_reads (
       company_code text NOT NULL,
       employee_key text NOT NULL,
@@ -2562,6 +2587,11 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_employee_app_invites_employee ON employee_app_invites(company_code, employee_key, status);
     CREATE INDEX IF NOT EXISTS idx_employee_sessions_employee ON employee_sessions(company_code, employee_key, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_employee_push_tokens_employee ON employee_push_tokens(company_code, employee_key, active);
+    CREATE INDEX IF NOT EXISTS idx_employee_status_changes_employee
+      ON employee_status_changes(company_code, employee_key, committed_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_employee_status_changes_verification
+      ON employee_status_changes(verification_status, committed_at)
+      WHERE verification_status <> 'verified';
     CREATE INDEX IF NOT EXISTS idx_employee_notification_reads_employee ON employee_notification_reads(employee_key, message_id);
     INSERT INTO octopus_conversation_health
     (account_id, phone, conversation_id, source, status, last_success_at, last_failure_at,
@@ -36492,7 +36522,7 @@ def write_admin_audit(
     target: str | None = None,
     details: dict[str, Any] | None = None,
     status: str = "completed",
-) -> None:
+) -> dict[str, Any]:
     company = context.get("company_code")
     raw_payload = {
         "action": {"type": action_type, "target_type": target_type, "target": target},
@@ -36521,6 +36551,7 @@ def write_admin_audit(
         (turn_id, action_id, action_type, status, result, final_reply,
          company_code, actor_user_id, actor_email, actor_phone, actor_role)
         VALUES (NULL,NULL,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        RETURNING result_id, created_at
         """,
         (
             action_type,
@@ -36534,6 +36565,7 @@ def write_admin_audit(
             actor.get("actor_role"),
         ),
     )
+    return json_safe(dict(cur.fetchone()))
 
 
 def record_admin_audit(
@@ -47006,26 +47038,43 @@ def set_employee_employment_status(company_code: str, employee_key: str, status:
     """Mark an employee active or left. Never deletes — history is preserved and
     the row stays searchable. Returns {status, ...}."""
     company = (company_code or "").upper()
-    target = "left" if str(status or "").strip().lower() in {"left", "inactive", "terminated"} else "active"
+    target = str(status or "").strip().lower()
+    if target not in {"active", "left"}:
+        return {"status": "invalid_status"}
     with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "UPDATE employees SET employment_status=%s, updated_at=now() WHERE employee_key=%s AND company_code=%s RETURNING *",
-                (target, employee_key, company),
-            )
-            row = cur.fetchone()
-            if not row:
-                conn.commit()
-                return {"status": "not_found"}
-            updated = dict(row)
-        conn.commit()
-    # Hard kill switch: offboarding instantly revokes Employee App sessions and
-    # deactivates push tokens so a terminated employee loses access immediately.
-    if target == "left":
         try:
-            revoke_employee_app_access(company, employee_key, reason="offboarded")
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT employee_key FROM employees WHERE employee_key=%s AND company_code=%s FOR UPDATE",
+                    (employee_key, company),
+                )
+                if not cur.fetchone():
+                    return {"status": "not_found"}
+                cur.execute(
+                    "UPDATE employees SET employment_status=%s, updated_at=now() WHERE employee_key=%s AND company_code=%s RETURNING *",
+                    (target, employee_key, company),
+                )
+                updated = dict(cur.fetchone())
+                if target == "left":
+                    cur.execute(
+                        """
+                        UPDATE employee_sessions
+                        SET status='revoked', refresh_hash=NULL, revoked_at=now(),
+                            revoked_reason='offboarded',
+                            expires_at=LEAST(expires_at, now()),
+                            refresh_expires_at=LEAST(refresh_expires_at, now())
+                        WHERE company_code=%s AND employee_key=%s AND status='active'
+                        """,
+                        (company, employee_key),
+                    )
+                    cur.execute(
+                        "UPDATE employee_push_tokens SET active=false, updated_at=now() WHERE company_code=%s AND employee_key=%s AND active IS TRUE",
+                        (company, employee_key),
+                    )
+            conn.commit()
         except Exception:
-            logger.warning("failed to revoke employee app access on offboarding for %s", employee_key, exc_info=True)
+            conn.rollback()
+            raise
     return {"status": "ok", "employment_status": target, "employee_key": employee_key, "employee": posthire_employee_card(updated)}
 
 
@@ -47127,7 +47176,307 @@ def dashboard_posthire_update_employee(
 
 
 class DashboardEmployeeStatus(BaseModel):
-    status: str
+    status: Literal["active", "left"]
+    reason: str = Field(min_length=3, max_length=500)
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    expected_status: Literal["active", "left"]
+    expected_updated_at: datetime
+    approver_user_id: str = Field(min_length=1, max_length=64)
+    approval_reference: str = Field(min_length=3, max_length=200)
+    approval_mode: Literal["separate_approval", "self_approved_internal_canary"]
+
+
+def _canonical_employee_status(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    return "left" if normalized == "left" else "active"
+
+
+def _employee_status_request_hash(
+    company_code: str,
+    employee_key: str,
+    request: DashboardEmployeeStatus,
+    requester_user_id: str,
+    approver_user_id: str,
+) -> str:
+    payload = {
+        "company_code": str(company_code or "").upper(),
+        "employee_key": str(employee_key),
+        "status": request.status,
+        "reason": request.reason.strip(),
+        "idempotency_key": request.idempotency_key.strip(),
+        "expected_status": request.expected_status,
+        "expected_updated_at": request.expected_updated_at.isoformat(),
+        "requester_user_id": requester_user_id,
+        "approver_user_id": approver_user_id,
+        "approval_reference": request.approval_reference.strip(),
+        "approval_mode": request.approval_mode,
+    }
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _employee_status_change_response(change: dict[str, Any], employee: dict[str, Any] | None = None) -> dict[str, Any]:
+    verification_status = str(change.get("verification_status") or "pending")
+    verified = verification_status == "verified"
+    return {
+        "ok": True,
+        "committed": True,
+        "verified": verified,
+        "status": "updated" if verified else "committed_verification_pending",
+        "operator_verification_required": not verified,
+        "result_id": str(change.get("action_result_id") or ""),
+        "change_id": str(change.get("change_id") or ""),
+        "idempotency_key": str(change.get("idempotency_key") or ""),
+        "employment_status": str(change.get("requested_status") or ""),
+        "previous_status": str(change.get("previous_status") or ""),
+        "previous_updated_at": change.get("previous_updated_at"),
+        "resulting_updated_at": change.get("resulting_updated_at"),
+        "changed_fields": list(change.get("changed_fields") or []),
+        "verification_status": verification_status,
+        "employee": posthire_employee_card(employee) if employee else None,
+    }
+
+
+def _verify_committed_employee_status_change(
+    company_code: str,
+    idempotency_key: str,
+    fallback_change: dict[str, Any],
+) -> dict[str, Any]:
+    company = str(company_code or "").upper()
+    key = str(idempotency_key or "")
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM employee_status_changes WHERE company_code=%s AND idempotency_key=%s LIMIT 1",
+                    (company, key),
+                )
+                change = dict(cur.fetchone() or fallback_change)
+                if str(change.get("verification_status") or "") == "verified":
+                    cur.execute(
+                        "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+                        (company, change["employee_key"]),
+                    )
+                    return _employee_status_change_response(change, dict(cur.fetchone() or {}))
+                cur.execute(
+                    "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+                    (company, change["employee_key"]),
+                )
+                employee = dict(cur.fetchone() or {})
+                verified = bool(employee)
+                verified = verified and _canonical_employee_status(employee.get("employment_status")) == change["requested_status"]
+                verified = verified and employee.get("updated_at") == change.get("resulting_updated_at")
+                if change["requested_status"] == "left":
+                    cur.execute(
+                        "SELECT count(*) AS n FROM employee_sessions WHERE company_code=%s AND employee_key=%s AND status='active' AND expires_at > now()",
+                        (company, change["employee_key"]),
+                    )
+                    verified = verified and int(cur.fetchone()["n"]) == 0
+                if verified:
+                    cur.execute(
+                        """
+                        UPDATE employee_status_changes
+                        SET verification_status='verified', verification_error=NULL, verified_at=now()
+                        WHERE change_id=%s
+                        RETURNING *
+                        """,
+                        (change["change_id"],),
+                    )
+                    change = dict(cur.fetchone())
+                else:
+                    cur.execute(
+                        """
+                        UPDATE employee_status_changes
+                        SET verification_status='pending',
+                            verification_error='independent_readback_mismatch'
+                        WHERE change_id=%s
+                        RETURNING *
+                        """,
+                        (change["change_id"],),
+                    )
+                    change = dict(cur.fetchone())
+            conn.commit()
+        if not verified:
+            logger.error(
+                "employee status change committed but verification is pending result_id=%s",
+                change.get("action_result_id"),
+            )
+        return _employee_status_change_response(change, employee)
+    except Exception:
+        logger.error(
+            "employee status change committed but independent verification could not complete result_id=%s",
+            fallback_change.get("action_result_id"),
+            exc_info=True,
+        )
+        return _employee_status_change_response({**fallback_change, "verification_status": "pending"})
+
+
+def transition_employee_employment_status(
+    context: dict[str, Any],
+    employee_key: str,
+    request: DashboardEmployeeStatus,
+) -> dict[str, Any]:
+    company = str(context.get("company_code") or "").upper()
+    requester_user_id = str(context.get("actor_user_id") or "").strip()
+    requested_approver = str(request.approver_user_id or "").strip()
+    approver_user_id = requester_user_id if requested_approver == "self" else requested_approver
+    idempotency_key = request.idempotency_key.strip()
+    request_hash = _employee_status_request_hash(
+        company,
+        employee_key,
+        request,
+        requester_user_id,
+        approver_user_id,
+    )
+    committed_change: dict[str, Any]
+
+    with db_connect() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR SHARE",
+                    (company, requester_user_id),
+                )
+                requester = dict(cur.fetchone() or {})
+                requester_permissions = dashboard_effective_permissions_for_user(requester, cur=cur) if requester else []
+                if not _normal_dashboard_operator(requester) or "employees.manage" not in requester_permissions:
+                    raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
+
+                if approver_user_id == requester_user_id:
+                    approver = requester
+                    approver_permissions = requester_permissions
+                    if request.approval_mode != "self_approved_internal_canary":
+                        raise HTTPException(status_code=422, detail={"error": "invalid_approval_mode", "message": "Self-approval is limited to the approved internal canary."})
+                else:
+                    if request.approval_mode != "separate_approval":
+                        raise HTTPException(status_code=422, detail={"error": "invalid_approval_mode", "message": "This approval must name a separate approver."})
+                    cur.execute(
+                        "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR SHARE",
+                        (company, approver_user_id),
+                    )
+                    approver = dict(cur.fetchone() or {})
+                    approver_permissions = dashboard_effective_permissions_for_user(approver, cur=cur) if approver else []
+                if not _normal_dashboard_operator(approver) or "employees.status.approve" not in approver_permissions:
+                    raise HTTPException(status_code=403, detail={"error": "approver_permission_denied", "message": "The approver is not authorized for employee status changes."})
+
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+                    (f"employee-status:{company}:{idempotency_key}",),
+                )
+                cur.execute(
+                    "SELECT * FROM employee_status_changes WHERE company_code=%s AND idempotency_key=%s FOR UPDATE",
+                    (company, idempotency_key),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    committed_change = dict(existing)
+                    if committed_change["request_hash"] != request_hash:
+                        raise HTTPException(status_code=409, detail={"error": "idempotency_conflict", "message": "This request key was already used for a different status change."})
+                else:
+                    cur.execute(
+                        "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s FOR UPDATE",
+                        (company, str(employee_key)),
+                    )
+                    before = dict(cur.fetchone() or {})
+                    if not before:
+                        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+                    previous_status = _canonical_employee_status(before.get("employment_status"))
+                    if previous_status != request.expected_status or before.get("updated_at") != request.expected_updated_at:
+                        raise HTTPException(status_code=409, detail={"error": "employee_version_conflict", "message": "This employee changed after the status form was opened."})
+                    if previous_status == request.status and str(before.get("employment_status") or "").strip().lower() == request.status:
+                        raise HTTPException(status_code=409, detail={"error": "employee_status_unchanged", "message": "This employee already has that status."})
+
+                    cur.execute(
+                        """
+                        UPDATE employees
+                        SET employment_status=%s, updated_at=clock_timestamp()
+                        WHERE company_code=%s AND employee_key=%s
+                        RETURNING *
+                        """,
+                        (request.status, company, str(employee_key)),
+                    )
+                    after = dict(cur.fetchone())
+                    changed_fields = sorted(
+                        key for key in set(before) | set(after)
+                        if before.get(key) != after.get(key)
+                    )
+                    if set(changed_fields) != {"employment_status", "updated_at"}:
+                        raise RuntimeError("employee_status_changed_unapproved_fields")
+                    if _canonical_employee_status(after.get("employment_status")) != request.status:
+                        raise RuntimeError("employee_status_transaction_validation_failed")
+
+                    if request.status == "left":
+                        cur.execute(
+                            """
+                            UPDATE employee_sessions
+                            SET status='revoked', refresh_hash=NULL, revoked_at=now(),
+                                revoked_reason='offboarded',
+                                expires_at=LEAST(expires_at, now()),
+                                refresh_expires_at=LEAST(refresh_expires_at, now())
+                            WHERE company_code=%s AND employee_key=%s AND status='active'
+                            """,
+                            (company, str(employee_key)),
+                        )
+                        cur.execute(
+                            "UPDATE employee_push_tokens SET active=false, updated_at=now() WHERE company_code=%s AND employee_key=%s AND active IS TRUE",
+                            (company, str(employee_key)),
+                        )
+
+                    audit = write_admin_audit(
+                        cur,
+                        _permission_operator_context(requester, requester_permissions),
+                        "employee_marked_left" if request.status == "left" else "employee_reactivated",
+                        summary="Changed an employee's authoritative employment status.",
+                        target_type="employee",
+                        target=str(employee_key),
+                        details={
+                            "previous_status": previous_status,
+                            "requested_status": request.status,
+                            "requester_user_id": requester_user_id,
+                            "approver_user_id": approver_user_id,
+                            "reason": request.reason.strip(),
+                            "approval_reference": request.approval_reference.strip(),
+                            "approval_mode": request.approval_mode,
+                            "changed_fields": changed_fields,
+                            "idempotency_key": idempotency_key,
+                        },
+                    )
+                    cur.execute(
+                        """
+                        INSERT INTO employee_status_changes
+                          (company_code, employee_key, idempotency_key, request_hash,
+                           previous_status, requested_status, previous_updated_at,
+                           resulting_updated_at, requester_user_id, approver_user_id,
+                           reason, approval_reference, approval_mode, changed_fields,
+                           action_result_id, operation_status, verification_status)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                                'committed','pending')
+                        RETURNING *
+                        """,
+                        (
+                            company,
+                            str(employee_key),
+                            idempotency_key,
+                            request_hash,
+                            previous_status,
+                            request.status,
+                            before["updated_at"],
+                            after["updated_at"],
+                            requester_user_id,
+                            approver_user_id,
+                            request.reason.strip(),
+                            request.approval_reference.strip(),
+                            request.approval_mode,
+                            Json(changed_fields),
+                            audit["result_id"],
+                        ),
+                    )
+                    committed_change = dict(cur.fetchone())
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+    return _verify_committed_employee_status_change(company, idempotency_key, committed_change)
 
 
 @app.post("/dashboard/posthire/employees/{employee_key}/status")
@@ -47136,23 +47485,8 @@ def dashboard_posthire_set_employee_status(
     request: DashboardEmployeeStatus,
     context: dict[str, Any] = Depends(dashboard_context),
 ):
-    company = require_employee_roster_admin(context, "employees.manage")
-    if not dashboard_context_has_permission(context, "employees.status.approve"):
-        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
-    target = "left" if str(request.status or "").strip().lower() in {"left", "inactive", "terminated"} else "active"
-    result = set_employee_employment_status(company, employee_key, target)
-    if result["status"] == "not_found":
-        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
-    record_admin_audit(
-        context,
-        "employee_marked_left" if target == "left" else "employee_reactivated",
-        summary=(f"Marked {result.get('employee', {}).get('name') or employee_key} as left."
-                 if target == "left" else f"Reactivated {result.get('employee', {}).get('name') or employee_key}."),
-        target_type="employee",
-        target=employee_key,
-        details={"employment_status": target},
-    )
-    return {"ok": True, "status": "updated", "employment_status": target, "employee": result.get("employee")}
+    require_employee_roster_admin(context, "employees.manage")
+    return transition_employee_employment_status(context, employee_key, request)
 
 
 def _parse_employee_import_file(raw: bytes, filename: str) -> tuple[list[dict[str, str]], str | None]:

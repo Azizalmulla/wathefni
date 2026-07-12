@@ -1258,6 +1258,10 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   const changeStatus = useCallback(
     async (next: 'left' | 'active') => {
       if (!emp) return
+      if (!emp.updated_at) {
+        onNotice('Refresh this employee before changing their status.', 'error')
+        return
+      }
       if (next === 'left') {
         const ok = await confirm({
           title: 'Mark this employee as left?',
@@ -1267,10 +1271,28 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
         })
         if (!ok) return
       }
+      const reason = window.prompt('Required reason for this employment-status change:')?.trim()
+      if (!reason) return
+      const approvalReference = window.prompt('Approval reference for this internal-canary change:')?.trim()
+      if (!approvalReference) return
+      const idempotencyKey = globalThis.crypto?.randomUUID?.() || `status-${Date.now()}-${Math.random().toString(16).slice(2)}`
       setStatusBusy(true)
       try {
-        await setEmployeeStatus(access, emp.employee_key, next)
-        onNotice(next === 'left' ? `${emp.name} was marked as left.` : `${emp.name} was reactivated.`, 'success')
+        const result = await setEmployeeStatus(access, emp.employee_key, {
+          status: next,
+          reason,
+          idempotency_key: idempotencyKey,
+          expected_status: hasLeft ? 'left' : 'active',
+          expected_updated_at: emp.updated_at,
+          approver_user_id: 'self',
+          approval_reference: approvalReference,
+          approval_mode: 'self_approved_internal_canary',
+        })
+        if (result.verified) {
+          onNotice(next === 'left' ? `${emp.name} was marked as left.` : `${emp.name} was reactivated.`, 'success')
+        } else {
+          onNotice(`The change committed as ${result.result_id}, but independent verification is still pending.`, 'info')
+        }
         await reload()
       } catch (err) {
         const issue = accessIssueFromError(err)
@@ -1283,7 +1305,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
         setStatusBusy(false)
       }
     },
-    [access, emp, confirm, onNotice, onAccessIssue, reload],
+    [access, emp, hasLeft, confirm, onNotice, onAccessIssue, reload],
   )
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
