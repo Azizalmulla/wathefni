@@ -33,6 +33,7 @@ import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import {
   cancelShift,
   createEmployee,
+  createEmployeeAppHandoff,
   DashboardApiError,
   type EmployeeImportResult,
   getHrTasks,
@@ -733,6 +734,37 @@ function EditEmployeeModal({ access, employee, onClose, onNotice, onSaved }: {
   )
 }
 
+type ActivationHandoff = {
+  invite_id: string
+  task_id: string
+  expires_at: string
+  activation_code: string
+}
+
+export function ActivationHandoffModal({ handoff, onClose }: { handoff: ActivationHandoff; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
+        <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">One-time activation handoff</p>
+        <p className="mt-2 text-[13px] leading-6 text-subtle/95">
+          Show this code directly to the employee. Wathefni does not save or distribute the displayed value. Closing this window clears it.
+        </p>
+        <div className="mt-5 rounded-2xl border border-line/70 bg-canvas/70 px-5 py-6 text-center">
+          <p className="font-mono text-3xl font-semibold tracking-[0.35em] text-text" data-testid="activation-handoff-code">
+            {handoff.activation_code}
+          </p>
+        </div>
+        <p className="mt-3 text-[12px] leading-5 text-subtle/80">
+          Expires {formatDate(handoff.expires_at)}. If this window is lost, explicitly supersede invite {handoff.invite_id} and issue a new code.
+        </p>
+        <div className="mt-6 flex justify-end">
+          <Button size="sm" onClick={onClose}>Close and clear</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ImportSummaryRow({ label, rows, tone }: { label: string; rows: EmployeeImportResult['results']['created']; tone: 'success' | 'warning' | 'danger' | 'muted' }) {
   if (!rows.length) return null
   const toneClass = tone === 'success'
@@ -1249,11 +1281,18 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   const canPayrollManage = can(permissions, 'payroll.manage', role)
   const canManageRoster = can(permissions, 'employees.manage', role)
   const canApproveStatus = canManageRoster && can(permissions, 'employees.status.approve', role)
+  const canIssueActivation = canManageRoster && canOnboardingManage
   const [showEdit, setShowEdit] = useState(false)
   const [statusBusy, setStatusBusy] = useState(false)
+  const [activationBusy, setActivationBusy] = useState(false)
+  const [activationHandoff, setActivationHandoff] = useState<ActivationHandoff | null>(null)
 
   const emp = data?.employee
   const hasLeft = String(emp?.employment_status || 'active').toLowerCase() === 'left'
+
+  useEffect(() => {
+    setActivationHandoff(null)
+  }, [employeeKey])
 
   const changeStatus = useCallback(
     async (next: 'left' | 'active') => {
@@ -1307,6 +1346,50 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
     },
     [access, emp, hasLeft, confirm, onNotice, onAccessIssue, reload],
   )
+
+  const issueActivationHandoff = useCallback(async () => {
+    if (!emp) return
+    const reason = window.prompt('Required reason for this secure activation handoff:')?.trim()
+    if (!reason) return
+    const newKey = () => globalThis.crypto?.randomUUID?.() || `invite-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const create = (supersedeInviteId?: string) => createEmployeeAppHandoff(access, emp.employee_key, {
+      delivery_mode: 'hr_task_only',
+      idempotency_key: newKey(),
+      reason: supersedeInviteId ? `${reason} (explicit supersede and reissue)` : reason,
+      ...(supersedeInviteId ? { supersede_invite_id: supersedeInviteId } : {}),
+    })
+    setActivationBusy(true)
+    try {
+      let result
+      try {
+        result = await create()
+      } catch (err) {
+        if (!(err instanceof DashboardApiError) || err.code !== 'pending_activation_invite_exists') throw err
+        const detail = typeof err.detail === 'object' && err.detail ? err.detail as Record<string, unknown> : {}
+        const pendingInviteId = String(detail.pending_invite_id || '')
+        if (!pendingInviteId) throw err
+        const approved = await confirm({
+          title: 'Supersede the pending activation invite?',
+          body: 'The previous code will stop working. A new one-time code will be shown once in this window.',
+          confirmLabel: 'Supersede and reissue',
+          destructive: true,
+        })
+        if (!approved) return
+        result = await create(pendingInviteId)
+      }
+      setActivationHandoff(result)
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue(issue)
+        return
+      }
+      onNotice(friendlyError(err, 'We couldn’t create the secure activation handoff.'), 'error')
+    } finally {
+      setActivationBusy(false)
+    }
+  }, [access, confirm, emp, onAccessIssue, onNotice])
+
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
   const nextActionsEnabled = Boolean(data?.next_actions_enabled)
@@ -1354,6 +1437,9 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
       {showEdit && emp ? (
         <EditEmployeeModal access={access} employee={emp} onClose={() => setShowEdit(false)} onNotice={onNotice} onSaved={() => void reload()} />
       ) : null}
+      {activationHandoff ? (
+        <ActivationHandoffModal handoff={activationHandoff} onClose={() => setActivationHandoff(null)} />
+      ) : null}
       <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
           ← Back to directory
@@ -1396,6 +1482,11 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                     <Button variant="secondary" size="sm" disabled={statusBusy} onClick={() => setShowEdit(true)}>
                       Edit
                     </Button>
+                    {canIssueActivation && !hasLeft ? (
+                      <Button variant="secondary" size="sm" disabled={activationBusy} onClick={() => void issueActivationHandoff()}>
+                        {activationBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Activation handoff
+                      </Button>
+                    ) : null}
                     {canApproveStatus ? (
                       hasLeft ? (
                         <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('active')}>

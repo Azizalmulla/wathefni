@@ -756,6 +756,32 @@ export function setEmployeeStatus(
   )
 }
 
+export function createEmployeeAppHandoff(
+  access: DashboardAccess,
+  employeeKey: string,
+  body: {
+    delivery_mode: 'hr_task_only'
+    idempotency_key: string
+    reason: string
+    supersede_invite_id?: string
+  },
+) {
+  return request<{
+    ok: boolean
+    invite_id: string
+    task_id: string
+    audit_result_id: string
+    employee_key: string
+    expires_at: string
+    delivery_mode: 'hr_task_only'
+    activation_code: string
+  }>(
+    `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/app-invite`,
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
+}
+
 export function getEmployeeProfile(access: DashboardAccess, employeeKey: string) {
   return request<EmployeeProfileResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}`, access)
 }

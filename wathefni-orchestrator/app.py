@@ -39,7 +39,7 @@ import psycopg2.pool
 import puremagic
 from psycopg2.extras import RealDictCursor, Json
 from pydantic import BaseModel, Field
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 
 from module_catalog import (
@@ -1482,6 +1482,8 @@ def _ensure_schema_impl() -> None:
       status text NOT NULL DEFAULT 'open',
       priority text NOT NULL DEFAULT 'normal',
       related_message_id uuid,
+      related_invite_id uuid,
+      assigned_to_user_id uuid,
       metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
       resolved_by_phone text,
       resolved_at timestamptz,
@@ -2201,6 +2203,13 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS company_code text;
     ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS employment_status text;
     ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS device_user_id text;
+    ALTER TABLE IF EXISTS employee_app_invites ADD COLUMN IF NOT EXISTS delivery_mode text NOT NULL DEFAULT 'external_ladder';
+    ALTER TABLE IF EXISTS employee_app_invites ADD COLUMN IF NOT EXISTS handoff_task_id uuid;
+    ALTER TABLE IF EXISTS employee_app_invites ADD COLUMN IF NOT EXISTS idempotency_key text;
+    ALTER TABLE IF EXISTS employee_app_invites ADD COLUMN IF NOT EXISTS code_disclosed_at timestamptz;
+    ALTER TABLE IF EXISTS employee_app_invites ADD COLUMN IF NOT EXISTS superseded_by_invite_id uuid;
+    ALTER TABLE IF EXISTS hr_tasks ADD COLUMN IF NOT EXISTS related_invite_id uuid;
+    ALTER TABLE IF EXISTS hr_tasks ADD COLUMN IF NOT EXISTS assigned_to_user_id uuid;
     CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_device_user_id ON employees(company_code, device_user_id) WHERE device_user_id IS NOT NULL AND device_user_id <> '';
     ALTER TABLE IF EXISTS attendance_events ADD COLUMN IF NOT EXISTS import_batch_id uuid;
     CREATE INDEX IF NOT EXISTS idx_attendance_events_import_batch ON attendance_events(import_batch_id) WHERE import_batch_id IS NOT NULL;
@@ -2517,6 +2526,11 @@ def _ensure_schema_impl() -> None:
       expires_at timestamptz NOT NULL,
       redeemed_at timestamptz,
       last_sent_at timestamptz,
+      delivery_mode text NOT NULL DEFAULT 'external_ladder',
+      handoff_task_id uuid,
+      idempotency_key text,
+      code_disclosed_at timestamptz,
+      superseded_by_invite_id uuid,
       metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
@@ -2585,6 +2599,12 @@ def _ensure_schema_impl() -> None:
     );
     CREATE INDEX IF NOT EXISTS idx_employee_app_invites_lookup ON employee_app_invites(company_code, phone, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_employee_app_invites_employee ON employee_app_invites(company_code, employee_key, status);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_employee_app_invites_idempotency
+      ON employee_app_invites(company_code, idempotency_key)
+      WHERE idempotency_key IS NOT NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_hr_tasks_activation_invite
+      ON hr_tasks(company_code, related_invite_id)
+      WHERE related_invite_id IS NOT NULL AND task_type='app_activation_handoff';
     CREATE INDEX IF NOT EXISTS idx_employee_sessions_employee ON employee_sessions(company_code, employee_key, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_employee_push_tokens_employee ON employee_push_tokens(company_code, employee_key, active);
     CREATE INDEX IF NOT EXISTS idx_employee_status_changes_employee
@@ -46745,9 +46765,208 @@ def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dic
 
 # --- Dashboard side: HR provisions an app invite ----------------------------
 
+class DashboardEmployeeAppInviteRequest(BaseModel):
+    delivery_mode: Literal["hr_task_only"]
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    reason: str = Field(min_length=3, max_length=500)
+    supersede_invite_id: str | None = Field(default=None, max_length=64)
+
+
+def create_hr_task_only_employee_app_invite(
+    context: dict[str, Any],
+    employee_key: str,
+    request: DashboardEmployeeAppInviteRequest,
+) -> tuple[dict[str, Any], str]:
+    """Create one invite + metadata-only HR task + audit in one transaction.
+
+    The raw code exists only in this stack frame and the caller's response.
+    Replaying an idempotency key never rediscloses it.
+    """
+    company = str(context.get("company_code") or "").upper()
+    requester_user_id = str(context.get("actor_user_id") or "").strip()
+    idempotency_key = request.idempotency_key.strip()
+    reason_text = request.reason.strip()
+    requested_supersede = str(request.supersede_invite_id or "").strip()
+    invite_id = str(uuid.uuid4())
+    code = _app_code_generate()
+    expires = now_utc() + timedelta(hours=_EMPLOYEE_APP_INVITE_TTL_HOURS)
+
+    with db_connect() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR SHARE",
+                    (company, requester_user_id),
+                )
+                requester = dict(cur.fetchone() or {})
+                permissions = dashboard_effective_permissions_for_user(requester, cur=cur) if requester else []
+                if (
+                    not _normal_dashboard_operator(requester)
+                    or "employees.manage" not in permissions
+                    or "onboarding.manage" not in permissions
+                ):
+                    raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
+
+                allowed, denied_reason = _employee_app_company_gate(cur, company)
+                if not allowed:
+                    raise EmployeeAppInviteDenied(denied_reason or "company_not_eligible")
+                cur.execute(
+                    "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s FOR UPDATE",
+                    (company, str(employee_key)),
+                )
+                employee = dict(cur.fetchone() or {})
+                if not employee:
+                    raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+                phone = digits(employee.get("phone"))
+                if not phone:
+                    raise HTTPException(status_code=400, detail={"error": "employee_phone_missing", "message": "This employee needs a phone number before they can be invited."})
+                if not _employee_app_employee_eligible(employee):
+                    raise EmployeeAppInviteDenied("employee_not_eligible")
+
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+                    (f"employee-app-handoff:{company}:{employee_key}",),
+                )
+                cur.execute(
+                    "SELECT invite_id FROM employee_app_invites WHERE company_code=%s AND idempotency_key=%s LIMIT 1",
+                    (company, idempotency_key),
+                )
+                disclosed = cur.fetchone()
+                if disclosed:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={
+                            "error": "activation_code_already_disclosed",
+                            "message": "This response cannot be replayed. Supersede the invite and issue a new code if the original response was lost.",
+                            "invite_id": str(disclosed["invite_id"]),
+                        },
+                    )
+                cur.execute(
+                    """
+                    SELECT invite_id
+                    FROM employee_app_invites
+                    WHERE company_code=%s AND employee_key=%s AND status='pending'
+                    ORDER BY created_at DESC
+                    FOR UPDATE
+                    """,
+                    (company, str(employee_key)),
+                )
+                pending_ids = [str(row["invite_id"]) for row in cur.fetchall()]
+                if pending_ids and requested_supersede not in pending_ids:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={
+                            "error": "pending_activation_invite_exists",
+                            "message": "A pending activation handoff already exists. Explicitly supersede it to issue a new code.",
+                            "pending_invite_id": pending_ids[0],
+                        },
+                    )
+                if requested_supersede and requested_supersede not in pending_ids:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={"error": "supersede_invite_mismatch", "message": "The invite selected for supersession is no longer pending."},
+                    )
+                if requested_supersede:
+                    cur.execute(
+                        """
+                        UPDATE employee_app_invites
+                        SET status='superseded', superseded_by_invite_id=%s, updated_at=now()
+                        WHERE company_code=%s AND employee_key=%s AND invite_id=%s AND status='pending'
+                        """,
+                        (invite_id, company, str(employee_key), requested_supersede),
+                    )
+
+                cur.execute(
+                    """
+                    INSERT INTO employee_app_invites
+                      (invite_id, company_code, employee_key, phone, code_hash, status,
+                       created_by_phone, created_by_user_id, expires_at, last_sent_at,
+                       delivery_mode, idempotency_key, code_disclosed_at, metadata)
+                    VALUES (%s,%s,%s,%s,%s,'pending',%s,%s,%s,now(),
+                            'hr_task_only',%s,now(),%s)
+                    RETURNING *
+                    """,
+                    (
+                        invite_id,
+                        company,
+                        str(employee_key),
+                        phone,
+                        _app_code_hash(company, phone, code),
+                        digits(context.get("hr_phone")) or None,
+                        requester_user_id,
+                        expires,
+                        idempotency_key,
+                        Json({"delivery_mode": "hr_task_only", "external_delivery": False}),
+                    ),
+                )
+                invite = dict(cur.fetchone())
+                cur.execute(
+                    """
+                    INSERT INTO hr_tasks
+                      (company_code, employee_key, task_type, source, title, detail,
+                       status, priority, related_invite_id, assigned_to_user_id, metadata)
+                    VALUES (%s,%s,'app_activation_handoff','employee_app',
+                            'Complete secure Employee App activation handoff',
+                            'Use the one-time code shown only in the secure dashboard response. If it was lost, supersede this invite and reissue.',
+                            'open','high',%s,%s,%s)
+                    RETURNING task_id
+                    """,
+                    (
+                        company,
+                        str(employee_key),
+                        invite_id,
+                        requester_user_id,
+                        Json({
+                            "invite_id": invite_id,
+                            "delivery_mode": "hr_task_only",
+                            "contains_activation_secret": False,
+                        }),
+                    ),
+                )
+                task_id = str(cur.fetchone()["task_id"])
+                cur.execute(
+                    "UPDATE employee_app_invites SET handoff_task_id=%s WHERE invite_id=%s",
+                    (task_id, invite_id),
+                )
+                audit = write_admin_audit(
+                    cur,
+                    _permission_operator_context(requester, permissions),
+                    "app_invite_created_hr_task_only",
+                    summary="Created a secure HR-only Employee App activation handoff.",
+                    target_type="employee",
+                    target=str(employee_key),
+                    details={
+                        "invite_id": invite_id,
+                        "task_id": task_id,
+                        "delivery_mode": "hr_task_only",
+                        "external_delivery": False,
+                        "reason": reason_text,
+                        "superseded_invite_id": requested_supersede or None,
+                    },
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+    return {
+        "invite_id": invite_id,
+        "task_id": task_id,
+        "audit_result_id": str(audit["result_id"]),
+        "employee_key": str(employee_key),
+        "expires_at": invite["expires_at"],
+        "delivery_mode": "hr_task_only",
+    }, code
+
+
 @app.post("/dashboard/posthire/employees/{employee_key}/app-invite")
-def dashboard_posthire_app_invite(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
+def dashboard_posthire_app_invite(
+    employee_key: str,
+    request: DashboardEmployeeAppInviteRequest,
+    response: Response,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
     require_entitlement(context, "onboarding", "onboarding.manage")
+    require_employee_roster_admin(context, "employees.manage")
     company = context["company_code"]
     require_active_company(company)
     if not employee_app_enabled():
@@ -46763,21 +46982,17 @@ def dashboard_posthire_app_invite(employee_key: str, context: dict[str, Any] = D
     if not digits(employee.get("phone")):
         raise HTTPException(status_code=400, detail={"error": "employee_phone_missing", "message": "This employee needs a phone number before they can be invited."})
     try:
-        invite, code = create_employee_app_invite(company, employee, created_by_phone=context.get("hr_phone"), created_by_user_id=context.get("actor_user_id"))
+        handoff, code = create_hr_task_only_employee_app_invite(context, employee_key, request)
     except EmployeeAppInviteDenied as exc:
         if exc.reason.startswith("company_"):
             raise HTTPException(status_code=403, detail={"error": exc.reason, "message": "This company workspace is not active."}) from None
         raise HTTPException(status_code=403, detail={"error": "employee_app_invite_denied", "message": "This employee cannot be invited right now."}) from None
-    delivery = deliver_app_activation_code(company, employee, code)
-    record_admin_audit(context, "app_invite_created", summary="Issued an Employee App activation code.", target_type="employee", target=str(employee.get("employee_key")), details={"invite_id": str(invite.get("invite_id")), "delivery_status": delivery.get("delivery_status")})
-    # The raw code is returned to HR (a trusted actor performing this action) so it
-    # can be handed over directly if automated delivery didn't reach the employee.
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
     return json_safe({
         "ok": True,
-        "employee_key": employee.get("employee_key"),
-        "code": code,
-        "expires_at": invite.get("expires_at"),
-        "delivery": {"ok": bool(delivery.get("ok")), "status": delivery.get("delivery_status"), "channel": delivery.get("channel")},
+        **handoff,
+        "activation_code": code,
     })
 
 
