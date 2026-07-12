@@ -1,0 +1,29 @@
+{
+  "apply_enabled": false,
+  "apply_token": "67363fc9aca2c8f0df459ca8",
+  "apply_token_expires_at": "2026-07-12T07:35:04Z",
+  "by_action": {
+    "skip_expiry_older_than_existing": 1,
+    "sync_expiry": 1
+  },
+  "by_drift_class": {
+    "expiry_status_conflicts": 2
+  },
+  "by_skip_reason": {
+    "expiry_older_than_existing": 1
+  },
+  "canary": {
+    "document_type": "civil_id",
+    "employee_sample_id": "emp_2c08123fca34"
+  },
+  "company_code": "WATHEFNI",
+  "event_count": 2,
+  "manual_only": 0,
+  "mode": "dry-run",
+  "no_writes": true,
+  "plan_hash": "c1a37e5f37f2a01c152e0e56ade1f704eec008de6da6ce54d74ecba2eafd1349",
+  "planned_writes": 1,
+  "production_apply_authorized": false,
+  "read_only": true,
+  "skips": 1
+}

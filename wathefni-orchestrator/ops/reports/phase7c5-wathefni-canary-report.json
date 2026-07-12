@@ -1,0 +1,254 @@
+{
+  "action": "mark_onboarding_received",
+  "after": {
+    "civil_id_employee_docs": [
+      {
+        "sample_id": "emp_2c08123fca34",
+        "status": "rejected"
+      }
+    ],
+    "civil_id_onboarding": [
+      {
+        "item_id": "civil_id",
+        "match": false,
+        "sample_id": "emp_fbd61fad4485",
+        "status": "pending",
+        "updated_at": "2026-05-12 21:41:35.233584+00"
+      },
+      {
+        "item_id": "civil_id",
+        "match": true,
+        "sample_id": "emp_2c08123fca34",
+        "status": "received",
+        "updated_at": "2026-07-12 07:05:04.287288+00"
+      },
+      {
+        "item_id": "civil_id",
+        "match": false,
+        "sample_id": "emp_f95cc3108abe",
+        "status": "received",
+        "updated_at": "2026-05-08 22:57:23.632206+00"
+      }
+    ],
+    "counts": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 25,
+      "onboarding_items": 18
+    },
+    "onboarding_fingerprint": "eba63212ab8aa2682a6c634678ba8cc0",
+    "other_company_docs": 0
+  },
+  "apply_audit": [
+    {
+      "action": "mark_onboarding_received",
+      "actor": "phase7c3-reconcile-apply",
+      "after": {
+        "status": "received"
+      },
+      "before": {
+        "status": "pending"
+      },
+      "company_code": "WATHEFNI",
+      "decision": "applied",
+      "document_type": "civil_id",
+      "drift_class": "employee_doc_without_received_item",
+      "error": null,
+      "event_id": "59d1e5a4-9a30-47d7-a6e6-39f9f423e015",
+      "guards": {
+        "alias_merge": false,
+        "expiry_rule": null,
+        "no_delete": true
+      },
+      "host": "srv1419988",
+      "mode": "apply",
+      "natural_key": {
+        "item_id": "civil_id",
+        "sample_id": "emp_2c08123fca34"
+      },
+      "op": "UPDATE",
+      "operator": "root",
+      "plan_event_id": "0b5d35c9-bf90-47f4-85d6-d2fe0d774b16",
+      "plan_hash": "17afe78df32f83a5628b8aff81d5293887f3a702faff1fe0b781917bd85a8361",
+      "rowcount": 1,
+      "sample_id": "emp_2c08123fca34",
+      "schema_version": 1,
+      "skip_reason": null,
+      "table": "onboarding_items",
+      "ts": "2026-07-12T07:05:04Z"
+    }
+  ],
+  "apply_summary": {
+    "applied": 1,
+    "canary": {
+      "document_type": "civil_id",
+      "employee_sample_id": "emp_2c08123fca34"
+    },
+    "company_code": "WATHEFNI",
+    "dry_run_planned_writes": 2,
+    "failed": 0,
+    "max_writes": 1,
+    "mode": "apply",
+    "no_deletes": true,
+    "plan_hash": "17afe78df32f83a5628b8aff81d5293887f3a702faff1fe0b781917bd85a8361",
+    "production_apply_authorized": false,
+    "skipped": 0,
+    "staging_wathefni_canary": true
+  },
+  "before": {
+    "civil_id_employee_docs": [
+      {
+        "sample_id": "emp_2c08123fca34",
+        "status": "rejected"
+      }
+    ],
+    "civil_id_onboarding": [
+      {
+        "item_id": "civil_id",
+        "match": false,
+        "sample_id": "emp_fbd61fad4485",
+        "status": "pending",
+        "updated_at": "2026-05-12 21:41:35.233584+00"
+      },
+      {
+        "item_id": "civil_id",
+        "match": true,
+        "sample_id": "emp_2c08123fca34",
+        "status": "pending",
+        "updated_at": "2026-05-10 15:32:46.899056+00"
+      },
+      {
+        "item_id": "civil_id",
+        "match": false,
+        "sample_id": "emp_f95cc3108abe",
+        "status": "received",
+        "updated_at": "2026-05-08 22:57:23.632206+00"
+      }
+    ],
+    "counts": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 25,
+      "onboarding_items": 18
+    },
+    "onboarding_fingerprint": "3a3e1006c8ee6aac248c353a82ce87ac",
+    "other_company_docs": 0
+  },
+  "collateral": {
+    "counts_after": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 25,
+      "onboarding_items": 18
+    },
+    "counts_before": {
+      "compliance_documents": 15,
+      "employee_documents": 4,
+      "employees": 3,
+      "file_registry": 25,
+      "onboarding_items": 18
+    },
+    "fingerprint_changed": true,
+    "ok": true,
+    "other_company_docs_after": 0,
+    "other_company_docs_before": 0,
+    "other_onboarding_rows_unchanged": true
+  },
+  "company": "WATHEFNI",
+  "dashboard_endpoint": {
+    "body": "{\"company_code\":\"WATHEFNI\",\"configured_modules\":[...onboarding...]}",
+    "bootstrap_status": 200,
+    "ok": true
+  },
+  "document_type": "civil_id",
+  "dry_run_after": {
+    "plan_actions": [
+      "sync_expiry"
+    ],
+    "planned_writes": 1,
+    "w1_remaining": 0
+  },
+  "dry_run_before": {
+    "plan_actions": [
+      "mark_onboarding_received",
+      "sync_expiry"
+    ],
+    "plan_hash": "17afe78df32f83a5628b8aff81d5293887f3a702faff1fe0b781917bd85a8361",
+    "planned_writes": 2,
+    "w1_count": 1
+  },
+  "flags_ok": true,
+  "onboarding_view": {
+    "body": "{\"company_code\":\"WATHEFNI\",\"in_progress\":[...]}",
+    "ok": true,
+    "status": 200
+  },
+  "one_write_proof": {
+    "applied": 1,
+    "audit_events": 1,
+    "rowcount": 1,
+    "sibling_sync_expiry_still_planned": true,
+    "w1_remaining_after": 0
+  },
+  "phase": "7C.5",
+  "production_dsn_refused": {
+    "ok": true,
+    "output": "refusing production DSN for apply (Phase 7C.4)\n"
+  },
+  "protected_flags": {
+    "WATHEFNI_COMPANY_CHANNEL_ACCOUNTS": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "wathefni-orchestrator-staging.service:CHANNEL": "off",
+    "wathefni-orchestrator-staging.service:EMPLOYEE_APP": "off",
+    "wathefni-orchestrator.service:CHANNEL": "off",
+    "wathefni-orchestrator.service:EMPLOYEE_APP": "off"
+  },
+  "sample_id": "emp_2c08123fca34",
+  "selected_plan_event": {
+    "action": "mark_onboarding_received",
+    "actor": "phase7c2-reconcile-dryrun",
+    "after": {
+      "status": "received"
+    },
+    "before": {
+      "status": "pending"
+    },
+    "company_code": "WATHEFNI",
+    "decision": "plan",
+    "drift_class": "employee_doc_without_received_item",
+    "event_id": "74073472-0220-4584-b1d8-63cb7c67776a",
+    "evidence": {
+      "has_employee_document": true,
+      "onboarding_status": "pending"
+    },
+    "guards": {
+      "alias_merge": false,
+      "expiry_rule": null,
+      "no_delete": true
+    },
+    "mode": "dry-run",
+    "natural_key": {
+      "item_id": "civil_id",
+      "sample_id": "emp_2c08123fca34"
+    },
+    "op": "UPDATE",
+    "sample_id": "emp_2c08123fca34",
+    "schema_version": 1,
+    "skip_reason": null,
+    "table": "onboarding_items",
+    "ts": "2026-07-12T07:05:04Z"
+  },
+  "staging_health": {
+    "body": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\"}",
+    "ok": true,
+    "status": 200
+  },
+  "ts": "2026-07-12T07:05:03.872734Z",
+  "wathefni_without_unlock_refused": {
+    "ok": true,
+    "output": "refusing apply on forbidden company WATHEFNI (requires --allow-staging-wathefni-canary on staging only)\n"
+  }
+}

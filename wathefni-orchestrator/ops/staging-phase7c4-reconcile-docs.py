@@ -47,7 +47,8 @@ ALLOWED_ACTIONS = {
     "sync_expiry",
     "fill_compliance_expiry_from_ed",
 }
-FORBID_APPLY_COMPANIES = {"WATHEFNI"}
+FORBID_APPLY_COMPANIES = set()  # WATHEFNI requires --allow-staging-wathefni-canary (see run_apply)
+STAGING_WATHEFNI_CANARY_ACTIONS = {"mark_onboarding_received"}
 
 
 def _load_p7c2():
@@ -447,19 +448,30 @@ def run_apply(args: argparse.Namespace, company: str) -> tuple[list[dict], dict]
         raise SystemExit("missing confirm flag: --i-understand-writes")
     if str(args.confirm_company or "").strip().upper() != company:
         raise SystemExit("company confirmation mismatch")
-    if company in FORBID_APPLY_COMPANIES:
-        raise SystemExit(f"refusing apply on forbidden company {company} (Phase 7C.4 throwaway only)")
     if not args.employee_sample_id or not args.document_type:
         raise SystemExit("canary caps required: --employee-sample-id and --document-type")
     max_writes = int(args.max_writes)
     if max_writes < 1:
         raise SystemExit("--max-writes must be >= 1")
 
+    dsn = os.environ.get("WATHEFNI_DATABASE_URL", "")
+    if company == "WATHEFNI":
+        if not bool(getattr(args, "allow_staging_wathefni_canary", False)):
+            raise SystemExit(
+                "refusing apply on forbidden company WATHEFNI "
+                "(requires --allow-staging-wathefni-canary on staging only)"
+            )
+        if dsn_is_production(dsn) or not dsn_is_staging(dsn):
+            raise SystemExit("staging WATHEFNI canary requires staging DSN (production refused)")
+        if max_writes != 1:
+            raise SystemExit("staging WATHEFNI canary requires --max-writes 1")
+    elif company in FORBID_APPLY_COMPANIES:
+        raise SystemExit(f"refusing apply on forbidden company {company}")
+
     # Fresh dry-run for plan binding
     events, dry_summary = run_dry_run(args, company)
     plan_events = [e for e in events if e.get("decision") == "plan"]
     ph = dry_summary["plan_hash"]
-    expires = dry_summary["apply_token_expires_at"]
 
     if args.expect_plan_hash and args.expect_plan_hash != ph:
         raise SystemExit("wrong plan hash")
@@ -474,10 +486,26 @@ def run_apply(args: argparse.Namespace, company: str) -> tuple[list[dict], dict]
         if (ev.get("guards") or {}).get("alias_merge") is True:
             raise SystemExit("refusing alias merge plan")
 
+    # Phase 7C.5: staging WATHEFNI canary executes W1 only (ignore sibling plans for same type).
+    if company == "WATHEFNI" and bool(getattr(args, "allow_staging_wathefni_canary", False)):
+        w1_events = [e for e in plan_events if e.get("action") in STAGING_WATHEFNI_CANARY_ACTIONS]
+        if not w1_events:
+            raise SystemExit("no W1 mark_onboarding_received plan for staging WATHEFNI canary")
+        non_w1 = [e.get("action") for e in plan_events if e.get("action") not in STAGING_WATHEFNI_CANARY_ACTIONS]
+        plan_events = w1_events
+        dry_summary = {
+            **dry_summary,
+            "staging_wathefni_canary_w1_only": True,
+            "sibling_plan_actions_ignored": non_w1,
+        }
+
     if len(plan_events) > max_writes:
         raise SystemExit(
             f"max-writes exceeded: filtered plan has {len(plan_events)} events > max-writes={max_writes}"
         )
+    if company == "WATHEFNI" and bool(getattr(args, "allow_staging_wathefni_canary", False)):
+        if len(plan_events) != 1:
+            raise SystemExit(f"staging WATHEFNI canary requires exactly one W1 plan; got {len(plan_events)}")
 
     audit: list[dict[str, Any]] = []
     applied = skipped = failed = 0
@@ -568,6 +596,7 @@ def run_apply(args: argparse.Namespace, company: str) -> tuple[list[dict], dict]
         "plan_hash": ph,
         "no_deletes": True,
         "production_apply_authorized": False,
+        "staging_wathefni_canary": bool(getattr(args, "allow_staging_wathefni_canary", False)),
         "dry_run_planned_writes": dry_summary.get("planned_writes"),
     }
     return audit, summary
@@ -592,6 +621,11 @@ def main() -> int:
     parser.add_argument("--employee-sample-id", default="")
     parser.add_argument("--document-type", default="")
     parser.add_argument("--max-writes", type=int, default=1)
+    parser.add_argument(
+        "--allow-staging-wathefni-canary",
+        action="store_true",
+        help="Allow apply on staging WATHEFNI only (Phase 7C.5). Production still refused.",
+    )
     parser.add_argument("--allow-production-dsn", action="store_true")
     args = parser.parse_args()
 
