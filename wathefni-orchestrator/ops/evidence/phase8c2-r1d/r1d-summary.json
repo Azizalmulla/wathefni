@@ -1,0 +1,42 @@
+{
+  "company_code": "WATHEFNI",
+  "grants": [
+    {
+      "grant_id": "861ef8d5-5b9a-41f8-af36-a8f96fb0d76e",
+      "permission": "employees.manage",
+      "review_reference": "phase8c2-r1d-staging-cutover",
+      "status": "active"
+    },
+    {
+      "grant_id": "556fbb73-f55c-4ee0-b801-4410b67c232f",
+      "permission": "employees.read",
+      "review_reference": "phase8c2-r1d-staging-cutover",
+      "status": "active"
+    },
+    {
+      "grant_id": "e2d402f8-47fb-47dc-bb11-c6b48878b8bb",
+      "permission": "employees.status.approve",
+      "review_reference": "phase8c2-r1d-staging-cutover",
+      "status": "active"
+    }
+  ],
+  "ok": true,
+  "open_session_revocation": {
+    "failed": 0,
+    "passed": 4
+  },
+  "owner_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+  "r1b": {
+    "failed": 0,
+    "passed": 12
+  },
+  "r1c": {
+    "failed": 0,
+    "passed": 8
+  },
+  "recovery_sessions_revoked": 2,
+  "route_matrix": {
+    "failed": 0,
+    "passed": 27
+  }
+}

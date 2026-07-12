@@ -1,0 +1,40 @@
+{
+  "captured_at": "2026-07-12T14:58:18+00:00",
+  "employee_scopes_present": [
+    "employees.manage",
+    "employees.read",
+    "employees.status.approve"
+  ],
+  "permission_authority": "backend_current",
+  "permissions": [
+    "analytics.read",
+    "assessment.manage",
+    "attendance.manage",
+    "attendance.read",
+    "audit.read",
+    "candidate.decide",
+    "candidate.import",
+    "candidate.manage",
+    "compliance.manage",
+    "compliance.read",
+    "employees.manage",
+    "employees.read",
+    "employees.status.approve",
+    "interview.manage",
+    "leave.decide",
+    "leave.read",
+    "leave.request",
+    "onboarding.manage",
+    "onboarding.read",
+    "payroll.export",
+    "payroll.manage",
+    "payroll.read",
+    "prehire.read",
+    "report.export",
+    "settings.manage",
+    "shifts.manage",
+    "shifts.read",
+    "users.manage"
+  ],
+  "role": "owner"
+}

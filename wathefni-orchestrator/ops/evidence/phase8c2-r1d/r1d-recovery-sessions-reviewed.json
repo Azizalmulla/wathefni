@@ -1,0 +1,11 @@
+{
+  "auth_sources": [
+    "legacy_hr_phone_bootstrap"
+  ],
+  "captured_at": "2026-07-12T14:58:17+00:00",
+  "count": 2,
+  "emails_redacted": [
+    "az***@gmail.com"
+  ],
+  "fingerprint": "33ae0c6f275bdcb4864add3ba3aa538c7d92e56ccb8360e2322fdbdf2e88e1f0"
+}

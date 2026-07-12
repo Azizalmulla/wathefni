@@ -1,0 +1,82 @@
+{
+  "base": "http://127.0.0.1:8011",
+  "captured_at": "2026-07-12T15:01:02+00:00",
+  "checks": [
+    {
+      "name": "health 200",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "employee_scopes": [
+        "employees.manage",
+        "employees.read",
+        "employees.status.approve"
+      ],
+      "name": "reauth capabilities backend_current",
+      "ok": true,
+      "permission_authority": "backend_current",
+      "role": "owner",
+      "status": 200
+    },
+    {
+      "name": "employees directory unauthenticated denied",
+      "ok": true,
+      "status": 401
+    },
+    {
+      "name": "employees directory exact allowed",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "employees directory wrong company denied",
+      "ok": true,
+      "status": 403
+    },
+    {
+      "name": "team route authenticated",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "hr tasks authenticated",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "compliance/documents hub authenticated",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "payroll authenticated",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "open session loses employees.manage immediately",
+      "ok": true,
+      "status": 403
+    }
+  ],
+  "counts": {
+    "failed": 0,
+    "passed": 10
+  },
+  "failed": [],
+  "ok": true,
+  "passed": [
+    "health 200",
+    "reauth capabilities backend_current",
+    "employees directory unauthenticated denied",
+    "employees directory exact allowed",
+    "employees directory wrong company denied",
+    "team route authenticated",
+    "hr tasks authenticated",
+    "compliance/documents hub authenticated",
+    "payroll authenticated",
+    "open session loses employees.manage immediately"
+  ],
+  "session_fingerprint": "22a1e70bd92c1e49bb13ffe270e37d5bdf730a930cd7e936864ed39e379d2112"
+}

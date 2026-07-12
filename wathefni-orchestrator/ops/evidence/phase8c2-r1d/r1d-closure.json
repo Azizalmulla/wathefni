@@ -1,0 +1,88 @@
+{
+  "artifact_hash": "50ddb87937a2aeff3ce203062fcc50960270dfde7db26bf8bbaf68b28924170d",
+  "captured_at": "2026-07-12T15:01:18+00:00",
+  "cutover_summary": {
+    "company_code": "WATHEFNI",
+    "grants": [
+      {
+        "grant_id": "861ef8d5-5b9a-41f8-af36-a8f96fb0d76e",
+        "permission": "employees.manage",
+        "review_reference": "phase8c2-r1d-staging-cutover",
+        "status": "active"
+      },
+      {
+        "grant_id": "556fbb73-f55c-4ee0-b801-4410b67c232f",
+        "permission": "employees.read",
+        "review_reference": "phase8c2-r1d-staging-cutover",
+        "status": "active"
+      },
+      {
+        "grant_id": "e2d402f8-47fb-47dc-bb11-c6b48878b8bb",
+        "permission": "employees.status.approve",
+        "review_reference": "phase8c2-r1d-staging-cutover",
+        "status": "active"
+      }
+    ],
+    "ok": true,
+    "open_session_revocation": {
+      "failed": 0,
+      "passed": 4
+    },
+    "owner_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+    "r1b": {
+      "failed": 0,
+      "passed": 12
+    },
+    "r1c": {
+      "failed": 0,
+      "passed": 8
+    },
+    "recovery_sessions_revoked": 2,
+    "route_matrix": {
+      "failed": 0,
+      "passed": 27
+    }
+  },
+  "fail_closed_fallback_doc": "/opt/wathefni/staging/evidence/r1d-fail-closed-fallback.md",
+  "fixture_cleanup": {
+    "employee_app_invites": 0,
+    "employee_app_module_enabled": false,
+    "employee_status_changes": 0,
+    "employees": 0,
+    "hr_tasks_like_fixture": 0,
+    "ok": true
+  },
+  "http_live": {
+    "counts": {
+      "failed": 0,
+      "passed": 10
+    },
+    "failed": [],
+    "ok": true,
+    "passed": [
+      "health 200",
+      "reauth capabilities backend_current",
+      "employees directory unauthenticated denied",
+      "employees directory exact allowed",
+      "employees directory wrong company denied",
+      "team route authenticated",
+      "hr tasks authenticated",
+      "compliance/documents hub authenticated",
+      "payroll authenticated",
+      "open session loses employees.manage immediately"
+    ]
+  },
+  "ok": true,
+  "phase": "8C2-R1D",
+  "production_app_sha256": "b452a64d2fdf1fdb4d192b99e958877e45522ce56a4cb0134fbc131bed15a0bd",
+  "production_unchanged": true,
+  "protected_flags": "off",
+  "recommendation": "Do not cut over production yet. Staging R1D is green; schedule a separate production approval with inventory, explicit grants, recovery-session revocation, and Mode A fail-closed fallback ready.",
+  "source_commits": [
+    "b312d05",
+    "93720ed",
+    "b0ec347",
+    "8ff5061"
+  ],
+  "staging_app_sha256": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2"
+}

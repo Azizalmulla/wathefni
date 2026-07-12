@@ -1,0 +1,109 @@
+{
+  "captured_at": "2026-07-12T14:58:18+00:00",
+  "fixture_cleanup": {
+    "action_results": 2,
+    "employee_app_invites": 2,
+    "employee_app_module_disabled": 1,
+    "employee_messages": 0,
+    "employee_push_tokens": 0,
+    "employee_sessions": 0,
+    "employee_status_changes": 0,
+    "employees": 1,
+    "hr_tasks": 2
+  },
+  "open_session_revocation": {
+    "counts": {
+      "failed": 0,
+      "passed": 4
+    },
+    "failed": [],
+    "ok": true,
+    "passed": [
+      "open session can manage before revoke",
+      "employees.manage revoked",
+      "revocation affects already-open session",
+      "employees.manage restored"
+    ],
+    "title": "open-session revocation"
+  },
+  "r1b": {
+    "counts": {
+      "failed": 0,
+      "passed": 12
+    },
+    "failed": [],
+    "ok": true,
+    "passed": [
+      "unauthorized status transition denied",
+      "missing reason rejected",
+      "missing idempotency rejected",
+      "authorized status transition succeeds",
+      "durable result ID returned",
+      "post-change read-back succeeds",
+      "employee-app eligibility reflects left",
+      "only approved status fields change",
+      "authoritative employee status updated",
+      "duplicate request returns same result",
+      "concurrent conflict returns 409",
+      "audit and employee mutation remain atomic"
+    ],
+    "title": "R1B live staging"
+  },
+  "r1c": {
+    "counts": {
+      "failed": 0,
+      "passed": 8
+    },
+    "failed": [],
+    "ok": true,
+    "passed": [
+      "exactly one HR task",
+      "zero external provider calls",
+      "response uses Cache-Control no-store",
+      "activation code hash only in persistence",
+      "raw code absent from task and audit",
+      "replay requires supersede",
+      "pending invite requires explicit supersede",
+      "supersede and reissue succeeds"
+    ],
+    "title": "R1C live staging"
+  },
+  "route_matrix": {
+    "counts": {
+      "failed": 0,
+      "passed": 27
+    },
+    "failed": [],
+    "ok": true,
+    "passed": [
+      "team list exact permission allowed",
+      "users.manage missing denied",
+      "users.manage unrelated denied",
+      "users.manage wrong company denied",
+      "organization hierarchy readable for company",
+      "HR-task read exact allowed",
+      "HR-task manage exact allowed",
+      "HR-task manage missing denied",
+      "HR-task manage unrelated denied",
+      "employee directory exact allowed",
+      "employee directory missing denied",
+      "employee directory unrelated denied",
+      "employee directory wrong company denied",
+      "document hub exact allowed",
+      "document hub missing denied",
+      "document hub unrelated denied",
+      "employees.manage exact allowed",
+      "employees.manage missing denied",
+      "employees.manage empty denied",
+      "employees.manage unrelated denied",
+      "employees.status.approve exact allowed",
+      "employees.read exact allowed",
+      "settings.manage does not imply employees.manage",
+      "payroll.export exact capability present for reviewed owner role set",
+      "payroll.export unrelated denied",
+      "payroll.export missing denied",
+      "authenticated-only team route remains functional"
+    ],
+    "title": "live route matrix"
+  }
+}

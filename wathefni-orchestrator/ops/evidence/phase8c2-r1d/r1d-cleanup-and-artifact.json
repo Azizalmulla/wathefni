@@ -1,0 +1,28 @@
+{
+  "active_recovery_sessions": 0,
+  "artifact_file_count": 112,
+  "artifact_hash": "50ddb87937a2aeff3ce203062fcc50960270dfde7db26bf8bbaf68b28924170d",
+  "captured_at": "2026-07-12T15:01:00+00:00",
+  "employee_grant_counts": {
+    "employees.manage": 1,
+    "employees.read": 1,
+    "employees.status.approve": 1
+  },
+  "fixture_cleanup": {
+    "employee_app_invites": 0,
+    "employee_app_module_enabled": false,
+    "employee_status_changes": 0,
+    "employees": 0,
+    "hr_tasks_like_fixture": 0,
+    "ok": true
+  },
+  "postgres_env": "/root/.openclaw/secrets/postgres.staging.env",
+  "production_app_sha256": "b452a64d2fdf1fdb4d192b99e958877e45522ce56a4cb0134fbc131bed15a0bd",
+  "production_unchanged_vs_predeploy": true,
+  "schema_ok": true,
+  "schema_tables": [
+    "dashboard_user_permission_grants",
+    "employee_status_changes"
+  ],
+  "staging_app_sha256": "42f657fdb7d528f8dce25f09ef0de4ba28f8c1934d64acbb063d2cc3e36bf8d2"
+}
