@@ -45554,6 +45554,191 @@ def _employee_app_employee_eligible(employee: dict[str, Any] | None) -> bool:
     return bool(employee) and normalize_text((employee or {}).get("employment_status") or "active") in ("", "active")
 
 
+_EMPLOYEE_APP_FEATURE_CONTRACT_VERSION = "phase9a1"
+_EMPLOYEE_APP_FEATURE_DEFINITIONS: dict[str, dict[str, Any]] = {
+    # Core employee-safe surfaces. Reaching /app/me already proves the platform,
+    # lifecycle, employee_app entitlement, session, and employment gates.
+    "home": {"dependency_mode": "core", "module_keys": (), "actions": ("view",)},
+    "profile": {"dependency_mode": "core", "module_keys": (), "actions": ("view",)},
+    "inbox": {"dependency_mode": "core", "module_keys": (), "actions": ("view", "mark_read")},
+    "settings": {
+        "dependency_mode": "core",
+        "module_keys": (),
+        "actions": ("view", "change_locale", "request_deletion"),
+    },
+    # Module-backed employee projections. Documents intentionally spans both
+    # onboarding receipts and compliance-managed employee documents.
+    "onboarding": {
+        "dependency_mode": "all",
+        "module_keys": ("onboarding",),
+        "actions": ("view", "upload_document"),
+    },
+    "documents": {
+        "dependency_mode": "any",
+        "module_keys": ("onboarding", "compliance"),
+        "actions": ("view", "download"),
+    },
+    "attendance": {
+        "dependency_mode": "all",
+        "module_keys": ("attendance",),
+        "actions": ("view",),
+    },
+    "shifts": {
+        "dependency_mode": "all",
+        "module_keys": ("shifts",),
+        "actions": ("view",),
+    },
+    "leave": {
+        "dependency_mode": "all",
+        "module_keys": ("leave",),
+        "actions": ("view", "request", "cancel"),
+    },
+    # Reserved canonical keys. They are returned disabled until employee-safe
+    # APIs exist; a company payroll/compliance entitlement alone cannot invent
+    # an unfinished employee surface.
+    "payslips": {
+        "dependency_mode": "all",
+        "module_keys": ("payroll",),
+        "actions": (),
+        "implemented": False,
+    },
+    "compliance_actions": {
+        "dependency_mode": "all",
+        "module_keys": ("compliance",),
+        "actions": (),
+        "implemented": False,
+    },
+}
+
+
+def build_employee_app_feature_contract(
+    effective_modules: set[str] | list[str] | tuple[str, ...],
+    *,
+    push_available: bool,
+) -> dict[str, Any]:
+    """Pure canonical employee feature projection.
+
+    Company modules are an input to authority, never a client-side translation.
+    The result includes every stable feature key so removals are deterministic.
+    """
+    modules = {normalize_module_key(str(key)) for key in effective_modules}
+    features: dict[str, dict[str, Any]] = {}
+    for key, definition in _EMPLOYEE_APP_FEATURE_DEFINITIONS.items():
+        dependency_mode = str(definition.get("dependency_mode") or "all")
+        module_keys = tuple(str(item) for item in definition.get("module_keys") or ())
+        if dependency_mode == "core":
+            entitled = True
+        elif dependency_mode == "any":
+            entitled = any(item in modules for item in module_keys)
+        else:
+            entitled = all(item in modules for item in module_keys)
+        implemented = bool(definition.get("implemented", True))
+        enabled = entitled and implemented
+        reason = None
+        if not entitled:
+            reason = "module_disabled"
+        elif not implemented:
+            reason = "feature_not_available"
+        actions = list(definition.get("actions") or ()) if enabled else []
+        if key == "settings" and enabled and push_available:
+            actions.append("manage_push")
+        features[key] = {
+            "enabled": enabled,
+            "reason": reason,
+            "dependency_mode": dependency_mode,
+            "module_keys": list(module_keys),
+            "actions": actions,
+        }
+    return {
+        "version": _EMPLOYEE_APP_FEATURE_CONTRACT_VERSION,
+        "enabled_features": [key for key, value in features.items() if value["enabled"]],
+        "features": features,
+    }
+
+
+def employee_app_leave_types(company_code: str) -> list[str]:
+    """Company-owned leave types with a compatibility fallback for unseeded V1 tenants."""
+    company = str(company_code or "").strip().upper()
+    values: list[str] = []
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT DISTINCT leave_type FROM leave_policies WHERE company_code=%s ORDER BY leave_type",
+                    (company,),
+                )
+                values = [
+                    normalize_text(row.get("leave_type") or "").replace(" ", "_")
+                    for row in cur.fetchall()
+                    if normalize_text(row.get("leave_type") or "")
+                ]
+    except Exception:
+        logger.warning("employee app leave type lookup failed company=%s", company, exc_info=True)
+    return values or list(_LEAVE_P1_TYPES)
+
+
+def employee_app_effective_modules(context: dict[str, Any]) -> set[str]:
+    company = str(context.get("company_code") or "").strip().upper()
+    # Do not expose HR-only/candidate modules to the employee client.
+    return {
+        key
+        for key in effective_company_modules(company)
+        if key in MODULE_BY_KEY and MODULE_BY_KEY[key].audience == "employee"
+    }
+
+
+def employee_app_capability_payload(context: dict[str, Any]) -> dict[str, Any]:
+    company = str(context.get("company_code") or "").strip().upper()
+    employee_modules = employee_app_effective_modules(context)
+    contract = build_employee_app_feature_contract(
+        employee_modules,
+        push_available=push_notifications_enabled(),
+    )
+    leave_enabled = bool((contract["features"].get("leave") or {}).get("enabled"))
+    return {
+        "account_state": "active",
+        "app_state": "available",
+        "effective_modules": sorted(employee_modules),
+        # Compatibility alias. It now means effective employee-facing modules,
+        # never raw configured modules.
+        "enabled_modules": sorted(employee_modules),
+        **contract,
+        "leave": {
+            "balances_enabled": leave_balances_enabled() and leave_enabled,
+            "types": employee_app_leave_types(company) if leave_enabled else [],
+        },
+    }
+
+
+def require_employee_app_feature(
+    context: dict[str, Any],
+    feature_key: str,
+    *,
+    action: str | None = None,
+) -> dict[str, Any]:
+    key = str(feature_key or "").strip()
+    contract = build_employee_app_feature_contract(
+        employee_app_effective_modules(context),
+        push_available=push_notifications_enabled(),
+    )
+    feature = (contract.get("features") or {}).get(key)
+    allowed = bool(feature and feature.get("enabled"))
+    if action:
+        allowed = allowed and action in set(feature.get("actions") or ())
+    if not allowed:
+        reason = str((feature or {}).get("reason") or "feature_disabled")
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "employee_feature_disabled",
+                "message": "This feature is not available for your account.",
+                "feature": key,
+                "reason": reason,
+            },
+        )
+    return dict(feature)
+
+
 def _employee_app_company_gate(
     cur: Any,
     company_code: str,
@@ -45763,6 +45948,31 @@ def employee_by_session(token: str | None) -> dict[str, Any] | None:
     return {"session_id": str(sess["session_id"]), "company_code": str(sess["company_code"]).upper(), "employee_key": str(sess["employee_key"]), "employee": employee}
 
 
+def employee_session_record(token: str | None) -> dict[str, Any] | None:
+    """Resolve an opaque token's session row for authoritative denial reasons.
+
+    This never authenticates a request; it is consulted only after the normal
+    active-session lookup fails, so a revoked employee receives the correct
+    account/company state instead of an undifferentiated expired-session error.
+    """
+    if not token:
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT session_id, company_code, employee_key, status, expires_at,
+                       revoked_reason
+                FROM employee_sessions
+                WHERE token_hash=%s
+                LIMIT 1
+                """,
+                (_app_token_hash(token),),
+            )
+            row = cur.fetchone()
+    return dict(row) if row else None
+
+
 def rotate_employee_session(refresh_token: str | None) -> dict[str, Any] | None:
     if not refresh_token:
         return None
@@ -45876,6 +46086,38 @@ def employee_app_context(
     token = bearer_token(authorization) or str(x_app_token or "").strip()
     sess = employee_by_session(token)
     if not sess:
+        historical = employee_session_record(token)
+        if historical:
+            historical_company = str(historical.get("company_code") or "").strip().upper()
+            lifecycle = company_lifecycle_status(historical_company)
+            if lifecycle != "active":
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": f"company_{lifecycle}",
+                        "message": "Your company workspace is not active.",
+                    },
+                )
+            if not company_has_module(historical_company, "employee_app"):
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "employee_app_not_enabled_for_company",
+                        "message": "The app is not enabled for your company.",
+                    },
+                )
+            historical_employee = find_employee_by_key(
+                str(historical.get("employee_key") or ""),
+                company_code=historical_company,
+            )
+            if (
+                not _employee_app_employee_eligible(historical_employee)
+                or str(historical.get("revoked_reason") or "") in {"offboarded", "employment_inactive"}
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail={"error": "account_inactive", "message": "Your account is not active."},
+                )
         raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
     company = sess["company_code"]
     lifecycle = company_lifecycle_status(company)
@@ -46093,11 +46335,15 @@ def app_auth_logout(authorization: str | None = Header(default=None), x_app_toke
 def app_me(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     employee = context["employee"]
+    profile = employee_app_public(employee, company)
+    capabilities = employee_app_capability_payload(context)
     return json_safe({
         "ok": True,
-        **employee_app_public(employee, company),
-        "enabled_modules": sorted(configured_company_modules(company)),
-        "leave_balances_enabled": leave_balances_enabled(),
+        # Preserve the original flattened profile during the client transition.
+        **profile,
+        "employee": profile,
+        **capabilities,
+        "leave_balances_enabled": capabilities["leave"]["balances_enabled"],
     })
 
 
@@ -46125,6 +46371,7 @@ def app_onboarding(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     employee = context["employee"]
     key = context["employee_key"]
+    feature = require_employee_app_feature(context, "onboarding")
     summary = employee_onboarding_summary(employee)
     index = employee_document_index(company, key)
 
@@ -46147,7 +46394,7 @@ def app_onboarding(context: dict[str, Any] = Depends(employee_app_context)):
         "pending": _decorate(summary.get("pending") or []),
         "received": _decorate(summary.get("received") or []),
         "next_item": next_item,
-        "can_upload": company_has_module(company, "onboarding"),
+        "can_upload": "upload_document" in set(feature.get("actions") or ()),
     })
 
 
@@ -46155,6 +46402,7 @@ def app_onboarding(context: dict[str, Any] = Depends(employee_app_context)):
 def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "leave")
     requests: list[dict[str, Any]] = []
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -46173,6 +46421,7 @@ def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
     return json_safe({
         "ok": True,
         "balances_enabled": leave_balances_enabled(),
+        "types": employee_app_leave_types(company),
         "balances": balances,
         "requests": requests,
     })
@@ -46182,6 +46431,7 @@ def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
 def app_shifts_today(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "shifts")
     today = kuwait_today()
     rows: list[dict[str, Any]] = []
     with db_connect() as conn:
@@ -46203,6 +46453,7 @@ def app_shifts_today(context: dict[str, Any] = Depends(employee_app_context)):
 def app_shifts_upcoming(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "shifts")
     today = kuwait_today()
     rows: list[dict[str, Any]] = []
     with db_connect() as conn:
@@ -46226,6 +46477,7 @@ def app_shifts_upcoming(context: dict[str, Any] = Depends(employee_app_context))
 def app_attendance(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "attendance")
     start = kuwait_today() - timedelta(days=30)
     rows: list[dict[str, Any]] = []
     with db_connect() as conn:
@@ -46253,6 +46505,7 @@ def app_attendance(context: dict[str, Any] = Depends(employee_app_context)):
 def app_documents(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "documents")
     documents = employee_documents_for(company, key)
     return json_safe({"ok": True, "count": len(documents), "documents": documents})
 
@@ -46261,6 +46514,7 @@ def app_documents(context: dict[str, Any] = Depends(employee_app_context)):
 def app_document_file(file_id: str, disposition: str = "inline", context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "documents", action="download")
     doc = resolve_employee_document_file(company, file_id)
     # Self-scope: the document MUST belong to this employee (not just the company).
     if not doc or str(doc.get("subject_key")) != key:
@@ -46352,15 +46606,25 @@ def app_leave_request(body: EmployeeLeaveRequestBody, context: dict[str, Any] = 
     company = context["company_code"]
     key = context["employee_key"]
     phone = context["phone"]
-    if not company_has_module(company, "leave"):
-        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "Leave is not enabled for your company."})
+    require_employee_app_feature(context, "leave", action="request")
+    leave_types = employee_app_leave_types(company)
+    leave_type = normalize_text(body.leave_type or "").replace(" ", "_") or leave_types[0]
+    if leave_type not in set(leave_types):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "leave_type_not_available",
+                "message": "Choose an available leave type.",
+                "available_types": leave_types,
+            },
+        )
     token = set_active_company_code(company)
     try:
         action = {
             "subject_phone": phone,
             "start_date": body.start_date,
             "end_date": body.end_date,
-            "leave_type": (body.leave_type or "").strip() or None,
+            "leave_type": leave_type,
             "reason": (body.reason or "").strip() or None,
         }
         result = request_leave(action, company_code=company, created_by_phone=phone)
@@ -46381,6 +46645,7 @@ def app_leave_cancel(leave_id: str, context: dict[str, Any] = Depends(employee_a
     company = context["company_code"]
     key = context["employee_key"]
     phone = context["phone"]
+    require_employee_app_feature(context, "leave", action="cancel")
     # Ownership guard FIRST: the leave must belong to the caller and be cancellable.
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -46497,8 +46762,7 @@ async def app_onboarding_document_upload(
     company = context["company_code"]
     key = context["employee_key"]
     employee = context["employee"]
-    if not company_has_module(company, "onboarding"):
-        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "Onboarding is not enabled for your company."})
+    require_employee_app_feature(context, "onboarding", action="upload_document")
     item = str(item_id or "").strip()
     if not item:
         raise HTTPException(status_code=400, detail={"error": "item_required", "message": "Pick the document you're uploading."})
@@ -46696,6 +46960,7 @@ async def app_onboarding_document_upload(
 def app_push_register(body: EmployeePushRegisterBody, context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
+    require_employee_app_feature(context, "settings", action="manage_push")
     token = str(body.push_token or "").strip()
     if not token:
         raise HTTPException(status_code=400, detail={"error": "push_token_required", "message": "A push token is required."})
