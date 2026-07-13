@@ -57,6 +57,13 @@ def denied_before_data_access(function_name: str, feature_key: str) -> bool:
     )
 
 
+def function_source(function_name: str) -> str:
+    source = APP_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=str(APP_PATH))
+    fn = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == function_name)
+    return ast.get_source_segment(source, fn) or ""
+
+
 def main() -> None:
     build = load_contract_builder()
     core = {"home", "profile", "inbox", "settings"}
@@ -84,6 +91,18 @@ def main() -> None:
 
     no_modules = build({"employee_app"}, push_available=False)
     check("module removal deterministically removes optional features", set(no_modules["enabled_features"]) == core)
+
+    configured_source = function_source("configured_company_modules")
+    check(
+        "canonical registry is authoritative even when all rows are disabled",
+        "if registry_rows:" in configured_source
+        and "if bool(row.get(\"enabled\"))" in configured_source,
+    )
+    sync_source = function_source("sync_company_module_registry")
+    check(
+        "legacy sync cannot re-enable an explicit registry disable",
+        "enabled=EXCLUDED.enabled" not in sync_source,
+    )
 
     route_gates = {
         "app_onboarding": "onboarding",

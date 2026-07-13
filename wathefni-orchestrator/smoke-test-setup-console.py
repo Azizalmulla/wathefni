@@ -258,6 +258,12 @@ def main() -> int:
             and "employee_app" not in app.configured_company_modules(TEST_CO)
             and "pre_hiring" in app.configured_company_modules(TEST_CO),
         )
+        app.sync_company_module_registry()
+        check(
+            "restart-style legacy sync preserves explicit module disables",
+            "payroll" not in app.configured_company_modules(TEST_CO)
+            and "employee_app" not in app.configured_company_modules(TEST_CO),
+        )
 
         profile = app.setup_console_set_profile(
             TEST_CO,

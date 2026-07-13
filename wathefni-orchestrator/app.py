@@ -2705,10 +2705,21 @@ def configured_company_modules(company_code: str | None) -> set[str]:
     try:
         with db_connect() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT module_key FROM company_modules WHERE company_code=%s AND enabled IS TRUE", (company,))
-                modules.update(str(row["module_key"]) for row in cur.fetchall())
-                if modules:
-                    return modules
+                cur.execute(
+                    "SELECT module_key, enabled FROM company_modules WHERE company_code=%s",
+                    (company,),
+                )
+                registry_rows = [dict(row) for row in cur.fetchall()]
+                # Once a company has any canonical registry row, the registry is
+                # authoritative even when every module is explicitly disabled.
+                # Legacy metadata/files are seed-only and must never resurrect a
+                # module after an operator turns it off.
+                if registry_rows:
+                    return {
+                        str(row["module_key"])
+                        for row in registry_rows
+                        if bool(row.get("enabled"))
+                    }
                 cur.execute("SELECT metadata, raw_json FROM companies WHERE company_code=%s LIMIT 1", (company,))
                 row = cur.fetchone()
                 if row:
@@ -2983,8 +2994,10 @@ def sync_company_module_registry() -> None:
                             INSERT INTO company_modules (company_code, module_key, enabled, source, settings, updated_at)
                             VALUES (%s,%s,true,'company_config',%s,now())
                             ON CONFLICT (company_code, module_key)
-                            DO UPDATE SET enabled=EXCLUDED.enabled,
-                                          source=EXCLUDED.source,
+                            DO UPDATE SET source=CASE
+                                            WHEN company_modules.source='company_config' THEN EXCLUDED.source
+                                            ELSE company_modules.source
+                                          END,
                                           settings=CASE
                                             WHEN company_modules.settings = '{}'::jsonb THEN EXCLUDED.settings
                                             ELSE company_modules.settings
