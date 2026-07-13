@@ -3,9 +3,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useI18n } from '@/i18n'
-import { BrandLockup, DirectionalIcon, EditorialHeading, FadeIn, IconBadge, PastelCard } from '@/components/premium'
-import { ProgressBar, SectionTitle } from '@/components/ui'
-import { formatTimeRange, statusLabel } from '@/lib/format'
+import {
+  DirectionalIcon,
+  EditorialHeading,
+  FadeIn,
+  IconBadge,
+  MotionProgressBar,
+  PastelCard,
+  PremiumButton,
+  PreviewSkeleton,
+  WathefniBloom,
+  Wordmark,
+} from '@/components/premium'
+import { SectionTitle } from '@/components/ui'
+import { formatNumber, formatTimeRange, statusLabel } from '@/lib/format'
 import { colors, font, radius, spacing } from '@/theme'
 import type {
   AttendanceResponse,
@@ -61,6 +72,8 @@ export function HomeView({
   const onboardingPending = onboarding?.pending_count ?? 0
   const onboardingTotal = onboarding?.required_total ?? 0
   const onboardingDone = onboarding?.received_count ?? 0
+  const requiredPending = onboarding?.pending?.filter((item) => item.required !== false).length ?? 0
+  const rejectedPending = onboarding?.pending?.filter((item) => (item.status || '').toLowerCase() === 'rejected').length ?? 0
   const caughtUp = !shift && unread === 0 && onboardingPending === 0
   const moduleCount = Number(features.shifts) + Number(features.attendance) + Number(features.leave) + 1
   const wideTiles = moduleCount === 1
@@ -70,10 +83,9 @@ export function HomeView({
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={[styles.header, rowDirection]}>
-        <BrandLockup compact />
+        <Wordmark compact />
         <View style={styles.avatar} accessibilityLabel={profile?.name || t('profile.title')}>
           <Text style={styles.avatarText}>{initials || 'W'}</Text>
-          <View style={styles.onlineDot} />
         </View>
       </View>
 
@@ -81,6 +93,30 @@ export function HomeView({
         <Text style={[styles.greeting, align]}>{t('home.greeting', { name: firstName })}</Text>
         <EditorialHeading>{t('home.todayAtWork')}</EditorialHeading>
       </FadeIn>
+
+      {features.onboarding && (rejectedPending || requiredPending) ? (
+        <FadeIn delay={70}>
+          <PastelCard
+            tone={rejectedPending ? 'blush' : 'butter'}
+            style={styles.attentionCard}
+            onPress={() => onNavigate('/onboarding')}
+            accessibilityLabel={rejectedPending ? t('home.rejectedAction') : t('home.requiredAction')}
+          >
+            <View style={[styles.attentionRow, rowDirection]}>
+              <IconBadge name={rejectedPending ? 'alert-outline' : 'checkmark-circle-outline'} size={36} inverted />
+              <View style={styles.flex}>
+                <Text style={[styles.attentionEyebrow, align]}>{t('home.needsAttention')}</Text>
+                <Text style={[styles.attentionTitle, align]}>
+                  {rejectedPending ? t('home.rejectedAction') : t('home.requiredAction')}
+                </Text>
+              </View>
+              <View style={styles.attentionArrow}>
+                <DirectionalIcon size={16} />
+              </View>
+            </View>
+          </PastelCard>
+        </FadeIn>
+      ) : null}
 
       {caughtUp ? (
         <PastelCard tone="lilac" style={styles.caughtUpCard}>
@@ -91,11 +127,11 @@ export function HomeView({
               <Text style={[styles.cardSupporting, align]}>{t('home.caughtUpHint')}</Text>
             </View>
           </View>
-          <DecorativePetals mirrored={isRTL} />
+          <WathefniBloom variant="watermark" />
         </PastelCard>
       ) : null}
 
-      <View style={styles.moduleGrid}>
+      <FadeIn delay={100} style={styles.moduleGrid}>
         {features.shifts ? (
           <ModuleCard
             tone="sky"
@@ -105,7 +141,7 @@ export function HomeView({
             onPress={() => onNavigate('/(tabs)/shifts')}
             isRTL={isRTL}
           >
-            <Text style={[styles.metric, align]}>{shift ? formatTimeRange(shift.start_time, shift.end_time) : t('home.noShiftToday')}</Text>
+            <Text style={[styles.metric, align]}>{shift ? formatTimeRange(shift.start_time, shift.end_time, locale) : t('home.noShiftToday')}</Text>
             {shift?.location ? <Text style={[styles.cardSupporting, align]}>{shift.location}</Text> : null}
           </ModuleCard>
         ) : null}
@@ -139,7 +175,7 @@ export function HomeView({
           >
             <Text style={[styles.metric, align]}>
               {primaryBalance?.balance_days != null
-                ? t('home.leaveDays', { count: primaryBalance.balance_days })
+                ? t('home.leaveDays', { count: formatNumber(primaryBalance.balance_days, locale) })
                 : t('home.leaveAvailable')}
             </Text>
             {canRequestLeave ? (
@@ -152,19 +188,19 @@ export function HomeView({
           tone="blush"
           icon="mail-outline"
           title={t('notifications.title')}
-          badge={unread}
+          badge={unread ? formatNumber(unread, locale, 0) : undefined}
           wide={wideTiles}
           onPress={() => onNavigate('/(tabs)/notifications')}
           isRTL={isRTL}
         >
           <Text style={[styles.metric, align]}>
-            {unread ? t('home.unreadMessages', { count: unread }) : t('notifications.empty')}
+            {unread ? t('home.unreadMessages', { count: formatNumber(unread, locale, 0) }) : t('notifications.empty')}
           </Text>
           {notifications?.notifications?.[0]?.title ? (
             <Text style={[styles.cardSupporting, align]} numberOfLines={1}>{notifications.notifications[0].title}</Text>
           ) : null}
         </ModuleCard>
-      </View>
+      </FadeIn>
 
       {features.onboarding ? (
         <PastelCard
@@ -175,23 +211,25 @@ export function HomeView({
         >
           <View style={[styles.progressTop, rowDirection]}>
             <View style={styles.progressCount}>
-              <Text style={styles.progressCountText}>{onboardingDone}/{onboardingTotal || 0}</Text>
+              <Text style={styles.progressCountText}>
+                {formatNumber(onboardingDone, locale, 0)}/{formatNumber(onboardingTotal || 0, locale, 0)}
+              </Text>
             </View>
             <View style={styles.flex}>
               <Text style={[styles.progressOverline, align]}>{t('onboarding.title')}</Text>
               <Text style={[styles.progressTitle, align]}>
-                {onboardingPending ? t('home.continueChecklist') : t('onboarding.empty')}
+                {onboardingPending ? t('home.continueChecklist') : t('home.onboardingComplete')}
               </Text>
             </View>
             <View style={styles.arrowButton}>
               <DirectionalIcon size={17} />
             </View>
           </View>
-          <ProgressBar value={onboardingTotal ? onboardingDone / onboardingTotal : 1} />
+          <MotionProgressBar value={onboardingTotal ? onboardingDone / onboardingTotal : 1} />
         </PastelCard>
       ) : null}
 
-      {(features.onboarding || features.documents || features.attendance || canRequestLeave) ? (
+      {((features.onboarding && onboardingPending > 0) || features.documents || features.attendance || canRequestLeave) ? (
         <View style={styles.quickSection}>
           <SectionTitle>{t('home.quickActions')}</SectionTitle>
           <View style={[styles.quickRow, rowDirection]}>
@@ -201,7 +239,7 @@ export function HomeView({
             {features.documents ? (
               <QuickAction icon="documents-outline" label={t('home.documents')} onPress={() => onNavigate('/documents')} />
             ) : null}
-            {features.onboarding ? (
+            {features.onboarding && onboardingPending > 0 ? (
               <QuickAction icon="checkmark-done-outline" label={t('home.onboarding')} onPress={() => onNavigate('/onboarding')} />
             ) : null}
             {features.attendance ? (
@@ -213,6 +251,37 @@ export function HomeView({
 
       <Text style={styles.previewLocale} accessibilityElementsHidden>{locale === 'ar' ? 'AR' : 'EN'}</Text>
     </ScrollView>
+  )
+}
+
+export function HomeLoadingView() {
+  const { t, isRTL } = useI18n()
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  return (
+    <View style={styles.stateScreen}>
+      <Wordmark compact />
+      <EditorialHeading>{t('home.todayAtWork')}</EditorialHeading>
+      <PastelCard tone="lilac" style={styles.stateCard}>
+        <PreviewSkeleton rows={4} />
+      </PastelCard>
+      <Text style={[styles.stateMessage, align]}>{t('common.loading')}</Text>
+    </View>
+  )
+}
+
+export function HomeErrorView({ onRetry }: { onRetry: () => void }) {
+  const { t, isRTL } = useI18n()
+  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  return (
+    <View style={styles.stateScreen}>
+      <Wordmark compact />
+      <PastelCard tone="blush" style={styles.stateCard}>
+        <Ionicons name="cloud-offline-outline" size={34} color={colors.danger} />
+        <EditorialHeading size="medium">{t('common.error')}</EditorialHeading>
+        <Text style={[styles.stateMessage, align]}>{t('error.generic')}</Text>
+        <PremiumButton label={t('common.retry')} onPress={onRetry} />
+      </PastelCard>
+    </View>
   )
 }
 
@@ -229,7 +298,7 @@ function ModuleCard({
   tone: 'sky' | 'butter' | 'sage' | 'blush'
   icon: keyof typeof Ionicons.glyphMap
   title: string
-  badge?: number
+  badge?: string
   children: ReactNode
   onPress: () => void
   wide: boolean
@@ -283,16 +352,6 @@ function QuickAction({
   )
 }
 
-function DecorativePetals({ mirrored }: { mirrored: boolean }) {
-  return (
-    <View style={[styles.petals, mirrored && styles.petalsMirrored]} accessibilityElementsHidden>
-      <View style={[styles.petal, styles.petalButter]} />
-      <View style={[styles.petal, styles.petalBlush]} />
-      <View style={[styles.petal, styles.petalSage]} />
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xxxl, gap: spacing.lg },
@@ -307,30 +366,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: { color: colors.ink, fontSize: font.small, fontWeight: '800' },
-  onlineDot: {
-    position: 'absolute',
-    right: -1,
-    bottom: 1,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: colors.bg,
-    backgroundColor: colors.success,
-  },
   hero: { gap: spacing.xs },
   greeting: { color: colors.text, fontSize: font.small, fontWeight: '600' },
+  attentionCard: { paddingVertical: spacing.md, paddingHorizontal: spacing.md },
+  attentionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  attentionEyebrow: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
+  attentionTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800', marginTop: 2 },
+  attentionArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.ink,
+  },
   caughtUpCard: { minHeight: 82, justifyContent: 'center' },
   caughtUpRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, zIndex: 2 },
   caughtUpTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800' },
   cardSupporting: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
   flex: { flex: 1 },
-  petals: { position: 'absolute', right: 0, top: 0, width: 85, height: 85, opacity: 0.76 },
-  petalsMirrored: { right: undefined, left: 0, transform: [{ scaleX: -1 }] },
-  petal: { position: 'absolute', borderRadius: 18 },
-  petalButter: { width: 50, height: 24, right: -8, top: 6, backgroundColor: colors.pastelButter, transform: [{ rotate: '26deg' }] },
-  petalBlush: { width: 34, height: 42, right: 20, top: 26, backgroundColor: colors.pastelBlush, transform: [{ rotate: '-22deg' }] },
-  petalSage: { width: 30, height: 28, right: -2, top: 52, backgroundColor: colors.pastelSage },
   moduleGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   moduleCard: { width: '47%', minHeight: 178, flexGrow: 1 },
   moduleCardWide: { width: '100%' },
@@ -386,13 +440,23 @@ const styles = StyleSheet.create({
     minWidth: 72,
     flexGrow: 1,
     minHeight: 90,
-    padding: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 4,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.surface,
   },
-  quickLabel: { color: colors.text, fontSize: font.tiny, fontWeight: '700', textAlign: 'center' },
+  quickLabel: { color: colors.text, fontSize: 10.5, lineHeight: 13, fontWeight: '700', letterSpacing: -0.15, textAlign: 'center' },
   previewLocale: { height: 0, opacity: 0 },
+  stateScreen: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    gap: spacing.lg,
+  },
+  stateCard: { gap: spacing.lg, paddingVertical: spacing.xl },
+  stateMessage: { color: colors.subtle, fontSize: font.body, lineHeight: 22 },
 })

@@ -1,0 +1,270 @@
+{
+  "generated_at": "2026-07-13T23:34:07.966Z",
+  "results": [
+    {
+      "filename": "activation-en.png",
+      "query": "screen=activation&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR WORK, IN ONE PLACE Welcome to Wathefni Your workday, beautifully organized. Sign in with the details provided by your HR team. Phone number +965 Activation code Sign "
+    },
+    {
+      "filename": "activation-ar.png",
+      "query": "screen=activation&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني يوم عملك، ببساطة أهلاً بك في وظفني كل ما يخص يوم عملك، مرتب ببساطة. سجّل الدخول بالبيانات التي زوّدك بها فريق الموارد البشرية. رقم الهاتف +965 رمز التفعيل تسجيل الدخول  أحتا"
+    },
+    {
+      "filename": "activation-en-loading.png",
+      "query": "screen=activation&locale=en&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR WORK, IN ONE PLACE Welcome to Wathefni Your workday, beautifully organized. Sign in with the details provided by your HR team. Phone number +965 Activation code I nee"
+    },
+    {
+      "filename": "activation-ar-loading.png",
+      "query": "screen=activation&locale=ar&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني يوم عملك، ببساطة أهلاً بك في وظفني كل ما يخص يوم عملك، مرتب ببساطة. سجّل الدخول بالبيانات التي زوّدك بها فريق الموارد البشرية. رقم الهاتف +965 رمز التفعيل أحتاج رمزاً جديداً "
+    },
+    {
+      "filename": "activation-en-error.png",
+      "query": "screen=activation&locale=en&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR WORK, IN ONE PLACE Welcome to Wathefni Your workday, beautifully organized. Sign in with the details provided by your HR team. Phone number +965 Activation code  Tha"
+    },
+    {
+      "filename": "activation-ar-error.png",
+      "query": "screen=activation&locale=ar&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني يوم عملك، ببساطة أهلاً بك في وظفني كل ما يخص يوم عملك، مرتب ببساطة. سجّل الدخول بالبيانات التي زوّدك بها فريق الموارد البشرية. رقم الهاتف +965 رمز التفعيل  الرمز غير صحيح. ا"
+    },
+    {
+      "filename": "home-en-multi.png",
+      "query": "screen=home&locale=en&scenario=multi",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni PE Hi Preview Today at work  Needs your attention A required onboarding step is waiting   Today's shift 09:00 – 17:30 Customer Support  Attendance Present Latest atten"
+    },
+    {
+      "filename": "home-ar-multi.png",
+      "query": "screen=home&locale=ar&scenario=multi",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني مت مرحباً موظف يومك في العمل  يحتاج إلى انتباهك هناك خطوة مطلوبة لإكمال انضمامك   مناوبة اليوم ٠٩:٠٠ – ١٧:٣٠ دعم العملاء  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام مت"
+    },
+    {
+      "filename": "home-en-minimal.png",
+      "query": "screen=home&locale=en&scenario=minimal",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni PE Hi Preview Today at work  You're all caught up Have a great rest of your day.  Inbox No notifications yet EN"
+    },
+    {
+      "filename": "home-ar-minimal.png",
+      "query": "screen=home&locale=ar&scenario=minimal",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR"
+    },
+    {
+      "filename": "home-en-loading.png",
+      "query": "screen=home&locale=en&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni Today at work Loading…"
+    },
+    {
+      "filename": "home-ar-loading.png",
+      "query": "screen=home&locale=ar&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني يومك في العمل جارٍ التحميل…"
+    },
+    {
+      "filename": "home-en-empty.png",
+      "query": "screen=home&locale=en&scenario=empty",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni PE Hi Preview Today at work  You're all caught up Have a great rest of your day.  Today's shift No shift scheduled today  Attendance Present Latest attendance status  "
+    },
+    {
+      "filename": "home-ar-empty.png",
+      "query": "screen=home&locale=ar&scenario=empty",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  مناوبة اليوم لا توجد مناوبة اليوم  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام متاحة طلب إجازة  الو"
+    },
+    {
+      "filename": "home-en-error.png",
+      "query": "screen=home&locale=en&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  Something went wrong We couldn't load this right now. Please try again. Try again"
+    },
+    {
+      "filename": "home-ar-error.png",
+      "query": "screen=home&locale=ar&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  حدث خطأ ما تعذر تحميل المحتوى الآن. حاول مرة أخرى. حاول مرة أخرى"
+    },
+    {
+      "filename": "onboarding-en.png",
+      "query": "screen=onboarding&locale=en&scenario=multi",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni Your checklist A few clear steps to get you set up and ready to go. Overall progress 1 of 2 done 50% To do REQUIRED Pending Personal photo Add a clear photo so your team"
+    },
+    {
+      "filename": "onboarding-ar.png",
+      "query": "screen=onboarding&locale=ar&scenario=multi",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ١ من ٢ مكتمل ٥٠% المطلوب مطلوب قيد الانتظار الصورة الشخصية أضف صورة واضحة حتى يتعرّف عليك فريقك. ارفع ال"
+    },
+    {
+      "filename": "onboarding-en-loading.png",
+      "query": "screen=onboarding&locale=en&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni Your checklist Loading…"
+    },
+    {
+      "filename": "onboarding-ar-loading.png",
+      "query": "screen=onboarding&locale=ar&scenario=loading",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني قائمة مهامك جارٍ التحميل…"
+    },
+    {
+      "filename": "onboarding-en-empty.png",
+      "query": "screen=onboarding&locale=en&scenario=empty",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni Your checklist A few clear steps to get you set up and ready to go. Overall progress 1 of 1 done 100%  You're ready to go There are no outstanding checklist items. Subm"
+    },
+    {
+      "filename": "onboarding-ar-empty.png",
+      "query": "screen=onboarding&locale=ar&scenario=empty",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ١ من ١ مكتمل ١٠٠%  أصبحت جاهزاً لا توجد مهام معلقة في قائمتك. المُرسَل  الصورة الشخصية مكتمل  بياناتك"
+    },
+    {
+      "filename": "onboarding-en-error.png",
+      "query": "screen=onboarding&locale=en&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  Something went wrong We couldn't load this right now. Please try again. Try again"
+    },
+    {
+      "filename": "onboarding-ar-error.png",
+      "query": "screen=onboarding&locale=ar&scenario=error",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  حدث خطأ ما تعذر تحميل المحتوى الآن. حاول مرة أخرى. حاول مرة أخرى"
+    },
+    {
+      "filename": "onboarding-en-review.png",
+      "query": "screen=onboarding&locale=en&scenario=review",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni Your checklist A few clear steps to get you set up and ready to go. Overall progress 0 of 1 done 0% To do REQUIRED Pending Personal photo Add a clear photo so your team "
+    },
+    {
+      "filename": "onboarding-ar-review.png",
+      "query": "screen=onboarding&locale=ar&scenario=review",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ٠ من ١ مكتمل ٠% المطلوب مطلوب قيد الانتظار الصورة الشخصية أضف صورة واضحة حتى يتعرّف عليك فريقك. تم الإرس"
+    },
+    {
+      "filename": "onboarding-en-rejected.png",
+      "query": "screen=onboarding&locale=en&scenario=rejected",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni Your checklist A few clear steps to get you set up and ready to go. Overall progress 0 of 1 done 0% To do REQUIRED Not approved Personal photo Add a clear photo so your "
+    },
+    {
+      "filename": "onboarding-ar-rejected.png",
+      "query": "screen=onboarding&locale=ar&scenario=rejected",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ٠ من ١ مكتمل ٠% المطلوب مطلوب غير موافَق عليها الصورة الشخصية أضف صورة واضحة حتى يتعرّف عليك فريقك. هذا "
+    },
+    {
+      "filename": "onboarding-en-completed.png",
+      "query": "screen=onboarding&locale=en&scenario=completed",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni Your checklist A few clear steps to get you set up and ready to go. Overall progress 1 of 1 done 100%  You're ready to go There are no outstanding checklist items. Subm"
+    },
+    {
+      "filename": "onboarding-ar-completed.png",
+      "query": "screen=onboarding&locale=ar&scenario=completed",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ١ من ١ مكتمل ١٠٠%  أصبحت جاهزاً لا توجد مهام معلقة في قائمتك. المُرسَل  الصورة الشخصية مكتمل  بياناتك"
+    },
+    {
+      "filename": "interactive-ar-switch",
+      "query": "control-tap",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "http://127.0.0.1:8091/design-preview?screen=activation&locale=ar&scenario=default | وظفني يوم عملك، ببساطة أهلاً بك في وظفني كل ما يخص يوم عملك، مرتب ببساطة. سجّل الدخول بالبيانات التي زوّدك بها فريق المو"
+    },
+    {
+      "filename": "interactive-preserve-locale",
+      "query": "screen+scenario",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
+    },
+    {
+      "filename": "interactive-refresh-preserve",
+      "query": "reload",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
+    }
+  ],
+  "failed": 0
+}

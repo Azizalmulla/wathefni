@@ -26,6 +26,8 @@ def main() -> None:
     home = read("app/(tabs)/index.tsx")
     home_view = read("src/features/home/HomeView.tsx")
     preview = read("src/designPreview.ts")
+    premium = read("src/components/premium.tsx")
+    motion = read("src/motion.ts")
     leave_request = read("app/leave/request.tsx")
     documents = read("app/documents.tsx")
     settings = read("app/settings.tsx")
@@ -54,6 +56,17 @@ def main() -> None:
     check(
         "design fixtures require explicit build flag",
         "EXPO_PUBLIC_DESIGN_PREVIEW" in preview and "design-preview-only" in preview,
+    )
+    check(
+        "Wathefni branding is typography only",
+        "function Wordmark" in premium
+        and "Newsreader_600SemiBold" in premium
+        and "NotoKufiArabic_600SemiBold" in premium
+        and "brandMark" not in premium,
+    )
+    check(
+        "motion respects reduced-motion preference",
+        "isReduceMotionEnabled" in motion and "reduceMotionChanged" in motion,
     )
     check("leave types come from backend", "me?.leave.types" in leave_request and "LEAVE_TYPES" not in leave_request)
     check("documents do not read secure-store tokens directly", "loadSession" not in documents and "download" in documents)

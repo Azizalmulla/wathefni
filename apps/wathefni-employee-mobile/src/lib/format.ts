@@ -19,6 +19,8 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'approved':
     case 'received':
     case 'present':
+    case 'reviewed':
+    case 'completed':
       return 'success'
     case 'requested':
     case 'pending':
@@ -53,10 +55,24 @@ export function formatDate(value: string | null | undefined, locale: string): st
   }).format(d)
 }
 
-export function formatTimeRange(start: string | null, end: string | null): string {
+export function localizeNumerals(value: string | number, locale: string): string {
+  const text = String(value)
+  if (locale !== 'ar') return text
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩']
+  return text.replace(/\d/g, (digit) => arabicDigits[Number(digit)])
+}
+
+export function formatNumber(value: number, locale: string, maximumFractionDigits = 1): string {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-KW-u-nu-arab' : 'en-GB', {
+    maximumFractionDigits,
+    useGrouping: false,
+  }).format(value)
+}
+
+export function formatTimeRange(start: string | null, end: string | null, locale = 'en'): string {
   const fmt = (t: string | null) => (t ? String(t).slice(0, 5) : null)
   const s = fmt(start)
   const e = fmt(end)
-  if (s && e) return `${s} – ${e}`
-  return s || e || '—'
+  const range = s && e ? `${s} – ${e}` : s || e || '—'
+  return localizeNumerals(range, locale)
 }

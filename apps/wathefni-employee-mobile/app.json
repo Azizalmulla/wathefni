@@ -7,7 +7,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "ai.wathefni.employee",
@@ -18,7 +20,11 @@
     },
     "android": {
       "package": "ai.wathefni.employee",
-      "permissions": ["CAMERA", "READ_MEDIA_IMAGES", "POST_NOTIFICATIONS"]
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -31,7 +37,8 @@
           "photosPermission": "Wathefni accesses your photos only when you choose to attach a document to upload to HR.",
           "cameraPermission": "Wathefni uses the camera only when you choose to capture a document to upload to HR."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {},

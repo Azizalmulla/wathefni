@@ -1,13 +1,21 @@
 import { Tabs } from 'expo-router'
-import { Text } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { colors, font, radius, shadows } from '@/theme'
 
-// Lightweight text glyph tab icons (no extra icon dependency for V1).
-function TabIcon({ glyph, color }: { glyph: string; color: string }) {
-  return <Text style={{ fontSize: 18, color }}>{glyph}</Text>
+function TabIcon({
+  name,
+  focused,
+  color,
+}: {
+  name: 'home' | 'mail' | 'calendar' | 'umbrella' | 'person'
+  focused: boolean
+  color: string
+}) {
+  const iconName = (focused ? name : `${name}-outline`) as keyof typeof Ionicons.glyphMap
+  return <Ionicons name={iconName} size={21} color={color} />
 }
 
 export default function TabsLayout() {
@@ -20,12 +28,13 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.bg },
         headerShadowVisible: false,
         headerTitleStyle: { color: colors.text, fontWeight: '700', fontSize: font.h3 },
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: colors.ink,
         tabBarInactiveTintColor: colors.subtle,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', paddingBottom: 4 },
+        tabBarLabelStyle: { fontSize: 10.5, fontWeight: '700', paddingBottom: 5 },
         tabBarStyle: {
-          height: 68,
-          paddingTop: 7,
+          height: 72,
+          paddingTop: 8,
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopLeftRadius: radius.xl,
@@ -36,18 +45,18 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: t('tabs.home'), headerShown: false, tabBarIcon: ({ color }) => <TabIcon glyph="⌂" color={color} /> }}
+        options={{ title: t('tabs.home'), headerShown: false, tabBarIcon: ({ color, focused }) => <TabIcon name="home" focused={focused} color={color} /> }}
       />
       <Tabs.Screen
         name="notifications"
-        options={{ title: t('tabs.notifications'), tabBarIcon: ({ color }) => <TabIcon glyph="✉" color={color} /> }}
+        options={{ title: t('tabs.notifications'), tabBarIcon: ({ color, focused }) => <TabIcon name="mail" focused={focused} color={color} /> }}
       />
       <Tabs.Screen
         name="shifts"
         options={{
           title: t('tabs.shifts'),
           href: hasFeature('shifts') ? undefined : null,
-          tabBarIcon: ({ color }) => <TabIcon glyph="◷" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="calendar" focused={focused} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -55,12 +64,12 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.leave'),
           href: hasFeature('leave') ? undefined : null,
-          tabBarIcon: ({ color }) => <TabIcon glyph="✈" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="umbrella" focused={focused} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: t('tabs.profile'), tabBarIcon: ({ color }) => <TabIcon glyph="☻" color={color} /> }}
+        options={{ title: t('tabs.profile'), tabBarIcon: ({ color, focused }) => <TabIcon name="person" focused={focused} color={color} /> }}
       />
     </Tabs>
   )

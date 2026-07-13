@@ -1,5 +1,6 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
+  ActivityIndicator,
   Animated,
   Platform,
   Pressable,
@@ -13,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 
 import { useI18n } from '@/i18n'
+import { motion, useReducedMotion } from '@/motion'
 import { colors, font, radius, shadows, spacing } from '@/theme'
 
 export type PastelTone = 'lilac' | 'butter' | 'blush' | 'sage' | 'sky' | 'cream'
@@ -26,37 +28,129 @@ const pastelColors: Record<PastelTone, string> = {
   cream: colors.surface,
 }
 
+export const wordmarkRules = {
+  englishFont: 'Newsreader_600SemiBold',
+  arabicFont: 'NotoKufiArabic_600SemiBold',
+  englishTracking: -0.55,
+  arabicTracking: -0.1,
+  clearSpaceEm: 0.6,
+  minimumSize: 15,
+} as const
+
 export function editorialFont(locale: string): string {
   if (Platform.OS === 'ios') return locale === 'ar' ? 'Geeza Pro' : 'Georgia'
   return locale === 'ar' ? 'sans-serif' : 'serif'
 }
 
-export function FadeIn({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  const opacity = useRef(new Animated.Value(0)).current
-  const translateY = useRef(new Animated.Value(8)).current
+export function FadeIn({
+  children,
+  style,
+  delay = 0,
+  lift = 8,
+}: {
+  children: ReactNode
+  style?: StyleProp<ViewStyle>
+  delay?: number
+  lift?: number
+}) {
+  const reducedMotion = useReducedMotion()
+  const opacity = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current
+  const translateY = useRef(new Animated.Value(reducedMotion ? 0 : lift)).current
 
   useEffect(() => {
+    if (reducedMotion) {
+      opacity.setValue(1)
+      translateY.setValue(0)
+      return
+    }
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 340, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 340, useNativeDriver: true }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: motion.duration.enter,
+        delay,
+        easing: motion.easing.standard,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: motion.duration.enter,
+        delay,
+        easing: motion.easing.standard,
+        useNativeDriver: true,
+      }),
     ]).start()
-  }, [opacity, translateY])
+  }, [delay, lift, opacity, reducedMotion, translateY])
 
   return <Animated.View style={[style, { opacity, transform: [{ translateY }] }]}>{children}</Animated.View>
 }
 
-export function BrandLockup({ compact = false }: { compact?: boolean }) {
-  const { t, isRTL } = useI18n()
+export function Wordmark({
+  compact = false,
+  align,
+}: {
+  compact?: boolean
+  align?: 'start' | 'center'
+}) {
+  const { locale, isRTL } = useI18n()
+  const arabic = locale === 'ar'
   return (
-    <View style={[styles.brand, isRTL && styles.rowReverse]}>
-      <View style={[styles.brandMark, compact && styles.brandMarkCompact]} accessibilityElementsHidden>
-        <View style={[styles.brandPetal, styles.petalOne]} />
-        <View style={[styles.brandPetal, styles.petalTwo]} />
-        <View style={[styles.brandPetal, styles.petalThree]} />
-      </View>
-      <Text style={[styles.brandText, compact && styles.brandTextCompact, { fontFamily: editorialFont(isRTL ? 'ar' : 'en') }]}>
-        {t('app.name')}
+    <View
+      accessibilityRole="header"
+      accessibilityLabel={arabic ? 'وظفني' : 'Wathefni'}
+      style={[
+        styles.wordmarkWrap,
+        align === 'center' && styles.wordmarkCentered,
+        align !== 'center' && (isRTL ? styles.wordmarkEnd : styles.wordmarkStart),
+      ]}
+    >
+      <Text
+        maxFontSizeMultiplier={1.25}
+        style={[
+          styles.wordmark,
+          compact && styles.wordmarkCompact,
+          {
+            fontFamily: arabic ? wordmarkRules.arabicFont : wordmarkRules.englishFont,
+            letterSpacing: arabic ? wordmarkRules.arabicTracking : wordmarkRules.englishTracking,
+            writingDirection: arabic ? 'rtl' : 'ltr',
+          },
+        ]}
+      >
+        {arabic ? 'وظفني' : 'Wathefni'}
       </Text>
+    </View>
+  )
+}
+
+// Four fixed organic forms create one repeatable Wathefni decorative grammar.
+// Variant controls scale and crop; color order, overlap, and proportions stay fixed.
+export function WathefniBloom({
+  variant = 'corner',
+  mirrored,
+  style,
+}: {
+  variant?: 'corner' | 'ribbon' | 'watermark'
+  mirrored?: boolean
+  style?: StyleProp<ViewStyle>
+}) {
+  const { isRTL } = useI18n()
+  const flip = mirrored ?? isRTL
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.bloom,
+        variant === 'corner' && styles.bloomCorner,
+        variant === 'ribbon' && styles.bloomRibbon,
+        variant === 'watermark' && styles.bloomWatermark,
+        flip && styles.bloomMirrored,
+        style,
+      ]}
+    >
+      <View style={[styles.bloomShape, styles.bloomLilac]} />
+      <View style={[styles.bloomShape, styles.bloomButter]} />
+      <View style={[styles.bloomShape, styles.bloomBlush]} />
+      <View style={[styles.bloomShape, styles.bloomSage]} />
     </View>
   )
 }
@@ -73,6 +167,7 @@ export function EditorialHeading({
   const { locale, isRTL } = useI18n()
   return (
     <Text
+      maxFontSizeMultiplier={1.3}
       style={[
         size === 'large' ? styles.editorialLarge : styles.editorialMedium,
         { fontFamily: editorialFont(locale), textAlign: isRTL ? 'right' : 'left' },
@@ -112,11 +207,103 @@ export function PastelCard({
       onPress={onPress}
       style={({ pressed }) => [
         containerStyle,
-        { opacity: pressed ? 0.82 : 1, transform: [{ scale: pressed ? 0.99 : 1 }] },
+        { opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.992 : 1 }] },
       ]}
     >
       {body}
     </Pressable>
+  )
+}
+
+export function PremiumButton({
+  label,
+  onPress,
+  disabled = false,
+  busy = false,
+  success = false,
+  showDirection = false,
+}: {
+  label: string
+  onPress: () => void
+  disabled?: boolean
+  busy?: boolean
+  success?: boolean
+  showDirection?: boolean
+}) {
+  const { isRTL } = useI18n()
+  const reducedMotion = useReducedMotion()
+  const scale = useRef(new Animated.Value(1)).current
+  const unavailable = disabled || busy || success
+
+  const animate = (toValue: number) => {
+    if (reducedMotion) return
+    Animated.spring(scale, {
+      toValue,
+      useNativeDriver: true,
+      speed: motion.spring.speed,
+      bounciness: motion.spring.bounciness,
+    }).start()
+  }
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: unavailable, busy }}
+        disabled={unavailable}
+        onPress={onPress}
+        onPressIn={() => animate(0.985)}
+        onPressOut={() => animate(1)}
+        style={[styles.premiumButton, disabled && styles.premiumButtonDisabled, success && styles.premiumButtonSuccess]}
+      >
+        {busy ? (
+          <ActivityIndicator size="small" color={colors.surface} />
+        ) : (
+          <View style={[styles.buttonContent, isRTL && styles.rowReverse]}>
+            {success ? <Ionicons name="checkmark" size={18} color={colors.surface} /> : null}
+            <Text style={styles.premiumButtonText}>{label}</Text>
+            {showDirection && !success ? (
+              <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={17} color={colors.surface} />
+            ) : null}
+          </View>
+        )}
+      </Pressable>
+    </Animated.View>
+  )
+}
+
+export function MotionProgressBar({ value }: { value: number }) {
+  const normalized = Math.max(0, Math.min(1, value))
+  const reducedMotion = useReducedMotion()
+  const progress = useRef(new Animated.Value(reducedMotion ? normalized : 0)).current
+  const [trackWidth, setTrackWidth] = useState(0)
+
+  useEffect(() => {
+    if (reducedMotion) {
+      progress.setValue(normalized)
+      return
+    }
+    Animated.timing(progress, {
+      toValue: normalized,
+      duration: motion.duration.progress,
+      easing: motion.easing.standard,
+      useNativeDriver: false,
+    }).start()
+  }, [normalized, progress, reducedMotion])
+
+  const width = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, trackWidth],
+  })
+  return (
+    <View
+      style={styles.progressTrack}
+      onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(normalized * 100) }}
+    >
+      <Animated.View style={[styles.progressFill, { width }]} />
+    </View>
   )
 }
 
@@ -159,22 +346,55 @@ export function PreviewSkeleton({ rows = 3 }: { rows?: number }) {
 
 const styles = StyleSheet.create({
   rowReverse: { flexDirection: 'row-reverse' },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  brandMark: { width: 29, height: 26, position: 'relative' },
-  brandMarkCompact: { transform: [{ scale: 0.86 }] },
-  brandPetal: {
-    position: 'absolute',
-    width: 10,
-    height: 22,
-    borderRadius: radius.pill,
-    backgroundColor: colors.ink,
-    bottom: 1,
+  wordmarkWrap: { alignSelf: 'flex-start', minHeight: 30, justifyContent: 'center' },
+  wordmarkCentered: { alignSelf: 'center' },
+  wordmarkStart: { alignSelf: 'flex-start' },
+  wordmarkEnd: { alignSelf: 'flex-end' },
+  wordmark: {
+    color: colors.ink,
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: '600',
   },
-  petalOne: { left: 2, transform: [{ rotate: '-31deg' }] },
-  petalTwo: { left: 10, bottom: 5, transform: [{ rotate: '-15deg' }] },
-  petalThree: { right: 0, bottom: 7, height: 17, transform: [{ rotate: '40deg' }] },
-  brandText: { color: colors.ink, fontSize: font.h2, fontWeight: '700' },
-  brandTextCompact: { fontSize: font.h3 },
+  wordmarkCompact: { fontSize: 17, lineHeight: 24 },
+  bloom: { position: 'absolute', overflow: 'hidden' },
+  bloomCorner: { width: 108, height: 94, top: -12, right: -6 },
+  bloomRibbon: { position: 'relative', width: '100%', height: 58, opacity: 0.82 },
+  bloomWatermark: { width: 92, height: 88, top: -4, right: -8, opacity: 0.68 },
+  bloomMirrored: { transform: [{ scaleX: -1 }] },
+  bloomShape: { position: 'absolute', borderRadius: 28 },
+  bloomLilac: {
+    width: 49,
+    height: 28,
+    right: 34,
+    top: 5,
+    backgroundColor: colors.pastelLilac,
+    transform: [{ rotate: '24deg' }],
+  },
+  bloomButter: {
+    width: 34,
+    height: 50,
+    right: 6,
+    top: 18,
+    backgroundColor: colors.pastelButter,
+    transform: [{ rotate: '-18deg' }],
+  },
+  bloomBlush: {
+    width: 45,
+    height: 30,
+    right: 43,
+    top: 46,
+    backgroundColor: colors.pastelBlush,
+    transform: [{ rotate: '-28deg' }],
+  },
+  bloomSage: {
+    width: 31,
+    height: 33,
+    right: 16,
+    top: 58,
+    backgroundColor: colors.pastelSage,
+    transform: [{ rotate: '15deg' }],
+  },
   editorialLarge: {
     color: colors.ink,
     fontSize: font.display,
@@ -195,6 +415,33 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...shadows.card,
   },
+  premiumButton: {
+    height: 48,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.ink,
+    shadowColor: colors.ink,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+  premiumButtonDisabled: {
+    backgroundColor: '#BEB8AF',
+    shadowOpacity: 0,
+  },
+  premiumButtonSuccess: { backgroundColor: colors.success },
+  buttonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+  premiumButtonText: { color: colors.surface, fontSize: font.body, fontWeight: '700', letterSpacing: -0.1 },
+  progressTrack: {
+    height: 6,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.58)',
+  },
+  progressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.accent },
   iconBadge: {
     alignItems: 'center',
     justifyContent: 'center',

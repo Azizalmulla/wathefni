@@ -9,10 +9,13 @@
     "ios": "expo start --ios",
     "preview:design": "EXPO_PUBLIC_DESIGN_PREVIEW=1 expo start --web",
     "preview:capture": "node scripts/capture-phase9a2-previews.mjs",
+    "preview:verify": "node scripts/capture-phase9a2-previews.mjs",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@expo-google-fonts/newsreader": "^0.4.1",
+    "@expo-google-fonts/noto-kufi-arabic": "^0.4.3",
     "@expo/metro-runtime": "~3.2.3",
     "@expo/vector-icons": "^14.0.3",
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -22,6 +25,7 @@
     "expo-device": "~6.0.2",
     "expo-document-picker": "~12.0.2",
     "expo-file-system": "~17.0.1",
+    "expo-font": "~12.0.10",
     "expo-image-picker": "~15.0.7",
     "expo-linking": "~6.3.1",
     "expo-localization": "~15.0.3",

@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, View } from 'react-native'
+import { useFonts } from 'expo-font'
+import { Newsreader_600SemiBold } from '@expo-google-fonts/newsreader/600SemiBold'
+import { NotoKufiArabic_600SemiBold } from '@expo-google-fonts/noto-kufi-arabic/600SemiBold'
 
 import { AuthProvider, useAuth } from '@/auth/AuthProvider'
 import { I18nProvider, loadInitialLocale, useI18n, type AppLocale } from '@/i18n'
@@ -66,7 +69,7 @@ function AuthGate() {
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="design-preview" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade_from_bottom' }} />
       <Stack.Screen name="documents" options={{ title: t('documents.title') }} />
       <Stack.Screen name="attendance" options={{ title: t('attendance.title') }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
@@ -77,12 +80,16 @@ function AuthGate() {
 
 export default function RootLayout() {
   const [locale, setLocale] = useState<AppLocale | null>(null)
+  const [fontsLoaded, fontError] = useFonts({
+    Newsreader_600SemiBold,
+    NotoKufiArabic_600SemiBold,
+  })
 
   useEffect(() => {
     void loadInitialLocale().then(setLocale)
   }, [])
 
-  if (!locale) {
+  if (!locale || (!fontsLoaded && !fontError)) {
     // Pre-i18n: must not use any component that calls useI18n yet.
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>

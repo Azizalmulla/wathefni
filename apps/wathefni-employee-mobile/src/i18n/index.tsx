@@ -60,8 +60,10 @@ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLo
   i18n.locale = locale
 
   const setLocale = useCallback(async (next: AppLocale) => {
-    await AsyncStorage.setItem(LOCALE_KEY, next)
+    // Update in-memory locale first so interactive previews and settings switches
+    // never stall behind AsyncStorage or native RTL bookkeeping.
     i18n.locale = next
+    setLocaleState(next)
     const rtl = next === 'ar'
     // RTL flips require a reload to fully apply; we set it so the next launch is
     // correct and re-render immediately for everything layout-direction-agnostic.
@@ -69,7 +71,11 @@ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLo
       I18nManager.allowRTL(rtl)
       I18nManager.forceRTL(rtl)
     }
-    setLocaleState(next)
+    try {
+      await AsyncStorage.setItem(LOCALE_KEY, next)
+    } catch {
+      // Persistence is best-effort. Preview/web must still switch immediately.
+    }
   }, [])
 
   const value = useMemo<I18nContextValue>(

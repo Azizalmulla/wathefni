@@ -3,9 +3,17 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useI18n } from '@/i18n'
-import { Button, ProgressBar, StatusChip } from '@/components/ui'
-import { BrandLockup, EditorialHeading, FadeIn, PastelCard, PreviewSkeleton } from '@/components/premium'
-import { statusLabel, statusTone } from '@/lib/format'
+import { StatusChip } from '@/components/ui'
+import {
+  EditorialHeading,
+  FadeIn,
+  MotionProgressBar,
+  PastelCard,
+  PremiumButton,
+  PreviewSkeleton,
+  Wordmark,
+} from '@/components/premium'
+import { formatNumber, statusLabel, statusTone } from '@/lib/format'
 import { colors, font, radius, shadows, spacing } from '@/theme'
 import type { OnboardingItem, OnboardingResponse } from '@/api/types'
 
@@ -17,7 +25,7 @@ type OnboardingViewProps = {
 }
 
 export function OnboardingView({ data, uploadingId, onUpload, onBack }: OnboardingViewProps) {
-  const { t, isRTL } = useI18n()
+  const { t, isRTL, locale } = useI18n()
   const pending = data.pending ?? []
   const received = data.received ?? []
   const canUpload = Boolean(data.can_upload)
@@ -32,7 +40,7 @@ export function OnboardingView({ data, uploadingId, onUpload, onBack }: Onboardi
           <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={onBack} style={styles.backButton}>
             <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
           </Pressable>
-          <BrandLockup compact />
+          <Wordmark compact align="center" />
           <View style={styles.navSpacer} />
         </View>
 
@@ -46,14 +54,19 @@ export function OnboardingView({ data, uploadingId, onUpload, onBack }: Onboardi
             <View style={styles.progressCopy}>
               <Text style={[styles.progressLabel, align]}>{t('onboarding.progressLabel')}</Text>
               <Text style={[styles.progressValue, align]}>
-                {t('onboarding.progress', { done: data.received_count, total: data.required_total })}
+                {t('onboarding.progress', {
+                  done: formatNumber(data.received_count, locale, 0),
+                  total: formatNumber(data.required_total, locale, 0),
+                })}
               </Text>
             </View>
             <View style={styles.progressBubble}>
-              <Text style={styles.progressPercent}>{Math.round(progress * 100)}%</Text>
+              <Text style={styles.progressPercent}>
+                {formatNumber(Math.round(progress * 100), locale, 0)}%
+              </Text>
             </View>
           </View>
-          <ProgressBar value={progress} />
+          <MotionProgressBar value={progress} />
         </PastelCard>
 
         {pending.length ? (
@@ -63,7 +76,7 @@ export function OnboardingView({ data, uploadingId, onUpload, onBack }: Onboardi
               <ChecklistCard
                 key={itemKey(item, index)}
                 item={item}
-                tone={index % 2 ? 'sky' : 'lilac'}
+                tone={(item.status || '').toLowerCase() === 'rejected' ? 'blush' : index % 2 ? 'sky' : 'lilac'}
                 canUpload={canUpload}
                 uploading={uploadingId === item.item_id}
                 onUpload={onUpload}
@@ -105,7 +118,7 @@ export function OnboardingLoadingView() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.stateContent}>
-        <BrandLockup compact />
+        <Wordmark compact />
         <EditorialHeading>{t('onboarding.checklistTitle')}</EditorialHeading>
         <PastelCard tone="lilac" style={styles.loadingCard}>
           <PreviewSkeleton rows={3} />
@@ -122,12 +135,12 @@ export function OnboardingErrorView({ onRetry }: { onRetry: () => void }) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.stateContent}>
-        <BrandLockup compact />
+        <Wordmark compact />
         <PastelCard tone="blush" style={styles.errorCard}>
           <Ionicons name="cloud-offline-outline" size={34} color={colors.danger} />
           <EditorialHeading size="medium">{t('common.error')}</EditorialHeading>
           <Text style={[styles.stateMessage, align]}>{t('error.generic')}</Text>
-          <Button label={t('common.retry')} onPress={onRetry} />
+          <PremiumButton label={t('common.retry')} onPress={onRetry} />
         </PastelCard>
       </View>
     </SafeAreaView>
@@ -142,7 +155,7 @@ function ChecklistCard({
   onUpload,
 }: {
   item: OnboardingItem
-  tone: 'lilac' | 'sky'
+  tone: 'lilac' | 'sky' | 'blush'
   canUpload: boolean
   uploading: boolean
   onUpload: (item: OnboardingItem) => void
@@ -155,6 +168,16 @@ function ChecklistCard({
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
   const rowDirection = isRTL ? styles.rowReverse : undefined
   const photo = (item.item_id || item.document_type) === 'personal_photo'
+  const normalizedStatus = (item.status || 'pending').toLowerCase()
+  const rejected = normalizedStatus === 'rejected'
+  const awaitingReview = Boolean(item.file_id) && !rejected && !['completed', 'approved', 'reviewed'].includes(normalizedStatus)
+  const guidance = rejected
+    ? t('onboarding.rejectedGuidance')
+    : awaitingReview
+      ? t('onboarding.reviewGuidance')
+      : allowUpload
+        ? t('onboarding.uploadGuidance')
+        : t('onboarding.uploadUnavailable')
 
   return (
     <PastelCard tone={tone} style={styles.taskCard}>
@@ -162,7 +185,7 @@ function ChecklistCard({
         <View style={styles.flex}>
           <View style={[styles.requirementRow, rowDirection]}>
             <View style={[styles.requirementPill, item.required === false && styles.optionalPill]}>
-              <Text style={styles.requirementText}>
+              <Text style={[styles.requirementText, item.required === false && styles.optionalText]}>
                 {item.required === false ? t('onboarding.optional') : t('onboarding.required')}
               </Text>
             </View>
@@ -170,6 +193,16 @@ function ChecklistCard({
           </View>
           <Text style={[styles.taskTitle, align]}>{title}</Text>
           <Text style={[styles.taskDescription, align]}>{description}</Text>
+          <Text
+            style={[
+              styles.guidance,
+              rejected && styles.guidanceRejected,
+              awaitingReview && styles.guidanceReview,
+              align,
+            ]}
+          >
+            {guidance}
+          </Text>
         </View>
         <View style={styles.taskArt}>
           <Ionicons name={photo ? 'person' : 'document-text-outline'} size={38} color={colors.ink} />
@@ -180,15 +213,13 @@ function ChecklistCard({
           ) : null}
         </View>
       </View>
-      {allowUpload ? (
-        <Button
-          label={item.file_id ? t('onboarding.replace') : photo ? t('onboarding.uploadPhoto') : t('onboarding.upload')}
+      {allowUpload && !awaitingReview ? (
+        <PremiumButton
+          label={item.file_id || rejected ? t('onboarding.replace') : photo ? t('onboarding.uploadPhoto') : t('onboarding.upload')}
           busy={uploading}
           onPress={() => onUpload(item)}
         />
-      ) : (
-        <Text style={[styles.unavailableText, align]}>{t('onboarding.uploadUnavailable')}</Text>
-      )}
+      ) : null}
     </PastelCard>
   )
 }
@@ -247,14 +278,14 @@ const styles = StyleSheet.create({
   rowReverse: { flexDirection: 'row-reverse' },
   nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 52 },
   backButton: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
   },
-  navSpacer: { width: 38 },
+  navSpacer: { width: 44 },
   hero: { gap: spacing.sm },
   subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 22, maxWidth: 330 },
   progressCard: { gap: spacing.md },
@@ -280,12 +311,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.ink,
   },
-  optionalPill: { backgroundColor: colors.surfaceMuted },
-  requirementText: { color: colors.ink, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
+  optionalPill: { backgroundColor: 'rgba(255,255,255,0.72)' },
+  requirementText: { color: colors.surface, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
+  optionalText: { color: colors.ink },
   taskTitle: { color: colors.ink, fontSize: font.h3, fontWeight: '800', marginBottom: spacing.xs },
   taskDescription: { color: colors.subtle, fontSize: font.small, lineHeight: 19 },
+  guidance: { color: colors.ink, fontSize: font.tiny, lineHeight: 17, marginTop: spacing.sm, fontWeight: '600' },
+  guidanceRejected: { color: colors.danger },
+  guidanceReview: { color: colors.warning },
   taskArt: {
     width: 88,
     height: 88,
@@ -307,7 +342,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.ink,
   },
-  unavailableText: { color: colors.subtle, fontSize: font.tiny, fontStyle: 'italic' },
   reviewedRow: {
     flexDirection: 'row',
     alignItems: 'center',

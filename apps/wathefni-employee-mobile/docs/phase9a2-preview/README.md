@@ -7,7 +7,7 @@ unless the explicit `EXPO_PUBLIC_DESIGN_PREVIEW=1` build-time flag is present.
 No normal EAS profile sets that flag.
 
 The first slice covers Activation, Home, and Onboarding in English and Arabic,
-plus capability and loading/empty/error states.
+plus capability and loading/empty/error/review/rejected states.
 
 ## Real-device preview
 
@@ -24,41 +24,66 @@ npx serve -s /tmp/wathefni-preview -l 8091
 On an iPhone connected to the same Wi-Fi, open:
 
 ```text
-http://<mac-lan-ip>:8091/design-preview
+http://<mac-lan-ip>:8091/design-preview?screen=activation&locale=en&scenario=default
 ```
 
 For an app-like launch during review, use Safari's Share menu and choose
 **Add to Home Screen**.
 
-The floating review controls switch between Activation, Home, Onboarding,
-English, Arabic, multi-capability, minimal-capability, loading, empty, and error
-states. Activation continues to Home; the authorized onboarding entry continues
-to the checklist. The controls are hidden in captured screenshots.
+Preview URL query params are the source of truth:
+
+- `screen`: `activation` | `home` | `onboarding`
+- `locale`: `en` | `ar`
+- `scenario`: screen-specific; invalid values fall back safely
+- `capture=1`: hides the review controls
+
+Supported scenarios:
+
+- Activation: `default`, `loading`, `error`
+- Home: `multi`, `minimal`, `loading`, `empty`, `error`
+- Onboarding: `multi`, `loading`, `empty`, `error`, `review`, `rejected`, `completed`
+
+Changing language, screen, or scenario updates the URL immediately and preserves
+the other selected controls. Refresh restores the same combination. The selected
+control shows an active state (`… selected` accessibility label + butter highlight).
 
 ## Screenshot set
 
-- `activation-en.png`, `home-en-multi.png`, `onboarding-en.png`
-- `activation-ar.png`, `home-ar-multi.png`, `onboarding-ar.png`
-- `home-en-minimal.png`
-- `onboarding-en-loading.png`, `onboarding-en-empty.png`
-- `activation-en-error.png`
-
-Regenerate the set after serving the exported preview:
+Regenerate and verify:
 
 ```sh
-npm run preview:capture
+npm run preview:verify
 ```
 
-## First-slice tokens and components
+Results are written to `verification-matrix.json`.
 
-- Warm cream canvas, near-black ink, white-cream surfaces, subtle warm borders.
-- Lilac, butter, blush, sage, and sky capability cards.
-- 24–28 px rounded cards, pill controls, and low warm shadows.
-- Georgia editorial moments in English, Geeza Pro/system Arabic for RTL hero
-  moments, and native system sans-serif for operational UI.
-- `BrandLockup`, `EditorialHeading`, `PastelCard`, `IconBadge`, `DirectionalIcon`,
-  `FadeIn`, and `PreviewSkeleton`.
-- Feature views: `ActivationView`, `HomeView`, and `OnboardingView`.
+## Typography-only wordmark
+
+- English artwork: `Wathefni` in bundled Newsreader SemiBold, 22/30 at full size
+  and 17/24 in authenticated headers, with -0.55 optical tracking.
+- Arabic artwork: `وظفني` in bundled Noto Kufi Arabic SemiBold, matched to the
+  English wordmark's weight and visual height, with -0.1 optical tracking.
+- Minimum digital size is 15 px. Preserve clear space of at least 0.6 times the
+  wordmark text height on every side.
+- Keep both wordmarks on one line, never stretch or outline them, and never pair
+  them with a heart, W, abstract mark, app icon, or other logo symbol.
+- Hero headings continue to use Georgia/Geeza Pro/system editorial typography;
+  the dedicated wordmark faces must not be reused for screen headings.
+
+## Motion rules
+
+- Input focus and button feedback: 120–180 ms.
+- Fade-and-lift entry: 280 ms with an 8 px maximum lift.
+- Progress transitions: 420 ms.
+- Springs use low bounciness and settle quickly; no repeated or decorative
+  looping motion.
+- All first-slice motion reads the operating system reduced-motion setting and
+  resolves immediately when reduction is enabled.
+
+Reusable components: `Wordmark`, `WathefniBloom`, `EditorialHeading`, `PastelCard`,
+`PremiumButton`, `MotionProgressBar`, `IconBadge`, `DirectionalIcon`, `FadeIn`,
+and `PreviewSkeleton`. Feature views: `ActivationView`, `HomeView`, and
+`OnboardingView`.
 
 The concept's employee photo, payslip card, compliance actions, and example
 employment data were deliberately not copied. The real app uses authenticated

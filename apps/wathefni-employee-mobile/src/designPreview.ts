@@ -122,6 +122,48 @@ export const previewOnboarding: OnboardingResponse = {
   can_upload: true,
 }
 
+export const rejectedOnboarding: OnboardingResponse = {
+  ok: true,
+  status: 'in_progress',
+  required_total: 1,
+  received_count: 0,
+  pending_count: 1,
+  pending: [
+    {
+      item_id: 'personal_photo',
+      document_type: 'personal_photo',
+      item_type: 'document',
+      status: 'rejected',
+      required: true,
+      file_id: 'preview-rejected',
+    },
+  ],
+  received: [],
+  next_item: null,
+  can_upload: true,
+}
+
+export const reviewOnboarding: OnboardingResponse = {
+  ok: true,
+  status: 'in_progress',
+  required_total: 1,
+  received_count: 0,
+  pending_count: 1,
+  pending: [
+    {
+      item_id: 'personal_photo',
+      document_type: 'personal_photo',
+      item_type: 'document',
+      status: 'pending',
+      required: true,
+      file_id: 'preview-under-review',
+    },
+  ],
+  received: [],
+  next_item: null,
+  can_upload: true,
+}
+
 export const completedOnboarding: OnboardingResponse = {
   ok: true,
   status: 'completed',

@@ -47,8 +47,15 @@ export default function ActivateScreen() {
       busy={busy}
       error={error}
       notice={notice}
-      onPhoneChange={setPhone}
-      onCodeChange={setCode}
+      onPhoneChange={(value) => {
+        setPhone(value)
+        setError(null)
+        setNotice(null)
+      }}
+      onCodeChange={(value) => {
+        setCode(value)
+        setError(null)
+      }}
       onSignIn={() => void onSignIn()}
       onRequestCode={() => void onRequestCode()}
     />

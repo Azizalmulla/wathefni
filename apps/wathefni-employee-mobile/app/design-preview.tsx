@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
 import { useI18n, type AppLocale } from '@/i18n'
 import { ActivationView } from '@/features/activation/ActivationView'
-import { HomeView } from '@/features/home/HomeView'
+import { HomeErrorView, HomeLoadingView, HomeView } from '@/features/home/HomeView'
 import {
   OnboardingErrorView,
   OnboardingLoadingView,
@@ -22,31 +22,90 @@ import {
   previewOnboarding,
   previewProfile,
   previewShift,
+  rejectedOnboarding,
+  reviewOnboarding,
 } from '@/designPreview'
 import { colors, radius, spacing } from '@/theme'
 
 type PreviewScreen = 'activation' | 'home' | 'onboarding'
-type PreviewScenario = 'multi' | 'minimal' | 'loading' | 'empty' | 'error'
+type PreviewScenario =
+  | 'default'
+  | 'multi'
+  | 'minimal'
+  | 'loading'
+  | 'empty'
+  | 'error'
+  | 'rejected'
+  | 'review'
+  | 'completed'
+
+const SCREEN_SCENARIOS: Record<PreviewScreen, PreviewScenario[]> = {
+  activation: ['default', 'loading', 'error'],
+  home: ['multi', 'minimal', 'loading', 'empty', 'error'],
+  onboarding: ['multi', 'loading', 'empty', 'error', 'review', 'rejected', 'completed'],
+}
 
 export default function DesignPreviewScreen() {
   const params = useLocalSearchParams<{
-    screen?: string
-    locale?: string
-    scenario?: string
-    capture?: string
+    screen?: string | string[]
+    locale?: string | string[]
+    scenario?: string | string[]
+    capture?: string | string[]
   }>()
   const router = useRouter()
   const { locale, setLocale, t } = useI18n()
-  const [screen, setScreen] = useState<PreviewScreen>(previewScreen(params.screen))
-  const [scenario, setScenario] = useState<PreviewScenario>(previewScenario(params.scenario))
   const [phone, setPhone] = useState('0000 0000')
   const [code, setCode] = useState('123456')
-  const capture = params.capture === '1'
+  const localeSyncRef = useRef<AppLocale | null>(null)
 
+  const screen = previewScreen(firstParam(params.screen))
+  const previewLocale = previewLocaleFromParam(firstParam(params.locale))
+  const scenario = coerceScenario(screen, firstParam(params.scenario))
+  const capture = firstParam(params.capture) === '1'
+  const availableScenarios = SCREEN_SCENARIOS[screen]
+
+  // URL is the source of truth for preview controls. Sync i18n from the URL and
+  // never let a stale locale=en query silently overwrite an AR selection.
   useEffect(() => {
-    const requested: AppLocale = params.locale === 'ar' ? 'ar' : 'en'
-    if (locale !== requested) void setLocale(requested)
-  }, [locale, params.locale, setLocale])
+    if (localeSyncRef.current === previewLocale && locale === previewLocale) return
+    localeSyncRef.current = previewLocale
+    if (locale !== previewLocale) void setLocale(previewLocale)
+  }, [locale, previewLocale, setLocale])
+
+  // Keep invalid combinations out of the address bar so refresh is stable.
+  useEffect(() => {
+    const rawScenario = firstParam(params.scenario)
+    const rawScreen = firstParam(params.screen)
+    const rawLocale = firstParam(params.locale)
+    const needsNormalize =
+      previewScreen(rawScreen) !== (rawScreen as PreviewScreen | undefined)
+      || coerceScenario(screen, rawScenario) !== (rawScenario as PreviewScenario | undefined)
+      || previewLocaleFromParam(rawLocale) !== (rawLocale as AppLocale | undefined)
+    if (!needsNormalize) return
+    router.setParams({
+      screen,
+      locale: previewLocale,
+      scenario,
+      ...(capture ? { capture: '1' } : {}),
+    })
+  }, [capture, params.locale, params.scenario, params.screen, previewLocale, router, scenario, screen])
+
+  const updatePreview = (patch: {
+    screen?: PreviewScreen
+    locale?: AppLocale
+    scenario?: PreviewScenario
+  }) => {
+    const nextScreen = patch.screen ?? screen
+    const nextLocale = patch.locale ?? previewLocale
+    const nextScenario = coerceScenario(nextScreen, patch.scenario ?? scenario)
+    router.setParams({
+      screen: nextScreen,
+      locale: nextLocale,
+      scenario: nextScenario,
+      ...(capture ? { capture: '1' } : {}),
+    })
+    if (patch.locale && patch.locale !== locale) void setLocale(patch.locale)
+  }
 
   if (!DESIGN_PREVIEW_ENABLED) {
     return (
@@ -56,17 +115,14 @@ export default function DesignPreviewScreen() {
     )
   }
 
-  const goHome = () => {
-    setScenario('multi')
-    setScreen('home')
-  }
+  const goHome = () => updatePreview({ screen: 'home', scenario: 'multi' })
   const navigate = (path: string) => {
-    if (path === '/onboarding') setScreen('onboarding')
+    if (path === '/onboarding') updatePreview({ screen: 'onboarding', scenario: 'multi' })
   }
 
   return (
     <View style={styles.root}>
-      <View style={styles.phone}>
+      <View style={styles.phone} accessibilityLabel={`preview-${screen}-${previewLocale}-${scenario}`}>
         {screen === 'activation' ? (
           <ActivationView
             phone={phone}
@@ -81,14 +137,32 @@ export default function DesignPreviewScreen() {
           />
         ) : null}
 
-        {screen === 'home' ? (
+        {screen === 'home' && scenario === 'loading' ? <HomeLoadingView /> : null}
+        {screen === 'home' && scenario === 'error' ? (
+          <HomeErrorView onRetry={() => updatePreview({ scenario: 'multi' })} />
+        ) : null}
+        {screen === 'home' && scenario !== 'loading' && scenario !== 'error' ? (
           <HomeView
-            profile={previewProfile(locale)}
+            profile={previewProfile(previewLocale)}
             features={scenario === 'minimal' ? minimalFeatures : multiFeatures}
-            shift={scenario === 'minimal' || scenario === 'empty' ? undefined : previewShift}
+            shift={
+              scenario === 'minimal' || scenario === 'empty'
+                ? undefined
+                : { ...previewShift, location: previewLocale === 'ar' ? 'دعم العملاء' : previewShift.location }
+            }
             attendance={scenario === 'minimal' ? undefined : previewAttendance}
             leave={scenario === 'minimal' ? undefined : previewLeave}
-            notifications={scenario === 'minimal' || scenario === 'empty' ? emptyNotifications : previewNotifications}
+            notifications={
+              scenario === 'minimal' || scenario === 'empty'
+                ? emptyNotifications
+                : {
+                    ...previewNotifications,
+                    notifications: previewNotifications.notifications.map((notification) => ({
+                      ...notification,
+                      title: previewLocale === 'ar' ? 'تحديث على السياسات' : notification.title,
+                    })),
+                  }
+            }
             onboarding={
               scenario === 'minimal'
                 ? undefined
@@ -102,10 +176,20 @@ export default function DesignPreviewScreen() {
         ) : null}
 
         {screen === 'onboarding' && scenario === 'loading' ? <OnboardingLoadingView /> : null}
-        {screen === 'onboarding' && scenario === 'error' ? <OnboardingErrorView onRetry={() => setScenario('multi')} /> : null}
+        {screen === 'onboarding' && scenario === 'error' ? (
+          <OnboardingErrorView onRetry={() => updatePreview({ scenario: 'multi' })} />
+        ) : null}
         {screen === 'onboarding' && scenario !== 'loading' && scenario !== 'error' ? (
           <OnboardingView
-            data={scenario === 'empty' ? completedOnboarding : previewOnboarding}
+            data={
+              scenario === 'empty' || scenario === 'completed'
+                ? completedOnboarding
+                : scenario === 'rejected'
+                  ? rejectedOnboarding
+                  : scenario === 'review'
+                    ? reviewOnboarding
+                    : previewOnboarding
+            }
             uploadingId={null}
             onUpload={() => undefined}
             onBack={goHome}
@@ -117,10 +201,11 @@ export default function DesignPreviewScreen() {
         <PreviewControls
           screen={screen}
           scenario={scenario}
-          locale={locale}
-          onScreen={setScreen}
-          onScenario={setScenario}
-          onLocale={(next) => void setLocale(next)}
+          locale={previewLocale}
+          availableScenarios={availableScenarios}
+          onScreen={(value) => updatePreview({ screen: value })}
+          onScenario={(value) => updatePreview({ scenario: value })}
+          onLocale={(value) => updatePreview({ locale: value })}
           onClose={() => router.replace('/(auth)/activate')}
         />
       ) : null}
@@ -132,6 +217,7 @@ function PreviewControls({
   screen,
   scenario,
   locale,
+  availableScenarios,
   onScreen,
   onScenario,
   onLocale,
@@ -140,20 +226,21 @@ function PreviewControls({
   screen: PreviewScreen
   scenario: PreviewScenario
   locale: AppLocale
+  availableScenarios: PreviewScenario[]
   onScreen: (value: PreviewScreen) => void
   onScenario: (value: PreviewScenario) => void
   onLocale: (value: AppLocale) => void
   onClose: () => void
 }) {
   return (
-    <View style={styles.controls}>
+    <View style={styles.controls} accessibilityLabel="preview-controls">
       <View style={styles.controlRow}>
         {(['activation', 'home', 'onboarding'] as const).map((value) => (
           <Control key={value} active={screen === value} label={value} onPress={() => onScreen(value)} />
         ))}
       </View>
       <View style={styles.controlRow}>
-        {(['multi', 'minimal', 'loading', 'empty', 'error'] as const).map((value) => (
+        {availableScenarios.map((value) => (
           <Control key={value} active={scenario === value} label={value} onPress={() => onScenario(value)} />
         ))}
       </View>
@@ -168,20 +255,34 @@ function PreviewControls({
 
 function Control({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={[styles.control, active && styles.controlActive]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={active ? `${label} selected` : label}
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      style={[styles.control, active && styles.controlActive]}
+    >
       <Text style={[styles.controlText, active && styles.controlTextActive]}>{label}</Text>
     </Pressable>
   )
+}
+
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value
 }
 
 function previewScreen(value: string | undefined): PreviewScreen {
   return value === 'home' || value === 'onboarding' ? value : 'activation'
 }
 
-function previewScenario(value: string | undefined): PreviewScenario {
-  return value === 'minimal' || value === 'loading' || value === 'empty' || value === 'error'
-    ? value
-    : 'multi'
+function previewLocaleFromParam(value: string | undefined): AppLocale {
+  return value === 'ar' ? 'ar' : 'en'
+}
+
+function coerceScenario(screen: PreviewScreen, value: string | undefined): PreviewScenario {
+  const allowed = SCREEN_SCENARIOS[screen]
+  if (value && allowed.includes(value as PreviewScenario)) return value as PreviewScenario
+  return allowed[0]
 }
 
 const styles = StyleSheet.create({

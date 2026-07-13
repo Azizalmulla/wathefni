@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,8 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useI18n } from '@/i18n'
-import { Button } from '@/components/ui'
-import { BrandLockup, EditorialHeading, FadeIn } from '@/components/premium'
+import { EditorialHeading, FadeIn, PremiumButton, WathefniBloom, Wordmark } from '@/components/premium'
+import { motion, useReducedMotion } from '@/motion'
 import { colors, font, radius, shadows, spacing } from '@/theme'
 
 type ActivationViewProps = {
@@ -40,88 +42,134 @@ export function ActivationView({
   onRequestCode,
 }: ActivationViewProps) {
   const { t, isRTL } = useI18n()
+  const codeRef = useRef<TextInput>(null)
+  const [phoneFocused, setPhoneFocused] = useState(false)
+  const [codeFocused, setCodeFocused] = useState(false)
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const valid = Boolean(phone.trim() && code.trim().length >= 4)
 
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <View style={styles.top}>
-            <BrandLockup />
-            <PastelBloom mirrored={isRTL} />
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          automaticallyAdjustKeyboardInsets
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.wordmarkRow}>
+            <Wordmark />
           </View>
 
           <FadeIn style={styles.hero}>
-            <Text style={[styles.eyebrow, align]}>{t('auth.employeeApp')}</Text>
+            <Text style={[styles.eyebrow, align]}>{t('auth.activationEyebrow')}</Text>
             <EditorialHeading>{t('auth.welcomeTitle')}</EditorialHeading>
             <Text style={[styles.subtitle, align]}>{t('auth.subtitle')}</Text>
           </FadeIn>
 
-          <FadeIn style={styles.formCard}>
+          <FadeIn delay={70} style={styles.interlude}>
+            <View style={styles.interludeLine} />
+            <WathefniBloom variant="ribbon" style={styles.interludeBloom} />
+            <View style={styles.interludeGlow} />
+          </FadeIn>
+
+          <FadeIn delay={110} style={styles.formCard}>
             <View style={styles.field}>
               <Text style={[styles.label, align]}>{t('auth.phone')}</Text>
-              <View style={[styles.inputShell, isRTL && styles.rowReverse]}>
-                <View style={styles.countryCode}>
-                  <Text style={styles.countryText}>+965</Text>
+              <FocusFrame focused={phoneFocused} invalid={Boolean(error)}>
+                <View style={[styles.phoneRow, isRTL && styles.rowReverse]}>
+                  <View style={styles.countryCode}>
+                    <Text style={styles.countryText}>+965</Text>
+                  </View>
+                  <TextInput
+                    value={phone}
+                    onChangeText={onPhoneChange}
+                    onFocus={() => setPhoneFocused(true)}
+                    onBlur={() => setPhoneFocused(false)}
+                    onSubmitEditing={() => codeRef.current?.focus()}
+                    keyboardType="phone-pad"
+                    autoComplete="tel"
+                    textContentType="telephoneNumber"
+                    returnKeyType="next"
+                    style={styles.phoneInput}
+                    placeholder="0000 0000"
+                    placeholderTextColor={colors.subtle}
+                    accessibilityLabel={t('auth.phone')}
+                  />
                 </View>
-                <TextInput
-                  value={phone}
-                  onChangeText={onPhoneChange}
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                  style={styles.phoneInput}
-                  placeholder="0000 0000"
-                  placeholderTextColor={colors.subtle}
-                  accessibilityLabel={t('auth.phone')}
-                />
-              </View>
+              </FocusFrame>
             </View>
 
             <View style={styles.field}>
               <Text style={[styles.label, align]}>{t('auth.code')}</Text>
-              <TextInput
-                value={code}
-                onChangeText={onCodeChange}
-                keyboardType="number-pad"
-                maxLength={6}
-                style={styles.codeInput}
-                placeholder="••••••"
-                placeholderTextColor={colors.subtle}
-                accessibilityLabel={t('auth.code')}
-              />
+              <FocusFrame focused={codeFocused} invalid={Boolean(error)}>
+                <TextInput
+                  ref={codeRef}
+                  value={code}
+                  onChangeText={onCodeChange}
+                  onFocus={() => setCodeFocused(true)}
+                  onBlur={() => setCodeFocused(false)}
+                  onSubmitEditing={valid ? onSignIn : undefined}
+                  keyboardType="number-pad"
+                  autoComplete="sms-otp"
+                  textContentType="oneTimeCode"
+                  returnKeyType="done"
+                  maxLength={6}
+                  style={styles.codeInput}
+                  placeholder="••••••"
+                  placeholderTextColor={colors.subtle}
+                  accessibilityLabel={t('auth.code')}
+                />
+              </FocusFrame>
             </View>
 
             {error ? (
-              <View style={[styles.feedback, styles.errorFeedback, isRTL && styles.rowReverse]}>
-                <Ionicons name="alert-circle-outline" size={19} color={colors.danger} />
-                <Text style={[styles.feedbackText, { color: colors.danger }, align]}>{error}</Text>
-              </View>
+              <FadeIn style={[styles.feedback, styles.errorFeedback, isRTL && styles.rowReverse]}>
+                <Ionicons name="alert-circle-outline" size={18} color={colors.danger} />
+                <Text
+                  accessibilityLiveRegion="assertive"
+                  style={[styles.feedbackText, { color: colors.danger }, align]}
+                >
+                  {error}
+                </Text>
+              </FadeIn>
             ) : null}
             {notice ? (
-              <View style={[styles.feedback, styles.noticeFeedback, isRTL && styles.rowReverse]}>
-                <Ionicons name="checkmark-circle-outline" size={19} color={colors.success} />
-                <Text style={[styles.feedbackText, { color: colors.success }, align]}>{notice}</Text>
-              </View>
+              <FadeIn style={[styles.feedback, styles.noticeFeedback, isRTL && styles.rowReverse]}>
+                <Ionicons name="checkmark-circle-outline" size={18} color={colors.success} />
+                <Text
+                  accessibilityLiveRegion="polite"
+                  style={[styles.feedbackText, { color: colors.success }, align]}
+                >
+                  {notice}
+                </Text>
+              </FadeIn>
             ) : null}
 
-            <Button
+            <PremiumButton
               label={t('auth.signIn')}
               onPress={onSignIn}
               busy={busy}
-              disabled={!phone.trim() || code.trim().length < 4}
+              disabled={!valid}
+              showDirection
             />
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: busy || !phone.trim() }}
               onPress={onRequestCode}
               disabled={busy || !phone.trim()}
-              style={({ pressed }) => [styles.codeLink, { opacity: busy || !phone.trim() ? 0.4 : pressed ? 0.6 : 1 }]}
+              style={({ pressed }) => [
+                styles.codeLink,
+                { opacity: busy || !phone.trim() ? 0.34 : pressed ? 0.58 : 1 },
+              ]}
             >
               <Text style={styles.codeLinkText}>{t('auth.requestCode')}</Text>
             </Pressable>
           </FadeIn>
 
           <View style={[styles.secureNote, isRTL && styles.rowReverse]}>
-            <Ionicons name="shield-checkmark-outline" size={20} color={colors.success} />
+            <Ionicons name="shield-checkmark-outline" size={18} color={colors.success} />
             <Text style={[styles.secureText, align]}>{t('auth.secureNote')}</Text>
           </View>
         </ScrollView>
@@ -130,14 +178,51 @@ export function ActivationView({
   )
 }
 
-function PastelBloom({ mirrored }: { mirrored: boolean }) {
+function FocusFrame({
+  focused,
+  invalid,
+  children,
+}: {
+  focused: boolean
+  invalid: boolean
+  children: ReactNode
+}) {
+  const reducedMotion = useReducedMotion()
+  const focus = useRef(new Animated.Value(focused ? 1 : 0)).current
+
+  useEffect(() => {
+    Animated.timing(focus, {
+      toValue: focused ? 1 : 0,
+      duration: reducedMotion ? 0 : motion.duration.instant,
+      easing: motion.easing.standard,
+      useNativeDriver: false,
+    }).start()
+  }, [focus, focused, reducedMotion])
+
+  const borderColor = invalid
+    ? colors.danger
+    : focus.interpolate({
+        inputRange: [0, 1],
+        outputRange: [colors.border, colors.ink],
+      })
+  const backgroundColor = focus.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.bg, colors.surface],
+  })
+
   return (
-    <View style={[styles.bloom, mirrored && styles.bloomMirrored]} accessibilityElementsHidden>
-      <View style={[styles.bloomShape, styles.bloomLilac]} />
-      <View style={[styles.bloomShape, styles.bloomButter]} />
-      <View style={[styles.bloomShape, styles.bloomBlush]} />
-      <View style={[styles.bloomShape, styles.bloomSage]} />
-    </View>
+    <Animated.View
+      style={[
+        styles.inputShell,
+        {
+          borderColor,
+          backgroundColor,
+          shadowOpacity: focused && !reducedMotion ? 0.08 : 0,
+        },
+      ]}
+    >
+      {children}
+    </Animated.View>
   )
 }
 
@@ -147,49 +232,67 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
-    gap: spacing.xl,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xl,
+    gap: spacing.lg,
   },
-  top: { minHeight: 76, justifyContent: 'flex-start' },
-  bloom: { position: 'absolute', top: -14, right: -6, width: 104, height: 92 },
-  bloomMirrored: { right: undefined, left: -6, transform: [{ scaleX: -1 }] },
-  bloomShape: { position: 'absolute', borderRadius: 22 },
-  bloomLilac: { width: 46, height: 29, right: 30, top: 5, backgroundColor: colors.pastelLilac, transform: [{ rotate: '24deg' }] },
-  bloomButter: { width: 34, height: 48, right: 5, top: 20, backgroundColor: colors.pastelButter, transform: [{ rotate: '-18deg' }] },
-  bloomBlush: { width: 43, height: 31, right: 42, top: 46, backgroundColor: colors.pastelBlush, transform: [{ rotate: '-28deg' }] },
-  bloomSage: { width: 30, height: 32, right: 15, top: 57, backgroundColor: colors.pastelSage, transform: [{ rotate: '15deg' }] },
-  hero: { gap: spacing.sm },
+  wordmarkRow: { minHeight: 42, justifyContent: 'center' },
+  hero: { gap: spacing.sm, paddingTop: spacing.xs },
   eyebrow: {
     color: colors.accent,
     fontSize: font.tiny,
     fontWeight: '800',
-    letterSpacing: 1.1,
+    letterSpacing: 1.05,
     textTransform: 'uppercase',
   },
-  subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 23, maxWidth: 330 },
+  subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 22, maxWidth: 335 },
+  interlude: {
+    height: 48,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderRadius: radius.lg,
+  },
+  interludeLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+  },
+  interludeBloom: { position: 'absolute', right: -8, top: -8, width: 114, opacity: 0.68 },
+  interludeGlow: {
+    position: 'absolute',
+    left: 20,
+    width: 86,
+    height: 28,
+    borderRadius: radius.pill,
+    backgroundColor: colors.pastelSky,
+    opacity: 0.34,
+    transform: [{ rotate: '-4deg' }],
+  },
   formCard: {
     backgroundColor: colors.surface,
     borderRadius: radius.xl,
     padding: spacing.lg,
-    gap: spacing.lg,
+    gap: spacing.md,
     ...shadows.card,
   },
-  field: { gap: spacing.sm },
+  field: { gap: 7 },
   label: { color: colors.text, fontSize: font.small, fontWeight: '700' },
   inputShell: {
-    minHeight: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.bg,
+    minHeight: 48,
+    borderRadius: 16,
+    borderWidth: 1,
     overflow: 'hidden',
+    shadowColor: colors.ink,
+    shadowRadius: 9,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
   },
+  phoneRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center' },
   rowReverse: { flexDirection: 'row-reverse' },
   countryCode: {
-    height: '100%',
+    height: 48,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderEndWidth: StyleSheet.hairlineWidth,
@@ -198,7 +301,7 @@ const styles = StyleSheet.create({
   countryText: { color: colors.text, fontSize: font.body, fontWeight: '700' },
   phoneInput: {
     flex: 1,
-    minHeight: 56,
+    height: 48,
     paddingHorizontal: spacing.md,
     color: colors.text,
     fontSize: font.h3,
@@ -206,22 +309,25 @@ const styles = StyleSheet.create({
     writingDirection: 'ltr',
   },
   codeInput: {
-    minHeight: 62,
+    height: 52,
     paddingHorizontal: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.bg,
     color: colors.text,
-    fontSize: font.h1,
-    letterSpacing: 10,
+    fontSize: 25,
+    letterSpacing: 9,
     textAlign: 'center',
     writingDirection: 'ltr',
   },
-  feedback: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: radius.md },
+  feedback: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    borderRadius: radius.md,
+  },
   errorFeedback: { backgroundColor: colors.dangerSoft },
   noticeFeedback: { backgroundColor: colors.successSoft },
-  feedbackText: { flex: 1, fontSize: font.small, lineHeight: 19 },
+  feedbackText: { flex: 1, fontSize: font.small, lineHeight: 18 },
   codeLink: { minHeight: 38, alignItems: 'center', justifyContent: 'center' },
   codeLinkText: { color: colors.text, fontSize: font.small, fontWeight: '700', textDecorationLine: 'underline' },
   secureNote: {
@@ -231,6 +337,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
   },
-  secureText: { color: colors.subtle, fontSize: font.small, lineHeight: 19, flexShrink: 1 },
+  secureText: { color: colors.subtle, fontSize: font.tiny, lineHeight: 17, flexShrink: 1 },
 })
