@@ -77,6 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true
     void (async () => {
+      if (process.env.EXPO_PUBLIC_DESIGN_PREVIEW === '1') {
+        setStatus('signedOut')
+        return
+      }
       const stored = await loadSession()
       if (!active) return
       if (!stored) {

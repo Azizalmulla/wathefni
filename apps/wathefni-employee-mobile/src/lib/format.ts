@@ -7,6 +7,8 @@ const KNOWN_STATUSES = new Set([
   'pending',
   'late',
   'scheduled',
+  'reviewed',
+  'completed',
   'rejected',
   'cancelled',
   'absent',

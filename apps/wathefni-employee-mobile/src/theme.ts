@@ -1,22 +1,29 @@
-// Single source of design tokens. Calm, premium, high-contrast, generous spacing.
+// Phase 9A2 approved direction: warm editorial foundation with soft module color.
 export const colors = {
-  bg: '#F4F6F8',
-  surface: '#FFFFFF',
-  surfaceMuted: '#EEF2F3',
-  border: '#DFE5E7',
-  text: '#102A2E',
-  subtle: '#607579',
-  primary: '#123D42',
+  bg: '#F8F2E8',
+  surface: '#FFFCF6',
+  surfaceMuted: '#F1EADF',
+  border: '#E8DED0',
+  ink: '#1C1B19',
+  text: '#1C1B19',
+  subtle: '#6F6A62',
+  primary: '#1C1B19',
   primaryText: '#FFFFFF',
-  accent: '#168C84',
-  accentSoft: '#DDF3F0',
-  success: '#17845A',
-  successSoft: '#E0F3E9',
-  warning: '#A9660C',
-  warningSoft: '#FFF0D7',
-  danger: '#C43C3C',
-  dangerSoft: '#FBE5E5',
-  chip: '#E8EEEF',
+  accent: '#B14E88',
+  accentSoft: '#F2DDEC',
+  success: '#4D7659',
+  successSoft: '#DFEAD9',
+  warning: '#9A6A22',
+  warningSoft: '#F6E5B6',
+  danger: '#A83F45',
+  dangerSoft: '#F4D7D5',
+  chip: '#EEE6DA',
+  pastelLilac: '#EAE1F4',
+  pastelButter: '#F7DFA4',
+  pastelBlush: '#F5DCD9',
+  pastelSage: '#DDE8D4',
+  pastelSky: '#D9E6F5',
+  skeleton: '#E6DED2',
 }
 
 export const spacing = {
@@ -38,11 +45,21 @@ export const radius = {
 }
 
 export const font = {
-  display: 30,
-  h1: 25,
+  display: 38,
+  h1: 28,
   h2: 20,
   h3: 17,
   body: 15,
   small: 13,
   tiny: 11.5,
+}
+
+export const shadows = {
+  card: {
+    shadowColor: '#5D5144',
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
+  },
 }

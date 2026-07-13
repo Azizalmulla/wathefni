@@ -11,7 +11,28 @@ export type AppLocale = 'en' | 'ar'
 
 const LOCALE_KEY = 'wathefni.locale'
 
-const i18n = new I18n({ en, ar })
+function expandFlatTranslations(flat: Record<string, string>): Record<string, unknown> {
+  const nested: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(flat)) {
+    const parts = key.split('.')
+    let cursor = nested
+    parts.forEach((part, index) => {
+      if (index === parts.length - 1) {
+        cursor[part] = value
+        return
+      }
+      const current = cursor[part]
+      if (!current || typeof current !== 'object') cursor[part] = {}
+      cursor = cursor[part] as Record<string, unknown>
+    })
+  }
+  return nested
+}
+
+const i18n = new I18n({
+  en: expandFlatTranslations(en),
+  ar: expandFlatTranslations(ar),
+})
 i18n.enableFallback = true
 i18n.defaultLocale = 'en'
 

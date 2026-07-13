@@ -24,6 +24,8 @@ def main() -> None:
     auth = read("src/auth/AuthProvider.tsx")
     tabs = read("app/(tabs)/_layout.tsx")
     home = read("app/(tabs)/index.tsx")
+    home_view = read("src/features/home/HomeView.tsx")
+    preview = read("src/designPreview.ts")
     leave_request = read("app/leave/request.tsx")
     documents = read("app/documents.tsx")
     settings = read("app/settings.tsx")
@@ -32,8 +34,27 @@ def main() -> None:
     check("AuthProvider revalidates on foreground", "AppState.addEventListener" in auth and "refreshMe()" in auth)
     check("document download refreshes on 401", "result.status === 401" in auth and "rotateSessionAndLoadMe" in auth)
     check("optional tabs are capability-driven", "hasFeature('shifts')" in tabs and "hasFeature('leave')" in tabs)
-    check("home queries are capability-driven", "enabled: shiftsEnabled" in home and "enabled: onboardingEnabled" in home)
-    check("home actions are capability-driven", "documentsEnabled" in home and "attendanceEnabled" in home and "can('leave', 'request')" in home)
+    check(
+        "home queries are capability-driven",
+        "enabled: features.shifts" in home
+        and "enabled: features.attendance" in home
+        and "enabled: features.leave" in home
+        and "enabled: features.onboarding" in home,
+    )
+    check(
+        "home actions are capability-driven",
+        "features.documents" in home_view
+        and "features.attendance" in home_view
+        and "can('leave', 'request')" in home,
+    )
+    check(
+        "unsupported employee surfaces remain absent",
+        "payslip" not in home_view.lower() and "compliance" not in home_view.lower(),
+    )
+    check(
+        "design fixtures require explicit build flag",
+        "EXPO_PUBLIC_DESIGN_PREVIEW" in preview and "design-preview-only" in preview,
+    )
     check("leave types come from backend", "me?.leave.types" in leave_request and "LEAVE_TYPES" not in leave_request)
     check("documents do not read secure-store tokens directly", "loadSession" not in documents and "download" in documents)
     check("privacy URL is centralized", "@/config" in settings and "https://wathefni.ai/employee-app/privacy" not in settings)
@@ -71,6 +92,12 @@ def main() -> None:
     check("English account/capability copy complete", required_i18n <= set(en))
     check("Arabic account/capability copy complete", required_i18n <= set(ar))
     check("English/Arabic keysets match", set(en) == set(ar))
+    prefixes = {
+        key
+        for key in en
+        if any(other.startswith(f"{key}.") for other in en if other != key)
+    }
+    check("translation keys have no scalar/object collisions", not prefixes)
 
     print("employee mobile capability foundation: GREEN")
 

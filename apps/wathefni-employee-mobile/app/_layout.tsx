@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/auth/AuthProvider'
 import { I18nProvider, loadInitialLocale, useI18n, type AppLocale } from '@/i18n'
 import { LoadingState } from '@/components/States'
 import { AccessStateScreen } from '@/components/AccessStates'
+import { DESIGN_PREVIEW_ENABLED } from '@/designPreview'
 import { colors, font } from '@/theme'
 
 const queryClient = new QueryClient({
@@ -22,18 +23,19 @@ function AuthGate() {
   const { t } = useI18n()
   const segments = useSegments()
   const router = useRouter()
+  const inDesignPreview = DESIGN_PREVIEW_ENABLED && segments[0] === 'design-preview'
 
   useEffect(() => {
-    if (status === 'loading' || status === 'blocked') return
+    if (inDesignPreview || status === 'loading' || status === 'blocked') return
     const inAuthGroup = segments[0] === '(auth)'
     if (status === 'signedOut' && !inAuthGroup) {
       router.replace('/(auth)/activate')
     } else if (status === 'signedIn' && inAuthGroup) {
       router.replace('/(tabs)')
     }
-  }, [status, segments, router])
+  }, [status, segments, router, inDesignPreview])
 
-  if (status === 'loading') {
+  if (status === 'loading' && !inDesignPreview) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <LoadingState />
@@ -41,7 +43,7 @@ function AuthGate() {
     )
   }
 
-  if (status === 'blocked' && accessState !== 'active') {
+  if (status === 'blocked' && accessState !== 'active' && !inDesignPreview) {
     return (
       <AccessStateScreen
         state={accessState}
@@ -63,7 +65,8 @@ function AuthGate() {
     <Stack screenOptions={headerStyle}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ title: t('onboarding.title') }} />
+      <Stack.Screen name="design-preview" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="documents" options={{ title: t('documents.title') }} />
       <Stack.Screen name="attendance" options={{ title: t('attendance.title') }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title') }} />

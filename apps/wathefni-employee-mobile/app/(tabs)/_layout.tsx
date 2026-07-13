@@ -3,7 +3,7 @@ import { Text } from 'react-native'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
-import { colors, font } from '@/theme'
+import { colors, font, radius, shadows } from '@/theme'
 
 // Lightweight text glyph tab icons (no extra icon dependency for V1).
 function TabIcon({ glyph, color }: { glyph: string; color: string }) {
@@ -20,7 +20,7 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.bg },
         headerShadowVisible: false,
         headerTitleStyle: { color: colors.text, fontWeight: '700', fontSize: font.h3 },
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.ink,
         tabBarInactiveTintColor: colors.subtle,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', paddingBottom: 4 },
         tabBarStyle: {
@@ -28,6 +28,9 @@ export default function TabsLayout() {
           paddingTop: 7,
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+          borderTopLeftRadius: radius.xl,
+          borderTopRightRadius: radius.xl,
+          ...shadows.card,
         },
       }}
     >
