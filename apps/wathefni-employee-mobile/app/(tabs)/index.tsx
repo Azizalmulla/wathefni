@@ -6,7 +6,7 @@ import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { registerForPushToken } from '@/push/registerForPush'
-import { Card, SectionTitle, StatusChip } from '@/components/ui'
+import { Card, FeatureMark, PageIntro, SectionTitle, StatusChip } from '@/components/ui'
 import { ErrorState, LoadingState } from '@/components/States'
 import { formatTimeRange } from '@/lib/format'
 import { colors, font, radius, spacing } from '@/theme'
@@ -52,13 +52,23 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.greeting}>{t('home.greeting', { name: firstName })}</Text>
+      <PageIntro
+        eyebrow={t('app.name')}
+        title={t('home.greeting', { name: firstName })}
+        subtitle={t('home.subtitle')}
+      />
 
       {shiftsEnabled ? (
-        <Card>
-          <SectionTitle>{t('home.todayShift')}</SectionTitle>
+        <Card tone="accent" style={styles.shiftCard}>
+          <View style={styles.cardHeading}>
+            <FeatureMark glyph="S" />
+            <View style={styles.flex}>
+              <SectionTitle>{t('home.todayShift')}</SectionTitle>
+              <Text style={styles.cardHint}>{t('home.shiftHint')}</Text>
+            </View>
+          </View>
           {shift ? (
-            <View>
+            <View style={styles.shiftBody}>
               <Text style={styles.shiftTime}>{formatTimeRange(shift.start_time, shift.end_time)}</Text>
               {shift.location ? <Text style={styles.muted}>{shift.location}</Text> : null}
             </View>
@@ -75,16 +85,22 @@ export default function HomeScreen() {
             {onboardingEnabled ? (
               <ActionTile
                 label={t('home.onboarding')}
-                glyph="✓"
+                subtitle={t('home.onboardingHint')}
+                glyph="O"
                 badge={onboarding.data?.pending_count}
                 onPress={() => router.push('/onboarding')}
               />
             ) : null}
-            {documentsEnabled ? <ActionTile label={t('home.documents')} glyph="D" onPress={() => router.push('/documents')} /> : null}
-            {attendanceEnabled ? <ActionTile label={t('home.attendance')} glyph="◷" onPress={() => router.push('/attendance')} /> : null}
+            {documentsEnabled ? (
+              <ActionTile label={t('home.documents')} subtitle={t('home.documentsHint')} glyph="D" onPress={() => router.push('/documents')} />
+            ) : null}
+            {attendanceEnabled ? (
+              <ActionTile label={t('home.attendance')} subtitle={t('home.attendanceHint')} glyph="A" onPress={() => router.push('/attendance')} />
+            ) : null}
             {can('leave', 'request') ? (
               <ActionTile
                 label={t('home.requestLeave')}
+                subtitle={t('home.leaveHint')}
                 glyph="L"
                 onPress={() => router.push('/leave/request')}
               />
@@ -95,7 +111,10 @@ export default function HomeScreen() {
 
       {notifications.data && notifications.data.notifications.length ? (
         <Card>
-          <SectionTitle>{t('notifications.title')}</SectionTitle>
+          <View style={styles.sectionHeading}>
+            <SectionTitle>{t('notifications.title')}</SectionTitle>
+            {notifications.data.unread ? <StatusChip label={`${notifications.data.unread}`} tone="warning" /> : null}
+          </View>
           {notifications.data.notifications.slice(0, 3).map((n: NotificationItem) => (
             <Pressable key={n.id} style={styles.notifRow} onPress={() => router.push('/(tabs)/notifications')}>
               <View style={styles.flex}>
@@ -111,11 +130,24 @@ export default function HomeScreen() {
   )
 }
 
-function ActionTile({ label, glyph, badge, onPress }: { label: string; glyph: string; badge?: number; onPress: () => void }) {
+function ActionTile({
+  label,
+  subtitle,
+  glyph,
+  badge,
+  onPress,
+}: {
+  label: string
+  subtitle: string
+  glyph: string
+  badge?: number
+  onPress: () => void
+}) {
   return (
     <Pressable style={({ pressed }) => [styles.tile, { opacity: pressed ? 0.85 : 1 }]} onPress={onPress} accessibilityRole="button">
-      <Text style={styles.tileGlyph}>{glyph}</Text>
+      <FeatureMark glyph={glyph} />
       <Text style={styles.tileLabel}>{label}</Text>
+      <Text style={styles.tileSubtitle} numberOfLines={2}>{subtitle}</Text>
       {badge ? (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{badge}</Text>
@@ -127,9 +159,12 @@ function ActionTile({ label, glyph, badge, onPress }: { label: string; glyph: st
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.lg, gap: spacing.md },
-  greeting: { fontSize: font.h1, fontWeight: '800', color: colors.text },
-  shiftTime: { fontSize: font.h2, fontWeight: '700', color: colors.text },
+  content: { padding: spacing.lg, paddingBottom: spacing.xxxl, gap: spacing.lg },
+  shiftCard: { padding: spacing.xl, gap: spacing.lg },
+  cardHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  cardHint: { color: colors.subtle, fontSize: font.small, marginTop: 2 },
+  shiftBody: { gap: spacing.xs },
+  shiftTime: { fontSize: font.display, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
   muted: { fontSize: font.body, color: colors.subtle },
   flex: { flex: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
@@ -141,11 +176,11 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     padding: spacing.lg,
-    gap: spacing.sm,
-    minHeight: 92,
+    gap: spacing.xs,
+    minHeight: 144,
   },
-  tileGlyph: { fontSize: 22 },
-  tileLabel: { fontSize: font.body, fontWeight: '600', color: colors.text },
+  tileLabel: { fontSize: font.body, fontWeight: '700', color: colors.text, marginTop: spacing.xs },
+  tileSubtitle: { fontSize: font.small, color: colors.subtle, lineHeight: 18 },
   badge: {
     position: 'absolute',
     top: spacing.md,
@@ -159,6 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   badgeText: { color: '#fff', fontSize: font.tiny, fontWeight: '700' },
+  sectionHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   notifRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   notifTitle: { fontSize: font.body, fontWeight: '600', color: colors.text },
 })

@@ -22,12 +22,18 @@ export default function TabsLayout() {
         headerTitleStyle: { color: colors.text, fontWeight: '700', fontSize: font.h3 },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.subtle,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', paddingBottom: 4 },
+        tabBarStyle: {
+          height: 68,
+          paddingTop: 7,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
-        options={{ title: t('tabs.home'), tabBarIcon: ({ color }) => <TabIcon glyph="⌂" color={color} /> }}
+        options={{ title: t('tabs.home'), headerShown: false, tabBarIcon: ({ color }) => <TabIcon glyph="⌂" color={color} /> }}
       />
       <Tabs.Screen
         name="notifications"

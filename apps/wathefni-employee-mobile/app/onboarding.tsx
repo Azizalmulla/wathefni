@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
-import { Button, Card, SectionTitle, StatusChip } from '@/components/ui'
+import { Button, Card, ProgressBar, SectionTitle, StatusChip } from '@/components/ui'
 import { EmptyState, ErrorState, LoadingState } from '@/components/States'
 import { FeatureUnavailableState } from '@/components/AccessStates'
 import { approvedErrorMessage } from '@/api/errors'
@@ -75,9 +75,12 @@ export default function OnboardingScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       {data ? (
-        <Text style={styles.progress}>
-          {t('onboarding.progress', { done: data.received_count, total: data.required_total })}
-        </Text>
+        <Card tone="accent" style={styles.progressCard}>
+          <Text style={styles.progress}>
+            {t('onboarding.progress', { done: data.received_count, total: data.required_total })}
+          </Text>
+          <ProgressBar value={data.required_total ? data.received_count / data.required_total : 1} />
+        </Card>
       ) : null}
 
       {pending.length ? (
@@ -102,7 +105,8 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.lg, gap: spacing.md },
-  progress: { fontSize: font.body, color: colors.subtle, fontWeight: '600' },
+  progressCard: { padding: spacing.lg, gap: spacing.md },
+  progress: { fontSize: font.body, color: colors.primary, fontWeight: '700' },
   itemHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
   itemLabel: { fontSize: font.body, fontWeight: '600', color: colors.text, flexShrink: 1 },
 })

@@ -53,13 +53,19 @@
   "tabs.profile": "الملف",
 
   "home.greeting": "مرحباً {{name}}",
+  "home.subtitle": "كل ما تحتاجه ليوم عملك في مكان واحد.",
   "home.todayShift": "مناوبة اليوم",
+  "home.shiftHint": "فترة العمل المجدولة التالية",
   "home.noShiftToday": "لا توجد مناوبة اليوم",
   "home.quickActions": "إجراءات سريعة",
   "home.onboarding": "الانضمام",
+  "home.onboardingHint": "أكمل قائمة مهام الموظف",
   "home.documents": "المستندات",
+  "home.documentsHint": "اعرض ملفاتك المرسلة",
   "home.attendance": "الحضور",
+  "home.attendanceHint": "راجع سجل حضورك الأخير",
   "home.requestLeave": "طلب إجازة",
+  "home.leaveHint": "أرسل طلباً إلى الموارد البشرية",
 
   "notifications.title": "الوارد",
   "notifications.empty": "لا توجد إشعارات بعد",
@@ -108,6 +114,8 @@
   "attendance.empty": "لا توجد سجلات حضور بعد",
 
   "profile.title": "الملف الشخصي",
+  "profile.details": "بيانات الموظف",
+  "profile.account": "الحساب",
   "profile.position": "المنصب",
   "profile.department": "القسم",
   "profile.company": "الشركة",

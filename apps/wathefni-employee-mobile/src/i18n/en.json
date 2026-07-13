@@ -53,13 +53,19 @@
   "tabs.profile": "Profile",
 
   "home.greeting": "Hi {{name}}",
+  "home.subtitle": "Everything you need for your workday, in one place.",
   "home.todayShift": "Today's shift",
+  "home.shiftHint": "Your next scheduled work period",
   "home.noShiftToday": "No shift scheduled today",
   "home.quickActions": "Quick actions",
   "home.onboarding": "Onboarding",
+  "home.onboardingHint": "Finish your employee checklist",
   "home.documents": "Documents",
+  "home.documentsHint": "View your submitted files",
   "home.attendance": "Attendance",
+  "home.attendanceHint": "Review your recent record",
   "home.requestLeave": "Request leave",
+  "home.leaveHint": "Send a request to HR",
 
   "notifications.title": "Inbox",
   "notifications.empty": "No notifications yet",
@@ -108,6 +114,8 @@
   "attendance.empty": "No attendance records yet",
 
   "profile.title": "Profile",
+  "profile.details": "Employee details",
+  "profile.account": "Account",
   "profile.position": "Position",
   "profile.department": "Department",
   "profile.company": "Company",
