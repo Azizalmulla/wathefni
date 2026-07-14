@@ -26,7 +26,7 @@ export class AppErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.failed) return this.props.children
     return (
-      <View style={styles.root} accessibilityRole="alert">
+      <View style={styles.root} accessibilityRole="alert" accessibilityLiveRegion="assertive">
         <Text style={styles.title}>{this.props.title}</Text>
         <Text style={styles.message}>{this.props.message}</Text>
         <Pressable

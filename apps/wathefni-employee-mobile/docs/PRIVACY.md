@@ -77,4 +77,4 @@ you can only ever see your own records.
 ## Contact
 
 For privacy questions, contact your employer's HR team or Wathefni support at
-[ADD CONTACT EMAIL].
+support@wathefni.ai.

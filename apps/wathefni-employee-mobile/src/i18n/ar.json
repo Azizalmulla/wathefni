@@ -154,10 +154,18 @@
   "onboarding.item.employment_contract": "عقد العمل",
   "onboarding.item.other": "مستند الموظف",
   "onboarding.item.genericDescription": "قدّم المعلومات المطلوبة بأمان لمراجعتها من الموارد البشرية.",
+  "upload.unsupportedType": "اختر ملف PDF أو JPG أو PNG أو WebP أو HEIC.",
+  "upload.emptyFile": "هذا الملف فارغ. اختر ملفاً آخر.",
+  "upload.fileTooLarge": "يجب ألا يتجاوز حجم الملف 15 ميغابايت.",
+  "upload.invalidContent": "محتوى الملف لا يطابق نوعه. اختر ملفاً آخر.",
+  "upload.itemUnavailable": "عنصر قائمة المهام هذا لم يعد متاحاً. حدّث الصفحة وحاول مرة أخرى.",
+  "upload.failed": "تعذر رفع الملف. حاول مرة أخرى.",
 
   "documents.title": "المستندات",
   "documents.empty": "لا توجد مستندات بعد",
   "documents.view": "عرض",
+  "documents.unavailable": "هذا المستند لم يعد متاحاً.",
+  "documents.downloadFailed": "تعذر تنزيل المستند. حاول مرة أخرى.",
 
   "attendance.title": "الحضور",
   "attendance.present": "حاضر",

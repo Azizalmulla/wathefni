@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   errorFeedback: { backgroundColor: colors.dangerSoft },
   noticeFeedback: { backgroundColor: colors.successSoft },
   feedbackText: { flex: 1, fontSize: font.small, lineHeight: 18 },
-  codeLink: { minHeight: 38, alignItems: 'center', justifyContent: 'center' },
+  codeLink: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   codeLinkText: { color: colors.text, fontSize: font.small, fontWeight: '700', textDecorationLine: 'underline' },
   secureNote: {
     marginTop: 'auto',

@@ -29,6 +29,25 @@ export function approvedErrorMessage(error: unknown, t: Translate): string {
       return t('feature.unavailable.message')
     case 'leave_type_not_available':
       return t('leave.typeUnavailable')
+    case 'unsupported_file_type':
+      return t('upload.unsupportedType')
+    case 'empty_file':
+      return t('upload.emptyFile')
+    case 'file_too_large':
+      return t('upload.fileTooLarge')
+    case 'mime_mismatch_or_invalid_content':
+      return t('upload.invalidContent')
+    case 'item_required':
+    case 'item_not_found':
+      return t('upload.itemUnavailable')
+    case 'storage_failed':
+    case 'upload_failed':
+      return t('upload.failed')
+    case 'document_not_found':
+    case 'document_file_unavailable':
+      return t('documents.unavailable')
+    case 'download_failed':
+      return t('documents.downloadFailed')
     default:
       return t('error.generic')
   }

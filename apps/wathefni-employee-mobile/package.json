@@ -10,6 +10,7 @@
     "ios": "expo start --ios",
     "native:doctor": "npx expo-doctor",
     "native:bundle:ios": "npx expo export --platform ios --output-dir /tmp/wathefni-native-bundle",
+    "verify:capabilities": "python3 scripts/verify-capability-foundation.py",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

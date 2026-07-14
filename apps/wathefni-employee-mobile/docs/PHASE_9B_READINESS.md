@@ -16,6 +16,7 @@ The application code now has native transfer lifecycles, production-safe runtime
 6. Configure a production crash/diagnostic service with privacy review and source-map handling.
 7. Validate privacy disclosures, support/privacy URLs, account-deletion workflow, notification entitlement, export compliance, and App Store metadata.
 8. Confirm production API/TLS readiness separately; no production testing was performed.
+9. Approve and publish the draft privacy policy, and configure Android FCM V1 credentials plus a notification icon before Android push is enabled.
 
 ## Completed readiness controls
 

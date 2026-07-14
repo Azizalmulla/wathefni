@@ -25,7 +25,7 @@ export async function pickDocument(): Promise<PickedFile | null> {
   return {
     uri: asset.uri,
     name: asset.name || 'document',
-    mimeType: asset.mimeType || 'application/octet-stream',
+    mimeType: normalizedMimeType(asset.name, asset.mimeType),
   }
 }
 
@@ -79,4 +79,20 @@ async function prepareImage(asset: ImagePicker.ImagePickerAsset): Promise<Picked
 function normalizedImageName(name: string | null | undefined): string {
   const base = (name || `photo-${Date.now()}`).replace(/\.[^.]+$/, '')
   return `${base}.jpg`
+}
+
+function normalizedMimeType(name: string | null | undefined, provided: string | null | undefined): string {
+  const candidate = provided?.toLowerCase().split(';')[0].trim()
+  if (candidate === 'image/jpg') return 'image/jpeg'
+  if (candidate && candidate !== 'application/octet-stream') return candidate
+  const extension = name?.toLowerCase().match(/\.([^.]+)$/)?.[1]
+  const supported: Record<string, string> = {
+    pdf: 'application/pdf',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+    heic: 'image/heic',
+  }
+  return (extension && supported[extension]) || 'application/octet-stream'
 }

@@ -17,11 +17,11 @@ Source of truth: `src/theme.ts`.
 ### Color
 
 - Canvas `#F8F2E8`; surface `#FFFCF6`; muted surface `#F1EADF`; border `#E8DED0`.
-- Ink/text `#1C1B19`; secondary text `#6F6A62`.
+- Ink/text `#1C1B19`; secondary text `#656058`.
 - Accent `#AA477F`; soft accent `#F2DDEC`.
-- Success `#4D7659` / `#DFEAD9`; warning `#925F18` / `#F6E5B6`; danger `#A83F45` / `#F4D7D5`.
+- Success `#477052` / `#DFEAD9`; warning `#8E5B16` / `#F6E5B6`; danger `#A23A40` / `#F4D7D5`.
 - Pastels: lilac `#EAE1F4`, butter `#F7DFA4`, blush `#F5DCD9`, sage `#DDE8D4`, sky `#D9E6F5`.
-- Ink has at least 13.15:1 contrast on every approved pastel. Secondary text is 4.82:1 on canvas. Accent and warning were production-adjusted to exceed 4.5:1 on canvas.
+- Ink has at least 13.15:1 contrast on every approved pastel. Secondary text is 5.60:1 on canvas and at least 4.76:1 on every pastel. Semantic status text exceeds 4.5:1 on its paired soft surface.
 - Status must always include text or an icon; color is never the only signal.
 
 ### Typography

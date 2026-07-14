@@ -17,12 +17,13 @@
 - Ink on canvas: 15.45:1.
 - Ink on surface: 16.81:1.
 - Ink on approved pastels: 13.15:1 or higher.
-- Secondary text on canvas: 4.82:1.
+- Secondary text on canvas: 5.60:1; minimum on approved pastels: 4.76:1.
 - Accent on canvas: 4.81:1.
-- Warning on canvas: 4.87:1.
-- Danger on canvas: 5.45:1.
+- Success on its soft status surface: 4.56:1.
+- Warning on its soft status surface: 4.59:1.
+- Danger on its soft status surface: 4.83:1.
 
-The accent and warning tokens were minimally darkened after the audit because their prior values were 4.37:1 and 4.23:1 on the cream canvas.
+The secondary and semantic tokens were minimally darkened after the audit because several prior small-text combinations fell below 4.5:1.
 
 ## Required physical-device verification
 

@@ -34,10 +34,18 @@ export function PushLifecycle() {
     }
 
     void registerExistingPermission().catch(() => undefined)
+    void Notifications.getLastNotificationResponseAsync()
+      .then(async (response) => {
+        if (!active || !response) return
+        await Notifications.clearLastNotificationResponseAsync()
+        if (active) router.push('/notifications')
+      })
+      .catch(() => undefined)
     const tokenSubscription = Notifications.addPushTokenListener(() => {
       void registerExistingPermission().catch(() => undefined)
     })
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(() => {
+      void Notifications.clearLastNotificationResponseAsync().catch(() => undefined)
       router.push('/notifications')
     })
 

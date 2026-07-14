@@ -293,6 +293,7 @@ export function LeaveRequestView({
           <View style={styles.field}>
             <Text style={[styles.fieldLabel, align]}>{t('leave.reason')}</Text>
             <TextInput
+              accessibilityLabel={t('leave.reason')}
               value={reason}
               onChangeText={setReason}
               multiline
@@ -327,6 +328,7 @@ function DateField({ label, value, onChange, isRTL }: { label: string; value: st
       <View style={[styles.inputWithIcon, isRTL && styles.rowReverse]}>
         <Ionicons name="calendar-outline" size={19} color={colors.subtle} />
         <TextInput
+          accessibilityLabel={label}
           value={value}
           onChangeText={onChange}
           placeholder="YYYY-MM-DD"
@@ -594,7 +596,13 @@ export function SettingsView({
               <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('settings.push')}</Text>
               <Text style={[styles.supporting, { textAlign: isRTL ? 'right' : 'left' }]}>{t('remaining.pushSubtitle')}</Text>
             </View>
-            <Switch value={pushOn} onValueChange={onTogglePush} disabled={pushBusy} />
+            <Switch
+              accessibilityLabel={t('settings.push')}
+              accessibilityState={{ disabled: pushBusy, checked: pushOn }}
+              value={pushOn}
+              onValueChange={onTogglePush}
+              disabled={pushBusy}
+            />
           </View>
         </PastelCard>
       ) : null}

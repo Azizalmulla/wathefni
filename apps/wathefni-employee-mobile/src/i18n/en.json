@@ -154,10 +154,18 @@
   "onboarding.item.employment_contract": "Employment contract",
   "onboarding.item.other": "Employee document",
   "onboarding.item.genericDescription": "Provide the requested information securely for HR review.",
+  "upload.unsupportedType": "Choose a PDF, JPG, PNG, WebP, or HEIC file.",
+  "upload.emptyFile": "That file is empty. Choose another file.",
+  "upload.fileTooLarge": "Files must be 15 MB or smaller.",
+  "upload.invalidContent": "The file content doesn't match its file type. Choose another file.",
+  "upload.itemUnavailable": "This checklist item is no longer available. Refresh and try again.",
+  "upload.failed": "The file could not be uploaded. Try again.",
 
   "documents.title": "Documents",
   "documents.empty": "No documents yet",
   "documents.view": "View",
+  "documents.unavailable": "This document is no longer available.",
+  "documents.downloadFailed": "The document could not be downloaded. Try again.",
 
   "attendance.title": "Attendance",
   "attendance.present": "Present",

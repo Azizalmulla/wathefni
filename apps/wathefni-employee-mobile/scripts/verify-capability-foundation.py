@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static, dependency-free verification of Phase 9A1 mobile authority wiring."""
+"""Static, dependency-free verification of employee app authority wiring."""
 
 from __future__ import annotations
 
@@ -25,12 +25,11 @@ def main() -> None:
     tabs = read("app/(tabs)/_layout.tsx")
     home = read("app/(tabs)/index.tsx")
     home_view = read("src/features/home/HomeView.tsx")
-    preview = read("src/designPreview.ts")
     premium = read("src/components/premium.tsx")
     motion = read("src/motion.ts")
     leave_request = read("app/leave/request.tsx")
     documents = read("app/documents.tsx")
-    settings = read("app/settings.tsx")
+    privacy_support = read("app/privacy-support.tsx")
 
     check("AuthProvider stores typed /app/me", "MeResponse" in auth and "setMe(next)" in auth)
     check("AuthProvider revalidates on foreground", "AppState.addEventListener" in auth and "refreshMe()" in auth)
@@ -54,8 +53,9 @@ def main() -> None:
         "payslip" not in home_view.lower() and "compliance" not in home_view.lower(),
     )
     check(
-        "design fixtures require explicit build flag",
-        "EXPO_PUBLIC_DESIGN_PREVIEW" in preview and "design-preview-only" in preview,
+        "temporary design preview does not ship",
+        not (ROOT / "src/designPreview.ts").exists()
+        and not (ROOT / "app/design-preview.tsx").exists(),
     )
     check(
         "Wathefni branding is typography only",
@@ -69,8 +69,12 @@ def main() -> None:
         "isReduceMotionEnabled" in motion and "reduceMotionChanged" in motion,
     )
     check("leave types come from backend", "me?.leave.types" in leave_request and "LEAVE_TYPES" not in leave_request)
-    check("documents do not read secure-store tokens directly", "loadSession" not in documents and "download" in documents)
-    check("privacy URL is centralized", "@/config" in settings and "https://wathefni.ai/employee-app/privacy" not in settings)
+    check("documents do not read secure-store tokens directly", "loadSession" not in documents and "downloadFile" in documents)
+    check(
+        "privacy URL is centralized",
+        "@/config" in privacy_support
+        and "https://wathefni.ai/employee-app/privacy" not in privacy_support,
+    )
     check("localized not-found route exists", (ROOT / "app/+not-found.tsx").is_file())
 
     optional_routes = {

@@ -18,7 +18,8 @@ export async function openDocument(
   onProgress?: (progress: TransferProgress) => void,
 ): Promise<{ cancel: () => Promise<void>; completed: Promise<void> }> {
   const safeName = (filename || `document-${fileId}`).replace(/[^\w.\-]+/g, '_')
-  const target = `${FileSystem.cacheDirectory}${safeName}`
+  const safeId = fileId.replace(/[^\w\-]+/g, '_')
+  const target = `${FileSystem.cacheDirectory}${safeId}-${safeName}`
   const path = `/app/documents/${encodeURIComponent(fileId)}?disposition=attachment`
   const transfer = download(path, target, onProgress)
 

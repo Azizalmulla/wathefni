@@ -30,6 +30,8 @@
 2. `extra.eas.projectId` is still a placeholder and EAS authentication is unavailable on this machine.
 3. No approved App Store icon or splash asset exists.
 4. There is no crash/diagnostic service configured for release builds.
+5. The privacy policy is still a legal draft and must be approved and published at the configured public URL.
+6. Android push testing will require Firebase/FCM V1 credentials and an approved monochrome notification icon before production delivery can be enabled.
 
 ### Requires backend or product contract
 
