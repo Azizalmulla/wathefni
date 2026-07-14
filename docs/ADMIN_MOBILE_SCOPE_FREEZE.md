@@ -102,7 +102,23 @@ Deliver a backend-current, session-authenticated operator mobile bootstrap that 
 
 ## Durable model notes (HR-0)
 
-- Operator identity (`dashboard_user_id`) is the preferred manager-scope authority; phone remains a transitional binding.
+### Manager scope
+
+**Selected durable model:** role-aware fail-closed resolution with preferred `dashboard_user_id` binding.
+
+- Operator identity (`dashboard_user_id`) is the preferred manager-scope authority; phone remains a transitional binding for existing `manager_scopes` rows and WhatsApp.
 - The `manager` role never implies company-wide employee visibility without an explicit scope assignment (including explicit `scope_type=company`).
+- Missing phone/user binding or missing active scope rows for `manager` → empty restricted scope + deterministic `configuration_error` (`manager_scope_binding_missing` / `manager_scope_unconfigured`).
 - Owners / HR managers retain only backend-current authorized access (permissions + modules); they are not “managers without phone.”
-- Shared dashboard tokens and client-supplied phone/company/role/permission claims must not establish authority outside an explicit test-only harness that fails startup elsewhere.
+
+**Migration plan (safe incremental):**
+
+1. Schema: nullable `manager_scopes.dashboard_user_id` (shipped in HR-0).
+2. Write path: `upsert_manager_scope` accepts optional `dashboard_user_id`.
+3. Read path: resolve by `dashboard_user_id` first, then phone (phone-only rows remain valid).
+4. Follow-up (not HR-0): backfill `dashboard_user_id` from `dashboard_users.phone` matches per company; then require user-id binding for new manager assignments.
+
+### Dashboard authority
+
+- Shared dashboard tokens and client-supplied phone/company/role/permission claims must not establish authority outside an explicit test-only harness (`WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH` + `WATHEFNI_ENV=test|pytest|harness`) that fails startup elsewhere.
+- `/health` and `/ready` advertise `permission_authority: backend_current_required`.
