@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { Linking } from 'react-native'
+import type { CancellableTransfer, TransferProgress } from '@/auth/AuthProvider'
 
 // Authenticated open/download of an employee document. Local files are streamed
 // by the backend (FileResponse), so the caller supplies AuthProvider's
@@ -9,29 +10,49 @@ import { Linking } from 'react-native'
 export async function openDocument(
   fileId: string,
   filename: string | null,
-  download: (path: string, target: string) => Promise<FileSystem.FileSystemDownloadResult>,
-): Promise<void> {
+  download: (
+    path: string,
+    target: string,
+    onProgress?: (progress: TransferProgress) => void,
+  ) => CancellableTransfer<FileSystem.FileSystemDownloadResult>,
+  onProgress?: (progress: TransferProgress) => void,
+): Promise<{ cancel: () => Promise<void>; completed: Promise<void> }> {
   const safeName = (filename || `document-${fileId}`).replace(/[^\w.\-]+/g, '_')
   const target = `${FileSystem.cacheDirectory}${safeName}`
   const path = `/app/documents/${encodeURIComponent(fileId)}?disposition=attachment`
-  const result = await download(path, target)
+  const transfer = download(path, target, onProgress)
 
-  const contentType = (result.headers['Content-Type'] || result.headers['content-type'] || '').toLowerCase()
-  if (contentType.includes('application/json')) {
-    // External-provider access link: read the JSON and open the URL.
+  const completed = (async () => {
     try {
-      const body = await FileSystem.readAsStringAsync(result.uri)
-      const parsed = JSON.parse(body) as { url?: string }
-      if (parsed.url) {
-        await Linking.openURL(parsed.url)
-        return
+      const result = await transfer.promise
+      const contentType = (result.headers['Content-Type'] || result.headers['content-type'] || '').toLowerCase()
+      if (contentType.includes('application/json')) {
+        const body = await FileSystem.readAsStringAsync(result.uri)
+        const parsed = JSON.parse(body) as { url?: string }
+        if (parsed.url && isSafeExternalUrl(parsed.url)) {
+          await Linking.openURL(parsed.url)
+          return
+        }
       }
-    } catch {
-      // fall through to share attempt
-    }
-  }
 
-  if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(result.uri)
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(result.uri, {
+          dialogTitle: filename || 'Document',
+          mimeType: contentType || undefined,
+        })
+      }
+    } finally {
+      await FileSystem.deleteAsync(target, { idempotent: true }).catch(() => undefined)
+    }
+  })()
+
+  return { cancel: transfer.cancel, completed }
+}
+
+function isSafeExternalUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === 'https:'
+  } catch {
+    return false
   }
 }

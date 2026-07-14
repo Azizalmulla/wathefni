@@ -5,14 +5,11 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
+    "start:dev-client": "expo start --dev-client",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "preview:design": "EXPO_PUBLIC_DESIGN_PREVIEW=1 expo start --web",
-    "preview:export": "EXPO_PUBLIC_DESIGN_PREVIEW=1 npx expo export --platform web --output-dir /tmp/wathefni-preview",
-    "preview:serve": "node scripts/serve-preview.mjs",
-    "preview:capture": "node scripts/capture-phase9a2-previews.mjs",
-    "preview:verify": "node scripts/capture-phase9a2-previews.mjs",
-    "preview:verify:webkit": "node scripts/verify-phase9a2-webkit.mjs",
+    "native:doctor": "npx expo-doctor",
+    "native:bundle:ios": "npx expo export --platform ios --output-dir /tmp/wathefni-native-bundle",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
@@ -25,10 +22,13 @@
     "@tanstack/react-query": "^5.51.0",
     "expo": "~51.0.0",
     "expo-constants": "~16.0.2",
+    "expo-dev-client": "~4.0.29",
     "expo-device": "~6.0.2",
     "expo-document-picker": "~12.0.2",
     "expo-file-system": "~17.0.1",
     "expo-font": "~12.0.10",
+    "expo-haptics": "~13.0.1",
+    "expo-image-manipulator": "~12.0.5",
     "expo-image-picker": "~15.1.0",
     "expo-linking": "~6.3.1",
     "expo-localization": "~15.0.3",
@@ -46,7 +46,6 @@
     "react-native-web": "~0.19.10"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
     "@types/react": "~18.2.45",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "typescript": "~5.3.3"

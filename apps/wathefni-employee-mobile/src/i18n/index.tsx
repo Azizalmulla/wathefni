@@ -80,7 +80,7 @@ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLo
     try {
       await AsyncStorage.setItem(LOCALE_KEY, next)
     } catch {
-      // Persistence is best-effort. Preview/web must still switch immediately.
+      // Persistence is best-effort; the active session still switches immediately.
     }
   }, [])
 

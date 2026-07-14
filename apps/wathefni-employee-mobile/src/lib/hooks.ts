@@ -8,7 +8,7 @@ export function useAppQuery<T>(key: unknown[], path: string, options?: Partial<U
   const { request } = useAuth()
   return useQuery<T>({
     queryKey: key,
-    queryFn: () => request<T>(path),
+    queryFn: ({ signal }) => request<T>(path, { signal }),
     ...options,
   })
 }

@@ -13,6 +13,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "ai.wathefni.employee",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Wathefni uses the camera only when you choose to capture a document to upload to HR.",
         "NSPhotoLibraryUsageDescription": "Wathefni accesses your photos only when you choose to attach a document to upload to HR."
       }

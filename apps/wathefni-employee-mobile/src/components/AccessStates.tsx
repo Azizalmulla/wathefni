@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 import type { AppAccessState } from '@/capabilities'
 import { useI18n } from '@/i18n'

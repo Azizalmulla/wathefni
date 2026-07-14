@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n, type AppLocale } from '@/i18n'
 import {
@@ -50,18 +50,26 @@ function Page({
   children,
   onBack,
   bloom = true,
+  safeTop = false,
 }: BaseProps & {
   title: string
   subtitle?: string
   eyebrow?: string
   children: React.ReactNode
   bloom?: boolean
+  safeTop?: boolean
 }) {
   const { isRTL, t } = useI18n()
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
   return (
-    <SafeAreaView style={styles.safe} edges={onBack ? ['top'] : []}>
-      <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.safe} edges={onBack || safeTop ? ['top'] : []}>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      >
         <View style={[styles.nav, isRTL && styles.rowReverse]}>
           {onBack ? (
             <Pressable
@@ -375,7 +383,7 @@ function ShiftCard({ shift, index }: { shift: ShiftRow; index: number }) {
 export function AttendanceView({ data }: { data: AttendanceResponse }) {
   const { t, locale, isRTL } = useI18n()
   return (
-    <Page eyebrow={t('remaining.attendanceEyebrow')} title={t('attendance.title')} subtitle={t('remaining.attendanceSubtitle')}>
+    <Page safeTop={false} eyebrow={t('remaining.attendanceEyebrow')} title={t('attendance.title')} subtitle={t('remaining.attendanceSubtitle')}>
       <View style={[styles.attendanceSummary, isRTL && styles.rowReverse]}>
         <SummaryMetric tone="sage" label={t('attendance.present')} value={data.summary.present} locale={locale} />
         <SummaryMetric tone="butter" label={t('attendance.late')} value={data.summary.late} locale={locale} />
@@ -409,16 +417,20 @@ function SummaryMetric({ tone, label, value, locale }: { tone: PastelTone; label
 export function DocumentsView({
   documents,
   openingId,
+  downloadProgress = 0,
   onOpen,
+  onCancel,
 }: {
   documents: EmployeeDocument[]
   openingId: string | null
+  downloadProgress?: number
   onOpen: (fileId: string, filename: string | null) => void
+  onCancel?: () => void
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
   return (
-    <Page eyebrow={t('remaining.documentsEyebrow')} title={t('documents.title')} subtitle={t('remaining.documentsSubtitle')}>
+    <Page safeTop={false} eyebrow={t('remaining.documentsEyebrow')} title={t('documents.title')} subtitle={t('remaining.documentsSubtitle')}>
       {documents.length ? (
         <View style={styles.section}>
           {documents.map((document, index) => (
@@ -430,15 +442,29 @@ export function DocumentsView({
                   <Text style={[styles.meta, align]}>{formatDate(document.stored_at, locale)}</Text>
                 </View>
                 {document.has_file ? (
-                  <Pressable accessibilityRole="button" onPress={() => onOpen(document.file_id, document.filename)} style={styles.roundAction}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={openingId === document.file_id ? t('common.cancel') : t('documents.view')}
+                    onPress={() => openingId === document.file_id ? onCancel?.() : onOpen(document.file_id, document.filename)}
+                    style={styles.roundAction}
+                  >
                     {openingId === document.file_id ? (
-                      <ActivityIndicator size="small" color={colors.ink} />
+                      <Ionicons name="close" size={19} color={colors.ink} />
                     ) : (
                       <Ionicons name="eye-outline" size={19} color={colors.ink} />
                     )}
                   </Pressable>
                 ) : null}
               </View>
+              {openingId === document.file_id ? (
+                <View style={styles.documentProgress}>
+                  <ActivityIndicator size="small" color={colors.ink} />
+                  <View style={styles.documentProgressTrack}>
+                    <View style={[styles.documentProgressFill, { width: `${Math.round(downloadProgress * 100)}%` }]} />
+                  </View>
+                  <Text style={styles.meta}>{Math.round(downloadProgress * 100)}%</Text>
+                </View>
+              ) : null}
             </PastelCard>
           ))}
         </View>
@@ -541,7 +567,7 @@ export function SettingsView({
 }) {
   const { t, isRTL } = useI18n()
   return (
-    <Page eyebrow={t('remaining.settingsEyebrow')} title={t('settings.title')} subtitle={t('remaining.settingsSubtitle')}>
+    <Page safeTop={false} eyebrow={t('remaining.settingsEyebrow')} title={t('settings.title')} subtitle={t('remaining.settingsSubtitle')}>
       <View style={styles.section}>
         <SectionLabel>{t('settings.language')}</SectionLabel>
         <View style={[styles.segment, isRTL && styles.rowReverse]}>
@@ -651,8 +677,8 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: spacing.xl, paddingTop: spacing.md, paddingBottom: 120, gap: spacing.xl },
   nav: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  navSpacer: { width: 38 },
-  backButton: { width: 38, height: 38, borderRadius: radius.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', ...shadows.card },
+  navSpacer: { width: 44 },
+  backButton: { width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', ...shadows.card },
   hero: { gap: spacing.sm, position: 'relative', overflow: 'hidden', paddingBottom: spacing.xs },
   eyebrow: { color: colors.accent, fontSize: font.tiny, fontWeight: '800', letterSpacing: 0.9, textTransform: 'uppercase' },
   subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 22, maxWidth: 360 },
@@ -707,9 +733,12 @@ const styles = StyleSheet.create({
   recordRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, ...shadows.card },
   timelineDot: { width: 10, height: 10, borderRadius: 5 },
   recordDate: { color: colors.ink, fontSize: font.body, fontWeight: '600' },
-  documentCard: { padding: spacing.lg },
+  documentCard: { padding: spacing.lg, gap: spacing.md },
   documentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  roundAction: { width: 42, height: 42, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.62)', alignItems: 'center', justifyContent: 'center' },
+  roundAction: { width: 44, height: 44, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.62)', alignItems: 'center', justifyContent: 'center' },
+  documentProgress: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  documentProgressTrack: { flex: 1, height: 6, borderRadius: radius.pill, overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.58)' },
+  documentProgressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.accent },
   profileHero: { minHeight: 160, justifyContent: 'center', overflow: 'hidden' },
   profileTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   largeAvatar: { width: 72, height: 72, borderRadius: radius.pill, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },

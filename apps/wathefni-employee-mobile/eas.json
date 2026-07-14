@@ -8,19 +8,22 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://staging-api.wathefni.ai"
+        "EXPO_PUBLIC_API_BASE_URL": "https://staging-api.wathefni.ai",
+        "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "1"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://staging-api.wathefni.ai"
+        "EXPO_PUBLIC_API_BASE_URL": "https://staging-api.wathefni.ai",
+        "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "1"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai"
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+        "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "0"
       }
     }
   },

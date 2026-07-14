@@ -1,9 +1,7 @@
-import { useEffect, useRef } from 'react'
 import { useRouter, type Href } from 'expo-router'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useAppQuery } from '@/lib/hooks'
-import { registerForPushToken } from '@/push/registerForPush'
 import { ErrorState, LoadingState } from '@/components/States'
 import { HomeView } from '@/features/home/HomeView'
 import type {
@@ -15,26 +13,8 @@ import type {
 } from '@/api/types'
 
 export default function HomeScreen() {
-  const { profile, request, hasFeature, can } = useAuth()
+  const { profile, hasFeature, can } = useAuth()
   const router = useRouter()
-  const pushRegistered = useRef(false)
-
-  useEffect(() => {
-    if (pushRegistered.current || !can('settings', 'manage_push')) return
-    pushRegistered.current = true
-    void (async () => {
-      const result = await registerForPushToken()
-      if (!result) return
-      try {
-        await request('/app/push/register', {
-          method: 'POST',
-          json: { push_token: result.token, platform: result.platform },
-        })
-      } catch {
-        pushRegistered.current = false
-      }
-    })()
-  }, [request, can])
 
   const features = {
     shifts: hasFeature('shifts'),

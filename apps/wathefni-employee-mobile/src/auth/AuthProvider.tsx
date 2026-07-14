@@ -11,8 +11,21 @@ import {
   type AppAccessState,
 } from '@/capabilities'
 import { clearSession, loadSession, saveSession, type StoredSession } from './session'
+import type { PickedFile } from '@/lib/uploadDocument'
+import { savePushPreference } from '@/push/preferences'
 
 type AuthStatus = 'loading' | 'signedOut' | 'signedIn' | 'blocked'
+
+export type TransferProgress = {
+  transferred: number
+  total: number
+  progress: number
+}
+
+export type CancellableTransfer<T> = {
+  promise: Promise<T>
+  cancel: () => Promise<void>
+}
 
 type AuthContextValue = {
   status: AuthStatus
@@ -25,8 +38,19 @@ type AuthContextValue = {
   refreshMe: () => Promise<boolean>
   hasFeature: (feature: EmployeeFeatureKey) => boolean
   can: (feature: EmployeeFeatureKey, action: string) => boolean
-  request: <T>(path: string, opts?: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData }) => Promise<T>
+  request: <T>(path: string, opts?: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData; signal?: AbortSignal }) => Promise<T>
   download: (path: string, target: string) => Promise<FileSystem.FileSystemDownloadResult>
+  uploadFile: (
+    path: string,
+    file: PickedFile,
+    parameters: Record<string, string>,
+    onProgress?: (progress: TransferProgress) => void,
+  ) => CancellableTransfer<void>
+  downloadFile: (
+    path: string,
+    target: string,
+    onProgress?: (progress: TransferProgress) => void,
+  ) => CancellableTransfer<FileSystem.FileSystemDownloadResult>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -50,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (next === 'unknown_error' && !force) return false
     if (next === 'session_expired' || next === 'employee_inactive') {
       sessionRef.current = null
-      await clearSession()
+      await Promise.all([clearSession(), savePushPreference(false)])
     }
     setAccessState(next)
     setStatus('blocked')
@@ -77,10 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true
     void (async () => {
-      if (process.env.EXPO_PUBLIC_DESIGN_PREVIEW === '1') {
-        setStatus('signedOut')
-        return
-      }
       const stored = await loadSession()
       if (!active) return
       if (!stored) {
@@ -137,13 +157,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = sessionRef.current?.token
     if (token) {
       try {
+        await rawRequest('/app/push/unregister', { method: 'POST', token, json: {} })
+      } catch {
+        // Best-effort. The server also revokes push tokens when sessions are invalidated.
+      }
+      try {
         await rawRequest('/app/auth/logout', { method: 'POST', token })
       } catch {
         // Best-effort: local secure-store removal is authoritative for this device.
       }
     }
     sessionRef.current = null
-    await clearSession()
+    await Promise.all([clearSession(), savePushPreference(false)])
     setProfile(null)
     setMe(null)
     setAccessState('active')
@@ -151,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const request = useCallback(
-    async <T,>(path: string, opts: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData } = {}): Promise<T> => {
+    async <T,>(path: string, opts: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData; signal?: AbortSignal } = {}): Promise<T> => {
       const current = sessionRef.current
       if (!current) throw new ApiError(401, 'app_auth_failed', 'Please sign in again.')
       try {
@@ -206,6 +231,110 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applyMe, blockForError, refreshMe],
   )
 
+  const uploadFile = useCallback(
+    (
+      path: string,
+      file: PickedFile,
+      parameters: Record<string, string>,
+      onProgress?: (progress: TransferProgress) => void,
+    ): CancellableTransfer<void> => {
+      const current = sessionRef.current
+      if (!current) throw new ApiError(401, 'app_auth_failed', 'Please sign in again.')
+      let activeTask: FileSystem.UploadTask | null = null
+      let cancelled = false
+
+      const run = async (token: string) => {
+        activeTask = createUploadTask(path, file, parameters, token, onProgress)
+        const result = await activeTask.uploadAsync()
+        activeTask = null
+        if (!result || cancelled) throw transferCancelledError()
+        return result
+      }
+
+      const promise = (async () => {
+        let result = await run(current.token)
+        if (result.status === 401 && !cancelled) {
+          try {
+            const loaded = await rotateSessionAndLoadMe(current)
+            sessionRef.current = loaded.session
+            applyMe(loaded.me)
+            result = await run(loaded.session.token)
+          } catch (error) {
+            await blockForError(error, true)
+            throw error
+          }
+        }
+        if (result.status < 200 || result.status >= 300) {
+          const error = uploadApiError(result)
+          if (error.code === 'employee_feature_disabled') await refreshMe()
+          else await blockForError(error)
+          throw error
+        }
+      })()
+
+      return {
+        promise,
+        cancel: async () => {
+          cancelled = true
+          await activeTask?.cancelAsync()
+        },
+      }
+    },
+    [applyMe, blockForError, refreshMe],
+  )
+
+  const downloadFile = useCallback(
+    (
+      path: string,
+      target: string,
+      onProgress?: (progress: TransferProgress) => void,
+    ): CancellableTransfer<FileSystem.FileSystemDownloadResult> => {
+      const current = sessionRef.current
+      if (!current) throw new ApiError(401, 'app_auth_failed', 'Please sign in again.')
+      let activeTask: FileSystem.DownloadResumable | null = null
+      let cancelled = false
+
+      const run = async (token: string) => {
+        activeTask = createDownloadTask(path, target, token, onProgress)
+        const result = await activeTask.downloadAsync()
+        activeTask = null
+        if (!result || cancelled) throw transferCancelledError()
+        return result
+      }
+
+      const promise = (async () => {
+        let result = await run(current.token)
+        if (result.status === 401 && !cancelled) {
+          try {
+            const loaded = await rotateSessionAndLoadMe(current)
+            sessionRef.current = loaded.session
+            applyMe(loaded.me)
+            result = await run(loaded.session.token)
+          } catch (error) {
+            await blockForError(error, true)
+            throw error
+          }
+        }
+        if (result.status < 200 || result.status >= 300) {
+          const error = await downloadApiError(result)
+          if (error.code === 'employee_feature_disabled') await refreshMe()
+          else await blockForError(error)
+          throw error
+        }
+        return result
+      })()
+
+      return {
+        promise,
+        cancel: async () => {
+          cancelled = true
+          await activeTask?.cancelAsync()
+        },
+      }
+    },
+    [applyMe, blockForError, refreshMe],
+  )
+
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
@@ -220,8 +349,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       can: (feature, action) => canUseFeatureAction(me, feature, action),
       request,
       download,
+      uploadFile,
+      downloadFile,
     }),
-    [status, accessState, profile, me, activate, requestCode, signOut, refreshMe, request, download],
+    [status, accessState, profile, me, activate, requestCode, signOut, refreshMe, request, download, uploadFile, downloadFile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -258,6 +389,77 @@ async function authenticatedDownload(
   return FileSystem.downloadAsync(`${API_BASE_URL}${path}`, target, {
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/octet-stream' },
   })
+}
+
+function createUploadTask(
+  path: string,
+  file: PickedFile,
+  parameters: Record<string, string>,
+  token: string,
+  onProgress?: (progress: TransferProgress) => void,
+): FileSystem.UploadTask {
+  return FileSystem.createUploadTask(
+    `${API_BASE_URL}${path}`,
+    file.uri,
+    {
+      httpMethod: 'POST',
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      fieldName: 'file',
+      mimeType: file.mimeType,
+      parameters,
+      sessionType: FileSystem.FileSystemSessionType.FOREGROUND,
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    },
+    ({ totalBytesSent, totalBytesExpectedToSend }) => {
+      const total = Math.max(0, totalBytesExpectedToSend)
+      onProgress?.({
+        transferred: totalBytesSent,
+        total,
+        progress: total > 0 ? Math.min(1, totalBytesSent / total) : 0,
+      })
+    },
+  )
+}
+
+function createDownloadTask(
+  path: string,
+  target: string,
+  token: string,
+  onProgress?: (progress: TransferProgress) => void,
+): FileSystem.DownloadResumable {
+  return FileSystem.createDownloadResumable(
+    `${API_BASE_URL}${path}`,
+    target,
+    {
+      sessionType: FileSystem.FileSystemSessionType.FOREGROUND,
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/octet-stream' },
+    },
+    ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+      const total = Math.max(0, totalBytesExpectedToWrite)
+      onProgress?.({
+        transferred: totalBytesWritten,
+        total,
+        progress: total > 0 ? Math.min(1, totalBytesWritten / total) : 0,
+      })
+    },
+  )
+}
+
+function uploadApiError(result: FileSystem.FileSystemUploadResult): ApiError {
+  try {
+    const payload = JSON.parse(result.body) as { detail?: { error?: string; message?: string } }
+    return new ApiError(
+      result.status,
+      payload.detail?.error || 'upload_failed',
+      payload.detail?.message || 'The document could not be uploaded.',
+    )
+  } catch {
+    return new ApiError(result.status, 'upload_failed', 'The document could not be uploaded.')
+  }
+}
+
+function transferCancelledError(): ApiError {
+  return new ApiError(0, 'transfer_cancelled', 'Transfer cancelled.')
 }
 
 async function downloadApiError(result: FileSystem.FileSystemDownloadResult): Promise<ApiError> {

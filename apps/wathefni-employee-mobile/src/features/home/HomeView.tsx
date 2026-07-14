@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useI18n } from '@/i18n'
 import {
@@ -11,7 +12,7 @@ import {
   MotionProgressBar,
   PastelCard,
   PremiumButton,
-  PreviewSkeleton,
+  ContentSkeleton,
   WathefniBloom,
   Wordmark,
 } from '@/components/premium'
@@ -81,7 +82,8 @@ export function HomeView({
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={[styles.header, rowDirection]}>
         <Wordmark compact />
         <View style={styles.avatar} accessibilityLabel={profile?.name || t('profile.title')}>
@@ -250,7 +252,8 @@ export function HomeView({
       ) : null}
 
       <Text style={styles.previewLocale} accessibilityElementsHidden>{locale === 'ar' ? 'AR' : 'EN'}</Text>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -262,7 +265,7 @@ export function HomeLoadingView() {
       <Wordmark compact />
       <EditorialHeading>{t('home.todayAtWork')}</EditorialHeading>
       <PastelCard tone="lilac" style={styles.stateCard}>
-        <PreviewSkeleton rows={4} />
+        <ContentSkeleton rows={4} />
       </PastelCard>
       <Text style={[styles.stateMessage, align]}>{t('common.loading')}</Text>
     </View>
@@ -329,7 +332,7 @@ function ModuleCard({
 
 function MiniAction({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable style={({ pressed }) => [styles.miniAction, { opacity: pressed ? 0.75 : 1 }]} onPress={onPress}>
+    <Pressable accessibilityRole="button" style={({ pressed }) => [styles.miniAction, { opacity: pressed ? 0.75 : 1 }]} onPress={onPress}>
       <Text style={styles.miniActionText}>{label}</Text>
     </Pressable>
   )
@@ -345,7 +348,7 @@ function QuickAction({
   onPress: () => void
 }) {
   return (
-    <Pressable style={({ pressed }) => [styles.quickAction, { opacity: pressed ? 0.72 : 1 }]} onPress={onPress}>
+    <Pressable accessibilityRole="button" style={({ pressed }) => [styles.quickAction, { opacity: pressed ? 0.72 : 1 }]} onPress={onPress}>
       <IconBadge name={icon} size={38} />
       <Text style={styles.quickLabel} numberOfLines={2}>{label}</Text>
     </Pressable>
@@ -405,7 +408,7 @@ const styles = StyleSheet.create({
   badgeText: { color: colors.surface, fontSize: font.tiny, fontWeight: '800' },
   miniAction: {
     alignSelf: 'stretch',
-    minHeight: 34,
+    minHeight: 44,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',

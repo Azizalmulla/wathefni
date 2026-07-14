@@ -11,10 +11,11 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
+import { actionHaptic } from '@/native/haptics'
 import { colors, font, radius, shadows, spacing } from '@/theme'
 
 export type PastelTone = 'lilac' | 'butter' | 'blush' | 'sage' | 'sky' | 'cream'
@@ -181,7 +182,7 @@ export function EditorialHeading({
   const { locale, isRTL } = useI18n()
   return (
     <Text
-      maxFontSizeMultiplier={1.3}
+      maxFontSizeMultiplier={2}
       style={[
         size === 'large' ? styles.editorialLarge : styles.editorialMedium,
         { fontFamily: editorialFont(locale), textAlign: isRTL ? 'right' : 'left' },
@@ -265,7 +266,10 @@ export function PremiumButton({
         accessibilityRole="button"
         accessibilityState={{ disabled: unavailable, busy }}
         disabled={unavailable}
-        onPress={onPress}
+        onPress={() => {
+          actionHaptic()
+          onPress()
+        }}
         onPressIn={() => animate(0.985)}
         onPressOut={() => animate(1)}
         style={[styles.premiumButton, disabled && styles.premiumButtonDisabled, success && styles.premiumButtonSuccess]}
@@ -348,7 +352,7 @@ export function DirectionalIcon({ size = 18 }: { size?: number }) {
   return <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={size} color={colors.surface} />
 }
 
-export function PreviewSkeleton({ rows = 3 }: { rows?: number }) {
+export function ContentSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <View style={styles.skeletonWrap}>
       {Array.from({ length: rows }).map((_, index) => (

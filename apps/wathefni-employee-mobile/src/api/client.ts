@@ -47,7 +47,8 @@ export async function rawRequest<T>(path: string, options: RequestOptions = {}):
   let response: Response
   try {
     response = await fetch(`${API_BASE_URL}${path}`, { method, headers, body: payload, signal })
-  } catch {
+  } catch (error) {
+    if (signal?.aborted) throw error
     throw new ApiError(0, 'network_error', 'No connection. Please check your internet and try again.')
   }
 

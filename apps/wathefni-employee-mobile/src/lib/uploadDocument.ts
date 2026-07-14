@@ -1,10 +1,19 @@
 import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
+import * as ImageManipulator from 'expo-image-manipulator'
 
 export type PickedFile = { uri: string; name: string; mimeType: string }
 
-// Lets the employee pick a PDF or image. Camera/library access is requested
-// just-in-time (only when they tap upload), per store guidance.
+export class UploadPickError extends Error {
+  code: 'camera_permission' | 'library_permission'
+
+  constructor(code: UploadPickError['code']) {
+    super(code)
+    this.name = 'UploadPickError'
+    this.code = code
+  }
+}
+
 export async function pickDocument(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/pdf', 'image/*'],
@@ -22,22 +31,52 @@ export async function pickDocument(): Promise<PickedFile | null> {
 
 export async function pickImageFromLibrary(): Promise<PickedFile | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
-  if (!permission.granted) return null
+  if (!permission.granted) throw new UploadPickError('library_permission')
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    quality: 0.8,
+    quality: 1,
+    allowsEditing: false,
   })
   if (result.canceled || !result.assets?.length) return null
-  const asset = result.assets[0]
-  const name = asset.fileName || `photo-${Date.now()}.jpg`
-  return { uri: asset.uri, name, mimeType: asset.mimeType || 'image/jpeg' }
+  return prepareImage(result.assets[0])
 }
 
-// Builds the multipart body the /app/onboarding/documents endpoint expects.
-export function buildUploadForm(file: PickedFile, itemId: string): FormData {
-  const form = new FormData()
-  form.append('item_id', itemId)
-  // React Native's FormData file shape.
-  form.append('file', { uri: file.uri, name: file.name, type: file.mimeType } as unknown as Blob)
-  return form
+export async function takePhoto(): Promise<PickedFile | null> {
+  const permission = await ImagePicker.requestCameraPermissionsAsync()
+  if (!permission.granted) throw new UploadPickError('camera_permission')
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    cameraType: ImagePicker.CameraType.back,
+    quality: 1,
+    allowsEditing: false,
+  })
+  if (result.canceled || !result.assets?.length) return null
+  return prepareImage(result.assets[0])
+}
+
+async function prepareImage(asset: ImagePicker.ImagePickerAsset): Promise<PickedFile> {
+  const maxDimension = 2048
+  const largest = Math.max(asset.width || 0, asset.height || 0)
+  const actions: ImageManipulator.Action[] =
+    largest > maxDimension
+      ? [
+          asset.width >= asset.height
+            ? { resize: { width: maxDimension } }
+            : { resize: { height: maxDimension } },
+        ]
+      : []
+  const output = await ImageManipulator.manipulateAsync(asset.uri, actions, {
+    compress: 0.78,
+    format: ImageManipulator.SaveFormat.JPEG,
+  })
+  return {
+    uri: output.uri,
+    name: normalizedImageName(asset.fileName),
+    mimeType: 'image/jpeg',
+  }
+}
+
+function normalizedImageName(name: string | null | undefined): string {
+  const base = (name || `photo-${Date.now()}`).replace(/\.[^.]+$/, '')
+  return `${base}.jpg`
 }

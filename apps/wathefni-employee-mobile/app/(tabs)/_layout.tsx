@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'

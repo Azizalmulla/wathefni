@@ -3,17 +3,23 @@ import * as Notifications from 'expo-notifications'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 
+export const PUSH_REGISTRATION_ENABLED = process.env.EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED === '1'
+
 // Asks for push permission (with a JIT prompt the caller gates behind a rationale)
 // and returns the Expo push token, or null if unavailable/denied. The app stays
 // fully usable without push — the in-app inbox is always available.
-export async function registerForPushToken(): Promise<{ token: string; platform: string } | null> {
-  if (!Device.isDevice) return null
+export async function registerForPushToken({
+  requestPermission = false,
+}: {
+  requestPermission?: boolean
+} = {}): Promise<{ token: string; platform: string } | null> {
+  if (!PUSH_REGISTRATION_ENABLED || !Device.isDevice) return null
 
   const existing = await Notifications.getPermissionsAsync()
   let granted = existing.granted || existing.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-  if (!granted && existing.canAskAgain) {
+  if (!granted && requestPermission && existing.canAskAgain) {
     const requested = await Notifications.requestPermissionsAsync()
-    granted = requested.granted
+    granted = requested.granted || requested.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
   }
   if (!granted) return null
 

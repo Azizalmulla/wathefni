@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n } from '@/i18n'
 import { StatusChip } from '@/components/ui'
@@ -10,7 +10,7 @@ import {
   MotionProgressBar,
   PastelCard,
   PremiumButton,
-  PreviewSkeleton,
+  ContentSkeleton,
   Wordmark,
 } from '@/components/premium'
 import { formatNumber, statusLabel, statusTone } from '@/lib/format'
@@ -20,11 +20,24 @@ import type { OnboardingItem, OnboardingResponse } from '@/api/types'
 type OnboardingViewProps = {
   data: OnboardingResponse
   uploadingId: string | null
+  uploadProgress?: number
+  failedUploadId?: string | null
   onUpload: (item: OnboardingItem) => void
+  onCancelUpload?: () => void
+  onRetryUpload?: (item: OnboardingItem) => void
   onBack: () => void
 }
 
-export function OnboardingView({ data, uploadingId, onUpload, onBack }: OnboardingViewProps) {
+export function OnboardingView({
+  data,
+  uploadingId,
+  uploadProgress = 0,
+  failedUploadId = null,
+  onUpload,
+  onCancelUpload,
+  onRetryUpload,
+  onBack,
+}: OnboardingViewProps) {
   const { t, isRTL, locale } = useI18n()
   const pending = data.pending ?? []
   const received = data.received ?? []
@@ -79,7 +92,11 @@ export function OnboardingView({ data, uploadingId, onUpload, onBack }: Onboardi
                 tone={(item.status || '').toLowerCase() === 'rejected' ? 'blush' : index % 2 ? 'sky' : 'lilac'}
                 canUpload={canUpload}
                 uploading={uploadingId === item.item_id}
+                uploadProgress={uploadingId === item.item_id ? uploadProgress : 0}
+                uploadFailed={failedUploadId === item.item_id}
                 onUpload={onUpload}
+                onCancelUpload={onCancelUpload}
+                onRetryUpload={onRetryUpload}
               />
             ))}
           </View>
@@ -121,7 +138,7 @@ export function OnboardingLoadingView() {
         <Wordmark compact />
         <EditorialHeading>{t('onboarding.checklistTitle')}</EditorialHeading>
         <PastelCard tone="lilac" style={styles.loadingCard}>
-          <PreviewSkeleton rows={3} />
+          <ContentSkeleton rows={3} />
         </PastelCard>
         <Text style={[styles.stateMessage, align]}>{t('common.loading')}</Text>
       </View>
@@ -152,13 +169,21 @@ function ChecklistCard({
   tone,
   canUpload,
   uploading,
+  uploadProgress,
+  uploadFailed,
   onUpload,
+  onCancelUpload,
+  onRetryUpload,
 }: {
   item: OnboardingItem
   tone: 'lilac' | 'sky' | 'blush'
   canUpload: boolean
   uploading: boolean
+  uploadProgress: number
+  uploadFailed: boolean
   onUpload: (item: OnboardingItem) => void
+  onCancelUpload?: () => void
+  onRetryUpload?: (item: OnboardingItem) => void
 }) {
   const { t, isRTL } = useI18n()
   const title = onboardingItemLabel(item, t)
@@ -213,11 +238,31 @@ function ChecklistCard({
           ) : null}
         </View>
       </View>
-      {allowUpload && !awaitingReview ? (
+      {uploading ? (
+        <View style={styles.transfer}>
+          <View style={[styles.transferHead, rowDirection]}>
+            <Text style={[styles.transferText, align]}>{t('onboarding.uploading')}</Text>
+            <Text style={styles.transferText}>{Math.round(uploadProgress * 100)}%</Text>
+          </View>
+          <MotionProgressBar value={uploadProgress} />
+          {onCancelUpload ? (
+            <Pressable accessibilityRole="button" onPress={onCancelUpload} style={styles.cancelTransfer}>
+              <Text style={styles.cancelTransferText}>{t('common.cancel')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : allowUpload && !awaitingReview ? (
         <PremiumButton
-          label={item.file_id || rejected ? t('onboarding.replace') : photo ? t('onboarding.uploadPhoto') : t('onboarding.upload')}
-          busy={uploading}
-          onPress={() => onUpload(item)}
+          label={
+            uploadFailed
+              ? t('common.retry')
+              : item.file_id || rejected
+                ? t('onboarding.replace')
+                : photo
+                  ? t('onboarding.uploadPhoto')
+                  : t('onboarding.upload')
+          }
+          onPress={() => uploadFailed && onRetryUpload ? onRetryUpload(item) : onUpload(item)}
         />
       ) : null}
     </PastelCard>
@@ -305,6 +350,17 @@ const styles = StyleSheet.create({
   section: { gap: spacing.md },
   sectionTitle: { color: colors.ink, fontSize: font.h3, fontWeight: '800' },
   taskCard: { gap: spacing.lg, padding: spacing.lg },
+  transfer: { gap: spacing.sm },
+  transferHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  transferText: { color: colors.ink, fontSize: font.tiny, fontWeight: '700' },
+  cancelTransfer: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(255,255,255,0.58)',
+  },
+  cancelTransferText: { color: colors.danger, fontSize: font.small, fontWeight: '700' },
   taskTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   requirementRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md, flexWrap: 'wrap' },
   requirementPill: {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert } from 'react-native'
+import { Alert, Linking } from 'react-native'
 import { useRouter } from 'expo-router'
 import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
@@ -7,7 +7,8 @@ import * as Notifications from 'expo-notifications'
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
-import { registerForPushToken } from '@/push/registerForPush'
+import { PUSH_REGISTRATION_ENABLED, registerForPushToken } from '@/push/registerForPush'
+import { loadPushPreference, savePushPreference } from '@/push/preferences'
 import { SettingsView } from '@/features/remaining/RemainingViews'
 
 export default function SettingsScreen() {
@@ -18,23 +19,36 @@ export default function SettingsScreen() {
   const [pushBusy, setPushBusy] = useState(false)
 
   useEffect(() => {
-    void Notifications.getPermissionsAsync().then((p) => setPushOn(p.granted))
+    if (PUSH_REGISTRATION_ENABLED) {
+      void Promise.all([Notifications.getPermissionsAsync(), loadPushPreference()]).then(([p, preferred]) => {
+        const permitted = p.granted || p.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+        setPushOn(permitted && preferred)
+      })
+    }
   }, [])
 
   const togglePush = async (next: boolean) => {
     setPushBusy(true)
     try {
       if (next) {
-        const result = await registerForPushToken()
+        const result = await registerForPushToken({ requestPermission: true })
         if (!result) {
           setPushOn(false)
-          Alert.alert(t('settings.push'), t('common.error'))
+          const permission = await Notifications.getPermissionsAsync()
+          Alert.alert(t('settings.push'), t('settings.pushDenied'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            ...(!permission.canAskAgain
+              ? [{ text: t('onboarding.openSettings'), onPress: () => void Linking.openSettings() }]
+              : []),
+          ])
           return
         }
         await request('/app/push/register', { method: 'POST', json: { push_token: result.token, platform: result.platform } })
+        await savePushPreference(true)
         setPushOn(true)
       } else {
         await request('/app/push/unregister', { method: 'POST', json: {} })
+        await savePushPreference(false)
         setPushOn(false)
       }
     } catch (err) {
@@ -67,10 +81,19 @@ export default function SettingsScreen() {
       locale={locale}
       pushOn={pushOn}
       pushBusy={pushBusy}
-      canManagePush={can('settings', 'manage_push')}
+      canManagePush={PUSH_REGISTRATION_ENABLED && can('settings', 'manage_push')}
       version={Constants.expoConfig?.version ?? '—'}
       onLocale={(code) => void setLocale(code)}
-      onTogglePush={(next) => void togglePush(next)}
+      onTogglePush={(next) => {
+        if (!next) {
+          void togglePush(false)
+          return
+        }
+        Alert.alert(t('settings.push'), t('settings.pushRationale'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('common.continue'), onPress: () => void togglePush(true) },
+        ])
+      }}
       onPrivacySupport={() => router.push('/privacy-support')}
       onDelete={onRequestDeletion}
     />
