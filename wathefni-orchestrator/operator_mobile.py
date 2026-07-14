@@ -748,6 +748,7 @@ def build_recruiting_workspace_capabilities(app_mod: Any, context: dict[str, Any
             enabled=can_manage,
             actions=["shortlist"] if can_manage else [],
             reason="module_disabled" if not prehire else "action_forbidden",
+            confirmation_required=True,
         ),
         "candidate_reject": _feature(
             enabled=can_decide,

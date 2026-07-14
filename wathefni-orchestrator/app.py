@@ -75,6 +75,7 @@ import attendance_import as _attendance_import  # noqa: E402
 import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
+import operator_mobile_data as _operator_mobile_data  # noqa: E402
 
 logger = logging.getLogger("wathefni")
 
@@ -2702,6 +2703,7 @@ def _ensure_schema_impl() -> None:
     sync_company_org_registry()
     seed_assessment_item_bank()
     _operator_mobile.ensure_operator_mobile_schema(sys.modules[__name__])
+    _operator_mobile_data.ensure_operator_mobile_data_schema(sys.modules[__name__])
 
 
 def company_root(company_code: str | None) -> Path:
@@ -23924,8 +23926,34 @@ def candidate_contact(app: dict[str, Any]) -> dict[str, str | None]:
     }
 
 
-def run_workspace_tool(args: list[str], timeout: int = 60) -> dict[str, Any]:
-    proc = subprocess.run(args, cwd=WORKSPACE, text=True, capture_output=True, timeout=timeout)
+def run_workspace_tool(
+    args: list[str],
+    timeout: int = 60,
+    *,
+    database_env_path: Path | None = None,
+) -> dict[str, Any]:
+    tool_env = None
+    if database_env_path is not None:
+        # External workspace tools historically use ``setdefault`` when loading
+        # their --env file. A staging service process already has a DB URL in its
+        # environment, so merely passing --env is insufficient and can leave the
+        # child pointed at another runtime. Override the child environment from
+        # the backend-current env file without changing this process or logging
+        # any secret values.
+        tool_env = os.environ.copy()
+        if database_env_path.exists():
+            for line in database_env_path.read_text().splitlines():
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    tool_env[key] = value
+    proc = subprocess.run(
+        args,
+        cwd=WORKSPACE,
+        text=True,
+        capture_output=True,
+        timeout=timeout,
+        env=tool_env,
+    )
     output = (proc.stdout or "").strip()
     parsed: Any = None
     if output:
@@ -24472,25 +24500,31 @@ def record_outbound_delivery_event(
 def update_application_status(app: dict[str, Any], status: str) -> dict[str, Any]:
     args = [
         str(WORKSPACE / "tools" / "db" / "update_state.py"),
+        "--env",
+        str(ENV_PATH),
         "update-application",
         "--app-key",
         str(app["app_key"]),
+        "--company",
+        str(app.get("company_code") or "WATHEFNI"),
         "--status",
         status,
         "--current-step",
         status,
     ]
-    return run_workspace_tool(args, timeout=75)
+    return run_workspace_tool(args, timeout=75, database_env_path=ENV_PATH)
 
 
 def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
     args = [
         str(WORKSPACE / "tools" / "db" / "posthire_state.py"),
+        "--env",
+        str(ENV_PATH),
         "transition-hire",
         "--app-key",
         str(app["app_key"]),
     ]
-    result = run_workspace_tool(args, timeout=90)
+    result = run_workspace_tool(args, timeout=90, database_env_path=ENV_PATH)
     # Best-effort, idempotent top-up: the external tool seeds a small subset; this
     # fills in the rest of the company template without touching what it created.
     # No-op when the flag is off; failures never change the hire result.
@@ -34716,6 +34750,7 @@ def dashboard_auth_logout(authorization: str | None = Header(default=None), x_da
 # HR-1: Wathefni HR operator mobile auth + /dashboard/mobile/me (backend-only).
 # Registered here so routes precede the SPA catch-all at /dashboard/{asset_path:path}.
 _operator_mobile.register_operator_mobile_routes(sys.modules[__name__])
+_operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__])
 
 
 @app.post("/dashboard/team/invites/accept")
