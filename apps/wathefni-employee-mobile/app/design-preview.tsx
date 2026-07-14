@@ -25,6 +25,7 @@ import {
   rejectedOnboarding,
   reviewOnboarding,
 } from '@/designPreview'
+import { PreviewErrorBoundary } from '@/components/PreviewErrorBoundary'
 import { colors, radius, spacing } from '@/theme'
 
 type PreviewScreen = 'activation' | 'home' | 'onboarding'
@@ -46,6 +47,14 @@ const SCREEN_SCENARIOS: Record<PreviewScreen, PreviewScenario[]> = {
 }
 
 export default function DesignPreviewScreen() {
+  return (
+    <PreviewErrorBoundary label="Design preview">
+      <DesignPreviewBody />
+    </PreviewErrorBoundary>
+  )
+}
+
+function DesignPreviewBody() {
   const params = useLocalSearchParams<{
     screen?: string | string[]
     locale?: string | string[]
@@ -72,23 +81,34 @@ export default function DesignPreviewScreen() {
     if (locale !== previewLocale) void setLocale(previewLocale)
   }, [locale, previewLocale, setLocale])
 
-  // Keep invalid combinations out of the address bar so refresh is stable.
+  // One-shot address-bar cleanup from window.location. Do not call router.replace
+  // here — Expo Router remounts the screen on Safari and can loop into a blank tree.
   useEffect(() => {
-    const rawScenario = firstParam(params.scenario)
-    const rawScreen = firstParam(params.screen)
-    const rawLocale = firstParam(params.locale)
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    if (!url.pathname.includes('design-preview')) return
+    const rawScreen = url.searchParams.get('screen') ?? undefined
+    const rawLocale = url.searchParams.get('locale') ?? undefined
+    const rawScenario = url.searchParams.get('scenario') ?? undefined
+    const rawCapture = url.searchParams.get('capture')
+    const nextScreen = previewScreen(rawScreen)
+    const nextLocale = previewLocaleFromParam(rawLocale)
+    const nextScenario = coerceScenario(nextScreen, rawScenario)
+    const nextCapture = rawCapture === '1'
     const needsNormalize =
-      previewScreen(rawScreen) !== (rawScreen as PreviewScreen | undefined)
-      || coerceScenario(screen, rawScenario) !== (rawScenario as PreviewScenario | undefined)
-      || previewLocaleFromParam(rawLocale) !== (rawLocale as AppLocale | undefined)
+      rawScreen !== nextScreen
+      || rawLocale !== nextLocale
+      || rawScenario !== nextScenario
+      || (nextCapture ? rawCapture !== '1' : Boolean(rawCapture))
     if (!needsNormalize) return
-    router.setParams({
-      screen,
-      locale: previewLocale,
-      scenario,
-      ...(capture ? { capture: '1' } : {}),
+    const next = previewQuery({
+      screen: nextScreen,
+      locale: nextLocale,
+      scenario: nextScenario,
+      capture: nextCapture,
     })
-  }, [capture, params.locale, params.scenario, params.screen, previewLocale, router, scenario, screen])
+    window.history.replaceState(window.history.state, '', `${url.pathname}?${next}`)
+  }, [])
 
   const updatePreview = (patch: {
     screen?: PreviewScreen
@@ -98,6 +118,8 @@ export default function DesignPreviewScreen() {
     const nextScreen = patch.screen ?? screen
     const nextLocale = patch.locale ?? previewLocale
     const nextScenario = coerceScenario(nextScreen, patch.scenario ?? scenario)
+    // User-driven updates only. Do not call setParams from a normalize effect —
+    // that remount loop is what blanked Safari after the first paint.
     router.setParams({
       screen: nextScreen,
       locale: nextLocale,
@@ -285,9 +307,26 @@ function coerceScenario(screen: PreviewScreen, value: string | undefined): Previ
   return allowed[0]
 }
 
+function previewQuery({
+  screen,
+  locale,
+  scenario,
+  capture,
+}: {
+  screen: PreviewScreen
+  locale: AppLocale
+  scenario: PreviewScenario
+  capture: boolean
+}): string {
+  const params = new URLSearchParams({ screen, locale, scenario })
+  if (capture) params.set('capture', '1')
+  return params.toString()
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, alignItems: 'center', backgroundColor: '#D8D1C7' },
-  phone: { flex: 1, width: '100%', maxWidth: 430, overflow: 'hidden', backgroundColor: colors.bg },
+  // Avoid overflow:'hidden' + animated transforms: iOS Safari can composite that into a blank layer.
+  phone: { flex: 1, width: '100%', maxWidth: 430, backgroundColor: colors.bg },
   disabled: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
   controls: {
     position: 'absolute',

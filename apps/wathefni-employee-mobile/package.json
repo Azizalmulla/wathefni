@@ -8,6 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "preview:design": "EXPO_PUBLIC_DESIGN_PREVIEW=1 expo start --web",
+    "preview:export": "EXPO_PUBLIC_DESIGN_PREVIEW=1 npx expo export --platform web --output-dir /tmp/wathefni-preview",
+    "preview:serve": "node scripts/serve-preview.mjs",
     "preview:capture": "node scripts/capture-phase9a2-previews.mjs",
     "preview:verify": "node scripts/capture-phase9a2-previews.mjs",
     "lint": "tsc --noEmit",

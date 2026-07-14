@@ -54,8 +54,11 @@ export function FadeIn({
   lift?: number
 }) {
   const reducedMotion = useReducedMotion()
+  // iOS Safari has composited blank-layer bugs with overflow clipping + translateY.
+  // Keep motion on web to opacity only so the first paint cannot vanish.
+  const useLift = Platform.OS !== 'web'
   const opacity = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current
-  const translateY = useRef(new Animated.Value(reducedMotion ? 0 : lift)).current
+  const translateY = useRef(new Animated.Value(reducedMotion || !useLift ? 0 : lift)).current
 
   useEffect(() => {
     if (reducedMotion) {
@@ -63,7 +66,7 @@ export function FadeIn({
       translateY.setValue(0)
       return
     }
-    Animated.parallel([
+    const animations = [
       Animated.timing(opacity, {
         toValue: 1,
         duration: motion.duration.enter,
@@ -71,17 +74,28 @@ export function FadeIn({
         easing: motion.easing.standard,
         useNativeDriver: true,
       }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: motion.duration.enter,
-        delay,
-        easing: motion.easing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start()
-  }, [delay, lift, opacity, reducedMotion, translateY])
+    ]
+    if (useLift) {
+      animations.push(
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: motion.duration.enter,
+          delay,
+          easing: motion.easing.standard,
+          useNativeDriver: true,
+        }),
+      )
+    }
+    Animated.parallel(animations).start()
+  }, [delay, lift, opacity, reducedMotion, translateY, useLift])
 
-  return <Animated.View style={[style, { opacity, transform: [{ translateY }] }]}>{children}</Animated.View>
+  return (
+    <Animated.View
+      style={[style, { opacity }, useLift ? { transform: [{ translateY }] } : null]}
+    >
+      {children}
+    </Animated.View>
+  )
 }
 
 export function Wordmark({

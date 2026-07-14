@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import { I18nManager } from 'react-native'
+import { I18nManager, Platform } from 'react-native'
 import { I18n } from 'i18n-js'
 import * as Localization from 'expo-localization'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -51,8 +51,13 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null)
 
 export async function loadInitialLocale(): Promise<AppLocale> {
-  const stored = (await AsyncStorage.getItem(LOCALE_KEY)) as AppLocale | null
-  return stored ?? deviceLocale()
+  try {
+    const stored = (await AsyncStorage.getItem(LOCALE_KEY)) as AppLocale | null
+    if (stored === 'ar' || stored === 'en') return stored
+  } catch {
+    // Private mode / blocked storage must not block first paint.
+  }
+  return deviceLocale()
 }
 
 export function I18nProvider({ initialLocale, children }: { initialLocale: AppLocale; children: ReactNode }) {
@@ -65,9 +70,10 @@ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLo
     i18n.locale = next
     setLocaleState(next)
     const rtl = next === 'ar'
-    // RTL flips require a reload to fully apply; we set it so the next launch is
-    // correct and re-render immediately for everything layout-direction-agnostic.
-    if (I18nManager.isRTL !== rtl) {
+    // Native RTL flips need a reload. Skip the native bridge on web — RN-web's
+    // I18nManager is a no-op for isRTL, and calling it during preview remounts
+    // has been a source of Safari instability.
+    if (Platform.OS !== 'web' && I18nManager.isRTL !== rtl) {
       I18nManager.allowRTL(rtl)
       I18nManager.forceRTL(rtl)
     }

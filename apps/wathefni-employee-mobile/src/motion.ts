@@ -23,13 +23,18 @@ export function useReducedMotion(): boolean {
 
   useEffect(() => {
     let mounted = true
-    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (mounted) setReduced(value)
-    })
+    void AccessibilityInfo.isReduceMotionEnabled()
+      .then((value) => {
+        if (mounted) setReduced(value)
+      })
+      .catch(() => {
+        if (mounted) setReduced(false)
+      })
     const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced)
     return () => {
       mounted = false
-      subscription.remove()
+      // RN-web can return undefined when matchMedia is unavailable.
+      subscription?.remove?.()
     }
   }, [])
 
