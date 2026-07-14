@@ -50,7 +50,8 @@ def main() -> int:
     att_export = source.find("def dashboard_posthire_attendance_export(")
     att_body = source[att_start:att_export]
     check("attendance route accepts status query", "status: str | None = Query(None)" in att_body)
-    check("attendance route passes status into list_attendance", '"status": status' in att_body)
+    check("attendance invalid status rejected via helper", "normalize_attendance_status_filter" in source)
+    check("attendance route passes status into list_attendance", '"status": status_filter' in att_body or '"status": status' in att_body)
     check("attendance route passes actor_role for scope", '"actor_role": context.get("actor_role")' in att_body)
     check("attendance route passes viewer_user_id", '"viewer_user_id": context.get("actor_user_id")' in att_body)
 

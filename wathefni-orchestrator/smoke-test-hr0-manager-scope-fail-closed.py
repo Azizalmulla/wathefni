@@ -38,7 +38,9 @@ def main() -> int:
 
     check("MANAGER_SCOPE_REQUIRED_ROLES includes manager", 'MANAGER_SCOPE_REQUIRED_ROLES = frozenset({"manager"})' in source)
     check("fail-closed helper exists", "def _fail_closed_manager_scope" in source)
-    check("binding missing error exists", "manager_scope_binding_missing" in source)
+    check("binding conflict error exists", "manager_scope_binding_conflict" in source)
+    check("user-id resolution does not merge phone sets", "Exclusive user-ID resolution" in source or "never union phone-only rows" in source)
+    check("phone fallback only when user id absent", "Transitional phone fallback" in source)
     check("unconfigured error exists", "manager_scope_unconfigured" in source)
     check("dashboard_user_id column migration present", "ADD COLUMN IF NOT EXISTS dashboard_user_id" in source)
     check("operator_manager_scope helper exists", "def operator_manager_scope" in source)

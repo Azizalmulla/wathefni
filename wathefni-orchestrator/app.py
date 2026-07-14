@@ -6111,12 +6111,17 @@ def manager_scope_context(
 ) -> dict[str, Any]:
     """Resolve which employees a viewer may see.
 
-    Durable model (HR-0):
-      * Prefer stable `dashboard_user_id` scope rows when present; phone remains a
-        transitional binding for WhatsApp / legacy manager_scopes rows.
-      * The `manager` role never implies company-wide access. Missing phone/user
-        binding or missing active scope rows fail closed to an empty scope with a
-        deterministic `configuration_error`.
+    Precedence contract (HR-0 / HR-0A):
+      1. Stable `dashboard_user_id` — exclusive authority when present.
+      2. Transitional phone fallback — only when user ID is absent; never merged
+         with user-ID scopes.
+      3. Conflict or malformed binding — fail closed with deterministic
+         `configuration_error` (`manager_scope_binding_conflict` /
+         `manager_scope_binding_missing` / `manager_scope_unconfigured` /
+         `manager_scope_empty`).
+
+    Durable model:
+      * The `manager` role never implies company-wide access.
       * Explicit `scope_type=company` remains the only unrestricted manager path.
       * Owners/HR (roles outside MANAGER_SCOPE_REQUIRED_ROLES) stay unrestricted
         when they have no manager_scopes row — their authority is permissions, not
@@ -6141,22 +6146,32 @@ def manager_scope_context(
 
     with db_connect() as conn:
         with conn.cursor() as cur:
-            if user_id and phone:
-                cur.execute(
-                    """
-                    SELECT *
-                    FROM manager_scopes
-                    WHERE company_code=%s AND is_active IS TRUE
-                      AND (
-                        dashboard_user_id=%s
-                        OR (manager_phone=%s AND (dashboard_user_id IS NULL OR dashboard_user_id=''))
-                      )
-                    ORDER BY created_at
-                    LIMIT 200
-                    """,
-                    (company, user_id, phone),
-                )
-            elif user_id:
+            if user_id:
+                # Conflict: same phone actively bound to a different operator identity.
+                if phone:
+                    cur.execute(
+                        """
+                        SELECT DISTINCT dashboard_user_id
+                        FROM manager_scopes
+                        WHERE company_code=%s
+                          AND manager_phone=%s
+                          AND is_active IS TRUE
+                          AND dashboard_user_id IS NOT NULL
+                          AND dashboard_user_id <> ''
+                          AND dashboard_user_id <> %s
+                        LIMIT 5
+                        """,
+                        (company, phone, user_id),
+                    )
+                    conflicts = [str(r["dashboard_user_id"]) for r in cur.fetchall() if r.get("dashboard_user_id")]
+                    if conflicts:
+                        return _fail_closed_manager_scope(
+                            company=company,
+                            manager_phone=phone,
+                            dashboard_user_id=user_id,
+                            configuration_error="manager_scope_binding_conflict",
+                        )
+                # Exclusive user-ID resolution — never union phone-only rows.
                 cur.execute(
                     """
                     SELECT *
@@ -6168,11 +6183,15 @@ def manager_scope_context(
                     (company, user_id),
                 )
             else:
+                # Transitional phone fallback: only phone-bound rows with no user id.
                 cur.execute(
                     """
                     SELECT *
                     FROM manager_scopes
-                    WHERE company_code=%s AND manager_phone=%s AND is_active IS TRUE
+                    WHERE company_code=%s
+                      AND manager_phone=%s
+                      AND is_active IS TRUE
+                      AND (dashboard_user_id IS NULL OR dashboard_user_id='')
                     ORDER BY created_at
                     LIMIT 200
                     """,
@@ -6202,6 +6221,7 @@ def manager_scope_context(
             "manager_phone": phone,
             "dashboard_user_id": user_id,
             "scopes": json_safe(rows),
+            "scope_authority": "dashboard_user_id" if user_id else "phone_transitional",
         }
     branch_keys = sorted({str(row.get("branch_key")) for row in rows if row.get("branch_key")})
     team_keys = sorted({str(row.get("team_key")) for row in rows if row.get("team_key")})
@@ -6237,6 +6257,7 @@ def manager_scope_context(
         "team_keys": team_keys,
         "direct_employee_keys": direct_employee_keys,
         "scopes": json_safe(rows),
+        "scope_authority": "dashboard_user_id" if user_id else "phone_transitional",
     }
 
 
@@ -37126,7 +37147,14 @@ def record_admin_audit(
     details: dict[str, Any] | None = None,
     status: str = "completed",
 ) -> None:
-    """Best-effort audit row for admin/config mutations."""
+    """Best-effort audit row for admin/config and document-access events.
+
+    Fail-open policy for authorized reads (including candidate CV view/preview/
+    download): if the audit sink raises, the caller still receives the authorized
+    response. Audit loss is logged server-side; access is not blocked by an
+    audit outage. Mutations that already completed before audit retain the same
+    best-effort behavior.
+    """
     company = context.get("company_code")
     payload = {
         "action": {"type": action_type, "target_type": target_type, "target": target},
@@ -49159,6 +49187,32 @@ def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[dat
     return start, end
 
 
+ALLOWED_ATTENDANCE_STATUS_FILTERS = frozenset({"present", "late", "absent", "completed", "pending"})
+
+
+def normalize_attendance_status_filter(status: str | None) -> str | None:
+    """Return a canonical attendance status filter, or None when unset.
+
+    Invalid non-empty values raise HTTP 400 with a deterministic error contract —
+    they must never silently widen or ignore the filter on the HTTP route.
+    """
+    raw = str(status or "").strip()
+    if not raw:
+        return None
+    normalized = normalize_text(raw)
+    if normalized not in ALLOWED_ATTENDANCE_STATUS_FILTERS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "invalid_attendance_status",
+                "message": "That attendance status filter is not valid.",
+                "allowed": sorted(ALLOWED_ATTENDANCE_STATUS_FILTERS),
+                "received": raw,
+            },
+        )
+    return normalized
+
+
 @app.get("/dashboard/posthire/attendance")
 def dashboard_posthire_attendance(
     start_date: str | None = Query(None),
@@ -49171,6 +49225,7 @@ def dashboard_posthire_attendance(
     company = _posthire_read_context(context, "attendance")
     start, end = _attendance_range(start_date, end_date)
     today = kuwait_today().isoformat()
+    status_filter = normalize_attendance_status_filter(status)
     # Paged so a busy company/window (>1000 records over up to 92 days) isn't
     # silently truncated: the table pages via limit/offset with an accurate
     # total_count + has_more, same pattern as shifts/leave/payroll.
@@ -49182,7 +49237,7 @@ def dashboard_posthire_attendance(
             "viewer_phone": context.get("hr_phone"),
             "viewer_user_id": context.get("actor_user_id"),
             "actor_role": context.get("actor_role"),
-            "status": status,
+            "status": status_filter,
             "limit": limit,
             "offset": offset,
         },

@@ -16,11 +16,26 @@ log() { printf '%s [staging-smoke] %s\n' "$(date -u +%FT%TZ)" "$*"; }
 fail() { printf 'FAILED: %s\n' "$*"; exit 1; }
 
 set -a; . "$STAGING_ENV"; set +a
-TOKEN="${WATHEFNI_DASHBOARD_TOKEN:-}"
-[ -n "$TOKEN" ] || fail "no staging dashboard token in $STAGING_ENV"
+
+# HR-0A: mint a backend-current operator session. Shared dashboard tokens must
+# not establish authority on staging or production-like paths.
+TOKEN="$("$VENV_PY" "$STAGING_ORCH/ops/mint-staging-dashboard-session.py" --company WATHEFNI --role owner 2>/dev/null || true)"
+if [ -z "$TOKEN" ]; then
+  # Fresh sync may place the helper under the staging tree after deploy; fall back
+  # to the production ops copy used by deploy.sh rsync of ops/.
+  TOKEN="$("$VENV_PY" /opt/wathefni/orchestrator/ops/mint-staging-dashboard-session.py --company WATHEFNI --role owner)"
+fi
+[ -n "$TOKEN" ] || fail "could not mint backend-current staging dashboard session"
 
 code() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
-AUTH=(-H "Authorization: Bearer ${TOKEN}" -H "X-HR-Phone: ${HR_PHONE}" -H "X-Company-Code: WATHEFNI")
+AUTH=(-H "Authorization: Bearer ${TOKEN}" -H "X-Company-Code: WATHEFNI")
+
+# Prove shared-token + client phone cannot establish an operator context.
+SHARED="${WATHEFNI_DASHBOARD_TOKEN:-}"
+if [ -n "$SHARED" ]; then
+  c=$(code -H "Authorization: Bearer ${SHARED}" -H "X-HR-Phone: ${HR_PHONE}" -H "X-Company-Code: WATHEFNI" "$BASE/dashboard/auth/me")
+  case "$c" in 401|403) log "shared-token legacy path rejected ($c)";; *) fail "shared-token still usable for /dashboard/auth/me (code=$c)";; esac
+fi
 
 # 1) HTTP checks against the staging server
 h=$(code "$BASE/health"); [ "$h" = "200" ] || fail "health=$h"; log "health 200"
