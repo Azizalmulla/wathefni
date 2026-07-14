@@ -11,7 +11,7 @@ const marker = process.env.HR_PREVIEW_BUILD || `HR2-${sha}-${timestamp}`
 
 const result = spawnSync(
   'npx',
-  ['expo', 'export', '--platform', 'web', '--output-dir', 'dist-preview'],
+  ['expo', 'export', '--platform', 'web', '--output-dir', 'dist-preview', '--clear'],
   {
     cwd: projectRoot,
     env: {

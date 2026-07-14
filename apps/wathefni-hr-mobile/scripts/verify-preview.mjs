@@ -34,10 +34,11 @@ for (const [browserName, browserType] of [
     if (!headers['cache-control']?.includes('no-store')) {
       throw new Error(`${browserName}: preview response is cacheable for ${url}`)
     }
-    if (!headers['x-preview-build']) {
+    const buildMarker = headers['x-preview-build']
+    if (!buildMarker) {
       throw new Error(`${browserName}: preview build response header missing for ${url}`)
     }
-    await page.getByLabel(/^Preview build HR2-/).waitFor()
+    await page.getByLabel(`Preview build ${buildMarker}`, { exact: true }).waitFor()
     const expectedLocator =
       expected === 'Loading'
         ? page.getByLabel('Loading').first()
@@ -55,7 +56,7 @@ for (const [browserName, browserType] of [
         ? page.getByLabel('Loading').first()
         : page.getByText(expected, { exact: false }).first()
     ).waitFor()
-    await page.getByLabel(/^Preview build HR2-/).waitFor()
+    await page.getByLabel(`Preview build ${buildMarker}`, { exact: true }).waitFor()
     const serviceWorkerCount = await page.evaluate(async () =>
       'serviceWorker' in navigator ? (await navigator.serviceWorker.getRegistrations()).length : 0,
     )
