@@ -8,7 +8,9 @@ Production is never touched.
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 import sys
 import uuid
 from datetime import timedelta
@@ -55,7 +57,11 @@ def main() -> int:
     os.environ.setdefault("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.staging.env")
     os.environ.setdefault("WATHEFNI_WORKSPACE", "/opt/wathefni/staging/workspace")
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
-    os.environ.pop("WATHEFNI_ENV", None)
+    os.environ.setdefault("WATHEFNI_ENV", "staging")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_HOST", "127.0.0.1")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_PORT", "5432")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_NAME", "wathefni_staging")
+    os.environ.setdefault("WATHEFNI_DATABASE_ENVIRONMENT_MARKER", "wathefni-staging-hr2-isolation-v1")
 
     staging_orch = os.environ.get("WATHEFNI_STAGING_ORCH", "/opt/wathefni/staging/orchestrator")
     sys.path = [path for path in sys.path if path not in {staging_orch, "/opt/wathefni/orchestrator"}]
@@ -86,6 +92,8 @@ def main() -> int:
         "emp_b": "965500291002",
         "emp_other": "965500291099",
         "candidate": "965500292001",
+        "candidate_reject": "965500292002",
+        "candidate_hire": "965500292003",
     }
     branch = app.org_key(COMPANY, "branch", "HQ")
     team_a = app.org_key(COMPANY, "team", "Team A")
@@ -93,13 +101,28 @@ def main() -> int:
     employee_a = "hr2-emp-a"
     employee_b = "hr2-emp-b"
     other_employee = "hr2-emp-other"
-    app_key = f"{phones['candidate']}-{COMPANY}-HR2_DESIGN"
+    candidate_app_keys = {
+        "shortlist": f"{phones['candidate']}-{COMPANY}-HR2_DESIGN",
+        "reject": f"{phones['candidate_reject']}-{COMPANY}-HR2_DESIGN",
+        "hire": f"{phones['candidate_hire']}-{COMPANY}-HR2_DESIGN",
+    }
+    app_key = candidate_app_keys["shortlist"]
     leave_ids: dict[str, str] = {}
 
     def cleanup() -> None:
         with app.db_connect() as conn, conn.cursor() as cur:
+            employee_keys = [
+                employee_a,
+                employee_b,
+                other_employee,
+                f"{COMPANY}-{phones['candidate_hire']}",
+            ]
             cur.execute(
                 "DELETE FROM action_results WHERE result->>'company_code' = ANY(%s) OR result->>'company_id' = ANY(%s)",
+                ([COMPANY, OTHER], [COMPANY, OTHER]),
+            )
+            cur.execute(
+                "DELETE FROM outbound_delivery_events WHERE account_id = ANY(%s) OR payload->>'company_code' = ANY(%s)",
                 ([COMPANY, OTHER], [COMPANY, OTHER]),
             )
             cur.execute("DELETE FROM pending_actions WHERE account_id = ANY(%s)", ([COMPANY, OTHER],))
@@ -113,6 +136,24 @@ def main() -> int:
             cur.execute("DELETE FROM manager_scopes WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             cur.execute("DELETE FROM company_teams WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             cur.execute("DELETE FROM company_branches WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
+            cur.execute("DELETE FROM onboarding_items WHERE employee_key = ANY(%s)", (employee_keys,))
+            cur.execute("DELETE FROM employee_documents WHERE employee_key = ANY(%s)", (employee_keys,))
+            cur.execute("DELETE FROM compliance_documents WHERE employee_key = ANY(%s)", (employee_keys,))
+            cur.execute(
+                """
+                SELECT employee_key
+                FROM employees
+                WHERE employee_key='WATHEFNI-'
+                  AND company_code='WATHEFNI'
+                  AND COALESCE(phone,'')=''
+                  AND name='Hessa HR2'
+                  AND app_key IS NULL
+                """
+            )
+            if cur.fetchone():
+                for table in ("onboarding_items", "employee_documents", "compliance_documents"):
+                    cur.execute(f"DELETE FROM {table} WHERE employee_key='WATHEFNI-'")
+                cur.execute("DELETE FROM employees WHERE employee_key='WATHEFNI-'")
             cur.execute("DELETE FROM employees WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             cur.execute("DELETE FROM applications WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             cur.execute(
@@ -123,6 +164,15 @@ def main() -> int:
             cur.execute("DELETE FROM company_modules WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             cur.execute("DELETE FROM companies WHERE company_code = ANY(%s)", ([COMPANY, OTHER],))
             conn.commit()
+        malformed_root = Path(app.WORKSPACE) / "data" / "companies" / "WATHEFNI" / "employees"
+        malformed_employee = malformed_root / "employee.json"
+        if malformed_employee.is_file():
+            data = json.loads(malformed_employee.read_text())
+            if data.get("employee_key") == "WATHEFNI-" and data.get("name") == "Hessa HR2":
+                for filename in ("employee.json", "onboarding.json", "compliance.json"):
+                    path = malformed_root / filename
+                    if path.is_file():
+                        path.unlink()
 
     def login(email: str, company: str = COMPANY) -> tuple[requests.Response, dict[str, Any]]:
         response = requests.post(
@@ -256,39 +306,54 @@ def main() -> int:
                 )
                 leave_ids[key] = str(cur.fetchone()["leave_id"])
 
-            cur.execute(
-                """
-                INSERT INTO candidates
-                  (phone, name, email, active_company_code, data_source, raw_json, updated_at)
-                VALUES (%s,'Lina HR2','lina@hr2.staging.test',%s,'production',%s,now())
-                """,
-                (phones["candidate"], COMPANY, app.Json({"marker": MARKER})),
-            )
-            cur.execute(
-                """
-                INSERT INTO applications
-                  (app_key, company_code, phone, position_code, position_title,
-                   status, data_source, cv_received, raw_json, updated_at)
-                VALUES (%s,%s,%s,'HR2_DESIGN','Senior Designer',
-                        'review_pending','production',true,%s,now())
-                """,
-                (
-                    app_key,
-                    COMPANY,
-                    phones["candidate"],
-                    app.Json(
-                        {
-                            "marker": MARKER,
-                            "candidate_name": "Lina HR2",
-                            "cv": {
-                                "filename": "hr2-missing.pdf",
-                                "path": "/tmp/hr2-missing.pdf",
-                                "storage": {"mime_type": "application/pdf", "status": "missing"},
-                            },
-                        }
+            for action, phone, name in (
+                ("shortlist", phones["candidate"], "Lina HR2"),
+                ("reject", phones["candidate_reject"], "Rana HR2"),
+                ("hire", phones["candidate_hire"], "Hessa HR2"),
+            ):
+                cur.execute(
+                    """
+                    INSERT INTO candidates
+                      (phone, name, email, active_company_code, data_source, raw_json, updated_at)
+                    VALUES (%s,%s,%s,%s,'production',%s,now())
+                    """,
+                    (
+                        phone,
+                        name,
+                        f"{action}@hr2.staging.test",
+                        COMPANY,
+                        app.Json({"marker": MARKER, "action": action}),
                     ),
-                ),
-            )
+                )
+                cur.execute(
+                    """
+                    INSERT INTO applications
+                      (app_key, company_code, phone, position_code, position_title,
+                       status, data_source, cv_received, raw_json, updated_at)
+                    VALUES (%s,%s,%s,'HR2_DESIGN','Senior Designer',
+                            'review_pending','production',true,%s,now())
+                    """,
+                    (
+                        candidate_app_keys[action],
+                        COMPANY,
+                        phone,
+                        app.Json(
+                            {
+                                "marker": MARKER,
+                                "candidate_name": name,
+                                "phone": phone,
+                                "company_code": COMPANY,
+                                "position_code": "HR2_DESIGN",
+                                "position_title": "Senior Designer",
+                                "cv": {
+                                    "filename": "hr2-missing.pdf",
+                                    "path": "/tmp/hr2-missing.pdf",
+                                    "storage": {"mime_type": "application/pdf", "status": "missing"},
+                                },
+                            }
+                        ),
+                    ),
+                )
             conn.commit()
 
         for permission in ("leave.read", "leave.decide", "employees.read"):
@@ -470,6 +535,105 @@ def main() -> int:
             cur.execute("SELECT status FROM applications WHERE app_key=%s", (app_key,))
             candidate_status = str((cur.fetchone() or {}).get("status") or "")
         check("candidate status backend-authoritative", candidate_status == "shortlisted", candidate_status)
+
+        def confirm_candidate_decision(action: str) -> requests.Response:
+            target = candidate_app_keys[action]
+            key = f"hr2-candidate-{action}-{uuid.uuid4()}"
+            prepared_response = requests.post(
+                f"{BASE}/dashboard/mobile/candidates/{target}/decision",
+                headers=auth(owner_token),
+                json={
+                    "action": action,
+                    "reason": f"HR-2 staging {action} isolation proof",
+                    "idempotency_key": key,
+                    "confirm": False,
+                },
+                timeout=30,
+            )
+            prepared_body = body(prepared_response)
+            prepared_confirmation = prepared_body.get("confirmation") or {}
+            check(
+                f"candidate {action} requires confirmation",
+                prepared_response.status_code == 200 and prepared_body.get("status") == "needs_confirmation",
+                prepared_response.text[:400],
+            )
+            return requests.post(
+                f"{BASE}/dashboard/mobile/candidates/{target}/decision",
+                headers=auth(owner_token),
+                json={
+                    "action": action,
+                    "reason": f"HR-2 staging {action} isolation proof",
+                    "idempotency_key": key,
+                    "confirm": True,
+                    "confirmation_id": prepared_confirmation.get("confirmation_id"),
+                    "confirmation_hash": prepared_confirmation.get("confirmation_hash"),
+                },
+                timeout=90,
+            )
+
+        rejected = confirm_candidate_decision("reject")
+        check(
+            "candidate reject completes in staging",
+            rejected.status_code == 200 and body(rejected).get("ok") is True,
+            rejected.text[:500],
+        )
+        hired = confirm_candidate_decision("hire")
+        check(
+            "candidate hire completes in staging",
+            hired.status_code == 200 and body(hired).get("ok") is True,
+            hired.text[:500],
+        )
+        hire_registry_result = ((body(hired).get("result") or {}).get("result") or {})
+        hire_posthire = hire_registry_result.get("posthire") or {}
+        hire_sheet_sync = (hire_posthire.get("json") or {}).get("sheet_sync") or {}
+        check(
+            "staging candidate hire suppresses external sheet sync",
+            hire_sheet_sync.get("attempted") is False,
+            hire_sheet_sync,
+        )
+        with app.db_connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT app_key, status FROM applications WHERE app_key = ANY(%s)",
+                (list(candidate_app_keys.values()),),
+            )
+            statuses = {str(row["app_key"]): str(row["status"]) for row in cur.fetchall()}
+            cur.execute(
+                "SELECT count(*) AS n FROM employees WHERE company_code=%s AND phone=%s",
+                (COMPANY, phones["candidate_hire"]),
+            )
+            staging_hire_employees = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                """
+                SELECT count(*) AS n
+                FROM action_results
+                WHERE action_type = ANY(%s)
+                  AND result->>'company_code'=%s
+                """,
+                (["shortlist_candidate", "reject_candidate", "hire_candidate"], COMPANY),
+            )
+            candidate_audits = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                """
+                SELECT count(*) AS n
+                FROM outbound_delivery_events
+                WHERE target_phone = ANY(%s)
+                   OR subject_key = ANY(%s)
+                """,
+                (
+                    [
+                        phones["candidate"],
+                        phones["candidate_reject"],
+                        phones["candidate_hire"],
+                    ],
+                    list(candidate_app_keys.values()),
+                ),
+            )
+            candidate_notifications = int((cur.fetchone() or {}).get("n") or 0)
+        check("candidate reject status remains in staging", statuses.get(candidate_app_keys["reject"]) == "rejected", statuses)
+        check("candidate hire status remains in staging", statuses.get(candidate_app_keys["hire"]) == "hired", statuses)
+        check("candidate hire provisions staging employee", staging_hire_employees == 1, staging_hire_employees)
+        check("candidate decisions remain audited in staging", candidate_audits >= 3, candidate_audits)
+        check("candidate decisions emit no external notifications", candidate_notifications == 0, candidate_notifications)
 
         viewer_before = requests.get(f"{BASE}/dashboard/mobile/employees", headers=auth(viewer_token), timeout=30)
         check("viewer grant-only employee search works", viewer_before.status_code == 200, viewer_before.text[:200])

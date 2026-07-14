@@ -76,11 +76,12 @@ import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
+import runtime_environment as _runtime_environment  # noqa: E402
 
 logger = logging.getLogger("wathefni")
 
-WORKSPACE = Path(os.environ.get("WATHEFNI_WORKSPACE", "/root/.openclaw/workspaces/company-wathefni"))
-ENV_PATH = Path(os.environ.get("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.env"))
+WORKSPACE = Path(os.environ.get("WATHEFNI_WORKSPACE") or "/nonexistent/wathefni-workspace")
+ENV_PATH = Path(os.environ.get("WATHEFNI_POSTGRES_ENV") or "/nonexistent/wathefni-postgres.env")
 OPENCLAW_CONFIG_PATH = Path(os.environ.get("OPENCLAW_CONFIG", "/root/.openclaw/openclaw.json"))
 DASHBOARD_DIST_PATH = Path(
     os.environ.get(
@@ -91,12 +92,10 @@ DASHBOARD_DIST_PATH = Path(
 
 
 def load_env() -> None:
-    if not ENV_PATH.exists():
+    if not ENV_PATH.is_file():
         return
-    for line in ENV_PATH.read_text().splitlines():
-        if line and not line.startswith("#") and "=" in line:
-            key, value = line.split("=", 1)
-            os.environ.setdefault(key, value)
+    for key, value in _runtime_environment.read_env_file(ENV_PATH).items():
+        os.environ.setdefault(key, value)
 
 
 load_env()
@@ -104,6 +103,45 @@ load_env()
 
 _DB_POOL: psycopg2.pool.ThreadedConnectionPool | None = None
 _DB_POOL_LOCK = threading.Lock()
+_RUNTIME_BINDING: _runtime_environment.RuntimeBinding | None = None
+_RUNTIME_IDENTITY: _runtime_environment.RuntimeIdentity | None = None
+_RUNTIME_BINDING_LOCK = threading.Lock()
+
+
+def assert_runtime_environment_binding() -> _runtime_environment.RuntimeIdentity:
+    """Validate one immutable app-environment/database identity per process."""
+    global _RUNTIME_BINDING, _RUNTIME_IDENTITY
+    if _RUNTIME_IDENTITY is not None:
+        return _RUNTIME_IDENTITY
+    with _RUNTIME_BINDING_LOCK:
+        if _RUNTIME_IDENTITY is not None:
+            return _RUNTIME_IDENTITY
+        binding = _runtime_environment.resolve_runtime_binding(os.environ)
+        conn = psycopg2.connect(
+            binding.database_url,
+            cursor_factory=RealDictCursor,
+            application_name=f"wathefni_{binding.application_environment}_identity_check",
+        )
+        try:
+            conn.set_session(readonly=True, autocommit=True)
+            identity = _runtime_environment.validate_database_identity(conn, binding)
+        finally:
+            conn.close()
+        _RUNTIME_BINDING = binding
+        _RUNTIME_IDENTITY = identity
+        return identity
+
+
+def runtime_environment_readiness() -> dict[str, Any]:
+    identity = assert_runtime_environment_binding()
+    return identity.public()
+
+
+def runtime_binding() -> _runtime_environment.RuntimeBinding:
+    assert_runtime_environment_binding()
+    if _RUNTIME_BINDING is None:  # pragma: no cover - guarded above
+        raise RuntimeError("runtime_environment_binding_unavailable")
+    return _RUNTIME_BINDING
 
 
 def _get_db_pool() -> psycopg2.pool.ThreadedConnectionPool:
@@ -111,32 +149,31 @@ def _get_db_pool() -> psycopg2.pool.ThreadedConnectionPool:
     if _DB_POOL is None:
         with _DB_POOL_LOCK:
             if _DB_POOL is None:
-                dsn = os.environ["WATHEFNI_DATABASE_URL"]
+                binding = runtime_binding()
                 min_conn = int(os.environ.get("WATHEFNI_DB_POOL_MIN", "1") or "1")
                 max_conn = int(os.environ.get("WATHEFNI_DB_POOL_MAX", "16") or "16")
                 _DB_POOL = psycopg2.pool.ThreadedConnectionPool(
-                    min_conn, max(min_conn, max_conn), dsn, cursor_factory=RealDictCursor
+                    min_conn,
+                    max(min_conn, max_conn),
+                    binding.database_url,
+                    cursor_factory=RealDictCursor,
+                    application_name=f"wathefni_{binding.application_environment}",
                 )
     return _DB_POOL
 
 
 class _DbConnection:
     """Context manager that reuses pooled connections and commits/rolls back like
-    psycopg2's native ``with connection`` block. Connections are returned to the pool
-    on exit. If the pool is unavailable or exhausted, falls back to a direct connection
-    so a request never fails purely because the pool is saturated."""
+    psycopg2's native ``with connection`` block. Connections are returned to the
+    validated pool on exit; there is no unvalidated direct-connect fallback."""
 
     def __init__(self) -> None:
         self._conn = None
         self._from_pool = False
 
     def __enter__(self):
-        try:
-            self._conn = _get_db_pool().getconn()
-            self._from_pool = True
-        except Exception:
-            self._conn = psycopg2.connect(os.environ["WATHEFNI_DATABASE_URL"], cursor_factory=RealDictCursor)
-            self._from_pool = False
+        self._conn = _get_db_pool().getconn()
+        self._from_pool = True
         return self._conn
 
     def __exit__(self, exc_type, exc, tb):
@@ -21801,6 +21838,8 @@ def start_public_candidate_application(request: WhatsAppTurnRequest, role: dict[
     result = run_workspace_tool(
         [
             str(WORKSPACE / "tools" / "db" / "update_state.py"),
+            "--env",
+            str(ENV_PATH),
             "start-application",
             "--phone",
             phone,
@@ -23929,23 +23968,12 @@ def candidate_contact(app: dict[str, Any]) -> dict[str, str | None]:
 def run_workspace_tool(
     args: list[str],
     timeout: int = 60,
-    *,
-    database_env_path: Path | None = None,
 ) -> dict[str, Any]:
-    tool_env = None
-    if database_env_path is not None:
-        # External workspace tools historically use ``setdefault`` when loading
-        # their --env file. A staging service process already has a DB URL in its
-        # environment, so merely passing --env is insufficient and can leave the
-        # child pointed at another runtime. Override the child environment from
-        # the backend-current env file without changing this process or logging
-        # any secret values.
-        tool_env = os.environ.copy()
-        if database_env_path.exists():
-            for line in database_env_path.read_text().splitlines():
-                if line and not line.startswith("#") and "=" in line:
-                    key, value = line.split("=", 1)
-                    tool_env[key] = value
+    # Workspace tools historically default to the production env file and load
+    # it with ``setdefault``. Always replace the child environment from the
+    # already-validated backend binding; ambient inheritance is forbidden.
+    binding = runtime_binding()
+    tool_env = binding.child_environment(os.environ)
     proc = subprocess.run(
         args,
         cwd=WORKSPACE,
@@ -24512,7 +24540,9 @@ def update_application_status(app: dict[str, Any], status: str) -> dict[str, Any
         "--current-step",
         status,
     ]
-    return run_workspace_tool(args, timeout=75, database_env_path=ENV_PATH)
+    if runtime_binding().application_environment != "production":
+        args.append("--no-sheet-sync")
+    return run_workspace_tool(args, timeout=75)
 
 
 def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
@@ -24524,7 +24554,9 @@ def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
         "--app-key",
         str(app["app_key"]),
     ]
-    result = run_workspace_tool(args, timeout=90, database_env_path=ENV_PATH)
+    if runtime_binding().application_environment != "production":
+        args.append("--no-sheet-sync")
+    result = run_workspace_tool(args, timeout=90)
     # Best-effort, idempotent top-up: the external tool seeds a small subset; this
     # fills in the rest of the company template without touching what it created.
     # No-op when the flag is off; failures never change the hire result.
@@ -31913,6 +31945,7 @@ app = FastAPI(title="Wathefni HR Orchestrator")
 @app.on_event("startup")
 def on_startup() -> None:
     assert_legacy_dashboard_auth_safe_at_startup()
+    assert_runtime_environment_binding()
     ensure_schema()
 
 
@@ -31922,6 +31955,7 @@ def health():
     return {
         "status": "ok",
         "runtime": "toolcall_fastapi",
+        "environment_binding": runtime_environment_readiness(),
         "permission_authority": "backend_current_required",
         "legacy_dashboard_token_auth": legacy_dashboard_token_auth_enabled(),
         "legacy_untrusted_auth_usable": False if not legacy_dashboard_token_auth_enabled() else True,
@@ -31930,11 +31964,12 @@ def health():
 
 @app.get("/ready")
 def ready():
-    """Readiness: schema reachable and trusted dashboard authority enforced."""
+    """Readiness: environment, schema, and trusted authority are enforced."""
     ensure_schema()
     legacy_on = legacy_dashboard_token_auth_enabled()
     return {
         "status": "ready",
+        "environment_binding": runtime_environment_readiness(),
         "permission_authority": "backend_current_required",
         "legacy_dashboard_token_auth": legacy_on,
         "trusted_authority_enforced": not legacy_on,

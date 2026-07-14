@@ -87,8 +87,8 @@ def main() -> int:
         "candidate hire transition is explicitly bound to current environment",
     )
     check(
-        "tool_env[key] = value" in app_source
-        and "database_env_path=ENV_PATH" in app_source,
+        "binding.child_environment(os.environ)" in app_source
+        and "database_env_path" not in app_source,
         "workspace mutation child overrides inherited DB environment",
     )
 

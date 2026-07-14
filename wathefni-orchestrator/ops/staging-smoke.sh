@@ -16,6 +16,11 @@ log() { printf '%s [staging-smoke] %s\n' "$(date -u +%FT%TZ)" "$*"; }
 fail() { printf 'FAILED: %s\n' "$*"; exit 1; }
 
 set -a; . "$STAGING_ENV"; set +a
+export WATHEFNI_ENV=staging
+export WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+export WATHEFNI_EXPECTED_DATABASE_PORT=5432
+export WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging
+export WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-hr2-isolation-v1
 
 # HR-0A: mint a backend-current operator session. Shared dashboard tokens must
 # not establish authority on staging or production-like paths.
@@ -268,10 +273,14 @@ log "entitlement hardening (runtime: viewer denied, owner allowed)"
 "$VENV_PY" - <<'PY' | sed 's/^/    /'
 import app
 def ctx(role):
+    perms=sorted(app.hr_role_permissions(role))
     return {"company_code":"WATHEFNI","actor_user_id":f"smoke-{role}","actor_role":role,
+            "permission_authority":"backend_current",
+            "permission_subject_user_id":f"smoke-{role}",
+            "permission_subject_company":"WATHEFNI",
             "hr_user":{"role":role,"status":"active","company_code":"WATHEFNI"},
-            "permissions":sorted(app.hr_role_permissions(role)),
-            "access":{"role":role,"permissions":sorted(app.hr_role_permissions(role))}}
+            "permissions":perms,
+            "access":{"role":role,"permissions":perms}}
 # Viewer can read, cannot mutate.
 app.require_entitlement(ctx("viewer"), "pre_hiring", "prehire.read")
 for perm in ("candidate.manage","assessment.manage","users.manage"):

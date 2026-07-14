@@ -21,6 +21,7 @@ import app
 
 
 def main() -> None:
+    app.assert_runtime_environment_binding()
     parser = argparse.ArgumentParser(description="Process pending Wathefni employee outbound deliveries.")
     parser.add_argument("--limit", type=int, default=50, help="Maximum messages to process per pass.")
     parser.add_argument("--loop", action="store_true", help="Keep polling instead of running one pass.")

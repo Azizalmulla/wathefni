@@ -18,8 +18,8 @@ ORCH_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"          # wathefni-orchestrator/
 REPO_ROOT="$(cd "$ORCH_SRC/.." && pwd)"
 DASH_SRC="$REPO_ROOT/apps/wathefni-dashboard"
 
-CODE_FILES=(app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py delivery-sweep-worker.py document-storage-reconcile-worker.py video-interview-worker.py leave-accrual-worker.py operator_mobile.py operator_mobile_data.py)
-RUNTIME_OPS_FILES=(ops/document-storage-reconciliation.py ops/wathefni-document-storage-reconcile-staging.service ops/wathefni-document-storage-reconcile-staging.timer ops/wathefni-document-storage-reconcile.service ops/wathefni-document-storage-reconcile.timer)
+CODE_FILES=(app.py runtime_environment.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py delivery-sweep-worker.py document-storage-reconcile-worker.py video-interview-worker.py leave-accrual-worker.py operator_mobile.py operator_mobile_data.py)
+RUNTIME_OPS_FILES=(ops/provision-environment-identity.py ops/document-storage-reconciliation.py ops/wathefni-orchestrator-staging.service ops/wathefni-orchestrator-production-environment.conf ops/wathefni-document-storage-reconcile-staging.service ops/wathefni-document-storage-reconcile-staging.timer ops/wathefni-document-storage-reconcile.service ops/wathefni-document-storage-reconcile.timer ops/wathefni-delivery-sweep-staging.service ops/wathefni-delivery-sweep.service ops/wathefni-leave-accrual.service)
 
 PROD_ORCH=/opt/wathefni/orchestrator
 PROD_DASH_DIST=/opt/wathefni/apps/wathefni-dashboard/dist
@@ -104,7 +104,7 @@ artifact_sha() {
 
 sync_code() {  # $1 = dest orchestrator dir
   rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC/requirements.txt" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
-  rsync -az "$ORCH_SRC/ops/" "$VPS_HOST:$PROD_ORCH/ops/"
+  rsync -az "$ORCH_SRC/ops/" "$VPS_HOST:$1/ops/"
 }
 
 install_pinned_runtime_dependencies() {  # $1 = remote orchestrator dir
@@ -122,11 +122,12 @@ deploy_staging() {
   install_pinned_runtime_dependencies "$STAGING_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$STAGING_DASH/"
   log "compile + migrate (staging DB) + restart"
-  "${SSH[@]}" "set -e; install -m 0644 $PROD_ORCH/ops/wathefni-document-storage-reconcile-staging.service /etc/systemd/system/; install -m 0644 $PROD_ORCH/ops/wathefni-document-storage-reconcile-staging.timer /etc/systemd/system/; systemctl daemon-reload; cd $STAGING_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py document-storage-reconcile-worker.py operator_mobile.py operator_mobile_data.py; \
-    WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.staging.env WATHEFNI_WORKSPACE=/opt/wathefni/staging/workspace /opt/wathefni/orchestrator/.venv/bin/python -c 'import app; app.ensure_schema(force=True); print(\"staging schema ok\")'; \
+  "${SSH[@]}" "set -e; install -m 0644 $STAGING_ORCH/ops/wathefni-orchestrator-staging.service /etc/systemd/system/; install -m 0644 $STAGING_ORCH/ops/wathefni-document-storage-reconcile-staging.service /etc/systemd/system/; install -m 0644 $STAGING_ORCH/ops/wathefni-document-storage-reconcile-staging.timer /etc/systemd/system/; install -m 0644 $STAGING_ORCH/ops/wathefni-delivery-sweep-staging.service /etc/systemd/system/; systemctl daemon-reload; cd $STAGING_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py runtime_environment.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py delivery-sweep-worker.py document-storage-reconcile-worker.py operator_mobile.py operator_mobile_data.py; \
+    /opt/wathefni/orchestrator/.venv/bin/python ops/provision-environment-identity.py --env-file /root/.openclaw/secrets/postgres.staging.env --environment staging --expected-host 127.0.0.1 --expected-port 5432 --expected-database wathefni_staging --marker wathefni-staging-hr2-isolation-v1 --apply --confirm staging:wathefni_staging:wathefni-staging-hr2-isolation-v1; \
+    WATHEFNI_ENV=staging WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.staging.env WATHEFNI_WORKSPACE=/opt/wathefni/staging/workspace WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1 WATHEFNI_EXPECTED_DATABASE_PORT=5432 WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-hr2-isolation-v1 /opt/wathefni/orchestrator/.venv/bin/python -c 'import app; app.assert_runtime_environment_binding(); app.ensure_schema(force=True); print(\"staging schema ok\")'; \
     systemctl restart wathefni-orchestrator-staging.service; systemctl enable --now wathefni-document-storage-reconcile-staging.timer; sleep 3; systemctl is-active wathefni-orchestrator-staging.service; systemctl is-active wathefni-document-storage-reconcile-staging.timer"
   log "staging smoke suite"
-  "${SSH[@]}" "/opt/wathefni/orchestrator/ops/staging-smoke.sh"
+  "${SSH[@]}" "$STAGING_ORCH/ops/staging-smoke.sh"
   log "record staging-green artifact hash"
   local sha; sha="$(artifact_sha)"
   "${SSH[@]}" "printf '%s\n' '$sha' > $GREEN_FILE"
@@ -152,7 +153,7 @@ deploy_production() {
   install_pinned_runtime_dependencies "$PROD_ORCH"
   rsync -az --delete "$DASH_SRC/dist/" "$VPS_HOST:$PROD_DASH_DIST/"
   log "compile + migrate + restart + publish dashboard"
-  if "${SSH[@]}" "set -e; cd $PROD_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py; \
+  if "${SSH[@]}" "set -e; cd $PROD_ORCH; /opt/wathefni/orchestrator/.venv/bin/python -m py_compile app.py runtime_environment.py company_setup.py module_catalog.py tool_call_orchestrator.py action_registry.py outbound_delivery.py attendance_import.py channel_account_routing.py; \
     /opt/wathefni/orchestrator/.venv/bin/python -c 'import app; app.ensure_schema(force=True); print(\"prod schema ok\")'; \
     systemctl restart wathefni-orchestrator.service; sleep 3; systemctl is-active wathefni-orchestrator.service >/dev/null; \
     rm -rf $PROD_DASH_PUBLIC.new; mkdir -p $PROD_DASH_PUBLIC.new; cp -a $PROD_DASH_DIST/. $PROD_DASH_PUBLIC.new/; rsync -a --delete $PROD_DASH_PUBLIC.new/ $PROD_DASH_PUBLIC/; rm -rf $PROD_DASH_PUBLIC.new; systemctl reload caddy; \

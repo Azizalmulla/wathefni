@@ -19,6 +19,7 @@ import app
 
 
 def main() -> None:
+    app.assert_runtime_environment_binding()
     parser = argparse.ArgumentParser(description="Post monthly Wathefni leave accruals.")
     parser.add_argument("--company", type=str, default=None, help="Restrict to one company_code.")
     parser.add_argument("--loop", action="store_true", help="Keep polling instead of one pass.")

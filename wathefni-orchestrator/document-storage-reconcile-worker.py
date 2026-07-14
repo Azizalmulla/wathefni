@@ -11,6 +11,7 @@ import app
 
 
 def main() -> None:
+    app.assert_runtime_environment_binding()
     parser = argparse.ArgumentParser(description="Reconcile pending employee document storage operations.")
     parser.add_argument("--limit", type=int, default=50, help="Maximum operations to process per pass.")
     parser.add_argument("--company", help="Optional company scope.")

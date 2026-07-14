@@ -59,7 +59,11 @@ def main() -> int:
     os.environ.setdefault("WATHEFNI_WORKSPACE", "/opt/wathefni/staging/workspace")
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
     os.environ.pop("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", None)
-    os.environ.pop("WATHEFNI_ENV", None)
+    os.environ.setdefault("WATHEFNI_ENV", "staging")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_HOST", "127.0.0.1")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_PORT", "5432")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_NAME", "wathefni_staging")
+    os.environ.setdefault("WATHEFNI_DATABASE_ENVIRONMENT_MARKER", "wathefni-staging-hr2-isolation-v1")
 
     staging_orch = os.environ.get("WATHEFNI_STAGING_ORCH", "/opt/wathefni/staging/orchestrator")
     sys.path = [p for p in sys.path if p not in {staging_orch, "/opt/wathefni/orchestrator"}]

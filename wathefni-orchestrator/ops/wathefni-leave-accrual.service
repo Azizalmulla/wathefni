@@ -8,6 +8,11 @@ Type=oneshot
 WorkingDirectory=/opt/wathefni/orchestrator
 Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
 Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=WATHEFNI_ENV=production
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
+Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni
+Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-production-isolation-v1
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
 EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env

@@ -62,12 +62,20 @@ def main() -> int:
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
     # Ensure production-like authority on this process too.
     os.environ.pop("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", None)
-    os.environ.pop("WATHEFNI_ENV", None)
+    os.environ.setdefault("WATHEFNI_ENV", "staging")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_HOST", "127.0.0.1")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_PORT", "5432")
+    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_NAME", "wathefni_staging")
+    os.environ.setdefault("WATHEFNI_DATABASE_ENVIRONMENT_MARKER", "wathefni-staging-hr2-isolation-v1")
 
     staging_orch = os.environ.get("WATHEFNI_STAGING_ORCH", "/opt/wathefni/staging/orchestrator")
+    # Prefer staging app.py exclusively for HR-0A proofs.
+    sys.path = [p for p in sys.path if p not in {staging_orch, "/opt/wathefni/orchestrator"}]
     sys.path.insert(0, staging_orch)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     import app
+
+    if not str(getattr(app, "__file__", "")).startswith(staging_orch):
+        raise RuntimeError(f"HR-0A must import staging app.py, got {app.__file__}")
 
     print(f"HR-0A staging verify — company {COMPANY} against {BASE}")
     app.ensure_schema(force=True)
@@ -191,6 +199,7 @@ def main() -> int:
                 cur.execute("DELETE FROM onboarding_items WHERE employee_key LIKE %s", (f"hr0a-%{co}",))
                 cur.execute("DELETE FROM employees WHERE company_code=%s", (co,))
                 cur.execute("DELETE FROM applications WHERE company_code=%s", (co,))
+                cur.execute("DELETE FROM candidates WHERE active_company_code=%s OR phone=%s", (co, "965500091010"))
                 cur.execute("DELETE FROM dashboard_user_sessions WHERE company_code=%s", (co,))
                 cur.execute("DELETE FROM dashboard_user_permission_grants WHERE company_code=%s", (co,))
                 cur.execute("DELETE FROM dashboard_users WHERE company_code=%s", (co,))
@@ -311,8 +320,9 @@ def main() -> int:
                 """,
                 (COMPANY, phones["mgr_phone"], team_b),
             )
-            # Conflict setup: mgr_conflict has user-id scope for Team A, and same phone
-            # is also bound to a different dashboard_user_id on another active row.
+            phantom_conflict_user = str(uuid.uuid4())
+            # Conflict setup: mgr_conflict has user-id scope for Team A, and the same
+            # phone is also actively bound to a *different* dashboard_user_id.
             cur.execute(
                 """
                 INSERT INTO manager_scopes
@@ -327,9 +337,13 @@ def main() -> int:
                   (company_code, manager_phone, dashboard_user_id, scope_type, team_key, role, is_active, updated_at)
                 VALUES (%s,%s,%s,'team',%s,'manager',true,now())
                 """,
-                (COMPANY, phones["mgr_conflict"], ids["mgr_user"], team_b),
+                (COMPANY, phones["mgr_conflict"], phantom_conflict_user, team_b),
             )
             # Cross-company scope row that must never grant access into COMPANY
+            cur.execute(
+                "INSERT INTO company_teams (company_code, team_key, team_name, is_active) VALUES (%s,%s,%s,true) ON CONFLICT DO NOTHING",
+                (OTHER, app.org_key(OTHER, "team", "X"), "X"),
+            )
             cur.execute(
                 """
                 INSERT INTO manager_scopes
@@ -362,14 +376,23 @@ def main() -> int:
             app_key = f"hr0a-app-{COMPANY}"
             cur.execute(
                 """
-                INSERT INTO applications (app_key, company_code, phone, status, data_source, raw_json, updated_at)
-                VALUES (%s,%s,%s,'new','production',%s,now())
+                INSERT INTO candidates (phone, name, email, active_company_code, data_source, raw_json, updated_at)
+                VALUES (%s,%s,%s,%s,'production',%s,now())
+                ON CONFLICT (phone) DO UPDATE SET active_company_code=EXCLUDED.active_company_code, updated_at=now()
+                """,
+                ("965500091010", "HR0A Candidate", "cand@hr0a.staging.test", COMPANY, app.Json({"marker": MARKER})),
+            )
+            cur.execute(
+                """
+                INSERT INTO applications (app_key, company_code, phone, position_code, status, data_source, raw_json, updated_at)
+                VALUES (%s,%s,%s,%s,'new','production',%s,now())
                 ON CONFLICT (app_key) DO UPDATE SET company_code=EXCLUDED.company_code, raw_json=EXCLUDED.raw_json
                 """,
                 (
                     app_key,
                     COMPANY,
                     "965500091010",
+                    "HR0A-POS",
                     app.Json({"marker": MARKER, "candidate_name": "HR0A Candidate", "cv": {"original_filename": "missing.pdf", "mime_type": "application/pdf"}}),
                 ),
             )
@@ -400,16 +423,15 @@ def main() -> int:
 
         user_scope = app.manager_scope_context(phones["mgr_user"], COMPANY, dashboard_user_id=ids["mgr_user"], actor_role="manager")
         check("user-id scope authority marked", user_scope.get("scope_authority") == "dashboard_user_id")
-        check("user-id manager restricted to Team A", user_scope.get("team_keys") == [team_a])
+        check("user-id manager restricted to Team A", user_scope.get("team_keys") == [team_a], user_scope.get("team_keys"))
         allowed_user = app.manager_scope_employee_keys(COMPANY, phones["mgr_user"], dashboard_user_id=ids["mgr_user"], actor_role="manager")
-        check("user-id manager sees only assigned team employees", allowed_user == {emp["a"]})
+        check("user-id manager sees only assigned team employees", allowed_user == {emp["a"]}, allowed_user)
 
         phone_scope = app.manager_scope_context(phones["mgr_phone"], COMPANY, actor_role="manager")
         check("phone transitional authority marked", phone_scope.get("scope_authority") == "phone_transitional")
-        check("phone-only manager restricted to Team B", phone_scope.get("team_keys") == [team_b])
+        check("phone-only manager restricted to Team B", phone_scope.get("team_keys") == [team_b], phone_scope.get("team_keys"))
 
         # Precedence: if user-id present, phone-only rows for same phone must not merge.
-        # Attach a phone-only Team B row onto mgr_user phone and ensure Team B is NOT added.
         with app.db_connect() as conn, conn.cursor() as cur:
             cur.execute(
                 """
@@ -421,7 +443,7 @@ def main() -> int:
             )
             conn.commit()
         precedence = app.manager_scope_context(phones["mgr_user"], COMPANY, dashboard_user_id=ids["mgr_user"], actor_role="manager")
-        check("user-id takes precedence; phone set not merged", precedence.get("team_keys") == [team_a])
+        check("user-id takes precedence; phone set not merged", precedence.get("team_keys") == [team_a], precedence.get("team_keys"))
 
         conflict = app.manager_scope_context(phones["mgr_conflict"], COMPANY, dashboard_user_id=ids["mgr_conflict"], actor_role="manager")
         check("conflicting user-id/phone bindings fail closed", conflict.get("configuration_error") == "manager_scope_binding_conflict")
@@ -475,9 +497,22 @@ def main() -> int:
         owner_perms2 = set(app.dashboard_effective_permissions_for_user(user_row(ids["owner"])))
         check("employees.read available only after grant", "employees.read" in owner_perms2)
 
-        # HTTP: manager list employees
+        # employees.read is grant-only — grant it for HTTP directory proof.
+        grant = app.set_dashboard_user_permission_grant(
+            COMPANY,
+            ids["mgr_user"],
+            "employees.read",
+            active=True,
+            actor_user_id=ids["owner"],
+            reason="hr0a-manager-directory",
+            review_reference="HR-0A",
+        )
+        check("grant employees.read to scoped manager", grant.get("ok") is True, grant)
+        tokens["mgr_user"] = app.create_dashboard_session(user_row(ids["mgr_user"]))[0]
+        tokens["owner"] = app.create_dashboard_session(user_row(ids["owner"]))[0]
+
         r = get("/dashboard/posthire/employees", "mgr_user", limit=100)
-        check("manager HTTP employees authorized", r.status_code == 200, r.status_code)
+        check("manager HTTP employees authorized", r.status_code == 200, r.status_code if r.status_code != 200 else None)
         if r.status_code == 200:
             keys = {e.get("employee_key") for e in r.json().get("employees") or []}
             check("manager HTTP sees only Team A", keys == {emp["a"]}, keys)
@@ -550,7 +585,7 @@ def main() -> int:
             check("startup refuses unsafe legacy config", True)
         finally:
             os.environ.pop("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", None)
-            os.environ.pop("WATHEFNI_ENV", None)
+            os.environ["WATHEFNI_ENV"] = "staging"
 
         # --- attendance status filter --------------------------------------
         today = app.kuwait_today().isoformat()

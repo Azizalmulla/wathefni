@@ -1,10 +1,9 @@
 [Unit]
-Description=Wathefni STAGING outbound delivery retry sweep (employee messages -> WhatsApp/template/email/HR task)
-After=network-online.target postgresql.service wathefni-orchestrator-staging.service
-Wants=network-online.target
+Description=Wathefni HR Orchestrator (STAGING — dry-run delivery, internal/localhost only)
+After=network.target postgresql.service
 
 [Service]
-Type=oneshot
+Type=simple
 WorkingDirectory=/opt/wathefni/staging/orchestrator
 Environment=WATHEFNI_WORKSPACE=/opt/wathefni/staging/workspace
 Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.staging.env
@@ -13,14 +12,18 @@ Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
 Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
 Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging
 Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-hr2-isolation-v1
-# Staging stays dry_run so retries never send anything real during the soak.
+Environment=WATHEFNI_DASHBOARD_DIST=/opt/wathefni/staging/dashboard-dist
 Environment=WATHEFNI_DELIVERY_MODE=dry_run
+Environment=PUBLIC_CANDIDATE_BASE_URL=http://127.0.0.1:8011
+Environment=WATHEFNI_TOOLCALL_ORCHESTRATOR_ENABLED=true
+Environment=WATHEFNI_DB_POOL_MAX=8
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
 EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
-# The sweep processes existing pending rows regardless of the layer flag; with no
-# pending rows each pass is a harmless no-op.
-ExecStart=/opt/wathefni/orchestrator/.venv/bin/python delivery-sweep-worker.py --limit 50
-Nice=10
-IOSchedulingClass=best-effort
-IOSchedulingPriority=7
+# Bound to localhost only — reach it via SSH tunnel (see DEPLOY_RUNBOOK.md). No public domain.
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
