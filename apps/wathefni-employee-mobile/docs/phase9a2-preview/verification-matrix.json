@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T23:59:47.186Z",
+  "generated_at": "2026-07-14T00:19:41.539Z",
   "results": [
     {
       "filename": "activation-en.png",
@@ -55,7 +55,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "Wathefni PE Hi Preview Today at work  Needs your attention A required onboarding step is waiting   Today's shift 09:00 – 17:30 Customer Support  Attendance Present Latest atten"
+      "sample": "Wathefni NA Hi Noura Today at work  Needs your attention A required onboarding step is waiting   Today's shift 09:00 – 17:30 Kuwait City  Attendance Present Latest attendance s"
     },
     {
       "filename": "home-ar-multi.png",
@@ -63,7 +63,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "وظفني مت مرحباً موظف يومك في العمل  يحتاج إلى انتباهك هناك خطوة مطلوبة لإكمال انضمامك   مناوبة اليوم ٠٩:٠٠ – ١٧:٣٠ دعم العملاء  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام مت"
+      "sample": "وظفني نا مرحباً نورة يومك في العمل  يحتاج إلى انتباهك هناك خطوة مطلوبة لإكمال انضمامك   مناوبة اليوم ٠٩:٠٠ – ١٧:٣٠ مدينة الكويت  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام م"
     },
     {
       "filename": "home-en-minimal.png",
@@ -71,7 +71,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "Wathefni PE Hi Preview Today at work  You're all caught up Have a great rest of your day.  Inbox No notifications yet EN"
+      "sample": "Wathefni NA Hi Noura Today at work  You're all caught up Have a great rest of your day.  Inbox No notifications yet EN"
     },
     {
       "filename": "home-ar-minimal.png",
@@ -79,7 +79,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR"
+      "sample": "وظفني نا مرحباً نورة يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR"
     },
     {
       "filename": "home-en-loading.png",
@@ -103,7 +103,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "Wathefni PE Hi Preview Today at work  You're all caught up Have a great rest of your day.  Today's shift No shift scheduled today  Attendance Present Latest attendance status  "
+      "sample": "Wathefni NA Hi Noura Today at work  You're all caught up Have a great rest of your day.  Today's shift No shift scheduled today  Attendance Present Latest attendance status  Le"
     },
     {
       "filename": "home-ar-empty.png",
@@ -111,7 +111,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  مناوبة اليوم لا توجد مناوبة اليوم  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام متاحة طلب إجازة  الو"
+      "sample": "وظفني نا مرحباً نورة يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  مناوبة اليوم لا توجد مناوبة اليوم  الحضور حاضر أحدث حالة حضور  الإجازات ١٢ أيام متاحة طلب إجازة  الو"
     },
     {
       "filename": "home-en-error.png",
@@ -242,6 +242,278 @@
       "sample": " وظفني قائمة مهامك خطوات واضحة ومختصرة لتكون جاهزاً للبدء. التقدم الإجمالي ١ من ١ مكتمل ١٠٠%  أصبحت جاهزاً لا توجد مهام معلقة في قائمتك. المُرسَل  الصورة الشخصية مكتمل  بياناتك"
     },
     {
+      "filename": "inbox-en.png",
+      "query": "screen=inbox&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni MESSAGES FROM YOUR TEAM Inbox 2 unread messages  Policy update 14 Jul 2026  Leave request approved Your annual leave request for 21–23 July was approved. 13 Jul 2026  W"
+    },
+    {
+      "filename": "inbox-ar.png",
+      "query": "screen=inbox&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني رسائل من فريقك الوارد ٢ رسائل غير مقروءة  تحديث على السياسات راجع آخر تحديثات فريق الموارد البشرية. 14 يوليو 2026  تمت الموافقة على طلب الإجازة تمت الموافقة على إجازتك السن"
+    },
+    {
+      "filename": "leave-en.png",
+      "query": "screen=leave&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni TIME AWAY, CLEARLY ORGANIZED Leave Review balances and requests managed by your HR team. BALANCE Annual 12 days available Sick 8 days available Balances are shown for refe"
+    },
+    {
+      "filename": "leave-ar.png",
+      "query": "screen=leave&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني إجازاتك، مرتبة بوضوح الإجازات راجع الأرصدة والطلبات التي يديرها فريق الموارد البشرية. الرصيد سنوية ١٢ أيام متاحة مرضية ٨ أيام متاحة يُعرض الرصيد للاطلاع فقط وغير مُطبَّق. طلب"
+    },
+    {
+      "filename": "leave-request-en.png",
+      "query": "screen=leave-request&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni PLAN TIME AWAY Request leave Send the dates to HR for review and approval. Type Annual Sick Start date  End date  Reason (optional) Submit   Your HR team makes the f"
+    },
+    {
+      "filename": "leave-request-ar.png",
+      "query": "screen=leave-request&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني خطط لوقت إجازتك طلب إجازة أرسل التواريخ إلى الموارد البشرية للمراجعة والموافقة. النوع سنوية مرضية تاريخ البدء  تاريخ الانتهاء  السبب (اختياري) إرسال   يتخذ فريق الموارد"
+    },
+    {
+      "filename": "shifts-en.png",
+      "query": "screen=shifts&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR WORK CALENDAR Shifts Today and what is coming next, in one clear view. TODAY 14 Jul 2026 Scheduled 09:00 – 17:30  Kuwait City UPCOMING 15 Jul 2026 Scheduled 10:00 – "
+    },
+    {
+      "filename": "shifts-ar.png",
+      "query": "screen=shifts&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني جدول عملك المناوبات مناوبات اليوم والقادمة في عرض واحد وواضح. اليوم 14 يوليو 2026 مجدولة ٠٩:٠٠ – ١٧:٣٠  مدينة الكويت القادمة 15 يوليو 2026 مجدولة ١٠:٠٠ – ١٨:٣٠  مدينة الكوي"
+    },
+    {
+      "filename": "attendance-en.png",
+      "query": "screen=attendance&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR RECENT RECORD Attendance A simple summary of the attendance recorded by your company. 18 Present 1 Late 0 Absent RECENT ACTIVITY 14 Jul 2026 Present"
+    },
+    {
+      "filename": "attendance-ar.png",
+      "query": "screen=attendance&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني سجلك الأخير الحضور ملخص واضح للحضور المسجل من شركتك. ١٨ حاضر ١ متأخر ٠ غائب النشاط الأخير 14 يوليو 2026 حاضر"
+    },
+    {
+      "filename": "documents-en.png",
+      "query": "screen=documents&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR SECURE FILES Documents Documents shared with you or submitted to your HR team.  Employment contract 10 Jul 2026   Civil ID 12 Jul 2026   Files open through your "
+    },
+    {
+      "filename": "documents-ar.png",
+      "query": "screen=documents&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني ملفاتك الآمنة المستندات المستندات التي تمت مشاركتها معك أو إرسالها إلى الموارد البشرية.  عقد العمل 10 يوليو 2026   البطاقة المدنية 12 يوليو 2026   تُفتح الملفات عبر جلسة"
+    },
+    {
+      "filename": "profile-en.png",
+      "query": "screen=profile&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni YOUR EMPLOYEE IDENTITY Profile The details your company has on file. NA Noura Al Ahmad Customer Experience Specialist EMPLOYEE DETAILS  Position Customer Experience Speci"
+    },
+    {
+      "filename": "profile-ar.png",
+      "query": "screen=profile&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني هويتك الوظيفية الملف الشخصي البيانات المسجلة لدى شركتك. نا نورة الأحمد أخصائية تجربة العملاء بيانات الموظف  المنصب أخصائية تجربة العملاء  القسم تجربة العملاء  الشركة PREVI"
+    },
+    {
+      "filename": "settings-en.png",
+      "query": "screen=settings&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni MAKE WATHEFNI YOURS Settings Choose your language, notifications and account preferences. LANGUAGE English العربية  Push notifications Receive important employee updates "
+    },
+    {
+      "filename": "settings-ar.png",
+      "query": "screen=settings&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني خصّص تجربتك الإعدادات اختر اللغة والإشعارات وتفضيلات الحساب. اللغة English العربية  الإشعارات استلم تحديثات الموظف المهمة على هذا الجهاز.  الخصوصية والدعم   طلب حذف الحسا"
+    },
+    {
+      "filename": "privacy-support-en.png",
+      "query": "screen=privacy-support&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " Wathefni HERE WHEN YOU NEED IT Privacy & Support Clear information about your data and where to get help.  Privacy policy Learn how Wathefni protects and processes employee-app "
+    },
+    {
+      "filename": "privacy-support-ar.png",
+      "query": "screen=privacy-support&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": " وظفني معك عند الحاجة الخصوصية والدعم معلومات واضحة عن بياناتك وطريقة الحصول على المساعدة.  سياسة الخصوصية تعرّف على كيفية حماية وظفني لمعلومات تطبيق الموظف ومعالجتها. قراءة سياس"
+    },
+    {
+      "filename": "not-found-en.png",
+      "query": "screen=not-found&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  Page not found This page doesn't exist or is no longer available. Back to Home "
+    },
+    {
+      "filename": "not-found-ar.png",
+      "query": "screen=not-found&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الصفحة غير موجودة هذه الصفحة غير موجودة أو لم تعد متاحة. العودة إلى الرئيسية "
+    },
+    {
+      "filename": "offline-en.png",
+      "query": "screen=offline&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS You're offline Check your connection and try again. Try again Sign out"
+    },
+    {
+      "filename": "offline-ar.png",
+      "query": "screen=offline&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني لا يوجد اتصال بالإنترنت تحقق من اتصالك ثم حاول مرة أخرى. حاول مرة أخرى تسجيل الخروج"
+    },
+    {
+      "filename": "session-expired-en.png",
+      "query": "screen=session-expired&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS Session expired Sign in again to continue. Return to sign in"
+    },
+    {
+      "filename": "session-expired-ar.png",
+      "query": "screen=session-expired&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني انتهت الجلسة سجّل الدخول مرة أخرى للمتابعة. العودة إلى تسجيل الدخول"
+    },
+    {
+      "filename": "employee-inactive-en.png",
+      "query": "screen=employee-inactive&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS Account access ended Your employee account is no longer active. Contact your HR team if this is unexpected. Sign out"
+    },
+    {
+      "filename": "employee-inactive-ar.png",
+      "query": "screen=employee-inactive&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني انتهى الوصول إلى الحساب حساب الموظف الخاص بك لم يعد نشطاً. تواصل مع الموارد البشرية إذا كان ذلك غير متوقع. تسجيل الخروج"
+    },
+    {
+      "filename": "company-disabled-en.png",
+      "query": "screen=company-disabled&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS Company access paused Your company workspace is not active. Contact your HR team. Try again Sign out"
+    },
+    {
+      "filename": "company-disabled-ar.png",
+      "query": "screen=company-disabled&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني تم إيقاف وصول الشركة مؤقتاً مساحة عمل شركتك غير نشطة. تواصل مع فريق الموارد البشرية. حاول مرة أخرى تسجيل الخروج"
+    },
+    {
+      "filename": "company-archived-en.png",
+      "query": "screen=company-archived&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS Company access ended Your company workspace has been archived. Contact your HR team. Try again Sign out"
+    },
+    {
+      "filename": "company-archived-ar.png",
+      "query": "screen=company-archived&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني انتهى وصول الشركة تمت أرشفة مساحة عمل شركتك. تواصل مع فريق الموارد البشرية. حاول مرة أخرى تسجيل الخروج"
+    },
+    {
+      "filename": "module-removed-en.png",
+      "query": "screen=module-removed&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS App access unavailable The employee app is not enabled for your company. Try again Sign out"
+    },
+    {
+      "filename": "module-removed-ar.png",
+      "query": "screen=module-removed&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني الوصول إلى التطبيق غير متاح تطبيق الموظف غير مفعّل لشركتك. حاول مرة أخرى تسجيل الخروج"
+    },
+    {
+      "filename": "app-unavailable-en.png",
+      "query": "screen=app-unavailable&locale=en&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "Wathefni  WATHEFNI ACCESS Temporarily unavailable The employee app is temporarily unavailable. Please try again later. Try again Sign out"
+    },
+    {
+      "filename": "app-unavailable-ar.png",
+      "query": "screen=app-unavailable&locale=ar&scenario=default",
+      "pass": true,
+      "missing": [],
+      "unexpectedEnglish": false,
+      "sample": "وظفني  الوصول إلى وظفني غير متاح مؤقتاً تطبيق الموظف غير متاح مؤقتاً. حاول مرة أخرى لاحقاً. حاول مرة أخرى تسجيل الخروج"
+    },
+    {
       "filename": "interactive-ar-switch",
       "query": "control-tap",
       "pass": true,
@@ -255,7 +527,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
+      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني نا مرحباً نورة يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
     },
     {
       "filename": "interactive-refresh-preserve",
@@ -263,7 +535,7 @@
       "pass": true,
       "missing": [],
       "unexpectedEnglish": false,
-      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني مت مرحباً موظف يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
+      "sample": "http://127.0.0.1:8091/design-preview?screen=home&locale=ar&scenario=minimal | وظفني نا مرحباً نورة يومك في العمل  أنجزت كل شيء نتمنى لك بقية يوم رائعة.  الوارد لا توجد إشعارات بعد AR Activation Ho"
     }
   ],
   "failed": 0
