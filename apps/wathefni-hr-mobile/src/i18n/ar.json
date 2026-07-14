@@ -66,5 +66,10 @@
   "preview.label": "معاينة تصميم — بيانات تجريبية فقط",
   "preview.screen": "الشاشة",
   "preview.locale": "اللغة",
-  "preview.scenario": "الحالة"
+  "preview.operator": "المشغّل",
+  "preview.scenario": "الحالة",
+  "preview.controls": "التحكم",
+  "preview.openControls": "فتح عناصر التحكم",
+  "preview.closeControls": "إغلاق عناصر التحكم",
+  "preview.done": "تم"
 }

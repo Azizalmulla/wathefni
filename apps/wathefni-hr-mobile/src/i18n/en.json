@@ -66,5 +66,10 @@
   "preview.label": "Design preview — fixture data only",
   "preview.screen": "Screen",
   "preview.locale": "Language",
-  "preview.scenario": "Scenario"
+  "preview.operator": "Operator",
+  "preview.scenario": "Scenario",
+  "preview.controls": "Controls",
+  "preview.openControls": "Open preview controls",
+  "preview.closeControls": "Close preview controls",
+  "preview.done": "Done"
 }

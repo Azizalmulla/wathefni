@@ -44,15 +44,17 @@ npm run preview:serve
 
 Open:
 
-`http://127.0.0.1:4177/design-preview?screen=home&locale=en&operator=multi-workspace&scenario=ready`
+`http://127.0.0.1:4177/design-preview?view=home&locale=en&operator=multi-workspace&scenario=ready`
 
 URL state:
 
-- `screen=home|leave|candidate`
+- `view=home|leave|candidate`
 - `locale=en|ar`
 - `operator=hr-only|recruiter-only|restricted-manager|multi-workspace`
 - `scenario=ready|loading|empty|error|revoked|company-disabled|stale|success`
+- `controls=0` hides the control chrome for clean phone review links
 - `capture=1` hides preview controls for screenshots
+- Prefer `view=` over legacy `screen=` (Expo Router reserves `screen`)
 
 The preview:
 

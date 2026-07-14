@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useLocale } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
+import { usePreviewEmbed } from '@/preview/PreviewEmbedContext'
 import { colors, radius, shadows, spacing, type as typography } from '@/theme'
 
 export function Screen({
@@ -28,10 +29,15 @@ export function Screen({
   scroll?: boolean
   contentStyle?: StyleProp<ViewStyle>
 }) {
+  const embed = usePreviewEmbed()
   const body = <View style={[styles.screenContent, contentStyle]}>{children}</View>
+  const shouldScroll = scroll && !embed
+  if (embed) {
+    return <View style={styles.safeEmbed}>{body}</View>
+  }
   return (
     <SafeAreaView style={styles.safe}>
-      {scroll ? (
+      {shouldScroll ? (
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
@@ -442,6 +448,7 @@ const actionTones = StyleSheet.create({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.canvas },
+  safeEmbed: { width: '100%', backgroundColor: colors.canvas },
   scroll: { flex: 1, backgroundColor: colors.canvas },
   scrollContent: { flexGrow: 1 },
   screenContent: { width: '100%', maxWidth: 720, alignSelf: 'center', padding: spacing.xl, gap: spacing.xl },
