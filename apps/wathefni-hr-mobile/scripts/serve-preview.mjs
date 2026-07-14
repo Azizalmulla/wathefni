@@ -1,9 +1,26 @@
 import { createServer } from 'node:http'
-import { createReadStream, existsSync, statSync } from 'node:fs'
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs'
+import { isIP } from 'node:net'
 import { extname, join, normalize } from 'node:path'
 
 const root = new URL('../dist-preview/', import.meta.url).pathname
 const port = Number(process.env.PORT || 4177)
+const host = process.env.HOST || '127.0.0.1'
+const build = JSON.parse(readFileSync(new URL('../dist-preview/preview-build.json', import.meta.url), 'utf8'))
+const buildMarker = String(build.marker || '').trim()
+const octets = host.split('.').map(Number)
+const privateLan =
+  isIP(host) === 4 &&
+  (octets[0] === 10 ||
+    (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) ||
+    (octets[0] === 192 && octets[1] === 168))
+if (host !== '127.0.0.1' && !privateLan) {
+  throw new Error('HOST must be 127.0.0.1 or one explicit RFC1918 IPv4 address')
+}
+if (!Number.isInteger(port) || port < 1024 || port > 65535) {
+  throw new Error('PORT must be an unprivileged TCP port')
+}
+if (!buildMarker) throw new Error('Preview build marker is missing; run preview:export first')
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -25,8 +42,9 @@ createServer((request, response) => {
   response.setHeader('Pragma', 'no-cache')
   response.setHeader('Expires', '0')
   response.setHeader('Service-Worker-Allowed', 'none')
+  response.setHeader('X-Preview-Build', buildMarker)
   response.setHeader('Content-Type', contentTypes[extname(file)] || 'application/octet-stream')
   createReadStream(file).pipe(response)
-}).listen(port, '127.0.0.1', () => {
-  console.log(`HR_PREVIEW_READY http://127.0.0.1:${port}/design-preview`)
+}).listen(port, host, () => {
+  console.log(`HR_PREVIEW_READY http://${host}:${port}/design-preview build=${buildMarker}`)
 })

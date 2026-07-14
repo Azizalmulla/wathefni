@@ -41,7 +41,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "expo:doctor": "npx expo-doctor",
-    "preview:export": "EXPO_PUBLIC_HR_DESIGN_PREVIEW=1 npx expo export --platform web --output-dir dist-preview",
+    "preview:export": "node scripts/export-preview.mjs",
     "preview:serve": "node scripts/serve-preview.mjs",
     "preview:verify": "node scripts/verify-preview.mjs"
   },

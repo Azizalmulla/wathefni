@@ -29,7 +29,15 @@ for (const [browserName, browserType] of [
   const page = await browser.newPage({ viewport: { width: 460, height: 940 }, reducedMotion: 'reduce' })
   for (const [screen, locale, operator, scenario, expected] of cases) {
     const url = `${base}?screen=${screen}&locale=${locale}&operator=${operator}&scenario=${scenario}&capture=1`
-    await page.goto(url, { waitUntil: 'networkidle' })
+    const response = await page.goto(url, { waitUntil: 'networkidle' })
+    const headers = response?.headers() || {}
+    if (!headers['cache-control']?.includes('no-store')) {
+      throw new Error(`${browserName}: preview response is cacheable for ${url}`)
+    }
+    if (!headers['x-preview-build']) {
+      throw new Error(`${browserName}: preview build response header missing for ${url}`)
+    }
+    await page.getByLabel(/^Preview build HR2-/).waitFor()
     const expectedLocator =
       expected === 'Loading'
         ? page.getByLabel('Loading').first()
@@ -47,6 +55,13 @@ for (const [browserName, browserType] of [
         ? page.getByLabel('Loading').first()
         : page.getByText(expected, { exact: false }).first()
     ).waitFor()
+    await page.getByLabel(/^Preview build HR2-/).waitFor()
+    const serviceWorkerCount = await page.evaluate(async () =>
+      'serviceWorker' in navigator ? (await navigator.serviceWorker.getRegistrations()).length : 0,
+    )
+    if (serviceWorkerCount !== 0) {
+      throw new Error(`${browserName}: stale service worker remained registered for ${url}`)
+    }
   }
   if (browserName === 'webkit') {
     for (const locale of ['en', 'ar']) {

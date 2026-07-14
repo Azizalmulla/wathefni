@@ -18,6 +18,7 @@ import { colors, radius, spacing, type as typography } from '@/theme'
 const screens = ['home', 'leave', 'candidate'] as const
 const operators = ['hr-only', 'recruiter-only', 'restricted-manager', 'multi-workspace'] as const
 const scenarios = ['ready', 'loading', 'empty', 'error', 'revoked', 'company-disabled', 'stale', 'success'] as const
+const previewBuild = process.env.EXPO_PUBLIC_HR_PREVIEW_BUILD || 'UNMARKED'
 type PreviewScreen = (typeof screens)[number]
 type Operator = (typeof operators)[number]
 type Scenario = (typeof scenarios)[number]
@@ -93,6 +94,13 @@ function Preview({
 
   return (
     <View style={styles.root}>
+      <View
+        accessibilityLabel={`Preview build ${previewBuild}`}
+        pointerEvents="none"
+        style={styles.buildMarker}
+      >
+        <Text style={styles.buildMarkerText}>HR2 · {previewBuild}</Text>
+      </View>
       {controls}
       <View style={styles.phone}>
         {screen === 'home' ? (
@@ -165,7 +173,9 @@ function Control<T extends readonly string[]>({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, minHeight: '100%', backgroundColor: '#E9E1D8', alignItems: 'center', padding: spacing.lg, gap: spacing.lg },
+  root: { flex: 1, minHeight: '100%', position: 'relative', backgroundColor: '#E9E1D8', alignItems: 'center', padding: spacing.lg, paddingTop: spacing.xl, gap: spacing.lg },
+  buildMarker: { position: 'absolute', top: spacing.xs, right: spacing.sm, zIndex: 50, paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: colors.ink },
+  buildMarkerText: { color: colors.white, fontSize: 9, fontWeight: '800' },
   disabled: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   controls: { width: '100%', maxWidth: 900, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.lg, gap: spacing.md, borderWidth: 1, borderColor: colors.line },
   previewLabel: { color: colors.plum, fontSize: typography.label, fontWeight: '900' },
