@@ -63,9 +63,9 @@ The in-product AI Recruiter is the Wathefni dashboard/orchestrator Assistant sur
 | Stream | Status |
 | --- | --- |
 | Employee App — isolated Expo SDK migration | Approved to continue independently |
-| **HR-0** — Existing Authority and Exposure Remediation | Active next slice (backend only) |
-| **HR-1** — Operator Mobile Authentication and `/dashboard/mobile/me` Capability Contract | **Blocked until HR-0 is reviewed** |
-| Wathefni HR frontend | **Do not start** |
+| **HR-0 / HR-0A** — Existing Authority and Exposure Remediation | **Closed green** (staging-green, authority-remediated) |
+| **HR-1** — Operator Mobile Authentication and `/dashboard/mobile/me` Capability Contract | **In progress (backend-only)** |
+| Wathefni HR frontend | **Do not start until HR-1 is reviewed** |
 
 HR-0 must not delay or combine with the Expo SDK migration.
 
@@ -92,11 +92,11 @@ HR-0 must not delay or combine with the Expo SDK migration.
 
 ---
 
-## Recommended next slice (after HR-0 review)
+## Recommended next slice (after HR-1 review)
 
-**HR-1 — Operator Mobile Authentication and `/dashboard/mobile/me` Capability Contract**
+**HR-2 — Wathefni HR Frontend Design and Initial Implementation**
 
-Deliver a backend-current, session-authenticated operator mobile bootstrap that exposes only granted capabilities for Wathefni HR — without starting the HR frontend and without unifying principals.
+Only after HR-1 backend contract, tests, and staging proof are reviewed. Do not start HR-2 in the same change set as HR-1.
 
 ---
 
