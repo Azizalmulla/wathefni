@@ -1,5 +1,9 @@
 version: "3.9"
 
+# LEGACY PROTOTYPE ONLY — not Wathefni HR / dashboard AI Recruiter.
+# Bound to localhost. /internal/* is disabled unless LEGACY_AI_RECRUITER_INTERNAL_ENABLED=1
+# and LEGACY_AI_RECRUITER_INTERNAL_TOKEN is set.
+
 services:
   db:
     image: postgres:16-alpine
@@ -8,16 +12,18 @@ services:
       POSTGRES_PASSWORD: recruiter
       POSTGRES_DB: ai_recruiter
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   api:
     build: .
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
+    environment:
+      LEGACY_AI_RECRUITER_INTERNAL_ENABLED: "0"
     depends_on:
       - db
     volumes:
