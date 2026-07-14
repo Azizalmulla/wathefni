@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from pathlib import Path
 
 
 def main() -> int:
@@ -22,6 +23,12 @@ def main() -> int:
     os.environ.setdefault("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.staging.env")
     os.environ.setdefault("WATHEFNI_WORKSPACE", "/opt/wathefni/staging/workspace")
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
+
+    staging_orch = os.environ.get("WATHEFNI_STAGING_ORCH", "/opt/wathefni/staging/orchestrator")
+    prod_orch = os.environ.get("WATHEFNI_PROD_ORCH", "/opt/wathefni/orchestrator")
+    for path in (staging_orch, prod_orch, str(Path(__file__).resolve().parents[1])):
+        if path and path not in sys.path and Path(path, "app.py").exists():
+            sys.path.insert(0, path)
 
     import app
 
