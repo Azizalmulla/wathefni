@@ -74,6 +74,7 @@ run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 import attendance_import as _attendance_import  # noqa: E402
 import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
+import operator_mobile as _operator_mobile  # noqa: E402
 
 logger = logging.getLogger("wathefni")
 
@@ -2700,6 +2701,7 @@ def _ensure_schema_impl() -> None:
     sync_company_module_registry()
     sync_company_org_registry()
     seed_assessment_item_bank()
+    _operator_mobile.ensure_operator_mobile_schema(sys.modules[__name__])
 
 
 def company_root(company_code: str | None) -> Path:
@@ -31047,6 +31049,8 @@ def dashboard_compliance_payload(
     company: str,
     viewer_phone: str | None = None,
     *,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
     search: str | None = None,
     bucket_filter: str | None = None,
     offset: int = 0,
@@ -31069,7 +31073,12 @@ def dashboard_compliance_payload(
     list is returned, preserving every existing caller's behavior.
     """
     employees = company_employees(company)
-    allowed_keys = manager_scope_employee_keys(company, viewer_phone)
+    allowed_keys = manager_scope_employee_keys(
+        company,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     if allowed_keys is not None:
         employees = [e for e in employees if str(e.get("employee_key")) in allowed_keys]
     cards: dict[str, dict[str, Any]] = {}
@@ -34704,6 +34713,11 @@ def dashboard_auth_logout(authorization: str | None = Header(default=None), x_da
     return {"ok": True}
 
 
+# HR-1: Wathefni HR operator mobile auth + /dashboard/mobile/me (backend-only).
+# Registered here so routes precede the SPA catch-all at /dashboard/{asset_path:path}.
+_operator_mobile.register_operator_mobile_routes(sys.modules[__name__])
+
+
 @app.post("/dashboard/team/invites/accept")
 def dashboard_team_accept_invite(request: DashboardAcceptInviteRequest):
     ensure_schema()
@@ -34948,6 +34962,7 @@ def dashboard_team_update_user(user_id: str, request: DashboardTeamUserUpdateReq
             if request.status == "disabled":
                 cur.execute("UPDATE dashboard_user_sessions SET status='revoked' WHERE user_id=%s", (user_id,))
                 cur.execute("UPDATE dashboard_whatsapp_identities SET status='disabled', updated_at=now() WHERE user_id=%s", (user_id,))
+                _operator_mobile.revoke_user_operator_mobile_sessions(cur, user_id, reason="operator_disabled")
         conn.commit()
     member = dict(user)
     new_role = dashboard_role_key(request.role) if request.role is not None else None
@@ -36127,6 +36142,11 @@ def setup_console_set_company_lifecycle(
                     (company,),
                 )
                 revoked_sessions = cur.rowcount
+                revoked_sessions += _operator_mobile.revoke_company_operator_mobile_sessions(
+                    cur,
+                    company,
+                    reason=f"company_{desired}",
+                )
                 cur.execute(
                     "UPDATE dashboard_user_invites SET status='superseded' "
                     "WHERE company_code=%s AND status='pending'",
@@ -45127,6 +45147,24 @@ def posthire_dashboard_conversation_id(context: dict[str, Any]) -> str:
 
 def posthire_dashboard_scope(context: dict[str, Any], conversation_id: str) -> dict[str, Any]:
     permissions = sorted({str(p) for p in (context.get("permissions") or []) if str(p).strip()})
+    access = context.get("access") if isinstance(context.get("access"), dict) else {}
+    authority = str(
+        context.get("permission_authority")
+        or access.get("permission_authority")
+        or ""
+    ).strip()
+    subject_user_id = str(
+        context.get("permission_subject_user_id")
+        or access.get("permission_subject_user_id")
+        or context.get("actor_user_id")
+        or ""
+    ).strip()
+    subject_company = str(
+        context.get("permission_subject_company")
+        or access.get("permission_subject_company")
+        or context.get("company_code")
+        or ""
+    ).strip().upper()
     return {
         "company_id": context["company_code"],
         "account_id": context["company_code"],
@@ -45142,6 +45180,19 @@ def posthire_dashboard_scope(context: dict[str, Any], conversation_id: str) -> d
         "module": "pre_hiring",
         "role_scope": context.get("actor_role") or "viewer",
         "permissions": permissions,
+        # HR-0: preserve trusted authority markers so tool-call entitlement checks
+        # see the same backend_current grants as HTTP dashboard handlers.
+        "permission_authority": authority,
+        "permission_subject_user_id": subject_user_id,
+        "permission_subject_company": subject_company,
+        "hr_user": context.get("hr_user") if isinstance(context.get("hr_user"), dict) else None,
+        "access": {
+            "role": context.get("actor_role") or access.get("role") or "viewer",
+            "permissions": permissions,
+            "permission_authority": authority,
+            "permission_subject_user_id": subject_user_id,
+            "permission_subject_company": subject_company,
+        },
     }
 
 
@@ -49195,8 +49246,13 @@ def normalize_attendance_status_filter(status: str | None) -> str | None:
 
     Invalid non-empty values raise HTTP 400 with a deterministic error contract —
     they must never silently widen or ignore the filter on the HTTP route.
+
+    Direct Python calls of the FastAPI route (smoke harnesses) may receive the
+    ``Query(None)`` default object instead of ``None``; treat that as unset.
     """
-    raw = str(status or "").strip()
+    if status is None or not isinstance(status, str):
+        return None
+    raw = status.strip()
     if not raw:
         return None
     normalized = normalize_text(raw)
@@ -50316,6 +50372,8 @@ def dashboard_posthire_compliance(
         dashboard_compliance_payload(
             company,
             viewer_phone=context.get("hr_phone"),
+            dashboard_user_id=context.get("actor_user_id"),
+            actor_role=context.get("actor_role"),
             search=search,
             bucket_filter=bucket,
             offset=offset,
