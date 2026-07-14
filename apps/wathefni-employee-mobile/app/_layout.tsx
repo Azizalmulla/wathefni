@@ -79,7 +79,8 @@ function AuthGate() {
       <Stack.Screen name="documents" options={{ title: t('documents.title') }} />
       <Stack.Screen name="attendance" options={{ title: t('attendance.title') }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
-      <Stack.Screen name="leave/request" options={{ title: t('leave.request'), presentation: 'modal' }} />
+      <Stack.Screen name="privacy-support" options={{ headerShown: false }} />
+      <Stack.Screen name="leave/request" options={{ headerShown: false, presentation: 'modal' }} />
     </Stack>
   )
 }
