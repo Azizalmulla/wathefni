@@ -24,11 +24,11 @@ cd apps/wathefni-employee-mobile
 npm install
 cp .env.example .env          # set EXPO_PUBLIC_API_BASE_URL (staging by default)
 npx expo install              # align native module versions with the installed Expo SDK
-npm start                      # Expo dev server (use a dev client / Expo Go)
+npm run start:dev-client       # after installing the EAS development build
 ```
 
-Set the EAS project id in `app.json` (`extra.eas.projectId`) before building or
-push notifications will be disabled (the app stays fully usable via the inbox).
+Follow `docs/NATIVE_DEVELOPMENT_BUILD.md` before building. The EAS project ID is
+required for a development client and push token registration.
 
 ## V1 screens
 
@@ -53,13 +53,20 @@ signed-in employee's own data.
 ## Builds (EAS)
 
 ```bash
-eas build --profile development --platform ios     # internal dev client
-eas build --profile preview --platform all         # internal testing
-eas build --profile production --platform all      # store builds
-eas submit --profile production --platform all
+npx eas-cli build --profile development --platform ios
 ```
 
 Production builds strip `console.*` (see `babel.config.js`).
+Production push registration remains disabled until delivery is explicitly approved.
+
+## Production references
+
+- Permanent design reference: `docs/DESIGN_SYSTEM.md`
+- Native build onboarding: `docs/NATIVE_DEVELOPMENT_BUILD.md`
+- Performance: `docs/PHASE_9B_PERFORMANCE.md`
+- Accessibility: `docs/PHASE_9B_ACCESSIBILITY.md`
+- Engineering audit: `docs/PHASE_9B_ENGINEERING_AUDIT.md`
+- Readiness decision: `docs/PHASE_9B_READINESS.md`
 
 ## Conventions
 
