@@ -25,6 +25,8 @@ def main() -> None:
     assert_true("@app.patch(\"/dashboard/team/users/{user_id}\")" in app_source, "team role/status update endpoint must exist")
     assert_true("require_workspace_permission(context, \"users.manage\")" in app_source, "team mutations must require users.manage")
     assert_true("permission_authority" in app_source and "backend_current" in app_source, "permissions must come from current backend authority")
+    assert_true("legacy_dashboard_token_auth_enabled" in app_source, "legacy dashboard token auth must be explicitly gated")
+    assert_true("backend_current_required" in app_source, "health/ready must advertise trusted authority")
     assert_true("if not perms:" not in app_source, "missing permissions must not retain a fail-open fallback")
     assert_true("dashboard_password_hash" in app_source and "pbkdf2_sha256" in app_source, "passwords must be hashed")
     assert_true("Your account is not active." in app_source, "disabled users must get HR-safe inactive copy")

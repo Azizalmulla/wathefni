@@ -3746,7 +3746,8 @@ def _leave_action(ctx: ExecutionContext) -> dict[str, Any]:
     Mirrors execute_direct_action: the actor's phone is injected as viewer_phone
     so manager-scope enforcement behaves identically to the legacy path. HR
     admins who are not scoped managers stay unrestricted (manager_scope_context
-    returns restricted=False when no manager_scopes row exists).
+    returns restricted=False when no manager_scopes row exists for non-manager
+    roles). Team managers without an explicit scope binding fail closed.
     """
 
     action = dict(ctx.action)

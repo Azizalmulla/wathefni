@@ -1417,6 +1417,7 @@ def _ensure_schema_impl() -> None:
       scope_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
       manager_phone text NOT NULL,
+      dashboard_user_id text,
       scope_type text NOT NULL DEFAULT 'company',
       branch_key text REFERENCES company_branches(branch_key) ON DELETE SET NULL,
       team_key text REFERENCES company_teams(team_key) ON DELETE SET NULL,
@@ -2422,6 +2423,25 @@ def _ensure_schema_impl() -> None:
     CREATE UNIQUE INDEX IF NOT EXISTS idx_intake_addresses_local ON intake_addresses(lower(local_part), lower(coalesce(domain,'')));
     CREATE UNIQUE INDEX IF NOT EXISTS idx_inbound_messages_provider_msg ON inbound_messages(provider, provider_message_id);
     CREATE INDEX IF NOT EXISTS idx_inbound_messages_company ON inbound_messages(company_code, created_at DESC);
+    -- Role-based privacy mailbox audit (not CV intake). Stores metadata only.
+    CREATE TABLE IF NOT EXISTS privacy_mailbox_events (
+      event_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      direction text NOT NULL,
+      provider text NOT NULL DEFAULT 'postmark',
+      provider_message_id text,
+      from_address text,
+      to_address text,
+      subject text,
+      test_token text,
+      sensitive_content boolean NOT NULL DEFAULT false,
+      body_excerpt text,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_privacy_mailbox_provider_msg
+      ON privacy_mailbox_events(provider, provider_message_id)
+      WHERE provider_message_id IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_privacy_mailbox_created ON privacy_mailbox_events(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_pending_actions_lookup ON pending_actions(admin_phone, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_pending_operations_lookup ON pending_operations(admin_phone, status, expires_at DESC);
     CREATE INDEX IF NOT EXISTS idx_public_candidate_sessions_lookup ON public_candidate_sessions(phone, account_id, conversation_id, status, expires_at DESC);
@@ -2443,6 +2463,10 @@ def _ensure_schema_impl() -> None:
     CREATE INDEX IF NOT EXISTS idx_employee_org_assignments_employee ON employee_org_assignments(company_code, employee_key, is_primary);
     CREATE INDEX IF NOT EXISTS idx_employee_org_assignments_branch ON employee_org_assignments(company_code, branch_key, team_key);
     CREATE INDEX IF NOT EXISTS idx_manager_scopes_phone ON manager_scopes(company_code, manager_phone, is_active);
+    ALTER TABLE IF EXISTS manager_scopes ADD COLUMN IF NOT EXISTS dashboard_user_id text;
+    CREATE INDEX IF NOT EXISTS idx_manager_scopes_user
+      ON manager_scopes(company_code, dashboard_user_id, is_active)
+      WHERE dashboard_user_id IS NOT NULL AND dashboard_user_id <> '';
     CREATE INDEX IF NOT EXISTS idx_manager_scope_members_scope ON manager_scope_members(scope_id);
     CREATE INDEX IF NOT EXISTS idx_manager_scope_members_employee ON manager_scope_members(company_code, employee_key);
     CREATE INDEX IF NOT EXISTS idx_employee_messages_company_status ON employee_messages(company_code, status, created_at DESC);
@@ -6047,28 +6071,138 @@ def team_from_action(action: dict[str, Any], company_code: str | None) -> dict[s
     return None
 
 
-def manager_scope_context(manager_phone: str | None, company_code: str | None) -> dict[str, Any]:
+# Roles that must never receive unrestricted employee visibility without an
+# explicit manager_scopes assignment. Owners/HR keep backend-current access and
+# are unrestricted only when they have no manager_scopes row (not via this set).
+MANAGER_SCOPE_REQUIRED_ROLES = frozenset({"manager"})
+
+
+def manager_role_requires_explicit_scope(actor_role: str | None) -> bool:
+    return normalize_hr_role(actor_role) in MANAGER_SCOPE_REQUIRED_ROLES
+
+
+def _fail_closed_manager_scope(
+    *,
+    company: str,
+    manager_phone: str = "",
+    dashboard_user_id: str = "",
+    configuration_error: str,
+) -> dict[str, Any]:
+    return {
+        "restricted": True,
+        "company_code": company,
+        "manager_phone": manager_phone,
+        "dashboard_user_id": dashboard_user_id,
+        "branch_keys": [],
+        "team_keys": [],
+        "direct_employee_keys": [],
+        "scopes": [],
+        "configuration_error": configuration_error,
+    }
+
+
+def manager_scope_context(
+    manager_phone: str | None,
+    company_code: str | None,
+    *,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+    require_explicit_scope: bool | None = None,
+) -> dict[str, Any]:
+    """Resolve which employees a viewer may see.
+
+    Durable model (HR-0):
+      * Prefer stable `dashboard_user_id` scope rows when present; phone remains a
+        transitional binding for WhatsApp / legacy manager_scopes rows.
+      * The `manager` role never implies company-wide access. Missing phone/user
+        binding or missing active scope rows fail closed to an empty scope with a
+        deterministic `configuration_error`.
+      * Explicit `scope_type=company` remains the only unrestricted manager path.
+      * Owners/HR (roles outside MANAGER_SCOPE_REQUIRED_ROLES) stay unrestricted
+        when they have no manager_scopes row — their authority is permissions, not
+        the manager role.
+    """
     phone = digits(manager_phone)
+    user_id = str(dashboard_user_id or "").strip()
     company = (company_code or "WATHEFNI").upper()
-    if not phone:
-        return {"restricted": False, "company_code": company, "manager_phone": ""}
+    must_scope = (
+        bool(require_explicit_scope)
+        if require_explicit_scope is not None
+        else manager_role_requires_explicit_scope(actor_role)
+    )
+
+    if not phone and not user_id:
+        if must_scope:
+            return _fail_closed_manager_scope(
+                company=company,
+                configuration_error="manager_scope_binding_missing",
+            )
+        return {"restricted": False, "company_code": company, "manager_phone": "", "dashboard_user_id": ""}
+
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT *
-                FROM manager_scopes
-                WHERE company_code=%s AND manager_phone=%s AND is_active IS TRUE
-                ORDER BY created_at
-                LIMIT 200
-                """,
-                (company, phone),
-            )
+            if user_id and phone:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM manager_scopes
+                    WHERE company_code=%s AND is_active IS TRUE
+                      AND (
+                        dashboard_user_id=%s
+                        OR (manager_phone=%s AND (dashboard_user_id IS NULL OR dashboard_user_id=''))
+                      )
+                    ORDER BY created_at
+                    LIMIT 200
+                    """,
+                    (company, user_id, phone),
+                )
+            elif user_id:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM manager_scopes
+                    WHERE company_code=%s AND dashboard_user_id=%s AND is_active IS TRUE
+                    ORDER BY created_at
+                    LIMIT 200
+                    """,
+                    (company, user_id),
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM manager_scopes
+                    WHERE company_code=%s AND manager_phone=%s AND is_active IS TRUE
+                    ORDER BY created_at
+                    LIMIT 200
+                    """,
+                    (company, phone),
+                )
             rows = [dict(row) for row in cur.fetchall()]
+
     if not rows:
-        return {"restricted": False, "company_code": company, "manager_phone": phone, "scopes": []}
+        if must_scope:
+            return _fail_closed_manager_scope(
+                company=company,
+                manager_phone=phone,
+                dashboard_user_id=user_id,
+                configuration_error="manager_scope_unconfigured",
+            )
+        return {
+            "restricted": False,
+            "company_code": company,
+            "manager_phone": phone,
+            "dashboard_user_id": user_id,
+            "scopes": [],
+        }
     if any(str(row.get("scope_type") or "") == "company" for row in rows):
-        return {"restricted": False, "company_code": company, "manager_phone": phone, "scopes": json_safe(rows)}
+        return {
+            "restricted": False,
+            "company_code": company,
+            "manager_phone": phone,
+            "dashboard_user_id": user_id,
+            "scopes": json_safe(rows),
+        }
     branch_keys = sorted({str(row.get("branch_key")) for row in rows if row.get("branch_key")})
     team_keys = sorted({str(row.get("team_key")) for row in rows if row.get("team_key")})
     # V1a: a "direct" scope carries a hand-picked list of managed employees in
@@ -6085,10 +6219,20 @@ def manager_scope_context(manager_phone: str | None, company_code: str | None) -
                         (company, direct_scope_ids),
                     )
                     direct_employee_keys = sorted({str(r["employee_key"]) for r in cur.fetchall() if r.get("employee_key")})
+    restricted = bool(branch_keys or team_keys or direct_employee_keys)
+    if must_scope and not restricted:
+        # Active rows exist but resolve to nothing usable — fail closed.
+        return _fail_closed_manager_scope(
+            company=company,
+            manager_phone=phone,
+            dashboard_user_id=user_id,
+            configuration_error="manager_scope_empty",
+        )
     return {
-        "restricted": bool(branch_keys or team_keys or direct_employee_keys),
+        "restricted": restricted,
         "company_code": company,
         "manager_phone": phone,
+        "dashboard_user_id": user_id,
         "branch_keys": branch_keys,
         "team_keys": team_keys,
         "direct_employee_keys": direct_employee_keys,
@@ -6098,7 +6242,12 @@ def manager_scope_context(manager_phone: str | None, company_code: str | None) -
 
 def org_scope_for_action(action: dict[str, Any], company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
-    scope = manager_scope_context(action.get("viewer_phone"), company)
+    scope = manager_scope_context(
+        action.get("viewer_phone"),
+        company,
+        dashboard_user_id=action.get("viewer_user_id") or action.get("dashboard_user_id"),
+        actor_role=action.get("actor_role") or action.get("viewer_role"),
+    )
     branch = branch_from_action(action, company)
     team = team_from_action(action, company)
     requested_branch = str(branch.get("branch_key")) if branch else ""
@@ -6147,10 +6296,22 @@ def employee_scope_sql(alias: str, scope: dict[str, Any]) -> tuple[str, list[Any
     return clause, [bool(direct_keys), direct_keys, company, bool(branch_keys), branch_keys, bool(team_keys), team_keys]
 
 
-def manager_scope_allows_employee(employee: dict[str, Any] | None, *, company_code: str | None, viewer_phone: str | None) -> bool:
+def manager_scope_allows_employee(
+    employee: dict[str, Any] | None,
+    *,
+    company_code: str | None,
+    viewer_phone: str | None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> bool:
     if not employee:
         return False
-    scope = manager_scope_context(viewer_phone, company_code)
+    scope = manager_scope_context(
+        viewer_phone,
+        company_code,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     if not scope.get("restricted"):
         return True
     employee_key = str(employee.get("employee_key") or "")
@@ -6180,7 +6341,13 @@ def manager_scope_allows_employee(employee: dict[str, Any] | None, *, company_co
             return bool(cur.fetchone())
 
 
-def manager_scope_employee_keys(company_code: str | None, viewer_phone: str | None) -> set[str] | None:
+def manager_scope_employee_keys(
+    company_code: str | None,
+    viewer_phone: str | None,
+    *,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> set[str] | None:
     """In-scope employee_keys for a manager, or None when unrestricted.
 
     Returns None when the viewer has no manager scope (owners/HR managers see
@@ -6189,7 +6356,12 @@ def manager_scope_employee_keys(company_code: str | None, viewer_phone: str | No
     reads (employees/onboarding/compliance) that build off `company_employees`
     can be filtered identically to the SQL-scoped list endpoints."""
     company = (company_code or "WATHEFNI").upper()
-    scope = manager_scope_context(viewer_phone, company)
+    scope = manager_scope_context(
+        viewer_phone,
+        company,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     if not scope.get("restricted"):
         return None
     clause, params = employee_scope_sql("e", scope)
@@ -6202,6 +6374,58 @@ def manager_scope_employee_keys(company_code: str | None, viewer_phone: str | No
                 (company, *params),
             )
             return {str(r["employee_key"]) for r in cur.fetchall() if r.get("employee_key")}
+
+
+def operator_manager_scope(
+    *,
+    company_code: str | None,
+    manager_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> dict[str, Any]:
+    """Dashboard/operator entry point for manager scope resolution."""
+    return manager_scope_context(
+        manager_phone,
+        company_code,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
+
+
+def dashboard_scope_viewer_args(context: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract manager-scope viewer identity from a dashboard/action context."""
+    data = context if isinstance(context, dict) else {}
+    return {
+        "viewer_phone": data.get("hr_phone") or data.get("viewer_phone") or data.get("actor_phone") or "",
+        "dashboard_user_id": data.get("actor_user_id") or data.get("viewer_user_id") or data.get("dashboard_user_id") or "",
+        "actor_role": data.get("actor_role") or data.get("viewer_role") or "",
+    }
+
+
+def context_manager_allows_employee(
+    context: dict[str, Any] | None,
+    employee: dict[str, Any] | None,
+    *,
+    company_code: str | None,
+) -> bool:
+    args = dashboard_scope_viewer_args(context)
+    return manager_scope_allows_employee(
+        employee,
+        company_code=company_code,
+        viewer_phone=args["viewer_phone"],
+        dashboard_user_id=args["dashboard_user_id"],
+        actor_role=args["actor_role"],
+    )
+
+
+def context_manager_employee_keys(context: dict[str, Any] | None, company_code: str | None) -> set[str] | None:
+    args = dashboard_scope_viewer_args(context)
+    return manager_scope_employee_keys(
+        company_code,
+        args["viewer_phone"],
+        dashboard_user_id=args["dashboard_user_id"],
+        actor_role=args["actor_role"],
+    )
 
 
 # --- Org & Managers admin (V1a) --------------------------------------------
@@ -6335,12 +6559,18 @@ def upsert_manager_scope(
     team_key: str | None = None,
     employee_keys: list[str] | None = None,
     is_active: bool = True,
+    dashboard_user_id: str | None = None,
 ) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     phone = digits(manager_phone)
+    user_id = str(dashboard_user_id or "").strip() or None
     scope_type = str(scope_type or "").strip().lower()
+    if not phone and not user_id:
+        return {"ok": False, "error": "manager_binding_required"}
     if not phone:
-        return {"ok": False, "error": "manager_phone_required"}
+        # Phone remains NOT NULL on the table for transitional compatibility;
+        # store empty string when binding is user-id only.
+        phone = ""
     if scope_type not in VALID_MANAGER_SCOPE_TYPES:
         return {"ok": False, "error": "invalid_scope_type"}
     branch = str(branch_key or "").strip() or None
@@ -6370,11 +6600,11 @@ def upsert_manager_scope(
                     return {"ok": False, "error": "employee_not_found", "missing": missing}
             cur.execute(
                 """
-                INSERT INTO manager_scopes (company_code, manager_phone, scope_type, branch_key, team_key, role, is_active, updated_at)
-                VALUES (%s,%s,%s,%s,%s,'manager',%s,now())
+                INSERT INTO manager_scopes (company_code, manager_phone, dashboard_user_id, scope_type, branch_key, team_key, role, is_active, updated_at)
+                VALUES (%s,%s,%s,%s,%s,%s,'manager',%s,now())
                 RETURNING *
                 """,
-                (company, phone, scope_type, branch, team, bool(is_active)),
+                (company, phone, user_id, scope_type, branch, team, bool(is_active)),
             )
             scope = dict(cur.fetchone() or {})
             scope_id = str(scope.get("scope_id"))
@@ -13174,13 +13404,24 @@ def _ilike_escape(term: str) -> str:
     return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-def _employee_scope_where(company_code: str | None, viewer_phone: str | None) -> tuple[str, list[Any]]:
+def _employee_scope_where(
+    company_code: str | None,
+    viewer_phone: str | None,
+    *,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> tuple[str, list[Any]]:
     """Shared WHERE fragment (aliased `e`) for scoped reads over `employees`:
     company match + the manager scope clause. Returns the SQL string (already
     joined with AND) and its params, so every directory-style read (employees,
     onboarding, stats) narrows to the SAME rows a scoped manager may see."""
     company = (company_code or "WATHEFNI").upper()
-    scope = manager_scope_context(viewer_phone, company)
+    scope = manager_scope_context(
+        viewer_phone,
+        company,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     where = ["e.company_code=%s"]
     params: list[Any] = [company]
     scope_clause, scope_params = employee_scope_sql("e", scope)
@@ -13211,6 +13452,8 @@ def list_employees_page(
     company_code: str | None,
     *,
     viewer_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
     search: str | None = None,
     limit: int,
     offset: int,
@@ -13228,7 +13471,12 @@ def list_employees_page(
     workforce (not just the pages already loaded in the browser) and total_count
     reflects the filtered set for correct paging.
     """
-    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    where_sql, params = _employee_scope_where(
+        company_code,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     search_clause, search_params = _employee_search_clause(search)
     if search_clause:
         where_sql = f"{where_sql} AND {search_clause}"
@@ -13254,12 +13502,23 @@ def list_employees_page(
     return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
 
 
-def employee_directory_stats(company_code: str | None, *, viewer_phone: str | None = None) -> dict[str, Any]:
+def employee_directory_stats(
+    company_code: str | None,
+    *,
+    viewer_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> dict[str, Any]:
     """Scope-aware directory headline counts computed in SQL over the WHOLE
     workforce, so the stat cards stay correct no matter how many pages of the
     directory are loaded in the UI. Uses the same manager scope as the paged read.
     """
-    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    where_sql, params = _employee_scope_where(
+        company_code,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     not_left = "lower(coalesce(e.employment_status,'active')) <> 'left'"
     onboarding_done = "lower(coalesce(e.onboarding_status,'')) IN ('complete','completed','done')"
     # `department` is not a column — it lives in the profile/raw_json JSON, mirroring
@@ -26850,7 +27109,7 @@ def _outbound_email_result(
     }
 
 
-def send_email_via_postmark(*, to: str, subject: str, body: str) -> dict[str, Any]:
+def send_email_via_postmark(*, to: str, subject: str, body: str, reply_to: str | None = None) -> dict[str, Any]:
     """Send one transactional email through Postmark. No raw API body is surfaced
     (it can echo recipient/sender); errors are mapped to short, safe codes."""
     cfg = outbound_postmark_config()
@@ -26863,8 +27122,9 @@ def send_email_via_postmark(*, to: str, subject: str, body: str) -> dict[str, An
         "TextBody": body,
         "MessageStream": cfg["message_stream"] or "outbound",
     }
-    if cfg["reply_to"]:
-        message["ReplyTo"] = cfg["reply_to"]
+    reply = str(reply_to or cfg["reply_to"] or "").strip()
+    if reply:
+        message["ReplyTo"] = reply
     data = json.dumps(message).encode("utf-8")
     req = urllib.request.Request(
         OUTBOUND_EMAIL_API,
@@ -31588,13 +31848,33 @@ app = FastAPI(title="Wathefni HR Orchestrator")
 
 @app.on_event("startup")
 def on_startup() -> None:
+    assert_legacy_dashboard_auth_safe_at_startup()
     ensure_schema()
 
 
 @app.get("/health")
 def health():
     ensure_schema()
-    return {"status": "ok", "runtime": "toolcall_fastapi"}
+    return {
+        "status": "ok",
+        "runtime": "toolcall_fastapi",
+        "permission_authority": "backend_current_required",
+        "legacy_dashboard_token_auth": legacy_dashboard_token_auth_enabled(),
+        "legacy_untrusted_auth_usable": False if not legacy_dashboard_token_auth_enabled() else True,
+    }
+
+
+@app.get("/ready")
+def ready():
+    """Readiness: schema reachable and trusted dashboard authority enforced."""
+    ensure_schema()
+    legacy_on = legacy_dashboard_token_auth_enabled()
+    return {
+        "status": "ready",
+        "permission_authority": "backend_current_required",
+        "legacy_dashboard_token_auth": legacy_on,
+        "trusted_authority_enforced": not legacy_on,
+    }
 
 
 @app.get("/orchestrator/debug/prompt-context")
@@ -33304,6 +33584,47 @@ def dashboard_configured_token() -> str | None:
     )
 
 
+def legacy_dashboard_token_auth_enabled() -> bool:
+    """Return True only for an explicit test/harness gate.
+
+    Production, staging, Employee App, Wathefni HR, and public browser clients
+    must never enter the legacy_untrusted shared-token path. Setting the allow
+    flag outside a test harness fails closed (and startup refuses to boot).
+    """
+    flag = os.environ.get("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    if not flag:
+        return False
+    env = (os.environ.get("WATHEFNI_ENV") or os.environ.get("ENV") or "").strip().lower()
+    if env in {"test", "pytest", "harness"}:
+        return True
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return True
+    return False
+
+
+def assert_legacy_dashboard_auth_safe_at_startup() -> None:
+    flag = os.environ.get("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    if not flag:
+        return
+    if legacy_dashboard_token_auth_enabled():
+        return
+    raise RuntimeError(
+        "WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH is set outside a test harness "
+        "(require WATHEFNI_ENV=test|pytest|harness). Refusing to start with "
+        "legacy_untrusted dashboard auth enabled."
+    )
+
+
 def bearer_token(authorization: str | None) -> str | None:
     value = str(authorization or "").strip()
     if not value:
@@ -33607,6 +33928,141 @@ def revoke_dashboard_recovery_sessions(
             conn.rollback()
             raise
     return {"ok": True, "revoked_count": revoked_count}
+
+
+def promote_legacy_bootstrap_dashboard_user(
+    company_code: str,
+    user_id: str,
+    *,
+    actor_user_id: str,
+    reason: str,
+    review_reference: str,
+    new_password: str | None = None,
+) -> dict[str, Any]:
+    """Convert a legacy HR-phone bootstrap user to a normal workspace operator.
+
+    Fail-closed: requires a normal active actor with users.manage, an active
+    target that is currently marked legacy_hr_phone_bootstrap, and either an
+    existing password hash or an explicit new password. Does not grant any
+    permissions. Revokes the target's active dashboard sessions so bootstrap
+    session authority cannot remain.
+    """
+    ensure_schema()
+    company = str(company_code or "").strip().upper()
+    reason_text = str(reason or "").strip()
+    review_text = str(review_reference or "").strip()
+    password_text = str(new_password or "")
+    if not reason_text or not review_text:
+        return {"ok": False, "error": "reason_and_review_required"}
+    if password_text and len(password_text) < 8:
+        return {"ok": False, "error": "password_too_short"}
+
+    with db_connect() as conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR UPDATE",
+                    (company, str(actor_user_id)),
+                )
+                actor = dict(cur.fetchone() or {})
+                actor_permissions = dashboard_effective_permissions_for_user(actor, cur=cur) if actor else []
+                if not _normal_dashboard_operator(actor) or "users.manage" not in actor_permissions:
+                    return {"ok": False, "error": "permission_denied"}
+
+                cur.execute(
+                    "SELECT * FROM dashboard_users WHERE company_code=%s AND user_id=%s FOR UPDATE",
+                    (company, str(user_id)),
+                )
+                target = dict(cur.fetchone() or {})
+                if not target:
+                    return {"ok": False, "error": "user_not_found"}
+                if normalize_dashboard_user_status(target.get("status"), default="invited") != "active":
+                    return {"ok": False, "error": "target_user_not_active"}
+                metadata = target.get("metadata") if isinstance(target.get("metadata"), dict) else {}
+                if str(metadata.get("source") or "") != "legacy_hr_phone_bootstrap":
+                    return {"ok": False, "error": "target_not_legacy_bootstrap"}
+                email = normalize_email(target.get("email"))
+                if email.endswith(".wathefni.local"):
+                    return {"ok": False, "error": "target_email_not_workspace"}
+                has_password = bool(str(target.get("password_hash") or "").strip())
+                if not has_password and not password_text:
+                    return {"ok": False, "error": "password_required"}
+
+                promoted_meta = {
+                    "source": "workspace",
+                    "promoted_from": "legacy_hr_phone_bootstrap",
+                    "promoted_via": "audited_promote_legacy_bootstrap",
+                    "promoted_at": now_utc().isoformat(),
+                    "promoted_by_user_id": str(actor_user_id),
+                    "review_reference": review_text,
+                    "reason": reason_text,
+                }
+                if password_text:
+                    cur.execute(
+                        """
+                        UPDATE dashboard_users
+                        SET password_hash=%s,
+                            metadata=COALESCE(metadata, '{}'::jsonb) || %s,
+                            accepted_at=COALESCE(accepted_at, now()),
+                            updated_at=now()
+                        WHERE company_code=%s AND user_id=%s
+                        RETURNING *
+                        """,
+                        (dashboard_password_hash(password_text), Json(promoted_meta), company, str(user_id)),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        UPDATE dashboard_users
+                        SET metadata=COALESCE(metadata, '{}'::jsonb) || %s,
+                            accepted_at=COALESCE(accepted_at, now()),
+                            updated_at=now()
+                        WHERE company_code=%s AND user_id=%s
+                        RETURNING *
+                        """,
+                        (Json(promoted_meta), company, str(user_id)),
+                    )
+                updated = dict(cur.fetchone() or {})
+                cur.execute(
+                    """
+                    UPDATE dashboard_user_sessions
+                    SET status='revoked'
+                    WHERE company_code=%s AND user_id=%s AND status='active'
+                    RETURNING session_id
+                    """,
+                    (company, str(user_id)),
+                )
+                revoked_sessions = len(cur.fetchall())
+                write_admin_audit(
+                    cur,
+                    _permission_operator_context(actor, actor_permissions),
+                    "dashboard_legacy_bootstrap_promoted",
+                    summary="Promoted legacy HR-phone bootstrap user to normal workspace operator.",
+                    target_type="dashboard_user",
+                    target=str(user_id),
+                    details={
+                        "reason": reason_text,
+                        "review_reference": review_text,
+                        "revoked_sessions": revoked_sessions,
+                        "password_rotated": bool(password_text),
+                        "prior_source": "legacy_hr_phone_bootstrap",
+                        "auth_source": "workspace",
+                    },
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+    public = dashboard_user_public(updated)
+    return {
+        "ok": True,
+        "user": public,
+        "normal_operator": _normal_dashboard_operator(updated),
+        "revoked_sessions": revoked_sessions,
+        "password_rotated": bool(password_text),
+        "permission_authority": "backend_current",
+    }
 
 
 def permission_authority_preflight(company_code: str) -> dict[str, Any]:
@@ -34005,8 +34461,25 @@ def dashboard_context(
             "actor_phone": public_user.get("phone") or "",
             "actor_role": public_user["role"],
             "actor": public_user,
-            "scope": manager_scope_context(public_user.get("phone"), company) if public_user.get("phone") else {"restricted": False, "company_code": company, "manager_phone": ""},
+            "scope": operator_manager_scope(
+                company_code=company,
+                manager_phone=public_user.get("phone"),
+                dashboard_user_id=public_user.get("user_id"),
+                actor_role=public_user.get("role"),
+            ),
         }
+
+    # Shared-token + client phone/company is legacy_untrusted. Disabled on all
+    # normal production/staging paths; only an explicit test harness may enter.
+    if not legacy_dashboard_token_auth_enabled():
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "dashboard_auth_failed",
+                "message": "Access needs to be verified.",
+                "permission_authority_required": "backend_current",
+            },
+        )
 
     configured = dashboard_configured_token()
     if not configured:
@@ -34068,6 +34541,13 @@ def dashboard_context(
     if seeded_user:
         access = dashboard_access_payload_for_user(seeded_user)
     actor = actor_context_for_hr_user(hr_user, company_code=company, hr_phone=hr_phone)
+    actor_role = access.get("role") or actor.get("actor_role")
+    actor_user_id = (
+        access.get("permission_subject_user_id")
+        or actor.get("actor_user_id")
+        or (hr_user.get("user_id") if isinstance(hr_user, dict) else "")
+        or ""
+    )
 
     return {
         "company_code": company,
@@ -34079,8 +34559,13 @@ def dashboard_context(
         "permission_subject_user_id": access.get("permission_subject_user_id") if seeded_user else "",
         "permission_subject_company": access.get("permission_subject_company") if seeded_user else "",
         **actor,
-        "actor_role": access["role"],
-        "scope": manager_scope_context(hr_phone, company) if hr_phone else {"restricted": False, "company_code": company, "manager_phone": ""},
+        "actor_role": actor_role,
+        "scope": operator_manager_scope(
+            company_code=company,
+            manager_phone=hr_phone,
+            dashboard_user_id=str(actor_user_id or "") if seeded_user else "",
+            actor_role=actor_role,
+        ),
     }
 
 
@@ -34132,7 +34617,12 @@ def dashboard_auth_login(request: DashboardLoginRequest):
         return dashboard_auth_response(user, token, expires_at)
 
     configured = dashboard_configured_token()
-    if request.token and configured and hmac.compare_digest(str(request.token).strip(), configured):
+    if (
+        request.token
+        and configured
+        and hmac.compare_digest(str(request.token).strip(), configured)
+        and legacy_dashboard_token_auth_enabled()
+    ):
         phone = digits(request.hr_phone)
         legacy_company = company or hr_company_code(phone) or "WATHEFNI"
         require_active_company(legacy_company)
@@ -34243,6 +34733,31 @@ def dashboard_team_accept_invite(request: DashboardAcceptInviteRequest):
                 ),
             )
             user = dict(cur.fetchone() or {})
+            metadata = user.get("metadata") if isinstance(user.get("metadata"), dict) else {}
+            if str(metadata.get("source") or "") == "legacy_hr_phone_bootstrap":
+                cur.execute(
+                    """
+                    UPDATE dashboard_users
+                    SET metadata=COALESCE(metadata, '{}'::jsonb) || %s,
+                        updated_at=now()
+                    WHERE company_code=%s AND user_id=%s
+                    RETURNING *
+                    """,
+                    (
+                        Json(
+                            {
+                                "source": "workspace",
+                                "promoted_from": "legacy_hr_phone_bootstrap",
+                                "promoted_via": "team_invite_accept",
+                                "promoted_at": now_utc().isoformat(),
+                                "review_reference": f"invite:{invite.get('invite_id')}",
+                            }
+                        ),
+                        company,
+                        user.get("user_id"),
+                    ),
+                )
+                user = dict(cur.fetchone() or user)
             cur.execute(
                 "UPDATE dashboard_user_invites SET status='accepted', accepted_by_user_id=%s, accepted_at=now() WHERE invite_id=%s",
                 (user.get("user_id"), invite.get("invite_id")),
@@ -40810,12 +41325,34 @@ def dashboard_prehire_application_cv(app_key: str, context: dict[str, Any] = Dep
     application = dashboard_application_or_404(app_key, company)
     cv = dashboard_candidate_cv_metadata(application)
     if not cv:
+        record_admin_audit(
+            context,
+            "candidate_cv_download",
+            summary="Candidate CV download denied — not found.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "not_found"},
+            status="failed",
+        )
         raise HTTPException(status_code=404, detail={"error": "candidate_cv_not_found"})
 
     filename = str(cv.get("original_filename") or f"{app_key}-cv").strip()
     mime_type = str(cv.get("mime_type") or mimetypes.guess_type(filename)[0] or "application/octet-stream")
     storage_url = str(cv.get("storage_url") or "").strip()
     if storage_url and not storage_url.startswith("local://"):
+        record_admin_audit(
+            context,
+            "candidate_cv_download",
+            summary="Downloaded candidate CV (external provider).",
+            target_type="application",
+            target=app_key,
+            details={
+                "outcome": "ok",
+                "delivery": "external_url",
+                "mime_type": mime_type,
+                "storage_provider": cv.get("storage_provider"),
+            },
+        )
         return {
             "type": "external_url",
             "url": storage_url,
@@ -40826,8 +41363,25 @@ def dashboard_prehire_application_cv(app_key: str, context: dict[str, Any] = Dep
 
     path = dashboard_candidate_cv_path(cv)
     if path:
+        record_admin_audit(
+            context,
+            "candidate_cv_download",
+            summary="Downloaded candidate CV.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "ok", "delivery": "file", "mime_type": mime_type},
+        )
         return FileResponse(path, media_type=mime_type, filename=filename)
 
+    record_admin_audit(
+        context,
+        "candidate_cv_download",
+        summary="Candidate CV download denied — file unavailable.",
+        target_type="application",
+        target=app_key,
+        details={"outcome": "unavailable"},
+        status="failed",
+    )
     raise HTTPException(status_code=404, detail={"error": "candidate_cv_file_unavailable"})
 
 
@@ -40837,12 +41391,34 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
     application = dashboard_application_or_404(app_key, company)
     cv = dashboard_candidate_cv_metadata(application)
     if not cv:
+        record_admin_audit(
+            context,
+            "candidate_cv_preview",
+            summary="Candidate CV preview denied — not found.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "not_found"},
+            status="failed",
+        )
         raise HTTPException(status_code=404, detail={"error": "candidate_cv_not_found"})
 
     filename = str(cv.get("original_filename") or f"{app_key}-cv").strip()
     mime_type = str(cv.get("mime_type") or mimetypes.guess_type(filename)[0] or "application/octet-stream")
     storage_url = str(cv.get("storage_url") or "").strip()
     if storage_url and not storage_url.startswith("local://"):
+        record_admin_audit(
+            context,
+            "candidate_cv_view",
+            summary="Viewed candidate CV (external provider).",
+            target_type="application",
+            target=app_key,
+            details={
+                "outcome": "ok",
+                "delivery": "external_url",
+                "mime_type": mime_type,
+                "storage_provider": cv.get("storage_provider"),
+            },
+        )
         return {
             "type": "external_url",
             "url": storage_url,
@@ -40854,13 +41430,38 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
     preview = dashboard_candidate_cv_preview_metadata(application)
     preview_path = dashboard_candidate_cv_path(preview or {}) if preview else None
     if preview and preview_path:
+        record_admin_audit(
+            context,
+            "candidate_cv_preview",
+            summary="Previewed candidate CV.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "ok", "delivery": "preview_file", "mime_type": "application/pdf"},
+        )
         return FileResponse(preview_path, media_type="application/pdf")
 
     path = dashboard_candidate_cv_path(cv)
     if not path:
+        record_admin_audit(
+            context,
+            "candidate_cv_preview",
+            summary="Candidate CV preview denied — file unavailable.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "unavailable"},
+            status="failed",
+        )
         raise HTTPException(status_code=404, detail={"error": "candidate_cv_file_unavailable"})
 
     if mime_type.startswith("image/") or mime_type == "application/pdf":
+        record_admin_audit(
+            context,
+            "candidate_cv_view",
+            summary="Viewed candidate CV.",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "ok", "delivery": "file", "mime_type": mime_type},
+        )
         return FileResponse(path, media_type=mime_type)
 
     generated = generate_candidate_cv_pdf_preview(application, cv)
@@ -40868,6 +41469,14 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
         preview = dashboard_candidate_cv_preview_metadata(application)
         preview_path = dashboard_candidate_cv_path(preview or {}) if preview else None
         if preview_path:
+            record_admin_audit(
+                context,
+                "candidate_cv_preview",
+                summary="Previewed candidate CV.",
+                target_type="application",
+                target=app_key,
+                details={"outcome": "ok", "delivery": "generated_preview", "mime_type": "application/pdf"},
+            )
             return FileResponse(preview_path, media_type="application/pdf")
 
     if mime_type == "text/plain":
@@ -40875,10 +41484,26 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
             text = path.read_text(errors="replace")
         except Exception:
             text = ""
+        record_admin_audit(
+            context,
+            "candidate_cv_preview",
+            summary="Previewed candidate CV (text fallback).",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "ok", "delivery": "text_fallback", "mime_type": mime_type},
+        )
         return cv_preview_html(app_key=app_key, filename=filename, mime_type=mime_type, body=text)
 
     if mime_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or path.suffix.lower() == ".docx":
         text = docx_text_preview(path)
+        record_admin_audit(
+            context,
+            "candidate_cv_preview",
+            summary="Previewed candidate CV (docx fallback).",
+            target_type="application",
+            target=app_key,
+            details={"outcome": "ok", "delivery": "docx_fallback", "mime_type": mime_type},
+        )
         return cv_preview_html(
             app_key=app_key,
             filename=filename,
@@ -40887,6 +41512,14 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
             note="PDF preview generation is not available yet, so this is a text fallback. Download the original if formatting matters.",
         )
 
+    record_admin_audit(
+        context,
+        "candidate_cv_preview",
+        summary="Candidate CV preview fallback shown.",
+        target_type="application",
+        target=app_key,
+        details={"outcome": "ok", "delivery": "unsupported_fallback", "mime_type": mime_type},
+    )
     return cv_preview_html(
         app_key=app_key,
         filename=filename,
@@ -43134,6 +43767,177 @@ def resolve_intake_address(cur: Any, recipient: str | None, mailbox_hash: str | 
     return None
 
 
+def privacy_mailbox_address() -> str:
+    return (os.environ.get("WATHEFNI_PRIVACY_MAILBOX") or "privacy@wathefni.ai").strip().lower()
+
+
+def privacy_mailbox_monitor_recipients() -> list[str]:
+    raw = (os.environ.get("WATHEFNI_PRIVACY_MAILBOX_MONITORS") or "").strip()
+    if raw:
+        return [normalize_email(part) for part in raw.split(",") if normalize_email(part)]
+    # Default Phase 8C monitors: support primary + backup (no employee PII).
+    return [
+        "h.almulla@almulla-media.com",
+        "azizalmulla16@gmail.com",
+    ]
+
+
+def _privacy_recipient_match(recipient: str | None) -> bool:
+    target = privacy_mailbox_address()
+    value = normalize_email(recipient)
+    if not value:
+        return False
+    if value == target:
+        return True
+    # Postmark may wrap "Name <privacy@wathefni.ai>"
+    return f"<{target}>" in str(recipient or "").lower() or value.endswith(f"+{target.split('@', 1)[0]}@{target.split('@', 1)[-1]}")
+
+
+def _extract_privacy_test_token(subject: str | None, text_body: str | None) -> str | None:
+    blob = f"{subject or ''}\n{text_body or ''}"
+    match = re.search(r"PHASE8C-PRIVACY-TEST-[A-Z0-9-]{6,64}", blob, re.I)
+    return match.group(0).upper() if match else None
+
+
+def process_privacy_mailbox_inbound(payload: dict[str, Any]) -> dict[str, Any]:
+    """Handle role-based privacy@ inbound separately from CV intake."""
+    ensure_schema()
+    provider = "postmark"
+    provider_message_id = str(payload.get("MessageID") or "").strip() or None
+    from_full = payload.get("FromFull") or {}
+    from_address = (from_full.get("Email") if isinstance(from_full, dict) else None) or _parse_email_address(payload.get("From"))
+    recipient = str(payload.get("OriginalRecipient") or "").strip()
+    if not recipient:
+        to_full = payload.get("ToFull") or []
+        if isinstance(to_full, list) and to_full:
+            recipient = str((to_full[0] or {}).get("Email") or "")
+    if not recipient:
+        recipient = str(payload.get("To") or "")
+    subject = str(payload.get("Subject") or "").strip() or None
+    text_body = str(payload.get("TextBody") or payload.get("StrippedTextReply") or "")
+    html_body = str(payload.get("HtmlBody") or "")
+    body_for_token = text_body or re.sub(r"<[^>]+>", " ", html_body)
+    test_token = _extract_privacy_test_token(subject, body_for_token)
+    # Never persist full bodies for this mailbox; keep a short non-sensitive excerpt.
+    excerpt = re.sub(r"\s+", " ", body_for_token).strip()[:240]
+    lowered = excerpt.lower()
+    sensitive_markers = ("civil id", "iban", "passport", "bank detail", "personal photo", "employee key", "activation code")
+    sensitive = any(marker in lowered for marker in sensitive_markers)
+    if sensitive:
+        excerpt = "[redacted: potential sensitive content]"
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            if provider_message_id:
+                cur.execute(
+                    """
+                    INSERT INTO privacy_mailbox_events
+                      (direction, provider, provider_message_id, from_address, to_address,
+                       subject, test_token, sensitive_content, body_excerpt, metadata)
+                    VALUES ('inbound',%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    ON CONFLICT (provider, provider_message_id) WHERE provider_message_id IS NOT NULL
+                    DO NOTHING
+                    RETURNING event_id::text
+                    """,
+                    (
+                        provider,
+                        provider_message_id,
+                        from_address,
+                        normalize_email(recipient) or privacy_mailbox_address(),
+                        subject,
+                        test_token,
+                        sensitive,
+                        None if sensitive else excerpt,
+                        Json(
+                            {
+                                "mailbox": privacy_mailbox_address(),
+                                "has_test_token": bool(test_token),
+                                "attachment_count": len(payload.get("Attachments") or []),
+                            }
+                        ),
+                    ),
+                )
+                inserted = cur.fetchone()
+                if not inserted:
+                    conn.commit()
+                    return {"ok": True, "privacy_mailbox": True, "duplicate": True, "test_token": test_token}
+                event_id = inserted["event_id"]
+            else:
+                cur.execute(
+                    """
+                    INSERT INTO privacy_mailbox_events
+                      (direction, provider, from_address, to_address, subject, test_token,
+                       sensitive_content, body_excerpt, metadata)
+                    VALUES ('inbound',%s,%s,%s,%s,%s,%s,%s,%s)
+                    RETURNING event_id::text
+                    """,
+                    (
+                        provider,
+                        from_address,
+                        normalize_email(recipient) or privacy_mailbox_address(),
+                        subject,
+                        test_token,
+                        sensitive,
+                        None if sensitive else excerpt,
+                        Json({"mailbox": privacy_mailbox_address(), "has_test_token": bool(test_token)}),
+                    ),
+                )
+                event_id = cur.fetchone()["event_id"]
+        conn.commit()
+
+    forwards: list[dict[str, Any]] = []
+    if not sensitive:
+        forward_subject = f"[privacy@wathefni.ai] {subject or '(no subject)'}"
+        forward_body = (
+            "Wathefni privacy mailbox inbound copy (non-sensitive metadata forward).\n\n"
+            f"Mailbox: {privacy_mailbox_address()}\n"
+            f"From: {from_address or ''}\n"
+            f"Subject: {subject or ''}\n"
+            f"Test token: {test_token or '(none)'}\n"
+            f"Event: {event_id}\n\n"
+            "If this is a mailbox monitoring test, reply to privacy@wathefni.ai with:\n"
+            f"RECEIVED {test_token or 'PHASE8C-PRIVACY-TEST'}\n"
+        )
+        for monitor in privacy_mailbox_monitor_recipients():
+            result = send_email_via_postmark(
+                to=monitor,
+                subject=forward_subject,
+                body=forward_body,
+                reply_to=privacy_mailbox_address(),
+            )
+            forwards.append({"to": monitor, "ok": bool(result.get("ok")), "message_id": result.get("message_id"), "error": result.get("error")})
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO privacy_mailbox_events
+                          (direction, provider, provider_message_id, from_address, to_address,
+                           subject, test_token, sensitive_content, body_excerpt, metadata)
+                        VALUES ('outbound_forward',%s,%s,%s,%s,%s,%s,false,%s,%s)
+                        """,
+                        (
+                            "postmark",
+                            result.get("message_id"),
+                            privacy_mailbox_address(),
+                            monitor,
+                            forward_subject,
+                            test_token,
+                            "forwarded inbound privacy mailbox notice",
+                            Json({"source_event_id": event_id, "ok": bool(result.get("ok")), "error": result.get("error")}),
+                        ),
+                    )
+                conn.commit()
+
+    return {
+        "ok": True,
+        "privacy_mailbox": True,
+        "event_id": event_id,
+        "test_token": test_token,
+        "sensitive_content": sensitive,
+        "forwards": forwards,
+    }
+
+
 def process_postmark_inbound(payload: dict[str, Any]) -> dict[str, Any]:
     """Process one Postmark inbound message through the shared import core.
 
@@ -43141,6 +43945,15 @@ def process_postmark_inbound(payload: dict[str, Any]) -> dict[str, Any]:
     quarantines spam, extracts CV attachments, and lands them in Import review /
     Needs role. Never messages candidates and never enters Ranking.
     """
+    # Privacy role mailbox is not CV intake.
+    recipient_guess = str(payload.get("OriginalRecipient") or payload.get("To") or "")
+    to_full = payload.get("ToFull") or []
+    if isinstance(to_full, list):
+        for item in to_full:
+            if isinstance(item, dict) and _privacy_recipient_match(item.get("Email")):
+                return process_privacy_mailbox_inbound(payload)
+    if _privacy_recipient_match(recipient_guess):
+        return process_privacy_mailbox_inbound(payload)
     provider = "postmark"
     provider_message_id = str(payload.get("MessageID") or "").strip()
     recipient = str(payload.get("OriginalRecipient") or "").strip()
@@ -44965,7 +45778,7 @@ def dashboard_employee_profile(context: dict[str, Any], employee_key: str) -> di
     # Manager scoping: a scoped manager may only open a profile for an employee in
     # their branch/team/direct scope. Inert for unscoped users (owners/HR).
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     card = posthire_employee_card(employee)
     modules = employee_profile_accessible_modules(context, company)
@@ -45280,7 +46093,7 @@ async def dashboard_posthire_employee_document_upload(
     if not employee:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
 
     item = str(item_id or "").strip()
@@ -45395,7 +46208,7 @@ def dashboard_posthire_employee_documents(employee_key: str, context: dict[str, 
     if not employee:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     documents = employee_documents_for(company, str(employee.get("employee_key")))
     return json_safe({"company_code": company, "employee_key": employee.get("employee_key"), "count": len(documents), "documents": documents})
@@ -45409,7 +46222,7 @@ def dashboard_posthire_document_file(file_id: str, disposition: str = "inline", 
         raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "We couldn't find that document."})
     employee = find_employee_by_key(str(doc.get("subject_key")), company_code=company)
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and employee and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if employee and not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "We couldn't find that document."})
 
     filename = str(doc.get("original_filename") or f"{doc.get('document_type') or 'document'}").strip()
@@ -47255,7 +48068,7 @@ def dashboard_posthire_app_invite(
     if not employee:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     if not digits(employee.get("phone")):
         raise HTTPException(status_code=400, detail={"error": "employee_phone_missing", "message": "This employee needs a phone number before they can be invited."})
@@ -47296,9 +48109,22 @@ def dashboard_posthire_employees(
     # workforce-wide so the stat cards don't jump around as HR types.
     limit = max(1, min(int(limit or 100), 500))
     offset = max(0, int(offset or 0))
-    page = list_employees_page(company, viewer_phone=context.get("hr_phone"), search=search, limit=limit, offset=offset)
+    page = list_employees_page(
+        company,
+        viewer_phone=context.get("hr_phone"),
+        dashboard_user_id=context.get("actor_user_id"),
+        actor_role=context.get("actor_role"),
+        search=search,
+        limit=limit,
+        offset=offset,
+    )
     employees = [posthire_employee_card(row) for row in page["rows"]]
-    stats = employee_directory_stats(company, viewer_phone=context.get("hr_phone"))
+    stats = employee_directory_stats(
+        company,
+        viewer_phone=context.get("hr_phone"),
+        dashboard_user_id=context.get("actor_user_id"),
+        actor_role=context.get("actor_role"),
+    )
     return {
         "company_code": company,
         "count": len(employees),
@@ -48175,6 +49001,8 @@ def list_onboarding_page(
     company_code: str | None,
     *,
     viewer_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
     search: str | None = None,
     limit: int,
     offset: int,
@@ -48183,7 +49011,12 @@ def list_onboarding_page(
     primary view), scope- and search-aware in SQL so a large intake isn't
     truncated and search reaches the whole in-progress set. Stable PK tiebreaker
     keeps OFFSET paging deterministic."""
-    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    where_sql, params = _employee_scope_where(
+        company_code,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     where_sql = f"{where_sql} AND {_ONBOARDING_IN_PROGRESS_SQL}"
     search_clause, search_params = _employee_search_clause(search)
     if search_clause:
@@ -48210,10 +49043,21 @@ def list_onboarding_page(
     return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
 
 
-def onboarding_directory_counts(company_code: str | None, *, viewer_phone: str | None = None) -> dict[str, int]:
+def onboarding_directory_counts(
+    company_code: str | None,
+    *,
+    viewer_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+) -> dict[str, int]:
     """Scope-aware onboarding headline counts over the WHOLE workforce (total +
     completed), so the summary numbers stay correct regardless of paging."""
-    where_sql, params = _employee_scope_where(company_code, viewer_phone)
+    where_sql, params = _employee_scope_where(
+        company_code,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -48248,14 +49092,27 @@ def dashboard_posthire_onboarding(
     limit = max(1, min(int(limit or 100), 500))
     offset = max(0, int(offset or 0))
     viewer_phone = context.get("hr_phone")
-    page = list_onboarding_page(company, viewer_phone=viewer_phone, search=search, limit=limit, offset=offset)
+    page = list_onboarding_page(
+        company,
+        viewer_phone=viewer_phone,
+        dashboard_user_id=context.get("actor_user_id"),
+        actor_role=context.get("actor_role"),
+        search=search,
+        limit=limit,
+        offset=offset,
+    )
     cards = [posthire_employee_card(row) for row in page["rows"]]
     counts = onboarding_counts_by_employee(company, [c["employee_key"] for c in cards])
     for card in cards:
         c = counts.get(card["employee_key"]) or {"pending_count": 0, "received_count": 0}
         card["pending_count"] = c["pending_count"]
         card["received_count"] = c["received_count"]
-    summary = onboarding_directory_counts(company, viewer_phone=viewer_phone)
+    summary = onboarding_directory_counts(
+        company,
+        viewer_phone=viewer_phone,
+        dashboard_user_id=context.get("actor_user_id"),
+        actor_role=context.get("actor_role"),
+    )
     return {
         "company_code": company,
         "in_progress": cards,
@@ -48276,7 +49133,7 @@ def dashboard_posthire_onboarding_detail(employee_key: str, context: dict[str, A
     if not employee:
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     viewer_phone = context.get("hr_phone")
-    if viewer_phone and not manager_scope_allows_employee(employee, company_code=company, viewer_phone=viewer_phone):
+    if not context_manager_allows_employee(context, employee, company_code=company):
         raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
     summary = employee_onboarding_summary(employee)
     document_index = employee_document_index(company, str(employee.get("employee_key")))
@@ -48306,6 +49163,7 @@ def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[dat
 def dashboard_posthire_attendance(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
+    status: str | None = Query(None),
     offset: int = Query(0),
     limit: int = Query(1000),
     context: dict[str, Any] = Depends(dashboard_context),
@@ -48317,7 +49175,17 @@ def dashboard_posthire_attendance(
     # silently truncated: the table pages via limit/offset with an accurate
     # total_count + has_more, same pattern as shifts/leave/payroll.
     result = list_attendance(
-        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": limit, "offset": offset},
+        {
+            "company_code": company,
+            "start_date": start.isoformat(),
+            "end_date": end.isoformat(),
+            "viewer_phone": context.get("hr_phone"),
+            "viewer_user_id": context.get("actor_user_id"),
+            "actor_role": context.get("actor_role"),
+            "status": status,
+            "limit": limit,
+            "offset": offset,
+        },
         company_code=company,
     )
     return json_safe({
@@ -48360,7 +49228,15 @@ def dashboard_posthire_attendance_export(
     company = _posthire_read_context(context, "attendance")
     start, end = _attendance_range(start_date, end_date)
     result = list_attendance(
-        {"company_code": company, "start_date": start.isoformat(), "end_date": end.isoformat(), "viewer_phone": context.get("hr_phone"), "limit": 5000},
+        {
+            "company_code": company,
+            "start_date": start.isoformat(),
+            "end_date": end.isoformat(),
+            "viewer_phone": context.get("hr_phone"),
+            "viewer_user_id": context.get("actor_user_id"),
+            "actor_role": context.get("actor_role"),
+            "limit": 5000,
+        },
         company_code=company,
     )
     rows = result.get("attendance") or []
@@ -49070,7 +49946,7 @@ def _dashboard_scheduled_shift_or_error(company_code: str, shift_id: str, contex
     if not row:
         raise HTTPException(status_code=404, detail={"error": "shift_not_found", "message": "We couldn't find that shift."})
     shift = dict(row)
-    allowed = manager_scope_employee_keys(company_code, context.get("hr_phone"))
+    allowed = context_manager_employee_keys(context, company_code)
     if allowed is not None and str(shift.get("employee_key")) not in allowed:
         raise HTTPException(status_code=403, detail={"error": "out_of_scope", "message": "That shift is outside the team you manage."})
     if str(shift.get("status")) != "scheduled":
