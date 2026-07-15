@@ -21,6 +21,10 @@ Environment=WATHEFNI_DB_POOL_MAX=8
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
 EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+EnvironmentFile=-/root/.openclaw/secrets/mistral.env
+Environment=WATHEFNI_MISTRAL_ENV=/root/.openclaw/secrets/mistral.env
+Environment=WATHEFNI_CV_MISTRAL_OCR=true
+Environment=WATHEFNI_CV_GPT_VISION_RESCUE=true
 # Bound to localhost only — reach it via SSH tunnel (see DEPLOY_RUNBOOK.md). No public domain.
 ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011
 Restart=always
