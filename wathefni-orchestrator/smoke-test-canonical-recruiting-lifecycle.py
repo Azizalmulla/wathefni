@@ -224,13 +224,24 @@ def main() -> int:
             return 1 if FAIL else 0
 
         company = "WATHEFNI"
-        phone = f"9655{uuid.uuid4().hex[:7]}"
+        phone = f"9655{int(uuid.uuid4().hex[:7], 16) % 10_000_000:07d}"
         app_key_a = f"LIFECYCLE-A-{uuid.uuid4().hex[:8]}"
         app_key_b = f"LIFECYCLE-B-{uuid.uuid4().hex[:8]}"
         conv = f"wa-lifecycle-{uuid.uuid4().hex[:10]}"
 
         with app.db_connect() as conn:
             with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO candidates (phone, name, current_status, active_company_code, data_source)
+                    VALUES (%s,%s,'ready_for_review',%s,'production')
+                    ON CONFLICT (phone) DO UPDATE SET
+                      name=EXCLUDED.name,
+                      active_company_code=EXCLUDED.active_company_code,
+                      updated_at=now()
+                    """,
+                    (phone, "Lifecycle Smoke", company),
+                )
                 for key, position in ((app_key_a, "ROLE_A"), (app_key_b, "ROLE_B")):
                     cur.execute(
                         """
@@ -403,6 +414,7 @@ def main() -> int:
                     (company, app_key_a, app_key_b),
                 )
                 cur.execute("DELETE FROM applications WHERE app_key IN (%s,%s)", (app_key_a, app_key_b))
+                cur.execute("DELETE FROM candidates WHERE phone=%s", (phone,))
             conn.commit()
 
     finally:
