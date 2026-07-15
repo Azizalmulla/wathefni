@@ -109,17 +109,18 @@ def main() -> int:
                 cur.execute(
                     """
                     SELECT count(*) AS c FROM outbound_delivery_events
-                    WHERE subject_key IN (%s,%s) OR metadata->>'smoke_marker'=%s
+                    WHERE subject_key IN (%s,%s)
                     """,
-                    (app_key_a, app_key_b, MARKER),
+                    (app_key_a, app_key_b),
                 )
                 outbound = int((cur.fetchone() or {}).get("c") or 0)
                 cur.execute(
                     """
                     SELECT count(*) AS c FROM action_results
-                    WHERE result::text LIKE %s
+                    WHERE COALESCE(result::text, '') LIKE %s
+                       OR COALESCE(final_reply, '') LIKE %s
                     """,
-                    (f"%{MARKER}%",),
+                    (f"%{MARKER}%", f"%{MARKER}%"),
                 )
                 actions = int((cur.fetchone() or {}).get("c") or 0)
         return {
