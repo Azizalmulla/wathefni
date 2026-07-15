@@ -74,6 +74,7 @@ run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 import attendance_import as _attendance_import  # noqa: E402
 import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
+import cv_extraction as _cv_extraction  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
@@ -334,6 +335,17 @@ def onboarding_hr_mutate_enabled() -> bool:
     (start/restart onboarding, mark/waive a checklist item). Defaults OFF so the
     new controls stay hidden and inert in production until explicitly enabled."""
     return (os.environ.get("WATHEFNI_ONBOARDING_HR_MUTATE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def cv_mistral_ocr_enabled() -> bool:
+    """CV OCR via pinned Mistral mistral-ocr-4-0. Default OFF until staging proof
+    and owner-approved privacy/retention config. Does not send production CVs."""
+    return _cv_extraction.mistral_ocr_enabled()
+
+
+def cv_gpt_vision_rescue_enabled() -> bool:
+    """Bounded GPT vision rescue only after Mistral OCR quality failure."""
+    return _cv_extraction.gpt_vision_rescue_enabled()
 
 
 def doc_upload_enabled() -> bool:
@@ -2741,6 +2753,16 @@ def _ensure_schema_impl() -> None:
     seed_assessment_item_bank()
     _operator_mobile.ensure_operator_mobile_schema(sys.modules[__name__])
     _operator_mobile_data.ensure_operator_mobile_data_schema(sys.modules[__name__])
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            def _cv_schema_exec(sql: str, params: tuple[Any, ...] | None = None, fetchone: bool = False) -> Any:
+                cur.execute(sql, params or ())
+                if fetchone:
+                    return cur.fetchone()
+                return None
+
+            _cv_extraction.ensure_cv_extraction_schema(_cv_schema_exec)
+        conn.commit()
 
 
 def company_root(company_code: str | None) -> Path:
@@ -20716,74 +20738,138 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
 def extract_pdf_text_best_effort(path: Path) -> tuple[str, str, str | None]:
     """Best-effort PDF text extraction without making receipt depend on parsing.
 
-    Prefer `pdftotext` when installed. If unavailable, use a lightweight literal
-    string fallback so text-based simple PDFs can still progress. Scanned PDFs
-    will correctly fail and the worker can send fallback screening questions.
+    Prefer `pdftotext` when installed. Clean digital PDFs stay local. Scanned /
+    image-only / corrupt pages are routed by `extract_candidate_cv_document`.
     """
-
+    result = _cv_extraction.extract_cv_document(path, mime_type="application/pdf")
+    # When Mistral is disabled and OCR is required, still return local text + error
+    # so callers preserve prior scanned-PDF failure behavior.
+    if result.method.startswith("pdftotext") or result.method == "pdftotext":
+        if result.quality_ok:
+            return result.text, "pdftotext", None
+        if result.error == "ocr_required_mistral_disabled":
+            return result.text, "pdftotext", result.error
+        return result.text, "pdftotext", result.error or "no_text_extracted"
+    if result.quality_ok and result.text:
+        return result.text, result.method, None
+    # Literal fallback for environments without poppler (dev only).
     pdftotext = shutil.which("pdftotext")
-    if pdftotext:
+    if not pdftotext:
         try:
-            proc = subprocess.run(
-                [pdftotext, "-layout", str(path), "-"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if proc.returncode == 0 and cv_text_quality_ok(proc.stdout):
-                return proc.stdout.strip(), "pdftotext", None
+            raw = path.read_bytes()
+            strings = []
+            for match in re.finditer(rb"\(([^()]{3,500})\)", raw):
+                text = match.group(1).decode("latin-1", errors="ignore")
+                text = text.replace("\\n", "\n").replace("\\r", "\n").replace("\\t", " ")
+                if re.search(r"[A-Za-z\u0600-\u06FF]", text):
+                    strings.append(text)
+            extracted = "\n".join(strings).strip()
+            if extracted and _cv_extraction.cv_text_quality_ok(extracted):
+                return extracted, "pdf-literal-fallback", None
+            return "", "pdf-literal-fallback", "no_text_extracted"
         except Exception as exc:
-            return "", "pdftotext", str(exc)
-    try:
-        raw = path.read_bytes()
-        strings = []
-        for match in re.finditer(rb"\(([^()]{3,500})\)", raw):
-            text = match.group(1).decode("latin-1", errors="ignore")
-            text = text.replace("\\n", "\n").replace("\\r", "\n").replace("\\t", " ")
-            if re.search(r"[A-Za-z\u0600-\u06FF]", text):
-                strings.append(text)
-        extracted = "\n".join(strings).strip()
-        if extracted and cv_text_quality_ok(extracted):
-            return extracted, "pdf-literal-fallback", None
-        return "", "pdf-literal-fallback", "no_text_extracted"
-    except Exception as exc:
-        return "", "pdf-literal-fallback", str(exc)
+            return "", "pdf-literal-fallback", str(exc)
+    return result.text, result.method, result.error
 
 
-def extract_candidate_cv_text_from_path(path_value: str | None, mime_type: str | None = None) -> tuple[str, str, str | None]:
+def _cv_db_execute_factory(cur: Any) -> Any:
+    def _execute(sql: str, params: tuple[Any, ...] | None = None, fetchone: bool = False) -> Any:
+        cur.execute(sql, params or ())
+        if fetchone:
+            return cur.fetchone()
+        return None
+
+    return _execute
+
+
+def _gpt_vision_rescue_adapter(path: Path, mime_type: str) -> tuple[str, _cv_extraction.EngineCallMeta]:
+    """GPT-5.4 vision as bounded rescue only. Emits real model metadata (not gpt-5.4-vision)."""
+    started = time_module.perf_counter()
+    text, _legacy_method, error = extract_image_cv_text_with_vision(path, mime_type)
+    provider = planner_provider_config() or {}
+    latency_ms = int((time_module.perf_counter() - started) * 1000)
+    ok = bool(text and _cv_extraction.cv_text_quality_ok(text))
+    meta = _cv_extraction.EngineCallMeta(
+        stage="vision_rescue",
+        tier="gpt_vision_rescue",
+        provider=str(provider.get("provider") or "openai"),
+        actual_request_model=str(provider.get("model") or "unknown"),
+        provider_response_model=str(provider.get("model") or "unknown"),
+        latency_ms=latency_ms,
+        quality_ok=ok,
+        error=error,
+        retention="openai_vision_ephemeral_request",
+    )
+    return text, meta
+
+
+def extract_candidate_cv_document(
+    path_value: str | None,
+    mime_type: str | None = None,
+    *,
+    company_code: str | None = None,
+    document_id: str | None = None,
+    app_key: str | None = None,
+    cur: Any | None = None,
+) -> _cv_extraction.ExtractionResult:
     path = Path(str(path_value or ""))
     if not path.exists() or not path.is_file():
-        return "", "missing-file", "file_not_found"
+        return _cv_extraction.ExtractionResult(text="", method="missing-file", error="file_not_found")
     guessed = str(mime_type or mimetypes.guess_type(path.name)[0] or "").lower()
     suffix = path.suffix.lower()
     if guessed.startswith("text/") or suffix in {".txt", ".md", ".csv"}:
         try:
-            return path.read_text(errors="ignore").strip(), "text", None
+            text = path.read_text(errors="ignore").strip()
+            return _cv_extraction.ExtractionResult(
+                text=text,
+                method="text",
+                quality_ok=_cv_extraction.cv_text_quality_ok(text),
+                error=None if text else "no_text_extracted",
+            )
         except Exception as exc:
-            return "", "text", str(exc)
+            return _cv_extraction.ExtractionResult(text="", method="text", error=str(exc))
     if guessed in {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"} or suffix == ".docx":
         text = docx_text_preview(path)
-        return text, "docx-stdlib", None if text else "no_text_extracted"
-    if guessed == "application/pdf" or suffix == ".pdf":
-        return extract_pdf_text_best_effort(path)
-    if guessed.startswith("image/") or suffix in {".jpg", ".jpeg", ".png", ".webp"}:
-        return extract_image_cv_text_with_vision(path, guessed or mimetypes.guess_type(path.name)[0] or "image/jpeg")
-    return "", "unsupported", f"unsupported_mime:{guessed or suffix}"
+        return _cv_extraction.ExtractionResult(
+            text=text,
+            method="docx-stdlib",
+            quality_ok=bool(text and _cv_extraction.cv_text_quality_ok(text)),
+            error=None if text else "no_text_extracted",
+        )
+    db_execute = _cv_db_execute_factory(cur) if cur is not None else None
+    return _cv_extraction.extract_cv_document(
+        path,
+        mime_type=guessed or mime_type,
+        company_code=company_code,
+        document_id=document_id,
+        app_key=app_key,
+        db_execute=db_execute,
+        vision_rescue=_gpt_vision_rescue_adapter,
+    )
+
+
+def extract_candidate_cv_text_from_path(path_value: str | None, mime_type: str | None = None) -> tuple[str, str, str | None]:
+    result = extract_candidate_cv_document(path_value, mime_type)
+    if result.quality_ok and result.text:
+        return result.text, result.method, None
+    if result.text and not result.error:
+        return result.text, result.method, None
+    return result.text, result.method, result.error or ("no_text_extracted" if not result.text else "low_quality_text")
 
 
 def extract_image_cv_text_with_vision(path: Path, mime_type: str) -> tuple[str, str, str | None]:
     provider = planner_provider_config()
     if not provider:
-        return "", "gpt-vision", "missing_model_provider"
+        return "", "gpt_vision_rescue", "missing_model_provider"
     try:
         if not path.exists() or not path.is_file() or path.stat().st_size > 8 * 1024 * 1024:
-            return "", "gpt-vision", "image_file_unavailable_or_too_large"
+            return "", "gpt_vision_rescue", "image_file_unavailable_or_too_large"
         encoded = base64.b64encode(path.read_bytes()).decode("ascii")
         data_uri = f"{mime_type or 'image/jpeg'};base64,{encoded}"
         if not data_uri.startswith("data:"):
             data_uri = f"data:{data_uri}"
     except Exception as exc:
-        return "", "gpt-vision", str(exc)
+        return "", "gpt_vision_rescue", str(exc)
     system = (
         "You extract text from an image CV/resume for an HR application. "
         "Return JSON only. Preserve useful CV text in reading order. Do not invent."
@@ -20840,72 +20926,78 @@ def extract_image_cv_text_with_vision(path: Path, mime_type: str) -> tuple[str, 
             parsed = json.loads(resp.read().decode("utf-8", errors="replace"))
         result = extract_json_object(extract_model_text(parsed))
         if not isinstance(result, dict):
-            return "", "gpt-vision", "vision_json_not_found"
+            return "", "gpt_vision_rescue", "vision_json_not_found"
         try:
             confidence = float(result.get("confidence") or 0)
         except Exception:
             confidence = 0.0
         text = str(result.get("text") or "").strip()
         if confidence < 0.45:
-            return "", "gpt-vision", f"low_confidence:{confidence}"
-        if not cv_text_quality_ok(text):
-            return "", "gpt-vision", "low_quality_text"
-        return text, "gpt-5.4-vision", None
+            return "", "gpt_vision_rescue", f"low_confidence:{confidence}"
+        if not _cv_extraction.cv_text_quality_ok(text):
+            return "", "gpt_vision_rescue", "low_quality_text"
+        # Real metadata label — never the misleading gpt-5.4-vision alias.
+        return text, f"openai:{provider['model']}", None
     except Exception as exc:
-        return "", "gpt-vision", str(exc)
+        return "", "gpt_vision_rescue", str(exc)
 
 
 def cv_text_quality_ok(text: str | None) -> bool:
-    raw = str(text or "").strip()
-    if len(raw) < 80:
-        return False
-    words = re.findall(r"[A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF0-9+#.'-]{1,}", raw)
-    if len(words) < 12:
-        return False
-    alpha_chars = sum(1 for ch in raw if ch.isalpha())
-    printable_chars = sum(1 for ch in raw if ch.isprintable() and not ch.isspace())
-    if printable_chars and alpha_chars / max(printable_chars, 1) < 0.35:
-        return False
-    # Common PDF metadata-only extraction signals. If these dominate, parsing
-    # did not actually recover CV content.
-    metadata_markers = sum(raw.lower().count(marker) for marker in ("reportlab", "anonymous", "unspecified", "obj", "endobj", "xref"))
-    if metadata_markers >= 3 and len(words) < 40:
-        return False
-    return True
+    return _cv_extraction.cv_text_quality_ok(text)
 
 
 def parse_candidate_profile_from_cv_text(text: str, *, fallback_name: str | None = None, fallback_phone: str | None = None) -> dict[str, Any]:
+    contacts = _cv_extraction.deterministic_contact_profile(text)
+    normalized = _cv_extraction.normalize_cv_text_for_contacts(text)
     lines = [line.strip() for line in str(text or "").splitlines() if line.strip()]
-    email = _extract_email_from_text(text)
-    phone_match = re.search(r"(?:\+?965)?\s?([569]\d{7})\b", text or "")
-    phone = digits(phone_match.group(0)) if phone_match else digits(fallback_phone)
+    email = contacts.get("email") or _extract_email_from_text(normalized)
+    phone = contacts.get("phone") or None
+    if not phone:
+        phone_match = re.search(r"(?:\+?965)?\s?([569]\d{7})\b", normalized or "")
+        phone = digits(phone_match.group(0)) if phone_match else digits(fallback_phone)
     name = fallback_name
     if lines:
         first = lines[0]
-        if 2 <= len(first.split()) <= 5 and not _extract_email_from_text(first) and not re.search(r"\d", first):
+        # Allow bilingual names (Arabic and/or Latin letters), still reject emails/phones.
+        if (
+            2 <= len(first.split()) <= 6
+            and not _extract_email_from_text(first)
+            and not re.search(r"\d", _cv_extraction.normalize_digits(first))
+            and re.search(r"[A-Za-z\u0600-\u06FF]", first)
+        ):
             name = first
     skills: list[str] = []
     skill_capture = False
     for line in lines:
         lower = line.lower()
-        if any(marker in lower for marker in ("key skills", "skills", "technical skills")):
+        if any(marker in lower for marker in ("key skills", "skills", "technical skills")) or any(
+            marker in line for marker in ("المهارات", "مهارات")
+        ):
             skill_capture = True
             continue
-        if skill_capture and any(marker in lower for marker in ("experience", "education", "languages", "professional summary")):
+        if skill_capture and (
+            any(marker in lower for marker in ("experience", "education", "languages", "professional summary"))
+            or any(marker in line for marker in ("الخبرة", "الخبرات", "التعليم", "اللغات", "الملخص"))
+        ):
             break
         if skill_capture:
             item = re.sub(r"^[•\\-\\*\\d\\.\\s]+", "", line).strip()
             if item and len(item) <= 80:
                 skills.append(item)
-    return {
+    profile = {
         "name": name,
         "email": email,
         "phone": phone or None,
         "skills": skills[:20],
         "summary": " ".join(lines[:4])[:800] if lines else None,
+        "urls": contacts.get("urls") or [],
+        "dates": contacts.get("dates") or [],
+        "headings": contacts.get("headings") or [],
         "parsed_at": now_iso(),
-        "parser": "regex_cv_profile_v1",
+        "parser": "regex_cv_profile_v1+deterministic_contacts_v1",
+        "field_provenance": contacts.get("field_provenance") or {},
     }
+    return profile
 
 
 def extract_structured_candidate_profile_from_cv_text(text: str, *, application: dict[str, Any]) -> dict[str, Any] | None:
@@ -20915,7 +21007,8 @@ def extract_structured_candidate_profile_from_cv_text(text: str, *, application:
     system = (
         "You extract structured candidate profile facts from one CV. "
         "Return JSON only. Do not invent. Use null/empty arrays when not visible. "
-        "Keep evidence short and quote/paraphrase only visible CV facts."
+        "Keep evidence short and quote/paraphrase only visible CV facts. "
+        "Support Arabic and bilingual CVs; preserve original name spelling."
     )
     payload = {
         "role": application.get("position_title") or application.get("position_code"),
@@ -20974,6 +21067,8 @@ def extract_structured_candidate_profile_from_cv_text(text: str, *, application:
     result["confidence"] = confidence
     result["parser"] = "llm_cv_profile_v1"
     result["parsed_at"] = now_iso()
+    result["actual_request_model"] = provider.get("model")
+    result["provider"] = provider.get("provider")
     return result
 
 
@@ -20991,6 +21086,15 @@ def merge_candidate_profiles(regex_profile: dict[str, Any], llm_profile: dict[st
     merged["parser"] = "llm_cv_profile_v1+regex_fallback"
     merged["parsed_at"] = now_iso()
     return merged
+
+
+def merge_candidate_profiles_with_authority(
+    existing_profile: dict[str, Any] | None,
+    regex_profile: dict[str, Any],
+    llm_profile: dict[str, Any] | None,
+) -> dict[str, Any]:
+    merged = merge_candidate_profiles(regex_profile, llm_profile)
+    return _cv_extraction.preserve_human_fields(existing_profile, merged)
 
 
 def screening_questions_for_application(application: dict[str, Any]) -> list[dict[str, Any]]:
@@ -21174,6 +21278,8 @@ def upsert_application_semantic_document(
 
 
 def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, send_screening: bool = True) -> dict[str, Any]:
+    lease_owner = f"cv-worker-{os.getpid()}-{uuid.uuid4().hex[:8]}"
+    lease_key: str | None = None
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -21203,103 +21309,180 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
             if held_import or imported_app:
                 send_screening = False
             local_path = item.get("local_path") or ((raw_json.get("cv") or {}).get("path") if isinstance(raw_json.get("cv"), dict) else None)
-            text, method, error = extract_candidate_cv_text_from_path(local_path, (raw_json.get("cv") or {}).get("storage", {}).get("mime_type") if isinstance(raw_json.get("cv"), dict) else None)
-            if dry_run:
-                return {"ok": bool(text), "document_id": document_id, "method": method, "chars": len(text), "error": error}
-            text_path = None
-            if text:
-                text_dir = WORKSPACE / "data" / "candidates" / digits(app.get("phone")) / "cv-text"
-                text_dir.mkdir(parents=True, exist_ok=True)
-                text_path = text_dir / f"{safe_storage_name(str(app.get('app_key')))}.txt"
-                text_path.write_text(text, encoding="utf-8")
-                regex_profile = parse_candidate_profile_from_cv_text(text, fallback_name=item.get("candidate_name"), fallback_phone=app.get("phone"))
-                llm_profile = extract_structured_candidate_profile_from_cv_text(text, application=app)
-                profile = merge_candidate_profiles(regex_profile, llm_profile)
-                screening_questions = screening_questions_for_application(app)
-                prefill_answers, prefill_sources, prefill_evidence = prefill_screening_answers_from_profile(profile, screening_questions)
-                semantic = upsert_application_semantic_document(
-                    cur,
-                    application=app,
-                    content=text,
-                    metadata={"source": "cv_worker", "document_id": document_id, "extraction_method": method},
+            company_code = str(app.get("company_code") or "WATHEFNI").upper()
+            db_exec = _cv_db_execute_factory(cur)
+            lease = _cv_extraction.acquire_extraction_lease(
+                db_exec,
+                company_code=company_code,
+                document_id=str(document_id),
+                stage="cv_extract",
+                owner=lease_owner,
+            )
+            conn.commit()
+            if not lease.get("acquired"):
+                return {
+                    "ok": False,
+                    "error": "lease_not_acquired",
+                    "document_id": document_id,
+                    "lease": json_safe(lease),
+                }
+            lease_key = str(lease.get("lease_key") or "")
+            try:
+                mime = None
+                if isinstance(raw_json.get("cv"), dict):
+                    storage = raw_json.get("cv", {}).get("storage")
+                    if isinstance(storage, dict):
+                        mime = storage.get("mime_type")
+                extraction = extract_candidate_cv_document(
+                    local_path,
+                    mime,
+                    company_code=company_code,
+                    document_id=str(document_id),
+                    app_key=str(app.get("app_key") or ""),
+                    cur=cur,
                 )
-                candidate_profile = item.get("candidate_profile") if isinstance(item.get("candidate_profile"), dict) else {}
-                existing_apps = candidate_profile.get("applications") if isinstance(candidate_profile.get("applications"), list) else []
-                updated_apps: list[dict[str, Any]] = []
-                found_app = False
-                for existing_app in existing_apps:
-                    if not isinstance(existing_app, dict):
-                        continue
-                    if str(existing_app.get("app_key") or "") == str(app.get("app_key") or ""):
-                        found_app = True
+                conn.commit()
+                text, method, error = extraction.text, extraction.method, extraction.error
+                if dry_run:
+                    return {
+                        "ok": bool(text and extraction.quality_ok),
+                        "document_id": document_id,
+                        "method": method,
+                        "chars": len(text),
+                        "error": error,
+                        "extraction_meta": {
+                            k: v
+                            for k, v in extraction.to_dict().items()
+                            if k not in {"blocks"}  # keep dry-run payload smaller; never log full text
+                        },
+                    }
+                text_path = None
+                if text and (extraction.quality_ok or (text and method.startswith("pdftotext") and not error)):
+                    # Accept quality_ok text; also accept strong local digital extracts.
+                    if not extraction.quality_ok and not _cv_extraction.cv_text_quality_ok(text):
+                        text = ""
+                if text and _cv_extraction.cv_text_quality_ok(text):
+                    text_dir = WORKSPACE / "data" / "candidates" / digits(app.get("phone")) / "cv-text"
+                    text_dir.mkdir(parents=True, exist_ok=True)
+                    text_path = text_dir / f"{safe_storage_name(str(app.get('app_key')))}.txt"
+                    text_path.write_text(text, encoding="utf-8")
+                    regex_profile = parse_candidate_profile_from_cv_text(text, fallback_name=item.get("candidate_name"), fallback_phone=app.get("phone"))
+                    llm_profile = extract_structured_candidate_profile_from_cv_text(text, application=app)
+                    candidate_profile = item.get("candidate_profile") if isinstance(item.get("candidate_profile"), dict) else {}
+                    profile = merge_candidate_profiles_with_authority(candidate_profile, regex_profile, llm_profile)
+                    screening_questions = screening_questions_for_application(app)
+                    prefill_answers, prefill_sources, prefill_evidence = prefill_screening_answers_from_profile(profile, screening_questions)
+                    semantic = upsert_application_semantic_document(
+                        cur,
+                        application=app,
+                        content=text,
+                        metadata={
+                            "source": "cv_worker",
+                            "document_id": document_id,
+                            "extraction_method": method,
+                            "extraction_stage": (extraction.metadata or {}).get("stage"),
+                            "extraction_tier": (extraction.metadata or {}).get("tier"),
+                            "extraction_provider": (extraction.metadata or {}).get("provider"),
+                            "actual_request_model": (extraction.metadata or {}).get("actual_request_model"),
+                            "provider_response_model": (extraction.metadata or {}).get("provider_response_model"),
+                            "cache_hit": extraction.cache_hit,
+                        },
+                    )
+                    existing_apps = candidate_profile.get("applications") if isinstance(candidate_profile.get("applications"), list) else []
+                    updated_apps: list[dict[str, Any]] = []
+                    found_app = False
+                    for existing_app in existing_apps:
+                        if not isinstance(existing_app, dict):
+                            continue
+                        if str(existing_app.get("app_key") or "") == str(app.get("app_key") or ""):
+                            found_app = True
+                            updated_apps.append({
+                                **existing_app,
+                                "status": "screening",
+                                "current_step": "screening",
+                                "cv_received": True,
+                                "screening_status": "pending",
+                                "updated_at": now_iso(),
+                            })
+                        else:
+                            updated_apps.append(existing_app)
+                    if not found_app:
                         updated_apps.append({
-                            **existing_app,
+                            "app_key": app.get("app_key"),
+                            "company_code": app.get("company_code"),
+                            "position_code": app.get("position_code"),
+                            "apply_code": app.get("apply_code"),
                             "status": "screening",
                             "current_step": "screening",
                             "cv_received": True,
                             "screening_status": "pending",
                             "updated_at": now_iso(),
                         })
-                    else:
-                        updated_apps.append(existing_app)
-                if not found_app:
-                    updated_apps.append({
-                        "app_key": app.get("app_key"),
-                        "company_code": app.get("company_code"),
-                        "position_code": app.get("position_code"),
-                        "apply_code": app.get("apply_code"),
-                        "status": "screening",
-                        "current_step": "screening",
-                        "cv_received": True,
-                        "screening_status": "pending",
-                        "updated_at": now_iso(),
-                    })
-                merged_profile = {
-                    **candidate_profile,
-                    **{k: v for k, v in profile.items() if v not in (None, "", [], {})},
-                    "applications": updated_apps,
-                    "current_status": "screening",
-                    "active_company_code": app.get("company_code"),
-                    "active_position_code": app.get("position_code"),
-                    "active_application": {
-                        "app_key": app.get("app_key"),
-                        "apply_code": app.get("apply_code"),
-                        "company_code": app.get("company_code"),
-                        "position_code": app.get("position_code"),
-                        "updated_at": now_iso(),
-                    },
-                }
-                cur.execute(
-                    """
-                    UPDATE candidates
-                    SET name=COALESCE(NULLIF(%s,''), name),
-                        email=COALESCE(NULLIF(%s,''), email),
-                        profile=%s,
-                        raw_json=COALESCE(raw_json,'{}'::jsonb) || %s::jsonb,
-                        updated_at=now()
-                    WHERE phone=%s
-                    """,
-                    (
-                        profile.get("name"),
-                        profile.get("email"),
-                        Json(json_safe(merged_profile)),
-                        Json(json_safe({"profile_parse": profile})),
-                        digits(app.get("phone")),
-                    ),
-                )
-                current_screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
-                current_answers = current_screening.get("answers") if isinstance(current_screening.get("answers"), dict) else {}
-                current_sources = current_screening.get("answer_sources") if isinstance(current_screening.get("answer_sources"), dict) else {}
-                current_evidence = current_screening.get("answer_evidence") if isinstance(current_screening.get("answer_evidence"), dict) else {}
-                merged_answers = {**prefill_answers, **current_answers}
-                merged_sources = {**prefill_sources, **current_sources}
-                merged_evidence = {**prefill_evidence, **current_evidence}
-                required_keys = [str(q.get("key") or "") for q in screening_questions if q.get("required") is True and q.get("key")]
-                pending_keys = [key for key in required_keys if not str(merged_answers.get(key) or "").strip()]
-                screening_status = "complete" if not pending_keys and required_keys else "pending"
-                next_raw = {
-                    **raw_json,
-                    "screening": {
+                    merged_profile = {
+                        **candidate_profile,
+                        **{k: v for k, v in profile.items() if v not in (None, "", [], {})},
+                        "applications": updated_apps,
+                        "current_status": "screening",
+                        "active_company_code": app.get("company_code"),
+                        "active_position_code": app.get("position_code"),
+                        "active_application": {
+                            "app_key": app.get("app_key"),
+                            "apply_code": app.get("apply_code"),
+                            "company_code": app.get("company_code"),
+                            "position_code": app.get("position_code"),
+                            "updated_at": now_iso(),
+                        },
+                    }
+                    cur.execute(
+                        """
+                        UPDATE candidates
+                        SET name=COALESCE(NULLIF(%s,''), name),
+                            email=COALESCE(NULLIF(%s,''), email),
+                            profile=%s,
+                            raw_json=COALESCE(raw_json,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE phone=%s
+                        """,
+                        (
+                            profile.get("name"),
+                            profile.get("email"),
+                            Json(json_safe(merged_profile)),
+                            Json(json_safe({"profile_parse": profile})),
+                            digits(app.get("phone")),
+                        ),
+                    )
+                    current_screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
+                    current_answers = current_screening.get("answers") if isinstance(current_screening.get("answers"), dict) else {}
+                    current_sources = current_screening.get("answer_sources") if isinstance(current_screening.get("answer_sources"), dict) else {}
+                    current_evidence = current_screening.get("answer_evidence") if isinstance(current_screening.get("answer_evidence"), dict) else {}
+                    merged_answers = {**prefill_answers, **current_answers}
+                    merged_sources = {**prefill_sources, **current_sources}
+                    merged_evidence = {**prefill_evidence, **current_evidence}
+                    required_keys = [str(q.get("key") or "") for q in screening_questions if q.get("required") is True and q.get("key")]
+                    pending_keys = [key for key in required_keys if not str(merged_answers.get(key) or "").strip()]
+                    screening_status = "complete" if not pending_keys and required_keys else "pending"
+                    next_raw = update_cv_processing_flags(
+                        raw_json,
+                        file_received=True,
+                        file_stored=True,
+                        text_extracted=True,
+                        profile_parsed=True,
+                        semantic_indexed=bool(semantic.get("ok")),
+                        screening_prefill_ready=True,
+                        screening_prefill_count=len(prefill_answers),
+                        status="processed",
+                        extraction_method=method,
+                        extraction_chars=len(text),
+                        extraction_stage=(extraction.metadata or {}).get("stage"),
+                        extraction_tier=(extraction.metadata or {}).get("tier"),
+                        extraction_provider=(extraction.metadata or {}).get("provider"),
+                        actual_request_model=(extraction.metadata or {}).get("actual_request_model"),
+                        provider_response_model=(extraction.metadata or {}).get("provider_response_model"),
+                        cache_hit=extraction.cache_hit,
+                        billable_pages=(extraction.metadata or {}).get("billable_pages"),
+                        estimated_cost_usd=(extraction.metadata or {}).get("estimated_cost_usd"),
+                    )
+                    next_raw["screening"] = {
                         **current_screening,
                         "status": screening_status,
                         "answers": merged_answers,
@@ -21308,72 +21491,160 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         "questions": screening_questions,
                         "pending_keys": pending_keys,
                         "completed_at": now_iso() if screening_status == "complete" else current_screening.get("completed_at"),
-                    },
-                }
+                    }
+                    cur.execute(
+                        """
+                        UPDATE applications
+                        SET raw_json=%s,
+                            cv_received=true,
+                            cv_received_at=COALESCE(cv_received_at, CURRENT_DATE),
+                            status=CASE WHEN status IN ('needs_role','import_review') THEN status WHEN %s='complete' THEN 'screening_complete' WHEN status IN ('awaiting_cv','cv_received') THEN 'screening' ELSE status END,
+                            current_step=CASE WHEN status IN ('needs_role','import_review') THEN current_step ELSE 'screening' END,
+                            screening_status=%s,
+                            screening_completed_at=CASE WHEN %s='complete' THEN COALESCE(screening_completed_at, CURRENT_DATE) ELSE screening_completed_at END,
+                            updated_at=COALESCE(updated_at, CURRENT_DATE)
+                        WHERE app_key=%s
+                        """,
+                        (Json(json_safe(next_raw)), screening_status, screening_status, screening_status, app.get("app_key")),
+                    )
+                    cur.execute(
+                        """
+                        UPDATE candidate_documents
+                        SET text_path=%s,
+                            extraction_status=%s,
+                            extraction_method=%s,
+                            extraction_chars=%s,
+                            metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE document_id=%s
+                        """,
+                        (
+                            str(text_path),
+                            "ok",
+                            method,
+                            len(text),
+                            Json(
+                                json_safe(
+                                    {
+                                        "semantic": semantic,
+                                        "profile": profile,
+                                        "extraction": {
+                                            k: v
+                                            for k, v in extraction.to_dict().items()
+                                            if k != "blocks"
+                                        },
+                                    }
+                                )
+                            ),
+                            document_id,
+                        ),
+                    )
+                    conn.commit()
+                    screening_result = None
+                    if send_screening:
+                        ctx = _action_registry.ExecutionContext(
+                            request=WhatsAppTurnRequest(
+                                account_id=None,
+                                conversation_id=None,
+                                sender_phone="system",
+                                sender_role="system",
+                                raw_text="send screening questions",
+                                metadata={"source": "cv_processing_worker", "document_id": document_id},
+                            ),
+                            action={"action_type": "send_screening_questions", "app_key": app.get("app_key")},
+                            state={},
+                            graph_state={},
+                            intent={},
+                            legacy=sys.modules[__name__],
+                        )
+                        screening_result = _action_registry.execute("send_screening_questions", ctx)
+                        with db_connect() as flag_conn:
+                            with flag_conn.cursor() as flag_cur:
+                                flag_cur.execute("SELECT raw_json FROM applications WHERE app_key=%s", (app.get("app_key"),))
+                                flag_row = flag_cur.fetchone()
+                                latest_raw = flag_row.get("raw_json") if flag_row and isinstance(flag_row.get("raw_json"), dict) else next_raw
+                                latest_raw = update_cv_processing_flags(
+                                    latest_raw,
+                                    screening_questions_sent=bool((screening_result or {}).get("success")),
+                                    screening_questions_sent_at=now_iso() if bool((screening_result or {}).get("success")) else None,
+                                )
+                                flag_cur.execute("UPDATE applications SET raw_json=%s WHERE app_key=%s", (Json(json_safe(latest_raw)), app.get("app_key")))
+                            flag_conn.commit()
+                    return {
+                        "ok": True,
+                        "document_id": document_id,
+                        "app_key": app.get("app_key"),
+                        "chars": len(text),
+                        "method": method,
+                        "semantic": semantic,
+                        "screening": json_safe(screening_result),
+                        "extraction_meta": {
+                            "stage": (extraction.metadata or {}).get("stage"),
+                            "tier": (extraction.metadata or {}).get("tier"),
+                            "provider": (extraction.metadata or {}).get("provider"),
+                            "actual_request_model": (extraction.metadata or {}).get("actual_request_model"),
+                            "provider_response_model": (extraction.metadata or {}).get("provider_response_model"),
+                            "cache_hit": extraction.cache_hit,
+                            "billable_pages": (extraction.metadata or {}).get("billable_pages"),
+                            "estimated_cost_usd": (extraction.metadata or {}).get("estimated_cost_usd"),
+                        },
+                    }
                 next_raw = update_cv_processing_flags(
                     raw_json,
                     file_received=True,
                     file_stored=True,
-                    text_extracted=True,
-                    profile_parsed=True,
-                    semantic_indexed=bool(semantic.get("ok")),
-                    screening_prefill_ready=True,
-                    screening_prefill_count=len(prefill_answers),
-                    status="processed",
+                    text_extracted=False,
+                    profile_parsed=False,
+                    semantic_indexed=False,
+                    screening_prefill_ready=False,
+                    status="failed",
+                    failed_reason=error or "no_text_extracted",
                     extraction_method=method,
-                    extraction_chars=len(text),
+                    extraction_stage=(extraction.metadata or {}).get("stage"),
+                    extraction_tier=(extraction.metadata or {}).get("tier"),
+                    extraction_provider=(extraction.metadata or {}).get("provider"),
+                    actual_request_model=(extraction.metadata or {}).get("actual_request_model"),
+                    provider_response_model=(extraction.metadata or {}).get("provider_response_model"),
                 )
-                next_raw["screening"] = {
-                    **current_screening,
-                    "status": screening_status,
-                    "answers": merged_answers,
-                    "answer_sources": merged_sources,
-                    "answer_evidence": merged_evidence,
-                    "questions": screening_questions,
-                    "pending_keys": pending_keys,
-                    "completed_at": now_iso() if screening_status == "complete" else current_screening.get("completed_at"),
-                }
-                cur.execute(
-                    """
-                    UPDATE applications
-                    SET raw_json=%s,
-                        cv_received=true,
-                        cv_received_at=COALESCE(cv_received_at, CURRENT_DATE),
-                        status=CASE WHEN status IN ('needs_role','import_review') THEN status WHEN %s='complete' THEN 'screening_complete' WHEN status IN ('awaiting_cv','cv_received') THEN 'screening' ELSE status END,
-                        current_step=CASE WHEN status IN ('needs_role','import_review') THEN current_step ELSE 'screening' END,
-                        screening_status=%s,
-                        screening_completed_at=CASE WHEN %s='complete' THEN COALESCE(screening_completed_at, CURRENT_DATE) ELSE screening_completed_at END,
-                        updated_at=COALESCE(updated_at, CURRENT_DATE)
-                    WHERE app_key=%s
-                    """,
-                    (Json(json_safe(next_raw)), screening_status, screening_status, screening_status, app.get("app_key")),
-                )
+                cur.execute("UPDATE applications SET raw_json=%s, updated_at=COALESCE(updated_at, CURRENT_DATE) WHERE app_key=%s", (Json(json_safe(next_raw)), app.get("app_key")))
                 cur.execute(
                     """
                     UPDATE candidate_documents
-                    SET text_path=%s,
-                        extraction_status=%s,
+                    SET extraction_status=%s,
                         extraction_method=%s,
-                        extraction_chars=%s,
                         metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
                         updated_at=now()
                     WHERE document_id=%s
                     """,
-                    (str(text_path), "ok", method, len(text), Json(json_safe({"semantic": semantic, "profile": profile})), document_id),
+                    (
+                        "failed",
+                        method,
+                        Json(
+                            json_safe(
+                                {
+                                    "extraction_error": error or "no_text_extracted",
+                                    "extraction_meta": {
+                                        k: v
+                                        for k, v in extraction.to_dict().items()
+                                        if k != "blocks"
+                                    },
+                                }
+                            )
+                        ),
+                        document_id,
+                    ),
                 )
                 conn.commit()
                 screening_result = None
                 if send_screening:
-                    # Import lazily to avoid circular boot coupling; action_registry is
-                    # already validated at startup.
                     ctx = _action_registry.ExecutionContext(
                         request=WhatsAppTurnRequest(
                             account_id=None,
                             conversation_id=None,
                             sender_phone="system",
                             sender_role="system",
-                            raw_text="send screening questions",
-                            metadata={"source": "cv_processing_worker", "document_id": document_id},
+                            raw_text="send fallback screening questions",
+                            metadata={"source": "cv_processing_worker", "document_id": document_id, "parse_failed": True},
                         ),
                         action={"action_type": "send_screening_questions", "app_key": app.get("app_key")},
                         state={},
@@ -21395,70 +21666,26 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             flag_cur.execute("UPDATE applications SET raw_json=%s WHERE app_key=%s", (Json(json_safe(latest_raw)), app.get("app_key")))
                         flag_conn.commit()
                 return {
-                    "ok": True,
+                    "ok": False,
                     "document_id": document_id,
                     "app_key": app.get("app_key"),
-                    "chars": len(text),
                     "method": method,
-                    "semantic": semantic,
+                    "error": error,
                     "screening": json_safe(screening_result),
                 }
-            next_raw = update_cv_processing_flags(
-                raw_json,
-                file_received=True,
-                file_stored=True,
-                text_extracted=False,
-                profile_parsed=False,
-                semantic_indexed=False,
-                screening_prefill_ready=False,
-                status="failed",
-                failed_reason=error or "no_text_extracted",
-                extraction_method=method,
-            )
-            cur.execute("UPDATE applications SET raw_json=%s, updated_at=COALESCE(updated_at, CURRENT_DATE) WHERE app_key=%s", (Json(json_safe(next_raw)), app.get("app_key")))
-            cur.execute(
-                """
-                UPDATE candidate_documents
-                SET extraction_status=%s,
-                    extraction_method=%s,
-                    metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
-                    updated_at=now()
-                WHERE document_id=%s
-                """,
-                ("failed", method, Json(json_safe({"extraction_error": error or "no_text_extracted"})), document_id),
-            )
-            conn.commit()
-            screening_result = None
-            if send_screening:
-                ctx = _action_registry.ExecutionContext(
-                    request=WhatsAppTurnRequest(
-                        account_id=None,
-                        conversation_id=None,
-                        sender_phone="system",
-                        sender_role="system",
-                        raw_text="send fallback screening questions",
-                        metadata={"source": "cv_processing_worker", "document_id": document_id, "parse_failed": True},
-                    ),
-                    action={"action_type": "send_screening_questions", "app_key": app.get("app_key")},
-                    state={},
-                    graph_state={},
-                    intent={},
-                    legacy=sys.modules[__name__],
-                )
-                screening_result = _action_registry.execute("send_screening_questions", ctx)
-                with db_connect() as flag_conn:
-                    with flag_conn.cursor() as flag_cur:
-                        flag_cur.execute("SELECT raw_json FROM applications WHERE app_key=%s", (app.get("app_key"),))
-                        flag_row = flag_cur.fetchone()
-                        latest_raw = flag_row.get("raw_json") if flag_row and isinstance(flag_row.get("raw_json"), dict) else next_raw
-                        latest_raw = update_cv_processing_flags(
-                            latest_raw,
-                            screening_questions_sent=bool((screening_result or {}).get("success")),
-                            screening_questions_sent_at=now_iso() if bool((screening_result or {}).get("success")) else None,
-                        )
-                        flag_cur.execute("UPDATE applications SET raw_json=%s WHERE app_key=%s", (Json(json_safe(latest_raw)), app.get("app_key")))
-                    flag_conn.commit()
-            return {"ok": False, "document_id": document_id, "app_key": app.get("app_key"), "method": method, "error": error, "screening": json_safe(screening_result)}
+            finally:
+                if lease_key:
+                    try:
+                        with db_connect() as release_conn:
+                            with release_conn.cursor() as release_cur:
+                                _cv_extraction.release_extraction_lease(
+                                    _cv_db_execute_factory(release_cur),
+                                    lease_key=lease_key,
+                                    owner=lease_owner,
+                                )
+                            release_conn.commit()
+                    except Exception:
+                        logger.warning("cv_extraction_lease_release_failed document_id=%s", document_id)
 
 
 def run_candidate_cv_processing_worker(*, dry_run: bool = True, limit: int = 10, force: bool = False, send_screening: bool = True) -> dict[str, Any]:

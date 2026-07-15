@@ -6,3 +6,4 @@ python-multipart
 openpyxl
 cryptography
 puremagic==2.2.0
+mistralai==2.6.0
