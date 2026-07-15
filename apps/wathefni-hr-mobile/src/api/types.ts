@@ -150,3 +150,141 @@ export type DecisionResponse = {
   confirmation: ConfirmationMaterial
   result: unknown
 }
+
+export type AllowedAction = string
+
+export type MobileListMeta = {
+  generated_at?: string | null
+  stale?: boolean
+}
+
+export type HRTask = {
+  task_id: string
+  title: string
+  summary?: string | null
+  status: string
+  due_at?: string | null
+  destination?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type DocumentReview = {
+  document_id: string
+  source?: 'compliance' | 'onboarding' | null
+  employee?: PersonIdentity | null
+  name: string
+  document_type?: string | null
+  status: string
+  submitted_at?: string | null
+  preview_path?: string | null
+  download_path?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type OnboardingChecklistItem = {
+  item_id: string
+  label: string
+  item_type?: string | null
+  document_type?: string | null
+  required: boolean
+  status: string
+  preview_path?: string | null
+  download_path?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type OnboardingEmployee = {
+  employee_key: string
+  employee: PersonIdentity
+  status: string
+  start_date?: string | null
+  current_step?: string | null
+  documents?: DocumentReview[]
+  items?: OnboardingChecklistItem[]
+  allowed_actions: AllowedAction[]
+}
+
+export type AttendanceException = {
+  exception_id: string
+  employee: PersonIdentity
+  exception_type: string
+  status: string
+  occurred_at?: string | null
+  note?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type Shift = {
+  shift_id: string
+  employee: PersonIdentity
+  status: string
+  starts_at?: string | null
+  ends_at?: string | null
+  location?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type ShiftSwap = {
+  swap_id: string
+  requester: PersonIdentity
+  replacement?: PersonIdentity | null
+  status: string
+  starts_at?: string | null
+  ends_at?: string | null
+  reason?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type EmployeeSummary = {
+  employee_key: string
+  employee: PersonIdentity
+  email?: string | null
+  phone?: string | null
+  started_on?: string | null
+  manager_name?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type DeliveryAlert = {
+  alert_id: string
+  title: string
+  summary?: string | null
+  status: string
+  channel?: string | null
+  occurred_at?: string | null
+  destination?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type CandidateSummary = {
+  app_key: string
+  candidate: { name: string; email?: string | null }
+  position?: { code?: string | null; title?: string | null }
+  status: string
+  score?: number | null
+  confidence?: string | number | null
+  updated_at?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type InterviewSummary = {
+  interview_id: string
+  app_key?: string | null
+  candidate: { name: string; email?: string | null }
+  position?: { code?: string | null; title?: string | null }
+  status: string
+  scheduled_at?: string | null
+  notes?: string | null
+  communication_status?: string | null
+  allowed_actions: AllowedAction[]
+}
+
+export type MobileCollection<T> = MobileListMeta & {
+  ok: true
+  items: T[]
+}
+
+export type MobileDetail<T> = MobileListMeta & {
+  ok: true
+  item: T
+}

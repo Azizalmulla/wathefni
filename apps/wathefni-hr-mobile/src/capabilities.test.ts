@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { can, enabledWorkspaces, hasCapability } from './capabilities'
+import {
+  can,
+  destinationAvailable,
+  enabledWorkspaces,
+  hasCapability,
+  routeAvailable,
+  workspaceRoutes,
+} from './capabilities'
 import { meFixture } from './preview/fixtures'
 
 describe('capability-driven navigation', () => {
@@ -25,5 +32,25 @@ describe('capability-driven navigation', () => {
     const me = meFixture('multi-workspace')
     expect(can(me, 'recruiting', 'candidate_hire', 'hire')).toBe(true)
     expect(can(me, 'recruiting', 'candidate_hire', 'reject')).toBe(false)
+  })
+
+  it('builds workspace navigation only from capability grants', () => {
+    const recruiter = meFixture('recruiter-only')
+    recruiter.principal.role = 'hr_manager'
+    expect(workspaceRoutes(recruiter).map((route) => route.key)).toEqual(['candidates', 'interviews'])
+    expect(routeAvailable(recruiter, 'attendance')).toBe(false)
+  })
+
+  it('hides routes immediately when a feature is disabled', () => {
+    const me = meFixture('multi-workspace')
+    me.workspaces.hr.features.attendance_exceptions.enabled = false
+    expect(routeAvailable(me, 'attendance')).toBe(false)
+  })
+
+  it('does not open a priority destination outside current capabilities', () => {
+    expect(destinationAvailable(meFixture('recruiter-only'), '/attendance')).toBe(false)
+    expect(destinationAvailable(meFixture('hr-only'), '/candidates/c-1')).toBe(false)
+    expect(destinationAvailable(meFixture('multi-workspace'), '/candidates/c-1')).toBe(true)
+    expect(destinationAvailable(meFixture('multi-workspace'), '/unknown-admin')).toBe(false)
   })
 })

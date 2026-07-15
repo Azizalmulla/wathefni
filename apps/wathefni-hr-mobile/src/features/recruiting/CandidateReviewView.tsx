@@ -3,6 +3,9 @@ import { StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import type { CandidateReview } from '@/api/types'
+import type { ResourceState } from '@/api/state'
+import { hasAnyAllowedAction, visibleActions } from '@/api/actions'
+import { ResourcePanel } from '@/features/operations/OperationalViews'
 import { useLocale } from '@/i18n'
 import {
   ActionButton,
@@ -13,14 +16,13 @@ import {
   IdentityRow,
   Screen,
   Skeleton,
-  StatePanel,
   StatusBadge,
   WorkspaceHeader,
   type ConfirmationView,
 } from '@/components/primitives'
 import { colors, spacing, type as typography } from '@/theme'
 
-export type CandidateViewState = 'ready' | 'loading' | 'error' | 'revoked' | 'stale' | 'success'
+export type CandidateViewState = ResourceState
 
 export function CandidateReviewView({
   review,
@@ -37,7 +39,7 @@ export function CandidateReviewView({
   state?: CandidateViewState
   onPrepareDecision?: (action: 'shortlist' | 'reject' | 'hire') => Promise<ConfirmationView>
   onConfirmDecision?: () => Promise<void>
-  onOpenCV?: () => void
+  onOpenCV?: (action: 'preview' | 'download') => void
   onRetry?: () => void
   onLocale?: () => void
 }) {
@@ -93,14 +95,8 @@ export function CandidateReviewView({
           <Skeleton lines={5} />
           <Skeleton lines={3} />
         </View>
-      ) : state === 'error' ? (
-        <StatePanel title={t('state.errorTitle')} body={t('state.errorBody')} action={t('common.retry')} onAction={onRetry} icon="alert-circle-outline" />
-      ) : state === 'revoked' ? (
-        <StatePanel title={t('state.revokedTitle')} body={t('state.revokedBody')} action={t('common.retry')} onAction={onRetry} icon="lock-closed-outline" />
-      ) : state === 'stale' ? (
-        <StatePanel title={t('state.staleTitle')} body={t('state.staleBody')} action={t('common.retry')} onAction={onRetry} icon="refresh-circle-outline" />
-      ) : state === 'success' ? (
-        <StatePanel title={t('state.successTitle')} body={t('state.successBody')} icon="checkmark-done-circle-outline" />
+      ) : state !== 'ready' ? (
+        <ResourcePanel state={state} onRetry={onRetry} />
       ) : (
         <>
           <Card tone="cream">
@@ -109,6 +105,12 @@ export function CandidateReviewView({
               <Text style={styles.appKey}>#{review.app_key.slice(0, 8)}</Text>
             </View>
             <IdentityRow name={name} subtitle={role} meta={review.overview.candidate?.email} />
+            <View style={styles.rule} />
+            <Fact title={t('candidate.experience')} value={name} />
+            {review.overview.candidate?.email ? (
+              <Fact title={t('common.email')} value={review.overview.candidate.email} />
+            ) : null}
+            <Fact title={t('common.position')} value={role} />
             <View style={[styles.scoreWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <View style={styles.scoreRing}>
                 <Text style={styles.score}>{review.ranking.score ?? '—'}</Text>
@@ -121,6 +123,12 @@ export function CandidateReviewView({
             </View>
           </Card>
 
+          <EvidenceCard
+            title={t('candidate.interpretation')}
+            items={review.ranking.reasons.length ? review.ranking.reasons : [t('candidate.noEvidence')]}
+            tone="missing"
+            icon="sparkles-outline"
+          />
           <EvidenceCard title={t('candidate.evidence')} items={review.ranking.evidence.length ? review.ranking.evidence : review.ranking.reasons} tone="evidence" icon="checkmark-circle-outline" />
           <EvidenceCard title={t('candidate.concerns')} items={review.ranking.concerns.length ? review.ranking.concerns : [t('candidate.noEvidence')]} tone="concern" icon="alert-circle-outline" />
           <EvidenceCard title={t('candidate.missing')} items={review.ranking.missing_evidence.length ? review.ranking.missing_evidence : [t('candidate.noEvidence')]} tone="missing" icon="help-circle-outline" />
@@ -136,30 +144,50 @@ export function CandidateReviewView({
                   {review.cv.filename || 'No CV available'}
                 </Text>
               </View>
-              {review.cv.available ? (
-                <ActionButton label={t('common.view')} tone="secondary" onPress={onOpenCV} />
-              ) : null}
+              <View style={styles.cvActions}>
+                {review.cv.available && hasAnyAllowedAction(review.allowed_actions, ['preview_cv', 'cv_preview', 'preview']) ? (
+                  <ActionButton label={t('candidate.previewCV')} tone="secondary" onPress={() => onOpenCV?.('preview')} />
+                ) : null}
+                {review.cv.available && hasAnyAllowedAction(review.allowed_actions, ['download_cv', 'cv_download', 'download']) ? (
+                  <ActionButton label={t('candidate.downloadCV')} tone="secondary" onPress={() => onOpenCV?.('download')} />
+                ) : null}
+              </View>
             </View>
           </Card>
 
           {review.interview ? (
             <Card tone="lilac">
-              <Fact title="Interview" value={String(review.interview.status || 'Scheduled')} />
-              <Fact title="Notes" value={String(review.interview.notes || 'No notes yet.')} />
+              <Fact title={t('interviews.detailTitle')} value={String(review.interview.status || t('interviews.scheduled'))} />
+              <Fact title={t('interviews.notes')} value={String(review.interview.notes || t('common.none'))} />
+            </Card>
+          ) : null}
+
+          {review.communication_status.length ? (
+            <Card tone="sky">
+              <Text style={[styles.communicationTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('interviews.delivery')}
+              </Text>
+              {review.communication_status.map((entry, index) => (
+                <Fact
+                  key={index}
+                  title={String(entry.message_kind || entry.channel || t('interviews.delivery'))}
+                  value={String(entry.status || t('common.none'))}
+                />
+              ))}
             </Card>
           ) : null}
 
           <View style={styles.actions}>
-            {review.allowed_actions.includes('shortlist') ? (
+            {visibleActions(review.allowed_actions, ['shortlist']).length ? (
               <ActionButton label={t('candidate.shortlist')} tone="secondary" loading={preparing} onPress={() => void prepare('shortlist')} />
             ) : null}
             <View style={[styles.decisionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              {review.allowed_actions.includes('reject') ? (
+              {visibleActions(review.allowed_actions, ['reject']).length ? (
                 <View style={styles.flex}>
                   <ActionButton label={t('candidate.reject')} tone="secondary" loading={preparing} onPress={() => void prepare('reject')} />
                 </View>
               ) : null}
-              {review.allowed_actions.includes('hire') ? (
+              {visibleActions(review.allowed_actions, ['hire']).length ? (
                 <View style={styles.flex}>
                   <ActionButton label={t('candidate.hire')} loading={preparing} onPress={() => void prepare('hire')} />
                 </View>
@@ -192,6 +220,7 @@ function Fact({ title, value }: { title: string; value: string }) {
 const styles = StyleSheet.create({
   stack: { gap: spacing.xl },
   topRow: { justifyContent: 'space-between', alignItems: 'center' },
+  rule: { height: 1, backgroundColor: colors.line },
   appKey: { color: colors.faint, fontSize: typography.micro, fontWeight: '700' },
   scoreWrap: { alignItems: 'center', gap: spacing.lg, paddingTop: spacing.sm },
   scoreRing: { width: 84, height: 84, borderRadius: 42, backgroundColor: colors.plumSoft, borderWidth: 5, borderColor: colors.plum, alignItems: 'center', justifyContent: 'center' },
@@ -203,11 +232,13 @@ const styles = StyleSheet.create({
   cvRow: { alignItems: 'center', gap: spacing.md },
   cvIcon: { width: 46, height: 46, borderRadius: 16, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   cvText: { flex: 1, gap: 3 },
+  cvActions: { gap: spacing.sm },
   cvTitle: { color: colors.ink, fontSize: typography.body, fontWeight: '800' },
   cvMeta: { color: colors.muted, fontSize: typography.label },
   fact: { gap: spacing.xs },
   factTitle: { color: colors.muted, fontSize: typography.label, fontWeight: '800' },
   factValue: { color: colors.ink, fontSize: typography.body, lineHeight: 22 },
+  communicationTitle: { color: colors.ink, fontSize: typography.section, fontWeight: '800' },
   actions: { gap: spacing.md },
   decisionRow: { gap: spacing.md },
   flex: { flex: 1 },

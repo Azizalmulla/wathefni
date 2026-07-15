@@ -33,6 +33,32 @@ npm run preview:serve
 npm run preview:verify
 ```
 
+## HR-3 route inventory
+
+All production data calls remain under `/dashboard/mobile/*`. Workspace links are
+derived only from `/dashboard/mobile/me` workspaces, features and actions; role
+names are display metadata and never grant a route.
+
+- `/` — capability-shaped priorities and workspace navigation
+- `/tasks` — authorized HR task queue
+- `/leave/[id]` — retained leave review and confirmed decision flow
+- `/onboarding` and `/onboarding/[employeeKey]` — onboarding review
+- `/documents` and `/documents/[employeeKey]/[documentType]` — document review
+- `/attendance` and `/attendance/[attendanceId]` — attendance review and confirmed resolution
+- `/shifts` and `/shift-swaps/[swapId]` — today’s shifts and swap decisions
+- `/employees` and `/employees/[employeeKey]` — grant-only directory and profile
+- `/delivery-alerts` — communication delivery operations
+- `/candidates` and `/candidates/[appKey]` — ranked list, evidence-separated
+  review, authenticated CV access, and confirmed human decisions
+- `/interviews` and `/interviews/[interviewId]` — status, delivery and notes
+- `/settings` — company, operator, scope, locale, authority refresh and sessions
+
+Settings intentionally has no Setup Console, ownership or company-control
+surface.
+
+Capability-to-route details, endpoint envelope assumptions and state handling
+are recorded in `docs/HR3_FRONTEND.md`.
+
 ## Fixture-only design preview
 
 Build:
@@ -44,14 +70,14 @@ npm run preview:serve
 
 Open:
 
-`http://127.0.0.1:4177/design-preview?view=home&locale=en&operator=multi-workspace&scenario=ready`
+`http://127.0.0.1:4177/design-preview?view=home&locale=en&operator=multi-workspace&scenario=ready&controls=0`
 
 URL state:
 
-- `view=home|leave|candidate`
+- `view=sign-in|home|tasks|onboarding|documents|attendance|shifts|shift-swap|employees|employee-profile|delivery-alerts|candidates|candidate|interviews|interview|settings|leave`
 - `locale=en|ar`
 - `operator=hr-only|recruiter-only|restricted-manager|multi-workspace`
-- `scenario=ready|loading|empty|error|revoked|company-disabled|stale|success`
+- `scenario=ready|loading|empty|error|offline|permission|revoked|company-disabled|company-archived|session-expired|stale|success`
 - `controls=0` hides the control chrome for clean phone review links
 - `capture=1` hides preview controls for screenshots
 - Prefer `view=` over legacy `screen=` (Expo Router reserves `screen`)
@@ -71,5 +97,6 @@ The preview:
 The provisional Arabic wordmark is `وظفني للموارد البشرية`. It remains subject
 to owner visual review before freezing.
 
-Staging API connection, production EAS credentials, push delivery and store
-submission are intentionally not configured in this slice.
+The DB-backed staging contract is green. Native authenticated PDF handoff still
+requires signed development-build testing. Production, EAS credentials, push
+delivery, TestFlight and store submission remain intentionally untouched.

@@ -3,7 +3,10 @@ import { StyleSheet, Text, TextInput, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import type { LeaveRequest } from '@/api/types'
+import type { ResourceState } from '@/api/state'
+import { ResourcePanel } from '@/features/operations/OperationalViews'
 import { useLocale } from '@/i18n'
+import { formatDateRange } from '@/i18n/date'
 import {
   ActionButton,
   Card,
@@ -19,14 +22,7 @@ import {
 } from '@/components/primitives'
 import { colors, radius, spacing, type as typography } from '@/theme'
 
-export type LeaveViewState =
-  | 'ready'
-  | 'loading'
-  | 'stale'
-  | 'success'
-  | 'revoked'
-  | 'already_decided'
-  | 'error'
+export type LeaveViewState = ResourceState | 'already_decided'
 
 export function LeaveApprovalView({
   request,
@@ -45,15 +41,18 @@ export function LeaveApprovalView({
   onRetry?: () => void
   onLocale?: () => void
 }) {
-  const { t, isRTL } = useLocale()
+  const { t, isRTL, locale } = useLocale()
   const [reason, setReason] = useState('')
   const [confirmation, setConfirmation] = useState<ConfirmationView | null>(null)
   const [preparing, setPreparing] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
   const dateText = useMemo(
-    () => `${request.start_date} — ${request.end_date} · ${request.duration_days ?? '—'} days`,
-    [request],
+    () =>
+      `${formatDateRange(request.start_date, request.end_date, locale)} · ${
+        request.duration_days ?? '—'
+      } ${locale === 'ar' ? 'أيام' : 'days'}`,
+    [locale, request],
   )
 
   const prepare = async (action: 'approve' | 'reject') => {
@@ -95,16 +94,10 @@ export function LeaveApprovalView({
           <Skeleton lines={4} />
           <Skeleton lines={5} />
         </View>
-      ) : state === 'stale' ? (
-        <StatePanel title={t('state.staleTitle')} body={t('state.staleBody')} action={t('common.retry')} onAction={onRetry} icon="refresh-circle-outline" />
-      ) : state === 'success' ? (
-        <StatePanel title={t('state.successTitle')} body={t('state.successBody')} icon="checkmark-done-circle-outline" />
-      ) : state === 'revoked' ? (
-        <StatePanel title={t('state.revokedTitle')} body={t('state.revokedBody')} action={t('common.retry')} onAction={onRetry} icon="lock-closed-outline" />
       ) : state === 'already_decided' ? (
         <StatePanel title={t('leave.alreadyDecided')} body={t('state.staleBody')} action={t('common.retry')} onAction={onRetry} icon="time-outline" />
-      ) : state === 'error' ? (
-        <StatePanel title={t('state.errorTitle')} body={t('state.errorBody')} action={t('common.retry')} onAction={onRetry} icon="alert-circle-outline" />
+      ) : state !== 'ready' ? (
+        <ResourcePanel state={state} onRetry={onRetry} />
       ) : (
         <>
           <Card tone="cream">

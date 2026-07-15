@@ -45,20 +45,58 @@ function AccessGate({ preview }: { preview: boolean }) {
     )
   }
   if (status === 'blocked') {
-    const disabled = accessState === 'company_disabled' || accessState === 'company_archived'
+    const companyDisabled = accessState === 'company_disabled'
+    const companyArchived = accessState === 'company_archived'
+    const sessionExpired = accessState === 'session_expired' || accessState === 'session_revoked'
+    const offline = accessState === 'network_error'
+    const operatorDisabled = accessState === 'operator_disabled'
+    const title = companyDisabled
+      ? t('state.companyDisabledTitle')
+      : companyArchived
+        ? t('state.companyArchivedTitle')
+        : sessionExpired
+          ? t('state.sessionExpiredTitle')
+          : offline
+            ? t('state.offlineTitle')
+            : t('state.revokedTitle')
+    const body = companyDisabled
+      ? t('state.companyDisabledBody')
+      : companyArchived
+        ? t('state.companyArchivedBody')
+        : sessionExpired
+          ? t('state.sessionExpiredBody')
+          : offline
+            ? t('state.offlineBody')
+            : t('state.revokedBody')
     return (
       <Screen>
         <StatePanel
-          title={disabled ? t('state.companyDisabledTitle') : t('state.revokedTitle')}
-          body={disabled ? t('state.companyDisabledBody') : t('state.revokedBody')}
-          action={disabled ? undefined : t('common.retry')}
-          onAction={disabled ? undefined : () => void refreshMe()}
-          icon={disabled ? 'business-outline' : 'lock-closed-outline'}
+          title={title}
+          body={body}
+          action={
+            companyDisabled || companyArchived || operatorDisabled
+              ? undefined
+              : sessionExpired
+                ? t('auth.signIn')
+                : t('common.retry')
+          }
+          onAction={sessionExpired ? () => void signOut() : () => void refreshMe()}
+          icon={
+            companyDisabled
+              ? 'business-outline'
+              : companyArchived
+                ? 'archive-outline'
+                : sessionExpired
+                  ? 'time-outline'
+                  : offline
+                    ? 'cloud-offline-outline'
+                    : 'lock-closed-outline'
+          }
         />
         <StatePanel
-          title="Sign out"
-          body="Clear this device’s operator session."
-          action="Sign out"
+          title={t('settings.signOut')}
+          body={t('state.signOutBody')}
+          action={t('settings.signOut')}
           onAction={() => void signOut()}
           icon="log-out-outline"
         />
@@ -71,6 +109,22 @@ function AccessGate({ preview }: { preview: boolean }) {
       <Stack.Screen name="sign-in" />
       <Stack.Screen name="leave/[id]" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="candidates/[appKey]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="tasks" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="onboarding/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="onboarding/[employeeKey]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="documents/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="documents/[employeeKey]/[documentType]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="attendance/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="attendance/[attendanceId]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="shifts" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="shift-swaps/[swapId]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="employees/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="employees/[employeeKey]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="delivery-alerts" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="candidates/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="interviews/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="interviews/[interviewId]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="design-preview" options={{ animation: 'none' }} />
     </Stack>
   )

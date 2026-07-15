@@ -3,8 +3,10 @@ import { useLocalSearchParams } from 'expo-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ApiError } from '@/api/client'
+import { resourceState } from '@/api/state'
 import type { ConfirmationMaterial, DecisionResponse, LeaveRequest } from '@/api/types'
 import { useAuth } from '@/auth/AuthProvider'
+import { hasCapability } from '@/capabilities'
 import { LeaveApprovalView, type LeaveViewState } from '@/features/leave/LeaveApprovalView'
 import { useLocale } from '@/i18n'
 import { createIdempotencyKey } from '@/lib/idempotency'
@@ -15,13 +17,14 @@ export default function LeaveRoute() {
   const { locale, setLocale } = useLocale()
   const queryClient = useQueryClient()
   const [decisionState, setDecisionState] = useState<LeaveViewState>('ready')
+  const permitted = hasCapability(me, 'hr', 'leave_approvals')
   const pending = useRef<{ material: ConfirmationMaterial; action: string; reason?: string; key: string } | null>(null)
 
   const detail = useQuery({
     queryKey: ['leave', id],
     queryFn: ({ signal }) =>
       request<{ ok: true; request: LeaveRequest }>(`/dashboard/mobile/leave/${encodeURIComponent(id || '')}`, { signal }),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && permitted,
   })
 
   const prepare = async (action: 'approve' | 'reject', reason?: string) => {
@@ -66,13 +69,12 @@ export default function LeaveRoute() {
     }
   }
 
-  const state: LeaveViewState = detail.isLoading
-    ? 'loading'
-    : detail.isError
-      ? detail.error instanceof ApiError && ['action_forbidden', 'out_of_scope'].includes(detail.error.code)
-        ? 'revoked'
-        : 'error'
-      : decisionState
+  const state: LeaveViewState =
+    !permitted
+      ? 'permission'
+      : decisionState !== 'ready'
+      ? decisionState
+      : resourceState({ loading: detail.isLoading, error: detail.error })
   const fallback: LeaveRequest = {
     leave_id: id || '',
     employee: { name: 'Employee' },

@@ -16,6 +16,7 @@ export type RequestOptions = {
   token?: string | null
   json?: unknown
   signal?: AbortSignal
+  responseType?: 'json' | 'arrayBuffer'
 }
 
 function safeError(payload: unknown, fallback: string): { code: string; message: string } {
@@ -53,6 +54,9 @@ export async function rawRequest<T>(path: string, options: RequestOptions = {}):
   } catch (error) {
     if (options.signal?.aborted) throw error
     throw new ApiError(0, 'network_error', 'No connection. Check your network and try again.')
+  }
+  if (response.ok && options.responseType === 'arrayBuffer') {
+    return (await response.arrayBuffer()) as T
   }
   const text = await response.text()
   let payload: unknown = null

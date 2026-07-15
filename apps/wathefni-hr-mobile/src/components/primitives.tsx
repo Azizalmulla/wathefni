@@ -235,14 +235,18 @@ export function PriorityCard({
   meta?: string | null
   onPress?: () => void
 }) {
-  const { isRTL } = useLocale()
+  const { isRTL, t } = useLocale()
+  const reduced = useReducedMotion()
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={`${title}. ${summary}. ${status}`}
       onPress={onPress}
       disabled={!onPress}
-      style={({ pressed }) => [styles.priorityCard, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.priorityCard,
+        pressed && (reduced ? styles.pressedReduced : styles.pressed),
+      ]}
     >
       <View style={[styles.priorityTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={[styles.priorityTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{title}</Text>
@@ -250,6 +254,74 @@ export function PriorityCard({
       </View>
       <Text style={[styles.prioritySummary, { textAlign: isRTL ? 'right' : 'left' }]}>{summary}</Text>
       {meta ? <Text style={[styles.priorityMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{meta}</Text> : null}
+      {onPress ? (
+        <View style={[styles.reviewRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <Text style={styles.reviewText}>{t('common.review')}</Text>
+          <Ionicons
+            name={isRTL ? 'chevron-back' : 'chevron-forward'}
+            size={16}
+            color={colors.plum}
+          />
+        </View>
+      ) : null}
+    </Pressable>
+  )
+}
+
+export function ActionableCard({
+  title,
+  subtitle,
+  meta,
+  status,
+  tone = 'neutral',
+  onPress,
+}: {
+  title: string
+  subtitle?: string | null
+  meta?: string | null
+  status?: string | null
+  tone?: StatusTone
+  onPress?: () => void
+}) {
+  const { isRTL, t } = useLocale()
+  const reduced = useReducedMotion()
+  return (
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={[title, subtitle, status, onPress ? t('common.review') : null]
+        .filter(Boolean)
+        .join('. ')}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.actionableCard,
+        pressed && (reduced ? styles.pressedReduced : styles.pressedLift),
+      ]}
+    >
+      <View style={[styles.actionableTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.actionableTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{title}</Text>
+        {status ? <StatusBadge label={status} tone={tone} /> : null}
+      </View>
+      {subtitle ? (
+        <Text style={[styles.actionableSubtitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+          {subtitle}
+        </Text>
+      ) : null}
+      <View style={[styles.actionableBottom, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.actionableMeta, { textAlign: isRTL ? 'right' : 'left' }]}>
+          {meta || ''}
+        </Text>
+        {onPress ? (
+          <View style={[styles.reviewRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Text style={styles.reviewText}>{t('common.review')}</Text>
+            <Ionicons
+              name={isRTL ? 'chevron-back' : 'chevron-forward'}
+              size={16}
+              color={colors.plum}
+            />
+          </View>
+        ) : null}
+      </View>
     </Pressable>
   )
 }
@@ -298,6 +370,7 @@ export function ActionButton({
   disabled?: boolean
   loading?: boolean
 }) {
+  const reduced = useReducedMotion()
   return (
     <Pressable
       accessibilityRole="button"
@@ -309,7 +382,7 @@ export function ActionButton({
         styles.action,
         actionTones[tone],
         (disabled || loading) && styles.disabled,
-        pressed && styles.pressed,
+        pressed && (reduced ? styles.pressedReduced : styles.pressed),
       ]}
     >
       {loading ? (
@@ -465,7 +538,7 @@ const styles = StyleSheet.create({
   scopeLabel: { color: colors.faint, fontSize: typography.micro },
   localeButton: { minWidth: 44, minHeight: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line },
   localeText: { color: colors.ink, fontWeight: '800', fontSize: 15 },
-  badge: { borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
+  badge: { minHeight: 28, justifyContent: 'center', borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
   badgeText: { fontSize: typography.micro, fontWeight: '800', textTransform: 'capitalize' },
   identityRow: { gap: spacing.md, alignItems: 'center' },
   avatar: { width: 52, height: 52, borderRadius: 18, backgroundColor: colors.plumSoft, alignItems: 'center', justifyContent: 'center' },
@@ -480,6 +553,14 @@ const styles = StyleSheet.create({
   priorityTitle: { flex: 1, color: colors.ink, fontSize: typography.label, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.45 },
   prioritySummary: { color: colors.ink, fontSize: 17, lineHeight: 24, fontWeight: '700' },
   priorityMeta: { color: colors.muted, fontSize: typography.label, lineHeight: 18 },
+  reviewRow: { minHeight: 28, alignItems: 'center', gap: 2, alignSelf: 'flex-end' },
+  reviewText: { color: colors.plum, fontSize: typography.label, fontWeight: '800' },
+  actionableCard: { minHeight: 116, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.sm, borderWidth: 1, borderColor: colors.line, ...shadows.card },
+  actionableTop: { alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },
+  actionableTitle: { flex: 1, color: colors.ink, fontSize: 17, lineHeight: 23, fontWeight: '800' },
+  actionableSubtitle: { color: colors.muted, fontSize: typography.body, lineHeight: 21 },
+  actionableBottom: { minHeight: 28, alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  actionableMeta: { flex: 1, color: colors.faint, fontSize: typography.label },
   evidenceTitleRow: { alignItems: 'center', gap: spacing.sm },
   evidenceTitle: { color: colors.ink, fontSize: typography.section, fontWeight: '800' },
   evidenceRow: { gap: spacing.sm, alignItems: 'flex-start' },
@@ -490,6 +571,8 @@ const styles = StyleSheet.create({
   actionTextDark: { color: colors.ink },
   disabled: { opacity: 0.46 },
   pressed: { opacity: 0.78, transform: [{ scale: 0.992 }] },
+  pressedReduced: { opacity: 0.78 },
+  pressedLift: { opacity: 0.9, transform: [{ translateY: 1 }, { scale: 0.995 }] },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(28,26,24,0.38)' },
   sheet: { backgroundColor: colors.canvas, padding: spacing.xl, paddingBottom: spacing.xxxl, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, gap: spacing.lg, ...shadows.floating },
   sheetHandle: { width: 42, height: 4, borderRadius: 2, backgroundColor: colors.line, alignSelf: 'center' },

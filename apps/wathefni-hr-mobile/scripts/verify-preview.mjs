@@ -1,8 +1,10 @@
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { chromium, webkit } from '@playwright/test'
 
 const base = process.env.PREVIEW_URL || 'http://127.0.0.1:4177/design-preview'
 const cases = [
+  ['sign-in', 'en', 'multi-workspace', 'ready', 'Company operations'],
+  ['sign-in', 'ar', 'multi-workspace', 'ready', 'عمليات شركتك'],
   ['home', 'en', 'multi-workspace', 'ready', 'What needs your attention'],
   ['home', 'ar', 'multi-workspace', 'ready', 'ما يحتاج إلى انتباهك'],
   ['home', 'en', 'hr-only', 'empty', 'all caught up'],
@@ -17,7 +19,43 @@ const cases = [
   ['candidate', 'ar', 'recruiter-only', 'ready', 'مراجعة المرشح'],
   ['candidate', 'en', 'multi-workspace', 'error', 'couldn’t load'],
   ['candidate', 'en', 'multi-workspace', 'revoked', 'access changed'],
+  ['tasks', 'en', 'hr-only', 'ready', 'HR tasks'],
+  ['onboarding', 'ar', 'hr-only', 'ready', 'مراجعة التهيئة'],
+  ['documents', 'en', 'hr-only', 'ready', 'Document reviews'],
+  ['attendance', 'en', 'restricted-manager', 'ready', 'Exceptions to resolve'],
+  ['shifts', 'ar', 'hr-only', 'ready', 'مناوبات اليوم'],
+  ['shift-swap', 'en', 'hr-only', 'ready', 'Dalal Al-Awadi'],
+  ['employees', 'en', 'hr-only', 'permission', 'authorized scope'],
+  ['employee-profile', 'ar', 'multi-workspace', 'ready', 'سارة الكندري'],
+  ['delivery-alerts', 'en', 'hr-only', 'offline', 'offline'],
+  ['candidates', 'en', 'recruiter-only', 'ready', 'Candidates'],
+  ['interviews', 'ar', 'multi-workspace', 'ready', 'المقابلات'],
+  ['interview', 'en', 'multi-workspace', 'ready', 'Interview record'],
+  ['settings', 'en', 'multi-workspace', 'ready', 'Settings'],
+  ['tasks', 'en', 'recruiter-only', 'ready', 'authorized scope'],
+  ['onboarding', 'en', 'hr-only', 'company-archived', 'archived'],
+  ['interviews', 'en', 'recruiter-only', 'session-expired', 'session expired'],
 ]
+const screenshotViews = [
+  'sign-in',
+  'home',
+  'tasks',
+  'onboarding',
+  'documents',
+  'attendance',
+  'shifts',
+  'shift-swap',
+  'employees',
+  'employee-profile',
+  'delivery-alerts',
+  'candidates',
+  'candidate',
+  'interviews',
+  'interview',
+  'settings',
+  'leave',
+]
+const screenshotMap = {}
 
 await mkdir(new URL('../docs/screenshots/', import.meta.url), { recursive: true })
 
@@ -144,15 +182,15 @@ for (const [browserName, browserType] of [
 
   if (browserName === 'webkit') {
     for (const locale of ['en', 'ar']) {
-      for (const screen of ['home', 'leave', 'candidate']) {
+      for (const screen of screenshotViews) {
         await page.goto(
           `${base}?view=${screen}&locale=${locale}&operator=multi-workspace&scenario=ready&controls=0&capture=1`,
           { waitUntil: 'networkidle' },
         )
-        await page.screenshot({
-          path: new URL(`../docs/screenshots/${screen}-${locale}.png`, import.meta.url).pathname,
-          fullPage: true,
-        })
+        const filename = `${screen}-${locale}.png`
+        const path = new URL(`../docs/screenshots/${filename}`, import.meta.url).pathname
+        await page.screenshot({ path, fullPage: true })
+        screenshotMap[`${screen}:${locale}:multi-workspace:ready`] = `docs/screenshots/${filename}`
       }
     }
     for (const [screen, locale, action, confirmationTitle] of [
@@ -178,4 +216,8 @@ for (const [browserName, browserType] of [
   await browser.close()
 }
 
+await writeFile(
+  new URL('../docs/screenshots/HR3_SCREENSHOT_MAP.json', import.meta.url),
+  `${JSON.stringify(screenshotMap, null, 2)}\n`,
+)
 console.log(`PREVIEW_VERIFIED ${cases.length} scenarios x chromium+webkit`)

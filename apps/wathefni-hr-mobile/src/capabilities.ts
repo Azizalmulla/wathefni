@@ -32,3 +32,96 @@ export function can(
   const value = capability(me, workspace, feature)
   return value?.enabled === true && value.actions.includes(action)
 }
+
+export type WorkspaceRoute = {
+  key: string
+  path: string
+  workspace: WorkspaceKey
+  features: string[]
+}
+
+const routeDefinitions: WorkspaceRoute[] = [
+  { key: 'tasks', path: '/tasks', workspace: 'hr', features: ['hr_tasks'] },
+  {
+    key: 'onboarding',
+    path: '/onboarding',
+    workspace: 'hr',
+    features: ['onboarding_review'],
+  },
+  {
+    key: 'documents',
+    path: '/documents',
+    workspace: 'hr',
+    features: ['document_review'],
+  },
+  {
+    key: 'attendance',
+    path: '/attendance',
+    workspace: 'hr',
+    features: ['attendance_exceptions'],
+  },
+  {
+    key: 'shifts',
+    path: '/shifts',
+    workspace: 'hr',
+    features: ['today_shifts', 'shift_swap_decisions'],
+  },
+  {
+    key: 'employees',
+    path: '/employees',
+    workspace: 'hr',
+    features: ['employee_search', 'employee_quick_profile'],
+  },
+  {
+    key: 'deliveryAlerts',
+    path: '/delivery-alerts',
+    workspace: 'hr',
+    features: ['delivery_alerts'],
+  },
+  {
+    key: 'candidates',
+    path: '/candidates',
+    workspace: 'recruiting',
+    features: ['candidate_rankings', 'candidate_summary', 'candidate_evidence'],
+  },
+  {
+    key: 'interviews',
+    path: '/interviews',
+    workspace: 'recruiting',
+    features: ['interview_status', 'interview_notes'],
+  },
+]
+
+export function hasAnyCapability(
+  me: MobileMe | null,
+  workspace: WorkspaceKey,
+  features: string[],
+): boolean {
+  return features.some((feature) => hasCapability(me, workspace, feature))
+}
+
+export function workspaceRoutes(me: MobileMe | null): WorkspaceRoute[] {
+  return routeDefinitions.filter(
+    (route) =>
+      me?.workspaces[route.workspace]?.enabled === true &&
+      hasAnyCapability(me, route.workspace, route.features),
+  )
+}
+
+export function routeAvailable(me: MobileMe | null, key: string): boolean {
+  return workspaceRoutes(me).some((route) => route.key === key)
+}
+
+export function destinationAvailable(me: MobileMe | null, destination: string): boolean {
+  const path = destination.split('?')[0]
+  if (path === '/' || path === '/settings') return Boolean(me)
+  if (path.startsWith('/leave/')) return hasCapability(me, 'hr', 'leave_approvals')
+  if (path.startsWith('/candidates/')) return routeAvailable(me, 'candidates')
+  if (path.startsWith('/onboarding/')) return routeAvailable(me, 'onboarding')
+  if (path.startsWith('/employees/')) return routeAvailable(me, 'employees')
+  if (path.startsWith('/shift-swaps/')) {
+    return hasCapability(me, 'hr', 'shift_swap_decisions')
+  }
+  if (path.startsWith('/interviews/')) return routeAvailable(me, 'interviews')
+  return workspaceRoutes(me).some((route) => route.path === path)
+}

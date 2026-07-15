@@ -10,6 +10,7 @@ export type OperatorAccessState =
   | 'rate_limited'
   | 'permission_revoked'
   | 'scope_denied'
+  | 'network_error'
   | 'unknown_error'
 
 const codeMap: Record<string, OperatorAccessState> = {
@@ -26,6 +27,7 @@ const codeMap: Record<string, OperatorAccessState> = {
   manager_scope_missing: 'scope_denied',
   manager_scope_conflict: 'scope_denied',
   out_of_scope: 'scope_denied',
+  network_error: 'network_error',
 }
 
 export function accessStateForError(error: unknown): OperatorAccessState {

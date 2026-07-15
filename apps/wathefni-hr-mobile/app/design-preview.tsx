@@ -8,18 +8,28 @@ import { LocaleProvider, useLocale } from '@/i18n'
 import { HRHomeView, type HomeState } from '@/features/home/HRHomeView'
 import { LeaveApprovalView, type LeaveViewState } from '@/features/leave/LeaveApprovalView'
 import { CandidateReviewView, type CandidateViewState } from '@/features/recruiting/CandidateReviewView'
+import { SignInView } from '@/features/auth/SignInView'
+import {
+  OperationalDetailView,
+  OperationalListView,
+} from '@/features/operations/OperationalViews'
+import { SettingsView } from '@/features/settings/SettingsView'
 import {
   localizedCandidateFixture,
   localizedLeaveFixture,
   localizedPrioritiesFixture,
   meFixture,
+  operationalFixture,
 } from '@/preview/fixtures'
 import { PreviewEmbedProvider } from '@/preview/PreviewEmbedContext'
+import {
+  previewOperators as operators,
+  previewScenarios as scenarios,
+  previewViews as screens,
+} from '@/preview/inventory'
+import { routeAvailable } from '@/capabilities'
 import { colors, radius, spacing, type as typography } from '@/theme'
 
-const screens = ['home', 'leave', 'candidate'] as const
-const operators = ['hr-only', 'recruiter-only', 'restricted-manager', 'multi-workspace'] as const
-const scenarios = ['ready', 'loading', 'empty', 'error', 'revoked', 'company-disabled', 'stale', 'success'] as const
 const previewBuild = process.env.EXPO_PUBLIC_HR_PREVIEW_BUILD || 'UNMARKED'
 const MOBILE_BREAKPOINT = 768
 
@@ -107,6 +117,7 @@ function Preview({
   const mobile = width < MOBILE_BREAKPOINT
   const controlsAllowed = !capture && controlsMode !== '0'
   const [panelOpen, setPanelOpen] = useState(() => controlsAllowed && (controlsMode === '1' || !mobile))
+  const [markerVisible, setMarkerVisible] = useState(true)
 
   useEffect(() => {
     if (!controlsAllowed) {
@@ -120,6 +131,12 @@ function Preview({
     if (mobile) setPanelOpen(false)
     else setPanelOpen(true)
   }, [controlsAllowed, controlsMode, mobile])
+
+  useEffect(() => {
+    if (capture) return
+    const timer = setTimeout(() => setMarkerVisible(false), 4200)
+    return () => clearTimeout(timer)
+  }, [capture])
 
   const params = useMemo(() => {
     const next: Record<string, string> = {
@@ -144,13 +161,57 @@ function Preview({
   const homeState: HomeState =
     scenario === 'company-disabled'
       ? 'company_disabled'
-      : scenario === 'stale' || scenario === 'success'
-        ? 'ready'
+      : scenario === 'company-archived'
+        ? 'company_archived'
+        : scenario === 'session-expired'
+          ? 'session_expired'
         : scenario
   const leaveState: LeaveViewState =
-    scenario === 'company-disabled' ? 'revoked' : scenario === 'empty' ? 'ready' : scenario
+    scenario === 'company-disabled'
+      ? 'company_disabled'
+      : scenario === 'company-archived'
+        ? 'company_archived'
+        : scenario === 'session-expired'
+          ? 'session_expired'
+          : scenario === 'empty'
+            ? 'ready'
+            : scenario
   const candidateState: CandidateViewState =
-    scenario === 'company-disabled' ? 'revoked' : scenario === 'empty' ? 'ready' : scenario
+    scenario === 'company-disabled'
+      ? 'company_disabled'
+      : scenario === 'company-archived'
+        ? 'company_archived'
+        : scenario === 'session-expired'
+          ? 'session_expired'
+          : scenario === 'empty'
+            ? 'ready'
+            : scenario
+  const operationalRouteKey =
+    screen === 'delivery-alerts'
+      ? 'deliveryAlerts'
+      : screen === 'shift-swap'
+        ? 'shifts'
+        : screen === 'employee-profile'
+          ? 'employees'
+          : screen === 'interview'
+            ? 'interviews'
+            : screen
+  const operatorHasRoute =
+    screen === 'settings' ||
+    screen === 'sign-in' ||
+    !['tasks', 'onboarding', 'documents', 'attendance', 'shifts', 'shift-swap', 'employees', 'employee-profile', 'delivery-alerts', 'candidates', 'interviews', 'interview'].includes(screen) ||
+    routeAvailable(meFixture(operator), operationalRouteKey)
+  const operationalState =
+    !operatorHasRoute
+      ? 'permission'
+      :
+    scenario === 'company-disabled'
+      ? 'company_disabled'
+      : scenario === 'company-archived'
+        ? 'company_archived'
+        : scenario === 'session-expired'
+          ? 'session_expired'
+          : scenario
 
   const bottomPad = Math.max(insets.bottom, 16) + 28
   const controlsPanel = (
@@ -175,13 +236,15 @@ function Preview({
 
   return (
     <View style={styles.shell}>
-      <View
-        accessibilityLabel={`Preview build ${previewBuild}`}
-        pointerEvents="none"
-        style={styles.buildMarker}
-      >
-        <Text style={styles.buildMarkerText}>HR2 · {previewBuild}</Text>
-      </View>
+      {markerVisible ? (
+        <View
+          accessibilityLabel={`Preview build ${previewBuild}`}
+          pointerEvents="none"
+          style={styles.buildMarker}
+        >
+          <Text style={styles.buildMarkerText}>HR3 · {previewBuild}</Text>
+        </View>
+      ) : null}
 
       <ScrollView
         style={styles.rootScroll}
@@ -194,7 +257,9 @@ function Preview({
 
         <View style={styles.phone} accessibilityLabel="App preview">
           <PreviewEmbedProvider>
-            {screen === 'home' ? (
+            {screen === 'sign-in' ? (
+              <SignInView onSignIn={async () => undefined} />
+            ) : screen === 'home' ? (
               <HRHomeView
                 me={meFixture(operator)}
                 priorities={localizedPrioritiesFixture(operator, locale)}
@@ -212,7 +277,7 @@ function Preview({
                 company="NORTHSTAR"
                 onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
               />
-            ) : (
+            ) : screen === 'candidate' ? (
               <CandidateReviewView
                 review={{
                   ...localizedCandidateFixture(locale),
@@ -223,6 +288,71 @@ function Preview({
                 }}
                 state={candidateState}
                 company="NORTHSTAR"
+                onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
+              />
+            ) : screen === 'settings' ? (
+              <SettingsView
+                me={meFixture(operator)}
+                onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
+                onRefresh={() => undefined}
+                onSignOut={() => undefined}
+                onSignOutAll={() => undefined}
+              />
+            ) : screen === 'shift-swap' ? (
+              <OperationalDetailView
+                company="NORTHSTAR"
+                eyebrow={locale === 'ar' ? 'قرار التبديل' : 'Swap decision'}
+                title={locale === 'ar' ? 'دلال العوضي' : 'Dalal Al-Awadi'}
+                status={locale === 'ar' ? 'بانتظار القرار' : 'requested'}
+                state={operationalState}
+                facts={[
+                  { label: locale === 'ar' ? 'الموظف البديل' : 'Replacement', value: locale === 'ar' ? 'يوسف الغانم' : 'Yousef Al-Ghanem' },
+                  { label: locale === 'ar' ? 'التاريخ' : 'Date', value: locale === 'ar' ? '١٧ يوليو ٢٠٢٦' : '17 July 2026' },
+                  { label: locale === 'ar' ? 'السبب' : 'Reason', value: locale === 'ar' ? 'تعارض مع موعد طبي' : 'Medical appointment conflict' },
+                ]}
+                actions={[
+                  { key: 'approve', label: locale === 'ar' ? 'موافقة' : 'Approve' },
+                  { key: 'reject', label: locale === 'ar' ? 'رفض' : 'Reject', tone: 'danger' },
+                ]}
+                onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
+              />
+            ) : screen === 'employee-profile' ? (
+              <OperationalDetailView
+                company="NORTHSTAR"
+                eyebrow={locale === 'ar' ? 'ملف مختصر' : 'Quick profile'}
+                title={locale === 'ar' ? 'سارة الكندري' : 'Sara Al-Kandari'}
+                status={locale === 'ar' ? 'نشطة' : 'active'}
+                state={operationalState}
+                facts={[
+                  { label: locale === 'ar' ? 'المسمى الوظيفي' : 'Position', value: locale === 'ar' ? 'مديرة عمليات' : 'Operations Manager' },
+                  { label: locale === 'ar' ? 'القسم' : 'Department', value: locale === 'ar' ? 'العمليات' : 'Operations' },
+                  { label: locale === 'ar' ? 'تاريخ البدء' : 'Start date', value: locale === 'ar' ? '١ فبراير ٢٠٢٤' : '1 February 2024' },
+                ]}
+                onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
+              />
+            ) : screen === 'interview' ? (
+              <OperationalDetailView
+                company="NORTHSTAR"
+                eyebrow={locale === 'ar' ? 'سجل المقابلة' : 'Interview record'}
+                title={locale === 'ar' ? 'لينا الخالد' : 'Lina Al-Khaled'}
+                status={locale === 'ar' ? 'بانتظار الملاحظات' : 'feedback pending'}
+                state={operationalState}
+                facts={[
+                  { label: locale === 'ar' ? 'الموعد' : 'Scheduled', value: locale === 'ar' ? '١٦ يوليو ٢٠٢٦، ١٠:٣٠ ص' : '16 July 2026, 10:30 am' },
+                  { label: locale === 'ar' ? 'حالة التواصل' : 'Communication', value: locale === 'ar' ? 'تم إرسال الدعوة' : 'Invite sent' },
+                  { label: locale === 'ar' ? 'ملاحظات المقابلة' : 'Interview notes', value: locale === 'ar' ? 'تفكير قوي في الأنظمة؛ يلزم التحقق من أمثلة القيادة.' : 'Strong systems thinking; validate leadership examples.' },
+                ]}
+                onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
+              />
+            ) : (
+              <OperationalListView
+                company="NORTHSTAR"
+                eyebrow={previewCopy(screen, locale).eyebrow}
+                title={previewCopy(screen, locale).title}
+                items={operationalFixture(screen, locale)}
+                state={operationalState}
+                onOpen={() => undefined}
+                onRetry={() => undefined}
                 onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
               />
             )}
@@ -288,6 +418,49 @@ function Control<T extends readonly string[]>({
   )
 }
 
+function previewCopy(screen: PreviewScreen, locale: Locale): { eyebrow: string; title: string } {
+  const ar = locale === 'ar'
+  const copy: Partial<Record<PreviewScreen, { eyebrow: string; title: string }>> = {
+    tasks: {
+      eyebrow: ar ? 'قائمة العمليات' : 'Operational queue',
+      title: ar ? 'مهام الموارد البشرية' : 'HR tasks',
+    },
+    onboarding: {
+      eyebrow: ar ? 'الموظفون الجدد' : 'New starters',
+      title: ar ? 'مراجعة التهيئة الوظيفية' : 'Onboarding review',
+    },
+    documents: {
+      eyebrow: ar ? 'مراجعة الامتثال' : 'Compliance review',
+      title: ar ? 'مراجعة المستندات' : 'Document reviews',
+    },
+    attendance: {
+      eyebrow: ar ? 'ضبط الحضور' : 'Attendance control',
+      title: ar ? 'استثناءات تحتاج إلى معالجة' : 'Exceptions to resolve',
+    },
+    shifts: {
+      eyebrow: ar ? 'جدول القوى العاملة' : 'Workforce schedule',
+      title: ar ? 'مناوبات اليوم وطلبات التبديل' : 'Today’s shifts and swaps',
+    },
+    employees: {
+      eyebrow: ar ? 'الدليل المصرّح' : 'Authorized directory',
+      title: ar ? 'الموظفون' : 'Employees',
+    },
+    'delivery-alerts': {
+      eyebrow: ar ? 'عمليات التواصل' : 'Communication operations',
+      title: ar ? 'تنبيهات الإرسال' : 'Delivery alerts',
+    },
+    candidates: {
+      eyebrow: ar ? 'قائمة المرشحين المرتبة' : 'Ranked pipeline',
+      title: ar ? 'المرشحون' : 'Candidates',
+    },
+    interviews: {
+      eyebrow: ar ? 'جدول التوظيف' : 'Recruiting schedule',
+      title: ar ? 'المقابلات' : 'Interviews',
+    },
+  }
+  return copy[screen] || { eyebrow: '', title: '' }
+}
+
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
@@ -313,12 +486,12 @@ const styles = StyleSheet.create({
     top: spacing.xs,
     right: spacing.sm,
     zIndex: 50,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: radius.pill,
     backgroundColor: colors.ink,
   },
-  buildMarkerText: { color: colors.white, fontSize: 9, fontWeight: '800' },
+  buildMarkerText: { color: colors.white, fontSize: 8, fontWeight: '800' },
   disabled: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   controls: {
     width: '100%',

@@ -3,8 +3,11 @@ import { useLocalSearchParams } from 'expo-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ApiError } from '@/api/client'
+import { openAuthenticatedFile } from '@/api/files'
+import { resourceState } from '@/api/state'
 import type { CandidateReview, ConfirmationMaterial, DecisionResponse } from '@/api/types'
 import { useAuth } from '@/auth/AuthProvider'
+import { routeAvailable } from '@/capabilities'
 import { CandidateReviewView, type CandidateViewState } from '@/features/recruiting/CandidateReviewView'
 import { useLocale } from '@/i18n'
 import { createIdempotencyKey } from '@/lib/idempotency'
@@ -15,6 +18,7 @@ export default function CandidateRoute() {
   const { locale, setLocale } = useLocale()
   const queryClient = useQueryClient()
   const [decisionState, setDecisionState] = useState<CandidateViewState>('ready')
+  const permitted = routeAvailable(me, 'candidates')
   const pending = useRef<{ material: ConfirmationMaterial; action: string; key: string } | null>(null)
   const detail = useQuery({
     queryKey: ['candidate', appKey],
@@ -23,7 +27,7 @@ export default function CandidateRoute() {
         `/dashboard/mobile/candidates/${encodeURIComponent(appKey || '')}`,
         { signal },
       ),
-    enabled: Boolean(appKey),
+    enabled: Boolean(appKey) && permitted,
   })
 
   const prepare = async (action: 'shortlist' | 'reject' | 'hire') => {
@@ -76,13 +80,12 @@ export default function CandidateRoute() {
     }
   }
 
-  const state: CandidateViewState = detail.isLoading
-    ? 'loading'
-    : detail.isError
-      ? detail.error instanceof ApiError && detail.error.code === 'action_forbidden'
-        ? 'revoked'
-        : 'error'
-      : decisionState
+  const state: CandidateViewState =
+    !permitted
+      ? 'permission'
+      : decisionState !== 'ready'
+      ? decisionState
+      : resourceState({ loading: detail.isLoading, error: detail.error })
 
   const fallback: CandidateReview = {
     app_key: appKey || '',
@@ -115,6 +118,18 @@ export default function CandidateRoute() {
       company={me?.principal.company_code}
       onPrepareDecision={prepare}
       onConfirmDecision={confirm}
+      onOpenCV={(action) => {
+        const cv = detail.data?.candidate.cv
+        const path = action === 'download' ? cv?.download_path : cv?.preview_path
+        if (!cv || !path) return
+        void openAuthenticatedFile({
+          request,
+          path,
+          filename: cv.filename,
+          mimeType: cv.mime_type,
+          download: action === 'download',
+        })
+      }}
       onRetry={() => {
         setDecisionState('ready')
         void refreshMe()

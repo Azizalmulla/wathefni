@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 
 import type { PrioritiesResponse } from '@/api/types'
+import { resourceState } from '@/api/state'
 import { useAuth } from '@/auth/AuthProvider'
 import { HRHomeView } from '@/features/home/HRHomeView'
 import { useLocale } from '@/i18n'
@@ -28,7 +29,11 @@ export default function HomeRoute() {
           sections: [],
         }
       }
-      state={priorities.isLoading ? 'loading' : priorities.isError ? 'error' : priorities.data?.sections.every((section) => !section.items.length) ? 'empty' : 'ready'}
+      state={resourceState({
+        loading: priorities.isLoading,
+        error: priorities.error,
+        empty: priorities.data?.sections.every((section) => !section.items.length),
+      })}
       onRetry={() => {
         void refreshMe()
         void priorities.refetch()

@@ -7,7 +7,7 @@ const sha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
   encoding: 'utf8',
 }).trim()
 const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
-const marker = process.env.HR_PREVIEW_BUILD || `HR2-${sha}-${timestamp}`
+const marker = process.env.HR_PREVIEW_BUILD || `HR3-${sha}-${timestamp}`
 
 const result = spawnSync(
   'npx',

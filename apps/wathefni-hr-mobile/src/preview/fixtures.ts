@@ -4,6 +4,7 @@ import type {
   MobileMe,
   PrioritiesResponse,
 } from '@/api/types'
+import type { OperationalItem } from '@/features/operations/OperationalViews'
 
 type OperatorFixture = 'hr-only' | 'recruiter-only' | 'restricted-manager' | 'multi-workspace'
 
@@ -37,6 +38,14 @@ export function meFixture(operator: OperatorFixture): MobileMe {
   const hr = operator !== 'recruiter-only'
   const recruiting = operator === 'recruiter-only' || operator === 'multi-workspace'
   const restricted = operator === 'restricted-manager'
+  const operatorHRFeatures =
+    operator === 'multi-workspace'
+      ? {
+          ...hrFeatures,
+          employee_search: { enabled: true, actions: ['read'] },
+          employee_quick_profile: { enabled: true, actions: ['read'] },
+        }
+      : hrFeatures
   return {
     ok: true,
     principal: {
@@ -51,7 +60,7 @@ export function meFixture(operator: OperatorFixture): MobileMe {
     account_state: 'active',
     company_state: 'active',
     workspaces: {
-      hr: { enabled: hr, features: hr ? hrFeatures : {} },
+      hr: { enabled: hr, features: hr ? operatorHRFeatures : {} },
       recruiting: { enabled: recruiting, features: recruiting ? recruitingFeatures : {} },
       owner: { enabled: false, features: {}, reason: 'feature_disabled' },
     },
@@ -216,7 +225,7 @@ export const candidateFixture: CandidateReview = {
     notes: 'Strong systems thinking. Validate leadership examples in the next round.',
   },
   communication_status: [{ status: 'sent', message_kind: 'interview_invite' }],
-  allowed_actions: ['shortlist', 'reject', 'hire'],
+  allowed_actions: ['shortlist', 'reject', 'hire', 'preview_cv', 'download_cv'],
 }
 
 export function localizedPrioritiesFixture(
@@ -312,4 +321,101 @@ export function localizedCandidateFixture(locale: 'en' | 'ar'): CandidateReview 
       notes: 'تفكير قوي في الأنظمة. يجب التحقق من أمثلة القيادة في الجولة التالية.',
     },
   }
+}
+
+export function operationalFixture(view: string, locale: 'en' | 'ar'): OperationalItem[] {
+  const ar = locale === 'ar'
+  const fixtures: Record<string, OperationalItem[]> = {
+    tasks: [
+      {
+        id: 'task-1',
+        title: ar ? 'مراجعة مستندات الانضمام' : 'Review joining documents',
+        subtitle: ar ? 'نور الصباح · مستندان بانتظار المراجعة' : 'Noor Al-Sabah · 2 documents pending',
+        meta: ar ? 'الاستحقاق ١٦ يوليو ٢٠٢٦' : 'Due 16 July 2026',
+        status: ar ? 'قيد الانتظار' : 'pending',
+      },
+    ],
+    onboarding: [
+      {
+        id: 'employee-1',
+        title: ar ? 'نور الصباح' : 'Noor Al-Sabah',
+        subtitle: ar ? 'مراجعة المستندات' : 'Document review',
+        meta: ar ? 'يبدأ في ٢٦ يوليو ٢٠٢٦' : 'Starts 26 July 2026',
+        status: ar ? 'قيد التنفيذ' : 'in progress',
+      },
+    ],
+    documents: [
+      {
+        id: 'employee-1:civil_id',
+        title: ar ? 'نور الصباح' : 'Noor Al-Sabah',
+        subtitle: ar ? 'البطاقة المدنية' : 'Civil ID',
+        meta: ar ? 'تم التقديم في ١٤ يوليو ٢٠٢٦' : 'Submitted 14 July 2026',
+        status: ar ? 'يحتاج مراجعة' : 'needs review',
+        allowedActions: ['review'],
+      },
+    ],
+    attendance: [
+      {
+        id: 'attendance-1',
+        title: ar ? 'فاطمة الدعيج' : 'Fatima Al-Duaij',
+        subtitle: ar ? 'تأخر في الحضور' : 'Late arrival',
+        meta: ar ? '١٤ يوليو ٢٠٢٦، ٨:١٩ ص' : '14 July 2026, 8:19 am',
+        status: ar ? 'مفتوح' : 'open',
+        allowedActions: ['resolve'],
+      },
+    ],
+    shifts: [
+      {
+        id: 'shift-1',
+        title: ar ? 'يوسف الغانم' : 'Yousef Al-Ghanem',
+        subtitle: ar ? 'فرع مدينة الكويت' : 'Kuwait City branch',
+        meta: ar ? '٩:٠٠ ص إلى ٥:٠٠ م' : '9:00 am–5:00 pm',
+        status: ar ? 'مجدولة' : 'scheduled',
+      },
+      {
+        id: 'swap-1',
+        title: ar ? 'تبديل مناوبة · دلال العوضي' : 'Shift swap · Dalal Al-Awadi',
+        subtitle: ar ? 'تعارض مع موعد طبي' : 'Medical appointment conflict',
+        meta: ar ? '١٧ يوليو ٢٠٢٦' : '17 July 2026',
+        status: ar ? 'بانتظار القرار' : 'pending decision',
+      },
+    ],
+    employees: [
+      {
+        id: 'employee-2',
+        title: ar ? 'سارة الكندري' : 'Sara Al-Kandari',
+        subtitle: ar ? 'مديرة عمليات' : 'Operations Manager',
+        meta: ar ? 'العمليات · مدينة الكويت' : 'Operations · Kuwait City',
+        status: ar ? 'نشطة' : 'active',
+      },
+    ],
+    'delivery-alerts': [
+      {
+        id: 'alert-1',
+        title: ar ? 'تعذّر إرسال دعوة المقابلة' : 'Interview invite not delivered',
+        subtitle: ar ? 'تعذر تسليم البريد الإلكتروني للمرشح' : 'Candidate email delivery failed',
+        meta: ar ? 'البريد الإلكتروني · ١٤ يوليو ٢٠٢٦' : 'Email · 14 July 2026',
+        status: ar ? 'يحتاج متابعة' : 'needs attention',
+      },
+    ],
+    candidates: [
+      {
+        id: 'candidate-1',
+        title: ar ? 'لينا الخالد' : 'Lina Al-Khaled',
+        subtitle: ar ? 'مصممة منتجات أولى' : 'Senior Product Designer',
+        meta: ar ? 'مدى التوافق ٨٦/١٠٠ · استشاري' : 'Role match 86/100 · advisory',
+        status: ar ? 'بانتظار المراجعة' : 'review pending',
+      },
+    ],
+    interviews: [
+      {
+        id: 'interview-1',
+        title: ar ? 'لينا الخالد' : 'Lina Al-Khaled',
+        subtitle: ar ? 'مصممة منتجات أولى' : 'Senior Product Designer',
+        meta: ar ? '١٦ يوليو ٢٠٢٦، ١٠:٣٠ ص' : '16 July 2026, 10:30 am',
+        status: ar ? 'بانتظار الملاحظات' : 'feedback pending',
+      },
+    ],
+  }
+  return fixtures[view] || []
 }

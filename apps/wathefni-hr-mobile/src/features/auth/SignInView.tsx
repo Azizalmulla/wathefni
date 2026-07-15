@@ -24,7 +24,13 @@ export function SignInView({
     try {
       await onSignIn(email.trim(), password, company.trim())
     } catch (caught) {
-      setError(caught instanceof ApiError && caught.code === 'rate_limited' ? caught.message : t('auth.genericError'))
+      setError(
+        caught instanceof ApiError && caught.code === 'rate_limited'
+          ? caught.message
+          : caught instanceof ApiError && caught.code === 'network_error'
+            ? t('state.offlineBody')
+            : t('auth.genericError'),
+      )
     } finally {
       setLoading(false)
     }
