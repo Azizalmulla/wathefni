@@ -16,6 +16,7 @@ Environment=WATHEFNI_DASHBOARD_DIST=/opt/wathefni/staging/dashboard-dist
 Environment=WATHEFNI_DELIVERY_MODE=dry_run
 Environment=PUBLIC_CANDIDATE_BASE_URL=http://127.0.0.1:8011
 Environment=WATHEFNI_TOOLCALL_ORCHESTRATOR_ENABLED=true
+Environment=WATHEFNI_ONBOARDING_HR_MUTATE=true
 Environment=WATHEFNI_DB_POOL_MAX=8
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
