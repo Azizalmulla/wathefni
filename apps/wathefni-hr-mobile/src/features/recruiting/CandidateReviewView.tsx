@@ -22,6 +22,30 @@ import {
 } from '@/components/primitives'
 import { colors, spacing, type as typography } from '@/theme'
 
+const STAGE_LABELS: Record<string, string> = {
+  awaiting_cv: 'Waiting for CV',
+  cv_processing: 'Processing CV',
+  cv_received: 'Processing CV',
+  screening: 'Processing CV',
+  ready_for_review: 'Ready for review',
+  screening_complete: 'Ready for review',
+  review_pending: 'Ready for review',
+  shortlisted: 'Shortlisted',
+  interview: 'Interview',
+  hired: 'Hired',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+  offered: 'Shortlisted',
+  offer_sent: 'Shortlisted',
+}
+
+function stageLabel(value: string | null | undefined) {
+  const normalized = String(value || '').toLowerCase()
+  if (STAGE_LABELS[normalized]) return STAGE_LABELS[normalized]
+  const spaced = normalized.replaceAll('_', ' ').trim()
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : 'Ready for review'
+}
+
 export type CandidateViewState = ResourceState
 
 export function CandidateReviewView({
@@ -101,7 +125,10 @@ export function CandidateReviewView({
         <>
           <Card tone="cream">
             <View style={[styles.topRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <StatusBadge label={review.overview.status || 'review pending'} tone="info" />
+              <StatusBadge
+                label={review.overview.status_label || stageLabel(review.overview.status) || 'Ready for review'}
+                tone="info"
+              />
               <Text style={styles.appKey}>#{review.app_key.slice(0, 8)}</Text>
             </View>
             <IdentityRow name={name} subtitle={role} meta={review.overview.candidate?.email} />

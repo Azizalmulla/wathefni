@@ -105,6 +105,8 @@ export type CandidateReview = {
     candidate?: { name?: string; email?: string }
     position?: { code?: string; title?: string }
     status?: string
+    status_label?: string
+    canonical_stage?: string
     current_step?: string
     cv?: Record<string, unknown>
     assessment?: unknown

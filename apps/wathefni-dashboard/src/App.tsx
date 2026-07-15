@@ -215,15 +215,19 @@ type OverviewQueueItem = {
 }
 const statuses = [
   '',
+  'awaiting_cv',
+  'cv_processing',
+  'ready_for_review',
+  'shortlisted',
+  'interview',
+  'hired',
+  'rejected',
+  'withdrawn',
+  // Legacy aliases still filterable until data is remapped.
   'cv_received',
   'screening',
   'screening_complete',
   'review_pending',
-  'shortlisted',
-  'interview',
-  'offered',
-  'hired',
-  'rejected',
 ]
 
 const navItems: DashboardNavItem[] = [
@@ -2661,6 +2665,17 @@ function CandidateDrawer({
       return
     await mutate('Hiring candidate', () => hireCandidate(access, candidate.app_key), actionKey('hire'))
   }
+  const runShortlist = async () => {
+    if (
+      !(await confirm({
+        title: 'Shortlist this candidate?',
+        body: `Move ${who} to the shortlist for ${candidate.position?.title || candidate.position?.code || 'this role'}.`,
+        confirmLabel: 'Shortlist candidate',
+      }))
+    )
+      return
+    await mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate.app_key), actionKey('shortlist'))
+  }
   const runReject = async () => {
     if (
       !(await confirm({
@@ -2680,7 +2695,7 @@ function CandidateDrawer({
       onOpenInterviews()
       return
     }
-    if (primaryAction.id === 'shortlist') return mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate.app_key), actionKey('shortlist'))
+    if (primaryAction.id === 'shortlist') return void runShortlist()
     if (primaryAction.id === 'follow_up') return runNotify(actionKey('follow_up'))
     onOpenInterviews()
   }
@@ -2761,7 +2776,7 @@ function CandidateDrawer({
                     {runningAction === actionKey('send_video_interview') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send video interview'}
                   </Button>
                 ) : null}
-                <Button disabled={busy || !canManageCandidates} onClick={() => mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate.app_key), actionKey('shortlist'))} size="sm" variant="secondary">
+                <Button disabled={busy || !canManageCandidates} onClick={() => void runShortlist()} size="sm" variant="secondary">
                   {runningAction === actionKey('shortlist') ? <><Loader2 className="animate-spin" size={14} /> Shortlisting…</> : 'Shortlist'}
                 </Button>
                 <Button disabled={busy || !canManageCandidates} onClick={() => void runNotify(actionKey('notify'))} size="sm" variant="secondary">
@@ -2770,7 +2785,7 @@ function CandidateDrawer({
                 <Button disabled={busy || !canDecideCandidates} onClick={() => void runHire()} size="sm" variant="secondary">
                   {runningAction === actionKey('hire') ? <><Loader2 className="animate-spin" size={14} /> Hiring…</> : 'Hire'}
                 </Button>
-                <Button disabled={busy || !canManageCandidates} onClick={() => void runReject()} size="sm" variant="secondary">
+                <Button disabled={busy || !canDecideCandidates} onClick={() => void runReject()} size="sm" variant="secondary">
                   {runningAction === actionKey('reject') ? <><Loader2 className="animate-spin" size={14} /> Rejecting…</> : 'Reject candidate'}
                 </Button>
               </div>
@@ -6302,10 +6317,12 @@ function uniqueNotificationFollowUps(notifications: NotificationRow[]) {
 
 const STAGE_LABELS: Record<string, string> = {
   awaiting_cv: 'Waiting for CV',
-  cv_received: 'CV received',
-  screening: 'Screening',
+  cv_processing: 'Processing CV',
+  cv_received: 'Processing CV',
+  screening: 'Processing CV',
+  ready_for_review: 'Ready for review',
   screening_complete: 'Ready for review',
-  review_pending: 'Needs HR review',
+  review_pending: 'Ready for review',
   shortlisted: 'Shortlisted',
   interview: 'Interview',
   scheduled: 'Scheduled',
@@ -6315,26 +6332,29 @@ const STAGE_LABELS: Record<string, string> = {
   cancelled: 'Cancelled',
   notes_pending: 'Notes pending',
   feedback_complete: 'Feedback complete',
-  offered: 'Offer sent',
   hired: 'Hired',
   rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
   in_progress: 'In progress',
   in_review: 'In review',
   needs_review: 'Needs review',
   pending_review: 'Pending review',
   not_started: 'Not started',
   phone_screen: 'Phone screen',
-  offer_sent: 'Offer sent',
+  // Offer labels kept as read aliases only — formal offer lifecycle is out of scope.
+  offered: 'Shortlisted',
+  offer_sent: 'Shortlisted',
   link_sent: 'Sent',
   opened: 'Opened',
   consented: 'Opened',
   submitted: 'Submitted',
   processing: 'Processing',
-  ready_for_review: 'Ready for review',
   transcription_failed: 'Needs retry',
   summary_pending: 'Preparing summary',
   synthetic_until_client_benchmark: 'Collecting company results',
   internal_synthetic_until_client_benchmark: 'Collecting company results',
+  // Video review readiness — namespaced away from application stage.
+  video_ready_for_review: 'Ready for review',
 }
 
 function stageLabel(value: string | null | undefined) {
@@ -6374,7 +6394,8 @@ function friendlyDashboardError(error: unknown, fallback: string) {
 }
 
 function isReadyForReview(application: ApplicationSummary) {
-  return ['screening_complete', 'review_pending'].includes(String(application.status || '').toLowerCase())
+  const status = String(application.status || '').toLowerCase()
+  return ['ready_for_review', 'screening_complete', 'review_pending'].includes(status)
 }
 
 function assessmentStatusCount(statusCounts: Array<{ status: string; count: number }>, status: string) {

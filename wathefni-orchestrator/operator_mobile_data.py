@@ -1252,14 +1252,20 @@ def mobile_leave_detail(app_mod: Any, context: dict[str, Any], leave_id: str) ->
 
 def _candidate_allowed_actions(context: dict[str, Any], status: str) -> list[str]:
     permissions = {str(value) for value in context.get("permissions") or []}
-    if status in {"hired", "rejected"}:
-        return []
-    actions: list[str] = []
-    if "candidate.manage" in permissions and status != "shortlisted":
-        actions.append("shortlist")
-    if "candidate.decide" in permissions:
-        actions.extend(["reject", "hire"])
-    return actions
+    try:
+        import recruiting_lifecycle as _rl
+
+        stage = _rl.normalize_stage(status) or str(status or "").strip().lower()
+        return _rl.allowed_actions_for_stage(stage, permissions)
+    except Exception:
+        if status in {"hired", "rejected", "withdrawn"}:
+            return []
+        actions: list[str] = []
+        if "candidate.manage" in permissions and status != "shortlisted":
+            actions.append("shortlist")
+        if "candidate.decide" in permissions:
+            actions.extend(["reject", "hire"])
+        return actions
 
 
 def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
@@ -1275,6 +1281,14 @@ def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
         or []
     )
     status = str(item.get("status") or application.get("status") or "")
+    try:
+        import recruiting_lifecycle as _rl
+
+        canonical_stage = _rl.normalize_stage(status) or status
+        status_label = _rl.stage_label(status)
+    except Exception:
+        canonical_stage = status
+        status_label = status.replace("_", " ")
     return {
         "app_key": str(item.get("app_key") or application.get("app_key") or ""),
         "candidate": {
@@ -1286,6 +1300,8 @@ def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
             "title": item.get("position_title") or position.get("title"),
         },
         "status": status,
+        "canonical_stage": canonical_stage,
+        "status_label": status_label,
         "score": item.get("score"),
         "confidence": item.get("confidence"),
         "evidence": app_mod.json_safe(evidence),
@@ -1336,6 +1352,8 @@ def mobile_candidate_rankings(
 
 
 def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str) -> dict[str, Any]:
+    import recruiting_lifecycle as _rl
+
     app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
     application = app_mod.dashboard_application_or_404(app_key, context["company_code"])
     summary = app_mod.prehire_application_summary(
@@ -1348,6 +1366,13 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
     concerns = evaluation.get("concerns") or evaluation.get("gaps") or evaluation.get("gaps_or_risks") or []
     cv = app_mod.dashboard_candidate_cv_metadata(application)
     status = str(summary.get("status") or application.get("status") or "")
+    if isinstance(summary, dict):
+        summary = {
+            **summary,
+            "status": status,
+            "canonical_stage": _rl.normalize_stage(status) or status,
+            "status_label": _rl.stage_label(status),
+        }
     with app_mod.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -1397,7 +1422,10 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
             "interview": app_mod.json_safe(interview) if interview else None,
             "communication_status": [
                 {
-                    "status": row.get("status"),
+                    "status": _rl.normalize_communication_status(
+                        row.get("status") or app_mod.dashboard_delivery_status(row)
+                    ),
+                    "raw_status": row.get("status"),
                     "display_status": app_mod.dashboard_delivery_status(row),
                     "message_kind": row.get("message_kind"),
                     "sent_at": _iso(row.get("sent_at")),

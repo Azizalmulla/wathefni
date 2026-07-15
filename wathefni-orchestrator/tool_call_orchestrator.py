@@ -94,7 +94,7 @@ TOOL_PERMISSION_MAP = {
     "execute_candidate_batch": "candidate.manage",
     "execute_candidate_workflow": "candidate.manage",
     "shortlist_candidate": "candidate.manage",
-    "reject_candidate": "candidate.manage",
+    "reject_candidate": "candidate.decide",
     "send_email": "candidate.manage",
     "notify_candidate": "candidate.manage",
     "send_screening_questions": "candidate.manage",

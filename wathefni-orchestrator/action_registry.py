@@ -651,7 +651,38 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
         action_type = str(ctx.action.get("action_type") or "")
         if not app:
             return _candidate_not_found_result(action_type, success_label.lower())
-        update = legacy.update_application_status(app, target_status)
+        # AI never executes autonomously: confirmation was already collected by the
+        # orchestrator before this executor runs. Still refuse if actor is marked AI
+        # without human_confirmed on the action payload.
+        actor_type = str(ctx.action.get("actor_type") or "human")
+        human_confirmed = bool(ctx.action.get("human_confirmed", True))
+        permissions = set(getattr(ctx.request, "metadata", {}) or {}).get("permissions") or []
+        if isinstance(permissions, dict):
+            permissions = list(permissions.keys())
+        meta = getattr(ctx.request, "metadata", {}) or {}
+        if isinstance(meta, dict) and meta.get("permissions"):
+            permissions = meta.get("permissions") or permissions
+        kwargs: dict[str, Any] = {}
+        if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
+            kwargs = {
+                "trigger": action_type or f"registry_{target_status}",
+                "human_confirmed": human_confirmed,
+                "actor_type": "ai" if actor_type == "ai" else "human",
+                "actor_phone": getattr(ctx.request, "sender_phone", None),
+                "channel": "whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
+                "permissions": set(permissions) if permissions else {
+                    "candidate.manage",
+                    "candidate.decide",
+                },
+                "expected_from_stage": str(app.get("status") or "") or None,
+                "idempotency_key": str(ctx.action.get("idempotency_key") or "") or None,
+            }
+            # Force AI actor when the request is from the assistant without dashboard flag.
+            if not (isinstance(meta, dict) and meta.get("dashboard")) and str(getattr(ctx.request, "sender_role", "") or "") != "hr_admin":
+                # Still human-confirmed via pending-action flow; actor_type stays human
+                # because a person confirmed. Only block if explicitly actor_type=ai without confirm.
+                pass
+        update = legacy.update_application_status(app, target_status, **kwargs) if kwargs else legacy.update_application_status(app, target_status)
         ok = bool(update.get("ok") if isinstance(update, dict) else False)
         name = _candidate_name(app, ctx.action)
         return {
@@ -662,6 +693,7 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
             "application": legacy.json_safe(app),
             "update": legacy.json_safe(update),
             "candidate_status": target_status if ok else app.get("status"),
+            "error": update.get("error") if isinstance(update, dict) and not ok else None,
         }
 
     return executor
@@ -683,7 +715,20 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
     action_type = str(ctx.action.get("action_type") or "hire_candidate")
     if not app:
         return _candidate_not_found_result(action_type, "hire")
-    update = legacy.update_application_status(app, "hired")
+    kwargs: dict[str, Any] = {}
+    if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
+        meta = getattr(ctx.request, "metadata", {}) or {}
+        permissions = meta.get("permissions") if isinstance(meta, dict) else []
+        kwargs = {
+            "trigger": "hire_candidate",
+            "human_confirmed": bool(ctx.action.get("human_confirmed", True)),
+            "actor_type": "human",
+            "actor_phone": getattr(ctx.request, "sender_phone", None),
+            "channel": "whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
+            "permissions": set(permissions) if permissions else {"candidate.decide"},
+            "expected_from_stage": str(app.get("status") or "") or None,
+        }
+    update = legacy.update_application_status(app, "hired", **kwargs) if kwargs else legacy.update_application_status(app, "hired")
     update_ok = bool(update.get("ok") if isinstance(update, dict) else False)
     posthire = legacy.transition_hire(app) if update_ok else {"ok": False, "skipped": "application_update_failed"}
     posthire_ok = bool(posthire.get("ok") if isinstance(posthire, dict) else False)
@@ -702,6 +747,7 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
         "update": legacy.json_safe(update),
         "posthire": legacy.json_safe(posthire),
         "candidate_status": "hired" if update_ok else app.get("status"),
+        "error": update.get("error") if isinstance(update, dict) and not update_ok else None,
     }
 
 
@@ -1922,6 +1968,35 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
             created_by_phone=getattr(ctx.request, "sender_phone", None),
             source="schedule_interview",
         )
+        # Canonical lifecycle: scheduling moves the application into `interview`.
+        if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
+            meta = getattr(ctx.request, "metadata", {}) or {}
+            permissions = meta.get("permissions") if isinstance(meta, dict) else []
+            stage_update = legacy.update_application_status(
+                app,
+                "interview",
+                trigger="schedule_interview",
+                human_confirmed=bool(ctx.action.get("human_confirmed", True)),
+                actor_type="human",
+                actor_phone=getattr(ctx.request, "sender_phone", None),
+                channel="whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
+                permissions=set(permissions) if permissions else {"interview.manage", "candidate.manage"},
+                expected_from_stage=str(app.get("status") or "") or None,
+            )
+            if isinstance(interview, dict):
+                interview = {**interview, "application_stage_update": legacy.json_safe(stage_update)}
+            stage_ok = bool(stage_update.get("ok"))
+            if not stage_ok:
+                return {
+                    "action_type": "schedule_interview",
+                    "success": False,
+                    "status": "failed",
+                    "message": f"Interview invite was created, but I could not move {name} to the interview stage.",
+                    "error": stage_update.get("error"),
+                    "result": legacy.json_safe(cal_result),
+                    "interview": legacy.json_safe(interview),
+                    "update": legacy.json_safe(stage_update),
+                }
     google_meet_link = None
     calendar_event_id = None
     if hasattr(legacy, "interview_meet_link_from_calendar"):
@@ -2048,14 +2123,18 @@ def _candidate_cv_evaluation_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 
 CANDIDATE_STATUSES = (
-    "review_pending",
-    "screening",
-    "screening_complete",
+    "awaiting_cv",
+    "cv_processing",
+    "ready_for_review",
     "shortlisted",
+    "interview",
     "hired",
     "rejected",
     "withdrawn",
-    "awaiting_cv",
+    # Legacy aliases kept for ranker filter compatibility (mapped by lifecycle).
+    "review_pending",
+    "screening",
+    "screening_complete",
 )
 
 

@@ -286,6 +286,23 @@ def _prehire_registry_enabled(action_type: str) -> bool:
     return action_type in enabled
 
 
+# --- Canonical Recruiting Lifecycle ---------------------------------------
+# WATHEFNI_CANONICAL_LIFECYCLE enables the single application transition
+# authority (strict stages, conversation-bound WhatsApp binding, ready-for-
+# review HR tasks, human confirmation for shortlist/reject/schedule/hire).
+# Default OFF — production keeps legacy free-form status writes until staging
+# proof is approved and the flag is explicitly enabled.
+def canonical_lifecycle_enabled() -> bool:
+    try:
+        import recruiting_lifecycle as _rl
+
+        return _rl.canonical_lifecycle_enabled()
+    except Exception:
+        return (os.environ.get("WATHEFNI_CANONICAL_LIFECYCLE") or "").strip().lower() in {
+            "1", "true", "on", "yes", "all", "enabled",
+        }
+
+
 # --- Manager / org hierarchy (V1a) -----------------------------------------
 # WATHEFNI_ORG_HIERARCHY gates the V1a additions: the "direct" manager scope
 # (a hand-picked managed-employee list in manager_scope_members) and the
@@ -2763,6 +2780,9 @@ def _ensure_schema_impl() -> None:
                 return None
 
             _cv_extraction.ensure_cv_extraction_schema(_cv_schema_exec)
+            import recruiting_lifecycle as _rl
+
+            _rl.ensure_lifecycle_schema(cur)
         conn.commit()
 
 
@@ -20197,7 +20217,43 @@ def record_employee_document_receipt(
         },
     )
 
-def find_candidate_application_for_file(phone: str | None) -> dict[str, Any] | None:
+def find_candidate_application_for_file(
+    phone: str | None,
+    *,
+    conversation_id: str | None = None,
+    company_code: str | None = None,
+    account_id: str | None = None,
+) -> dict[str, Any] | None:
+    """Resolve the application that should receive a candidate CV upload.
+
+    When WATHEFNI_CANONICAL_LIFECYCLE is on, resolution is conversation-bound and
+    fails closed on ambiguity. Legacy path keeps the historical phone LIMIT 1 heuristic.
+    """
+    if canonical_lifecycle_enabled():
+        import recruiting_lifecycle as _rl
+
+        resolved = _rl.resolve_conversation_application(
+            sys.modules[__name__],
+            phone=phone,
+            conversation_id=conversation_id,
+            company_code=company_code,
+            account_id=account_id,
+            allow_single_eligible=True,
+        )
+        if not resolved.get("ok"):
+            return None
+        app = resolved.get("application")
+        if resolved.get("requires_bind") and conversation_id and isinstance(app, dict):
+            _rl.bind_conversation_application(
+                sys.modules[__name__],
+                company_code=str(app.get("company_code") or company_code or ""),
+                conversation_id=str(conversation_id),
+                phone=str(app.get("phone") or phone or ""),
+                app_key=str(app.get("app_key") or ""),
+                account_id=account_id,
+                bound_reason="single_eligible",
+            )
+        return app if isinstance(app, dict) else None
     target = digits(phone)
     if not target:
         return None
@@ -20210,7 +20266,8 @@ def find_candidate_application_for_file(phone: str | None) -> dict[str, Any] | N
                 WHERE phone=%s
                 ORDER BY
                   CASE
-                    WHEN status IN ('awaiting_cv','cv_received','screening','screening_complete') OR current_step IN ('cv_request','cv_upload','screening','screening_complete') THEN 0
+                    WHEN status IN ('awaiting_cv','cv_received','cv_processing','screening','screening_complete','ready_for_review')
+                      OR current_step IN ('cv_request','cv_upload','screening','screening_complete','cv_processing','ready_for_review') THEN 0
                     WHEN status IN ('review_pending','shortlisted') THEN 1
                     ELSE 2
                   END,
@@ -20710,7 +20767,55 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
     }
     if not (media_type.startswith("image/") or media_type in allowed_media):
         return None
-    application = find_candidate_application_for_file(request.sender_phone)
+    if canonical_lifecycle_enabled():
+        import recruiting_lifecycle as _rl
+
+        resolved = _rl.resolve_conversation_application(
+            sys.modules[__name__],
+            phone=request.sender_phone,
+            conversation_id=request.conversation_id,
+            account_id=request.account_id,
+            allow_single_eligible=True,
+        )
+        if not resolved.get("ok"):
+            error = str(resolved.get("error") or "ambiguous_applications")
+            if error == "no_eligible_application":
+                reply = "I received your file, but I don’t have an open application for you yet. Please send your job APPLY code first, then resend your CV."
+            elif error == "ambiguous_applications":
+                matches = resolved.get("matches") if isinstance(resolved.get("matches"), list) else []
+                roles = ", ".join(
+                    str(m.get("position_code") or m.get("app_key") or "role")
+                    for m in matches[:5]
+                    if isinstance(m, dict)
+                )
+                reply = (
+                    "I received your file, but you have more than one open application. "
+                    f"Please reply with the APPLY code for the role you want this CV to update"
+                    + (f" ({roles})." if roles else ".")
+                )
+            else:
+                reply = "I received your file, but I could not safely match it to one application. Please send your APPLY code, then resend your CV."
+            return {
+                "ok": False,
+                "error": error,
+                "reply": reply,
+                "matches": resolved.get("matches") or [],
+            }
+        application = resolved.get("application")
+        if not isinstance(application, dict):
+            return None
+        if resolved.get("requires_bind") and request.conversation_id:
+            _rl.bind_conversation_application(
+                sys.modules[__name__],
+                company_code=str(application.get("company_code") or ""),
+                conversation_id=str(request.conversation_id),
+                phone=str(application.get("phone") or request.sender_phone or ""),
+                app_key=str(application.get("app_key") or ""),
+                account_id=request.account_id,
+                bound_reason="single_eligible",
+            )
+    else:
+        application = find_candidate_application_for_file(request.sender_phone)
     if not application:
         return None
     if not company_has_module(application.get("company_code"), "pre_hiring"):
@@ -20730,6 +20835,15 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             )
         conn.commit()
     if result.get("ok"):
+        if canonical_lifecycle_enabled():
+            import recruiting_lifecycle as _rl
+
+            _rl.mark_cv_received(
+                sys.modules[__name__],
+                application=application,
+                channel="whatsapp",
+                conversation_id=request.conversation_id,
+            )
         result["reply"] = "Got it — I received your CV and I’m processing it now. I’ll continue with the next step once it’s ready."
     else:
         result["reply"] = "I received your file, but I could not save it safely. Please resend your CV as a clear PDF, Word document, or image."
@@ -21496,21 +21610,66 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         "pending_keys": pending_keys,
                         "completed_at": now_iso() if screening_status == "complete" else current_screening.get("completed_at"),
                     }
+                    lifecycle_on = canonical_lifecycle_enabled()
                     cur.execute(
                         """
                         UPDATE applications
                         SET raw_json=%s,
                             cv_received=true,
                             cv_received_at=COALESCE(cv_received_at, CURRENT_DATE),
-                            status=CASE WHEN status IN ('needs_role','import_review') THEN status WHEN %s='complete' THEN 'screening_complete' WHEN status IN ('awaiting_cv','cv_received') THEN 'screening' ELSE status END,
-                            current_step=CASE WHEN status IN ('needs_role','import_review') THEN current_step ELSE 'screening' END,
+                            status=CASE
+                              WHEN status IN ('needs_role','import_review') THEN status
+                              WHEN status IN ('shortlisted','interview','hired','rejected','withdrawn') THEN status
+                              WHEN %s THEN 'ready_for_review'
+                              WHEN %s='complete' THEN 'screening_complete'
+                              WHEN status IN ('awaiting_cv','cv_received','cv_processing') THEN 'screening'
+                              ELSE status
+                            END,
+                            current_step=CASE
+                              WHEN status IN ('needs_role','import_review') THEN current_step
+                              WHEN status IN ('shortlisted','interview','hired','rejected','withdrawn') THEN current_step
+                              WHEN %s THEN 'ready_for_review'
+                              ELSE 'screening'
+                            END,
                             screening_status=%s,
                             screening_completed_at=CASE WHEN %s='complete' THEN COALESCE(screening_completed_at, CURRENT_DATE) ELSE screening_completed_at END,
                             updated_at=COALESCE(updated_at, CURRENT_DATE)
                         WHERE app_key=%s
+                        RETURNING *
                         """,
-                        (Json(json_safe(next_raw)), screening_status, screening_status, screening_status, app.get("app_key")),
+                        (
+                            Json(json_safe(next_raw)),
+                            lifecycle_on,
+                            screening_status,
+                            lifecycle_on,
+                            screening_status,
+                            screening_status,
+                            app.get("app_key"),
+                        ),
                     )
+                    refreshed_after_cv = cur.fetchone()
+                    if lifecycle_on and not held_import and refreshed_after_cv:
+                        import recruiting_lifecycle as _rl
+
+                        try:
+                            cur.execute(
+                                """
+                                INSERT INTO application_lifecycle_events (
+                                  company_code, app_key, from_stage, to_stage, trigger,
+                                  actor_type, channel, metadata
+                                )
+                                VALUES (%s,%s,%s,%s,'cv_processing_success','system','system',%s)
+                                """,
+                                (
+                                    str(refreshed_after_cv.get("company_code") or company_code).upper(),
+                                    refreshed_after_cv.get("app_key"),
+                                    _rl.normalize_stage(app.get("status")) or str(app.get("status") or ""),
+                                    str(refreshed_after_cv.get("status") or "ready_for_review"),
+                                    Json(json_safe({"document_id": document_id, "screening_status": screening_status})),
+                                ),
+                            )
+                        except Exception:
+                            logger.warning("lifecycle event write after CV processing failed", exc_info=True)
                     cur.execute(
                         """
                         UPDATE candidate_documents
@@ -21544,6 +21703,18 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         ),
                     )
                     conn.commit()
+                    if lifecycle_on and not held_import and refreshed_after_cv:
+                        import recruiting_lifecycle as _rl
+
+                        try:
+                            _rl.ensure_ready_for_review_task(
+                                sys.modules[__name__],
+                                company_code=str(refreshed_after_cv.get("company_code") or company_code),
+                                application=dict(refreshed_after_cv),
+                                cv_version=str(document_id),
+                            )
+                        except Exception:
+                            logger.warning("ready_for_review HR task create failed", exc_info=True)
                     screening_result = None
                     if send_screening:
                         ctx = _action_registry.ExecutionContext(
@@ -24756,7 +24927,48 @@ def record_outbound_delivery_event(
         conn.commit()
 
 
-def update_application_status(app: dict[str, Any], status: str) -> dict[str, Any]:
+def update_application_status(
+    app: dict[str, Any],
+    status: str,
+    *,
+    trigger: str = "legacy_update",
+    human_confirmed: bool = False,
+    actor_type: str = "human",
+    actor_user_id: str | None = None,
+    actor_phone: str | None = None,
+    channel: str | None = None,
+    expected_from_stage: str | None = None,
+    idempotency_key: str | None = None,
+    permissions: set[str] | list[str] | None = None,
+    confirmation_token: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Update application status.
+
+    When WATHEFNI_CANONICAL_LIFECYCLE is on, all writes go through the single
+    transition authority (strict matrix, stale checks, confirmation, audit).
+    """
+    if canonical_lifecycle_enabled():
+        import recruiting_lifecycle as _rl
+
+        return _rl.transition_application(
+            sys.modules[__name__],
+            app_key=str(app.get("app_key") or ""),
+            company_code=str(app.get("company_code") or ""),
+            to_stage=status,
+            trigger=trigger,
+            expected_from_stage=expected_from_stage,
+            actor_type=actor_type,
+            actor_user_id=actor_user_id,
+            actor_phone=actor_phone,
+            channel=channel,
+            confirmation_token=confirmation_token,
+            human_confirmed=human_confirmed,
+            idempotency_key=idempotency_key,
+            permissions=permissions,
+            metadata=metadata,
+            run_hire_side_effects=False,  # hire path calls transition_hire separately / via hire executor
+        )
     args = [
         str(WORKSPACE / "tools" / "db" / "update_state.py"),
         "--env",
@@ -41145,10 +41357,10 @@ def prehire_action_counts(company: str) -> dict[str, int]:
                 """
                 SELECT
                   COUNT(*) FILTER (
-                    WHERE a.status IN ('screening_complete','review_pending')
+                    WHERE a.status IN ('screening_complete','review_pending','ready_for_review')
                   ) AS ready_for_review,
                   COUNT(*) FILTER (
-                    WHERE a.status IN ('screening_complete','review_pending','shortlisted')
+                    WHERE a.status IN ('screening_complete','review_pending','ready_for_review','shortlisted')
                       AND COALESCE(la.assessment_status, a.raw_json->'assessment'->>'status', '') IN ('', 'pending')
                   ) AS assessment_pending
                 FROM applications a
@@ -45132,14 +45344,35 @@ def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(
     application = dashboard_application_or_404(app_key, company)
     if _prehire_registry_enabled("shortlist_candidate"):
         return run_prehire_registry_action(context, "shortlist_candidate", {}, app_key=app_key)
-    update_result = update_application_status(application, "shortlisted")
-    update_ok = workspace_tool_operation_ok(update_result)
+    if canonical_lifecycle_enabled():
+        update_result = update_application_status(
+            application,
+            "shortlisted",
+            trigger="dashboard_shortlist",
+            human_confirmed=True,
+            actor_type="human",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_phone=digits(context.get("hr_phone")),
+            channel="web",
+            permissions=set(context.get("permissions") or []) | {"candidate.manage"},
+            expected_from_stage=str(application.get("status") or "") or None,
+            idempotency_key=f"web-shortlist:{company}:{app_key}:{application.get('status')}",
+        )
+    else:
+        update_result = update_application_status(application, "shortlisted")
+    update_ok = workspace_tool_operation_ok(update_result) if not canonical_lifecycle_enabled() else bool(update_result.get("ok"))
     status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     if update_ok:
         reply = f"{name} is shortlisted."
     else:
         reply = f"I could not shortlist {name}."
+        if update_result.get("error") == "stale_state":
+            reply = "This candidate’s status changed. Refresh and try again."
+        elif update_result.get("error") == "transition_not_allowed":
+            reply = f"{name} cannot be shortlisted from the current stage."
+        elif update_result.get("error") == "confirmation_required":
+            reply = "Confirmation is required before shortlisting."
     result_payload = {
         "application": json_safe(application),
         "update": update_result,
@@ -45160,19 +45393,38 @@ def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(
 
 @app.post("/dashboard/prehire/applications/{app_key}/reject")
 def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    require_entitlement(context, "pre_hiring", "candidate.manage")
+    require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
     if _prehire_registry_enabled("reject_candidate"):
         return run_prehire_registry_action(context, "reject_candidate", {}, app_key=app_key)
-    update_result = update_application_status(application, "rejected")
-    update_ok = workspace_tool_operation_ok(update_result)
+    if canonical_lifecycle_enabled():
+        update_result = update_application_status(
+            application,
+            "rejected",
+            trigger="dashboard_reject",
+            human_confirmed=True,
+            actor_type="human",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_phone=digits(context.get("hr_phone")),
+            channel="web",
+            permissions=set(context.get("permissions") or []) | {"candidate.decide"},
+            expected_from_stage=str(application.get("status") or "") or None,
+            idempotency_key=f"web-reject:{company}:{app_key}:{application.get('status')}",
+        )
+    else:
+        update_result = update_application_status(application, "rejected")
+    update_ok = workspace_tool_operation_ok(update_result) if not canonical_lifecycle_enabled() else bool(update_result.get("ok"))
     status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     if update_ok:
         reply = f"{name} was moved out of the active pipeline."
     else:
         reply = f"I could not reject {name}."
+        if update_result.get("error") == "stale_state":
+            reply = "This candidate’s status changed. Refresh and try again."
+        elif update_result.get("error") == "transition_not_allowed":
+            reply = f"{name} cannot be rejected from the current stage."
     result_payload = {
         "application": json_safe(application),
         "update": update_result,
@@ -45198,12 +45450,34 @@ def dashboard_prehire_hire(app_key: str, context: dict[str, Any] = Depends(prehi
     application = dashboard_application_or_404(app_key, company)
     if _prehire_registry_enabled("hire_candidate"):
         return run_prehire_registry_action(context, "hire_candidate", {}, app_key=app_key)
-    update_result = update_application_status(application, "hired")
-    posthire_result = transition_hire(application)
-    ok = bool(update_result.get("ok") and posthire_result.get("ok"))
+    if canonical_lifecycle_enabled():
+        update_result = update_application_status(
+            application,
+            "hired",
+            trigger="dashboard_hire",
+            human_confirmed=True,
+            actor_type="human",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_phone=digits(context.get("hr_phone")),
+            channel="web",
+            permissions=set(context.get("permissions") or []) | {"candidate.decide"},
+            expected_from_stage=str(application.get("status") or "") or None,
+            idempotency_key=f"web-hire:{company}:{app_key}:{application.get('status')}",
+        )
+        # transition_application with run_hire_side_effects=False; run hire separately.
+        posthire_result = transition_hire(application) if update_result.get("ok") else {"ok": False, "skipped": "application_update_failed"}
+        ok = bool(update_result.get("ok") and posthire_result.get("ok"))
+    else:
+        update_result = update_application_status(application, "hired")
+        posthire_result = transition_hire(application)
+        ok = bool(update_result.get("ok") and posthire_result.get("ok"))
     status = "completed" if ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     reply = f"{name} is hired and employee setup is done." if ok else f"I could not complete hiring for {name}."
+    if not ok and update_result.get("error") == "stale_state":
+        reply = "This candidate’s status changed. Refresh and try again."
+    elif not ok and update_result.get("error") == "transition_not_allowed":
+        reply = f"{name} cannot be hired from the current stage."
     result_payload = {
         "application": json_safe(application),
         "update": update_result,
