@@ -22,8 +22,6 @@ sys.path.insert(0, str(ROOT))
 def _make_text_pdf(path: Path, text: str) -> None:
     """Create a real text PDF via reportlab (required for Poppler digital path proof)."""
     from reportlab.lib.pagesizes import A4
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.pdfgen import canvas
 
     c = canvas.Canvas(str(path), pagesize=A4)
