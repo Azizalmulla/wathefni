@@ -74,6 +74,7 @@ run_delivery_sweep = _outbound_delivery.run_delivery_sweep
 import attendance_import as _attendance_import  # noqa: E402
 import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
+import cv_docx as _cv_docx  # noqa: E402
 import cv_extraction as _cv_extraction  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
@@ -20829,12 +20830,15 @@ def extract_candidate_cv_document(
         except Exception as exc:
             return _cv_extraction.ExtractionResult(text="", method="text", error=str(exc))
     if guessed in {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"} or suffix == ".docx":
-        text = docx_text_preview(path)
-        return _cv_extraction.ExtractionResult(
-            text=text,
-            method="docx-stdlib",
-            quality_ok=bool(text and _cv_extraction.cv_text_quality_ok(text)),
-            error=None if text else "no_text_extracted",
+        # Local-first DOCX v2: structure/provenance locally; Mistral only for
+        # embedded text-candidate images. Ordinary DOCX text never calls OCR.
+        db_execute = _cv_db_execute_factory(cur) if cur is not None else None
+        return _cv_docx.extract_docx_document(
+            path,
+            company_code=company_code,
+            document_id=document_id,
+            app_key=app_key,
+            db_execute=db_execute,
         )
     db_execute = _cv_db_execute_factory(cur) if cur is not None else None
     return _cv_extraction.extract_cv_document(
@@ -40516,22 +40520,14 @@ def generate_candidate_cv_pdf_preview(application: dict[str, Any], cv: dict[str,
 
 
 def docx_text_preview(path: Path) -> str:
+    """Local-only DOCX preview (headers/footers/tables/textboxes). Never calls OCR."""
     try:
-        with zipfile.ZipFile(path) as archive:
-            document_xml = archive.read("word/document.xml")
+        blocks, _images, meta = _cv_docx.parse_docx_local(Path(path))
+        if meta.get("corrupted"):
+            return ""
+        return _cv_docx.blocks_to_text(blocks)
     except Exception:
         return ""
-    try:
-        root = ElementTree.fromstring(document_xml)
-    except Exception:
-        return ""
-    namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
-    paragraphs: list[str] = []
-    for paragraph in root.iter(f"{namespace}p"):
-        text = "".join(node.text or "" for node in paragraph.iter(f"{namespace}t")).strip()
-        if text:
-            paragraphs.append(text)
-    return "\n\n".join(paragraphs).strip()
 
 
 def cv_preview_html(*, app_key: str, filename: str, mime_type: str, body: str, note: str | None = None) -> HTMLResponse:
