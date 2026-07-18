@@ -776,6 +776,22 @@ def build_recruiting_workspace_capabilities(app_mod: Any, context: dict[str, Any
             reason="module_disabled" if not prehire else "action_forbidden",
             confirmation_required=True,
         ),
+        "employment_offers": _feature(
+            enabled=_module_on(app_mod, company, "employment_offers") and (
+                "offer.approve" in perms
+                or "offer.record_response" in perms
+                or "offer.withdraw" in perms
+                or "prehire.read" in perms
+            ),
+            actions=(
+                (["read"] if "prehire.read" in perms else [])
+                + (["approve", "return_draft"] if "offer.approve" in perms else [])
+                + (["record_accept", "record_decline"] if "offer.record_response" in perms else [])
+                + (["withdraw"] if "offer.withdraw" in perms else [])
+            ),
+            reason="module_disabled" if not _module_on(app_mod, company, "employment_offers") else "action_forbidden",
+            confirmation_required=True,
+        ),
         "interview_status": _feature(
             enabled=can_read or can_interview,
             actions=["read"] if (can_read or can_interview) else [],

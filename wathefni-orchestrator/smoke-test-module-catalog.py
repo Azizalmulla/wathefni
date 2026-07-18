@@ -35,8 +35,8 @@ def main() -> int:
     # Catalog invariants are dependency-free and run everywhere.
     keys = [module.key for module in catalog.MODULE_CATALOG]
     check("catalog module keys are unique", len(keys) == len(set(keys)))
-    check("catalog contains exactly the 11 canonical product modules", set(keys) == {
-        "pre_hiring", "assessments", "video_interviews", "onboarding",
+    check("catalog contains exactly the 12 canonical product modules", set(keys) == {
+        "pre_hiring", "assessments", "video_interviews", "employment_offers", "onboarding",
         "compliance", "attendance", "shifts", "leave", "payroll",
         "analytics", "employee_app",
     })
@@ -56,6 +56,8 @@ def main() -> int:
     check("legacy post_hiring alias remains backward compatible", catalog.normalize_module_key("post-hiring") == "onboarding")
     check("assessments hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["assessments"].depends_on == ("pre_hiring",))
     check("video_interviews hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["video_interviews"].depends_on == ("pre_hiring",))
+    check("employment_offers hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["employment_offers"].depends_on == ("pre_hiring",))
+    check("offers alias maps to employment_offers", catalog.normalize_module_key("offers") == "employment_offers")
     check("workforce ops modules remain independently selectable", all(
         not catalog.MODULE_BY_KEY[key].depends_on
         for key in ("attendance", "shifts", "leave", "payroll")
@@ -126,6 +128,9 @@ def main() -> int:
         context = {
             "company_code": "POSTHIREONLY",
             "actor_user_id": "smoke-owner",
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "smoke-owner",
+            "permission_subject_company": "POSTHIREONLY",
             "actor_role": "owner",
             "access": {
                 "role": "owner",

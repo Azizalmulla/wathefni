@@ -2783,6 +2783,9 @@ def _ensure_schema_impl() -> None:
             import recruiting_lifecycle as _rl
 
             _rl.ensure_lifecycle_schema(cur)
+            import offer_lifecycle as _offers
+
+            _offers.ensure_offer_schema(cur)
         conn.commit()
 
 
@@ -5803,11 +5806,11 @@ _POSTHIRE_PERMS_TEAM_MANAGER = {
 }
 
 ROLE_PERMISSIONS = {
-    "owner": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
-    "hr_manager": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
+    "owner": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
+    "hr_manager": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
     "manager": set(_POSTHIRE_PERMS_TEAM_MANAGER),
-    "recruiter": {"prehire.read", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "report.export"},
-    "hiring_manager": {"prehire.read", "interview.manage", "report.export", *_POSTHIRE_PERMS_MANAGER},
+    "recruiter": {"prehire.read", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.send", "offer.withdraw", "report.export"},
+    "hiring_manager": {"prehire.read", "interview.manage", "offer.approve", "report.export", *_POSTHIRE_PERMS_MANAGER},
     "viewer": {"prehire.read", *_POSTHIRE_PERMS_VIEWER},
 }
 
@@ -5816,7 +5819,15 @@ EMPLOYEE_PERMISSION_SCOPES = {
     "employees.manage",
     "employees.status.approve",
 }
-KNOWN_DASHBOARD_PERMISSIONS = set().union(*ROLE_PERMISSIONS.values(), EMPLOYEE_PERMISSION_SCOPES)
+# Grant-only offer scopes — never inferred from role defaults.
+OFFER_GRANT_ONLY_PERMISSIONS = {
+    "offer.hire_override",
+}
+KNOWN_DASHBOARD_PERMISSIONS = set().union(
+    *ROLE_PERMISSIONS.values(),
+    EMPLOYEE_PERMISSION_SCOPES,
+    OFFER_GRANT_ONLY_PERMISSIONS,
+)
 
 
 def normalize_hr_role(role: str | None) -> str:
@@ -5842,6 +5853,7 @@ def dashboard_effective_permissions_for_user(
     role_key = normalize_hr_role(data.get("role"))
     permissions = set(ROLE_PERMISSIONS.get(role_key, ROLE_PERMISSIONS["viewer"]))
     permissions.difference_update(EMPLOYEE_PERMISSION_SCOPES)
+    permissions.difference_update(OFFER_GRANT_ONLY_PERMISSIONS)
     company = str(data.get("company_code") or "").strip().upper()
     user_id = str(data.get("user_id") or "").strip()
     if not company or not user_id:
@@ -32970,6 +32982,13 @@ class DashboardCandidateMessage(BaseModel):
     account_id: str | None = "default"
 
 
+class DashboardHireRequest(BaseModel):
+    hire_override: bool = False
+    override_reason: str | None = None
+    confirm: bool = False
+    confirmation_token: str | None = None
+
+
 class DashboardInterviewStateRequest(BaseModel):
     status: str
 
@@ -35229,6 +35248,9 @@ def dashboard_auth_logout(authorization: str | None = Header(default=None), x_da
 # Registered here so routes precede the SPA catch-all at /dashboard/{asset_path:path}.
 _operator_mobile.register_operator_mobile_routes(sys.modules[__name__])
 _operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__])
+import offer_routes as _offer_routes
+
+_offer_routes.register_offer_routes(app, sys.modules[__name__])
 
 
 @app.post("/dashboard/team/invites/accept")
@@ -37204,7 +37226,147 @@ def dashboard_candidate_name(row: dict[str, Any]) -> str | None:
     return None if name == "Unknown" else name
 
 
-def prehire_application_summary(row: dict[str, Any], *, include_raw: bool = False, include_assessment: bool = True) -> dict[str, Any]:
+def _application_intake_source(row: dict[str, Any], raw_json: dict[str, Any]) -> str:
+    intake = raw_json.get("intake") if isinstance(raw_json.get("intake"), dict) else {}
+    import_meta = raw_json.get("import") if isinstance(raw_json.get("import"), dict) else {}
+    source = str(
+        intake.get("source")
+        or import_meta.get("source")
+        or raw_json.get("intake_source")
+        or raw_json.get("source")
+        or row.get("data_source")
+        or ""
+    ).strip().lower()
+    if any(token in source for token in ("whatsapp", "apply_code", "qr")):
+        return "whatsapp"
+    if any(token in source for token in ("bulk", "spreadsheet", "csv", "import")):
+        return "bulk_import"
+    if any(token in source for token in ("email", "mailbox")):
+        return "email"
+    if any(token in source for token in ("manual", "dashboard", "operator")):
+        return "manual"
+    if source in {"", "production", "staging", "test", "legacy", "unknown"}:
+        return "unknown"
+    return source or "unknown"
+
+
+def _application_ui_contract(
+    row: dict[str, Any],
+    *,
+    include_assessment: bool,
+    permissions: set[str] | list[str] | None,
+) -> dict[str, Any]:
+    import recruiting_lifecycle as _rl
+
+    raw_json = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
+    cv = raw_json.get("cv") if isinstance(raw_json.get("cv"), dict) else {}
+    cv_processing = cv.get("processing") if isinstance(cv.get("processing"), dict) else {}
+    screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
+    communication = row.get("communication_json") if isinstance(row.get("communication_json"), dict) else {}
+    review_task = row.get("review_task_json") if isinstance(row.get("review_task_json"), dict) else {}
+    lifecycle_event = row.get("lifecycle_event_json") if isinstance(row.get("lifecycle_event_json"), dict) else {}
+    raw_status = str(row.get("status") or "")
+    canonical_stage = _rl.normalize_stage(raw_status) or raw_status
+    communication_status = _rl.normalize_communication_status(
+        communication.get("status") or (dashboard_delivery_status(communication) if communication else None)
+    )
+    cv_received = bool(row.get("cv_received") is True or cv)
+    cv_status = str(
+        cv_processing.get("status")
+        or cv.get("processing_status")
+        or ((cv.get("storage") or {}).get("status") if isinstance(cv.get("storage"), dict) else "")
+        or ("received" if cv_received else "not_received")
+    ).strip().lower()
+    screening_status = str(row.get("screening_status") or screening.get("status") or "not_started").strip().lower()
+
+    automatic_activity: list[str] = []
+    if cv_received:
+        automatic_activity.append("cv_received")
+    if canonical_stage not in {"", "awaiting_cv", "cv_processing"}:
+        automatic_activity.append("cv_processed")
+    if screening_status not in {"", "not_started", "pending"}:
+        automatic_activity.append("screening_updated")
+    if review_task:
+        automatic_activity.append("review_task_created")
+
+    waiting_for_hr: list[str] = []
+    if canonical_stage == "ready_for_review":
+        waiting_for_hr.append("review_candidate")
+    elif canonical_stage == "shortlisted":
+        waiting_for_hr.append("schedule_interview")
+    elif canonical_stage == "interview":
+        interview = row.get("interview_json") if isinstance(row.get("interview_json"), dict) else {}
+        if interview.get("status") == "completed" and interview.get("feedback_status") != "feedback_complete":
+            waiting_for_hr.append("record_interview_notes")
+        elif interview.get("status") == "completed":
+            waiting_for_hr.append("decide_after_interview")
+    if communication_status == "failed":
+        waiting_for_hr.append("resolve_communication")
+    elif canonical_stage in {"shortlisted", "interview", "hired", "rejected"} and communication_status != "sent":
+        waiting_for_hr.append("inform_candidate")
+
+    allowed_actions: list[str] = []
+    if permissions is not None:
+        perms = {str(value) for value in permissions}
+        allowed_actions = _rl.allowed_actions_for_stage(canonical_stage, perms)
+        if cv_received and "prehire.read" in perms:
+            allowed_actions.extend(["preview_cv", "download_cv"])
+        if "candidate.manage" in perms:
+            allowed_actions.extend(["notify", "generate_evaluation"])
+        if include_assessment and cv_received and "assessment.manage" in perms:
+            allowed_actions.append("send_assessment")
+        if cv_received and "interview.manage" in perms:
+            allowed_actions.append("send_video_interview")
+        allowed_actions = list(dict.fromkeys(allowed_actions))
+
+    stage_changed_at = lifecycle_event.get("created_at")
+    sent_at = communication.get("sent_at")
+    stage_changed_without_contact = (
+        canonical_stage in {"shortlisted", "interview", "hired", "rejected"}
+        and (
+            communication_status != "sent"
+            or (
+                stage_changed_at is not None
+                and sent_at is not None
+                and str(sent_at) < str(stage_changed_at)
+            )
+        )
+    )
+    return {
+        "canonical_stage": canonical_stage,
+        "status_label": _rl.stage_label(canonical_stage),
+        "intake_source": _application_intake_source(row, raw_json),
+        "cv_processing": {
+            "status": cv_status,
+            "received": cv_received,
+            "automatic": True,
+        },
+        "screening": {
+            "status": screening_status,
+            "automatic": bool(screening),
+        },
+        "communication": {
+            "status": communication_status,
+            "message_kind": communication.get("message_kind"),
+            "channel": communication.get("channel") or communication.get("notification_channel"),
+            "sent_at": json_safe(sent_at),
+            "failed_at": json_safe(communication.get("failed_at")),
+            "last_error": communication.get("last_error"),
+            "stage_changed_without_contact": stage_changed_without_contact,
+        },
+        "automatic_activity": automatic_activity,
+        "waiting_for_hr": waiting_for_hr,
+        "allowed_actions": allowed_actions,
+    }
+
+
+def prehire_application_summary(
+    row: dict[str, Any],
+    *,
+    include_raw: bool = False,
+    include_assessment: bool = True,
+    permissions: set[str] | list[str] | None = None,
+) -> dict[str, Any]:
     raw_json = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
     candidate_raw = row.get("candidate_raw_json") if isinstance(row.get("candidate_raw_json"), dict) else {}
     screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
@@ -37246,6 +37408,13 @@ def prehire_application_summary(row: dict[str, Any], *, include_raw: bool = Fals
     if include_assessment:
         payload["assessment"] = json_safe(assessment) if assessment else None
     payload["interview"] = json_safe(interview) if interview else None
+    payload.update(
+        _application_ui_contract(
+            row,
+            include_assessment=include_assessment,
+            permissions=permissions,
+        )
+    )
     rank_evaluation = row.get("rank_evaluation_json") if isinstance(row.get("rank_evaluation_json"), dict) else None
     if rank_evaluation:
         payload["ranking"] = rank_evaluation
@@ -38209,7 +38378,42 @@ def update_application_interview_snapshot(app_key: str, interview: dict[str, Any
 
 
 def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
+    import recruiting_lifecycle as _rl
+
     ai_summary = row.get("ai_summary") if isinstance(row.get("ai_summary"), dict) else {}
+    application_stage = _rl.normalize_stage(row.get("application_status")) or str(
+        row.get("application_status") or ""
+    )
+    if row.get("candidate_notified") or row.get("candidate_invited") or row.get("calendar_invite_sent"):
+        communication_status = "sent"
+    elif str(row.get("status") or "") == "cancelled":
+        communication_status = "intentionally_skipped"
+    else:
+        communication_status = "pending"
+    notes_status = (
+        "complete"
+        if row.get("feedback_status") == "feedback_complete" or str(row.get("notes") or "").strip()
+        else "pending"
+    )
+    if row.get("consent_accepted_at"):
+        candidate_confirmation = "confirmed"
+    elif communication_status == "sent":
+        candidate_confirmation = "not_confirmed"
+    else:
+        candidate_confirmation = "not_requested"
+    interview_status = str(row.get("status") or "")
+    if communication_status == "failed":
+        next_human_action = "resolve_invitation"
+    elif interview_status in {"scheduled", "rescheduled"} and communication_status != "sent":
+        next_human_action = "send_invitation"
+    elif interview_status == "completed" and notes_status == "pending":
+        next_human_action = "record_notes"
+    elif interview_status == "completed":
+        next_human_action = "decide_application"
+    elif interview_status in {"no_show", "cancelled"}:
+        next_human_action = "review_next_step"
+    else:
+        next_human_action = "conduct_interview"
     summary = {
         "interview_id": str(row.get("interview_id") or ""),
         "company_code": row.get("company_code"),
@@ -38219,6 +38423,8 @@ def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
         "candidate_email": row.get("candidate_email"),
         "position_code": row.get("position_code"),
         "position_title": row.get("position_title"),
+        "application_stage": application_stage,
+        "application_stage_label": _rl.stage_label(application_stage) if application_stage else None,
         "interview_type": row.get("interview_type") or ("async_video" if row.get("source") == "async_video" else "live"),
         "status": row.get("status"),
         "feedback_status": row.get("feedback_status"),
@@ -38232,11 +38438,15 @@ def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
         "calendar_invite_sent": bool(row.get("calendar_invite_sent")),
         "candidate_invited": bool(row.get("candidate_invited")),
         "candidate_notified": bool(row.get("candidate_notified")),
+        "communication_status": communication_status,
+        "invitation_status": communication_status,
+        "candidate_confirmation": candidate_confirmation,
         "notification_channel": row.get("notification_channel"),
         "sent_subject": row.get("sent_subject"),
         "sent_body": row.get("sent_body"),
         "invite_sent_at": json_safe(row.get("invite_sent_at")),
         "notes": row.get("notes"),
+        "notes_status": notes_status,
         "transcript": row.get("transcript"),
         "ai_summary": json_safe(ai_summary),
         "public_link_expires_at": json_safe(row.get("public_link_expires_at")),
@@ -38250,6 +38460,7 @@ def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
         "updated_by_phone": row.get("updated_by_phone"),
         "created_at": json_safe(row.get("created_at")),
         "updated_at": json_safe(row.get("updated_at")),
+        "next_human_action": next_human_action,
     }
     if summary.get("interview_type") == "async_video" or row.get("source") == "async_video":
         interview_id = summary["interview_id"]
@@ -39959,6 +40170,7 @@ def dashboard_interviews_payload(
     interviewer: str | None = None,
     limit: int = 100,
     offset: int = 0,
+    permissions: set[str] | list[str] | None = None,
 ) -> dict[str, Any]:
     where = [
         "ci.company_code=%s",
@@ -40024,7 +40236,13 @@ def dashboard_interviews_payload(
             total = int((cur.fetchone() or {}).get("count") or 0)
             cur.execute(
                 f"""
-                SELECT ci.*
+                SELECT ci.*,
+                       (
+                         SELECT a.status
+                         FROM applications a
+                         WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key
+                         LIMIT 1
+                       ) AS application_status
                 FROM candidate_interviews ci
                 WHERE {where_sql}
                 ORDER BY
@@ -40043,6 +40261,18 @@ def dashboard_interviews_payload(
                 [*params, limit_value, offset_value],
             )
             interviews = [candidate_interview_summary(dict(row)) for row in cur.fetchall()]
+            if permissions is not None:
+                perms = {str(value) for value in permissions}
+                for interview in interviews:
+                    allowed_actions: list[str] = []
+                    if "interview.manage" in perms:
+                        status_value = str(interview.get("status") or "")
+                        if status_value in {"scheduled", "rescheduled"}:
+                            allowed_actions.extend(["mark_completed", "mark_no_show", "cancel_interview"])
+                        if interview.get("notes_status") != "complete":
+                            allowed_actions.append("write_notes")
+                        allowed_actions.append("open_candidate")
+                    interview["allowed_actions"] = allowed_actions
             cur.execute(
                 """
                 SELECT status, COUNT(*) AS count
@@ -40832,6 +41062,7 @@ def prehire_applications_query(
     activity_to: str | None = None,
     sort: str | None = None,
     include_assessment: bool = True,
+    permissions: set[str] | list[str] | None = None,
 ) -> dict[str, Any]:
     cv_filter = str(cv_status or "").strip().lower()
     base_predicate = production_application_predicate("a") if cv_filter in {"all", "incomplete", "missing", "no_cv"} else reviewable_application_predicate("a")
@@ -40931,6 +41162,30 @@ def prehire_applications_query(
                   ORDER BY CASE cre.source WHEN 'profile_evaluation' THEN 0 ELSE 1 END, cre.created_at DESC
                   LIMIT 1
                 ) latest_eval ON TRUE
+                LEFT JOIN LATERAL (
+                  SELECT to_jsonb(ode) AS communication_json
+                  FROM outbound_delivery_events ode
+                  WHERE ode.subject_key=a.app_key
+                    AND (ode.company_code=a.company_code OR ode.company_code IS NULL)
+                  ORDER BY ode.created_at DESC
+                  LIMIT 1
+                ) latest_delivery ON TRUE
+                LEFT JOIN LATERAL (
+                  SELECT to_jsonb(ht) AS review_task_json
+                  FROM hr_tasks ht
+                  WHERE ht.company_code=a.company_code
+                    AND ht.task_type='candidate_ready_for_review'
+                    AND ht.metadata->>'app_key'=a.app_key
+                  ORDER BY ht.created_at DESC
+                  LIMIT 1
+                ) latest_review_task ON TRUE
+                LEFT JOIN LATERAL (
+                  SELECT to_jsonb(ale) AS lifecycle_event_json
+                  FROM application_lifecycle_events ale
+                  WHERE ale.company_code=a.company_code AND ale.app_key=a.app_key
+                  ORDER BY ale.created_at DESC
+                  LIMIT 1
+                ) latest_lifecycle_event ON TRUE
     """
     sort_key = str(sort or "newest").strip().lower()
     order_sql = {
@@ -40958,7 +41213,10 @@ def prehire_applications_query(
                        c.profile AS candidate_profile, c.raw_json AS candidate_raw_json,
                        latest_assessment.assessment_json,
                        latest_interview.interview_json,
-                       latest_eval.rank_evaluation_json
+                       latest_eval.rank_evaluation_json,
+                       latest_delivery.communication_json,
+                       latest_review_task.review_task_json,
+                       latest_lifecycle_event.lifecycle_event_json
                 FROM applications a
                 {joins_sql}
                 WHERE {where_sql}
@@ -40972,7 +41230,14 @@ def prehire_applications_query(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "applications": [prehire_application_summary(row, include_assessment=include_assessment) for row in rows],
+        "applications": [
+            prehire_application_summary(
+                row,
+                include_assessment=include_assessment,
+                permissions=permissions,
+            )
+            for row in rows
+        ],
     }
 
 
@@ -41426,6 +41691,7 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
         limit=10,
         offset=0,
         include_assessment=assessments_enabled,
+        permissions=context.get("permissions") or [],
     )
     positions = dashboard_prehire_positions_payload(company, limit=25)
     return {
@@ -41541,6 +41807,7 @@ def dashboard_prehire_applications(
             activity_to=(activity_to or "").strip() or None,
             sort=(sort or "").strip() or None,
             include_assessment=company_has_module(company, "assessments"),
+            permissions=context.get("permissions") or [],
         ),
     }
 
@@ -41773,6 +42040,7 @@ def dashboard_prehire_application_detail(app_key: str, context: dict[str, Any] =
         application,
         include_raw=True,
         include_assessment=company_has_module(company, "assessments"),
+        permissions=context.get("permissions") or [],
     )
     latest_evaluation = latest_application_rank_evaluation(company, app_key)
     if latest_evaluation:
@@ -42102,6 +42370,7 @@ def dashboard_prehire_interviews(
         interviewer=interviewer,
         limit=limit,
         offset=offset,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -45444,10 +45713,49 @@ def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(pre
 
 
 @app.post("/dashboard/prehire/applications/{app_key}/hire")
-def dashboard_prehire_hire(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_hire(
+    app_key: str,
+    body: DashboardHireRequest | None = None,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
     require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
+    payload = body or DashboardHireRequest()
+    hire_override = bool(payload.hire_override)
+    override_reason = payload.override_reason
+    if hire_override and not payload.confirm:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "override_confirm_required", "message": "Confirm hire override explicitly."},
+        )
+    import offer_service as _offer_service
+    import offer_lifecycle as _offers
+
+    try:
+        _offer_service.enforce_hire_gate(
+            sys.modules[__name__],
+            company_code=company,
+            app_key=app_key,
+            permissions=set(context.get("permissions") or []),
+            hire_override=hire_override,
+            override_reason=str(override_reason or "") or None,
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_subject=str(
+                context.get("actor_user_id")
+                or context.get("permission_subject_user_id")
+                or (context.get("hr_user") or {}).get("user_id")
+                or ""
+            )
+            or None,
+            actor_type="human",
+            confirmation_token=str(payload.confirmation_token or "") or None,
+            confirmed=bool(payload.confirm) if hire_override else False,
+            expected_from_stage=str(application.get("status") or "") or None,
+            idempotency_key=f"web-hire-override:{company}:{app_key}:{payload.confirmation_token or payload.confirm}",
+        )
+    except _offers.OfferAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
     if _prehire_registry_enabled("hire_candidate"):
         return run_prehire_registry_action(context, "hire_candidate", {}, app_key=app_key)
     if canonical_lifecycle_enabled():
@@ -45486,6 +45794,7 @@ def dashboard_prehire_hire(app_key: str, context: dict[str, Any] = Depends(prehi
         "source": "dashboard",
         "company_code": company,
         "requested_by": context.get("hr_user"),
+        "hire_override": hire_override,
     }
     return dashboard_prehire_mutation_response(
         action_type="hire_candidate",

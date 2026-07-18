@@ -97,9 +97,20 @@ import {
   updateInterviewStatus,
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
+import {
+  actionLabel as recruitingActionLabel,
+  canonicalStageLabel,
+  communicationLabel,
+  facetStatusLabel,
+  intakeSourceLabel,
+  recruitingCopy,
+  workflowItemLabel,
+  type RecruitingLocale,
+} from '@/lib/recruitingLifecycle'
 import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
 import { ActivityLog } from '@/components/ActivityLog'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
+import { OfferPanel } from '@/components/OfferPanel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -474,6 +485,9 @@ function App() {
   const [access, setAccess] = useState<DashboardAccess>(() => normalizedAccess(storedAccess()))
   const [page, setPage] = useState<Page>(() => (new URLSearchParams(window.location.search).get('page') === 'settings' ? 'settings' : 'overview'))
   const [lastWorkPage, setLastWorkPage] = useState<Page>('overview')
+  const [recruitingLocale, setRecruitingLocale] = useState<RecruitingLocale>(() =>
+    localStorage.getItem('wathefni_recruiting_locale') === 'ar' ? 'ar' : 'en',
+  )
   const [workspaceBootstrap, setWorkspaceBootstrap] = useState<DashboardBootstrapResponse | null>(null)
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [applications, setApplications] = useState<ApplicationsResponse | null>(null)
@@ -591,9 +605,7 @@ function App() {
   const dashboardLoaded = Boolean(moduleState && (!prehireEnabled || (summary && applications && notifications && interviews && reports)))
   const userAccess = moduleState?.access || null
   const showingInviteAcceptance = Boolean(inviteToken.trim())
-  const canManageCandidates = hasDashboardPermission(userAccess, 'candidate.manage')
   const canImportCandidates = hasDashboardPermission(userAccess, 'candidate.import')
-  const canDecideCandidates = hasDashboardPermission(userAccess, 'candidate.decide')
   const canManageInterviews = hasDashboardPermission(userAccess, 'interview.manage')
   const canManageAssessments = hasDashboardPermission(userAccess, 'assessment.manage')
   const canExportReports = hasDashboardPermission(userAccess, 'report.export')
@@ -1276,7 +1288,15 @@ function App() {
       setNoticeOk(result.reply || `${label} completed.`)
       if (result.application) {
         const updatedApplication = result.application
-        setSelected((current) => (current?.app_key === updatedApplication.app_key ? updatedApplication : current))
+        setSelected((current) =>
+          current?.app_key === updatedApplication.app_key
+            ? {
+                ...current,
+                ...updatedApplication,
+                allowed_actions: updatedApplication.allowed_actions || current.allowed_actions,
+              }
+            : current,
+        )
         setApplications((current) =>
           current
             ? { ...current, applications: current.applications.map((item) => (item.app_key === updatedApplication.app_key ? updatedApplication : item)) }
@@ -1284,7 +1304,7 @@ function App() {
         )
       }
     } catch (error) {
-      setNoticeErr(friendlyDashboardError(error, `${label} needs another try.`))
+      setNoticeErr(friendlyDashboardError(error, `${label} needs another try.`, recruitingLocale))
       setBusy(false)
       setRunningAction(null)
       return
@@ -1325,7 +1345,7 @@ function App() {
       setNoticeOk(interview.interview_type === 'async_video' && nextStatus === 'completed' ? 'Video interview marked reviewed.' : `Interview marked ${stageLabel(nextStatus)}.`)
       revalidatePrehire()
     } catch (error) {
-      setNoticeErr(friendlyDashboardError(error, 'Could not update the interview.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not update the interview.', recruitingLocale))
     } finally {
       setBusy(false)
     }
@@ -1345,7 +1365,7 @@ function App() {
       setNoticeOk(result.reply || 'Interview notes saved.')
       revalidatePrehire()
     } catch (error) {
-      setNoticeErr(friendlyDashboardError(error, 'Could not save interview notes.'))
+      setNoticeErr(friendlyDashboardError(error, 'Could not save interview notes.', recruitingLocale))
     } finally {
       setBusy(false)
     }
@@ -1858,6 +1878,12 @@ function App() {
               )}
               {activePage === 'candidates' && (
                 <CandidatesPage
+                  locale={recruitingLocale}
+                  onLocale={() => {
+                    const next = recruitingLocale === 'ar' ? 'en' : 'ar'
+                    localStorage.setItem('wathefni_recruiting_locale', next)
+                    setRecruitingLocale(next)
+                  }}
                   importButton={
                     canImportCandidates ? (
                       <ImportCvButton
@@ -1917,6 +1943,12 @@ function App() {
               )}
               {activePage === 'interviews' && (
                 <InterviewsPage
+                  locale={recruitingLocale}
+                  onLocale={() => {
+                    const next = recruitingLocale === 'ar' ? 'en' : 'ar'
+                    localStorage.setItem('wathefni_recruiting_locale', next)
+                    setRecruitingLocale(next)
+                  }}
                   busy={busy}
                   interviews={interviews?.interviews || []}
                   limit={interviews?.limit || 25}
@@ -2070,6 +2102,7 @@ function App() {
 
           {selected ? (
             <CandidateDrawer
+              locale={recruitingLocale}
               access={access}
               busy={busy}
               runningAction={runningAction}
@@ -2085,13 +2118,17 @@ function App() {
                 openPage('interviews')
                 setSelected(null)
               }}
+              onScheduleInterview={() => {
+                setPage('ai')
+                void askDashboardAssistant(`Schedule an interview for application ${selected.app_key}. Ask me for any missing date, time, or channel details before preparing the confirmation.`)
+                setSelected(null)
+              }}
               onPreviewCv={previewCv}
               canManageAssessments={canManageAssessments}
-              canManageCandidates={canManageCandidates}
               canManageInterviews={canManageInterviews}
-              canDecideCandidates={canDecideCandidates}
               setMessage={setMessage}
               videoInterviewsEnabled={dashboardModuleEnabled(moduleState, 'video_interviews')}
+              employmentOffersEnabled={dashboardModuleEnabled(moduleState, 'employment_offers')}
             />
           ) : null}
 
@@ -2410,8 +2447,10 @@ function CandidatesPage({
   filters,
   importButton,
   importReview,
+  locale,
   offset,
   onFilter,
+  onLocale,
   onPage,
   onPreviewCv,
   onSelect,
@@ -2429,8 +2468,10 @@ function CandidatesPage({
   filters: CandidateFilters
   importButton?: ReactNode
   importReview?: ReactNode
+  locale: RecruitingLocale
   offset: number
   onFilter: () => void
+  onLocale: () => void
   onPage: (offset: number) => void
   onPreviewCv: (application: ApplicationSummary) => void
   onSelect: (application: ApplicationSummary) => void
@@ -2459,17 +2500,22 @@ function CandidatesPage({
     sort: 'newest',
   })
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {importReview}
       <Card>
       <CardHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <CardTitle>Candidate list</CardTitle>
-              <CardDescription>Select a candidate to review evidence and choose the next step.</CardDescription>
+              <CardTitle>{recruitingCopy(locale, 'candidateList')}</CardTitle>
+              <CardDescription>{recruitingCopy(locale, 'candidateListDescription')}</CardDescription>
             </div>
-            {importButton ? <div className="shrink-0">{importButton}</div> : null}
+            <div className="flex shrink-0 items-center gap-2">
+              <Button onClick={onLocale} size="sm" type="button" variant="secondary">
+                {recruitingCopy(locale, 'language')}
+              </Button>
+              {importButton}
+            </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <Input className="w-full sm:w-64" onChange={(event) => setQuery(event.target.value)} placeholder="Search candidates" value={query} />
@@ -2551,16 +2597,18 @@ function CandidatesPage({
         ) : (
           <>
         <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[1180px] text-left text-sm">
             <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
               <tr>
-                <th className="px-4 py-3">Candidate</th>
-                <th className="px-4 py-3">Job</th>
-                <th className="px-4 py-3">Stage</th>
-                <th className="px-4 py-3">CV</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'candidate')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'job')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'entryMethod')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'applicationStage')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'cvProcessing')}</th>
                 {assessmentEnabled ? <th className="px-4 py-3">Assessment</th> : null}
-                <th className="px-4 py-3">Last activity</th>
-                <th className="px-4 py-3">Actions</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'communication')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'nextHumanAction')}</th>
+                <th className="px-4 py-3">{recruitingCopy(locale, 'operatorActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line/45 bg-panel/42">
@@ -2569,6 +2617,7 @@ function CandidatesPage({
                   application={application}
                   assessmentEnabled={assessmentEnabled}
                   key={application.app_key}
+                  locale={locale}
                   onPreviewCv={onPreviewCv}
                   onSelect={onSelect}
                 />
@@ -2600,44 +2649,43 @@ function CandidateDrawer({
   assessmentEnabled,
   busy,
   runningAction,
-  canDecideCandidates,
   canManageAssessments,
-  canManageCandidates,
   canManageInterviews,
   candidate,
+  locale,
   message,
   mutate,
   onClose,
   onOpenAssessments,
   onOpenInterviews,
+  onScheduleInterview,
   onPreviewCv,
   setMessage,
   videoInterviewsEnabled,
+  employmentOffersEnabled,
 }: {
   access: DashboardAccess
   assessmentEnabled: boolean
   busy: boolean
   runningAction: string | null
-  canDecideCandidates: boolean
   canManageAssessments: boolean
-  canManageCandidates: boolean
   canManageInterviews: boolean
   candidate: ApplicationSummary
+  locale: RecruitingLocale
   message: string
   mutate: (label: string, action: () => Promise<MutationResponse>, key?: string) => Promise<void>
   onClose: () => void
   onOpenAssessments: () => void
   onOpenInterviews: () => void
+  onScheduleInterview: () => void
   onPreviewCv: (application: ApplicationSummary) => void
   setMessage: (value: string) => void
   videoInterviewsEnabled: boolean
+  employmentOffersEnabled: boolean
 }) {
   const ranking = candidate.ranking
-  const evaluation = ranking?.gpt_evaluation
-  const primaryAction = candidatePrimaryAction(candidate, assessmentEnabled, videoInterviewsEnabled)
-  const recommendationText = assessmentEnabled
-    ? evaluation?.recommended_next_step
-    : safeModuleRecommendation(evaluation?.recommended_next_step, primaryAction.detail)
+  const allowedActions = new Set(candidate.allowed_actions || [])
+  const primaryAction = candidatePrimaryAction(candidate, assessmentEnabled, videoInterviewsEnabled, allowedActions)
   const actionKey = (id: string) => `${id}:${candidate.app_key}`
   const confirm = useConfirm()
   const who = candidateName(candidate)
@@ -2696,45 +2744,79 @@ function CandidateDrawer({
       return
     }
     if (primaryAction.id === 'shortlist') return void runShortlist()
-    if (primaryAction.id === 'follow_up') return runNotify(actionKey('follow_up'))
-    onOpenInterviews()
+    if (primaryAction.id === 'hire') return void runHire()
+    if (primaryAction.id === 'reject') return void runReject()
+    if (primaryAction.id === 'notify') return runNotify(actionKey('notify'))
+    if (primaryAction.id === 'schedule_interview') return onScheduleInterview()
   }
   const primaryRunning = runningAction === actionKey(primaryAction.id)
   const primaryDisabled =
-    busy ||
-    (primaryAction.id === 'send_assessment' && !canManageAssessments) ||
-    (primaryAction.id === 'send_video_interview' && (!canManageInterviews || !videoInterviewsEnabled)) ||
-    (primaryAction.id === 'shortlist' && !canManageCandidates) ||
-    (primaryAction.id === 'follow_up' && !canManageCandidates)
+    busy || primaryAction.id === 'none'
   return (
     <div className="fixed inset-0 z-30 bg-ink/25 backdrop-blur-[2px]" onClick={onClose}>
       <aside
         className="ml-auto flex h-full w-full max-w-3xl animate-[drawerIn_220ms_ease-out] flex-col overflow-y-auto border-l border-white/70 bg-panel/95 p-6 shadow-[0_28px_90px_rgba(24,20,15,0.18)] backdrop-blur-2xl"
+        dir={locale === 'ar' ? 'rtl' : 'ltr'}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone={statusTone(candidate.status)}>{stageLabel(candidate.status)}</Badge>
+              <Badge tone={statusTone(candidate.canonical_stage || candidate.status)}>
+                {canonicalStageLabel(candidate.canonical_stage || candidate.status, locale)}
+              </Badge>
               {ranking?.score != null ? <Badge>{Math.round(ranking.score)} / 100 fit</Badge> : null}
             </div>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">{candidateName(candidate)}</h2>
-            <p className="mt-1 text-sm text-subtle">{candidate.position?.title || candidate.position?.code || 'Unassigned job'}</p>
+            <p className="mt-1 text-sm text-subtle">
+              {recruitingCopy(locale, 'job')}: {candidate.position?.title || candidate.position?.code || (locale === 'ar' ? 'غير محددة' : 'Unassigned job')}
+            </p>
           </div>
           <Button onClick={onClose} variant="secondary">
             Close
           </Button>
         </div>
 
-        <DrawerStatusStrip application={candidate} assessmentEnabled={assessmentEnabled} />
+        {candidate.communication?.stage_changed_without_contact ? (
+          <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            <AlertTriangle className="mr-2 inline" size={16} />
+            {recruitingCopy(locale, 'notInformed')}
+          </div>
+        ) : null}
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Info label={recruitingCopy(locale, 'applicationStage')} value={canonicalStageLabel(candidate.canonical_stage || candidate.status, locale)} />
+          <Info label={recruitingCopy(locale, 'entryMethod')} value={intakeSourceLabel(candidate.intake_source || candidate.data_source, locale)} />
+          <Info label={recruitingCopy(locale, 'communication')} value={communicationLabel(candidate.communication?.status, locale)} />
+          <Info label={recruitingCopy(locale, 'cvProcessing')} value={facetStatusLabel(candidate.cv_processing?.status || (candidate.cv?.received ? 'received' : 'not_received'), locale)} />
+          <Info label={recruitingCopy(locale, 'screening')} value={facetStatusLabel(candidate.screening?.status || candidate.screening_status || 'not_started', locale)} />
+          <Info label={recruitingCopy(locale, 'nextHumanAction')} value={candidate.waiting_for_hr?.[0] ? workflowItemLabel(candidate.waiting_for_hr[0], locale) : recruitingCopy(locale, 'noPendingHr')} />
+        </div>
+
+        <section className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-line/60 bg-white/45 p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{recruitingCopy(locale, 'automaticActions')}</div>
+            <ul className="mt-2 space-y-1 text-sm text-text">
+              {(candidate.automatic_activity?.length ? candidate.automatic_activity : []).map((item) => <li key={item}>• {workflowItemLabel(item, locale)}</li>)}
+              {!candidate.automatic_activity?.length ? <li className="text-subtle">{recruitingCopy(locale, 'noAutomaticActions')}</li> : null}
+            </ul>
+          </div>
+          <div className="rounded-2xl border border-line/60 bg-white/45 p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{recruitingCopy(locale, 'waitingForHr')}</div>
+            <ul className="mt-2 space-y-1 text-sm text-text">
+              {(candidate.waiting_for_hr?.length ? candidate.waiting_for_hr : []).map((item) => <li key={item}>• {workflowItemLabel(item, locale)}</li>)}
+              {!candidate.waiting_for_hr?.length ? <li className="text-subtle">{recruitingCopy(locale, 'noPendingHr')}</li> : null}
+            </ul>
+          </div>
+        </section>
 
         <section className="mt-5 rounded-[1.45rem] border border-white/70 bg-white/58 p-4 shadow-[0_1px_0_rgba(255,255,255,0.82)_inset,0_12px_30px_rgba(24,20,15,0.055)] backdrop-blur">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">Recommended next action</div>
-              <div className="mt-1.5 text-[17px] font-semibold tracking-tight text-text">{primaryAction.label}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{recruitingCopy(locale, 'humanDecision')}</div>
+              <div className="mt-1.5 text-[17px] font-semibold tracking-tight text-text">{recruitingActionLabel(primaryAction.id, locale)}</div>
               <p className="mt-1.5 text-[13px] leading-5 text-subtle">
-                {recommendationText || primaryAction.detail}
+                {primaryAction.detail}
               </p>
             </div>
             <Textarea
@@ -2746,7 +2828,7 @@ function CandidateDrawer({
             />
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button disabled={primaryDisabled} onClick={runPrimaryAction}>
+            {primaryAction.id !== 'none' ? <Button disabled={primaryDisabled} onClick={runPrimaryAction}>
               {primaryRunning ? (
                 <Loader2 className="animate-spin" size={16} />
               ) : primaryAction.icon === 'video' ? (
@@ -2756,54 +2838,66 @@ function CandidateDrawer({
               ) : (
                 <UserCheck size={16} />
               )}
-              {primaryRunning ? 'Working…' : primaryAction.button}
-            </Button>
-            <Button disabled={!candidate.cv?.received} onClick={() => onPreviewCv(candidate)} title={!candidate.cv?.received ? 'CV not received yet' : undefined} variant="secondary">
-              <FileText size={16} /> Preview CV
-            </Button>
-            <details className="relative">
+              {primaryRunning ? 'Working…' : recruitingActionLabel(primaryAction.id, locale)}
+            </Button> : null}
+            {allowedActions.has('preview_cv') ? <Button disabled={!candidate.cv?.received} onClick={() => onPreviewCv(candidate)} title={!candidate.cv?.received ? 'CV not received yet' : undefined} variant="secondary">
+              <FileText size={16} /> {recruitingActionLabel('preview_cv', locale)}
+            </Button> : null}
+            {candidate.allowed_actions?.length ? <details className="relative">
               <summary className="inline-flex h-11 cursor-pointer items-center rounded-full px-4 text-sm font-semibold text-subtle transition hover:bg-[#f4e7cf]/45 hover:text-text">
-                More actions
+                {locale === 'ar' ? 'إجراءات أخرى' : 'More actions'}
               </summary>
               <div className="mt-2 grid gap-2 rounded-3xl border border-white/70 bg-panel/90 p-3 shadow-soft sm:grid-cols-2">
-                {assessmentEnabled ? (
+                {assessmentEnabled && allowedActions.has('send_assessment') ? (
                   <Button disabled={busy || !canManageAssessments} onClick={() => void runSendAssessment()} size="sm" variant="secondary">
-                    {runningAction === actionKey('send_assessment') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send assessment'}
+                    {runningAction === actionKey('send_assessment') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : recruitingActionLabel('send_assessment', locale)}
                   </Button>
                 ) : null}
-                {videoInterviewsEnabled ? (
+                {videoInterviewsEnabled && allowedActions.has('send_video_interview') ? (
                   <Button disabled={busy || !canManageInterviews} onClick={() => void runSendVideoInterview()} size="sm" variant="secondary">
-                    {runningAction === actionKey('send_video_interview') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : 'Send video interview'}
+                    {runningAction === actionKey('send_video_interview') ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : recruitingActionLabel('send_video_interview', locale)}
                   </Button>
                 ) : null}
-                <Button disabled={busy || !canManageCandidates} onClick={() => void runShortlist()} size="sm" variant="secondary">
-                  {runningAction === actionKey('shortlist') ? <><Loader2 className="animate-spin" size={14} /> Shortlisting…</> : 'Shortlist'}
-                </Button>
-                <Button disabled={busy || !canManageCandidates} onClick={() => void runNotify(actionKey('notify'))} size="sm" variant="secondary">
-                  {runningAction === actionKey('notify') ? <><Loader2 className="animate-spin" size={14} /> Notifying…</> : 'Notify'}
-                </Button>
-                <Button disabled={busy || !canDecideCandidates} onClick={() => void runHire()} size="sm" variant="secondary">
-                  {runningAction === actionKey('hire') ? <><Loader2 className="animate-spin" size={14} /> Hiring…</> : 'Hire'}
-                </Button>
-                <Button disabled={busy || !canDecideCandidates} onClick={() => void runReject()} size="sm" variant="secondary">
-                  {runningAction === actionKey('reject') ? <><Loader2 className="animate-spin" size={14} /> Rejecting…</> : 'Reject candidate'}
-                </Button>
+                {allowedActions.has('shortlist') ? <Button disabled={busy} onClick={() => void runShortlist()} size="sm" variant="secondary">
+                  {runningAction === actionKey('shortlist') ? <><Loader2 className="animate-spin" size={14} /> Shortlisting…</> : recruitingActionLabel('shortlist', locale)}
+                </Button> : null}
+                {allowedActions.has('schedule_interview') ? <Button disabled={busy} onClick={onScheduleInterview} size="sm" variant="secondary">
+                  {recruitingActionLabel('schedule_interview', locale)}
+                </Button> : null}
+                {allowedActions.has('notify') ? <Button disabled={busy} onClick={() => void runNotify(actionKey('notify'))} size="sm" variant="secondary">
+                  {runningAction === actionKey('notify') ? <><Loader2 className="animate-spin" size={14} /> Notifying…</> : recruitingActionLabel('notify', locale)}
+                </Button> : null}
+                {allowedActions.has('hire') ? <Button disabled={busy} onClick={() => void runHire()} size="sm" variant="secondary">
+                  {runningAction === actionKey('hire') ? <><Loader2 className="animate-spin" size={14} /> Hiring…</> : recruitingActionLabel('hire', locale)}
+                </Button> : null}
+                {allowedActions.has('reject') ? <Button disabled={busy} onClick={() => void runReject()} size="sm" variant="secondary">
+                  {runningAction === actionKey('reject') ? <><Loader2 className="animate-spin" size={14} /> Rejecting…</> : recruitingActionLabel('reject', locale)}
+                </Button> : null}
               </div>
-            </details>
+            </details> : null}
           </div>
-          {!canManageCandidates || !canDecideCandidates || !canManageInterviews ? (
-            <div className="mt-3 text-xs text-subtle">Some actions are disabled for your current role.</div>
+          {!candidate.allowed_actions?.length ? (
+            <div className="mt-3 text-xs text-subtle">{recruitingCopy(locale, 'noPermittedActions')}</div>
           ) : null}
         </section>
 
         <DrawerDecisionContext
           application={candidate}
           busy={busy}
-          canManageCandidates={canManageCandidates}
+          canManageCandidates={allowedActions.has('generate_evaluation')}
+          locale={locale}
           onGenerateEvaluation={() => mutate('Generating evaluation', () => generateCandidateEvaluation(access, candidate.app_key))}
         />
 
         <CandidateVideoInterviewCard application={candidate} onOpenInterviews={onOpenInterviews} />
+
+        <OfferPanel
+          access={access}
+          appKey={candidate.app_key}
+          enabled={employmentOffersEnabled}
+          busy={busy}
+          onMessage={setMessage}
+        />
 
         <div className="mt-6 space-y-3">
           <details className="rounded-3xl border border-white/70 bg-white/42 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.04)]">
@@ -2863,10 +2957,15 @@ function CandidateDrawer({
   )
 }
 
-function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabled: boolean, videoInterviewsEnabled: boolean) {
+function candidatePrimaryAction(
+  application: ApplicationSummary,
+  assessmentEnabled: boolean,
+  videoInterviewsEnabled: boolean,
+  allowedActions: Set<string>,
+) {
   const interview = application.interview
   const asyncStatus = interview?.interview_type === 'async_video' ? asyncVideoDisplayStatus(interview) : null
-  if (asyncStatus?.label === 'Ready for review') {
+  if (asyncStatus?.label === 'Ready for review' && allowedActions.has('schedule_interview')) {
     return {
       id: 'review_video',
       label: 'Review video response',
@@ -2875,7 +2974,7 @@ function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabl
       icon: 'video',
     }
   }
-  if (assessmentEnabled && application.cv?.received && !application.assessment?.status) {
+  if (assessmentEnabled && allowedActions.has('send_assessment') && application.cv?.received && !application.assessment?.status) {
     return {
       id: 'send_assessment',
       label: 'Send assessment',
@@ -2884,7 +2983,7 @@ function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabl
       icon: 'send',
     }
   }
-  if (videoInterviewsEnabled && application.cv?.received && interview?.interview_type !== 'async_video') {
+  if (videoInterviewsEnabled && allowedActions.has('send_video_interview') && application.cv?.received && interview?.interview_type !== 'async_video') {
     return {
       id: 'send_video_interview',
       label: 'Send video interview',
@@ -2893,7 +2992,7 @@ function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabl
       icon: 'video',
     }
   }
-  if (isReadyForReview(application)) {
+  if (allowedActions.has('shortlist')) {
     return {
       id: 'shortlist',
       label: 'Shortlist candidate',
@@ -2902,12 +3001,48 @@ function candidatePrimaryAction(application: ApplicationSummary, assessmentEnabl
       icon: 'user',
     }
   }
+  if (allowedActions.has('schedule_interview')) {
+    return {
+      id: 'schedule_interview',
+      label: 'Schedule interview',
+      button: 'Schedule interview',
+      detail: 'Open interview scheduling. The interview is only created after a human confirms the details.',
+      icon: 'user',
+    }
+  }
+  if (allowedActions.has('hire')) {
+    return {
+      id: 'hire',
+      label: 'Hire candidate',
+      button: 'Hire',
+      detail: 'Review all evidence before making the final human hiring decision.',
+      icon: 'user',
+    }
+  }
+  if (allowedActions.has('reject')) {
+    return {
+      id: 'reject',
+      label: 'Reject candidate',
+      button: 'Reject',
+      detail: 'Review all evidence before making the final human rejection decision.',
+      icon: 'user',
+    }
+  }
+  if (allowedActions.has('notify')) {
+    return {
+      id: 'notify',
+      label: 'Contact candidate',
+      button: 'Contact candidate',
+      detail: 'Send a message about the current application step.',
+      icon: 'send',
+    }
+  }
   return {
-    id: 'follow_up',
-    label: 'Follow up with candidate',
-    button: 'Notify candidate',
-    detail: 'Send a short message if HR needs missing information or wants to explain the next step.',
-    icon: 'send',
+    id: 'none',
+    label: 'No permitted action',
+    button: 'No permitted action',
+    detail: 'No application action is permitted for this operator and current stage.',
+    icon: 'user',
   }
 }
 
@@ -2925,7 +3060,7 @@ function CandidateVideoInterviewCard({ application, onOpenInterviews }: { applic
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="text-sm font-semibold">AI video interview</div>
+            <div className="text-sm font-semibold">Wathefni analysis · video interview</div>
             <Badge tone={displayStatus.tone}>{displayStatus.label}</Badge>
           </div>
           <div className="mt-1 text-sm leading-6 text-subtle">
@@ -2946,64 +3081,17 @@ function CandidateVideoInterviewCard({ application, onOpenInterviews }: { applic
   )
 }
 
-function DrawerStatusStrip({ application, assessmentEnabled }: { application: ApplicationSummary; assessmentEnabled: boolean }) {
-  return (
-    <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      <StatusStripItem label="CV" tone={application.cv?.received ? 'success' : 'warning'} value={application.cv?.received ? 'Received' : 'Missing'} />
-      <StatusStripItem label="Screening" tone={application.screening_status === 'complete' ? 'success' : 'warning'} value={basicScreeningLabel(application)} />
-      {assessmentEnabled ? (
-        <StatusStripItem label="Assessment" tone={application.assessment?.status === 'completed' ? 'success' : 'warning'} value={assessmentLabel(application)} />
-      ) : null}
-      <StatusStripItem
-        label={application.interview?.interview_type === 'async_video' ? 'Video interview' : 'Interview'}
-        tone={application.interview?.interview_type === 'async_video' ? asyncVideoDisplayStatus(application.interview).tone : application.interview?.status === 'completed' ? 'success' : application.interview?.status ? 'warning' : 'muted'}
-        value={application.interview?.interview_type === 'async_video' ? asyncVideoDisplayStatus(application.interview).label : interviewLabel(application)}
-      />
-    </div>
-  )
-}
-
-function StatusStripItem({
-  label,
-  tone,
-  value,
-}: {
-  label: string
-  tone: 'default' | 'success' | 'warning' | 'danger' | 'muted'
-  value: string
-}) {
-  return (
-    <div className="min-w-0 rounded-full border border-white/70 bg-white/48 px-3.5 py-2 shadow-[0_1px_0_rgba(255,255,255,0.75)_inset]">
-      <div className="flex min-w-0 items-center justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-subtle/78">{label}</div>
-          <div className="truncate text-[12.5px] font-medium text-text">{value}</div>
-        </div>
-        <span
-          aria-label={tone === 'success' ? 'Complete' : tone === 'warning' ? 'Action needed' : 'Info'}
-          className={cn(
-            'h-2.5 w-2.5 shrink-0 rounded-full',
-            tone === 'success' && 'bg-emerald-500',
-            tone === 'warning' && 'bg-amber-500',
-            tone === 'danger' && 'bg-rose-500',
-            tone === 'muted' && 'bg-ink/25',
-            tone === 'default' && 'bg-ink/35',
-          )}
-        />
-      </div>
-    </div>
-  )
-}
-
 function DrawerDecisionContext({
   application,
   busy,
   canManageCandidates,
+  locale,
   onGenerateEvaluation,
 }: {
   application: ApplicationSummary
   busy: boolean
   canManageCandidates: boolean
+  locale: RecruitingLocale
   onGenerateEvaluation: () => void
 }) {
   const evaluation = application.ranking?.gpt_evaluation
@@ -3015,7 +3103,7 @@ function DrawerDecisionContext({
       <section className="mt-4 rounded-[1.35rem] border border-dashed border-line/70 bg-white/42 p-4 shadow-[0_1px_0_rgba(255,255,255,0.78)_inset]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">AI decision support</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{recruitingCopy(locale, 'analysis')}</div>
             <div className="mt-1 text-sm font-semibold text-text">No fit summary generated yet.</div>
             <p className="mt-1 max-w-xl text-[12.5px] leading-5 text-subtle">
               Generate a fit summary for {application.position?.title || application.position?.code || 'this role'} when you need deeper evidence.
@@ -3033,7 +3121,7 @@ function DrawerDecisionContext({
       <summary className="cursor-pointer list-none">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">AI decision support</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">{recruitingCopy(locale, 'analysis')}</div>
             <p className="mt-1 line-clamp-2 text-[13px] font-medium leading-5 text-text">
               {evaluation?.fit_summary || candidateSummary(application)}
             </p>
@@ -3043,14 +3131,15 @@ function DrawerDecisionContext({
         <div className="mt-2 text-[12px] font-medium text-subtle">Open evidence details</div>
       </summary>
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
-        <EvaluationPanel label="Strengths" tone="strong" values={strengths} />
-        <EvaluationPanel label="Gaps / missing evidence" tone="warning" values={gaps} />
-        <EvaluationPanel label="Risks" tone="danger" values={risks} />
+        <EvaluationPanel label={recruitingCopy(locale, 'sourceEvidence')} tone="strong" values={strengths} />
+        <EvaluationPanel label={recruitingCopy(locale, 'missingInformation')} tone="warning" values={gaps} />
+        <EvaluationPanel label={recruitingCopy(locale, 'concerns')} tone="danger" values={risks} />
       </div>
       <div className="mt-4 rounded-xl border border-ink/10 bg-ink px-4 py-3 text-sm text-white">
-        <span className="font-semibold">Recommended next step: </span>
+        <span className="font-semibold">{recruitingCopy(locale, 'recommendation')}: </span>
         {evaluation?.recommended_next_step || recommendedCandidateAction(application)}
       </div>
+      <div className="mt-3 text-xs text-subtle">{recruitingCopy(locale, 'advisory')}</div>
     </details>
   )
 }
@@ -3358,9 +3447,11 @@ function InterviewsPage({
   filters,
   interviews,
   limit,
+  locale,
   notesDrafts,
   offset,
   onOpenCandidate,
+  onLocale,
   onPreviewVideoAnswer,
   onRetryVideoTranscripts,
   onSaveNotes,
@@ -3379,9 +3470,11 @@ function InterviewsPage({
   filters: { tab: string; q: string; role: string; date: string; interviewer: string }
   interviews: CandidateInterview[]
   limit: number
+  locale: RecruitingLocale
   notesDrafts: Record<string, string>
   offset: number
   onOpenCandidate: (appKey?: string) => void
+  onLocale: () => void
   onPreviewVideoAnswer: (videoUrl?: string) => void
   onRetryVideoTranscripts: (interview: CandidateInterview) => void
   onSaveNotes: (interview: CandidateInterview) => void
@@ -3414,7 +3507,7 @@ function InterviewsPage({
   const canGoBack = offset > 0
   const canGoNext = offset + limit < total
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <MetricGrid
         metrics={[
           { label: 'Upcoming interviews', value: scheduled, icon: CalendarCheck },
@@ -3428,8 +3521,15 @@ function InterviewsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Interview queue</CardTitle>
-          <CardDescription>Review upcoming interviews, submitted video responses, and feedback that needs attention.</CardDescription>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>{recruitingCopy(locale, 'interviewQueue')}</CardTitle>
+              <CardDescription>{recruitingCopy(locale, 'interviewQueueDescription')}</CardDescription>
+            </div>
+            <Button onClick={onLocale} size="sm" type="button" variant="secondary">
+              {recruitingCopy(locale, 'language')}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -3463,19 +3563,21 @@ function InterviewsPage({
 
           {interviews.length ? (
             <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-              <div className="min-w-[980px]">
-                <div className="grid grid-cols-[minmax(180px,1.2fr)_minmax(140px,1fr)_minmax(150px,0.9fr)_minmax(130px,0.8fr)_minmax(170px,1fr)_auto] gap-3 border-b border-line/55 bg-[#f7f1e7]/72 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
-                  <div>Candidate</div>
-                  <div>Role</div>
-                  <div>Schedule / activity</div>
-                  <div>State</div>
-                  <div>Invite / feedback</div>
+              <div className="min-w-[1160px]">
+                <div className="grid grid-cols-[minmax(170px,1.1fr)_minmax(140px,0.9fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_minmax(150px,0.9fr)_minmax(160px,1fr)_auto] gap-3 border-b border-line/55 bg-[#f7f1e7]/72 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
+                  <div>{recruitingCopy(locale, 'candidate')}</div>
+                  <div>{recruitingCopy(locale, 'job')}</div>
+                  <div>{recruitingCopy(locale, 'applicationStage')}</div>
+                  <div>{recruitingCopy(locale, 'interviewStatus')}</div>
+                  <div>{recruitingCopy(locale, 'schedule')}</div>
+                  <div>{recruitingCopy(locale, 'nextHumanAction')}</div>
                   <div></div>
                 </div>
                 {interviews.map((interview) => (
                   <InterviewQueueRow
                     interview={interview}
                     key={interview.interview_id}
+                    locale={locale}
                     onOpen={() => setSelectedInterview(interview)}
                   />
                 ))}
@@ -3503,6 +3605,7 @@ function InterviewsPage({
         <InterviewDetailDrawer
           busy={busy}
           interview={selectedInterview}
+          locale={locale}
           notesDraft={notesDrafts[selectedInterview.interview_id] || ''}
           onClose={() => setSelectedInterview(null)}
           onOpenCandidate={onOpenCandidate}
@@ -3518,12 +3621,10 @@ function InterviewsPage({
   )
 }
 
-function InterviewQueueRow({ interview, onOpen }: { interview: CandidateInterview; onOpen: () => void }) {
-  const isVideo = interview.interview_type === 'async_video'
-  const videoStatus = asyncVideoDisplayStatus(interview)
+function InterviewQueueRow({ interview, locale, onOpen }: { interview: CandidateInterview; locale: RecruitingLocale; onOpen: () => void }) {
   return (
     <div
-      className="grid cursor-pointer grid-cols-[minmax(180px,1.2fr)_minmax(140px,1fr)_minmax(150px,0.9fr)_minmax(130px,0.8fr)_minmax(170px,1fr)_auto] items-center gap-3 border-b border-line/45 px-4 py-3.5 text-sm transition hover:bg-white/42 last:border-b-0"
+      className="grid cursor-pointer grid-cols-[minmax(170px,1.1fr)_minmax(140px,0.9fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_minmax(150px,0.9fr)_minmax(160px,1fr)_auto] items-center gap-3 border-b border-line/45 px-4 py-3.5 text-sm transition hover:bg-white/42 last:border-b-0"
       onClick={onOpen}
     >
       <div className="min-w-0">
@@ -3531,17 +3632,20 @@ function InterviewQueueRow({ interview, onOpen }: { interview: CandidateIntervie
         <div className="truncate text-xs text-subtle">{interview.candidate_email || interview.phone || 'No contact'}</div>
       </div>
       <div className="truncate text-subtle">{interview.position_title || interview.position_code || 'Role'}</div>
-      <div className="text-subtle">{isVideo ? asyncVideoActivityLabel(interview) : interview.scheduled_start ? formatDateTime(interview.scheduled_start) : 'Time not set'}</div>
       <div>
-        <Badge tone={isVideo ? videoStatus.tone : statusTone(interview.status)}>
-          {isVideo ? videoStatus.label : stageLabel(interview.status)}
+        <Badge tone={statusTone(interview.application_stage)}>
+          {canonicalStageLabel(interview.application_stage, locale)}
         </Badge>
       </div>
-      <div className="text-subtle">
-        {isVideo ? videoStatus.description : `${interviewInviteShort(interview)} · ${interview.feedback_status === 'feedback_complete' ? 'Feedback complete' : 'Needs feedback'}`}
+      <div>
+        <Badge tone={statusTone(interview.status)}>
+          {facetStatusLabel(interview.status, locale)}
+        </Badge>
       </div>
+      <div className="text-subtle">{interview.scheduled_start ? formatDateTime(interview.scheduled_start) : recruitingCopy(locale, 'dateNotSet')}</div>
+      <div className="text-subtle">{workflowItemLabel(interview.next_human_action || 'conduct_interview', locale)}</div>
       <Button onClick={onOpen} size="sm" variant="secondary">
-        Open
+        {recruitingCopy(locale, 'open')}
       </Button>
     </div>
   )
@@ -3551,6 +3655,7 @@ function InterviewDetailDrawer({
   busy,
   canManageInterviews,
   interview,
+  locale,
   notesDraft,
   onClose,
   onOpenCandidate,
@@ -3563,6 +3668,7 @@ function InterviewDetailDrawer({
   busy: boolean
   canManageInterviews: boolean
   interview: CandidateInterview
+  locale: RecruitingLocale
   notesDraft: string
   onClose: () => void
   onOpenCandidate: (appKey?: string) => void
@@ -3574,9 +3680,17 @@ function InterviewDetailDrawer({
 }) {
   const isVideo = interview.interview_type === 'async_video'
   const videoStatus = asyncVideoDisplayStatus(interview)
-  const mainStatus = isVideo ? videoStatus.label : stageLabel(interview.status)
+  const mainStatus = facetStatusLabel(interview.status, locale)
+  const allowedActions = new Set(interview.allowed_actions || [])
   const roleLabel = interview.position_title || interview.position_code || 'Role'
-  const scheduleLabel = isVideo ? asyncVideoActivityLabel(interview) : interview.scheduled_start ? formatDateTime(interview.scheduled_start) : 'Time not set'
+  const scheduleLabel = interview.scheduled_start ? formatDateTime(interview.scheduled_start) : recruitingCopy(locale, 'dateNotSet')
+  const channelLocation = isVideo
+    ? recruitingCopy(locale, 'recordedVideo')
+    : interview.meet_link
+      ? 'Google Meet'
+      : interview.meeting_type
+        ? stageLabel(interview.meeting_type)
+        : notificationChannelLabel(interview.notification_channel)
   const followUpDraft = 'Add interview feedback or next-step notes...'
   const appendFollowUpNote = () => {
     const current = notesDraft.trim()
@@ -3592,14 +3706,23 @@ function InterviewDetailDrawer({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-semibold tracking-tight">{interview.candidate_name || interview.phone || 'Candidate'}</h3>
-            <Badge tone={isVideo ? videoStatus.tone : statusTone(interview.status)}>{mainStatus}</Badge>
+            <Badge tone={statusTone(interview.application_stage)}>
+              {recruitingCopy(locale, 'applicationStage')}: {canonicalStageLabel(interview.application_stage, locale)}
+            </Badge>
+            <Badge tone={isVideo ? videoStatus.tone : statusTone(interview.status)}>
+              {recruitingCopy(locale, 'interviewStatus')}: {mainStatus}
+            </Badge>
           </div>
           <div className="mt-1 text-sm text-subtle">
             {roleLabel} · {scheduleLabel}
           </div>
-          <div className="mt-3 rounded-xl border border-line bg-panel-muted/60 p-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-subtle">Next recommended action</div>
-            <div className="mt-1 text-sm leading-6 text-text">{interviewNextAction(interview)}</div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <Info label={recruitingCopy(locale, 'schedule')} value={scheduleLabel} />
+            <Info label={recruitingCopy(locale, 'channelLocation')} value={channelLocation} />
+            <Info label={recruitingCopy(locale, 'invitationStatus')} value={communicationLabel(interview.invitation_status, locale)} />
+            <Info label={recruitingCopy(locale, 'candidateConfirmation')} value={facetStatusLabel(interview.candidate_confirmation, locale)} />
+            <Info label={recruitingCopy(locale, 'notesStatus')} value={facetStatusLabel(interview.notes_status || notesStateLabel(interview), locale)} />
+            <Info label={recruitingCopy(locale, 'nextHumanAction')} value={workflowItemLabel(interview.next_human_action || 'conduct_interview', locale)} />
           </div>
           <div className="mt-3 space-y-1 text-sm leading-6 text-subtle">
             <div>{interviewInviteLine(interview)}</div>
@@ -3612,53 +3735,53 @@ function InterviewDetailDrawer({
           </Button>
           {isVideo ? (
             <>
-              <Button disabled={busy || !canManageInterviews || interview.feedback_status === 'feedback_complete'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="secondary">
-                Mark reviewed
-              </Button>
-              <Button disabled={busy || !canManageInterviews} onClick={appendFollowUpNote} size="sm" variant="ghost">
-                Request follow-up
-              </Button>
-              <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="ghost">
-                Open candidate
-              </Button>
+              {allowedActions.has('mark_completed') ? <Button disabled={busy || interview.feedback_status === 'feedback_complete'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="secondary">
+                {locale === 'ar' ? 'تحديد كمراجعة' : 'Mark reviewed'}
+              </Button> : null}
+              {allowedActions.has('write_notes') ? <Button disabled={busy} onClick={appendFollowUpNote} size="sm" variant="ghost">
+                {locale === 'ar' ? 'طلب متابعة' : 'Request follow-up'}
+              </Button> : null}
+              {allowedActions.has('open_candidate') ? <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="ghost">
+                {recruitingActionLabel('open_candidate', locale)}
+              </Button> : null}
               <details className="relative">
                 <summary className="cursor-pointer rounded-full border border-line bg-panel-muted/60 px-3 py-1.5 text-sm text-subtle transition hover:border-ink/25 hover:text-text">
                   More
                 </summary>
                 <div className="absolute right-0 z-10 mt-2 grid w-44 gap-2 rounded-xl border border-line bg-panel p-2 shadow-soft">
-                  <Button disabled={busy || !canManageInterviews || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
-                    Mark no response
-                  </Button>
-                  <Button disabled={busy || !canManageInterviews || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
-                    Cancel
-                  </Button>
+                  {allowedActions.has('mark_no_show') ? <Button disabled={busy || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
+                    {recruitingActionLabel('mark_no_show', locale)}
+                  </Button> : null}
+                  {allowedActions.has('cancel_interview') ? <Button disabled={busy || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
+                    {recruitingActionLabel('cancel_interview', locale)}
+                  </Button> : null}
                 </div>
               </details>
             </>
           ) : (
             <>
-              <Button disabled={busy || !canManageInterviews || interview.status === 'completed'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="secondary">
-                Mark completed
-              </Button>
+              {allowedActions.has('mark_completed') ? <Button disabled={busy || interview.status === 'completed'} onClick={() => onStatusChange(interview, 'completed')} size="sm" variant="secondary">
+                {recruitingActionLabel('mark_completed', locale)}
+              </Button> : null}
               {interview.meet_link ? (
                 <Button onClick={() => window.open(interview.meet_link, '_blank', 'noopener,noreferrer')} size="sm" variant="ghost">
                   <ExternalLink size={14} /> Meet
                 </Button>
               ) : null}
-              <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="ghost">
-                Open candidate
-              </Button>
+              {allowedActions.has('open_candidate') ? <Button onClick={() => onOpenCandidate(interview.app_key)} size="sm" variant="ghost">
+                {recruitingActionLabel('open_candidate', locale)}
+              </Button> : null}
               <details className="relative">
                 <summary className="cursor-pointer rounded-full border border-line bg-panel-muted/60 px-3 py-1.5 text-sm text-subtle transition hover:border-ink/25 hover:text-text">
                   More
                 </summary>
                 <div className="absolute right-0 z-10 mt-2 grid w-44 gap-2 rounded-xl border border-line bg-panel p-2 shadow-soft">
-                  <Button disabled={busy || !canManageInterviews || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
-                    No-show
-                  </Button>
-                  <Button disabled={busy || !canManageInterviews || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
-                    Cancel
-                  </Button>
+                  {allowedActions.has('mark_no_show') ? <Button disabled={busy || interview.status === 'no_show'} onClick={() => onStatusChange(interview, 'no_show')} size="sm" variant="ghost">
+                    {recruitingActionLabel('mark_no_show', locale)}
+                  </Button> : null}
+                  {allowedActions.has('cancel_interview') ? <Button disabled={busy || interview.status === 'cancelled'} onClick={() => onStatusChange(interview, 'cancelled')} size="sm" variant="ghost">
+                    {recruitingActionLabel('cancel_interview', locale)}
+                  </Button> : null}
                 </div>
               </details>
             </>
@@ -3666,7 +3789,15 @@ function InterviewDetailDrawer({
         </div>
       </div>
 
-      {interview.ai_summary?.summary || interview.ai_summary?.overall_summary ? <PracticalInterviewSummary interview={interview} /> : null}
+      {interview.ai_summary?.summary || interview.ai_summary?.overall_summary ? (
+        <PracticalInterviewSummary interview={interview} locale={locale} />
+      ) : (
+        <div className="mt-4 rounded-xl border border-line bg-panel-muted/60 p-4">
+          <div className="text-sm font-semibold">{recruitingCopy(locale, 'analysis')}</div>
+          <p className="mt-2 text-sm leading-6 text-subtle">{recruitingCopy(locale, 'noAdvisoryAnalysis')}</p>
+          <div className="mt-2 text-xs leading-5 text-subtle">{recruitingCopy(locale, 'advisory')}</div>
+        </div>
+      )}
       {isVideo ? (
         <VideoInterviewReview
           busy={busy}
@@ -3683,18 +3814,19 @@ function InterviewDetailDrawer({
           placeholder="Add interview feedback or next-step notes..."
           value={notesDraft}
         />
-        <Button disabled={busy || !canManageInterviews} onClick={() => onSaveNotes(interview)} variant="secondary">
-          {busy ? <Loader2 className="animate-spin" size={14} /> : <Pencil size={14} />} Save feedback
+        <Button disabled={busy || !allowedActions.has('write_notes')} onClick={() => onSaveNotes(interview)} variant="secondary">
+          {busy ? <Loader2 className="animate-spin" size={14} /> : <Pencil size={14} />} {locale === 'ar' ? 'حفظ الملاحظات' : 'Save feedback'}
         </Button>
       </div>
-      {!canManageInterviews ? <div className="mt-2 text-xs text-subtle">Interview updates are disabled for your current role.</div> : null}
+      {!interview.allowed_actions?.length ? <div className="mt-2 text-xs text-subtle">{recruitingCopy(locale, 'noPermittedActions')}</div> : null}
 
       <div className="mt-4 space-y-2">
         <details className="rounded-xl border border-line bg-panel-muted/60 p-4">
           <summary className="cursor-pointer text-sm font-semibold text-text">Invite details</summary>
           <div className="mt-3 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-3">
             <Info label="Invite" value={inviteTruthLabel(interview)} />
-            <Info label="Candidate invited" value={candidateNotifiedLabel(interview)} />
+            <Info label={recruitingCopy(locale, 'invitationStatus')} value={communicationLabel(interview.invitation_status, locale)} />
+            <Info label={recruitingCopy(locale, 'candidateConfirmation')} value={stageLabel(interview.candidate_confirmation)} />
             <Info label="Meeting" value={isVideo ? 'Video interview link' : interview.meet_link ? 'Meet link available' : calendarEventLabel(interview)} />
             <Info label="Invite sent at" value={interview.invite_sent_at ? formatDateTime(interview.invite_sent_at) : 'Not recorded'} />
             <Info label="Contact" value={interview.candidate_email || interview.phone || 'Not recorded'} />
@@ -3720,8 +3852,9 @@ function InterviewDetailDrawer({
           <summary className="cursor-pointer text-sm font-semibold text-text">Status details</summary>
           <div className="mt-3 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-3">
             <Info label="Interview state" value={isVideo ? mainStatus : stageLabel(interview.status)} />
+            <Info label={recruitingCopy(locale, 'applicationStage')} value={canonicalStageLabel(interview.application_stage, locale)} />
             <Info label="Feedback state" value={stageLabel(interview.feedback_status || 'notes_pending')} />
-            <Info label="Notes" value={notesStateLabel(interview)} />
+            <Info label={recruitingCopy(locale, 'notesStatus')} value={stageLabel(interview.notes_status || notesStateLabel(interview))} />
           </div>
           {interview.notes ? <div className="mt-3 text-sm leading-6 text-subtle">Latest HR notes: {interview.notes}</div> : null}
         </details>
@@ -3731,7 +3864,7 @@ function InterviewDetailDrawer({
   )
 }
 
-function PracticalInterviewSummary({ interview }: { interview: CandidateInterview }) {
+function PracticalInterviewSummary({ interview, locale }: { interview: CandidateInterview; locale: RecruitingLocale }) {
   const summary = interview.ai_summary
   const overallSummary = summary?.overall_summary || summary?.summary || 'No AI summary is ready yet.'
   const strengths = summary?.strengths || []
@@ -3744,18 +3877,18 @@ function PracticalInterviewSummary({ interview }: { interview: CandidateIntervie
     <div className="mt-4 rounded-xl border border-line bg-panel-muted/60 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="text-sm font-semibold">AI interview summary</div>
+          <div className="text-sm font-semibold">{recruitingCopy(locale, 'analysis')}</div>
           <p className="mt-2 text-sm leading-6 text-subtle">{overallSummary}</p>
         </div>
         <div className="grid min-w-[220px] gap-2 text-sm sm:grid-cols-2 md:grid-cols-1">
           <Info label="Overall impression" value={overallFit} />
-          <Info label="Confidence" value={confidence} />
+          <Info label={recruitingCopy(locale, 'confidence')} value={confidence} />
         </div>
       </div>
       <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
         <InterviewSummaryList label="Key strengths" values={strengths} />
-        <InterviewSummaryList label="Main concerns" values={concerns} />
-        <InterviewSummaryList label="Recommended next step" values={[recommended]} />
+        <InterviewSummaryList label={recruitingCopy(locale, 'concerns')} values={concerns} />
+        <InterviewSummaryList label={recruitingCopy(locale, 'recommendation')} values={[recommended]} />
       </div>
       {followUps.length ? (
         <div className="mt-4 rounded-lg border border-line bg-panel p-3">
@@ -3770,10 +3903,10 @@ function PracticalInterviewSummary({ interview }: { interview: CandidateIntervie
         <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
           <InterviewSummaryList label="Role-fit evidence" values={summary?.role_fit_evidence || []} />
           <InterviewSummaryList label="Communication notes" values={summary?.communication_notes || []} />
-          <InterviewSummaryList label="Missing evidence" values={summary?.missing_evidence || []} />
+          <InterviewSummaryList label={recruitingCopy(locale, 'missingInformation')} values={summary?.missing_evidence || []} />
         </div>
       </details>
-      <div className="mt-3 text-xs leading-5 text-subtle">{summary?.hr_decision_maker_note || summary?.decision_policy || 'HR remains the decision-maker.'}</div>
+      <div className="mt-3 text-xs leading-5 text-subtle">{summary?.hr_decision_maker_note || summary?.decision_policy || recruitingCopy(locale, 'advisory')}</div>
     </div>
   )
 }
@@ -5897,11 +6030,13 @@ function MetricGrid({ metrics }: { metrics: Array<{ label: string; value: number
 function CandidateRow({
   application,
   assessmentEnabled,
+  locale,
   onPreviewCv,
   onSelect,
 }: {
   application: ApplicationSummary
   assessmentEnabled: boolean
+  locale: RecruitingLocale
   onPreviewCv: (application: ApplicationSummary) => void
   onSelect: (application: ApplicationSummary) => void
 }) {
@@ -5916,11 +6051,14 @@ function CandidateRow({
         <div className="text-xs text-subtle">{application.candidate?.email || application.phone}</div>
       </td>
       <td className="px-4 py-3 text-subtle">{application.position?.title || application.position?.code || '—'}</td>
+      <td className="px-4 py-3 text-subtle">{intakeSourceLabel(application.intake_source || application.data_source, locale)}</td>
       <td className="px-4 py-3">
-        <Badge tone={statusTone(application.status)}>{stageLabel(application.status)}</Badge>
+        <Badge tone={statusTone(application.canonical_stage || application.status)}>
+          {canonicalStageLabel(application.canonical_stage || application.status, locale)}
+        </Badge>
       </td>
       <td className="px-4 py-3">
-        {application.cv?.received ? (
+        {application.cv?.received && application.allowed_actions?.includes('preview_cv') ? (
           <Button
             onClick={(event) => {
               event.stopPropagation()
@@ -5929,17 +6067,33 @@ function CandidateRow({
             size="sm"
             variant="secondary"
           >
-            Preview CV
+            {recruitingActionLabel('preview_cv', locale)}
           </Button>
+        ) : application.cv?.received ? (
+          <Badge tone="success">{locale === 'ar' ? 'تمت الاستلام' : 'Received'}</Badge>
         ) : (
-          <Badge tone="warning">missing</Badge>
+          <Badge tone="warning">{locale === 'ar' ? 'غير مستلمة' : 'Not received'}</Badge>
         )}
       </td>
       {assessmentEnabled ? <td className="px-4 py-3 text-subtle">{assessmentLabel(application)}</td> : null}
-      <td className="px-4 py-3 text-subtle">{formatDateTime(application.updated_at || application.ingested_at)}</td>
+      <td className="px-4 py-3">
+        <div className="flex flex-col items-start gap-1">
+          <Badge tone={application.communication?.status === 'failed' ? 'danger' : application.communication?.status === 'sent' ? 'success' : 'warning'}>
+            {communicationLabel(application.communication?.status, locale)}
+          </Badge>
+          {application.communication?.stage_changed_without_contact ? (
+            <span className="max-w-48 text-xs font-medium text-amber-800">{recruitingCopy(locale, 'notInformed')}</span>
+          ) : null}
+        </div>
+      </td>
+      <td className="max-w-56 px-4 py-3 text-subtle">
+        {application.waiting_for_hr?.length
+          ? workflowItemLabel(application.waiting_for_hr[0], locale)
+          : recruitingCopy(locale, 'noPendingHr')}
+      </td>
       <td className="px-4 py-3">
         <Button onClick={() => onSelect(application)} size="sm" variant="secondary">
-          Review
+          {locale === 'ar' ? 'مراجعة' : 'Review'}
         </Button>
       </td>
     </tr>
@@ -6366,10 +6520,19 @@ function stageLabel(value: string | null | undefined) {
   return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : spaced
 }
 
-function friendlyDashboardError(error: unknown, fallback: string) {
+function friendlyDashboardError(error: unknown, fallback: string, locale: RecruitingLocale = 'en') {
+  const staleMessage = locale === 'ar'
+    ? 'تغيّر هذا الطلب. حدّث الصفحة وراجع المرحلة الحالية قبل المحاولة مجدداً.'
+    : 'This application changed. Refresh it and review the current stage before trying again.'
+  const permissionMessage = locale === 'ar'
+    ? 'ليست لديك صلاحية لتنفيذ هذا الإجراء.'
+    : 'You do not have permission to do this action.'
   if (error instanceof DashboardApiError) {
-    if (error.code === 'permission_denied') {
-      return 'You do not have permission to do this action.'
+    if (['stale_state', 'stale_decision', 'stage_mismatch', 'application_state_changed'].includes(error.code)) {
+      return staleMessage
+    }
+    if (['permission_denied', 'action_forbidden', 'forbidden_transition'].includes(error.code)) {
+      return permissionMessage
     }
     if (error.code === 'account_inactive') {
       return 'Your account is not active.'
@@ -6385,6 +6548,12 @@ function friendlyDashboardError(error: unknown, fallback: string) {
   }
   const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
   if (!message) return fallback
+  if (/stale_state|stale_decision|stage_mismatch|state changed/i.test(message)) {
+    return staleMessage
+  }
+  if (/action_forbidden|permission_denied|forbidden_transition/i.test(message)) {
+    return permissionMessage
+  }
   if (/invalid_grant|gmail_auth|token has been expired/i.test(message)) return 'Email needs reconnecting.'
   if (/no_usable_conversation_id|conversation_closed|conversation_inactive/i.test(message)) return 'WhatsApp conversation is not active.'
   if (/conversation_|no_usable_|backend|traceback|exception|error"|detail|module_disabled|auth_failed|not_found/i.test(message)) {
@@ -6446,12 +6615,6 @@ function roleBottleneckLabel(job: PositionSummary, assessmentEnabled = true) {
       : `Plan interviews for ${top.count} shortlisted candidate${top.count === 1 ? '' : 's'}.`
   }
   return `Open this role and move ${top.count} candidate${top.count === 1 ? '' : 's'} forward.`
-}
-
-function safeModuleRecommendation(value: string | null | undefined, fallback: string) {
-  const text = String(value || '').trim()
-  if (!text) return fallback
-  return /\bassess|assessment|test\b/i.test(text) ? fallback : text
 }
 
 function recommendedBattery(application: ApplicationSummary) {
@@ -6545,14 +6708,6 @@ function interviewInviteLine(interview: InterviewTruth) {
   return `${invite} · ${meet}`
 }
 
-function interviewInviteShort(interview: InterviewTruth) {
-  if (interview.interview_type === 'async_video') return asyncVideoDisplayStatus(interview).label
-  if (interview.candidate_notified || interview.candidate_invited || interview.calendar_invite_sent) {
-    return interview.notification_channel ? `Invited by ${notificationChannelLabel(interview.notification_channel).toLowerCase()}` : 'Invited'
-  }
-  return 'Invite pending'
-}
-
 function interviewStateLine(interview: InterviewTruth) {
   if (interview.interview_type === 'async_video') {
     const status = asyncVideoDisplayStatus(interview)
@@ -6561,38 +6716,6 @@ function interviewStateLine(interview: InterviewTruth) {
   const status = stageLabel(interview.status)
   const feedback = interview.feedback_status === 'feedback_complete' ? 'Feedback complete' : 'Feedback pending'
   return `${status} · ${feedback}`
-}
-
-function interviewNextAction(interview: InterviewTruth) {
-  if (interview.interview_type === 'async_video') {
-    if (interview.feedback_status === 'feedback_complete') return 'Reviewed. Decide whether to move the candidate forward, request follow-up, or close the loop.'
-    const failedCount = interview.video_processing?.failed_response_ids?.length || 0
-    const pendingCount = interview.video_processing?.pending_response_ids?.length || 0
-    if (failedCount) return 'Retry transcription, then review the original video and transcript before deciding next steps.'
-    if (pendingCount) return 'Video answers are submitted. Transcription and AI summary are still processing.'
-    if (interview.ai_summary?.summary || interview.ai_summary?.overall_summary) return 'Review the AI summary and video evidence, then mark reviewed or request a follow-up.'
-    return 'Wait for the candidate response, then review the video evidence when it is ready.'
-  }
-  const status = String(interview.status || '').toLowerCase()
-  if (!interview.candidate_notified && !interview.candidate_invited && !interview.calendar_invite_sent) {
-    return 'Confirm the candidate has the invite before the interview time.'
-  }
-  if (status === 'scheduled' || status === 'rescheduled') {
-    return 'After the interview, mark it completed and add feedback notes.'
-  }
-  if (status === 'completed' && interview.feedback_status !== 'feedback_complete') {
-    return 'Add feedback notes and generate the AI summary.'
-  }
-  if (status === 'completed' && interview.feedback_status === 'feedback_complete') {
-    return 'Review the summary and decide the next hiring step.'
-  }
-  if (status === 'no_show') {
-    return 'Decide whether to reschedule or close the candidate.'
-  }
-  if (status === 'cancelled') {
-    return 'No active interview action unless HR wants to reschedule.'
-  }
-  return 'Review this interview and choose the next step.'
 }
 
 function summaryValue(summary: CandidateInterview['ai_summary'] | undefined, keys: string[]) {
@@ -6663,7 +6786,7 @@ function videoInterviewProcessingLine(interview: CandidateInterview) {
   if (failed) return `${failed} answer${failed === 1 ? '' : 's'} need summary retry. Original video remains available.`
   const pending = answers.filter((answer) => answer.transcript_status !== 'completed').length
   if (pending) return 'Video response is submitted. The written summary is being prepared.'
-  if (interview.ai_summary?.summary || interview.ai_summary?.overall_summary) return 'Video answer and AI interview summary are ready for HR review.'
+  if (interview.ai_summary?.summary || interview.ai_summary?.overall_summary) return 'Video answer and Wathefni analysis are ready for HR review.'
   return 'Video answer is ready. AI summary is being prepared.'
 }
 
@@ -6730,7 +6853,7 @@ function recommendedCandidateAction(application: ApplicationSummary) {
     return 'Review the profile, then schedule an interview if the fit still looks strong.'
   }
   if (application.interview?.feedback_status !== 'feedback_complete' && application.interview?.status === 'completed') {
-    return 'Save interview feedback and generate the AI interview summary.'
+    return 'Save interview feedback and prepare the Wathefni analysis.'
   }
   if (status === 'hired') return 'Candidate is already hired. Continue onboarding/post-hire follow-up.'
   return 'Review the candidate’s details and choose the next step.'

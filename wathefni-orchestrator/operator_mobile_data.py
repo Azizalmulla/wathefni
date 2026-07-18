@@ -1520,6 +1520,30 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
     permissions = _authoritative_permissions(app_mod, context)
     if cv and "prehire.read" in permissions:
         allowed_actions.extend(["preview_cv", "download_cv"])
+    offer_payload = None
+    try:
+        import offer_lifecycle as _offers
+        import offer_service as _offer_service
+
+        if _offers.employment_offers_enabled(app_mod, context["company_code"]):
+            offer_items = _offer_service.list_offers_for_application(
+                app_mod,
+                context["company_code"],
+                app_key,
+                permissions=permissions,
+                surface="mobile",
+                can_hire="hire" in allowed_actions,
+            )
+            current = next((item for item in offer_items if item.get("status") in _offers.OFFER_OPEN | {"accepted"}), None)
+            if current is None and offer_items:
+                current = offer_items[0]
+            offer_payload = {
+                "current": app_mod.json_safe(current) if current else None,
+                "items": app_mod.json_safe(offer_items),
+                "allowed_actions": list((current or {}).get("allowed_actions") or []),
+            }
+    except Exception:
+        offer_payload = None
     return {
         "ok": True,
         "candidate": {
@@ -1544,6 +1568,7 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
             },
             "interview": app_mod.json_safe(interview) if interview else None,
             "communication_status": communication_status,
+            "offer": offer_payload,
             "allowed_actions": list(dict.fromkeys(allowed_actions)),
         },
     }
@@ -2156,6 +2181,12 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         confirmation_hash: str | None = None
         confirm: bool = False
 
+    class OfferActionRequest(BaseModel):
+        action: str
+        reason: str | None = None
+        evidence_note: str | None = None
+        confirm: bool = False
+
     class OnboardingReviewRequest(BaseModel):
         item_id: str
         outcome: str = "received"
@@ -2194,6 +2225,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
     # through module globals rather than this registration function's locals.
     globals()["LeaveDecisionRequest"] = LeaveDecisionRequest
     globals()["CandidateActionRequest"] = CandidateActionRequest
+    globals()["OfferActionRequest"] = OfferActionRequest
     globals()["OnboardingReviewRequest"] = OnboardingReviewRequest
     globals()["AttendanceResolveRequest"] = AttendanceResolveRequest
     globals()["ShiftSwapDecisionRequest"] = ShiftSwapDecisionRequest
@@ -2402,6 +2434,91 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             consequence=consequences[action],
             args={"app_key": app_key, "reason": str(request.reason or "").strip() or None},
         )
+
+    @app_mod.app.post("/dashboard/mobile/offers/{offer_id}/action")
+    def mobile_offer_action(
+        offer_id: str,
+        request: OfferActionRequest,
+        context: dict[str, Any] = Depends(dependency),
+    ):
+        """Mobile V1 offer mutations: approve/return, record response, withdraw."""
+        import offer_lifecycle as _offers
+        import offer_service as _offer_service
+
+        app_mod.require_entitlement(context, "employment_offers", "prehire.read")
+        if not _offers.employment_offers_enabled(app_mod, context["company_code"]):
+            raise app_mod.HTTPException(
+                status_code=403,
+                detail={"error": "module_disabled", "message": "Employment offers module is not enabled."},
+            )
+        action = str(request.action or "").strip().lower()
+        mobile_actions = {"approve", "return_draft", "record_accept", "record_decline", "withdraw"}
+        if action not in mobile_actions:
+            raise app_mod.HTTPException(
+                status_code=400,
+                detail={
+                    "error": "unsupported_offer_action",
+                    "message": "Mobile V1 supports approve, return, record response, and withdraw only.",
+                },
+            )
+        if not request.confirm:
+            raise app_mod.HTTPException(
+                status_code=422,
+                detail={"error": "confirmation_required", "message": "Confirm this offer action explicitly."},
+            )
+        permissions = _authoritative_permissions(app_mod, context)
+        actor_user_id = str(context.get("actor_user_id") or "")
+        company = context["company_code"]
+        try:
+            if action == "approve":
+                offer = _offer_service.approve_offer(
+                    legacy=app_mod,
+                    company_code=company,
+                    offer_id=offer_id,
+                    actor_user_id=actor_user_id,
+                    permissions=permissions,
+                )
+            elif action == "return_draft":
+                offer = _offer_service.return_to_draft(
+                    legacy=app_mod,
+                    company_code=company,
+                    offer_id=offer_id,
+                    actor_user_id=actor_user_id,
+                    permissions=permissions,
+                    reason=request.reason,
+                )
+            elif action == "withdraw":
+                offer = _offer_service.withdraw_offer(
+                    legacy=app_mod,
+                    company_code=company,
+                    offer_id=offer_id,
+                    actor_user_id=actor_user_id,
+                    permissions=permissions,
+                    reason=request.reason,
+                )
+            elif action == "record_accept":
+                offer = _offer_service.record_response(
+                    app_mod,
+                    company_code=company,
+                    offer_id=offer_id,
+                    decision="accepted",
+                    actor_user_id=actor_user_id,
+                    permissions=permissions,
+                    evidence={"note": request.evidence_note} if request.evidence_note else {},
+                )
+            else:
+                offer = _offer_service.record_response(
+                    app_mod,
+                    company_code=company,
+                    offer_id=offer_id,
+                    decision="declined",
+                    actor_user_id=actor_user_id,
+                    permissions=permissions,
+                    evidence={"note": request.evidence_note} if request.evidence_note else {},
+                )
+        except _offers.OfferAuthorityError as exc:
+            raise app_mod.HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+        return {"ok": True, "offer": app_mod.json_safe(offer)}
 
     @app_mod.app.get("/dashboard/mobile/tasks")
     def mobile_tasks(

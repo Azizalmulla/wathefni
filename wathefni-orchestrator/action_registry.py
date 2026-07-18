@@ -715,10 +715,83 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
     action_type = str(ctx.action.get("action_type") or "hire_candidate")
     if not app:
         return _candidate_not_found_result(action_type, "hire")
+    meta = getattr(ctx.request, "metadata", {}) or {}
+    permissions = meta.get("permissions") if isinstance(meta, dict) else []
+    # Offer-1 hire gate: when employment_offers is enabled, accepted offer is required.
+    # AI must never pass hire_override (never available to AI).
+    try:
+        import offer_service as _offer_service
+        import offer_lifecycle as _offers
+
+        actor_type = "human"
+        if str((meta.get("actor_type") if isinstance(meta, dict) else "") or "").lower() == "ai" or (
+            isinstance(meta, dict) and meta.get("ai_actor")
+        ):
+            actor_type = "ai"
+        hire_override = bool(ctx.action.get("hire_override") or (isinstance(meta, dict) and meta.get("hire_override")))
+        if actor_type == "ai":
+            hire_override = False
+        # Assistant/tool paths must never pass override: strip unless explicit human dashboard confirm.
+        if hire_override and not (
+            isinstance(meta, dict)
+            and (meta.get("dashboard") or meta.get("hire_override_confirmed"))
+            and (ctx.action.get("confirm") or meta.get("confirm") or meta.get("hire_override_confirmed"))
+        ):
+            hire_override = False
+        company_code = str(app.get("company_code") or (meta.get("company_code") if isinstance(meta, dict) else "") or "")
+        actor_user_id = str((meta.get("actor_user_id") if isinstance(meta, dict) else "") or "") or None
+        actor_subject = str(
+            (meta.get("actor_subject") if isinstance(meta, dict) else "")
+            or (meta.get("permission_subject_user_id") if isinstance(meta, dict) else "")
+            or actor_user_id
+            or ""
+        ) or None
+        _offer_service.enforce_hire_gate(
+            legacy,
+            company_code=company_code,
+            app_key=str(app.get("app_key") or ""),
+            permissions=set(permissions) if permissions else {"candidate.decide"},
+            hire_override=hire_override and actor_type == "human",
+            override_reason=str(ctx.action.get("override_reason") or (meta.get("override_reason") if isinstance(meta, dict) else "") or "")
+            or None,
+            actor_user_id=actor_user_id,
+            actor_subject=actor_subject,
+            actor_type=actor_type,
+            confirmation_token=str(
+                ctx.action.get("confirmation_token")
+                or (meta.get("confirmation_token") if isinstance(meta, dict) else "")
+                or ""
+            )
+            or None,
+            confirmed=bool(
+                ctx.action.get("confirm")
+                or (meta.get("confirm") if isinstance(meta, dict) else False)
+                or (meta.get("hire_override_confirmed") if isinstance(meta, dict) else False)
+            ),
+            expected_from_stage=str(app.get("status") or "") or None,
+            idempotency_key=str(
+                ctx.action.get("idempotency_key")
+                or (meta.get("idempotency_key") if isinstance(meta, dict) else "")
+                or ""
+            )
+            or None,
+        )
+    except Exception as gate_exc:
+        import offer_lifecycle as _offers
+
+        if isinstance(gate_exc, _offers.OfferAuthorityError):
+            return {
+                "action_type": action_type,
+                "success": False,
+                "status": "failed",
+                "message": gate_exc.message,
+                "error": gate_exc.code,
+                "detail": gate_exc.as_detail(),
+            }
+        raise
+
     kwargs: dict[str, Any] = {}
     if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-        meta = getattr(ctx.request, "metadata", {}) or {}
-        permissions = meta.get("permissions") if isinstance(meta, dict) else []
         kwargs = {
             "trigger": "hire_candidate",
             "human_confirmed": bool(ctx.action.get("human_confirmed", True)),
