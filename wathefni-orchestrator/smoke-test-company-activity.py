@@ -68,11 +68,15 @@ def _call(ctx: dict, **kw):
 
 def _ctx(role: str, company: str) -> dict:
     perms = sorted(app.hr_role_permissions(role))
+    user_id = f"smoke-{role}"
     return {
         "company_code": company,
-        "actor_user_id": f"smoke-{role}",
+        "actor_user_id": user_id,
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": user_id,
+        "permission_subject_company": company,
         "actor_role": role,
-        "hr_user": {"user_id": f"smoke-{role}", "role": role, "status": "active", "company_code": company},
+        "hr_user": {"user_id": user_id, "role": role, "status": "active", "company_code": company},
         "permissions": perms,
         "access": {"role": role, "permissions": perms},
     }
