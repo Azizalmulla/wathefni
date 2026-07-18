@@ -69,7 +69,7 @@ describe('canonical recruiting lifecycle labels', () => {
     for (const stage of CANONICAL_APPLICATION_STAGES) {
       expect(mobileSource).toContain(`'${stage}'`)
     }
-    expect(mobileSource).toContain("scheduled: { en: 'Scheduled', ar: 'مجدولة' }")
+    expect(mobileSource).toContain("scheduled: ['Scheduled', 'مجدولة']")
   })
 
   test('web action visibility comes from backend allowed_actions', () => {
