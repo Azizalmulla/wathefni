@@ -144,6 +144,7 @@ SENS_METADATA = "metadata_only"
 
 # HR-readable terminal statuses (see app flag docs / dashboard copy).
 STATUS_PENDING = "pending"
+STATUS_DELIVERED_PUSH = "delivered_push"
 STATUS_DELIVERED_WHATSAPP = "delivered_whatsapp"
 STATUS_DELIVERED_TEMPLATE = "delivered_template"
 STATUS_SENT_EMAIL = "sent_email_fallback"
@@ -160,6 +161,7 @@ STATUS_THROTTLED = "throttled"
 STATUS_DASHBOARD_ONLY = "dashboard_only"
 
 _TERMINAL_STATUSES = {
+    STATUS_DELIVERED_PUSH,
     STATUS_DELIVERED_WHATSAPP,
     STATUS_DELIVERED_TEMPLATE,
     STATUS_SENT_EMAIL,
@@ -169,7 +171,7 @@ _TERMINAL_STATUSES = {
     STATUS_THROTTLED,
     STATUS_DASHBOARD_ONLY,
 }
-_DELIVERED_STATUSES = {STATUS_DELIVERED_WHATSAPP, STATUS_DELIVERED_TEMPLATE, STATUS_SENT_EMAIL}
+_DELIVERED_STATUSES = {STATUS_DELIVERED_PUSH, STATUS_DELIVERED_WHATSAPP, STATUS_DELIVERED_TEMPLATE, STATUS_SENT_EMAIL}
 
 # WhatsApp session errors that will NOT fix themselves on retry (the conversation
 # is closed / there is no usable conversation). For these we go straight down the
@@ -336,6 +338,21 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
             "ar": "مرحباً {employee_name}، يوجد تحديث في الرواتب لفترة {period}. يرجى المراجعة مع الموارد البشرية.",
         },
     },
+    # Employee App activation code. Critical so a code that reaches nobody raises a
+    # visible HR task (HR can then hand the code over). metadata_only so the code
+    # itself is NEVER persisted in the message body_preview/audit row.
+    "app_activation": {
+        "criticality": CRITICALITY_CRITICAL,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_HR_TASK,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
+        "sensitivity": SENS_METADATA,
+        "label": "App activation code",
+        "text": {
+            "en": "Hi {employee_name}, your {company_name} app activation code is {code}. It expires in {expiry_hours} hours.",
+            "ar": "مرحباً {employee_name}، رمز تفعيل تطبيق {company_name} هو {code}. ينتهي خلال {expiry_hours} ساعة.",
+        },
+    },
 }
 
 
@@ -447,6 +464,22 @@ class OctopusProvider:
         )
 
 
+class PushProvider:
+    @staticmethod
+    def send(legacy: Any, *, company_code, employee_key, title, body, flow, subject_type, subject_key, account_id) -> dict[str, Any]:
+        return legacy.send_outbound_push(
+            company_code=company_code,
+            employee_key=employee_key,
+            title=title,
+            body=body,
+            flow=flow,
+            subject_type=subject_type,
+            subject_key=subject_key,
+            account_id=account_id,
+            message_kind=flow,
+        )
+
+
 class EmailProvider:
     @staticmethod
     def send(legacy: Any, *, to, subject, body, company_code, subject_type, subject_key, account_id, message_kind) -> dict[str, Any]:
@@ -537,6 +570,29 @@ def _attempt_ladder(
             "retryable": False,
             "dashboard_only": True,
         }
+
+    # 0c. Push (Employee App, owned channel). Tried FIRST when enabled because it's
+    #     the cheapest/fastest channel and the whole point of the app is to reduce
+    #     WhatsApp-template dependency. It is NEVER load-bearing: no token / not
+    #     configured / send failure all fall straight through to WhatsApp/email.
+    #     A scope='all' opt-out blocks push too; a WhatsApp-only opt-out does not.
+    if not all_suppressed and legacy.push_notifications_enabled():
+        p = PushProvider.send(
+            legacy,
+            company_code=company_code,
+            employee_key=subject_key,
+            title=email_subject,
+            body=full_text,
+            flow=flow,
+            subject_type=subject_type,
+            subject_key=subject_key,
+            account_id=account_id,
+        )
+        if p.get("ok"):
+            return {"status": STATUS_DELIVERED_PUSH, "channel": "push", "reasons": reasons, "retryable": False}
+        reasons.append(f"push:{str(p.get('error') or 'push_failed')}")
+    elif all_suppressed:
+        reasons.append("push:suppressed_opt_out")
 
     # 1. WhatsApp session (free-form) — only if allowed by preset, has a phone, not suppressed.
     session_retryable = False
@@ -761,7 +817,9 @@ def _finalize(
                     company_code=company_code,
                     employee_key=row.get("employee_key"),
                     title=f"Couldn't reach employee: {_generic_label(template_key, flow)}",
-                    detail=f"This message could not be delivered by WhatsApp or email and needs HR follow-up. Reasons: {'; '.join(reasons)[:200]}",
+                    # HR-visible text stays channel-agnostic and calm; raw reason
+                    # codes are kept in metadata (attempt_reasons) for diagnosis.
+                    detail="Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
                     source=flow,
                     related_message_id=message_id,
                     priority="high",
@@ -1013,6 +1071,7 @@ def list_hr_tasks(
     scope: dict[str, Any] | None = None,
     statuses: list[str] | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> list[dict[str, Any]]:
     """HR follow-up tasks for a company (joined to the employee name when known),
     newest + highest priority first."""
@@ -1029,12 +1088,12 @@ def list_hr_tasks(
           LEFT JOIN employees e
             ON e.company_code = t.company_code AND e.employee_key = t.employee_key
          WHERE t.company_code = %s AND t.status = ANY(%s) {clause}
-         ORDER BY (t.priority = 'high') DESC, t.created_at DESC
-         LIMIT %s
+         ORDER BY (t.priority = 'high') DESC, t.created_at DESC, t.task_id
+         LIMIT %s OFFSET %s
     """
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute(sql, [company, statuses, *params, int(limit)])
+            cur.execute(sql, [company, statuses, *params, int(limit), int(offset)])
             return [dict(r) for r in cur.fetchall()]
 
 
@@ -1048,6 +1107,24 @@ def hr_task_open_count(*, company_code: str, scope: dict[str, Any] | None = None
             cur.execute(
                 f"SELECT count(*) AS n FROM hr_tasks t WHERE t.company_code=%s AND t.status='open' {clause}",
                 [company, *params],
+            )
+            return int(cur.fetchone()["n"])
+
+
+def count_hr_tasks(*, company_code: str, scope: dict[str, Any] | None = None, statuses: list[str] | None = None) -> int:
+    """True company-wide count of tasks matching `statuses`, independent of any
+    page size — the number the dashboard badge/pagination footer must use, never
+    the length of a possibly-truncated page."""
+    import app as legacy
+
+    company = str(company_code or "").strip().upper()
+    statuses = statuses or ["open"]
+    clause, params = _scope_clause(legacy, "t", scope)
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT count(*) AS n FROM hr_tasks t WHERE t.company_code=%s AND t.status = ANY(%s) {clause}",
+                [company, statuses, *params],
             )
             return int(cur.fetchone()["n"])
 
@@ -1082,11 +1159,15 @@ def resolve_hr_task(*, company_code: str, task_id: str, status: str = "done", re
     return {"ok": True, "task": dict(row)}
 
 
+_NEEDS_FOLLOW_UP_STATUSES = (STATUS_NEEDS_HR, STATUS_FAILED, STATUS_SUPPRESSED, STATUS_THROTTLED, STATUS_DASHBOARD_ONLY)
+
+
 def list_needs_follow_up(
     *,
     company_code: str,
     scope: dict[str, Any] | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Employee messages that did not reach the employee and need attention.
     Only HR-safe fields are returned (body_preview honours the sensitivity
@@ -1103,14 +1184,30 @@ def list_needs_follow_up(
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key
          WHERE m.company_code = %s
-           AND m.status IN ('{STATUS_NEEDS_HR}', '{STATUS_FAILED}', '{STATUS_SUPPRESSED}', '{STATUS_THROTTLED}', '{STATUS_DASHBOARD_ONLY}') {clause}
-         ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC
-         LIMIT %s
+           AND m.status = ANY(%s) {clause}
+         ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC, m.message_id
+         LIMIT %s OFFSET %s
     """
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute(sql, [company, *params, int(limit)])
+            cur.execute(sql, [company, list(_NEEDS_FOLLOW_UP_STATUSES), *params, int(limit), int(offset)])
             return [dict(r) for r in cur.fetchall()]
+
+
+def count_needs_follow_up(*, company_code: str, scope: dict[str, Any] | None = None) -> int:
+    """True company-wide count backing the needs-follow-up list, independent of
+    the page size — used for the badge/footer instead of a page's length."""
+    import app as legacy
+
+    company = str(company_code or "").strip().upper()
+    clause, params = _scope_clause(legacy, "m", scope)
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT count(*) AS n FROM employee_messages m WHERE m.company_code=%s AND m.status = ANY(%s) {clause}",
+                [company, list(_NEEDS_FOLLOW_UP_STATUSES), *params],
+            )
+            return int(cur.fetchone()["n"])
 
 
 def run_delivery_sweep(*, limit: int = 50) -> dict[str, Any]:
