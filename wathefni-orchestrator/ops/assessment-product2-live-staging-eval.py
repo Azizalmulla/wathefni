@@ -255,7 +255,6 @@ def bootstrap_registry(cur: Any) -> list[str]:
             SET enabled=TRUE,
                 activated_at=COALESCE(activated_at, now()),
                 qualified_provider_model_id=NULL,
-                approved_by_user_id=NULL,
                 pricing_snapshot=%s
             WHERE registry_version_id=%s
             """,

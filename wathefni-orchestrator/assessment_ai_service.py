@@ -287,12 +287,14 @@ def assert_registry_qualification_gate(cur: Any, *, registry_version_id: str) ->
 
     Temporary synthetic bootstrap (enabled without formal activator) is skipped so
     recorded staging pilots can exercise the pipeline. Formal activation always
-    requires a green live/blinded qualification gate.
+    requires a green live/blinded qualification gate and a pinned
+    qualified_provider_model_id.
     """
 
     cur.execute(
         """
-        SELECT registry_version_id::text, approved_by_user_id, activated_at, enabled
+        SELECT registry_version_id::text, approved_by_user_id, activated_at, enabled,
+               qualified_provider_model_id
         FROM assessment_ai_model_registry_versions
         WHERE registry_version_id=%s
         """,
@@ -301,7 +303,9 @@ def assert_registry_qualification_gate(cur: Any, *, registry_version_id: str) ->
     registry = _dict(cur.fetchone())
     if not registry:
         raise AssessmentAIError("assessment_model_registry_version_not_found", "Model registry version was not found.", status_code=404)
-    if not registry.get("approved_by_user_id"):
+    # Formal activation pins qualified_provider_model_id. Design-seeded
+    # approved_by_user_id alone must not require a prior live gate (chicken/egg).
+    if not registry.get("qualified_provider_model_id"):
         return {"skipped": "not_formally_activated", "registry_version_id": registry_version_id}
     cur.execute(
         """
