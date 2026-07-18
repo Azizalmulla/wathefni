@@ -176,6 +176,16 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-job-close-reopen.py | sed '
 log "assessments pagination (true company-wide totals/status-counts/average over paged attempts, awaiting-assessment filter matches headline count, tenant-scoped, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assessments-pagination.py | sed 's/^/    /'
 
+log "Assessments Cleanup-1 (version pinning, idempotency, expiry/revocation, facet separation, authoring gate, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run WATHEFNI_ASSESSMENT_AUTHORING=true "$VENV_PY" smoke-test-assessments-cleanup1.py | sed 's/^/    /'
+
+log "Assessment Product-2 offline contracts/eval (recorded fixtures only; authoring remains off)"
+WATHEFNI_DELIVERY_MODE=dry_run WATHEFNI_ASSESSMENT_AUTHORING=false "$VENV_PY" smoke-test-assessment-product2.py | sed 's/^/    /'
+WATHEFNI_DELIVERY_MODE=dry_run WATHEFNI_ASSESSMENT_AUTHORING=false "$VENV_PY" smoke-test-assessment-product2-eval.py | sed 's/^/    /'
+c=$(code "${AUTH[@]}" "$BASE/dashboard/prehire/assessments/authoring/product2/status")
+[ "$c" = "403" ] || fail "Product-2 authoring endpoint is not dark (code=$c)"
+log "Assessment Product-2 dashboard/API dark (403)"
+
 log "notifications delivery (eligibility-aware failure messages never blame a channel the company doesn't use, true HR-task/needs-follow-up counts + pagination, tenant-scoped, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-notifications-delivery.py | sed 's/^/    /'
 

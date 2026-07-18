@@ -345,9 +345,33 @@ export type ApplicationSummary = {
     title?: string
   }
   status?: string
+  canonical_stage?: string
+  status_label?: string
   current_step?: string
   screening_status?: string
   data_source?: string
+  intake_source?: string
+  cv_processing?: {
+    status?: string
+    received?: boolean
+    automatic?: boolean
+  }
+  screening?: {
+    status?: string
+    automatic?: boolean
+  }
+  communication?: {
+    status?: 'pending' | 'sent' | 'failed' | 'intentionally_skipped' | string
+    message_kind?: string
+    channel?: string
+    sent_at?: string
+    failed_at?: string
+    last_error?: string
+    stage_changed_without_contact?: boolean
+  }
+  automatic_activity?: string[]
+  waiting_for_hr?: string[]
+  allowed_actions?: string[]
   lead_quality?: 'candidate_record' | 'incomplete_lead' | string
   cv?: {
     received?: boolean
@@ -359,12 +383,20 @@ export type ApplicationSummary = {
   }
   assessment?: {
     attempt_id?: string
+    assessment_version_id?: string
     status?: string
+    delivery_status?: string
+    review_status?: string
+    battery_key?: string
     raw_score?: number
     max_score?: number
     percent?: number
     band?: string
     summary?: string
+    expires_at?: string
+    cancelled_at?: string
+    expired_at?: string
+    reviewed_at?: string
     completed_at?: string
   }
   interview?: {
@@ -444,6 +476,8 @@ export type CandidateInterview = {
   candidate_email?: string
   position_code?: string
   position_title?: string
+  application_stage?: string
+  application_stage_label?: string
   status?: 'scheduled' | 'completed' | 'no_show' | 'rescheduled' | 'cancelled' | string
   feedback_status?: 'notes_pending' | 'feedback_complete' | string
   scheduled_start?: string
@@ -455,11 +489,15 @@ export type CandidateInterview = {
   calendar_invite_sent?: boolean
   candidate_invited?: boolean
   candidate_notified?: boolean
+  communication_status?: 'pending' | 'sent' | 'failed' | 'intentionally_skipped' | string
+  invitation_status?: string
+  candidate_confirmation?: string
   notification_channel?: string
   sent_subject?: string
   sent_body?: string
   invite_sent_at?: string
   notes?: string
+  notes_status?: string
   transcript?: string
   ai_summary?: {
     summary?: string
@@ -543,6 +581,8 @@ export type CandidateInterview = {
     summary_ready?: boolean
   }
   source?: string
+  next_human_action?: string
+  allowed_actions?: string[]
   created_at?: string
   updated_at?: string
 }
@@ -703,8 +743,12 @@ export type AssessmentAttempt = {
   position_title?: string
   application_status?: string
   battery_key?: string
+  assessment_version_id?: string
   status?: string
+  delivery_status?: string
+  review_status?: string
   current_item_index?: number
+  progress_version?: number
   total_items?: number
   answered_count?: number
   percent_complete?: number
@@ -732,8 +776,15 @@ export type AssessmentAttempt = {
   report_json?: Record<string, unknown>
   summary?: string
   created_at?: string
+  expires_at?: string
   started_at?: string
   completed_at?: string
+  cancelled_at?: string
+  cancel_reason?: string
+  expired_at?: string
+  reviewed_at?: string
+  reviewed_by_user_id?: string
+  review_notes?: string
   updated_at?: string
 }
 
@@ -793,6 +844,230 @@ export type AssessmentNormRecalculationResponse = {
     percentiles?: Record<string, number>
     raw_json?: Record<string, unknown>
   }>
+}
+
+export type Product2Locale = 'en' | 'ar'
+
+export type Product2ModelRole = {
+  registry_version_id: string
+  role_key: string
+  version: number
+  provider: string
+  requested_model: string
+  qualified_provider_model_id?: string | null
+  api_kind: string
+  enabled: boolean
+  output_schema_name: string
+  output_schema_version: string
+  activated_at?: string | null
+}
+
+export type Product2AuthoringStatus = {
+  product_version: string
+  global_flag: boolean
+  production_hard_off: boolean
+  publish_available: false
+  live_scoring_ai_calls: false
+  environment?: string
+  model_roles: Product2ModelRole[]
+  draft_counts: Record<string, number>
+}
+
+export type Product2BlueprintInput = {
+  battery_key?: string
+  source_locale: Product2Locale
+  required_locales: Product2Locale[]
+  section: string
+  constructs: string[]
+  item_type: 'single_choice' | 'competency_keyed'
+  difficulty_target: 'easy' | 'medium' | 'hard'
+  reading_level: string
+  role_context: string[]
+  allowed_context: string[]
+  prohibited_content: string[]
+  scoring_family: 'answer_key' | 'competency_keyed'
+  choice_count: number
+  originality_policy_version: string
+}
+
+export type Product2Blueprint = {
+  blueprint_version_id: string
+  company_code: string
+  blueprint_key: string
+  version: number
+  status: string
+  blueprint_json: Product2BlueprintInput
+  blueprint_sha256: string
+  created_by_user_id?: string | null
+  approved_by_user_id?: string | null
+  approved_at?: string | null
+  created_at?: string
+}
+
+export type Product2DraftChoice = {
+  key: string
+  text: string
+}
+
+export type Product2DraftContent = {
+  draft_local_id: string
+  locale: Product2Locale
+  prompt_text: string
+  choices: Product2DraftChoice[]
+  proposed_answer_key: string
+  proposed_scoring: {
+    family: 'answer_key' | 'competency_keyed'
+    correct_points: number
+    incorrect_points: number
+    max_points: number
+    choice_points: Array<{ choice_key: string; points: number }>
+  }
+  compiled_scoring?: Record<string, unknown>
+  compiled_scoring_sha256?: string
+  rationale: string
+  explanation: string
+  distractor_rationales: Array<Record<string, unknown>>
+  competency_tags: string[]
+  skill_tags: string[]
+  role_tags: string[]
+  difficulty_rationale: string
+  assumptions: string[]
+  original_content_attested: boolean
+  safety_flags: string[]
+  translation?: Record<string, unknown>
+}
+
+export type Product2Draft = {
+  draft_id: string
+  company_code: string
+  battery_key: string
+  lifecycle_status: string
+  section?: string
+  difficulty?: string
+  locale: Product2Locale
+  prompt_text: string
+  choices: Product2DraftChoice[]
+  proposed_answer_key?: string
+  proposed_scoring?: Record<string, unknown>
+  rationale?: string | null
+  explanation?: string | null
+  ai_model?: string | null
+  source_blueprint_id?: string | null
+  current_revision_id?: string | null
+  blueprint_version_id?: string | null
+  source_run_id?: string | null
+  human_reviewer_id?: string | null
+  reviewed_at?: string | null
+  created_at?: string
+  updated_at?: string
+  content_json?: Product2DraftContent
+  content_sha256?: string
+  compiled_scoring_sha256?: string
+  revision?: number
+}
+
+export type Product2DraftRevision = {
+  draft_revision_id: string
+  draft_id: string
+  company_code: string
+  revision: number
+  parent_revision_id?: string | null
+  source_run_id?: string | null
+  revision_kind: string
+  content_json: Product2DraftContent
+  content_sha256: string
+  locale: Product2Locale
+  answer_key_id: string
+  compiled_scoring_json: Record<string, unknown>
+  compiled_scoring_sha256: string
+  created_by_actor_type: string
+  created_by_user_id?: string | null
+  created_at?: string
+}
+
+export type Product2DraftReview = {
+  review_id: string
+  review_type: string
+  reviewer_type: string
+  reviewer_id?: string | null
+  from_status?: string | null
+  to_status?: string | null
+  findings_json?: Record<string, unknown>
+  notes?: string | null
+  created_at?: string
+}
+
+export type Product2AuthoringEvent = {
+  event_id: string
+  event_type: string
+  actor_type: string
+  actor_user_id?: string | null
+  from_status?: string | null
+  to_status?: string | null
+  payload_json?: Record<string, unknown>
+  created_at?: string
+}
+
+export type Product2Run = {
+  run_id: string
+  company_code: string
+  role_key: string
+  run_kind: string
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'refused' | 'budget_blocked' | string
+  registry_version_id: string
+  prompt_version_id: string
+  blueprint_version_id?: string | null
+  draft_id?: string | null
+  draft_revision_id?: string | null
+  parent_run_id?: string | null
+  requested_model: string
+  provider_response_model?: string | null
+  schema_name: string
+  schema_version: string
+  schema_sha256: string
+  input_json?: Record<string, unknown>
+  output_json?: Record<string, unknown> | null
+  input_sha256?: string
+  output_sha256?: string | null
+  input_tokens?: number | null
+  output_tokens?: number | null
+  estimated_cost_usd?: number | null
+  latency_ms?: number | null
+  refusal_reason?: string | null
+  error_code?: string | null
+  error_message?: string | null
+  queued_at?: string
+  started_at?: string | null
+  completed_at?: string | null
+  idempotent?: boolean
+}
+
+export type Product2BlueprintsResponse = {
+  ok: boolean
+  blueprints: Product2Blueprint[]
+  publish_available: false
+}
+
+export type Product2RunResponse = {
+  ok: boolean
+  run: Product2Run
+  queued?: boolean
+  publish_available: false
+}
+
+export type Product2DraftEvidenceResponse = {
+  ok: boolean
+  draft: Product2Draft
+  revisions: Product2DraftRevision[]
+  reviews: Product2DraftReview[]
+  events: Product2AuthoringEvent[]
+  publish_available: false
+}
+
+export type AssessmentAuthoringDraftsResponse = {
+  ok: boolean
+  drafts: Product2Draft[]
+  publish_available: false
 }
 
 export type AssessmentReportResponse = {

@@ -1,0 +1,669 @@
+{
+  "corpus_version": "assessment_product2_eval_corpus_v1",
+  "gate_profile_version": "assessment_product2_offline_gate_v1",
+  "provenance": {
+    "owner": "Wathefni",
+    "synthetic_only": true,
+    "candidate_data_included": false,
+    "third_party_assessment_content_included": false,
+    "description": "Synthetic Wathefni-owned fixtures for offline Assessment Product-2 evaluation."
+  },
+  "recordings": {
+    "authoring-valid-en-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-valid-en",
+      "items": [
+        {
+          "draft_local_id": "item-valid-en",
+          "locale": "en",
+          "prompt_text": "A Wathefni support team receives two urgent customer requests at the same time. Which action best demonstrates sound prioritization?",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Assess impact and urgency, then communicate the response order."
+            },
+            {
+              "key": "B",
+              "text": "Handle whichever request was noticed most recently."
+            }
+          ],
+          "proposed_answer_key": "A",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 1,
+            "incorrect_points": 0,
+            "max_points": 1,
+            "choice_points": []
+          },
+          "rationale": "The item measures transparent prioritization using job-relevant information.",
+          "explanation": "Option A uses impact and urgency consistently.",
+          "distractor_rationales": [
+            {
+              "choice_key": "B",
+              "rationale": "Recency alone is not a sound priority rule."
+            }
+          ],
+          "competency_tags": [
+            "prioritization"
+          ],
+          "skill_tags": [
+            "judgment"
+          ],
+          "role_tags": [
+            "support"
+          ],
+          "difficulty_rationale": "The response requires applying two clear priority criteria.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": []
+        }
+      ],
+      "generation_notes": [
+        "Synthetic Wathefni-owned content."
+      ],
+      "refusal_reason": null
+    },
+    "authoring-malformed-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-malformed",
+      "generation_notes": [],
+      "refusal_reason": null,
+      "unexpected_field": true
+    },
+    "authoring-ambiguity-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-ambiguity",
+      "items": [
+        {
+          "draft_local_id": "item-ambiguity",
+          "locale": "en",
+          "prompt_text": "Select the best response for this synthetic Wathefni workplace situation",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Ask the team lead for the approved procedure."
+            },
+            {
+              "key": "B",
+              "text": "Ask the team lead for the approved procedure."
+            }
+          ],
+          "proposed_answer_key": "A",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 1,
+            "incorrect_points": 0,
+            "max_points": 1,
+            "choice_points": []
+          },
+          "rationale": "This intentionally ambiguous fixture has indistinguishable options.",
+          "explanation": "The fixture must be rejected by deterministic ambiguity checks.",
+          "distractor_rationales": [
+            {
+              "choice_key": "B",
+              "rationale": "The duplicate choice intentionally creates ambiguity."
+            }
+          ],
+          "competency_tags": [],
+          "skill_tags": [],
+          "role_tags": [],
+          "difficulty_rationale": "Difficulty cannot be interpreted reliably.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": []
+        }
+      ],
+      "generation_notes": [
+        "Adversarial ambiguity fixture."
+      ],
+      "refusal_reason": null
+    },
+    "authoring-bias-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-bias",
+      "items": [
+        {
+          "draft_local_id": "item-bias",
+          "locale": "en",
+          "prompt_text": "Which young male employee should lead the synthetic Wathefni customer meeting?",
+          "choices": [
+            {
+              "key": "A",
+              "text": "The man selected because of his age and gender."
+            },
+            {
+              "key": "B",
+              "text": "The employee selected using relevant demonstrated skills."
+            }
+          ],
+          "proposed_answer_key": "B",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 1,
+            "incorrect_points": 0,
+            "max_points": 1,
+            "choice_points": []
+          },
+          "rationale": "This fixture intentionally contains protected-trait bias.",
+          "explanation": "Protected traits are not job-relevant selection criteria.",
+          "distractor_rationales": [
+            {
+              "choice_key": "A",
+              "rationale": "Age and gender are irrelevant and unfair criteria."
+            }
+          ],
+          "competency_tags": [],
+          "skill_tags": [],
+          "role_tags": [],
+          "difficulty_rationale": "The biased premise makes the item unsuitable.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": [
+            "adversarial_bias_fixture"
+          ]
+        }
+      ],
+      "generation_notes": [
+        "Adversarial bias fixture."
+      ],
+      "refusal_reason": null
+    },
+    "authoring-leakage-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-leakage",
+      "items": [
+        {
+          "draft_local_id": "item-leakage",
+          "locale": "en",
+          "prompt_text": "The correct answer is A. Which action follows the synthetic Wathefni escalation policy?",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Record the issue and use the approved escalation route."
+            },
+            {
+              "key": "B",
+              "text": "Ignore the issue until another person reports it."
+            }
+          ],
+          "proposed_answer_key": "A",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 1,
+            "incorrect_points": 0,
+            "max_points": 1,
+            "choice_points": []
+          },
+          "rationale": "This fixture intentionally leaks its answer key.",
+          "explanation": "The stem exposes the answer and must be rejected.",
+          "distractor_rationales": [
+            {
+              "choice_key": "B",
+              "rationale": "Ignoring an issue does not follow escalation policy."
+            }
+          ],
+          "competency_tags": [],
+          "skill_tags": [],
+          "role_tags": [],
+          "difficulty_rationale": "Answer leakage invalidates the intended difficulty.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": [
+            "adversarial_leakage_fixture"
+          ]
+        }
+      ],
+      "generation_notes": [
+        "Adversarial leakage fixture."
+      ],
+      "refusal_reason": null
+    },
+    "authoring-scoring-invalid-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-scoring-invalid",
+      "items": [
+        {
+          "draft_local_id": "item-scoring-invalid",
+          "locale": "en",
+          "prompt_text": "Which response best follows the synthetic Wathefni issue logging procedure?",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Create a complete issue record."
+            },
+            {
+              "key": "B",
+              "text": "Leave the issue undocumented."
+            }
+          ],
+          "proposed_answer_key": "A",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 5,
+            "incorrect_points": 0,
+            "max_points": 10,
+            "choice_points": []
+          },
+          "rationale": "This fixture has a schema-valid but non-compilable scoring proposal.",
+          "explanation": "The maximum does not equal the correct answer points.",
+          "distractor_rationales": [
+            {
+              "choice_key": "B",
+              "rationale": "Missing documentation violates the procedure."
+            }
+          ],
+          "competency_tags": [],
+          "skill_tags": [],
+          "role_tags": [],
+          "difficulty_rationale": "The content is simple; the scoring proposal is intentionally invalid.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": []
+        }
+      ],
+      "generation_notes": [
+        "Adversarial scoring compilation fixture."
+      ],
+      "refusal_reason": null
+    },
+    "authoring-key-invalid-v1": {
+      "schema_version": "assessment_product2_v1",
+      "request_id": "eval-key-invalid",
+      "items": [
+        {
+          "draft_local_id": "item-key-invalid",
+          "locale": "en",
+          "prompt_text": "Which action best preserves a synthetic Wathefni audit trail?",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Record the action with its reason."
+            },
+            {
+              "key": "B",
+              "text": "Remove the action history."
+            }
+          ],
+          "proposed_answer_key": "Z",
+          "proposed_scoring": {
+            "family": "answer_key",
+            "correct_points": 1,
+            "incorrect_points": 0,
+            "max_points": 1,
+            "choice_points": []
+          },
+          "rationale": "The proposed answer key intentionally does not name an option.",
+          "explanation": "The key must be rejected.",
+          "distractor_rationales": [
+            {
+              "choice_key": "B",
+              "rationale": "Removing history destroys the audit trail."
+            }
+          ],
+          "competency_tags": [],
+          "skill_tags": [],
+          "role_tags": [],
+          "difficulty_rationale": "The key defect is independent of item difficulty.",
+          "assumptions": [],
+          "original_content_attested": true,
+          "safety_flags": []
+        }
+      ],
+      "generation_notes": [
+        "Adversarial key validity fixture."
+      ],
+      "refusal_reason": null
+    },
+    "bilingual-valid-v1": {
+      "schema_version": "assessment_product2_v1",
+      "source_revision_id": "synthetic-source-revision-1",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_locale": "en",
+      "target_locale": "ar",
+      "adapted_prompt_text": "ما الإجراء الذي يحافظ على سجل تدقيق واضح في نظام وظفني التجريبي؟",
+      "adapted_choices": [
+        {
+          "key": "A",
+          "text": "توثيق الإجراء وسببه."
+        },
+        {
+          "key": "B",
+          "text": "حذف سجل الإجراء."
+        }
+      ],
+      "terminology_decisions": [
+        "استخدام سجل تدقيق مقابل audit trail."
+      ],
+      "cultural_adaptations": [],
+      "back_translation_summary": "Which action preserves a clear audit trail in the synthetic Wathefni system?",
+      "preserved_invariants": [
+        "option key identity",
+        "option order",
+        "intended correct response"
+      ],
+      "refusal_reason": null
+    },
+    "bilingual-key-drift-v1": {
+      "schema_version": "assessment_product2_v1",
+      "source_revision_id": "synthetic-source-revision-2",
+      "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_locale": "en",
+      "target_locale": "ar",
+      "adapted_prompt_text": "ما الإجراء الذي يحافظ على سجل تدقيق واضح في نظام وظفني التجريبي؟",
+      "adapted_choices": [
+        {
+          "key": "B",
+          "text": "توثيق الإجراء وسببه."
+        },
+        {
+          "key": "A",
+          "text": "حذف سجل الإجراء."
+        }
+      ],
+      "terminology_decisions": [
+        "استخدام سجل تدقيق مقابل audit trail."
+      ],
+      "cultural_adaptations": [],
+      "back_translation_summary": "Which action preserves a clear audit trail in the synthetic Wathefni system?",
+      "preserved_invariants": [
+        "meaning"
+      ],
+      "refusal_reason": null
+    },
+    "failure-refusal-v1": {
+      "failure_class": "refusal",
+      "retryable": false,
+      "draft_created": false
+    },
+    "failure-rate-limit-v1": {
+      "failure_class": "rate_limit",
+      "retryable": true,
+      "draft_created": false
+    },
+    "failure-outage-v1": {
+      "failure_class": "provider_outage",
+      "retryable": true,
+      "draft_created": false
+    }
+  },
+  "cases": [
+    {
+      "case_id": "valid_authoring_en",
+      "kind": "authoring",
+      "recording_id": "authoring-valid-en-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "answer_key_valid": true,
+        "scoring_compile_valid": true,
+        "duplicate_detected": false,
+        "critical_ambiguity_detected": false,
+        "critical_bias_detected": false,
+        "critical_leakage_detected": false
+      }
+    },
+    {
+      "case_id": "malformed_schema",
+      "kind": "authoring",
+      "recording_id": "authoring-malformed-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": false
+      }
+    },
+    {
+      "case_id": "exact_duplicate",
+      "kind": "authoring",
+      "recording_id": "authoring-valid-en-v1",
+      "comparison_prompts": [
+        "A WATHEFNI support team receives two urgent customer requests at the same time! Which action best demonstrates sound prioritization?"
+      ],
+      "expected": {
+        "exact_duplicate_detected": true,
+        "semantic_duplicate_detected": false,
+        "duplicate_detected": true
+      }
+    },
+    {
+      "case_id": "semantic_duplicate",
+      "kind": "authoring",
+      "recording_id": "authoring-valid-en-v1",
+      "comparison_prompts": [
+        "A Wathefni support team receives two urgent customer requests at the same time. Which action best demonstrates sound prioritization today?"
+      ],
+      "expected": {
+        "exact_duplicate_detected": false,
+        "semantic_duplicate_detected": true,
+        "duplicate_detected": true
+      }
+    },
+    {
+      "case_id": "critical_ambiguity",
+      "kind": "authoring",
+      "recording_id": "authoring-ambiguity-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "critical_ambiguity_detected": true
+      }
+    },
+    {
+      "case_id": "critical_bias",
+      "kind": "authoring",
+      "recording_id": "authoring-bias-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "critical_bias_detected": true
+      }
+    },
+    {
+      "case_id": "critical_leakage",
+      "kind": "authoring",
+      "recording_id": "authoring-leakage-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "critical_leakage_detected": true
+      }
+    },
+    {
+      "case_id": "scoring_compile_failure",
+      "kind": "authoring",
+      "recording_id": "authoring-scoring-invalid-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "answer_key_valid": true,
+        "scoring_compile_valid": false
+      }
+    },
+    {
+      "case_id": "invalid_answer_key",
+      "kind": "authoring",
+      "recording_id": "authoring-key-invalid-v1",
+      "comparison_prompts": [],
+      "expected": {
+        "schema_valid": true,
+        "answer_key_valid": false,
+        "scoring_compile_valid": false
+      }
+    },
+    {
+      "case_id": "bilingual_equivalent",
+      "kind": "bilingual",
+      "recording_id": "bilingual-valid-v1",
+      "source_choices": [
+        {
+          "key": "A",
+          "text": "Record the action with its reason."
+        },
+        {
+          "key": "B",
+          "text": "Remove the action history."
+        }
+      ],
+      "recorded_equivalence_review": {
+        "schema_version": "assessment_product2_v1",
+        "translation_pair_id": "synthetic-translation-pair-1",
+        "source_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "target_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "findings": [
+          {
+            "dimension": "semantic_equivalence",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The synthetic source meaning is preserved."
+          },
+          {
+            "dimension": "answer_key_invariance",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "Option keys and intended answer remain invariant."
+          },
+          {
+            "dimension": "linguistic_naturalness",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The Arabic wording is natural MSA."
+          },
+          {
+            "dimension": "rtl_punctuation_numerals",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "RTL punctuation is appropriate."
+          },
+          {
+            "dimension": "cultural_fairness",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "No culture-specific disadvantage is introduced."
+          },
+          {
+            "dimension": "difficulty_drift",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The expected difficulty is stable."
+          }
+        ],
+        "overall_recommendation": "pass",
+        "refusal_reason": null
+      },
+      "expected": {
+        "schema_valid": true,
+        "answer_key_valid": true,
+        "en_ar_key_invariant": true,
+        "translation_equivalent": true
+      }
+    },
+    {
+      "case_id": "bilingual_key_drift",
+      "kind": "bilingual",
+      "recording_id": "bilingual-key-drift-v1",
+      "source_choices": [
+        {
+          "key": "A",
+          "text": "Record the action with its reason."
+        },
+        {
+          "key": "B",
+          "text": "Remove the action history."
+        }
+      ],
+      "recorded_equivalence_review": {
+        "schema_version": "assessment_product2_v1",
+        "translation_pair_id": "synthetic-translation-pair-2",
+        "source_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "target_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "findings": [
+          {
+            "dimension": "semantic_equivalence",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The surface meaning is preserved."
+          },
+          {
+            "dimension": "answer_key_invariance",
+            "verdict": "fail",
+            "severity": "critical",
+            "evidence": [],
+            "explanation": "The Arabic option keys were reordered."
+          },
+          {
+            "dimension": "linguistic_naturalness",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The Arabic wording is natural MSA."
+          },
+          {
+            "dimension": "rtl_punctuation_numerals",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "RTL punctuation is appropriate."
+          },
+          {
+            "dimension": "cultural_fairness",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "No culture-specific disadvantage is introduced."
+          },
+          {
+            "dimension": "difficulty_drift",
+            "verdict": "pass",
+            "severity": "none",
+            "evidence": [],
+            "explanation": "The expected difficulty is stable."
+          }
+        ],
+        "overall_recommendation": "required_human_attention",
+        "refusal_reason": null
+      },
+      "expected": {
+        "schema_valid": true,
+        "answer_key_valid": false,
+        "en_ar_key_invariant": false,
+        "translation_equivalent": false
+      }
+    },
+    {
+      "case_id": "structured_refusal",
+      "kind": "failure",
+      "recording_id": "failure-refusal-v1",
+      "expected": {
+        "failure_class": "refusal",
+        "retryable": false,
+        "draft_created": false
+      }
+    },
+    {
+      "case_id": "provider_rate_limit",
+      "kind": "failure",
+      "recording_id": "failure-rate-limit-v1",
+      "expected": {
+        "failure_class": "rate_limit",
+        "retryable": true,
+        "draft_created": false
+      }
+    },
+    {
+      "case_id": "provider_outage",
+      "kind": "failure",
+      "recording_id": "failure-outage-v1",
+      "expected": {
+        "failure_class": "provider_outage",
+        "retryable": true,
+        "draft_created": false
+      }
+    }
+  ]
+}

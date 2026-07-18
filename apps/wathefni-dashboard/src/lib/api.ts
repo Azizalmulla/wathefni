@@ -2,6 +2,7 @@ import type {
   ActivityFilters,
   ActivityResponse,
   ApplicationsResponse,
+  AssessmentAuthoringDraftsResponse,
   AssessmentConfigResponse,
   AssessmentNormRecalculationResponse,
   AssessmentsResponse,
@@ -51,6 +52,15 @@ import type {
   PositionsResponse,
   PositionSummary,
   PrehireReportsResponse,
+  Product2AuthoringStatus,
+  Product2Blueprint,
+  Product2BlueprintInput,
+  Product2BlueprintsResponse,
+  Product2Draft,
+  Product2DraftContent,
+  Product2DraftEvidenceResponse,
+  Product2Locale,
+  Product2RunResponse,
   RankingResponse,
   SetupReadinessResponse,
   SummaryResponse,
@@ -421,6 +431,134 @@ export function getAssessmentConfig(access: DashboardAccess) {
   return request<AssessmentConfigResponse>('/dashboard/prehire/assessments/config', access)
 }
 
+const PRODUCT2_AUTHORING_PATH = '/dashboard/prehire/assessments/authoring/product2'
+
+export function getProduct2AuthoringStatus(access: DashboardAccess) {
+  return request<Product2AuthoringStatus>(`${PRODUCT2_AUTHORING_PATH}/status`, access)
+}
+
+export function getProduct2Blueprints(access: DashboardAccess, status?: string) {
+  const search = new URLSearchParams()
+  if (status) search.set('status', status)
+  const qs = search.toString()
+  return request<Product2BlueprintsResponse>(`${PRODUCT2_AUTHORING_PATH}/blueprints${qs ? `?${qs}` : ''}`, access)
+}
+
+export function createProduct2Blueprint(
+  access: DashboardAccess,
+  body: { blueprint_key: string; blueprint: Product2BlueprintInput; approve?: boolean },
+) {
+  return request<{ ok: boolean; blueprint: Product2Blueprint; publish_available: false }>(
+    `${PRODUCT2_AUTHORING_PATH}/blueprints`,
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
+}
+
+export function generateProduct2Drafts(
+  access: DashboardAccess,
+  body: { blueprint_version_id: string; requested_item_count: number },
+) {
+  return request<Product2RunResponse>(`${PRODUCT2_AUTHORING_PATH}/generate`, access, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export function runProduct2SecondaryReview(access: DashboardAccess, draftId: string) {
+  return request<Product2RunResponse>(
+    `${PRODUCT2_AUTHORING_PATH}/drafts/${encodeURIComponent(draftId)}/secondary-review`,
+    access,
+    { method: 'POST' },
+  )
+}
+
+export function adaptProduct2Draft(access: DashboardAccess, draftId: string, targetLocale: Product2Locale) {
+  return request<Product2RunResponse>(
+    `${PRODUCT2_AUTHORING_PATH}/drafts/${encodeURIComponent(draftId)}/adapt`,
+    access,
+    { method: 'POST', body: JSON.stringify({ target_locale: targetLocale }) },
+  )
+}
+
+export function reviewProduct2TranslationPair(access: DashboardAccess, translationPairId: string) {
+  return request<Product2RunResponse>(
+    `${PRODUCT2_AUTHORING_PATH}/translation-pairs/${encodeURIComponent(translationPairId)}/review`,
+    access,
+    { method: 'POST' },
+  )
+}
+
+export function humanReviewProduct2TranslationPair(
+  access: DashboardAccess,
+  translationPairId: string,
+  body: { decision: 'approve' | 'rewrite' | 'retire'; notes?: string },
+) {
+  return request<{
+    ok: boolean
+    translation_pair: Record<string, unknown>
+    human_reviewed: true
+    publish_available: false
+  }>(
+    `${PRODUCT2_AUTHORING_PATH}/translation-pairs/${encodeURIComponent(translationPairId)}/human-review`,
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
+}
+
+export function rewriteProduct2Draft(access: DashboardAccess, draftId: string, content: Product2DraftContent) {
+  return request<{
+    ok: boolean
+    draft: Product2Draft
+    revision: Record<string, unknown>
+    prior_reviews_invalidated: true
+    publish_available: false
+  }>(
+    `${PRODUCT2_AUTHORING_PATH}/drafts/${encodeURIComponent(draftId)}/rewrite`,
+    access,
+    { method: 'POST', body: JSON.stringify({ content }) },
+  )
+}
+
+export function getProduct2DraftEvidence(access: DashboardAccess, draftId: string) {
+  return request<Product2DraftEvidenceResponse>(
+    `${PRODUCT2_AUTHORING_PATH}/drafts/${encodeURIComponent(draftId)}/evidence`,
+    access,
+  )
+}
+
+export function getProduct2Run(access: DashboardAccess, runId: string) {
+  return request<Product2RunResponse>(`${PRODUCT2_AUTHORING_PATH}/runs/${encodeURIComponent(runId)}`, access)
+}
+
+// Product-2 reuses the established human-only lifecycle transitions. These
+// endpoints never add an item to the live bank and have no publish operation.
+export function getAssessmentAuthoringDrafts(access: DashboardAccess, status?: string) {
+  const search = new URLSearchParams({ limit: '100' })
+  if (status) search.set('status', status)
+  return request<AssessmentAuthoringDraftsResponse>(
+    `/dashboard/prehire/assessments/authoring/drafts?${search.toString()}`,
+    access,
+  )
+}
+
+export function transitionAssessmentAuthoringDraft(
+  access: DashboardAccess,
+  draftId: string,
+  body: {
+    to_status: 'ai_draft' | 'human_review' | 'pilot' | 'approved' | 'retired'
+    notes?: string
+    rejection_reason?: string
+    original_content_attested?: boolean
+  },
+) {
+  return request<{ ok: boolean; draft: Product2Draft; published: false; live_bank_unchanged: true }>(
+    `/dashboard/prehire/assessments/authoring/drafts/${encodeURIComponent(draftId)}/transition`,
+    access,
+    { method: 'POST', body: JSON.stringify(body) },
+  )
+}
+
 export function recalculateAssessmentNorms(access: DashboardAccess, persist = true) {
   const search = new URLSearchParams({ persist: String(persist), minimum_sample: '200' })
   return request<AssessmentNormRecalculationResponse>(`/dashboard/prehire/assessments/norms/recalculate?${search.toString()}`, access, {
@@ -515,6 +653,27 @@ export function sendAssessment(access: DashboardAccess, appKey: string, message?
   return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/assessment`, access, {
     method: 'POST',
     body: JSON.stringify({ account_id: 'default', message: message || null }),
+  })
+}
+
+export function resendAssessment(access: DashboardAccess, attemptId: string, message?: string) {
+  return request<MutationResponse>(`/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/resend`, access, {
+    method: 'POST',
+    body: JSON.stringify({ account_id: 'default', message: message || null }),
+  })
+}
+
+export function cancelAssessment(access: DashboardAccess, attemptId: string, reason: string) {
+  return request<MutationResponse>(`/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/cancel`, access, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  })
+}
+
+export function reviewAssessment(access: DashboardAccess, attemptId: string, notes?: string) {
+  return request<MutationResponse>(`/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/review`, access, {
+    method: 'POST',
+    body: JSON.stringify({ notes: notes || null }),
   })
 }
 

@@ -81,6 +81,7 @@ import {
   loginDashboard,
   logoutDashboard,
   notifyCandidate,
+  cancelAssessment,
   previewVideoInterviewAnswer,
   previewAssessmentReport,
   previewCandidateCv,
@@ -90,6 +91,8 @@ import {
   saveInterviewNotes,
   sendVideoInterview,
   sendAssessment,
+  resendAssessment,
+  reviewAssessment,
   shortlistCandidate,
   startDashboardChatSession,
   streamDashboardChat,
@@ -111,6 +114,7 @@ import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
 import { ActivityLog } from '@/components/ActivityLog'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
 import { OfferPanel } from '@/components/OfferPanel'
+import { Product2AuthoringPanel } from '@/components/Product2AuthoringPanel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -1988,6 +1992,7 @@ function App() {
               )}
               {activePage === 'assessments' && (
                 <AssessmentsPage
+                  access={access}
                   applications={allApplications}
                   enabled={assessmentModuleOn}
                   config={assessmentConfig}
@@ -1999,6 +2004,20 @@ function App() {
                   onOpenCandidate={openCandidateByKey}
                   onOpenFollowUpCandidates={viewPendingAssessmentCandidates}
                   onPreviewReport={previewReport}
+                  onCancelAttempt={async (attempt) => {
+                    const reason = window.prompt('Why are you cancelling this assessment?')
+                    if (!reason?.trim()) return
+                    if (!(await confirm({ title: 'Cancel assessment?', body: `This revokes every active link for ${attempt.candidate_name || attempt.phone || 'this candidate'}.`, confirmLabel: 'Cancel assessment', destructive: true }))) return
+                    await mutate('Cancelling assessment', () => cancelAssessment(access, attempt.attempt_id, reason.trim()), `cancel_assessment:${attempt.attempt_id}`)
+                  }}
+                  onResendAttempt={async (attempt) => {
+                    if (!(await confirm({ title: 'Resend assessment?', body: `The old link will be revoked and ${attempt.candidate_name || attempt.phone || 'the candidate'} will receive a new one.`, confirmLabel: 'Resend assessment' }))) return
+                    await mutate('Resending assessment', () => resendAssessment(access, attempt.attempt_id), `resend_assessment:${attempt.attempt_id}`)
+                  }}
+                  onReviewAttempt={async (attempt) => {
+                    if (!(await confirm({ title: 'Mark assessment reviewed?', body: `Record that HR reviewed the immutable report for ${attempt.candidate_name || attempt.phone || 'this candidate'}.`, confirmLabel: 'Mark reviewed' }))) return
+                    await mutate('Marking assessment reviewed', () => reviewAssessment(access, attempt.attempt_id), `review_assessment:${attempt.attempt_id}`)
+                  }}
                   onRecalculateNorms={recalculateNorms}
                   onRefresh={() => {
                     setAssessmentOffset(0)
@@ -2701,6 +2720,20 @@ function CandidateDrawer({
     if (!(await confirm({ title: 'Notify candidate?', body: `${who} will receive a message now.`, confirmLabel: 'Send message' }))) return
     await mutate('Notifying candidate', () => notifyCandidate(access, candidate.app_key, message), key)
   }
+  const runPreviewAssessment = async () => {
+    const attemptId = candidate.assessment?.attempt_id
+    if (!attemptId || candidate.assessment?.status !== 'completed') {
+      onOpenAssessments()
+      return
+    }
+    try {
+      setMessage('Opening this candidate’s assessment report…')
+      await previewAssessmentReport(access, attemptId)
+      setMessage('Assessment report opened.')
+    } catch (error) {
+      setMessage(friendlyDashboardError(error, 'Could not open this candidate’s assessment report.'))
+    }
+  }
   const runHire = async () => {
     if (
       !(await confirm({
@@ -2919,8 +2952,8 @@ function CandidateDrawer({
                     <div className="font-semibold">{assessmentLabel(candidate)}</div>
                     <div className="mt-1 text-subtle">{candidate.assessment.summary || 'Report will appear here after completion.'}</div>
                   </div>
-                  <Button onClick={onOpenAssessments} size="sm" variant="secondary">
-                    View report
+                  <Button onClick={() => void runPreviewAssessment()} size="sm" variant="secondary">
+                    {candidate.assessment.status === 'completed' && candidate.assessment.attempt_id ? 'View report' : 'Open assessments'}
                   </Button>
                 </div>
               </div>
@@ -4031,6 +4064,7 @@ function InterviewSummaryList({ label, values }: { label: string; values: string
 }
 
 function AssessmentsPage({
+  access,
   applications,
   canManageAssessments,
   enabled,
@@ -4044,6 +4078,9 @@ function AssessmentsPage({
   onOpenCandidate,
   onOpenFollowUpCandidates,
   onPreviewReport,
+  onCancelAttempt,
+  onResendAttempt,
+  onReviewAttempt,
   onRecalculateNorms,
   onRefresh,
   onSendAssessment,
@@ -4051,6 +4088,7 @@ function AssessmentsPage({
   statusCounts,
   pendingTotal,
 }: {
+  access: DashboardAccess
   applications: ApplicationSummary[]
   canManageAssessments: boolean
   enabled: boolean
@@ -4064,6 +4102,9 @@ function AssessmentsPage({
   onOpenCandidate: (appKey: string) => void
   onOpenFollowUpCandidates: () => void
   onPreviewReport: (attempt: AssessmentAttempt) => void
+  onCancelAttempt: (attempt: AssessmentAttempt) => void
+  onResendAttempt: (attempt: AssessmentAttempt) => void
+  onReviewAttempt: (attempt: AssessmentAttempt) => void
   onRecalculateNorms: () => void
   onRefresh: () => void
   onSendAssessment: (application: ApplicationSummary) => void
@@ -4077,7 +4118,7 @@ function AssessmentsPage({
   // Headline count is the company-wide total; the queue table below shows the loaded
   // candidates and discloses when more exist (kept separate from list loading).
   const pendingCount = typeof pendingTotal === 'number' ? pendingTotal : queue.length
-  const needsReview = attempts.filter((attempt) => attempt.band === 'needs_review' || attempt.job_match?.fit_band === 'low').length
+  const needsReview = attempts.filter((attempt) => attempt.status === 'completed' && attempt.review_status !== 'reviewed').length
   const completedAttempts = attempts.filter((attempt) => attempt.status === 'completed')
   const reports = completedAttempts.slice(0, 6)
   const canGoBack = offset > 0
@@ -4087,6 +4128,8 @@ function AssessmentsPage({
   const competencyCount = Object.keys(config?.framework?.competencies || {}).length
   const sections = Object.keys(itemBank?.section_totals || {}).map(stageLabel).join(', ') || 'Ability + workplace judgment'
   const questionCount = itemBank?.total_items || 22
+  const batteryName = String(config?.battery?.name || 'Wathefni Ability Assessment')
+  const batteryVersion = String(config?.battery?.version || 'v1')
   return (
     <div className="space-y-6">
       {!enabled ? (
@@ -4113,6 +4156,10 @@ function AssessmentsPage({
         ]}
       />
 
+      {enabled ? (
+        <Product2AuthoringPanel access={access} canManageAssessments={canManageAssessments} />
+      ) : null}
+
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -4136,7 +4183,7 @@ function AssessmentsPage({
                     <th className="px-4 py-3">Candidate</th>
                     <th className="px-4 py-3">Job</th>
                     <th className="px-4 py-3">Stage</th>
-                    <th className="px-4 py-3">Suggested assessment</th>
+                    <th className="px-4 py-3">Assessment</th>
                     <th className="px-4 py-3">Action</th>
                   </tr>
                 </thead>
@@ -4153,7 +4200,7 @@ function AssessmentsPage({
                           {application.assessment?.status ? `Assessment ${stageLabel(application.assessment.status)}` : stageLabel(application.status)}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-subtle">{recommendedBattery(application)}</td>
+                      <td className="px-4 py-3 text-subtle">{batteryName} {batteryVersion}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-2">
                           <Button disabled={busy || !enabled || !canManageAssessments} onClick={() => onSendAssessment(application)} size="sm" variant="secondary">
@@ -4186,7 +4233,7 @@ function AssessmentsPage({
       <Card>
         <CardHeader>
           <CardTitle>Recent attempts</CardTitle>
-          <CardDescription>Latest WhatsApp assessment attempts and score outcomes.</CardDescription>
+          <CardDescription>Latest browser-based attempts, delivery state, and HR review state.</CardDescription>
         </CardHeader>
         <CardContent>
           {attempts.length ? (
@@ -4201,7 +4248,7 @@ function AssessmentsPage({
                     <th className="px-4 py-3">Score</th>
                     <th className="px-4 py-3">Job match</th>
                     <th className="px-4 py-3">Completed</th>
-                    <th className="px-4 py-3">Report</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/45 bg-panel/42">
@@ -4220,15 +4267,22 @@ function AssessmentsPage({
                       <td className="px-4 py-3 text-subtle">{attempt.job_match?.job_match_percent == null ? '—' : `${attempt.job_match.job_match_percent}%`}</td>
                       <td className="px-4 py-3 text-subtle">{attempt.completed_at ? formatDateTime(attempt.completed_at) : '—'}</td>
                       <td className="px-4 py-3">
-                        {attempt.status === 'completed' ? (
-                          <Button onClick={() => onPreviewReport(attempt)} size="sm" variant="secondary">
-                            View report
-                          </Button>
-                        ) : (
-                          <Button onClick={() => onOpenCandidate(attempt.app_key)} size="sm" variant="ghost">
-                            Open
-                          </Button>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {attempt.status === 'completed' ? (
+                            <>
+                              <Button onClick={() => onPreviewReport(attempt)} size="sm" variant="secondary">View report</Button>
+                              {attempt.review_status !== 'reviewed' && canManageAssessments ? (
+                                <Button disabled={busy} onClick={() => onReviewAttempt(attempt)} size="sm" variant="ghost">Mark reviewed</Button>
+                              ) : null}
+                            </>
+                          ) : ['pending', 'in_progress'].includes(String(attempt.status)) ? (
+                            <>
+                              <Button disabled={busy || !canManageAssessments} onClick={() => onResendAttempt(attempt)} size="sm" variant="secondary">Resend</Button>
+                              <Button disabled={busy || !canManageAssessments} onClick={() => onCancelAttempt(attempt)} size="sm" variant="ghost">Cancel</Button>
+                            </>
+                          ) : null}
+                          <Button onClick={() => onOpenCandidate(attempt.app_key)} size="sm" variant="ghost">Open</Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -4261,22 +4315,17 @@ function AssessmentsPage({
           <CardTitle>Assessment setup</CardTitle>
           <CardDescription>How assessment results are grouped for HR review.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 lg:grid-cols-2">
-          {roleBatteryCards(questionCount, sections).map((battery) => (
-            <div className="rounded-lg border border-line bg-panel-muted/60 p-4" key={battery.key}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="font-semibold">{battery.label}</div>
-                  <div className="mt-1 text-sm text-subtle">{battery.sections}</div>
-                </div>
-                <Badge tone="success">{stageLabel(battery.status)}</Badge>
+        <CardContent>
+          <div className="rounded-lg border border-line bg-panel-muted/60 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-semibold">{batteryName} {batteryVersion}</div>
+                <div className="mt-1 text-sm text-subtle">{sections}</div>
               </div>
-              <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                <Info label="Time limit" value={battery.timeLimit} />
-                <Info label="Questions" value={`${battery.questions}`} />
-              </div>
+              <Badge tone="success">Approved item bank</Badge>
             </div>
-          ))}
+            <div className="mt-4 text-sm text-subtle">{questionCount} approved, versioned questions. No time limit is enforced.</div>
+          </div>
         </CardContent>
       </Card>
 
@@ -6595,7 +6644,7 @@ function assessmentQueue(applications: ApplicationSummary[]) {
   return applications.filter((application) => {
     const status = String(application.assessment?.status || '').toLowerCase()
     const stage = String(application.status || '').toLowerCase()
-    return (!status || status === 'pending') && application.cv?.received && ['screening_complete', 'review_pending', 'shortlisted'].includes(stage)
+    return (!status || status === 'pending') && application.cv?.received && ['screening_complete', 'review_pending', 'ready_for_review', 'shortlisted'].includes(stage)
   })
 }
 
@@ -6615,26 +6664,6 @@ function roleBottleneckLabel(job: PositionSummary, assessmentEnabled = true) {
       : `Plan interviews for ${top.count} shortlisted candidate${top.count === 1 ? '' : 's'}.`
   }
   return `Open this role and move ${top.count} candidate${top.count === 1 ? '' : 's'} forward.`
-}
-
-function recommendedBattery(application: ApplicationSummary) {
-  const role = `${application.position?.title || ''} ${application.position?.code || ''}`.toLowerCase()
-  if (role.includes('teller') || role.includes('cashier')) return 'Teller set'
-  if (role.includes('customer') || role.includes('service') || role.includes('call center')) return 'Customer Service set'
-  if (role.includes('sales') || role.includes('relationship') || role.includes('business development')) return 'Sales set'
-  if (role.includes('operation') || role.includes('back office') || role.includes('processing')) return 'Operations set'
-  if (role.includes('hr') || role.includes('recruit') || role.includes('admin') || role.includes('finance')) return 'HR / Admin set'
-  return 'General set'
-}
-
-function roleBatteryCards(questionCount: number, sections: string) {
-  return [
-    { key: 'teller', label: 'Teller', sections, timeLimit: '25 min', questions: questionCount, status: 'active' },
-    { key: 'customer_service', label: 'Customer Service Officer', sections, timeLimit: '25 min', questions: questionCount, status: 'active' },
-    { key: 'sales_officer', label: 'Sales Officer', sections, timeLimit: '25 min', questions: questionCount, status: 'active' },
-    { key: 'operations_officer', label: 'Operations Officer', sections, timeLimit: '25 min', questions: questionCount, status: 'active' },
-    { key: 'hr_admin', label: 'HR/Admin', sections, timeLimit: '25 min', questions: questionCount, status: 'active' },
-  ]
 }
 
 function assessmentModuleEnabled(state: DashboardModuleState, summary?: SummaryResponse | null) {
@@ -6846,10 +6875,10 @@ function recommendedCandidateAction(application: ApplicationSummary) {
   const status = String(application.status || '').toLowerCase()
   if (!application.cv?.received) return 'Ask the candidate to send their CV before HR review.'
   if (application.screening_status !== 'complete') return 'Finish missing screening answers before comparing this candidate.'
-  if (!application.assessment?.status && ['screening_complete', 'review_pending', 'shortlisted'].includes(status)) {
+  if (!application.assessment?.status && ['screening_complete', 'review_pending', 'ready_for_review', 'shortlisted'].includes(status)) {
     return 'Send the assessment or review whether assessment evidence is required for this role.'
   }
-  if (!application.interview?.status && ['shortlisted', 'review_pending', 'screening_complete'].includes(status)) {
+  if (!application.interview?.status && ['shortlisted', 'review_pending', 'ready_for_review', 'screening_complete'].includes(status)) {
     return 'Review the profile, then schedule an interview if the fit still looks strong.'
   }
   if (application.interview?.feedback_status !== 'feedback_complete' && application.interview?.status === 'completed') {

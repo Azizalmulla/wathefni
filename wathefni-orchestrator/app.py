@@ -2765,6 +2765,12 @@ def _ensure_schema_impl() -> None:
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(sql)
+            import assessment_lifecycle as _assessments
+
+            _assessments.ensure_assessment_schema(cur)
+            import assessment_ai_service as _assessment_ai
+
+            _assessment_ai.seed_product2_defaults(cur)
         conn.commit()
     sync_company_module_registry()
     sync_company_org_registry()
@@ -2786,6 +2792,13 @@ def _ensure_schema_impl() -> None:
             import offer_lifecycle as _offers
 
             _offers.ensure_offer_schema(cur)
+            import assessment_service as _assessment_service
+
+            _assessment_service.freeze_current_content_version(
+                cur,
+                company_code="GLOBAL",
+                battery_key=ASSESSMENT_BATTERY_KEY,
+            )
         conn.commit()
 
 
@@ -5823,10 +5836,15 @@ EMPLOYEE_PERMISSION_SCOPES = {
 OFFER_GRANT_ONLY_PERMISSIONS = {
     "offer.hire_override",
 }
+# Product-2 publishing is intentionally grant-only and is not exposed to AI.
+ASSESSMENT_GRANT_ONLY_PERMISSIONS = {
+    "assessment.publish",
+}
 KNOWN_DASHBOARD_PERMISSIONS = set().union(
     *ROLE_PERMISSIONS.values(),
     EMPLOYEE_PERMISSION_SCOPES,
     OFFER_GRANT_ONLY_PERMISSIONS,
+    ASSESSMENT_GRANT_ONLY_PERMISSIONS,
 )
 
 
@@ -5854,6 +5872,7 @@ def dashboard_effective_permissions_for_user(
     permissions = set(ROLE_PERMISSIONS.get(role_key, ROLE_PERMISSIONS["viewer"]))
     permissions.difference_update(EMPLOYEE_PERMISSION_SCOPES)
     permissions.difference_update(OFFER_GRANT_ONLY_PERMISSIONS)
+    permissions.difference_update(ASSESSMENT_GRANT_ONLY_PERMISSIONS)
     company = str(data.get("company_code") or "").strip().upper()
     user_id = str(data.get("user_id") or "").strip()
     if not company or not user_id:
@@ -12217,19 +12236,29 @@ def row_assessment_signal(row: dict[str, Any]) -> dict[str, Any]:
     except Exception:
         numeric_percent = None
     status = str(row.get("assessment_status") or "").lower()
-    if numeric_percent is not None:
+    has_completed_evidence = status == "completed" and numeric_percent is not None
+    if has_completed_evidence:
         score = bounded_score((numeric_percent / 100) * 10, 10)
         label = f"Assessment score is {numeric_percent:.0f}%."
     elif status == "completed":
-        score = 7
-        label = "Assessment is complete, but no numeric score is stored."
-    elif status in {"in_progress", "pending"}:
-        score = 3 if status == "in_progress" else 2
-        label = f"Assessment is {status.replace('_', ' ')}."
+        score = 0
+        numeric_percent = None
+        label = "Assessment is complete, but usable numeric evidence is missing."
+    elif status in {"in_progress", "pending", "cancelled", "expired"}:
+        score = 0
+        numeric_percent = None
+        label = f"Assessment is {status.replace('_', ' ')} and does not contribute ranking evidence."
     else:
         score = 0
+        numeric_percent = None
         label = "Assessment result is missing."
-    return {"score": score, "label": label, "percent": numeric_percent, "status": status or None}
+    return {
+        "score": score,
+        "label": label,
+        "percent": numeric_percent,
+        "status": status or None,
+        "has_completed_evidence": has_completed_evidence,
+    }
 
 
 def row_interview_signal(row: dict[str, Any]) -> dict[str, Any]:
@@ -12393,7 +12422,7 @@ def rank_candidate_row(
         confidence_score += 2
     if row.get("semantic_content") or semantic_score is not None:
         confidence_score += 1
-    if assessment_signal.get("status"):
+    if assessment_signal.get("has_completed_evidence"):
         confidence_score += 1
     if interview_signal.get("status") or interview_signal.get("has_summary"):
         confidence_score += 1
@@ -26166,26 +26195,32 @@ def recalculate_assessment_norm_groups(
     }
 
 
-def update_application_assessment_snapshot(app_key: str, snapshot: dict[str, Any]) -> None:
+def update_application_assessment_snapshot(
+    app_key: str,
+    company_code: str,
+    snapshot: dict[str, Any],
+) -> None:
+    company = str(company_code or "").strip().upper()
+    if not app_key or not company:
+        raise ValueError("assessment_snapshot_requires_tenant_binding")
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT raw_json FROM applications WHERE app_key=%s", (app_key,))
+            cur.execute(
+                "SELECT raw_json FROM applications WHERE app_key=%s AND company_code=%s FOR UPDATE",
+                (app_key, company),
+            )
             row = cur.fetchone()
             if not row:
                 return
-            raw_json = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
+            raw_json = dict(row.get("raw_json")) if isinstance(row.get("raw_json"), dict) else {}
             raw_json["assessment"] = json_safe(snapshot)
-            screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
-            if snapshot.get("status") == "completed":
-                screening["status"] = "complete"
-                screening["assessment_percent"] = snapshot.get("percent")
-                screening["assessment_band"] = snapshot.get("band")
-            elif snapshot.get("status") in {"pending", "in_progress"}:
-                screening["status"] = snapshot.get("status")
-            raw_json["screening"] = screening
             cur.execute(
-                "UPDATE applications SET raw_json=%s, updated_at=COALESCE(updated_at, CURRENT_DATE) WHERE app_key=%s",
-                (Json(json_safe(raw_json)), app_key),
+                """
+                UPDATE applications
+                SET raw_json=%s, updated_at=COALESCE(updated_at, CURRENT_DATE)
+                WHERE app_key=%s AND company_code=%s
+                """,
+                (Json(json_safe(raw_json)), app_key, company),
             )
         conn.commit()
 
@@ -26212,9 +26247,13 @@ def latest_assessment_attempt_for_app(app_key: str, company_code: str | None = N
             return dict(row) if row else None
 
 
-def active_assessment_attempt_for_phone(phone: str | None) -> dict[str, Any] | None:
+def active_assessment_attempt_for_phone(
+    phone: str | None,
+    company_code: str | None,
+) -> dict[str, Any] | None:
     phone_digits = digits(phone)
-    if not phone_digits:
+    company = normalize_company_code(company_code)
+    if not phone_digits or not company:
         return None
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -26222,12 +26261,12 @@ def active_assessment_attempt_for_phone(phone: str | None) -> dict[str, Any] | N
                 """
                 SELECT *
                 FROM assessment_attempts
-                WHERE phone=%s
+                WHERE phone=%s AND company_code=%s
                   AND status IN ('pending','in_progress')
                 ORDER BY updated_at DESC, created_at DESC
                 LIMIT 1
                 """,
-                (phone_digits,),
+                (phone_digits, company),
             )
             row = cur.fetchone()
             return dict(row) if row else None
@@ -26310,10 +26349,10 @@ def verify_assessment_token(attempt_id: str, token: str | None) -> bool:
     return hmac.compare_digest(signature, expected)
 
 
-def assessment_public_link(attempt_id: str, *, ttl_days: int = 14) -> str:
-    expires_at = int(time_module.time() + max(1, ttl_days) * 24 * 60 * 60)
-    token = sign_assessment_token(str(attempt_id), expires_at)
-    return f"{assessment_public_base_url()}/assessment/{attempt_id}?token={urllib.parse.quote(token)}"
+def assessment_public_link(attempt_id: str, raw_token: str) -> str:
+    if not raw_token:
+        raise ValueError("assessment_public_link_requires_raw_token")
+    return f"{assessment_public_base_url()}/assessment/{attempt_id}?token={urllib.parse.quote(raw_token)}"
 
 
 def sign_video_interview_token(interview_id: str, expires_at: int) -> str:
@@ -26347,10 +26386,16 @@ def video_interview_public_link(interview_id: str, *, ttl_days: int = 14) -> tup
     return f"{video_interview_public_base_url()}/video-interview/{interview_id}?token={urllib.parse.quote(token)}", expires_at
 
 
-def assessment_attempt_by_id(attempt_id: str) -> dict[str, Any] | None:
+def assessment_attempt_by_id(attempt_id: str, company_code: str) -> dict[str, Any] | None:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return None
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM assessment_attempts WHERE attempt_id=%s LIMIT 1", (attempt_id,))
+            cur.execute(
+                "SELECT * FROM assessment_attempts WHERE attempt_id=%s AND company_code=%s LIMIT 1",
+                (attempt_id, company),
+            )
             row = cur.fetchone()
     return dict(row) if row else None
 
@@ -26368,33 +26413,105 @@ def public_assessment_item_payload(item: dict[str, Any] | None) -> dict[str, Any
     }
 
 
+def assessment_authority_http_error(exc: Exception) -> HTTPException:
+    import assessment_lifecycle as _assessment_lifecycle
+
+    if isinstance(exc, _assessment_lifecycle.AssessmentAuthorityError):
+        return HTTPException(status_code=exc.status_code, detail=exc.as_detail())
+    return HTTPException(status_code=409, detail={"error": "assessment_authority_error", "message": str(exc)})
+
+
 def public_assessment_state(attempt_id: str, token: str | None, *, start: bool = False) -> dict[str, Any]:
-    if not verify_assessment_token(attempt_id, token):
-        raise HTTPException(status_code=403, detail={"error": "invalid_or_expired_assessment_link"})
-    attempt = assessment_attempt_by_id(attempt_id)
-    if not attempt:
-        raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
-    if not company_has_module(attempt.get("company_code"), "assessments"):
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    expired = False
+    started = False
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                attempt, token_row = _assessment_service.validate_take_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    raw_token=token,
+                    for_update=start,
+                )
+                if not company_has_module(attempt.get("company_code"), "assessments"):
+                    raise HTTPException(
+                        status_code=403,
+                        detail={
+                            "error": "module_disabled",
+                            "message": "This link is no longer available. Please contact the hiring team if you need a new link.",
+                        },
+                    )
+                attempt = _assessment_service.expire_attempt_if_due(cur, attempt)
+                expired = attempt.get("status") == "expired"
+                if not expired and start and attempt.get("status") == "pending":
+                    cur.execute(
+                        """
+                        UPDATE assessment_attempts
+                        SET status='in_progress', started_at=COALESCE(started_at,now()),
+                            progress_version=progress_version+1, updated_at=now()
+                        WHERE attempt_id=%s AND company_code=%s AND status='pending'
+                        RETURNING *
+                        """,
+                        (attempt_id, attempt.get("company_code")),
+                    )
+                    updated = cur.fetchone()
+                    if updated:
+                        attempt = dict(updated)
+                        started = True
+                        _assessment_lifecycle.record_event(
+                            cur,
+                            attempt_id=attempt_id,
+                            company_code=str(attempt.get("company_code")),
+                            event_type="started",
+                            actor_type="candidate",
+                            from_status="pending",
+                            to_status="in_progress",
+                        )
+                    cur.execute(
+                        "UPDATE assessment_tokens SET used_at=COALESCE(used_at,now()) WHERE token_id=%s",
+                        (token_row.get("token_id"),),
+                    )
+                version = _assessment_service.content_version_by_id(
+                    cur,
+                    str(attempt.get("assessment_version_id") or ""),
+                    company_code=str(attempt.get("company_code") or ""),
+                )
+                if not version:
+                    raise _assessment_lifecycle.AssessmentAuthorityError(
+                        "assessment_version_missing",
+                        "This attempt is not pinned to an assessment version.",
+                    )
+                item = _assessment_service.version_item_at(
+                    version,
+                    int(attempt.get("current_item_index") or 0),
+                )
+            conn.commit()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise assessment_authority_http_error(exc) from exc
+    if expired:
         raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "module_disabled",
-                "message": "This link is no longer available. Please contact the hiring team if you need a new link.",
-            },
+            status_code=409,
+            detail={"error": "attempt_expired", "message": "Assessment attempt has expired."},
         )
-    if start and attempt.get("status") == "pending":
-        attempt = start_assessment_attempt(attempt_id) or attempt
+    if started:
         update_application_assessment_snapshot(
             str(attempt.get("app_key") or ""),
+            str(attempt.get("company_code") or ""),
             {
                 "attempt_id": str(attempt.get("attempt_id")),
+                "assessment_version_id": str(attempt.get("assessment_version_id")),
                 "status": "in_progress",
+                "delivery_status": attempt.get("delivery_status"),
+                "review_status": attempt.get("review_status"),
                 "battery_key": attempt.get("battery_key"),
                 "started_at": json_safe(attempt.get("started_at")),
-                "delivery": "public_browser_assessment",
             },
         )
-    item = None if attempt.get("status") == "completed" else assessment_next_item(attempt)
     answered = int(attempt.get("current_item_index") or 0)
     total = int(attempt.get("total_items") or 0)
     return {
@@ -26407,271 +26524,692 @@ def public_assessment_state(attempt_id: str, token: str | None, *, start: bool =
             "current_item_index": answered,
             "total_items": total,
             "percent_complete": round((answered / total) * 100, 1) if total else 0,
+            "progress_version": int(attempt.get("progress_version") or 0),
+            "expires_at": json_safe(attempt.get("expires_at")),
         },
         "item": public_assessment_item_payload(item),
-        "completed": attempt.get("status") == "completed",
+        "completed": False,
     }
 
 
 def create_or_resume_assessment_attempt(app: dict[str, Any], *, source: str, requested_by: str | None = None) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
     company = str(app.get("company_code") or "WATHEFNI").upper()
     app_key = str(app.get("app_key") or "").strip()
     contact = candidate_contact(app)
     phone = digits(contact.get("phone"))
     if not app_key or not phone:
         return {"ok": False, "error": "missing_candidate_contact", "candidate": contact}
-    existing = latest_assessment_attempt_for_app(app_key, company)
-    if existing and existing.get("status") in {"pending", "in_progress"}:
-        return {"ok": True, "attempt": json_safe(existing), "candidate": contact, "resumed": True}
     battery = active_assessment_battery(company)
     if not battery:
         return {"ok": False, "error": "missing_active_assessment_battery", "candidate": contact}
-    items = assessment_items_for_battery(str(battery["battery_key"]))
-    if not items:
-        return {"ok": False, "error": "missing_assessment_items", "battery": json_safe(battery), "candidate": contact}
     seed = hashlib.sha256(f"{app_key}:{battery['battery_key']}:v1".encode("utf-8")).hexdigest()[:16]
+    created = False
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO assessment_attempts
-                (company_code, app_key, phone, candidate_name, position_code, position_title,
-                 battery_key, status, current_item_index, total_items, random_seed, raw_json)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,'pending',0,%s,%s,%s)
-                RETURNING *
+                SELECT app_key, company_code, phone
+                FROM applications
+                WHERE app_key=%s AND company_code=%s
+                FOR SHARE
                 """,
-                (
-                    company,
-                    app_key,
-                    phone,
-                    contact.get("name"),
-                    app.get("position_code"),
-                    app.get("position_title") or app.get("position_code"),
-                    battery["battery_key"],
-                    len(items),
-                    seed,
-                    Json({"source": source, "requested_by": requested_by, "candidate": contact}),
-                ),
+                (app_key, company),
             )
-            attempt = dict(cur.fetchone())
-        conn.commit()
-    update_application_assessment_snapshot(
-        app_key,
-        {
-            "attempt_id": str(attempt.get("attempt_id")),
-            "status": "pending",
-            "battery_key": attempt.get("battery_key"),
-            "sent_at": json_safe(attempt.get("created_at")),
-        },
-    )
-    return {"ok": True, "attempt": json_safe(attempt), "candidate": contact, "resumed": False}
-
-
-def assessment_next_item(attempt: dict[str, Any]) -> dict[str, Any] | None:
-    items = assessment_items_for_battery(str(attempt.get("battery_key") or ASSESSMENT_BATTERY_KEY))
-    index = int(attempt.get("current_item_index") or 0)
-    if index < 0 or index >= len(items):
-        return None
-    return items[index]
-
-
-def start_assessment_attempt(attempt_id: str) -> dict[str, Any] | None:
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE assessment_attempts
-                SET status='in_progress',
-                    started_at=COALESCE(started_at, now()),
-                    updated_at=now()
-                WHERE attempt_id=%s
-                RETURNING *
-                """,
-                (attempt_id,),
-            )
-            row = cur.fetchone()
-        conn.commit()
-    return dict(row) if row else None
-
-
-def record_assessment_response(attempt: dict[str, Any], item: dict[str, Any], response_text: str | None, selected_key: str) -> dict[str, Any]:
-    selected = str(selected_key or "").upper()
-    score, is_correct = selected_item_score(item, selected)
-    scoring = item_scoring(item)
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO assessment_responses
-                (attempt_id, item_id, item_order, response_text, selected_key, is_correct, score_numeric, raw_json)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT (attempt_id, item_id) DO UPDATE SET
-                  response_text=EXCLUDED.response_text,
-                  selected_key=EXCLUDED.selected_key,
-                  is_correct=EXCLUDED.is_correct,
-                  score_numeric=EXCLUDED.score_numeric,
-                  raw_json=EXCLUDED.raw_json,
-                  created_at=now()
-                RETURNING *
-                """,
-                (
-                    attempt.get("attempt_id"),
-                    item.get("item_id"),
-                    int(item.get("item_order") or 0),
-                    response_text,
-                    selected,
-                    is_correct,
-                    score,
-                    Json({
-                        "answer_key": item.get("answer_key"),
-                        "section": item.get("section"),
-                        "scoring": scoring,
-                        "max_score": item_max_score(item),
-                        "competencies": scoring.get("competencies") if isinstance(scoring.get("competencies"), dict) else {},
-                    }),
-                ),
-            )
-            response = dict(cur.fetchone())
-            cur.execute(
-                """
-                UPDATE assessment_attempts
-                SET current_item_index=current_item_index + 1,
-                    updated_at=now()
-                WHERE attempt_id=%s
-                RETURNING *
-                """,
-                (attempt.get("attempt_id"),),
-            )
-            updated_attempt = dict(cur.fetchone())
-        conn.commit()
-    return {"response": json_safe(response), "attempt": json_safe(updated_attempt)}
-
-
-def complete_assessment_attempt(attempt: dict[str, Any]) -> dict[str, Any]:
-    items = assessment_items_for_battery(str(attempt.get("battery_key") or ASSESSMENT_BATTERY_KEY))
-    with db_connect() as conn:
-        with conn.cursor() as cur:
+            bound_app = cur.fetchone()
+            if not bound_app:
+                return {"ok": False, "error": "tenant_application_binding_failed", "candidate": contact}
+            if digits(bound_app.get("phone")) != phone:
+                return {"ok": False, "error": "tenant_candidate_binding_failed", "candidate": contact}
             cur.execute(
                 """
                 SELECT *
-                FROM assessment_responses
-                WHERE attempt_id=%s
-                ORDER BY item_order ASC
+                FROM assessment_attempts
+                WHERE company_code=%s AND app_key=%s
+                  AND status IN ('pending','in_progress')
+                ORDER BY created_at DESC
+                LIMIT 1
+                FOR UPDATE
                 """,
-                (attempt.get("attempt_id"),),
+                (company, app_key),
             )
-            responses = [dict(row) for row in cur.fetchall()]
-    norm_lookup = assessment_norm_lookup(attempt.get("company_code"), attempt.get("battery_key"))
-    report = build_assessment_report_json(attempt=attempt, items=items, responses=responses, norm_lookup=norm_lookup)
+            existing_row = cur.fetchone()
+            existing = dict(existing_row) if existing_row else None
+            if existing:
+                existing = _assessment_service.expire_attempt_if_due(cur, existing)
+            if existing and existing.get("status") in _assessment_lifecycle.OPEN_ATTEMPT_STATUSES:
+                attempt = existing
+                resumed = True
+            else:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM assessment_content_versions
+                    WHERE battery_key=%s AND company_code IN (%s,'GLOBAL')
+                    ORDER BY CASE WHEN company_code=%s THEN 0 ELSE 1 END,
+                             content_version DESC, created_at DESC
+                    LIMIT 1
+                    """,
+                    (battery["battery_key"], company, company),
+                )
+                version_row = cur.fetchone()
+                version = dict(version_row) if version_row else _assessment_service.freeze_current_content_version(
+                    cur,
+                    company_code=company,
+                    battery_key=str(battery["battery_key"]),
+                    created_by_user_id=requested_by,
+                )
+                items = _assessment_service.version_items(version)
+                expires_at = datetime.now(timezone.utc) + timedelta(days=_assessment_lifecycle.DEFAULT_ATTEMPT_TTL_DAYS)
+                cur.execute(
+                    """
+                    INSERT INTO assessment_attempts
+                    (company_code, app_key, phone, candidate_name, position_code, position_title,
+                     battery_key, assessment_version_id, status, current_item_index, total_items,
+                     random_seed, expires_at, raw_json)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'pending',0,%s,%s,%s,%s)
+                    ON CONFLICT (company_code, app_key)
+                      WHERE status IN ('pending','in_progress')
+                    DO NOTHING
+                    RETURNING *
+                    """,
+                    (
+                        company,
+                        app_key,
+                        phone,
+                        contact.get("name"),
+                        app.get("position_code"),
+                        app.get("position_title") or app.get("position_code"),
+                        battery["battery_key"],
+                        version["assessment_version_id"],
+                        len(items),
+                        seed,
+                        expires_at,
+                        Json({"source": source, "requested_by": requested_by, "candidate": contact}),
+                    ),
+                )
+                inserted = cur.fetchone()
+                if inserted:
+                    attempt = dict(inserted)
+                    resumed = False
+                    created = True
+                    _assessment_lifecycle.record_event(
+                        cur,
+                        attempt_id=str(attempt["attempt_id"]),
+                        company_code=company,
+                        event_type="created",
+                        actor_type="human" if requested_by else "system",
+                        actor_user_id=requested_by,
+                        to_status="pending",
+                        payload={
+                            "source": source,
+                            "assessment_version_id": str(version["assessment_version_id"]),
+                            "content_sha256": version.get("content_sha256"),
+                        },
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT * FROM assessment_attempts
+                        WHERE company_code=%s AND app_key=%s
+                          AND status IN ('pending','in_progress')
+                        LIMIT 1
+                        """,
+                        (company, app_key),
+                    )
+                    attempt = dict(cur.fetchone())
+                    resumed = True
+        conn.commit()
+    if created:
+        update_application_assessment_snapshot(
+            app_key,
+            company,
+            {
+                "attempt_id": str(attempt.get("attempt_id")),
+                "assessment_version_id": str(attempt.get("assessment_version_id")),
+                "status": "pending",
+                "delivery_status": attempt.get("delivery_status"),
+                "review_status": attempt.get("review_status"),
+                "battery_key": attempt.get("battery_key"),
+                "expires_at": json_safe(attempt.get("expires_at")),
+                "sent_at": None,
+            },
+        )
+    return {"ok": True, "attempt": json_safe(attempt), "candidate": contact, "resumed": resumed}
+
+
+def assessment_next_item(attempt: dict[str, Any]) -> dict[str, Any] | None:
+    import assessment_service as _assessment_service
+
+    version_id = str(attempt.get("assessment_version_id") or "")
+    company = str(attempt.get("company_code") or "")
+    if not version_id or not company:
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            version = _assessment_service.content_version_by_id(cur, version_id, company_code=company)
+    return _assessment_service.version_item_at(version, int(attempt.get("current_item_index") or 0))
+
+
+def start_assessment_attempt(attempt_id: str, company_code: str, token: str) -> dict[str, Any] | None:
+    state = public_assessment_state(attempt_id, token, start=True)
+    return assessment_attempt_by_id(attempt_id, company_code) if state.get("ok") else None
+
+
+def _complete_assessment_locked(
+    cur: Any,
+    attempt: dict[str, Any],
+    version: dict[str, Any],
+) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    attempt_id = str(attempt.get("attempt_id"))
+    company = str(attempt.get("company_code") or "").upper()
+    if attempt.get("status") == "completed":
+        cur.execute("SELECT * FROM assessment_scores WHERE attempt_id=%s", (attempt_id,))
+        score = dict(cur.fetchone() or {})
+        cur.execute("SELECT * FROM assessment_reports WHERE attempt_id=%s", (attempt_id,))
+        report_row = dict(cur.fetchone() or {})
+        return {
+            "attempt": attempt,
+            "score": score,
+            "report": report_row,
+            "report_json": report_row.get("report_json") or score.get("score_json") or {},
+        }
+    if attempt.get("status") != "in_progress":
+        raise _assessment_lifecycle.AssessmentAuthorityError(
+            f"attempt_{attempt.get('status')}",
+            "Only an in-progress assessment can be completed.",
+        )
+    items = _assessment_service.version_items(version)
+    cur.execute(
+        "SELECT * FROM assessment_responses WHERE attempt_id=%s ORDER BY item_order ASC",
+        (attempt_id,),
+    )
+    responses = [dict(row) for row in cur.fetchall()]
+    if len(responses) != len(items) or int(attempt.get("current_item_index") or 0) != len(items):
+        raise _assessment_lifecycle.AssessmentAuthorityError(
+            "assessment_incomplete",
+            "All version-pinned items must be answered before completion.",
+        )
+    report = build_assessment_report_json(
+        attempt=attempt,
+        items=items,
+        responses=responses,
+        norm_lookup=_assessment_service.version_norm_lookup(version),
+    )
     raw_score = float(report["raw_score"])
     max_score = float(report["max_score"])
     percent = float(report["percent"])
     band = str(report["band"])
     section_totals = report["section_scores"]
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO assessment_scores
-                (attempt_id, raw_score, max_score, percent, band, section_scores, norm_version, score_json)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT (attempt_id) DO UPDATE SET
-                  raw_score=EXCLUDED.raw_score,
-                  max_score=EXCLUDED.max_score,
-                  percent=EXCLUDED.percent,
-                  band=EXCLUDED.band,
-                  section_scores=EXCLUDED.section_scores,
-                  norm_version=EXCLUDED.norm_version,
-                  score_json=EXCLUDED.score_json,
-                  created_at=now()
-                RETURNING *
-                """,
-                (
-                    attempt.get("attempt_id"),
-                    raw_score,
-                    max_score,
-                    percent,
-                    band,
-                    Json(json_safe(section_totals)),
-                    assessment_norm_version(norm_lookup),
-                    Json(json_safe(report)),
-                ),
+    report_digest = _assessment_lifecycle.content_digest({"report": report})
+    cur.execute(
+        """
+        INSERT INTO assessment_scores
+          (attempt_id, raw_score, max_score, percent, band, section_scores,
+           norm_version, score_json, assessment_version_id, immutable)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,TRUE)
+        ON CONFLICT (attempt_id) DO NOTHING
+        RETURNING *
+        """,
+        (
+            attempt_id,
+            raw_score,
+            max_score,
+            percent,
+            band,
+            Json(json_safe(section_totals)),
+            version.get("norm_version"),
+            Json(json_safe(report)),
+            version.get("assessment_version_id"),
+        ),
+    )
+    score_row = cur.fetchone()
+    if score_row:
+        score = dict(score_row)
+    else:
+        cur.execute("SELECT * FROM assessment_scores WHERE attempt_id=%s", (attempt_id,))
+        score = dict(cur.fetchone() or {})
+        existing_digest = _assessment_lifecycle.content_digest({"report": score.get("score_json") or {}})
+        if existing_digest != report_digest or not score.get("immutable"):
+            raise _assessment_lifecycle.AssessmentAuthorityError(
+                "immutable_score_conflict",
+                "An immutable score already exists with different evidence.",
             )
-            score = dict(cur.fetchone())
-            cur.execute(
-                """
-                INSERT INTO assessment_reports (attempt_id, report_json)
-                VALUES (%s,%s)
-                ON CONFLICT (attempt_id) DO UPDATE SET report_json=EXCLUDED.report_json, created_at=now()
-                RETURNING *
-                """,
-                (attempt.get("attempt_id"), Json(json_safe(report))),
+    cur.execute(
+        """
+        INSERT INTO assessment_reports
+          (attempt_id, report_json, assessment_version_id, immutable)
+        VALUES (%s,%s,%s,TRUE)
+        ON CONFLICT (attempt_id) DO NOTHING
+        RETURNING *
+        """,
+        (attempt_id, Json(json_safe(report)), version.get("assessment_version_id")),
+    )
+    report_row_result = cur.fetchone()
+    if report_row_result:
+        report_row = dict(report_row_result)
+    else:
+        cur.execute("SELECT * FROM assessment_reports WHERE attempt_id=%s", (attempt_id,))
+        report_row = dict(cur.fetchone() or {})
+        existing_digest = _assessment_lifecycle.content_digest({"report": report_row.get("report_json") or {}})
+        if existing_digest != report_digest or not report_row.get("immutable"):
+            raise _assessment_lifecycle.AssessmentAuthorityError(
+                "immutable_report_conflict",
+                "An immutable report already exists with different evidence.",
             )
-            report_row = dict(cur.fetchone())
-            cur.execute(
-                """
-                UPDATE assessment_attempts
-                SET status='completed',
-                    completed_at=COALESCE(completed_at, now()),
-                    updated_at=now()
-                WHERE attempt_id=%s
-                RETURNING *
-                """,
-                (attempt.get("attempt_id"),),
-            )
-            completed_attempt = dict(cur.fetchone())
-        conn.commit()
-    update_application_assessment_snapshot(
-        str(attempt.get("app_key") or ""),
-        {
-            "attempt_id": str(attempt.get("attempt_id")),
-            "status": "completed",
-            "battery_key": attempt.get("battery_key"),
-            "raw_score": raw_score,
-            "max_score": max_score,
+    cur.execute(
+        """
+        UPDATE assessment_attempts
+        SET status='completed', completed_at=COALESCE(completed_at,now()), updated_at=now()
+        WHERE attempt_id=%s AND company_code=%s AND status='in_progress'
+        RETURNING *
+        """,
+        (attempt_id, company),
+    )
+    completed_row = cur.fetchone()
+    if not completed_row:
+        raise _assessment_lifecycle.AssessmentAuthorityError(
+            "completion_race",
+            "Assessment completion state changed concurrently.",
+        )
+    completed_attempt = dict(completed_row)
+    _assessment_lifecycle.revoke_active_tokens(
+        cur,
+        attempt_id=attempt_id,
+        company_code=company,
+        reason="attempt_completed",
+        actor_type="candidate",
+    )
+    _assessment_lifecycle.record_event(
+        cur,
+        attempt_id=attempt_id,
+        company_code=company,
+        event_type="completed",
+        actor_type="candidate",
+        from_status="in_progress",
+        to_status="completed",
+        payload={
+            "assessment_version_id": str(version.get("assessment_version_id")),
+            "report_sha256": report_digest,
             "percent": percent,
-            "band": band,
-            "section_scores": section_totals,
-            "ability_scores": report["ability_scores"],
-            "competency_profile": report["competency_profile"],
-            "job_match": report["job_match"],
-            "summary": report["summary"],
-            "completed_at": json_safe(completed_attempt.get("completed_at")),
         },
     )
-    return {"attempt": json_safe(completed_attempt), "score": json_safe(score), "report": json_safe(report_row), "report_json": report}
+    return {
+        "attempt": completed_attempt,
+        "score": score,
+        "report": report_row,
+        "report_json": report,
+    }
 
 
-def cancel_assessment_attempt(attempt: dict[str, Any]) -> dict[str, Any]:
+def record_assessment_response(
+    *,
+    attempt_id: str,
+    company_code: str,
+    raw_token: str,
+    item_id: str,
+    response_text: str | None,
+    selected_key: str,
+    progress_version: int | None = None,
+) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    company = str(company_code or "").upper()
+    selected = str(selected_key or "").upper()
+    expired = False
+    completed: dict[str, Any] | None = None
+    idempotent = False
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                attempt, _token = _assessment_service.validate_take_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    raw_token=raw_token,
+                    company_code=company,
+                    for_update=True,
+                )
+                attempt = _assessment_service.expire_attempt_if_due(cur, attempt)
+                expired = attempt.get("status") == "expired"
+                if not expired:
+                    if attempt.get("status") == "pending":
+                        cur.execute(
+                            """
+                            UPDATE assessment_attempts
+                            SET status='in_progress', started_at=COALESCE(started_at,now()),
+                                progress_version=progress_version+1, updated_at=now()
+                            WHERE attempt_id=%s AND company_code=%s AND status='pending'
+                            RETURNING *
+                            """,
+                            (attempt_id, company),
+                        )
+                        attempt = dict(cur.fetchone())
+                        _assessment_lifecycle.record_event(
+                            cur,
+                            attempt_id=attempt_id,
+                            company_code=company,
+                            event_type="started",
+                            actor_type="candidate",
+                            from_status="pending",
+                            to_status="in_progress",
+                        )
+                    version = _assessment_service.content_version_by_id(
+                        cur,
+                        str(attempt.get("assessment_version_id") or ""),
+                        company_code=company,
+                    )
+                    if not version:
+                        raise _assessment_lifecycle.AssessmentAuthorityError(
+                            "assessment_version_missing",
+                            "This attempt is not pinned to an assessment version.",
+                        )
+                    cur.execute(
+                        """
+                        SELECT * FROM assessment_responses
+                        WHERE attempt_id=%s AND item_id=%s
+                        """,
+                        (attempt_id, item_id),
+                    )
+                    existing_response = cur.fetchone()
+                    if existing_response:
+                        response = dict(existing_response)
+                        if str(response.get("selected_key") or "").upper() != selected:
+                            raise _assessment_lifecycle.AssessmentAuthorityError(
+                                "idempotency_conflict",
+                                "This item was already answered with different content.",
+                            )
+                        idempotent = True
+                    else:
+                        expected_index = int(attempt.get("current_item_index") or 0)
+                        item = _assessment_service.version_item_at(version, expected_index)
+                        if not item or str(item.get("item_id")) != str(item_id):
+                            raise _assessment_lifecycle.AssessmentAuthorityError(
+                                "stale_progress",
+                                "The submitted item is not the next expected item.",
+                                extra={
+                                    "expected_item_id": str((item or {}).get("item_id") or ""),
+                                    "progress_version": int(attempt.get("progress_version") or 0),
+                                },
+                            )
+                        if progress_version is not None and progress_version != int(attempt.get("progress_version") or 0):
+                            raise _assessment_lifecycle.AssessmentAuthorityError(
+                                "stale_progress",
+                                "Assessment progress changed before this answer was submitted.",
+                                extra={"progress_version": int(attempt.get("progress_version") or 0)},
+                            )
+                        valid_keys = {
+                            str(choice.get("key") or "").upper()
+                            for choice in (item.get("choices") or [])
+                            if isinstance(choice, dict)
+                        }
+                        if selected not in valid_keys:
+                            raise _assessment_lifecycle.AssessmentAuthorityError(
+                                "invalid_assessment_answer",
+                                "Selected answer is not valid for this item.",
+                                status_code=422,
+                            )
+                        score, is_correct = selected_item_score(item, selected)
+                        scoring = item_scoring(item)
+                        cur.execute(
+                            """
+                            INSERT INTO assessment_responses
+                              (attempt_id, company_code, assessment_version_id,
+                               item_id, item_content_version, item_order, response_text,
+                               selected_key, answer_key_snapshot, scoring_snapshot,
+                               is_correct, score_numeric, is_final, raw_json)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,TRUE,%s)
+                            ON CONFLICT (attempt_id, item_id) DO NOTHING
+                            RETURNING *
+                            """,
+                            (
+                                attempt_id,
+                                company,
+                                version.get("assessment_version_id"),
+                                item.get("item_id"),
+                                int(item.get("content_version") or version.get("content_version") or 1),
+                                int(item.get("item_order") or expected_index + 1),
+                                response_text,
+                                selected,
+                                item.get("answer_key"),
+                                Json(json_safe(scoring)),
+                                is_correct,
+                                score,
+                                Json({
+                                    "section": item.get("section"),
+                                    "max_score": item_max_score(item),
+                                    "competencies": scoring.get("competencies") if isinstance(scoring.get("competencies"), dict) else {},
+                                }),
+                            ),
+                        )
+                        inserted = cur.fetchone()
+                        if not inserted:
+                            cur.execute(
+                                "SELECT * FROM assessment_responses WHERE attempt_id=%s AND item_id=%s",
+                                (attempt_id, item_id),
+                            )
+                            response = dict(cur.fetchone())
+                            idempotent = True
+                        else:
+                            response = dict(inserted)
+                            cur.execute(
+                                """
+                                UPDATE assessment_attempts
+                                SET current_item_index=current_item_index+1,
+                                    progress_version=progress_version+1,
+                                    updated_at=now()
+                                WHERE attempt_id=%s AND company_code=%s
+                                  AND status='in_progress' AND current_item_index=%s
+                                RETURNING *
+                                """,
+                                (attempt_id, company, expected_index),
+                            )
+                            updated = cur.fetchone()
+                            if not updated:
+                                raise _assessment_lifecycle.AssessmentAuthorityError(
+                                    "concurrent_progress_conflict",
+                                    "Assessment progress changed concurrently.",
+                                )
+                            attempt = dict(updated)
+                            _assessment_lifecycle.record_event(
+                                cur,
+                                attempt_id=attempt_id,
+                                company_code=company,
+                                event_type="answered",
+                                actor_type="candidate",
+                                payload={
+                                    "item_id": str(item.get("item_id")),
+                                    "item_order": int(item.get("item_order") or 0),
+                                    "progress_version": int(attempt.get("progress_version") or 0),
+                                },
+                            )
+                    if int(attempt.get("current_item_index") or 0) == int(attempt.get("total_items") or 0):
+                        completed = _complete_assessment_locked(cur, attempt, version)
+                        attempt = completed["attempt"]
+            conn.commit()
+    except Exception as exc:
+        raise assessment_authority_http_error(exc) from exc
+    if expired:
+        raise HTTPException(status_code=409, detail={"error": "attempt_expired", "message": "Assessment attempt has expired."})
+    result = {
+        "response": json_safe(response),
+        "attempt": json_safe(attempt),
+        "idempotent": idempotent,
+        "completed": bool(completed),
+    }
+    if completed:
+        result.update({
+            "score": json_safe(completed["score"]),
+            "report": json_safe(completed["report"]),
+            "report_json": json_safe(completed["report_json"]),
+        })
+    snapshot: dict[str, Any] = {
+        "attempt_id": attempt_id,
+        "assessment_version_id": str(attempt.get("assessment_version_id")),
+        "status": attempt.get("status"),
+        "delivery_status": attempt.get("delivery_status"),
+        "review_status": attempt.get("review_status"),
+        "battery_key": attempt.get("battery_key"),
+        "expires_at": json_safe(attempt.get("expires_at")),
+        "started_at": json_safe(attempt.get("started_at")),
+    }
+    if completed:
+        report_json = completed["report_json"]
+        snapshot.update({
+            "raw_score": report_json.get("raw_score"),
+            "max_score": report_json.get("max_score"),
+            "percent": report_json.get("percent"),
+            "band": report_json.get("band"),
+            "section_scores": report_json.get("section_scores"),
+            "ability_scores": report_json.get("ability_scores"),
+            "competency_profile": report_json.get("competency_profile"),
+            "job_match": report_json.get("job_match"),
+            "summary": report_json.get("summary"),
+            "completed_at": json_safe(attempt.get("completed_at")),
+        })
+    update_application_assessment_snapshot(
+        str(attempt.get("app_key") or ""),
+        company,
+        snapshot,
+    )
+    return result
+
+
+def complete_assessment_attempt(attempt: dict[str, Any]) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    attempt_id = str(attempt.get("attempt_id") or "")
+    company = str(attempt.get("company_code") or "").upper()
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
-                UPDATE assessment_attempts
-                SET status='cancelled', updated_at=now()
-                WHERE attempt_id=%s
-                RETURNING *
-                """,
-                (attempt.get("attempt_id"),),
+                "SELECT * FROM assessment_attempts WHERE attempt_id=%s AND company_code=%s FOR UPDATE",
+                (attempt_id, company),
+            )
+            locked = cur.fetchone()
+            if not locked:
+                raise assessment_authority_http_error(
+                    _assessment_lifecycle.AssessmentAuthorityError(
+                        "assessment_attempt_not_found",
+                        "Assessment attempt was not found for this tenant.",
+                        status_code=404,
+                    )
+                )
+            locked_attempt = dict(locked)
+            version = _assessment_service.content_version_by_id(
+                cur,
+                str(locked_attempt.get("assessment_version_id") or ""),
+                company_code=company,
+            )
+            if not version:
+                raise assessment_authority_http_error(
+                    _assessment_lifecycle.AssessmentAuthorityError(
+                        "assessment_version_missing",
+                        "This attempt is not pinned to an assessment version.",
+                    )
+                )
+            completed = _complete_assessment_locked(cur, locked_attempt, version)
+        conn.commit()
+    return json_safe(completed)
+
+
+def cancel_assessment_attempt(
+    attempt: dict[str, Any],
+    *,
+    reason: str,
+    actor_type: str,
+    actor_user_id: str | None = None,
+) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    attempt_id = str(attempt.get("attempt_id") or "")
+    company = str(attempt.get("company_code") or "").upper()
+    expired = False
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM assessment_attempts WHERE attempt_id=%s AND company_code=%s FOR UPDATE",
+                (attempt_id, company),
             )
             row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
+            locked = _assessment_service.expire_attempt_if_due(cur, dict(row))
+            expired = locked.get("status") == "expired"
+            if not expired:
+                if locked.get("status") not in _assessment_lifecycle.OPEN_ATTEMPT_STATUSES:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={"error": f"attempt_{locked.get('status')}"},
+                    )
+                cur.execute(
+                    """
+                    UPDATE assessment_attempts
+                    SET status='cancelled', cancelled_at=COALESCE(cancelled_at,now()),
+                        cancel_reason=%s, updated_at=now()
+                    WHERE attempt_id=%s AND company_code=%s
+                      AND status IN ('pending','in_progress')
+                    RETURNING *
+                    """,
+                    (reason, attempt_id, company),
+                )
+                cancelled = dict(cur.fetchone())
+                _assessment_lifecycle.revoke_active_tokens(
+                    cur,
+                    attempt_id=attempt_id,
+                    company_code=company,
+                    reason="attempt_cancelled",
+                    actor_type=actor_type,
+                    actor_user_id=actor_user_id,
+                )
+                _assessment_lifecycle.record_event(
+                    cur,
+                    attempt_id=attempt_id,
+                    company_code=company,
+                    event_type="cancelled",
+                    actor_type=actor_type,
+                    actor_user_id=actor_user_id,
+                    from_status=str(locked.get("status")),
+                    to_status="cancelled",
+                    payload={"reason": reason},
+                )
+            else:
+                cancelled = locked
         conn.commit()
-    cancelled = dict(row) if row else attempt
+    if expired:
+        raise HTTPException(status_code=409, detail={"error": "attempt_expired"})
     update_application_assessment_snapshot(
-        str(attempt.get("app_key") or ""),
+        str(cancelled.get("app_key") or ""),
+        company,
         {
-            "attempt_id": str(attempt.get("attempt_id")),
+            "attempt_id": attempt_id,
+            "assessment_version_id": str(cancelled.get("assessment_version_id")),
             "status": "cancelled",
-            "battery_key": attempt.get("battery_key"),
+            "delivery_status": cancelled.get("delivery_status"),
+            "review_status": cancelled.get("review_status"),
+            "battery_key": cancelled.get("battery_key"),
+            "cancelled_at": json_safe(cancelled.get("cancelled_at")),
+            "cancel_reason": cancelled.get("cancel_reason"),
         },
     )
     return json_safe(cancelled)
 
 
 def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
     if has_current_media_upload(request.media or {}):
         return None
-    attempt = active_assessment_attempt_for_phone(request.sender_phone)
+    company = active_company_code()
+    attempt = active_assessment_attempt_for_phone(request.sender_phone, company)
     if not attempt:
         return None
     if not company_has_module(attempt.get("company_code"), "assessments"):
@@ -26683,112 +27221,182 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
     text = (request.raw_text or "").strip()
     normalized = normalize_text(text)
     if normalized in {"cancel", "stop", "exit"}:
-        cancelled = cancel_assessment_attempt(attempt)
+        cancelled = cancel_assessment_attempt(
+            attempt,
+            reason="candidate_cancelled_via_whatsapp",
+            actor_type="candidate",
+        )
         return {
             "reply": "Assessment cancelled. Wathefni HR can send it again if needed.",
             "attempt": cancelled,
             "intent": "cancel_assessment",
             "turn_focus": "candidate_assessment",
         }
-    if attempt.get("status") == "pending":
-        if normalized not in {"ready", "start", "begin", "yes", "y"}:
-            title = attempt.get("position_title") or "the role"
-            return {
-                "reply": f"You have an application assessment pending for {title}. Reply READY when you want to start.",
-                "attempt": json_safe(attempt),
-                "intent": "await_assessment_ready",
-                "turn_focus": "candidate_assessment",
-            }
-        started = start_assessment_attempt(str(attempt.get("attempt_id")))
-        item = assessment_next_item(started or attempt)
-        if not item:
-            return {"reply": "I could not load the assessment questions. Please contact the hiring team.", "attempt": json_safe(started or attempt)}
-        update_application_assessment_snapshot(
-            str(attempt.get("app_key") or ""),
-            {
-                "attempt_id": str(attempt.get("attempt_id")),
-                "status": "in_progress",
-                "battery_key": attempt.get("battery_key"),
-                "started_at": json_safe((started or {}).get("started_at")),
-            },
-        )
+    expired = False
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM assessment_attempts WHERE attempt_id=%s AND company_code=%s FOR UPDATE",
+                (attempt.get("attempt_id"), company),
+            )
+            locked = dict(cur.fetchone())
+            locked = _assessment_service.expire_attempt_if_due(cur, locked, actor_type="system")
+            expired = locked.get("status") == "expired"
+            if not expired:
+                token_expiry = min(
+                    locked.get("expires_at") or (datetime.now(timezone.utc) + timedelta(days=14)),
+                    datetime.now(timezone.utc) + timedelta(days=14),
+                )
+                raw_token, token_row = _assessment_lifecycle.issue_token(
+                    cur,
+                    attempt_id=str(locked.get("attempt_id")),
+                    company_code=str(company),
+                    expires_at=token_expiry,
+                )
+                invitation = _assessment_service.create_invitation(
+                    cur,
+                    attempt_id=str(locked.get("attempt_id")),
+                    company_code=str(company),
+                    app_key=str(locked.get("app_key")),
+                    channel="whatsapp",
+                    token_id=str(token_row.get("token_id")),
+                    message_kind="assessment_reminder",
+                    status="sent",
+                    metadata={
+                        "source": "candidate_whatsapp_status",
+                        "account_id": request.account_id,
+                        "conversation_id": request.conversation_id,
+                    },
+                )
+                cur.execute(
+                    "UPDATE assessment_invitations SET sent_at=now(), updated_at=now() WHERE invitation_id=%s",
+                    (invitation.get("invitation_id"),),
+                )
+                cur.execute(
+                    "UPDATE assessment_attempts SET delivery_status='sent', updated_at=now() WHERE attempt_id=%s RETURNING *",
+                    (locked.get("attempt_id"),),
+                )
+                attempt = dict(cur.fetchone())
+                _assessment_lifecycle.record_event(
+                    cur,
+                    attempt_id=str(attempt.get("attempt_id")),
+                    company_code=str(company),
+                    event_type="delivery_updated",
+                    actor_type="candidate",
+                    payload={"channel": "whatsapp", "status": "sent", "message_kind": "assessment_reminder"},
+                )
+                link = assessment_public_link(str(attempt.get("attempt_id")), raw_token)
+        conn.commit()
+    if expired:
         return {
-            "reply": "Great. Let's begin.\n\n" + format_assessment_question(started or attempt, item),
-            "attempt": json_safe(started or attempt),
-            "item": json_safe(item),
-            "intent": "start_assessment",
+            "reply": "This assessment has expired. Please contact Wathefni HR for a new invitation.",
+            "attempt": json_safe(locked),
+            "intent": "assessment_expired",
             "turn_focus": "candidate_assessment",
         }
-    item = assessment_next_item(attempt)
-    if not item:
-        completed = complete_assessment_attempt(attempt)
-        return {
-            "reply": "Assessment completed. Thank you. The hiring team will review your result with the rest of your application.",
-            "attempt": completed.get("attempt"),
-            "score": completed.get("score"),
-            "intent": "complete_assessment",
-            "turn_focus": "candidate_assessment",
-        }
-    selected = parse_assessment_answer(text, item)
-    if not selected:
-        return {
-            "reply": "Please answer with A, B, C, or D.\n\n" + format_assessment_question(attempt, item),
-            "attempt": json_safe(attempt),
-            "item": json_safe(item),
-            "intent": "answer_assessment",
-            "turn_focus": "candidate_assessment",
-        }
-    recorded = record_assessment_response(attempt, item, text, selected)
-    updated_attempt = recorded.get("attempt") or attempt
-    next_item = assessment_next_item(updated_attempt)
-    if next_item:
-        return {
-            "reply": format_assessment_question(updated_attempt, next_item),
-            "attempt": json_safe(updated_attempt),
-            "response": recorded.get("response"),
-            "item": json_safe(next_item),
-            "intent": "answer_assessment",
-            "turn_focus": "candidate_assessment",
-        }
-    completed = complete_assessment_attempt(updated_attempt)
+    answered = int(attempt.get("current_item_index") or 0)
+    total = int(attempt.get("total_items") or 0)
     return {
-        "reply": "Assessment completed. Thank you. The hiring team will review your result with the rest of your application.",
-        "attempt": completed.get("attempt"),
-        "response": recorded.get("response"),
-        "score": completed.get("score"),
-        "report": completed.get("report_json"),
-        "intent": "complete_assessment",
+        "reply": (
+            f"Continue your assessment in your browser ({answered}/{total} answered):\n{link}\n\n"
+            "WhatsApp does not accept assessment answers. Reply CANCEL if you want to cancel the attempt."
+        ),
+        "attempt": json_safe(attempt),
+        "intent": "assessment_browser_link",
         "turn_focus": "candidate_assessment",
     }
 
 
-def send_assessment(app: dict[str, Any], account_id: str | None, *, note: str | None = None) -> dict[str, Any]:
-    attempt_result = create_or_resume_assessment_attempt(app, source="dashboard_or_hr_action")
-    if not attempt_result.get("ok"):
-        return attempt_result
+def deliver_assessment_invitation(
+    app: dict[str, Any],
+    attempt: dict[str, Any],
+    account_id: str | None,
+    *,
+    note: str | None,
+    message_kind: str,
+    requested_by: str | None,
+) -> dict[str, Any]:
+    import assessment_lifecycle as _assessment_lifecycle
+    import assessment_service as _assessment_service
+
+    company = str(attempt.get("company_code") or app.get("company_code") or "").upper()
+    attempt_id = str(attempt.get("attempt_id") or "")
+    app_key = str(attempt.get("app_key") or app.get("app_key") or "")
+    invitation_rows: dict[str, dict[str, Any]] = {}
+    expired = False
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM assessment_attempts WHERE attempt_id=%s AND company_code=%s FOR UPDATE",
+                (attempt_id, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                return {"ok": False, "error": "tenant_attempt_binding_failed"}
+            locked = _assessment_service.expire_attempt_if_due(cur, dict(row))
+            expired = locked.get("status") == "expired"
+            if not expired:
+                if locked.get("status") not in _assessment_lifecycle.OPEN_ATTEMPT_STATUSES:
+                    return {"ok": False, "error": f"attempt_{locked.get('status')}"}
+                if message_kind == "assessment_resend":
+                    _assessment_lifecycle.revoke_active_tokens(
+                        cur,
+                        attempt_id=attempt_id,
+                        company_code=company,
+                        reason="assessment_resent",
+                        actor_type="human",
+                        actor_user_id=requested_by,
+                    )
+                token_expiry = min(
+                    locked.get("expires_at") or (datetime.now(timezone.utc) + timedelta(days=14)),
+                    datetime.now(timezone.utc) + timedelta(days=14),
+                )
+                raw_token, token_row = _assessment_lifecycle.issue_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    company_code=company,
+                    expires_at=token_expiry,
+                    actor_user_id=requested_by,
+                )
+                for channel in ("email", "whatsapp"):
+                    invitation_rows[channel] = _assessment_service.create_invitation(
+                        cur,
+                        attempt_id=attempt_id,
+                        company_code=company,
+                        app_key=app_key,
+                        channel=channel,
+                        token_id=str(token_row.get("token_id")),
+                        message_kind=message_kind,
+                        metadata={"account_id": account_id},
+                    )
+                _assessment_lifecycle.record_event(
+                    cur,
+                    attempt_id=attempt_id,
+                    company_code=company,
+                    event_type="resent" if message_kind == "assessment_resend" else "invited",
+                    actor_type="human",
+                    actor_user_id=requested_by,
+                    payload={
+                        "message_kind": message_kind,
+                        "token_id": str(token_row.get("token_id")),
+                        "channels": ["email", "whatsapp"],
+                    },
+                )
+                link = assessment_public_link(attempt_id, raw_token)
+                attempt = locked
+        conn.commit()
+    if expired:
+        return {"ok": False, "error": "attempt_expired", "attempt": json_safe(locked)}
     contact = candidate_contact(app)
     name = contact.get("name") or "there"
     title = contact.get("position_title") or "the role"
-    attempt = attempt_result.get("attempt") if isinstance(attempt_result.get("attempt"), dict) else {}
-    link = assessment_public_link(str(attempt.get("attempt_id"))) if attempt.get("attempt_id") else None
-    update_application_assessment_snapshot(
-        str(app.get("app_key") or ""),
-        {
-            "attempt_id": str(attempt.get("attempt_id") or ""),
-            "status": attempt.get("status") or "pending",
-            "battery_key": attempt.get("battery_key"),
-            "sent_at": json_safe(attempt.get("created_at")),
-            "delivery": "public_browser_assessment",
-            "assessment_link": link,
-        },
-    )
     note_text = str(note or "").strip()
     body = (
         f"Hi {name},\n\n"
         + (f"{note_text}\n\n" if note_text else "")
         + f"You have been invited to complete an application assessment for {title}.\n\n"
         f"Open your assessment here:\n{link}\n\n"
-        "You can complete it from your phone browser. Your answers are saved automatically."
+        "Complete it in your browser. Your answers are saved after each question."
     )
     delivery = candidate_communication_router(
         app,
@@ -26803,16 +27411,133 @@ def send_assessment(app: dict[str, Any], account_id: str | None, *, note: str | 
             "assessment_link": link,
         },
     )
+    channel_attempts = {
+        str(row.get("channel")): row
+        for row in (delivery.get("attempts") or [])
+        if isinstance(row, dict) and row.get("channel")
+    }
+    dry_run = delivery_is_dry_run()
+    statuses: list[str] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            for channel, invitation in invitation_rows.items():
+                delivery_attempt = channel_attempts.get(channel) or {}
+                if dry_run:
+                    status = "intentionally_skipped"
+                else:
+                    status = "sent" if delivery_attempt.get("ok") else "failed"
+                statuses.append(status)
+                result_payload = delivery_attempt.get("result") if isinstance(delivery_attempt.get("result"), dict) else {}
+                outbound_event_id = (
+                    result_payload.get("event_id")
+                    or (result_payload.get("send") or {}).get("event_id")
+                    if isinstance(result_payload, dict)
+                    else None
+                )
+                _assessment_service.update_invitation_delivery(
+                    cur,
+                    invitation_id=str(invitation.get("invitation_id")),
+                    company_code=company,
+                    status=status,
+                    outbound_event_id=str(outbound_event_id) if outbound_event_id else None,
+                    last_error=str(delivery_attempt.get("error") or "") or None,
+                    metadata={"delivery_result": json_safe(delivery_attempt)},
+                )
+            if "sent" in statuses:
+                aggregate_status = "sent"
+            elif "intentionally_skipped" in statuses:
+                aggregate_status = "intentionally_skipped"
+            else:
+                aggregate_status = "failed"
+            cur.execute(
+                """
+                UPDATE assessment_attempts
+                SET delivery_status=%s, updated_at=now()
+                WHERE attempt_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (aggregate_status, attempt_id, company),
+            )
+            attempt = dict(cur.fetchone())
+            _assessment_lifecycle.record_event(
+                cur,
+                attempt_id=attempt_id,
+                company_code=company,
+                event_type="delivery_updated",
+                actor_type="system",
+                payload={"status": aggregate_status, "channels": statuses, "message_kind": message_kind},
+            )
+        conn.commit()
+    update_application_assessment_snapshot(
+        app_key,
+        company,
+        {
+            "attempt_id": attempt_id,
+            "assessment_version_id": str(attempt.get("assessment_version_id")),
+            "status": attempt.get("status"),
+            "delivery_status": attempt.get("delivery_status"),
+            "review_status": attempt.get("review_status"),
+            "battery_key": attempt.get("battery_key"),
+            "expires_at": json_safe(attempt.get("expires_at")),
+            "sent_at": now_iso(),
+        },
+    )
     return {
-        "ok": delivery.get("ok", False),
+        "ok": bool(delivery.get("ok")) or dry_run,
         "send": delivery,
         "delivery": delivery,
+        "delivery_status": attempt.get("delivery_status"),
         "message": body,
         "assessment_link": link,
         "candidate": contact,
-        "attempt": attempt,
-        "resumed": attempt_result.get("resumed", False),
+        "attempt": json_safe(attempt),
+        "invitations": json_safe(list(invitation_rows.values())),
     }
+
+
+def send_assessment(
+    app: dict[str, Any],
+    account_id: str | None,
+    *,
+    note: str | None = None,
+    requested_by: str | None = None,
+) -> dict[str, Any]:
+    attempt_result = create_or_resume_assessment_attempt(
+        app,
+        source="dashboard_or_hr_action",
+        requested_by=requested_by,
+    )
+    if not attempt_result.get("ok"):
+        return attempt_result
+    attempt = attempt_result.get("attempt") if isinstance(attempt_result.get("attempt"), dict) else {}
+    result = deliver_assessment_invitation(
+        app,
+        attempt,
+        account_id,
+        note=note,
+        message_kind="assessment_resend" if attempt_result.get("resumed") else "assessment_invite",
+        requested_by=requested_by,
+    )
+    result["resumed"] = attempt_result.get("resumed", False)
+    return result
+
+
+def resend_assessment(
+    app: dict[str, Any],
+    attempt: dict[str, Any],
+    account_id: str | None,
+    *,
+    note: str | None = None,
+    requested_by: str | None = None,
+) -> dict[str, Any]:
+    return deliver_assessment_invitation(
+        app,
+        attempt,
+        account_id,
+        note=note,
+        message_kind="assessment_resend",
+        requested_by=requested_by,
+    )
 
 
 DOCUMENT_LABELS = {
@@ -32982,6 +33707,40 @@ class DashboardCandidateMessage(BaseModel):
     account_id: str | None = "default"
 
 
+class DashboardAssessmentCancelRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class DashboardAssessmentReviewRequest(BaseModel):
+    notes: str | None = Field(default=None, max_length=4000)
+
+
+class AssessmentItemDraftRequest(BaseModel):
+    battery_key: str = Field(min_length=1, max_length=120)
+    section: str = Field(min_length=1, max_length=120)
+    competency_tags: list[str] = Field(default_factory=list)
+    skill_tags: list[str] = Field(default_factory=list)
+    role_tags: list[str] = Field(default_factory=list)
+    difficulty: str | None = Field(default=None, max_length=50)
+    locale: Literal["en", "ar"] = "en"
+    prompt_text: str = Field(min_length=10, max_length=8000)
+    choices: list[dict[str, Any]] = Field(min_length=2, max_length=6)
+    proposed_answer_key: str = Field(min_length=1, max_length=20)
+    proposed_scoring: dict[str, Any] = Field(default_factory=dict)
+    rationale: str | None = Field(default=None, max_length=8000)
+    explanation: str | None = Field(default=None, max_length=8000)
+    ai_model: str | None = Field(default=None, max_length=200)
+    source_blueprint_id: str = Field(min_length=1, max_length=200)
+    original_content_attested: bool = False
+
+
+class AssessmentItemTransitionRequest(BaseModel):
+    to_status: Literal["ai_draft", "human_review", "pilot", "approved", "retired"]
+    notes: str | None = Field(default=None, max_length=8000)
+    rejection_reason: str | None = Field(default=None, max_length=2000)
+    original_content_attested: bool = False
+
+
 class DashboardHireRequest(BaseModel):
     hire_override: bool = False
     override_reason: str | None = None
@@ -33109,6 +33868,12 @@ class DashboardChatResponse(BaseModel):
 class PublicAssessmentAnswer(BaseModel):
     selected_key: str
     response_text: str | None = None
+    item_id: str
+    progress_version: int | None = Field(default=None, ge=0)
+
+
+class PublicAssessmentCancel(BaseModel):
+    reason: str | None = Field(default="candidate_cancelled", max_length=500)
 
 
 class PublicVideoInterviewConsent(BaseModel):
@@ -33233,7 +33998,7 @@ def public_assessment_html() -> str:
         button.addEventListener('click', async () => {
           content.querySelectorAll('button.choice').forEach(b => b.disabled = true);
           try {
-            const next = await request(`/assessment/${attemptId}/answer`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ selected_key: button.dataset.key, response_text: button.innerText }) });
+            const next = await request(`/assessment/${attemptId}/answer`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ selected_key: button.dataset.key, response_text: button.innerText, item_id: item.item_id, progress_version: data.attempt.progress_version }) });
             render(next);
           } catch (err) {
             content.innerHTML = `<div class="error">${escapeHtml(err.message || 'We could not save your answer. Please try again.')}</div>`;
@@ -33893,21 +34658,89 @@ def public_assessment_state_endpoint(attempt_id: str, token: str | None = Query(
 @app.post("/assessment/{attempt_id}/answer")
 def public_assessment_answer_endpoint(attempt_id: str, answer: PublicAssessmentAnswer, token: str | None = Query(default=None)):
     state = public_assessment_state(attempt_id, token, start=True)
-    if state.get("completed"):
-        return state
-    attempt = assessment_attempt_by_id(attempt_id)
-    item = assessment_next_item(attempt or {})
-    if not attempt or not item:
-        return public_assessment_state(attempt_id, token, start=False)
+    item = state.get("item") if isinstance(state.get("item"), dict) else None
+    if not item:
+        raise HTTPException(status_code=409, detail={"error": "assessment_item_missing"})
+    if str(answer.item_id) != str(item.get("item_id")):
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "stale_progress",
+                "expected_item_id": item.get("item_id"),
+                "progress_version": state.get("attempt", {}).get("progress_version"),
+            },
+        )
     selected = parse_assessment_answer(answer.selected_key, item)
     if not selected:
         raise HTTPException(status_code=422, detail={"error": "invalid_assessment_answer"})
-    recorded = record_assessment_response(attempt, item, answer.response_text or selected, selected)
-    updated_attempt = recorded.get("attempt") or attempt
-    if assessment_next_item(updated_attempt):
-        return public_assessment_state(attempt_id, token, start=False)
-    complete_assessment_attempt(updated_attempt)
+    import assessment_service as _assessment_service
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                token_attempt, _token_row = _assessment_service.validate_take_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    raw_token=token,
+                )
+            except Exception as exc:
+                raise assessment_authority_http_error(exc) from exc
+    recorded = record_assessment_response(
+        attempt_id=attempt_id,
+        company_code=str(token_attempt.get("company_code") or ""),
+        raw_token=str(token or ""),
+        item_id=answer.item_id,
+        response_text=answer.response_text or selected,
+        selected_key=selected,
+        progress_version=answer.progress_version,
+    )
+    if recorded.get("completed"):
+        completed_attempt = recorded.get("attempt") or {}
+        total = int(completed_attempt.get("total_items") or 0)
+        return {
+            "ok": True,
+            "attempt": {
+                "attempt_id": attempt_id,
+                "status": "completed",
+                "candidate_name": completed_attempt.get("candidate_name"),
+                "position_title": completed_attempt.get("position_title"),
+                "current_item_index": total,
+                "total_items": total,
+                "percent_complete": 100,
+                "progress_version": int(completed_attempt.get("progress_version") or 0),
+                "expires_at": json_safe(completed_attempt.get("expires_at")),
+            },
+            "item": None,
+            "completed": True,
+        }
     return public_assessment_state(attempt_id, token, start=False)
+
+
+@app.post("/assessment/{attempt_id}/cancel")
+def public_assessment_cancel_endpoint(
+    attempt_id: str,
+    request: PublicAssessmentCancel | None = None,
+    token: str | None = Query(default=None),
+):
+    import assessment_service as _assessment_service
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                token_attempt, _token_row = _assessment_service.validate_take_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    raw_token=token,
+                )
+            except Exception as exc:
+                raise assessment_authority_http_error(exc) from exc
+    payload = request or PublicAssessmentCancel()
+    cancelled = cancel_assessment_attempt(
+        token_attempt,
+        reason=str(payload.reason or "candidate_cancelled").strip() or "candidate_cancelled",
+        actor_type="candidate",
+    )
+    return {"ok": True, "attempt": cancelled}
 
 
 @app.get("/video-interview/{interview_id}", response_class=HTMLResponse)
@@ -35251,6 +36084,9 @@ _operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__]
 import offer_routes as _offer_routes
 
 _offer_routes.register_offer_routes(app, sys.modules[__name__])
+import assessment_ai_routes as _assessment_ai_routes
+
+_assessment_ai_routes.register_assessment_ai_routes(app, sys.modules[__name__])
 
 
 @app.post("/dashboard/team/invites/accept")
@@ -41095,7 +41931,7 @@ def prehire_applications_query(
             # assessment itself is not sent yet or sent but not started. Keeps
             # the "N pending" number and this filter in agreement.
             where.append(
-                "a.status IN ('screening_complete','review_pending','shortlisted') "
+                "a.status IN ('screening_complete','review_pending','ready_for_review','shortlisted') "
                 "AND COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '') IN ('', 'pending')"
             )
         else:
@@ -41191,7 +42027,7 @@ def prehire_applications_query(
     order_sql = {
         "newest": "a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST",
         "last_activity": "COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
-        "ready_for_review": "CASE WHEN a.status IN ('screening_complete','review_pending') THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
+        "ready_for_review": "CASE WHEN a.status IN ('screening_complete','review_pending','ready_for_review') THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
         "assessment_complete": "CASE WHEN COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status')='completed' THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
         "ranking_score": "latest_eval.ranking_score DESC NULLS LAST, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
     }.get(sort_key, "a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST")
@@ -41258,8 +42094,12 @@ def assessment_attempt_summary(row: dict[str, Any]) -> dict[str, Any]:
         "position_title": row.get("position_title") or row.get("position_code"),
         "application_status": row.get("application_status"),
         "battery_key": row.get("battery_key"),
+        "assessment_version_id": str(row.get("assessment_version_id")) if row.get("assessment_version_id") else None,
         "status": row.get("status"),
+        "delivery_status": row.get("delivery_status"),
+        "review_status": row.get("review_status"),
         "current_item_index": int(row.get("current_item_index") or 0),
+        "progress_version": int(row.get("progress_version") or 0),
         "total_items": total_items,
         "answered_count": answered_count,
         "percent_complete": percent_complete,
@@ -41274,13 +42114,23 @@ def assessment_attempt_summary(row: dict[str, Any]) -> dict[str, Any]:
         "summary": report.get("summary") if isinstance(report, dict) else None,
         "report_json": json_safe(report) if report else None,
         "created_at": json_safe(row.get("created_at")),
+        "expires_at": json_safe(row.get("expires_at")),
         "started_at": json_safe(row.get("started_at")),
         "completed_at": json_safe(row.get("completed_at")),
+        "cancelled_at": json_safe(row.get("cancelled_at")),
+        "cancel_reason": row.get("cancel_reason"),
+        "expired_at": json_safe(row.get("expired_at")),
+        "reviewed_at": json_safe(row.get("reviewed_at")),
+        "reviewed_by_user_id": row.get("reviewed_by_user_id"),
+        "review_notes": row.get("review_notes"),
         "updated_at": json_safe(row.get("updated_at")),
     }
 
 
 def fetch_dashboard_assessment_report_payload(company: str, attempt_id: str) -> dict[str, Any]:
+    import assessment_service as _assessment_service
+
+    version: dict[str, Any] | None = None
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -41318,6 +42168,12 @@ def fetch_dashboard_assessment_report_payload(company: str, attempt_id: str) -> 
             if not row:
                 raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
             attempt = assessment_attempt_summary(dict(row))
+            if attempt.get("assessment_version_id"):
+                version = _assessment_service.content_version_by_id(
+                    cur,
+                    str(attempt["assessment_version_id"]),
+                    company_code=company,
+                )
             cur.execute(
                 """
                 SELECT
@@ -41327,27 +42183,39 @@ def fetch_dashboard_assessment_report_payload(company: str, attempt_id: str) -> 
                   ar.is_correct,
                   ar.score_numeric,
                   ar.created_at,
-                  ai.section,
-                  ai.prompt_text,
-                  ai.choices,
-                  ai.difficulty,
-                  ai.scoring
+                  ar.answer_key_snapshot,
+                  ar.scoring_snapshot,
+                  ar.item_content_version
                 FROM assessment_responses ar
-                LEFT JOIN assessment_items ai ON ai.item_id=ar.item_id
-                WHERE ar.attempt_id=%s
+                WHERE ar.attempt_id=%s AND ar.company_code=%s
                 ORDER BY ar.item_order ASC
                 """,
-                (attempt_id,),
+                (attempt_id, company),
             )
             responses = [json_safe(dict(item)) for item in cur.fetchall()]
+    frozen_items = {
+        str(item.get("item_id")): item
+        for item in _assessment_service.version_items(version)
+    }
+    responses = [
+        {
+            **(frozen_items.get(str(response.get("item_id"))) or {}),
+            **response,
+        }
+        for response in responses
+    ]
     report = attempt.get("report_json") if isinstance(attempt.get("report_json"), dict) else {}
     if attempt.get("status") == "completed" and responses and not report.get("report_sections"):
-        battery_id = str(attempt.get("battery_key") or ASSESSMENT_BATTERY_KEY)
+        if not version:
+            raise HTTPException(
+                status_code=409,
+                detail={"error": "assessment_version_missing", "message": "Immutable assessment evidence is unavailable."},
+            )
         report = build_assessment_report_json(
             attempt=attempt,
-            items=assessment_items_for_battery(battery_id),
+            items=_assessment_service.version_items(version),
             responses=responses,
-            norm_lookup=assessment_norm_lookup(attempt.get("company_code"), battery_id),
+            norm_lookup=_assessment_service.version_norm_lookup(version),
         )
         attempt["report_json"] = json_safe(report)
     return {
@@ -42627,6 +43495,412 @@ def dashboard_prehire_assessment_norms_recalculate(
     return recalculate_assessment_norm_groups(company, persist=persist, minimum_sample=minimum_sample)
 
 
+def require_assessment_authoring_access(context: dict[str, Any]) -> None:
+    import assessment_service as _assessment_service
+
+    require_entitlement(context, "assessments", "assessment.manage")
+    environment = str(os.environ.get("WATHEFNI_ENV") or "").strip().lower()
+    if not _assessment_service.authoring_enabled(
+        environment,
+        os.environ.get("WATHEFNI_ASSESSMENT_AUTHORING"),
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "assessment_authoring_disabled", "message": "Assessment authoring is not enabled in this environment."},
+        )
+
+
+@app.get("/dashboard/prehire/assessments/authoring/drafts")
+def dashboard_assessment_item_drafts(
+    status: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    require_assessment_authoring_access(context)
+    company = context["company_code"]
+    where = ["company_code=%s"]
+    params: list[Any] = [company]
+    if status:
+        where.append("lifecycle_status=%s")
+        params.append(status)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT *
+                FROM assessment_item_drafts
+                WHERE {' AND '.join(where)}
+                ORDER BY updated_at DESC, created_at DESC
+                LIMIT %s
+                """,
+                [*params, limit],
+            )
+            drafts = [json_safe(dict(row)) for row in cur.fetchall()]
+    return {"ok": True, "drafts": drafts, "publish_available": False}
+
+
+@app.post("/dashboard/prehire/assessments/authoring/drafts")
+def dashboard_assessment_item_draft_create(
+    request: AssessmentItemDraftRequest,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    require_assessment_authoring_access(context)
+    if not request.original_content_attested:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "original_content_attestation_required"},
+        )
+    company = context["company_code"]
+    actor_id = assessment_dashboard_actor_id(context)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT 1 FROM assessment_batteries
+                WHERE battery_key=%s AND company_code IN (%s,'GLOBAL')
+                LIMIT 1
+                """,
+                (request.battery_key, company),
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail={"error": "assessment_battery_not_found"})
+            cur.execute(
+                """
+                INSERT INTO assessment_item_drafts
+                  (company_code, battery_key, lifecycle_status, section,
+                   competency_tags, skill_tags, role_tags, difficulty, locale,
+                   prompt_text, choices, proposed_answer_key, proposed_scoring,
+                   rationale, explanation, ai_model, source_blueprint_id,
+                   created_by_user_id)
+                VALUES (%s,%s,'ai_draft',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING *
+                """,
+                (
+                    company,
+                    request.battery_key,
+                    request.section,
+                    Json(request.competency_tags),
+                    Json(request.skill_tags),
+                    Json(request.role_tags),
+                    request.difficulty,
+                    request.locale,
+                    request.prompt_text.strip(),
+                    Json(request.choices),
+                    request.proposed_answer_key.strip().upper(),
+                    Json(request.proposed_scoring),
+                    request.rationale,
+                    request.explanation,
+                    request.ai_model,
+                    request.source_blueprint_id,
+                    actor_id,
+                ),
+            )
+            draft = dict(cur.fetchone())
+            cur.execute(
+                """
+                INSERT INTO assessment_item_reviews
+                  (draft_id, company_code, review_type, reviewer_type, reviewer_id,
+                   to_status, findings_json, notes)
+                VALUES (%s,%s,'created','human',%s,'ai_draft',%s,%s)
+                """,
+                (
+                    draft["draft_id"],
+                    company,
+                    actor_id,
+                    Json({"original_content_attested": True, "live_bank_changed": False}),
+                    "Draft stored from an approved blueprint; not published.",
+                ),
+            )
+        conn.commit()
+    return {"ok": True, "draft": json_safe(draft), "published": False}
+
+
+@app.post("/dashboard/prehire/assessments/authoring/drafts/{draft_id}/automated-review")
+def dashboard_assessment_item_draft_automated_review(
+    draft_id: str,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    import assessment_service as _assessment_service
+
+    require_assessment_authoring_access(context)
+    company = context["company_code"]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT * FROM assessment_item_drafts
+                WHERE draft_id=%s AND company_code=%s
+                FOR UPDATE
+                """,
+                (draft_id, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail={"error": "assessment_item_draft_not_found"})
+            draft = dict(row)
+            if draft.get("lifecycle_status") != "ai_draft":
+                raise HTTPException(status_code=409, detail={"error": "invalid_authoring_transition"})
+            if draft.get("current_revision_id"):
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "product2_secondary_review_required",
+                        "message": "Product-2 revisions require deterministic checks plus an independent secondary review.",
+                    },
+                )
+            findings = _assessment_service.deterministic_draft_review(draft)
+            normalized_prompt = normalize_text(str(draft.get("prompt_text") or ""))
+            cur.execute(
+                """
+                SELECT prompt_text FROM assessment_items WHERE battery_key=%s
+                UNION ALL
+                SELECT prompt_text FROM assessment_item_drafts
+                WHERE company_code=%s AND battery_key=%s AND draft_id<>%s
+                """,
+                (draft.get("battery_key"), company, draft.get("battery_key"), draft_id),
+            )
+            duplicate_matches = [
+                str(item.get("prompt_text") or "")
+                for item in cur.fetchall()
+                if normalize_text(str(item.get("prompt_text") or "")) == normalized_prompt
+            ]
+            findings["exact_duplicate_count"] = len(duplicate_matches)
+            findings["passed"] = bool(findings.get("passed") and not duplicate_matches)
+            cur.execute(
+                """
+                UPDATE assessment_item_drafts
+                SET lifecycle_status='automated_review',
+                    duplication_flags=%s,
+                    ambiguity_flags=%s,
+                    leakage_flags=%s,
+                    updated_at=now()
+                WHERE draft_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (
+                    Json(["exact_prompt_duplicate"] if duplicate_matches else []),
+                    Json([] if findings.get("schema_valid") else ["schema_or_choice_ambiguity"]),
+                    Json(["answer_leakage"] if findings.get("answer_leakage") else []),
+                    draft_id,
+                    company,
+                ),
+            )
+            reviewed = dict(cur.fetchone())
+            cur.execute(
+                """
+                INSERT INTO assessment_item_reviews
+                  (draft_id, company_code, review_type, reviewer_type,
+                   from_status, to_status, findings_json, notes)
+                VALUES (%s,%s,'automated_checks','system','ai_draft','automated_review',%s,%s)
+                """,
+                (
+                    draft_id,
+                    company,
+                    Json(json_safe(findings)),
+                    "Deterministic checks only; human review remains required.",
+                ),
+            )
+        conn.commit()
+    return {"ok": True, "draft": json_safe(reviewed), "findings": json_safe(findings), "published": False}
+
+
+@app.post("/dashboard/prehire/assessments/authoring/drafts/{draft_id}/transition")
+def dashboard_assessment_item_draft_transition(
+    draft_id: str,
+    request: AssessmentItemTransitionRequest,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    import assessment_lifecycle as _assessment_lifecycle
+
+    require_assessment_authoring_access(context)
+    company = context["company_code"]
+    actor_id = assessment_dashboard_actor_id(context)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT * FROM assessment_item_drafts
+                WHERE draft_id=%s AND company_code=%s
+                FOR UPDATE
+                """,
+                (draft_id, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail={"error": "assessment_item_draft_not_found"})
+            draft = dict(row)
+            from_status = str(draft.get("lifecycle_status") or "")
+            if not _assessment_lifecycle.validate_authoring_transition(from_status, request.to_status):
+                raise HTTPException(
+                    status_code=409,
+                    detail={"error": "invalid_authoring_transition", "from_status": from_status, "to_status": request.to_status},
+                )
+            if draft.get("current_revision_id") and request.to_status == "ai_draft":
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "product2_new_revision_required",
+                        "message": "Product-2 rewrites must append a new revision and invalidate prior reviews.",
+                    },
+                )
+            if request.to_status == "human_review":
+                if draft.get("current_revision_id"):
+                    import assessment_ai_service as _assessment_ai
+
+                    if request.original_content_attested is not True:
+                        raise HTTPException(
+                            status_code=422,
+                            detail={"error": "human_originality_attestation_required"},
+                        )
+                    ready, evidence = _assessment_ai.product2_human_transition_ready(
+                        cur,
+                        draft_id=draft_id,
+                        company_code=company,
+                    )
+                    if not ready:
+                        raise HTTPException(
+                            status_code=409,
+                            detail={"error": "product2_automated_review_not_passed", "evidence": json_safe(evidence)},
+                        )
+                else:
+                    cur.execute(
+                        """
+                        SELECT findings_json FROM assessment_item_reviews
+                        WHERE draft_id=%s AND review_type='automated_checks'
+                        ORDER BY created_at DESC LIMIT 1
+                        """,
+                        (draft_id,),
+                    )
+                    checks = cur.fetchone()
+                    findings = checks.get("findings_json") if checks and isinstance(checks.get("findings_json"), dict) else {}
+                    if not findings.get("passed"):
+                        raise HTTPException(status_code=409, detail={"error": "automated_review_not_passed"})
+            if request.to_status == "pilot" and draft.get("current_revision_id"):
+                cur.execute(
+                    """
+                    SELECT blueprint_json FROM assessment_blueprint_versions
+                    WHERE blueprint_version_id=%s
+                    """,
+                    (draft.get("blueprint_version_id"),),
+                )
+                blueprint_row = cur.fetchone()
+                blueprint_json = (
+                    blueprint_row.get("blueprint_json")
+                    if blueprint_row and isinstance(blueprint_row.get("blueprint_json"), dict)
+                    else {}
+                )
+                required_locales = set(blueprint_json.get("required_locales") or [draft.get("locale")])
+                cur.execute(
+                    """
+                    SELECT COUNT(*) AS count
+                    FROM assessment_translation_pairs
+                    WHERE company_code=%s
+                      AND (source_revision_id=%s OR target_revision_id=%s)
+                      AND status<>'approved'
+                    """,
+                    (company, draft["current_revision_id"], draft["current_revision_id"]),
+                )
+                unresolved_pairs = int((cur.fetchone() or {}).get("count") or 0)
+                if unresolved_pairs:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={"error": "bilingual_human_review_required", "unresolved_pairs": unresolved_pairs},
+                    )
+                if len(required_locales) > 1:
+                    cur.execute(
+                        """
+                        SELECT COUNT(*) AS count
+                        FROM assessment_translation_pairs
+                        WHERE company_code=%s AND status='approved'
+                          AND (source_revision_id=%s OR target_revision_id=%s)
+                        """,
+                        (company, draft["current_revision_id"], draft["current_revision_id"]),
+                    )
+                    approved_pairs = int((cur.fetchone() or {}).get("count") or 0)
+                    if approved_pairs < len(required_locales) - 1:
+                        raise HTTPException(
+                            status_code=409,
+                            detail={
+                                "error": "required_locale_variant_missing",
+                                "required_locales": sorted(required_locales),
+                                "approved_pairs": approved_pairs,
+                            },
+                        )
+            cur.execute(
+                """
+                UPDATE assessment_item_drafts
+                SET lifecycle_status=%s,
+                    human_reviewer_id=CASE WHEN %s IN ('human_review','pilot','approved','retired') THEN %s ELSE human_reviewer_id END,
+                    reviewed_at=CASE WHEN %s IN ('human_review','pilot','approved','retired') THEN now() ELSE reviewed_at END,
+                    rejection_reason=%s,
+                    updated_at=now()
+                WHERE draft_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (
+                    request.to_status,
+                    request.to_status,
+                    actor_id,
+                    request.to_status,
+                    request.rejection_reason,
+                    draft_id,
+                    company,
+                ),
+            )
+            transitioned = dict(cur.fetchone())
+            cur.execute(
+                """
+                INSERT INTO assessment_item_reviews
+                  (draft_id, company_code, review_type, reviewer_type, reviewer_id,
+                   from_status, to_status, findings_json, notes)
+                VALUES (%s,%s,'human_transition','human',%s,%s,%s,%s,%s)
+                """,
+                (
+                    draft_id,
+                    company,
+                    actor_id,
+                    from_status,
+                    request.to_status,
+                    Json({
+                        "live_bank_changed": False,
+                        "publish_endpoint_available": False,
+                        "human_originality_attested": request.original_content_attested,
+                    }),
+                    request.notes,
+                ),
+            )
+            if transitioned.get("current_revision_id"):
+                import assessment_ai_service as _assessment_ai
+
+                _assessment_ai.record_authoring_event(
+                    cur,
+                    company_code=company,
+                    draft_id=draft_id,
+                    draft_revision_id=str(transitioned["current_revision_id"]),
+                    event_type="human_lifecycle_transition",
+                    actor_type="human",
+                    actor_user_id=actor_id,
+                    from_status=from_status,
+                    to_status=request.to_status,
+                    payload={
+                        "notes": request.notes,
+                        "rejection_reason": request.rejection_reason,
+                        "published": False,
+                        "live_bank_unchanged": True,
+                        "non_decision_pilot": request.to_status == "pilot",
+                        "eligible_for_future_human_release": request.to_status == "approved",
+                        "human_originality_attested": request.original_content_attested,
+                    },
+                )
+        conn.commit()
+    return {
+        "ok": True,
+        "draft": json_safe(transitioned),
+        "published": False,
+        "live_bank_unchanged": True,
+    }
+
+
 @app.get("/dashboard/prehire/assessments/{attempt_id}")
 def dashboard_prehire_assessment_report(attempt_id: str, context: dict[str, Any] = Depends(assessments_dashboard_context)):
     company = context["company_code"]
@@ -42638,6 +43912,121 @@ def dashboard_prehire_assessment_report_html(attempt_id: str, context: dict[str,
     company = context["company_code"]
     payload = fetch_dashboard_assessment_report_payload(company, attempt_id)
     return assessment_report_html(payload)
+
+
+def assessment_dashboard_actor_id(context: dict[str, Any]) -> str | None:
+    user = context.get("hr_user") if isinstance(context.get("hr_user"), dict) else {}
+    return str(user.get("user_id") or user.get("phone") or user.get("email") or context.get("hr_phone") or "").strip() or None
+
+
+@app.post("/dashboard/prehire/assessments/{attempt_id}/resend")
+def dashboard_prehire_assessment_resend(
+    attempt_id: str,
+    request: DashboardCandidateMessage | None = None,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    require_entitlement(context, "assessments", "assessment.manage")
+    company = context["company_code"]
+    attempt = assessment_attempt_by_id(attempt_id, company)
+    if not attempt:
+        raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
+    application = dashboard_application_or_404(str(attempt.get("app_key") or ""), company)
+    payload = request or DashboardCandidateMessage()
+    result = resend_assessment(
+        application,
+        attempt,
+        payload.account_id or "default",
+        note=payload.message,
+        requested_by=assessment_dashboard_actor_id(context),
+    )
+    if not result.get("ok"):
+        raise HTTPException(status_code=409, detail={"error": result.get("error") or "assessment_resend_failed"})
+    return result
+
+
+@app.post("/dashboard/prehire/assessments/{attempt_id}/cancel")
+def dashboard_prehire_assessment_cancel(
+    attempt_id: str,
+    request: DashboardAssessmentCancelRequest,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    require_entitlement(context, "assessments", "assessment.manage")
+    company = context["company_code"]
+    attempt = assessment_attempt_by_id(attempt_id, company)
+    if not attempt:
+        raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
+    cancelled = cancel_assessment_attempt(
+        attempt,
+        reason=request.reason.strip(),
+        actor_type="human",
+        actor_user_id=assessment_dashboard_actor_id(context),
+    )
+    return {"ok": True, "attempt": cancelled}
+
+
+@app.post("/dashboard/prehire/assessments/{attempt_id}/review")
+def dashboard_prehire_assessment_review(
+    attempt_id: str,
+    request: DashboardAssessmentReviewRequest | None = None,
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    import assessment_lifecycle as _assessment_lifecycle
+
+    require_entitlement(context, "assessments", "assessment.manage")
+    company = context["company_code"]
+    actor_id = assessment_dashboard_actor_id(context)
+    payload = request or DashboardAssessmentReviewRequest()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT * FROM assessment_attempts
+                WHERE attempt_id=%s AND company_code=%s
+                FOR UPDATE
+                """,
+                (attempt_id, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
+            attempt = dict(row)
+            if attempt.get("status") != "completed":
+                raise HTTPException(status_code=409, detail={"error": "assessment_not_completed"})
+            cur.execute(
+                """
+                UPDATE assessment_attempts
+                SET review_status='reviewed', reviewed_at=COALESCE(reviewed_at,now()),
+                    reviewed_by_user_id=%s, review_notes=%s, updated_at=now()
+                WHERE attempt_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (actor_id, payload.notes, attempt_id, company),
+            )
+            reviewed = dict(cur.fetchone())
+            _assessment_lifecycle.record_event(
+                cur,
+                attempt_id=attempt_id,
+                company_code=company,
+                event_type="reviewed",
+                actor_type="human",
+                actor_user_id=actor_id,
+                payload={"notes_present": bool(payload.notes)},
+            )
+        conn.commit()
+    update_application_assessment_snapshot(
+        str(reviewed.get("app_key") or ""),
+        company,
+        {
+            "attempt_id": attempt_id,
+            "assessment_version_id": str(reviewed.get("assessment_version_id")),
+            "status": reviewed.get("status"),
+            "delivery_status": reviewed.get("delivery_status"),
+            "review_status": "reviewed",
+            "reviewed_at": json_safe(reviewed.get("reviewed_at")),
+            "battery_key": reviewed.get("battery_key"),
+        },
+    )
+    return {"ok": True, "attempt": json_safe(reviewed)}
 
 
 def dashboard_notification_item(
@@ -45860,7 +47249,12 @@ def dashboard_prehire_assessment(
     if _prehire_registry_enabled("send_assessment"):
         extra = {"message_text": payload.message} if payload.message else {}
         return run_prehire_registry_action(context, "send_assessment", extra, app_key=app_key)
-    result = send_assessment(application, payload.account_id or "default", note=payload.message)
+    result = send_assessment(
+        application,
+        payload.account_id or "default",
+        note=payload.message,
+        requested_by=assessment_dashboard_actor_id(context),
+    )
     status = "completed" if result.get("ok") else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     send_error = (result.get("send") or {}).get("error") if isinstance(result.get("send"), dict) else None
