@@ -775,6 +775,42 @@ def main() -> int:
                             actor_user_id="live-eval-author",
                             environment="staging",
                         )
+                        # Dedupe may return the prior completed secondary run; force a unique probe.
+                        if str(fallback.get("status") or "") != "queued":
+                            cur.execute(
+                                """
+                                SELECT d.*,r.content_json,r.content_sha256,r.draft_revision_id,
+                                       r.locale,b.blueprint_json,d.blueprint_version_id,d.source_run_id
+                                FROM assessment_item_drafts d
+                                JOIN assessment_item_draft_revisions r ON r.draft_revision_id=d.current_revision_id
+                                JOIN assessment_blueprint_versions b ON b.blueprint_version_id=d.blueprint_version_id
+                                WHERE d.draft_id=%s
+                                """,
+                                (draft_id,),
+                            )
+                            row = cur.fetchone()
+                            probe_payload = {
+                                "schema_version": "assessment_product2_v1",
+                                "draft_revision_id": str(row["draft_revision_id"]),
+                                "draft_sha256": str(row["content_sha256"]),
+                                "draft": row["content_json"],
+                                "blueprint": row["blueprint_json"],
+                                "review_dimensions": ["ambiguity"],
+                                "rubric_version": service.RUBRIC_VERSION,
+                                "fail_closed_probe_id": str(uuid.uuid4()),
+                            }
+                            fallback = service.enqueue_run(
+                                cur,
+                                company_code=PILOT_COMPANY,
+                                role_key="assessment.review_secondary",
+                                environment="staging",
+                                input_payload=probe_payload,
+                                created_by_user_id="live-eval-author",
+                                blueprint_version_id=str(row["blueprint_version_id"]),
+                                draft_id=draft_id,
+                                draft_revision_id=str(row["draft_revision_id"]),
+                                parent_run_id=str(row["source_run_id"]) if row.get("source_run_id") else None,
+                            )
                     conn.commit()
                 failed = service.process_queued_run(app, str(fallback["run_id"]), adapter=unavailable_adapter)
                 evidence["fail_closed_fallback"] = {
@@ -782,6 +818,7 @@ def main() -> int:
                     "error_code": failed.get("error_code"),
                     "run_id": str(failed.get("run_id") or fallback.get("run_id")),
                     "expected_status": "failed",
+                    "idempotent_bypassed": str(fallback.get("status") or "") == "queued",
                 }
 
         # Offline corpus gate still required as supporting evidence.
