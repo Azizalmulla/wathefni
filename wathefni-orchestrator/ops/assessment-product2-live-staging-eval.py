@@ -30,7 +30,7 @@ import assessment_ai_service as service
 
 
 CONFIRM = "staging-product2-live-provider-budget-eval"
-PILOT_COMPANY = "WATHEFNI_P2_LIVE_SYNTHETIC"
+PILOT_COMPANY = "WATHEFNI_LIVE_P2_SYNTHETIC"
 MAX_COST_USD = 5.0
 MAX_INPUT_TOKENS = 120000
 MAX_OUTPUT_TOKENS = 60000
