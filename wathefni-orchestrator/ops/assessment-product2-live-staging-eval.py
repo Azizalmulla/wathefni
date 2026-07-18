@@ -490,6 +490,7 @@ def score_live_cohort(packages: list[dict[str, Any]], budget: Budget) -> dict[st
                 "target_draft_id",
                 "target_revision_id",
                 "scoring_invariant",
+                "answer_key_invariant",
             )
             review_payload = pkg.get("bilingual_review_full")
             if not isinstance(review_payload, dict) or "findings" not in review_payload:
