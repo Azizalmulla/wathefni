@@ -669,16 +669,27 @@ def main() -> int:
             draft_id = created[0]["draft_id"]
 
             # Ambiguity / difficult-distractor secondary path: first disagreement then rewrite.
-            with app.db_connect() as conn:
-                with conn.cursor() as cur:
-                    secondary = service.enqueue_secondary_review(
-                        cur,
-                        company_code=PILOT_COMPANY,
-                        draft_id=draft_id,
-                        actor_user_id="live-eval-author",
-                        environment="staging",
-                    )
-                conn.commit()
+            try:
+                with app.db_connect() as conn:
+                    with conn.cursor() as cur:
+                        secondary = service.enqueue_secondary_review(
+                            cur,
+                            company_code=PILOT_COMPANY,
+                            draft_id=draft_id,
+                            actor_user_id="live-eval-author",
+                            environment="staging",
+                        )
+                    conn.commit()
+            except service.AssessmentAIError as exc:
+                evidence["failed_or_rewritten"].append(
+                    {
+                        "stage": "secondary_enqueue",
+                        "draft_id": draft_id,
+                        "error_code": exc.code,
+                        "message": str(exc),
+                    }
+                )
+                continue
             reviewed = process(app, str(secondary["run_id"]), budget)
             package["secondary_review"] = {
                 "status": reviewed.get("status"),
@@ -696,65 +707,8 @@ def main() -> int:
                 evidence["disagreement_examples"].append(package["secondary_review"])
                 evidence["failed_or_rewritten"].append({"stage": "secondary_rewrite", "draft_id": draft_id})
 
-            if spec["locale"] == "en" and reviewed.get("status") == "completed":
-                # English → Arabic adaptation + bilingual review.
-                with app.db_connect() as conn:
-                    with conn.cursor() as cur:
-                        # Ensure lifecycle allows adaptation.
-                        cur.execute(
-                            "UPDATE assessment_item_drafts SET lifecycle_status='automated_review' WHERE draft_id=%s",
-                            (draft_id,),
-                        )
-                        adaptation = service.enqueue_bilingual_adaptation(
-                            cur,
-                            company_code=PILOT_COMPANY,
-                            draft_id=draft_id,
-                            target_locale="ar",
-                            actor_user_id="live-eval-author",
-                            environment="staging",
-                        )
-                    conn.commit()
-                adapted = process(app, str(adaptation["run_id"]), budget)
-                package["adaptation"] = {
-                    "status": adapted.get("status"),
-                    "error_code": adapted.get("error_code"),
-                    "output": adapted.get("output_json"),
-                    "requested_model": adapted.get("requested_model"),
-                    "provider_response_model": adapted.get("provider_response_model"),
-                    "latency_ms": adapted.get("latency_ms"),
-                    "estimated_cost_usd": adapted.get("estimated_cost_usd"),
-                    "input_tokens": adapted.get("input_tokens"),
-                    "output_tokens": adapted.get("output_tokens"),
-                }
-                if adapted.get("status") == "completed":
-                    pair_id = adapted["output_json"]["translation_pair_id"]
-                    with app.db_connect() as conn:
-                        with conn.cursor() as cur:
-                            bilingual = service.enqueue_bilingual_review(
-                                cur,
-                                company_code=PILOT_COMPANY,
-                                translation_pair_id=pair_id,
-                                actor_user_id="live-eval-author",
-                                environment="staging",
-                            )
-                        conn.commit()
-                    bilingual_result = process(app, str(bilingual["run_id"]), budget)
-                    package["bilingual_review"] = {
-                        "status": bilingual_result.get("status"),
-                        "error_code": bilingual_result.get("error_code"),
-                        "recommendation": (bilingual_result.get("output_json") or {}).get("overall_recommendation"),
-                        "requested_model": bilingual_result.get("requested_model"),
-                        "provider_response_model": bilingual_result.get("provider_response_model"),
-                        "latency_ms": bilingual_result.get("latency_ms"),
-                        "estimated_cost_usd": bilingual_result.get("estimated_cost_usd"),
-                        "input_tokens": bilingual_result.get("input_tokens"),
-                        "output_tokens": bilingual_result.get("output_tokens"),
-                        "arabic_human_review_required": True,
-                    }
-                    package["bilingual_review_full"] = bilingual_result.get("output_json")
-
-                # Fail-closed fallback probe once (fresh queued run; must not complete).
-            if spec["key"] == "live_numerical_en":
+            # Fail-closed fallback probe once (fresh queued run; must not complete).
+            if spec["key"] == "live_numerical_en" and "fail_closed_fallback" not in evidence:
                 def unavailable_adapter(registry, prompt, run):  # type: ignore[no-untyped-def]
                     raise service.AssessmentAIError(
                         "assessment_ai_provider_http_error",
@@ -820,6 +774,89 @@ def main() -> int:
                     "expected_status": "failed",
                     "idempotent_bypassed": str(fallback.get("status") or "") == "queued",
                 }
+
+            if (reviewed.get("output_json") or {}).get("overall_recommendation") == "rewrite":
+                # Do not adapt rewritten items in this cohort pass.
+                continue
+
+            if spec["locale"] == "en" and reviewed.get("status") == "completed":
+                # English → Arabic adaptation + bilingual review.
+                try:
+                    with app.db_connect() as conn:
+                        with conn.cursor() as cur:
+                            # Ensure lifecycle allows adaptation.
+                            cur.execute(
+                                "UPDATE assessment_item_drafts SET lifecycle_status='automated_review' WHERE draft_id=%s",
+                                (draft_id,),
+                            )
+                            adaptation = service.enqueue_bilingual_adaptation(
+                                cur,
+                                company_code=PILOT_COMPANY,
+                                draft_id=draft_id,
+                                target_locale="ar",
+                                actor_user_id="live-eval-author",
+                                environment="staging",
+                            )
+                        conn.commit()
+                    adapted = process(app, str(adaptation["run_id"]), budget)
+                except service.AssessmentAIError as exc:
+                    evidence["failed_or_rewritten"].append(
+                        {
+                            "stage": "adaptation_enqueue",
+                            "draft_id": draft_id,
+                            "error_code": exc.code,
+                            "message": str(exc),
+                        }
+                    )
+                    continue
+                package["adaptation"] = {
+                    "status": adapted.get("status"),
+                    "error_code": adapted.get("error_code"),
+                    "output": adapted.get("output_json"),
+                    "requested_model": adapted.get("requested_model"),
+                    "provider_response_model": adapted.get("provider_response_model"),
+                    "latency_ms": adapted.get("latency_ms"),
+                    "estimated_cost_usd": adapted.get("estimated_cost_usd"),
+                    "input_tokens": adapted.get("input_tokens"),
+                    "output_tokens": adapted.get("output_tokens"),
+                }
+                if adapted.get("status") == "completed":
+                    pair_id = adapted["output_json"]["translation_pair_id"]
+                    try:
+                        with app.db_connect() as conn:
+                            with conn.cursor() as cur:
+                                bilingual = service.enqueue_bilingual_review(
+                                    cur,
+                                    company_code=PILOT_COMPANY,
+                                    translation_pair_id=pair_id,
+                                    actor_user_id="live-eval-author",
+                                    environment="staging",
+                                )
+                            conn.commit()
+                        bilingual_result = process(app, str(bilingual["run_id"]), budget)
+                    except service.AssessmentAIError as exc:
+                        evidence["failed_or_rewritten"].append(
+                            {
+                                "stage": "bilingual_enqueue",
+                                "draft_id": draft_id,
+                                "error_code": exc.code,
+                                "message": str(exc),
+                            }
+                        )
+                        continue
+                    package["bilingual_review"] = {
+                        "status": bilingual_result.get("status"),
+                        "error_code": bilingual_result.get("error_code"),
+                        "recommendation": (bilingual_result.get("output_json") or {}).get("overall_recommendation"),
+                        "requested_model": bilingual_result.get("requested_model"),
+                        "provider_response_model": bilingual_result.get("provider_response_model"),
+                        "latency_ms": bilingual_result.get("latency_ms"),
+                        "estimated_cost_usd": bilingual_result.get("estimated_cost_usd"),
+                        "input_tokens": bilingual_result.get("input_tokens"),
+                        "output_tokens": bilingual_result.get("output_tokens"),
+                        "arabic_human_review_required": True,
+                    }
+                    package["bilingual_review_full"] = bilingual_result.get("output_json")
 
         # Offline corpus gate still required as supporting evidence.
         offline = evaluation.run_evaluation(mode="replay")
