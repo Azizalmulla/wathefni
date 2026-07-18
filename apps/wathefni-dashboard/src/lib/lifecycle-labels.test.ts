@@ -2,57 +2,80 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { describe, expect, test } from 'vitest'
-
-/**
- * Web/mobile consistency proof for Canonical Recruiting Lifecycle stage labels.
- * Both clients must render the same human labels for canonical + legacy statuses.
- */
-const SHARED_LABELS: Record<string, string> = {
-  awaiting_cv: 'Waiting for CV',
-  cv_processing: 'Processing CV',
-  cv_received: 'Processing CV',
-  screening: 'Processing CV',
-  ready_for_review: 'Ready for review',
-  screening_complete: 'Ready for review',
-  review_pending: 'Ready for review',
-  shortlisted: 'Shortlisted',
-  interview: 'Interview',
-  hired: 'Hired',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-  offered: 'Shortlisted',
-  offer_sent: 'Shortlisted',
-}
+import {
+  ACTION_LABELS,
+  CANONICAL_APPLICATION_STAGES,
+  COMMUNICATION_LABELS,
+  COMMUNICATION_STATES,
+  STAGE_LABELS,
+  canonicalStage,
+  facetStatusLabel,
+} from './recruitingLifecycle'
+import {
+  canonicalStages as mobileCanonicalStages,
+  communicationLabels as mobileCommunicationLabels,
+  communicationStates as mobileCommunicationStates,
+  facetStatusLabel as mobileFacetStatusLabel,
+  stageLabels as mobileStageLabels,
+} from '../../../wathefni-hr-mobile/src/features/recruiting/lifecycle'
 
 describe('canonical recruiting lifecycle labels', () => {
-  test('dashboard STAGE_LABELS match the shared contract', () => {
-    const source = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
-    for (const [status, label] of Object.entries(SHARED_LABELS)) {
-      expect(source).toContain(`${status}: '${label}'`)
+  test('web and HR mobile expose only the eight canonical stages', () => {
+    expect(CANONICAL_APPLICATION_STAGES).toEqual(mobileCanonicalStages)
+    expect(CANONICAL_APPLICATION_STAGES).toEqual([
+      'awaiting_cv',
+      'cv_processing',
+      'ready_for_review',
+      'shortlisted',
+      'interview',
+      'hired',
+      'rejected',
+      'withdrawn',
+    ])
+  })
+
+  test('English and Arabic stage labels match on web and HR mobile', () => {
+    expect(STAGE_LABELS).toEqual(mobileStageLabels)
+  })
+
+  test('communication states and labels match on both clients', () => {
+    expect(COMMUNICATION_STATES).toEqual(mobileCommunicationStates)
+    expect(COMMUNICATION_LABELS).toEqual(mobileCommunicationLabels)
+  })
+
+  test('interview and facet statuses have explicit bilingual labels', () => {
+    expect(facetStatusLabel('scheduled', 'en')).toBe('Scheduled')
+    expect(facetStatusLabel('scheduled', 'ar')).toBe('مجدولة')
+    expect(facetStatusLabel('not_confirmed', 'en')).toBe('Not confirmed')
+    expect(facetStatusLabel('not_confirmed', 'ar')).toBe('لم يتم التأكيد')
+    expect(mobileFacetStatusLabel('scheduled', 'ar')).toBe(facetStatusLabel('scheduled', 'ar'))
+    expect(mobileFacetStatusLabel('notes_pending', 'en')).toBe(facetStatusLabel('notes_pending', 'en'))
+  })
+
+  test('legacy statuses are read aliases, never new UI stages', () => {
+    expect(canonicalStage('screening_complete')).toBe('ready_for_review')
+    expect(canonicalStage('offer_sent')).toBe('shortlisted')
+    expect(STAGE_LABELS.en).not.toHaveProperty('offer_sent')
+  })
+
+  test('consequential action labels exist in English and Arabic', () => {
+    for (const action of ['shortlist', 'reject', 'schedule_interview', 'hire']) {
+      expect(ACTION_LABELS.en[action]).toBeTruthy()
+      expect(ACTION_LABELS.ar[action]).toBeTruthy()
     }
-    // Formal offer lifecycle is out of scope — do not show "Offer sent" as a stage.
-    expect(source).not.toMatch(/offered:\s*'Offer sent'/)
   })
 
-  test('HR mobile STAGE_LABELS match the shared contract', () => {
-    const source = readFileSync(
-      resolve(__dirname, '../../../wathefni-hr-mobile/src/features/recruiting/CandidateReviewView.tsx'),
-      'utf8',
-    )
-    for (const [status, label] of Object.entries(SHARED_LABELS)) {
-      expect(source).toContain(`${status}: '${label}'`)
-    }
-  })
-
-  test('reject requires candidate.decide on web (not manage)', () => {
+  test('web action visibility comes from backend allowed_actions', () => {
     const source = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
-    expect(source).toMatch(/canDecideCandidates[\s\S]{0,120}runReject/)
-    expect(source).toMatch(/disabled=\{busy \|\| !canDecideCandidates\} onClick=\{\(\) => void runReject\(\)\}/)
+    expect(source).toContain("const allowedActions = new Set(candidate.allowed_actions || [])")
+    expect(source).toContain("const allowedActions = new Set(interview.allowed_actions || [])")
   })
 
-  test('shortlist requires explicit confirmation on web', () => {
+  test('shortlist, reject and hire keep explicit confirmation', () => {
     const source = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
     expect(source).toContain("title: 'Shortlist this candidate?'")
-    expect(source).toContain('runShortlist')
+    expect(source).toContain("title: 'Reject this candidate?'")
+    expect(source).toContain("title: 'Hire this candidate?'")
+    expect(source).toContain('askDashboardAssistant')
   })
 })
