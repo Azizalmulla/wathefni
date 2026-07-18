@@ -53,6 +53,10 @@ MGR_TEAM_PHONE = "96550000000810"    # manages Team A (team scope) -> sees EMP_A
 MGR_DIRECT_PHONE = "96550000000811"  # manages EMP_C only (direct scope)
 HR_PHONE = "96550000000812"          # no scope -> sees everyone
 
+MGR_TEAM_USER = "mgr-read-team"
+MGR_DIRECT_USER = "mgr-read-direct"
+HR_USER = "mgr-read-hr"
+
 MODULES = ["onboarding", "compliance", "attendance", "leave", "payroll", "shifts"]
 
 
@@ -79,20 +83,29 @@ class Checks:
 
 
 def _ctx(viewer_phone: str | None) -> dict[str, Any]:
-    # Synthetic backend-authoritative owner capability set. Manager scope is
-    # carried independently by hr_phone, as every post-hire read requires.
-    permissions = [*app.hr_role_permissions("owner"), "employees.read"]
+    """Build a backend_current context whose manager identity matches the seeded scopes.
+
+    Managers use role=manager + stable dashboard_user_id (HR-0 durable path).
+    HR/owner remain unrestricted by manager_scopes.
+    """
+    if viewer_phone == MGR_TEAM_PHONE:
+        role, user_id = "manager", MGR_TEAM_USER
+    elif viewer_phone == MGR_DIRECT_PHONE:
+        role, user_id = "manager", MGR_DIRECT_USER
+    else:
+        role, user_id = "owner", HR_USER
+    permissions = sorted(set(app.hr_role_permissions(role)) | {"employees.read"})
     return {
         "company_code": COMPANY,
         "permissions": permissions,
         "hr_phone": viewer_phone,
-        "access": {"role": "owner", "permissions": permissions},
-        "actor_role": "owner",
-        "actor_user_id": "smoke-mgr-read",
-        "hr_user": {"role": "owner", "status": "active", "company_code": COMPANY},
+        "access": {"role": role, "permissions": permissions},
+        "actor_role": role,
+        "actor_user_id": user_id,
         "permission_authority": "backend_current",
-        "permission_subject_user_id": "smoke-mgr-read",
+        "permission_subject_user_id": user_id,
         "permission_subject_company": COMPANY,
+        "hr_user": {"role": role, "status": "active", "company_code": COMPANY, "user_id": user_id},
     }
 
 
@@ -141,8 +154,20 @@ def setup() -> None:
     assert app.upsert_org_team(COMPANY, name="Team B", branch_key=BRANCH_KEY, team_key=TEAM_B_KEY)["ok"], "team B create"
     assert app.set_employee_org_assignment(COMPANY, employee_key=EMP_A, team_key=TEAM_A_KEY)["ok"], "assign A"
     assert app.set_employee_org_assignment(COMPANY, employee_key=EMP_B, team_key=TEAM_B_KEY)["ok"], "assign B"
-    assert app.upsert_manager_scope(COMPANY, manager_phone=MGR_TEAM_PHONE, scope_type="team", team_key=TEAM_A_KEY)["ok"], "team scope"
-    assert app.upsert_manager_scope(COMPANY, manager_phone=MGR_DIRECT_PHONE, scope_type="direct", employee_keys=[EMP_C])["ok"], "direct scope"
+    assert app.upsert_manager_scope(
+        COMPANY,
+        manager_phone=MGR_TEAM_PHONE,
+        scope_type="team",
+        team_key=TEAM_A_KEY,
+        dashboard_user_id=MGR_TEAM_USER,
+    )["ok"], "team scope"
+    assert app.upsert_manager_scope(
+        COMPANY,
+        manager_phone=MGR_DIRECT_PHONE,
+        scope_type="direct",
+        employee_keys=[EMP_C],
+        dashboard_user_id=MGR_DIRECT_USER,
+    )["ok"], "direct scope"
 
 
 def _purge() -> None:
@@ -186,7 +211,13 @@ def _onboarding_seen(viewer_phone: str | None) -> set[str]:
 
 
 def _compliance_employees_total(viewer_phone: str | None) -> int:
-    res = app.dashboard_compliance_payload(COMPANY, viewer_phone=viewer_phone)
+    ctx = _ctx(viewer_phone)
+    res = app.dashboard_compliance_payload(
+        COMPANY,
+        viewer_phone=viewer_phone,
+        dashboard_user_id=ctx.get("actor_user_id"),
+        actor_role=ctx.get("actor_role"),
+    )
     return int((res.get("summary") or {}).get("employees_total") or 0)
 
 

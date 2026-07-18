@@ -72,7 +72,16 @@ def _add_identity(company: str, user_id: str, phone: str, status: str = "active"
 def _team(company: str) -> dict[str, Any]:
     # Call the real handler directly; prehire.read is enforced by the Depends in
     # production, so a minimal company-scoped context is all the body needs.
-    return app.dashboard_team_list(context={"company_code": company, "actor_role": "owner", "actor_user_id": "smoke"})
+    return app.dashboard_team_list(context={
+        "company_code": company,
+        "actor_role": "owner",
+        "actor_user_id": "smoke",
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": "smoke",
+        "permission_subject_company": company,
+        "permissions": app.hr_role_permissions("owner"),
+        "hr_user": {"user_id": "smoke", "role": "owner", "status": "active", "company_code": company},
+    })
 
 
 def _linked_map(company: str) -> dict[str, bool]:

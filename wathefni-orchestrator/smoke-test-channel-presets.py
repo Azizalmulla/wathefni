@@ -52,6 +52,9 @@ MATRIX = {
     "leave_request_approved":      {"frontline": "WA", "office": "WA", "conservative": "EM"},
     "leave_request_rejected":      {"frontline": "WA", "office": "WA", "conservative": "EM"},
     "payroll_timesheet_ready":     {"frontline": "EM", "office": "EM", "conservative": "EM"},
+    # Employee App activation code: critical action-now, whatsapp_ok intent —
+    # same resolution as other critical WhatsApp-capable templates.
+    "app_activation":              {"frontline": "WA", "office": "WA", "conservative": "EM"},
 }
 
 PRESETS = ("frontline", "office", "conservative")
@@ -107,6 +110,11 @@ class _FakeLegacy:
 
     def channel_presets_enabled(self) -> bool:
         return self._on
+
+    # Push rung is flag-gated and OFF here: this harness proves preset/channel
+    # policy for the WhatsApp/email ladder, independent of the employee app.
+    def push_notifications_enabled(self) -> bool:
+        return False
 
     def company_notification_preset(self, company_code):  # type: ignore[no-untyped-def]
         return self._preset

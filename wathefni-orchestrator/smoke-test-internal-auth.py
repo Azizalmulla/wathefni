@@ -99,7 +99,16 @@ def main() -> int:
             conn.commit()
 
     def ctx(user_id: str) -> dict:
-        return {"company_code": TEST_CO, "actor_user_id": user_id, "hr_phone": PHONE, "actor_role": "owner"}
+        return {
+            "company_code": TEST_CO,
+            "actor_user_id": user_id,
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": user_id,
+            "permission_subject_company": TEST_CO,
+            "hr_phone": PHONE,
+            "actor_role": "owner",
+            "permissions": sorted(app.hr_role_permissions("owner")),
+        }
 
     def link(user_id: str, phone: str):
         return app.dashboard_team_link_whatsapp(app.DashboardWhatsAppLinkRequest(phone=phone), context=ctx(user_id))

@@ -242,7 +242,22 @@ def run_checks(checks: Checks) -> None:
     # Seed a genuine failure (no email, all channels fail) for a separate employee.
     CALLS.update(session=0, template=0, email=0)
     fail = _notify(EMP_C, PHONE_C, None, flow="onboarding", template_key="onboarding_reminder", text="needs hr")
-    follow = app.dashboard_outbound_needs_follow_up({"company_code": COMPANY, "scope": None})
+    follow = app.dashboard_outbound_needs_follow_up(
+        limit=100,
+        offset=0,
+        context={
+            "company_code": COMPANY,
+            "scope": None,
+            "permissions": ["onboarding.read"],
+            "access": {"role": "owner", "permissions": ["onboarding.read"]},
+            "actor_user_id": "smoke-reminder",
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "smoke-reminder",
+            "permission_subject_company": COMPANY,
+            "actor_role": "owner",
+            "hr_user": {"role": "owner", "status": "active", "company_code": COMPANY},
+        },
+    )
     msgs = follow.get("messages") or []
     thr = next((m for m in msgs if m.get("status") == od.STATUS_THROTTLED), None)
     checks.check("throttled row present in Delivery Issues", lambda: thr is not None)

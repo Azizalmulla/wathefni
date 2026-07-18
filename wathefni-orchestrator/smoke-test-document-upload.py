@@ -52,6 +52,8 @@ TEAM_A_KEY = app.org_key(COMPANY, "team", "Team A")
 TEAM_B_KEY = app.org_key(COMPANY, "team", "Team B")
 BRANCH_KEY = app.org_key(COMPANY, "branch", "HQ")
 MGR_OTHER_PHONE = "96550000000610"  # manages Team B -> cannot touch EMP (Team A)
+MGR_OTHER_USER = "doc-upload-mgr-other"
+OWNER_USER = "doc-upload-owner"
 
 
 class Checks:
@@ -84,14 +86,22 @@ def _flag(on: bool) -> None:
 
 
 def _ctx(viewer_phone: str | None = None) -> dict[str, Any]:
+    # Owner role with backend_current grants. When the out-of-scope manager phone
+    # is attached, the seeded Team B manager_scopes row still restricts visibility
+    # (owners/HR become restricted once they have explicit scopes).
+    user_id = MGR_OTHER_USER if viewer_phone == MGR_OTHER_PHONE else OWNER_USER
+    permissions = sorted(set(app.hr_role_permissions("owner")) | {"employees.read"})
     return {
         "company_code": COMPANY,
-        "permissions": [],
+        "permissions": permissions,
         "hr_phone": viewer_phone,
-        "access": {"role": "owner", "permissions": []},
+        "access": {"role": "owner", "permissions": permissions},
         "actor_role": "owner",
-        "actor_user_id": "smoke-doc-upload",
-        "hr_user": {"role": "owner", "status": "active", "company_code": COMPANY},
+        "actor_user_id": user_id,
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": user_id,
+        "permission_subject_company": COMPANY,
+        "hr_user": {"role": "owner", "status": "active", "company_code": COMPANY, "user_id": user_id},
     }
 
 
@@ -143,7 +153,13 @@ def setup() -> None:
     app.upsert_org_team(COMPANY, name="Team A", branch_key=BRANCH_KEY, team_key=TEAM_A_KEY)
     app.upsert_org_team(COMPANY, name="Team B", branch_key=BRANCH_KEY, team_key=TEAM_B_KEY)
     app.set_employee_org_assignment(COMPANY, employee_key=EMP, team_key=TEAM_A_KEY)
-    app.upsert_manager_scope(COMPANY, manager_phone=MGR_OTHER_PHONE, scope_type="team", team_key=TEAM_B_KEY)
+    app.upsert_manager_scope(
+        COMPANY,
+        manager_phone=MGR_OTHER_PHONE,
+        scope_type="team",
+        team_key=TEAM_B_KEY,
+        dashboard_user_id=MGR_OTHER_USER,
+    )
 
 
 def _exec(sql: str, params: tuple) -> None:

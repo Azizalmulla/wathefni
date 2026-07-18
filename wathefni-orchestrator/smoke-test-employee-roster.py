@@ -96,11 +96,11 @@ def main() -> int:
             "permissions": perms,
             "access": {"role": role, "permissions": perms},
             "actor_user_id": "smoke-roster",
-            "actor_role": role,
-            "hr_user": {"role": role, "status": "active", "company_code": company},
             "permission_authority": "backend_current",
             "permission_subject_user_id": "smoke-roster",
             "permission_subject_company": company,
+            "actor_role": role,
+            "hr_user": {"role": role, "status": "active", "company_code": company},
         }
 
     has_module = any(app.company_has_module(company, m) for m in app.POSTHIRE_PEOPLE_MODULES)

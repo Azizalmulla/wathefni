@@ -35,6 +35,9 @@ FAKE_SUPERADMIN = {
     "actor_phone": "96599338566",
     "actor_role": "platform_admin",
     "actor_user_id": "settings-durability-smoke",
+    "permission_authority": "backend_current",
+    "permission_subject_user_id": "settings-durability-smoke",
+    "permission_subject_company": TEST_CO,
     "actor_email": "smoke@wathefni.ai",
     "hr_user": "settings-durability-smoke",
 }

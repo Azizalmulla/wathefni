@@ -50,6 +50,10 @@ EXPECTED = {
     "leave_request_approved": ("critical", od.URGENCY_ACTION_NOW, od.ESCALATION_HR_TASK, od.CHANNEL_WHATSAPP_OK),
     "leave_request_rejected": ("critical", od.URGENCY_ACTION_NOW, od.ESCALATION_HR_TASK, od.CHANNEL_WHATSAPP_OK),
     "payroll_timesheet_ready": ("standard", od.URGENCY_INFORMATIONAL, od.ESCALATION_DELIVERY_ISSUE, od.CHANNEL_EMAIL_ONLY),
+    # Employee App activation code (metadata-only sensitivity; code never persisted
+    # in message bodies). Critical: HR must know if the code never reached the
+    # employee, so failure escalates to an HR task.
+    "app_activation": ("critical", od.URGENCY_ACTION_NOW, od.ESCALATION_HR_TASK, od.CHANNEL_WHATSAPP_OK),
 }
 
 # Expected reminder cap windows (must stay stable through this metadata-only batch).

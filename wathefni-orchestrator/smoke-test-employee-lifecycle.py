@@ -73,12 +73,12 @@ def main() -> int:
             "permissions": perms,
             "access": {"role": role, "permissions": perms},
             "actor_user_id": "smoke-lifecycle",
-            "actor_role": role,
-            "hr_phone": "99900000066",
-            "hr_user": {"role": role, "status": "active", "company_code": company},
             "permission_authority": "backend_current",
             "permission_subject_user_id": "smoke-lifecycle",
             "permission_subject_company": company,
+            "actor_role": role,
+            "hr_phone": "99900000066",
+            "hr_user": {"role": role, "status": "active", "company_code": company},
         }
 
     owner: dict = {}

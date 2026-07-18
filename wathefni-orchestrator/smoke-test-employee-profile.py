@@ -50,6 +50,9 @@ def main() -> int:
             "permissions": permissions,
             "access": {"role": "owner", "permissions": permissions},
             "actor_user_id": "smoke-owner",
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "smoke-owner",
+            "permission_subject_company": company,
             "actor_role": "owner",
             "hr_user": {"role": "owner", "status": "active", "company_code": company},
         }

@@ -71,6 +71,10 @@ class Checks:
 def _ctx(company: str, permissions: list[str]) -> dict[str, Any]:
     return {
         "company_code": company,
+        "actor_user_id": "smoke-doc-hub",
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": "smoke-doc-hub",
+        "permission_subject_company": company,
         "permissions": permissions,
         "access": {"role": "owner", "permissions": permissions},
         "actor_role": "owner",
