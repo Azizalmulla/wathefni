@@ -896,12 +896,59 @@ def main() -> int:
         codes={"ai_forbidden"},
     )
 
-    # Grant-only override with reason + audit (attach to an open offer so event lands in offer_events)
-    _clear_open(legacy, company, revoke_app, offers, offer_service, perms, creator)
+    # Grant-only override proofs — must use an app with NO accepted offer,
+    # otherwise the normal accepted-offer hire gate short-circuits.
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT a.app_key, a.status FROM applications a
+                WHERE a.company_code=%s
+                  AND a.status = ANY(%s)
+                  AND NOT EXISTS (
+                    SELECT 1 FROM employment_offers o
+                    WHERE o.company_code=a.company_code
+                      AND o.app_key=a.app_key
+                      AND o.status='accepted'
+                  )
+                ORDER BY a.updated_at DESC NULLS LAST
+                LIMIT 1
+                """,
+                (company, list(offers.APPLICATION_STAGES_ELIGIBLE_FOR_HIRE)),
+            )
+            row = cur.fetchone()
+            if not row:
+                cur.execute(
+                    """
+                    SELECT a.app_key FROM applications a
+                    WHERE a.company_code=%s
+                      AND a.status NOT IN ('hired','rejected','withdrawn')
+                      AND NOT EXISTS (
+                        SELECT 1 FROM employment_offers o
+                        WHERE o.company_code=a.company_code
+                          AND o.app_key=a.app_key
+                          AND o.status='accepted'
+                      )
+                    LIMIT 1
+                    """,
+                    (company,),
+                )
+                row = cur.fetchone()
+                if row:
+                    cur.execute(
+                        "UPDATE applications SET status='shortlisted', updated_at=now() WHERE company_code=%s AND app_key=%s",
+                        (company, row["app_key"]),
+                    )
+            override_app = str(row["app_key"]) if row else ""
+        conn.commit()
+    review.check("override", "fixture app without accepted offer available", bool(override_app), detail=override_app)
+    if not override_app:
+        raise RuntimeError("No application without accepted offer available for override proof")
+    _clear_open(legacy, company, override_app, offers, offer_service, perms, creator)
     override_draft = offer_service.create_draft(
         legacy,
         company_code=company,
-        app_key=revoke_app,
+        app_key=override_app,
         actor_user_id=creator,
         permissions=perms,
         position_title="Override Audit Role",
@@ -909,14 +956,14 @@ def main() -> int:
         wording_en="Open offer present for override audit attachment",
         idempotency_key=f"owner-review-override:{uuid.uuid4()}",
     )
-    review.side_effects.append(f"open offer {override_draft['offer_id']} for override audit")
+    review.side_effects.append(f"open offer {override_draft['offer_id']} on {override_app} for override audit")
     review.expect_error(
         "override",
         "override without grant denied",
         lambda: offer_service.enforce_hire_gate(
             legacy,
             company_code=company,
-            app_key=revoke_app,
+            app_key=override_app,
             permissions=perms,  # no hire_override
             hire_override=True,
             override_reason="Needs override for owner review demonstration case",
@@ -926,7 +973,7 @@ def main() -> int:
             confirmation_token="owner-review-no-grant",
             confirmed=True,
         ),
-        codes={"permission_denied", "accepted_offer_required"},
+        codes={"permission_denied"},
     )
     review.expect_error(
         "override",
@@ -934,7 +981,7 @@ def main() -> int:
         lambda: offer_service.enforce_hire_gate(
             legacy,
             company_code=company,
-            app_key=revoke_app,
+            app_key=override_app,
             permissions=set(perms) | {"offer.hire_override"},
             hire_override=True,
             override_reason="   ",
@@ -950,7 +997,7 @@ def main() -> int:
     override_ok = offer_service.enforce_hire_gate(
         legacy,
         company_code=company,
-        app_key=revoke_app,
+        app_key=override_app,
         permissions=set(perms) | {"offer.hire_override"},
         hire_override=True,
         override_reason="Owner review mandatory override reason with audit trail",
@@ -986,38 +1033,12 @@ def main() -> int:
         and "Owner review mandatory override reason" in str((audit or {}).get("reason") or ""),
         detail=str((audit or {}).get("audit_id")),
     )
-    # No-offer durable audit path (non-UUID subject) must also persist.
-    synthetic_key = f"OFFER-OWNER-OVERRIDE-{uuid.uuid4().hex[:8]}"
-    # Need a real shortlisted application for stage/tenant checks — reuse revoke_app after ensuring shortlisted.
-    with legacy.db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "UPDATE applications SET status='shortlisted', updated_at=now() WHERE company_code=%s AND app_key=%s",
-                (company, revoke_app),
-            )
-            # Clear accepted offers blocking? hire_gate finds accepted — withdraw doesn't remove accepted.
-            # Use an app without accepted offer for synthetic durable proof.
-            cur.execute(
-                """
-                SELECT a.app_key FROM applications a
-                WHERE a.company_code=%s AND a.status = ANY(%s)
-                  AND NOT EXISTS (
-                    SELECT 1 FROM employment_offers o
-                    WHERE o.company_code=a.company_code AND o.app_key=a.app_key AND o.status='accepted'
-                  )
-                ORDER BY a.updated_at DESC NULLS LAST LIMIT 1
-                """,
-                (company, list(offers.APPLICATION_STAGES_ELIGIBLE_FOR_OFFER)),
-            )
-            row = cur.fetchone()
-            durable_app = str(row["app_key"]) if row else revoke_app
-        conn.commit()
+    # Second durable audit with non-UUID subject on same clean app (idempotent different confirm).
     synth_confirm = f"synth-{uuid.uuid4()}"
-    _clear_open(legacy, company, durable_app, offers, offer_service, perms, creator)
     offer_service.enforce_hire_gate(
         legacy,
         company_code=company,
-        app_key=durable_app,
+        app_key=override_app,
         permissions=set(perms) | {"offer.hire_override"},
         hire_override=True,
         override_reason="Synthetic no-offer override path must leave durable audit",
