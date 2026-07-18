@@ -967,6 +967,30 @@ def mobile_shift_swap_detail(
     }
 
 
+def _mobile_interview_allowed_actions(
+    status_actions: list[str],
+    note_actions: list[str],
+) -> list[str]:
+    """Only advertise interview actions mobile can execute.
+
+    Cancel / reschedule / schedule remain web-only (capabilities mark them
+    feature_disabled). Notes write is the sole mutation path on mobile.
+    """
+    try:
+        import recruiting_lifecycle as _rl
+
+        executable = _rl.MOBILE_EXECUTABLE_INTERVIEW_ACTIONS
+    except Exception:
+        executable = frozenset({"write", "write_notes", "read"})
+    return sorted(
+        {
+            action
+            for action in [*status_actions, *note_actions]
+            if str(action) in executable
+        }
+    )
+
+
 def interview_mobile_item(
     app_mod: Any,
     row: dict[str, Any],
@@ -989,6 +1013,8 @@ def interview_mobile_item(
         },
         "interview_type": row.get("interview_type"),
         "status": row.get("status"),
+        "application_stage": row.get("application_stage"),
+        "application_stage_label": row.get("application_stage_label"),
         "feedback_status": row.get("feedback_status"),
         "scheduled_start": _iso(row.get("scheduled_start")),
         "scheduled_end": _iso(row.get("scheduled_end")),
@@ -1004,9 +1030,14 @@ def interview_mobile_item(
             "channel": row.get("notification_channel"),
             "invite_sent_at": _iso(row.get("invite_sent_at")),
         },
+        "communication_status": row.get("communication_status"),
+        "invitation_status": row.get("invitation_status"),
+        "candidate_confirmation": row.get("candidate_confirmation"),
+        "notes_status": row.get("notes_status"),
+        "next_human_action": row.get("next_human_action"),
         "notes_available": bool(str(row.get("notes") or "").strip()),
         "updated_at": _iso(row.get("updated_at")),
-        "allowed_actions": sorted(set([*status_actions, *note_actions])),
+        "allowed_actions": _mobile_interview_allowed_actions(status_actions, note_actions),
         "destination": f"/interviews/{interview_id}",
     }
     if detail:
@@ -1084,7 +1115,17 @@ def mobile_interview_detail(
         app_mod, context, "recruiting", "interview_status", "read"
     )
     notes_feature = _workspace_features(app_mod, context, "recruiting").get("interview_notes") or {}
-    row = app_mod.candidate_interview_summary(_load_interview(app_mod, context, interview_id))
+    raw_row = _load_interview(app_mod, context, interview_id)
+    application = app_mod.find_application_by_key(
+        str(raw_row.get("app_key") or ""),
+        company_code=context["company_code"],
+    )
+    row = app_mod.candidate_interview_summary(
+        {
+            **raw_row,
+            "application_status": (application or {}).get("status"),
+        }
+    )
     return {
         "ok": True,
         "interview": interview_mobile_item(
@@ -1250,13 +1291,21 @@ def mobile_leave_detail(app_mod: Any, context: dict[str, Any], leave_id: str) ->
     }
 
 
-def _candidate_allowed_actions(context: dict[str, Any], status: str) -> list[str]:
-    permissions = {str(value) for value in context.get("permissions") or []}
+def _authoritative_permissions(app_mod: Any, context: dict[str, Any]) -> set[str]:
+    """Permissions from the same backend_current authority used by execution."""
+    if hasattr(app_mod, "context_permissions"):
+        return {str(item) for item in app_mod.context_permissions(context) if str(item).strip()}
+    # Fail closed when authority helpers are unavailable.
+    return set()
+
+
+def _candidate_allowed_actions(app_mod: Any, context: dict[str, Any], status: str) -> list[str]:
+    permissions = _authoritative_permissions(app_mod, context)
     try:
         import recruiting_lifecycle as _rl
 
         stage = _rl.normalize_stage(status) or str(status or "").strip().lower()
-        return _rl.allowed_actions_for_stage(stage, permissions)
+        return _rl.mobile_candidate_allowed_actions(stage, permissions)
     except Exception:
         if status in {"hired", "rejected", "withdrawn"}:
             return []
@@ -1264,11 +1313,20 @@ def _candidate_allowed_actions(context: dict[str, Any], status: str) -> list[str
         if "candidate.manage" in permissions and status != "shortlisted":
             actions.append("shortlist")
         if "candidate.decide" in permissions:
-            actions.extend(["reject", "hire"])
+            # Hire is not valid from ready_for_review under the canonical matrix;
+            # only advertise reject from early stages when lifecycle import fails.
+            actions.append("reject")
+            if status in {"shortlisted", "interview", "scheduled"}:
+                actions.append("hire")
         return actions
 
 
-def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
+def candidate_mobile_item(
+    app_mod: Any,
+    item: dict[str, Any],
+    *,
+    context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     application = item.get("application") if isinstance(item.get("application"), dict) else {}
     candidate = application.get("candidate") if isinstance(application.get("candidate"), dict) else {}
     position = application.get("position") if isinstance(application.get("position"), dict) else {}
@@ -1289,6 +1347,14 @@ def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
     except Exception:
         canonical_stage = status
         status_label = status.replace("_", " ")
+    # Prefer the trusted operator context. Never invent grants from role names or
+    # a raw `_permissions` bag without backend_current authority markers.
+    auth_context = context if isinstance(context, dict) else {
+        "permissions": [],
+        "permission_authority": "",
+        "actor_user_id": "",
+        "company_code": "",
+    }
     return {
         "app_key": str(item.get("app_key") or application.get("app_key") or ""),
         "candidate": {
@@ -1302,6 +1368,18 @@ def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
         "status": status,
         "canonical_stage": canonical_stage,
         "status_label": status_label,
+        "intake_source": application.get("intake_source"),
+        "communication_status": (
+            application.get("communication", {}).get("status")
+            if isinstance(application.get("communication"), dict)
+            else None
+        ),
+        "next_human_action": (
+            application.get("waiting_for_hr", [None])[0]
+            if isinstance(application.get("waiting_for_hr"), list)
+            and application.get("waiting_for_hr")
+            else None
+        ),
         "score": item.get("score"),
         "confidence": item.get("confidence"),
         "evidence": app_mod.json_safe(evidence),
@@ -1312,10 +1390,7 @@ def candidate_mobile_item(app_mod: Any, item: dict[str, Any]) -> dict[str, Any]:
         "interview": app_mod.json_safe(item.get("interview_signal") or application.get("interview")),
         "cv": app_mod.json_safe(application.get("cv") or {}),
         "ai_advisory": True,
-        "allowed_actions": _candidate_allowed_actions(
-            {"permissions": item.get("_permissions") or []},
-            status,
-        ),
+        "allowed_actions": _candidate_allowed_actions(app_mod, auth_context, status),
         "destination": f"/candidates/{item.get('app_key') or application.get('app_key')}",
     }
 
@@ -1341,7 +1416,7 @@ def mobile_candidate_rankings(
     )
     items = []
     for candidate in result.get("candidates") or []:
-        items.append(candidate_mobile_item(app_mod, {**candidate, "_permissions": context.get("permissions") or []}))
+        items.append(candidate_mobile_item(app_mod, candidate, context=context))
     return {
         "ok": True,
         "items": items,
@@ -1397,6 +1472,54 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
                 (context["company_code"], app_key),
             )
             communications = [dict(row) for row in cur.fetchall()]
+    communication_status = [
+        {
+            "status": _rl.normalize_communication_status(
+                row.get("status") or app_mod.dashboard_delivery_status(row)
+            ),
+            "raw_status": row.get("status"),
+            "display_status": app_mod.dashboard_delivery_status(row),
+            "message_kind": row.get("message_kind"),
+            "sent_at": _iso(row.get("sent_at")),
+            "failed_at": _iso(row.get("failed_at")),
+            "updated_at": _iso(row.get("updated_at")),
+        }
+        for row in communications
+    ]
+    if not communication_status:
+        communication_status = [
+            {
+                "status": "intentionally_skipped",
+                "raw_status": None,
+                "display_status": "intentionally_skipped",
+                "message_kind": None,
+                "sent_at": None,
+                "failed_at": None,
+                "updated_at": None,
+            }
+        ]
+    latest_communication = communication_status[0]
+    stage_changed_without_contact = (
+        (_rl.normalize_stage(status) or status) in {"shortlisted", "interview", "hired", "rejected"}
+        and latest_communication["status"] != "sent"
+    )
+    if isinstance(summary, dict):
+        waiting_for_hr = list(summary.get("waiting_for_hr") or [])
+        if stage_changed_without_contact and "inform_candidate" not in waiting_for_hr:
+            waiting_for_hr.append("inform_candidate")
+        summary = {
+            **summary,
+            "communication": {
+                **(summary.get("communication") if isinstance(summary.get("communication"), dict) else {}),
+                **latest_communication,
+                "stage_changed_without_contact": stage_changed_without_contact,
+            },
+            "waiting_for_hr": waiting_for_hr,
+        }
+    allowed_actions = _candidate_allowed_actions(app_mod, context, status)
+    permissions = _authoritative_permissions(app_mod, context)
+    if cv and "prehire.read" in permissions:
+        allowed_actions.extend(["preview_cv", "download_cv"])
     return {
         "ok": True,
         "candidate": {
@@ -1420,21 +1543,8 @@ def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str)
                 "download_path": f"/dashboard/mobile/candidates/{app_key}/cv" if cv else None,
             },
             "interview": app_mod.json_safe(interview) if interview else None,
-            "communication_status": [
-                {
-                    "status": _rl.normalize_communication_status(
-                        row.get("status") or app_mod.dashboard_delivery_status(row)
-                    ),
-                    "raw_status": row.get("status"),
-                    "display_status": app_mod.dashboard_delivery_status(row),
-                    "message_kind": row.get("message_kind"),
-                    "sent_at": _iso(row.get("sent_at")),
-                    "failed_at": _iso(row.get("failed_at")),
-                    "updated_at": _iso(row.get("updated_at")),
-                }
-                for row in communications
-            ],
-            "allowed_actions": _candidate_allowed_actions(context, status),
+            "communication_status": communication_status,
+            "allowed_actions": list(dict.fromkeys(allowed_actions)),
         },
     }
 
@@ -2218,21 +2328,22 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         request: CandidateActionRequest,
         context: dict[str, Any] = Depends(dependency),
     ):
+        import recruiting_lifecycle as _rl
+
         app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
         action = str(request.action or "").strip().lower()
-        if action not in {"shortlist", "reject", "hire"}:
+        if action not in _rl.MOBILE_EXECUTABLE_CANDIDATE_ACTIONS:
             raise app_mod.HTTPException(
                 status_code=400,
                 detail={"error": "unsupported_candidate_action", "message": "That candidate action is not supported."},
             )
-        permission = "candidate.manage" if action == "shortlist" else "candidate.decide"
-        if not app_mod.dashboard_context_has_permission(context, permission):
-            raise app_mod.HTTPException(
-                status_code=403,
-                detail={"error": "action_forbidden", "message": "You do not have access to do that."},
-            )
         application = app_mod.dashboard_application_or_404(app_key, context["company_code"])
+        status = str(application.get("status") or "")
+        stage = _rl.normalize_stage(status) or status
         if request.confirm:
+            # Confirm path owns stale_decision vs already-processed replay.
+            # Do not short-circuit on terminal status here — that would collapse
+            # mid-flight stale confirms into already_decided.
             return confirm_mobile_action(
                 app_mod,
                 context,
@@ -2242,11 +2353,32 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
                 expected_target_id=app_key,
                 expected_action_types={MOBILE_ACTIONS[action]},
             )
-        status = str(application.get("status") or "")
-        if status in {"hired", "rejected"}:
+        # Terminal state is distinct from permission denial (prepare path only).
+        if stage in _rl.TERMINAL_STAGES or status in {"hired", "rejected"}:
             raise app_mod.HTTPException(
                 status_code=409,
                 detail={"error": "already_decided", "message": "This candidate already has a final decision."},
+            )
+        permissions = _authoritative_permissions(app_mod, context)
+        required = _rl.permission_for_recruiting_action(action)
+        # Same matrix + permission authority used by allowed_actions advertisement.
+        if not _rl.authorize_recruiting_action(action, stage, permissions):
+            if required and required not in permissions:
+                raise app_mod.HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "permission_denied",
+                        "message": "You do not have permission to do this action.",
+                        "required_permission": required,
+                    },
+                )
+            raise app_mod.HTTPException(
+                status_code=403,
+                detail={
+                    "error": "action_forbidden",
+                    "message": "That action is not available in the current candidate stage.",
+                    "current_stage": stage,
+                },
             )
         summary = app_mod.prehire_application_summary(application, include_raw=False)
         candidate = summary.get("candidate") if isinstance(summary.get("candidate"), dict) else {}

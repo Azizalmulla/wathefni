@@ -15,7 +15,8 @@ describe('backend-controlled action visibility', () => {
     expect(hasAnyAllowedAction(['read'], ['preview_cv', 'preview'])).toBe(false)
   })
 
-  it('supports explicitly documented CV action aliases only', () => {
-    expect(hasAnyAllowedAction(['preview_cv'], ['preview_cv', 'cv_preview', 'preview'])).toBe(true)
+  it('does not invent schedule_interview when backend omits it', () => {
+    expect(visibleActions(['shortlist', 'reject'], ['schedule_interview'])).toEqual([])
+    expect(hasAnyAllowedAction(['shortlist', 'reject', 'hire'], ['schedule_interview'])).toBe(false)
   })
 })

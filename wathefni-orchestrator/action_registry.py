@@ -656,12 +656,12 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
         # without human_confirmed on the action payload.
         actor_type = str(ctx.action.get("actor_type") or "human")
         human_confirmed = bool(ctx.action.get("human_confirmed", True))
-        permissions = set(getattr(ctx.request, "metadata", {}) or {}).get("permissions") or []
+        meta = getattr(ctx.request, "metadata", None) or {}
+        if not isinstance(meta, dict):
+            meta = {}
+        permissions = meta.get("permissions") or []
         if isinstance(permissions, dict):
             permissions = list(permissions.keys())
-        meta = getattr(ctx.request, "metadata", {}) or {}
-        if isinstance(meta, dict) and meta.get("permissions"):
-            permissions = meta.get("permissions") or permissions
         kwargs: dict[str, Any] = {}
         if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
             kwargs = {
@@ -669,7 +669,7 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
                 "human_confirmed": human_confirmed,
                 "actor_type": "ai" if actor_type == "ai" else "human",
                 "actor_phone": getattr(ctx.request, "sender_phone", None),
-                "channel": "whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
+                "channel": "whatsapp" if not meta.get("dashboard") else "web",
                 "permissions": set(permissions) if permissions else {
                     "candidate.manage",
                     "candidate.decide",
@@ -678,7 +678,7 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
                 "idempotency_key": str(ctx.action.get("idempotency_key") or "") or None,
             }
             # Force AI actor when the request is from the assistant without dashboard flag.
-            if not (isinstance(meta, dict) and meta.get("dashboard")) and str(getattr(ctx.request, "sender_role", "") or "") != "hr_admin":
+            if not meta.get("dashboard") and str(getattr(ctx.request, "sender_role", "") or "") != "hr_admin":
                 # Still human-confirmed via pending-action flow; actor_type stays human
                 # because a person confirmed. Only block if explicitly actor_type=ai without confirm.
                 pass

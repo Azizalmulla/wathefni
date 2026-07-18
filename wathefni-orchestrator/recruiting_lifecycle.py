@@ -950,6 +950,58 @@ def allowed_actions_for_stage(
     return actions
 
 
+# Mobile candidate decision endpoint only executes these mutations. schedule_interview
+# remains a web/assistant registry action; advertising it on mobile would show a
+# button that execution rejects with unsupported_candidate_action.
+MOBILE_EXECUTABLE_CANDIDATE_ACTIONS = frozenset({"shortlist", "reject", "hire"})
+
+# Interview mutations that mobile currently executes (notes write). Cancel /
+# reschedule / schedule remain web-only until a mobile execute path exists.
+MOBILE_EXECUTABLE_INTERVIEW_ACTIONS = frozenset({"write", "write_notes", "read"})
+
+
+def authorize_recruiting_action(
+    action: str,
+    stage: str | None,
+    permissions: set[str] | list[str] | None,
+) -> bool:
+    """Single authority check shared by advertisement and execution gating.
+
+    Uses the same transition matrix + permission tokens as allowed_actions_for_stage.
+    Does not invent grants from role names.
+    """
+    requested = str(action or "").strip().lower()
+    if not requested:
+        return False
+    return requested in allowed_actions_for_stage(stage, permissions)
+
+
+def mobile_candidate_allowed_actions(
+    stage: str | None,
+    permissions: set[str] | list[str] | None,
+) -> list[str]:
+    """Candidate actions mobile may advertise — only those the decision API can run."""
+    return [
+        action
+        for action in allowed_actions_for_stage(stage, permissions)
+        if action in MOBILE_EXECUTABLE_CANDIDATE_ACTIONS
+    ]
+
+
+def permission_for_recruiting_action(action: str) -> str | None:
+    """Permission token required to execute a recruiting human decision."""
+    requested = str(action or "").strip().lower()
+    if requested == "shortlist":
+        return "candidate.manage"
+    if requested == "schedule_interview":
+        return "interview.manage"
+    if requested in {"reject", "hire"}:
+        return "candidate.decide"
+    if requested in {"write_notes", "write", "cancel_interview", "mark_completed", "mark_no_show", "reschedule"}:
+        return "interview.manage"
+    return None
+
+
 def transition_matrix_public() -> list[dict[str, Any]]:
     rows = []
     for src, targets in ALLOWED_TRANSITIONS.items():

@@ -630,6 +630,11 @@ def build_hr_workspace_capabilities(app_mod: Any, context: dict[str, Any]) -> di
     any_posthire = leave_mod or onboarding_mod or compliance_mod or attendance_mod or shifts_mod or _module_on(
         app_mod, company, "payroll"
     )
+    onboarding_mutation_on = bool(
+        onboarding_mod
+        and callable(getattr(app_mod, "onboarding_hr_mutate_enabled", None))
+        and app_mod.onboarding_hr_mutate_enabled()
+    )
 
     leave_actions = []
     if leave_mod and "leave.read" in perms:
@@ -640,13 +645,15 @@ def build_hr_workspace_capabilities(app_mod: Any, context: dict[str, Any]) -> di
     onboarding_actions = []
     if onboarding_mod and "onboarding.read" in perms:
         onboarding_actions.append("read")
-    if onboarding_mod and "onboarding.manage" in perms:
+    if onboarding_mutation_on and "onboarding.manage" in perms:
         onboarding_actions.append("review")
 
     doc_actions = []
     if (onboarding_mod or compliance_mod) and _has(perms, "onboarding.read", "compliance.read"):
         doc_actions.append("read")
-    if (onboarding_mod and "onboarding.manage" in perms) or (compliance_mod and "compliance.manage" in perms):
+    if (onboarding_mutation_on and "onboarding.manage" in perms) or (
+        compliance_mod and "compliance.manage" in perms
+    ):
         doc_actions.append("review")
 
     attendance_actions = []
@@ -718,9 +725,16 @@ def build_hr_workspace_capabilities(app_mod: Any, context: dict[str, Any]) -> di
     }
 
 
+def _capability_permissions(app_mod: Any, context: dict[str, Any]) -> set[str]:
+    """Use the same backend_current authority as require_entitlement when available."""
+    if hasattr(app_mod, "context_permissions"):
+        return {str(item) for item in app_mod.context_permissions(context) if str(item).strip()}
+    return {str(item) for item in (context.get("permissions") or []) if str(item).strip()}
+
+
 def build_recruiting_workspace_capabilities(app_mod: Any, context: dict[str, Any]) -> dict[str, Any]:
     company = context["company_code"]
-    perms = set(context.get("permissions") or [])
+    perms = _capability_permissions(app_mod, context)
     prehire = _module_on(app_mod, company, "pre_hiring")
     can_read = prehire and "prehire.read" in perms
     can_manage = prehire and "candidate.manage" in perms

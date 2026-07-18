@@ -187,8 +187,16 @@ export const candidateFixture: CandidateReview = {
   overview: {
     candidate: { name: 'Lina Al-Khaled', email: 'lina@preview.invalid' },
     position: { code: 'SPD-01', title: 'Senior Product Designer' },
-    status: 'review_pending',
+    status: 'ready_for_review',
+    canonical_stage: 'ready_for_review',
+    status_label: 'Ready for review',
     current_step: 'Hiring team review',
+    intake_source: 'whatsapp',
+    cv_processing: { status: 'completed', received: true, automatic: true },
+    screening: { status: 'completed', automatic: true },
+    communication: { status: 'pending', stage_changed_without_contact: true },
+    automatic_activity: ['cv_received', 'cv_processed', 'screening_updated', 'review_task_created'],
+    waiting_for_hr: ['review_candidate', 'inform_candidate'],
   },
   ranking: {
     score: 86,
@@ -224,8 +232,8 @@ export const candidateFixture: CandidateReview = {
     status: 'feedback_pending',
     notes: 'Strong systems thinking. Validate leadership examples in the next round.',
   },
-  communication_status: [{ status: 'sent', message_kind: 'interview_invite' }],
-  allowed_actions: ['shortlist', 'reject', 'hire', 'preview_cv', 'download_cv'],
+  communication_status: [{ status: 'pending', message_kind: 'application_stage_update' }],
+  allowed_actions: ['shortlist', 'reject', 'preview_cv', 'download_cv'],
 }
 
 export function localizedPrioritiesFixture(
@@ -293,7 +301,9 @@ export function localizedCandidateFixture(locale: 'en' | 'ar'): CandidateReview 
       ...candidateFixture.overview,
       candidate: { name: 'لينا الخالد', email: 'lina@preview.invalid' },
       position: { code: 'SPD-01', title: 'مصممة منتجات أولى' },
-      status: 'بانتظار المراجعة',
+      status: 'ready_for_review',
+      canonical_stage: 'ready_for_review',
+      status_label: 'جاهز للمراجعة',
       current_step: 'مراجعة فريق التوظيف',
     },
     ranking: {
@@ -403,8 +413,10 @@ export function operationalFixture(view: string, locale: 'en' | 'ar'): Operation
         id: 'candidate-1',
         title: ar ? 'لينا الخالد' : 'Lina Al-Khaled',
         subtitle: ar ? 'مصممة منتجات أولى' : 'Senior Product Designer',
-        meta: ar ? 'مدى التوافق ٨٦/١٠٠ · استشاري' : 'Role match 86/100 · advisory',
-        status: ar ? 'بانتظار المراجعة' : 'review pending',
+        meta: ar
+          ? 'طلب عبر واتساب · قيد الانتظار · مراجعة الأدلة واختيار الخطوة التالية'
+          : 'WhatsApp application · Pending · Review evidence and choose the next step',
+        status: ar ? 'جاهز للمراجعة' : 'Ready for review',
       },
     ],
     interviews: [
@@ -412,8 +424,10 @@ export function operationalFixture(view: string, locale: 'en' | 'ar'): Operation
         id: 'interview-1',
         title: ar ? 'لينا الخالد' : 'Lina Al-Khaled',
         subtitle: ar ? 'مصممة منتجات أولى' : 'Senior Product Designer',
-        meta: ar ? '١٦ يوليو ٢٠٢٦، ١٠:٣٠ ص' : '16 July 2026, 10:30 am',
-        status: ar ? 'بانتظار الملاحظات' : 'feedback pending',
+        meta: ar
+          ? 'مجدولة · ١٦ يوليو ٢٠٢٦، ١٠:٣٠ ص · تسجيل ملاحظات المقابلة'
+          : 'Scheduled · 16 July 2026, 10:30 am · Record interview notes',
+        status: ar ? 'المقابلة' : 'Interview',
       },
     ],
   }

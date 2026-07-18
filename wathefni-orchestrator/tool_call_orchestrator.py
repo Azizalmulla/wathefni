@@ -317,17 +317,54 @@ def _module_disabled(tool_name: str, module_key: str, scope: dict[str, Any]) -> 
 
 
 def _entitlement_context(scope: dict[str, Any]) -> dict[str, Any]:
+    """Map orchestrator scope into the same authority shape HTTP handlers use.
+
+    Must preserve permission_authority / subject markers from
+    posthire_dashboard_scope (and WhatsApp scopes). Dropping them makes
+    require_entitlement see an empty grant set and fail closed even when the
+    action was correctly advertised from backend-current permissions.
+    """
     permissions = sorted({str(item) for item in scope.get("permissions") or [] if str(item).strip()})
+    access = scope.get("access") if isinstance(scope.get("access"), dict) else {}
+    authority = str(
+        scope.get("permission_authority")
+        or access.get("permission_authority")
+        or ""
+    ).strip()
+    subject_user_id = str(
+        scope.get("permission_subject_user_id")
+        or access.get("permission_subject_user_id")
+        or scope.get("admin_user_id")
+        or ""
+    ).strip()
+    subject_company = str(
+        scope.get("permission_subject_company")
+        or access.get("permission_subject_company")
+        or scope.get("company_id")
+        or ""
+    ).strip().upper()
+    role = scope.get("role_scope") or access.get("role")
+    hr_user = scope.get("hr_user") if isinstance(scope.get("hr_user"), dict) else None
     return {
         "company_code": scope.get("company_id"),
         "company_id": scope.get("company_id"),
         "actor_user_id": scope.get("admin_user_id"),
         "admin_user_id": scope.get("admin_user_id"),
         "actor_email": scope.get("actor_email"),
-        "actor_role": scope.get("role_scope"),
-        "role_scope": scope.get("role_scope"),
+        "actor_role": role,
+        "role_scope": role,
         "permissions": permissions,
-        "access": {"role": scope.get("role_scope"), "permissions": permissions},
+        "permission_authority": authority,
+        "permission_subject_user_id": subject_user_id,
+        "permission_subject_company": subject_company,
+        "hr_user": hr_user,
+        "access": {
+            "role": role,
+            "permissions": permissions,
+            "permission_authority": authority,
+            "permission_subject_user_id": subject_user_id,
+            "permission_subject_company": subject_company,
+        },
     }
 
 

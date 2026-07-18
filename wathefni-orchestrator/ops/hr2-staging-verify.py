@@ -311,6 +311,9 @@ def main() -> int:
                 ("reject", phones["candidate_reject"], "Rana HR2"),
                 ("hire", phones["candidate_hire"], "Hessa HR2"),
             ):
+                # Hire is only valid from shortlisted/interview under the canonical
+                # matrix; seed that fixture accordingly so advertisement ≡ execution.
+                seed_status = "shortlisted" if action == "hire" else "review_pending"
                 cur.execute(
                     """
                     INSERT INTO candidates
@@ -331,12 +334,13 @@ def main() -> int:
                       (app_key, company_code, phone, position_code, position_title,
                        status, data_source, cv_received, raw_json, updated_at)
                     VALUES (%s,%s,%s,'HR2_DESIGN','Senior Designer',
-                            'review_pending','production',true,%s,now())
+                            %s,'production',true,%s,now())
                     """,
                     (
                         candidate_app_keys[action],
                         COMPANY,
                         phone,
+                        seed_status,
                         app.Json(
                             {
                                 "marker": MARKER,

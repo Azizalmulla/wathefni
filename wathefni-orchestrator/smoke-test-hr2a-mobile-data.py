@@ -36,6 +36,34 @@ class FakeApp:
         return json.loads(json.dumps(value, default=str))
 
     @staticmethod
+    def context_permissions(context: dict[str, Any], role_key: str | None = None) -> set[str]:
+        data = context or {}
+        access = data.get("access") if isinstance(data.get("access"), dict) else {}
+        authority = str(data.get("permission_authority") or access.get("permission_authority") or "")
+        if authority != "backend_current":
+            return set()
+        subject_user_id = str(
+            data.get("permission_subject_user_id")
+            or access.get("permission_subject_user_id")
+            or ""
+        ).strip()
+        actor_user_id = str(data.get("actor_user_id") or "").strip()
+        if not subject_user_id or (actor_user_id and subject_user_id != actor_user_id):
+            return set()
+        subject_company = str(
+            data.get("permission_subject_company")
+            or access.get("permission_subject_company")
+            or ""
+        ).strip().upper()
+        context_company = str(data.get("company_code") or data.get("company_id") or "").strip().upper()
+        if not subject_company or (context_company and subject_company != context_company):
+            return set()
+        permissions = data.get("permissions")
+        if not isinstance(permissions, list):
+            permissions = access.get("permissions") if isinstance(access.get("permissions"), list) else []
+        return {str(item) for item in permissions or [] if str(item).strip()}
+
+    @staticmethod
     def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:
         return {
             "employee_key": row.get("employee_key"),
@@ -71,7 +99,13 @@ def main() -> int:
     check("context[\"company_code\"]" in source, "company authority comes from authenticated context")
     check("context_manager_allows_employee" in source, "leave detail independently enforces manager record scope")
     check("employees.read" in source, "employee adapters retain grant-only employees.read")
-    check("backend_current" not in source or "permission_authority" not in source, "data adapters do not accept client authority claims")
+    check("context_permissions" in source, "candidate actions use backend context_permissions authority")
+    check("_authoritative_permissions" in source, "allowed_actions and decision share authoritative permission helper")
+    check("authorize_recruiting_action" in source, "candidate decision uses the shared recruiting authority function")
+    check(
+        '"_permissions"' not in source or "Never invent grants" in source,
+        "data adapters do not advertise from raw client permission bags",
+    )
     check(
         app_source.index("_operator_mobile.register_operator_mobile_routes")
         < app_source.index("_operator_mobile_data.register_operator_mobile_data_routes"),
@@ -125,11 +159,29 @@ def main() -> int:
                 "position": {"title": "Designer"},
                 "cv": {"received": True},
             },
-            "_permissions": ["candidate.manage"],
+        },
+        context={
+            "company_code": "HR2A",
+            "actor_user_id": "u-1",
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": "u-1",
+            "permission_subject_company": "HR2A",
+            "permissions": ["candidate.manage"],
         },
     )
     check(candidate["ai_advisory"] is True, "candidate ranking is explicitly advisory")
     check(candidate["allowed_actions"] == ["shortlist"], "candidate actions derive from exact backend-current permissions")
+    untrusted = mobile.candidate_mobile_item(
+        FakeApp,
+        {
+            "app_key": "app-2",
+            "name": "No Auth",
+            "status": "ready_for_review",
+            "application": {"candidate": {"name": "No Auth"}, "position": {"title": "Role"}},
+            "_permissions": ["candidate.manage", "candidate.decide"],
+        },
+    )
+    check(untrusted["allowed_actions"] == [], "candidate actions fail closed without trusted operator context")
     check("phone" not in candidate["candidate"], "candidate mobile identity omits phone by default")
     check("raw_json" not in json.dumps(candidate), "candidate DTO omits raw application payloads")
 
