@@ -481,8 +481,16 @@ def _arabic_linguistic_quality_ok(prompt: str, choices: list[str], locale: str, 
     latin = len(__import__("re").findall(r"[A-Za-z]", text or ""))
     if latin > arabic_chars:
         return False
-    if choices and any(len(__import__("re").findall(r"[\u0600-\u06ff]", c or "")) == 0 for c in choices):
-        return False
+    if choices:
+        for choice in choices:
+            choice_ar = len(__import__("re").findall(r"[\u0600-\u06ff]", choice or ""))
+            # Numeric-only choices are valid for Arabic numerical items
+            # (Western or Arabic-Indic digits, optional punctuation/spaces).
+            if choice_ar == 0 and not __import__("re").fullmatch(
+                r"[\d\u0660-\u0669\u06f0-\u06f9\s\.,/%+\-]+",
+                (choice or "").strip(),
+            ):
+                return False
     return True
 
 

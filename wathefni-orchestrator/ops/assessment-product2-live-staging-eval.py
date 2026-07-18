@@ -255,6 +255,7 @@ def bootstrap_registry(cur: Any) -> list[str]:
             SET enabled=TRUE,
                 activated_at=COALESCE(activated_at, now()),
                 qualified_provider_model_id=NULL,
+                approved_by_user_id=NULL,
                 pricing_snapshot=%s
             WHERE registry_version_id=%s
             """,
@@ -362,6 +363,9 @@ def score_live_cohort(packages: list[dict[str, Any]], budget: Budget) -> dict[st
                     "blueprint_key": pkg.get("blueprint_key"),
                     "disagreed": disagreed,
                     "recommendation": recommendation,
+                    "run_status": secondary.get("status"),
+                    "error_code": secondary.get("error_code"),
+                    "soft_human_attention": recommendation == "required_human_attention",
                 }
             )
         adaptation = pkg.get("adaptation") or {}
@@ -471,9 +475,23 @@ def score_live_cohort(packages: list[dict[str, Any]], budget: Budget) -> dict[st
         }
         results.append(evaluation._case_result(case, output))
 
-        if adaptation.get("status") == "completed" and bilingual.get("status") == "completed":
+        if adaptation.get("status") == "completed" and (
+            bilingual.get("status") == "completed"
+            or (
+                isinstance(pkg.get("bilingual_review_full"), dict)
+                and pkg["bilingual_review_full"].get("findings")
+                and pkg["bilingual_review_full"].get("overall_recommendation")
+            )
+        ):
             source_choices = item.get("choices") if isinstance(item.get("choices"), list) else []
-            adapted = _strip_runtime_fields(adaptation.get("output"), "translation_pair_id", "pair_id")
+            adapted = _strip_runtime_fields(
+                adaptation.get("output"),
+                "translation_pair_id",
+                "pair_id",
+                "target_draft_id",
+                "target_revision_id",
+                "scoring_invariant",
+            )
             review_payload = pkg.get("bilingual_review_full")
             if not isinstance(review_payload, dict) or "findings" not in review_payload:
                 review_payload = {
@@ -735,7 +753,7 @@ def main() -> int:
                     }
                     package["bilingual_review_full"] = bilingual_result.get("output_json")
 
-            # Fail-closed fallback probe once.
+                # Fail-closed fallback probe once (fresh queued run; must not complete).
             if spec["key"] == "live_numerical_en":
                 def unavailable_adapter(registry, prompt, run):  # type: ignore[no-untyped-def]
                     raise service.AssessmentAIError(
@@ -758,11 +776,12 @@ def main() -> int:
                             environment="staging",
                         )
                     conn.commit()
-                # Do not count unavailable probe against OpenAI budget.
                 failed = service.process_queued_run(app, str(fallback["run_id"]), adapter=unavailable_adapter)
                 evidence["fail_closed_fallback"] = {
                     "status": failed.get("status"),
                     "error_code": failed.get("error_code"),
+                    "run_id": str(failed.get("run_id") or fallback.get("run_id")),
+                    "expected_status": "failed",
                 }
 
         # Offline corpus gate still required as supporting evidence.
