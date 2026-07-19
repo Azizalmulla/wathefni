@@ -453,6 +453,9 @@ def main() -> None:
     assert_true("title" in job_props and "salary" in job_props, "create_job_opening must expose title and salary fields")
     assert_true("PREFLIGHT-THEN-CONFIRM" in job_tool["description"], "create_job_opening must be preflighted before confirmation")
     assert_true("JOB_OPENING_TRIGGER_RE" in toolcall_source and "create_job_opening" in toolcall_source, "job opening requests must force create_job_opening preflight")
+    assert_true("LIST_JOB_OPENINGS_RE" in toolcall_source and "list_job_openings" in toolcall_source, "list job openings must be forced for inventory asks")
+    assert_true("list_job_openings" in tool_index, "list_job_openings must be in the tool catalog")
+    assert_true(tool_call_orchestrator.TOOL_PERMISSION_MAP.get("list_job_openings") == "prehire.read", "list_job_openings is a prehire.read tool")
 
     for scoped_phrase in (
         "memory_scope",
@@ -505,9 +508,34 @@ def main() -> None:
         assert_true(required_phrase in toolcall_source, f"toolcall system prompt must include the rule: {required_phrase!r}")
 
     assert_true("MAX_TOOL_LOOPS" in toolcall_source and "tool_choice" in toolcall_source, "tool-use loop must bound iterations and request tool_choice")
+    assert_true("openai-responses" in toolcall_source or "/responses" in toolcall_source, "tool-use orchestrator must use the OpenAI Responses API")
+    assert_true("reasoning" in toolcall_source and "function_call_output" in toolcall_source, "Responses tool loop must pass reasoning effort and function_call_output")
+    assert_true("strict" in toolcall_source and "_convert_tools_for_responses" in toolcall_source, "Responses tools must use strict schemas")
+    assert_true("reasoning_content_logged" in toolcall_source, "telemetry must explicitly avoid logging hidden reasoning content")
     assert_true("needs_confirmation" in toolcall_source, "tool-use orchestrator must implement a confirmation gate")
     assert_true("handle_toolcall_whatsapp_turn" in toolcall_source, "tool-use orchestrator must expose handle_toolcall_whatsapp_turn entry point")
     assert_true("_save_pending" in toolcall_source and "_resolve_pending_match" in toolcall_source, "tool-use orchestrator must persist pending confirmations across turns")
+
+    # Responses payload shaping unit checks (no network).
+    body = tool_call_orchestrator._provider_responses_body(
+        instructions="sys",
+        input_items=[{"role": "user", "content": "hi"}],
+        tools=[{"type": "function", "name": "list_job_openings", "description": "x", "parameters": {"type": "object", "properties": {}}, "strict": True}],
+        provider={"model": "gpt-5.6-terra"},
+        reasoning_effort="low",
+        forced_tool_name="list_job_openings",
+    )
+    assert_true(body.get("model") == "gpt-5.6-terra", "Responses body must pin gpt-5.6-terra when provider says so")
+    assert_true(body.get("reasoning") == {"effort": "low"}, "Responses body must set reasoning.effort")
+    assert_true("temperature" not in body, "Responses body must not set custom temperature")
+    assert_true(body.get("tool_choice") == {"type": "function", "name": "list_job_openings"}, "forced tool_choice must use Responses shape")
+    assert_true(body.get("parallel_tool_calls") is False, "parallel tool calls must stay disabled")
+    strict_tools = tool_call_orchestrator._convert_tools_for_responses(
+        [{"type": "function", "function": {"name": "list_job_openings", "description": "List jobs", "parameters": {"type": "object", "properties": {"status": {"type": "string"}}, "required": [], "additionalProperties": True}}}]
+    )
+    assert_true(strict_tools and strict_tools[0].get("strict") is True, "converted tools must be strict")
+    assert_true(strict_tools[0]["parameters"].get("additionalProperties") is False, "strict tools must forbid additionalProperties")
+    assert_true("status" in (strict_tools[0]["parameters"].get("required") or []), "strict tools must require all properties")
 
     print("toolcall orchestrator smoke tests passed")
 

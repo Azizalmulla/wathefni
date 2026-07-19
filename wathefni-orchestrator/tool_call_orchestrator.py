@@ -1,23 +1,23 @@
-"""Tool-using orchestrator (experimental).
+"""Tool-using orchestrator for Wathefni HR/admin chat.
 
-One GPT call per turn. GPT receives:
+Uses the OpenAI Responses API (/v1/responses) with gpt-5.6-terra by default.
+The model may plan and request tools; the backend remains authoritative for
+tenant identity, permissions, confirmations, state transitions, payroll,
+candidate lifecycle, shifts, delivery, and employee data.
+
+Per turn the model receives:
 - the user's message
-- the conversation history
+- conversation history
 - a structured state_summary (last action result, current focus, pending confirmations)
-- the canonical action registry as tool schemas
+- the canonical action registry as strict Responses tool schemas
 
-GPT chooses:
+The model may:
 - reply directly (when state has the answer)
-- call exactly one tool
+- call tools (sequentially; parallel_tool_calls=false)
 - ask a clarifying question
 - ask the user to confirm a sensitive action (then re-call on the next turn)
 
-The orchestrator is responsible for:
-- audit parity with Wathefni's Postgres audit model (hr_turns, action_results, memory_snapshots, llm_call_logs)
-- candidate reference resolution before executor invocation
-- confirmation gate: never invokes a sensitive tool's executor without a matching pending_action
-
-This module is the live HR-admin runtime.
+Hidden reasoning content is never exposed in user replies or telemetry payloads.
 """
 
 from __future__ import annotations
@@ -38,12 +38,17 @@ import action_registry as _registry
 from module_catalog import TOOLCALL_GATED_MODULES
 
 
-TOOLCALL_GRAPH_VERSION = "wathefni_hr_toolcall_v1"
+TOOLCALL_GRAPH_VERSION = "wathefni_hr_toolcall_v2_responses"
 TOOLCALL_STATE_SCOPE = "toolcall_dialog_state"
 MAX_TOOL_LOOPS = 4
 MAX_HISTORY_MESSAGES = 10
 CANDIDATE_SUMMARY_LIMIT = 5
 ACTIVE_SESSION_TTL_MINUTES = int(os.environ.get("WATHEFNI_TOOLCALL_SESSION_TTL_MINUTES", "20") or "20")
+DEFAULT_TOOLCALL_REASONING_EFFORT = "low"
+ALLOWED_TOOLCALL_REASONING_EFFORTS = {"none", "low", "medium", "high", "xhigh", "max"}
+TOOLCALL_LLM_TIMEOUT_SEC = int(os.environ.get("WATHEFNI_TOOLCALL_LLM_TIMEOUT_SEC", "45") or "45")
+TOOLCALL_LLM_RETRIES = max(0, int(os.environ.get("WATHEFNI_TOOLCALL_LLM_RETRIES", "1") or "1"))
+TOOLCALL_TURN_BUDGET_SEC = int(os.environ.get("WATHEFNI_TOOLCALL_TURN_BUDGET_SEC", "90") or "90")
 TOOLCALL_MODULE = "pre_hiring"
 TOOLCALL_CHANNEL = "whatsapp"
 WEB_DASHBOARD_CHANNEL = "web_dashboard"
@@ -75,7 +80,15 @@ INVITE_STATUS_RE = re.compile(
     re.IGNORECASE,
 )
 JOB_OPENING_TRIGGER_RE = re.compile(
-    r"\b(create|open|publish|add|new)\b.*\b(job|position|opening|role|vacancy|qr|qr code)\b|\b(qr|qr code)\b.*\b(job|position|opening|role|apply)\b",
+    r"\b(create|publish|add|new)\b.*\b(job|position|opening|role|vacancy|qr|qr code)\b|"
+    r"\bopen\s+(a|an|the|new)\b.*\b(job|position|opening|role|vacancy)\b|"
+    r"\b(qr|qr code)\b.*\b(job|position|opening|role|apply)\b",
+    re.IGNORECASE,
+)
+LIST_JOB_OPENINGS_RE = re.compile(
+    r"\b(what|which|show|list|any|have|do we|we have|available|current)\b.*\b(job|jobs|opening|openings|position|positions|role|roles|vacanc(?:y|ies))\b|"
+    r"\b(job|jobs|opening|openings|position|positions)\b.*\b(open|available|active|current)\b|"
+    r"\bopen\s+(jobs?|openings?|positions?|roles?)\b",
     re.IGNORECASE,
 )
 APPROVAL_RE = re.compile(r"^\s*(yes|yeah|yep|ok|okay|go ahead|confirm|approved|do it|sure|نعم|اي|إي|تمام)\b", re.IGNORECASE)
@@ -87,6 +100,7 @@ TOOL_PERMISSION_MAP = {
     "compare_candidates": "prehire.read",
     "get_candidate_status": "prehire.read",
     "get_interview_invite_status": "prehire.read",
+    "list_job_openings": "prehire.read",
     "create_job_opening": "settings.manage",
     "close_job_opening": "settings.manage",
     "reopen_job_opening": "settings.manage",
@@ -192,6 +206,7 @@ Calling a tool:
 - For plural/batch candidate mutations where all candidates get the same action ("top 5", "all these candidates", "send to Foad and Sara"), call execute_candidate_batch, not atomic tools. The backend previews exact candidates and asks for confirmation.
 - For multi-step candidate operations (shortlist + email, shortlist + schedule interview, schedule + notify, video interview link, assessment + notify), call execute_candidate_workflow once immediately. Do NOT ask a generic confirmation yourself first. Do NOT call multiple sensitive tools separately for one user request.
 - For "did you notify/invite/email him?" after an interview, call get_interview_invite_status. Do not start a new notification unless the user explicitly asks you to send/resend.
+- For listing/reading open jobs or positions ("what jobs are open", "show openings", "list positions"), call list_job_openings. Do NOT use rank_candidates for job-opening inventory.
 - For job opening / position creation / QR-code requests, call create_job_opening immediately for backend preflight. Do NOT say job openings are unsupported.
 - For closing/pausing/stopping a job posting, use close_job_opening. For reopening/resuming a closed one, use reopen_job_opening (do not use create_job_opening for this — it would ask for salary again unnecessarily). Both are PREFLIGHT-THEN-CONFIRM: identify the exact job by title or APPLY code, then confirm before executing.
 - For employee leave requests (only when the leave tools are present in your catalog): use list_leave_requests to read leave ("show pending leave", "who is off next week"); request_leave to file a new request for an employee with their dates; approve_leave_request / reject_leave_request / cancel_leave_request for decisions. The decision tools are PREFLIGHT-THEN-CONFIRM: call the tool to let the backend identify the exact request and flag shift conflicts, then ask the user for one explicit confirmation before it executes. Identify a request by employee name/phone + dates, or by leave_id from prior state.
@@ -263,6 +278,13 @@ def _channel_for_request(request: Any) -> str:
 
 
 def _base_memory_scope(request: Any) -> dict[str, Any]:
+    """Build toolcall memory scope with the same authority markers as dashboard chat.
+
+    WhatsApp HR and dashboard Pre-Hiring Assistant share handle_toolcall_whatsapp_turn.
+    Dashboard injects access/permissions/admin_user; WhatsApp must hydrate the same
+    permission_authority=backend_current subject markers from the linked actor or the
+    entitlement gate fail-closes even when permissions are listed.
+    """
     legacy = _legacy()
     company_id = None
     if hasattr(legacy, "request_company_code"):
@@ -270,9 +292,13 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
             company_id = legacy.request_company_code(request)
         except Exception:
             company_id = None
-    metadata = getattr(request, "metadata", None)
-    access = metadata.get("access") if isinstance(metadata, dict) and isinstance(metadata.get("access"), dict) else {}
-    permissions = metadata.get("permissions") if isinstance(metadata, dict) and isinstance(metadata.get("permissions"), list) else access.get("permissions") if isinstance(access.get("permissions"), list) else []
+    metadata = getattr(request, "metadata", None) if isinstance(getattr(request, "metadata", None), dict) else {}
+    access = metadata.get("access") if isinstance(metadata.get("access"), dict) else {}
+    permissions = (
+        metadata.get("permissions")
+        if isinstance(metadata.get("permissions"), list)
+        else access.get("permissions") if isinstance(access.get("permissions"), list) else []
+    )
     actor_context = None
     if hasattr(legacy, "whatsapp_actor_context_for_phone"):
         try:
@@ -280,18 +306,90 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
         except Exception:
             actor_context = None
     if isinstance(actor_context, dict):
-        permissions = actor_context.get("permissions") if isinstance(actor_context.get("permissions"), list) else permissions
-    role_scope = str((actor_context or {}).get("actor_role") or access.get("role") or getattr(request, "sender_role", None) or "hr_admin")
+        if isinstance(actor_context.get("permissions"), list):
+            permissions = actor_context.get("permissions") or []
+        if actor_context.get("company_code") and not company_id:
+            company_id = actor_context.get("company_code")
+    permissions = sorted({str(item) for item in permissions if str(item).strip()})
+    role_scope = str(
+        (actor_context or {}).get("actor_role")
+        or access.get("role")
+        or getattr(request, "sender_role", None)
+        or "hr_admin"
+    )
+    admin_user_id = str(
+        (actor_context or {}).get("actor_user_id")
+        or legacy.digits(getattr(request, "sender_phone", None))
+        or "unknown_admin"
+    )
+    company_key = str(company_id or getattr(request, "account_id", None) or "default").strip().upper() or "default"
+    authority = str(
+        (actor_context or {}).get("permission_authority")
+        or access.get("permission_authority")
+        or metadata.get("permission_authority")
+        or ""
+    ).strip()
+    subject_user_id = str(
+        (actor_context or {}).get("permission_subject_user_id")
+        or access.get("permission_subject_user_id")
+        or (actor_context or {}).get("actor_user_id")
+        or ""
+    ).strip()
+    subject_company = str(
+        (actor_context or {}).get("permission_subject_company")
+        or access.get("permission_subject_company")
+        or (actor_context or {}).get("company_code")
+        or company_key
+        or ""
+    ).strip().upper()
+    # Only advertise backend_current when a trusted linked actor (or dashboard access) provided it.
+    if authority != "backend_current":
+        authority = ""
+        subject_user_id = ""
+        subject_company = ""
+    elif not subject_user_id:
+        subject_user_id = admin_user_id if admin_user_id != "unknown_admin" else ""
+        if not subject_user_id:
+            authority = ""
+            subject_company = ""
+
+    hr_user = None
+    if isinstance(metadata.get("admin_user"), dict):
+        hr_user = metadata.get("admin_user")
+    elif isinstance(metadata.get("hr_user"), dict):
+        hr_user = metadata.get("hr_user")
+    elif isinstance(actor_context, dict) and actor_context.get("actor_user_id") and authority == "backend_current":
+        hr_user = {
+            "user_id": actor_context.get("actor_user_id"),
+            "email": actor_context.get("actor_email") or "",
+            "phone": actor_context.get("actor_phone") or legacy.digits(getattr(request, "sender_phone", None)) or "",
+            "role": actor_context.get("actor_role") or role_scope,
+            "company_code": subject_company or company_key,
+            "status": actor_context.get("status") or "active",
+            "permissions": permissions,
+        }
+
     return {
-        "company_id": company_id or getattr(request, "account_id", None) or "default",
+        "company_id": company_key,
         "account_id": getattr(request, "account_id", None) or "default",
-        "admin_user_id": (actor_context or {}).get("actor_user_id") or legacy.digits(getattr(request, "sender_phone", None)) or "unknown_admin",
+        "admin_user_id": admin_user_id,
         "actor_email": (actor_context or {}).get("actor_email") or "",
         "conversation_id": getattr(request, "conversation_id", None) or "no_conversation",
         "channel": _channel_for_request(request),
         "module": _module_for_request(request),
         "role_scope": role_scope,
-        "permissions": sorted({str(item) for item in permissions}),
+        "permissions": permissions,
+        "permission_authority": authority,
+        "permission_subject_user_id": subject_user_id,
+        "permission_subject_company": subject_company,
+        "hr_user": hr_user,
+        "access": {
+            "role": role_scope,
+            "permissions": permissions,
+            "permission_authority": authority,
+            "permission_subject_user_id": subject_user_id,
+            "permission_subject_company": subject_company,
+        },
     }
 
 
@@ -1309,9 +1407,25 @@ def _execute_tool(tool_name: str, args: dict[str, Any], request: Any, state: dic
     return {"status": result.get("status") or "completed", "tool": tool_name, "result": _json_safe(result)}
 
 
+def _looks_like_list_job_openings_request(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
+    if not normalized:
+        return False
+    # Create / lifecycle intents belong to create/close/reopen tools.
+    if re.search(r"\b(create|publish|add|make|generate)\b.*\b(job|position|opening|role|vacancy|qr)\b", normalized):
+        return False
+    if re.search(r"\bopen\s+(a|an|the|new)\b.*\b(job|position|opening|role|vacancy)\b", normalized):
+        return False
+    if re.search(r"\b(close|reopen|pause|resume|take down)\b.*\b(job|position|opening|role)\b", normalized):
+        return False
+    return bool(LIST_JOB_OPENINGS_RE.search(normalized))
+
+
 def _forced_tool_for_turn(request: Any, tools: list[dict[str, Any]]) -> str | None:
     text = str(getattr(request, "raw_text", "") or "")
     tool_names = {str((tool.get("function") or {}).get("name") or "") for tool in tools}
+    if "list_job_openings" in tool_names and _looks_like_list_job_openings_request(text):
+        return "list_job_openings"
     if "create_job_opening" in tool_names and JOB_OPENING_TRIGGER_RE.search(text):
         return "create_job_opening"
     if "rank_candidates" in tool_names and _looks_like_candidate_list_request(text):
@@ -1360,39 +1474,292 @@ def _looks_like_candidate_list_request(text: str) -> bool:
     return bool(has_read_verb and has_candidate and has_status_filter)
 
 
-def _provider_messages(messages: list[dict[str, Any]], tools: list[dict[str, Any]], provider: dict[str, str], forced_tool_name: str | None = None) -> dict[str, Any]:
-    body: dict[str, Any] = {"model": provider["model"], "temperature": 0.2}
-    body["messages"] = messages
-    body["tools"] = tools
-    if forced_tool_name:
-        body["tool_choice"] = {"type": "function", "function": {"name": forced_tool_name}}
-    else:
-        body["tool_choice"] = "auto"
-    return body
+def _normalize_reasoning_effort(raw: Any) -> str:
+    effort = str(raw or "").strip().lower()
+    if effort in ALLOWED_TOOLCALL_REASONING_EFFORTS:
+        return effort
+    return DEFAULT_TOOLCALL_REASONING_EFFORT
 
 
-def _call_llm_with_tools(messages: list[dict[str, Any]], tools: list[dict[str, Any]], turn_id: str | None, step: int, forced_tool_name: str | None = None) -> dict[str, Any] | None:
+def _reasoning_effort_for_request(request: Any | None = None) -> str:
+    """Resolve Responses reasoning.effort. Staging may override via request metadata for evals."""
+    env_effort = _normalize_reasoning_effort(os.environ.get("WATHEFNI_TOOL_AGENT_REASONING_EFFORT") or DEFAULT_TOOLCALL_REASONING_EFFORT)
+    metadata = getattr(request, "metadata", None) if request is not None else None
+    if not isinstance(metadata, dict):
+        return env_effort
+    override = metadata.get("tool_agent_reasoning_effort")
+    if override is None:
+        return env_effort
+    # Staging-only override so production never changes effort via client metadata.
+    if str(os.environ.get("WATHEFNI_ENV") or "").strip().lower() != "staging":
+        return env_effort
+    return _normalize_reasoning_effort(override)
+
+
+def _toolcall_provider_config() -> dict[str, str] | None:
+    """HR toolcall always uses OpenAI Responses (/v1/responses), never Chat Completions."""
     legacy = _legacy()
     provider = legacy.planner_provider_config()
     if not provider:
         return None
-    body = _provider_messages(messages, tools, provider, forced_tool_name=forced_tool_name)
-    url = provider["url"]
-    if "/responses" in url:
-        url = url.replace("/responses", "/chat/completions")
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(body).encode("utf-8"),
-        headers={"Authorization": f"Bearer {provider['api_key']}", "Content-Type": "application/json"},
-        method="POST",
+    url = str(provider.get("url") or "")
+    if "/chat/completions" in url:
+        url = url.replace("/chat/completions", "/responses")
+    elif "/responses" not in url:
+        base = url.rsplit("/", 1)[0] if url else "https://api.openai.com/v1"
+        if base.endswith("/v1"):
+            url = f"{base}/responses"
+        else:
+            url = "https://api.openai.com/v1/responses"
+    return {
+        **provider,
+        "url": url,
+        "api": "openai-responses",
+    }
+
+
+def _force_strict_object_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    """Recursively make a JSON schema compatible with Responses strict function tools."""
+    out = dict(schema)
+
+    # Resolve anyOf/oneOf/allOf branches.
+    for key in ("anyOf", "oneOf", "allOf"):
+        if isinstance(out.get(key), list):
+            out[key] = [
+                _force_strict_object_schema(item) if isinstance(item, dict) else item
+                for item in out[key]
+            ]
+
+    raw_type = out.get("type")
+    types = raw_type if isinstance(raw_type, list) else ([raw_type] if isinstance(raw_type, str) else [])
+
+    if "object" in types or ("properties" in out and "type" not in out):
+        props_in = out.get("properties") if isinstance(out.get("properties"), dict) else {}
+        props: dict[str, Any] = {}
+        for key, child in props_in.items():
+            if isinstance(child, dict):
+                props[str(key)] = _force_strict_object_schema(child)
+            else:
+                props[str(key)] = child
+        out["properties"] = props
+        out["required"] = list(props.keys())
+        out["additionalProperties"] = False
+
+    if "array" in types or "items" in out:
+        items = out.get("items")
+        if isinstance(items, dict):
+            out["items"] = _force_strict_object_schema(items)
+        elif isinstance(items, list):
+            out["items"] = [
+                _force_strict_object_schema(item) if isinstance(item, dict) else item
+                for item in items
+            ]
+
+    if isinstance(out.get("additionalProperties"), dict):
+        out["additionalProperties"] = _force_strict_object_schema(out["additionalProperties"])
+
+    return out
+
+
+def _nullable_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    out = _force_strict_object_schema(schema)
+    raw_type = out.get("type")
+    if isinstance(raw_type, list):
+        types = list(raw_type)
+        if "null" not in types:
+            types.append("null")
+        out["type"] = types
+    elif isinstance(raw_type, str) and raw_type:
+        out["type"] = [raw_type, "null"]
+    else:
+        # Property without explicit type — treat as nullable string for strict mode.
+        out["type"] = ["string", "null"]
+    if "enum" in out and isinstance(out["enum"], list) and None not in out["enum"]:
+        out["enum"] = list(out["enum"]) + [None]
+    return out
+
+
+def _strict_parameters(parameters: dict[str, Any] | None) -> dict[str, Any]:
+    """Convert chat-style parameters into Responses strict-compatible JSON schema."""
+    params = parameters if isinstance(parameters, dict) else {}
+    properties_in = params.get("properties") if isinstance(params.get("properties"), dict) else {}
+    required_orig = {str(x) for x in (params.get("required") or []) if str(x)}
+    properties: dict[str, Any] = {}
+    for key, schema in properties_in.items():
+        name = str(key)
+        base = dict(schema) if isinstance(schema, dict) else {"type": "string"}
+        if name not in required_orig:
+            base = _nullable_schema(base)
+        else:
+            base = _force_strict_object_schema(base)
+        properties[name] = base
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": list(properties.keys()),
+        "additionalProperties": False,
+    }
+
+
+def _convert_tools_for_responses(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    converted: list[dict[str, Any]] = []
+    for tool in tools:
+        if not isinstance(tool, dict):
+            continue
+        fn = tool.get("function") if isinstance(tool.get("function"), dict) else tool
+        name = str(fn.get("name") or "").strip()
+        if not name:
+            continue
+        converted.append(
+            {
+                "type": "function",
+                "name": name,
+                "description": str(fn.get("description") or ""),
+                "parameters": _strict_parameters(fn.get("parameters") if isinstance(fn.get("parameters"), dict) else {}),
+                "strict": True,
+            }
+        )
+    return converted
+
+
+def _split_system_and_input(messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
+    instructions = TOOLCALL_SYSTEM
+    input_items: list[dict[str, Any]] = []
+    for msg in messages:
+        if not isinstance(msg, dict):
+            continue
+        role = str(msg.get("role") or "")
+        content = msg.get("content")
+        if role == "system":
+            instructions = str(content or instructions)
+            continue
+        if role in {"user", "assistant"} and content is not None:
+            input_items.append({"role": role, "content": str(content)})
+    return instructions, input_items
+
+
+def _provider_responses_body(
+    *,
+    instructions: str,
+    input_items: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    provider: dict[str, str],
+    reasoning_effort: str,
+    forced_tool_name: str | None = None,
+    previous_response_id: str | None = None,
+) -> dict[str, Any]:
+    body: dict[str, Any] = {
+        "model": provider["model"],
+        "instructions": instructions,
+        "input": input_items,
+        "tools": tools,
+        "parallel_tool_calls": False,
+        "reasoning": {"effort": reasoning_effort},
+        "store": False,
+    }
+    # No custom temperature — gpt-5.6-* rejects non-default values.
+    if forced_tool_name:
+        body["tool_choice"] = {"type": "function", "name": forced_tool_name}
+    else:
+        body["tool_choice"] = "auto"
+    if previous_response_id:
+        body["previous_response_id"] = previous_response_id
+    return body
+
+
+def _is_transient_llm_error(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    if isinstance(exc, TimeoutError) or "timed out" in text or "timeout" in text:
+        return True
+    if "http error 429" in text or "http error 500" in text or "http error 502" in text or "http error 503" in text:
+        return True
+    return False
+
+
+def _http_error_body(exc: BaseException) -> str:
+    read = getattr(exc, "read", None)
+    if not callable(read):
+        return ""
+    try:
+        return read().decode("utf-8", errors="replace")[:800]
+    except Exception:
+        return ""
+
+
+def _call_responses_with_tools(
+    *,
+    instructions: str,
+    input_items: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    turn_id: str | None,
+    step: int,
+    reasoning_effort: str,
+    forced_tool_name: str | None = None,
+    previous_response_id: str | None = None,
+    tool_sequence: list[str] | None = None,
+) -> dict[str, Any] | None:
+    legacy = _legacy()
+    provider = _toolcall_provider_config()
+    if not provider:
+        return None
+    body = _provider_responses_body(
+        instructions=instructions,
+        input_items=input_items,
+        tools=tools,
+        provider=provider,
+        reasoning_effort=reasoning_effort,
+        forced_tool_name=forced_tool_name,
+        previous_response_id=previous_response_id,
     )
-    start = time_module.monotonic()
+    url = provider["url"]
     prompt_hash = legacy.stable_text_hash(TOOLCALL_SYSTEM)
     estimated_tokens = legacy.estimate_tokens_from_payload(body)
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            parsed = json.loads(resp.read().decode("utf-8", errors="replace"))
-    except Exception as exc:
+    attempts = TOOLCALL_LLM_RETRIES + 1
+    last_error = ""
+    start = time_module.monotonic()
+    for attempt in range(attempts):
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers={"Authorization": f"Bearer {provider['api_key']}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=TOOLCALL_LLM_TIMEOUT_SEC) as resp:
+                parsed = json.loads(resp.read().decode("utf-8", errors="replace"))
+        except Exception as exc:
+            last_error = str(exc)
+            detail = _http_error_body(exc)
+            if detail:
+                last_error = f"{last_error} | {detail}"
+            if attempt + 1 < attempts and _is_transient_llm_error(exc):
+                continue
+            legacy.record_llm_call(
+                turn_id=turn_id,
+                call_name=f"toolcall_step_{step}",
+                provider={**provider, "url": url},
+                prompt_mode=TOOLCALL_GRAPH_VERSION,
+                prompt_docs_loaded=False,
+                prompt_hash=prompt_hash,
+                estimated_input_tokens=estimated_tokens,
+                latency_ms=int((time_module.monotonic() - start) * 1000),
+                status="error",
+                error=last_error[:500],
+                metadata={
+                    "graph": TOOLCALL_GRAPH_VERSION,
+                    "step": step,
+                    "forced_tool": forced_tool_name,
+                    "api": "openai-responses",
+                    "reasoning_effort": reasoning_effort,
+                    "attempt": attempt + 1,
+                    "previous_response_id": previous_response_id,
+                    "tool_sequence": list(tool_sequence or []),
+                    # Never persist hidden reasoning content.
+                    "reasoning_content_logged": False,
+                },
+            )
+            return None
+        usage = legacy.usage_from_llm_response(parsed) if hasattr(legacy, "usage_from_llm_response") else {}
         legacy.record_llm_call(
             turn_id=turn_id,
             call_name=f"toolcall_step_{step}",
@@ -1402,32 +1769,78 @@ def _call_llm_with_tools(messages: list[dict[str, Any]], tools: list[dict[str, A
             prompt_hash=prompt_hash,
             estimated_input_tokens=estimated_tokens,
             latency_ms=int((time_module.monotonic() - start) * 1000),
-            status="error",
-            error=str(exc),
-            metadata={"graph": TOOLCALL_GRAPH_VERSION, "step": step, "forced_tool": forced_tool_name},
+            status="ok",
+            parsed=parsed,
+            metadata={
+                "graph": TOOLCALL_GRAPH_VERSION,
+                "step": step,
+                "forced_tool": forced_tool_name,
+                "api": "openai-responses",
+                "reasoning_effort": reasoning_effort,
+                "attempt": attempt + 1,
+                "previous_response_id": previous_response_id,
+                "response_id": usage.get("response_id") or parsed.get("id"),
+                "tool_sequence": list(tool_sequence or []),
+                "output_item_types": [
+                    str(item.get("type") or "")
+                    for item in (parsed.get("output") or [])
+                    if isinstance(item, dict)
+                ],
+                "reasoning_content_logged": False,
+            },
         )
-        return None
-    legacy.record_llm_call(
-        turn_id=turn_id,
-        call_name=f"toolcall_step_{step}",
-        provider={**provider, "url": url},
-        prompt_mode=TOOLCALL_GRAPH_VERSION,
-        prompt_docs_loaded=False,
-        prompt_hash=prompt_hash,
-        estimated_input_tokens=estimated_tokens,
-        latency_ms=int((time_module.monotonic() - start) * 1000),
-        status="ok",
-        parsed=parsed,
-        metadata={"graph": TOOLCALL_GRAPH_VERSION, "step": step, "forced_tool": forced_tool_name},
-    )
-    return parsed
+        return parsed
+    return None
 
 
-def _extract_response_message(parsed: dict[str, Any]) -> dict[str, Any]:
-    choices = parsed.get("choices") if isinstance(parsed.get("choices"), list) else []
-    if choices and isinstance(choices[0], dict):
-        return choices[0].get("message") or {}
-    return {}
+def _extract_responses_tool_calls(parsed: dict[str, Any]) -> list[dict[str, Any]]:
+    calls: list[dict[str, Any]] = []
+    for item in parsed.get("output") or []:
+        if not isinstance(item, dict) or item.get("type") != "function_call":
+            continue
+        call_id = str(item.get("call_id") or item.get("id") or "").strip()
+        name = str(item.get("name") or "").strip()
+        args_raw = item.get("arguments") or "{}"
+        try:
+            args = json.loads(args_raw) if isinstance(args_raw, str) else (args_raw if isinstance(args_raw, dict) else {})
+        except Exception:
+            args = {}
+        if not isinstance(args, dict):
+            args = {}
+        calls.append(
+            {
+                "id": call_id or f"call_{len(calls)}",
+                "name": name,
+                "arguments": args,
+                "arguments_raw": args_raw if isinstance(args_raw, str) else json.dumps(args, ensure_ascii=False),
+            }
+        )
+    return calls
+
+
+def _extract_responses_text(parsed: dict[str, Any]) -> str:
+    direct = parsed.get("output_text")
+    if isinstance(direct, str) and direct.strip():
+        return direct.strip()
+    chunks: list[str] = []
+    for item in parsed.get("output") or []:
+        if not isinstance(item, dict) or item.get("type") != "message":
+            continue
+        for part in item.get("content") or []:
+            if not isinstance(part, dict):
+                continue
+            if part.get("type") in {"output_text", "text"} and part.get("text"):
+                chunks.append(str(part.get("text")))
+    return "\n".join(chunk for chunk in chunks if chunk).strip()
+
+
+def _continuation_items_from_response(parsed: dict[str, Any]) -> list[dict[str, Any]]:
+    """Pass model output items back (including reasoning) without logging their content."""
+    items: list[dict[str, Any]] = []
+    for item in parsed.get("output") or []:
+        if isinstance(item, dict):
+            items.append(item)
+    return items
 
 
 # Maps a dashboard page id to a short, HR-friendly description of what that page
@@ -1777,56 +2190,83 @@ def _handle_toolcall_whatsapp_turn_impl(request: Any) -> dict[str, Any]:
         }
 
     messages = _build_messages(request, state, state_summary, history)
+    instructions, input_items = _split_system_and_input(messages)
+    responses_tools = _convert_tools_for_responses(tools)
     forced_tool_name = _forced_tool_for_turn(request, tools)
+    reasoning_effort = _reasoning_effort_for_request(request)
     tool_outputs: list[dict[str, Any]] = []
+    tool_sequence: list[str] = []
+    executed_call_ids: set[str] = set()
     final_reply = ""
     last_action_type = "direct_reply"
     last_status = "completed"
+    previous_response_id: str | None = None
+    turn_started = time_module.monotonic()
+    cancelled = False
 
     for step in range(MAX_TOOL_LOOPS):
-        parsed = _call_llm_with_tools(messages, tools, turn_id, step, forced_tool_name=forced_tool_name if step == 0 else None)
+        if (time_module.monotonic() - turn_started) >= TOOLCALL_TURN_BUDGET_SEC:
+            final_reply = "That took too long to finish. Try again with a shorter request."
+            last_status = "cancelled"
+            cancelled = True
+            break
+        parsed = _call_responses_with_tools(
+            instructions=instructions,
+            input_items=input_items,
+            tools=responses_tools,
+            turn_id=turn_id,
+            step=step,
+            reasoning_effort=reasoning_effort,
+            forced_tool_name=forced_tool_name if step == 0 else None,
+            previous_response_id=None,
+            tool_sequence=tool_sequence,
+        )
         if not parsed:
             final_reply = "I had trouble reaching the model. Try again in a moment."
             last_status = "failed"
             break
-        message = _extract_response_message(parsed)
-        tool_calls = message.get("tool_calls") if isinstance(message.get("tool_calls"), list) else []
-        content = message.get("content") or ""
+        previous_response_id = str(parsed.get("id") or "") or previous_response_id
+        tool_calls = _extract_responses_tool_calls(parsed)
+        content = _extract_responses_text(parsed)
         if not tool_calls:
             final_reply = str(content).strip() or "I'm here. What would you like to check?"
             last_action_type = tool_outputs[-1].get("tool") if tool_outputs else "direct_reply"
             break
-        assistant_entry: dict[str, Any] = {"role": "assistant", "content": content or None, "tool_calls": []}
+
+        # Continue the same Responses flow: feed model output items (incl. reasoning) + tool outputs.
+        input_items.extend(_continuation_items_from_response(parsed))
         outputs_for_step: list[dict[str, Any]] = []
         for call in tool_calls:
-            call_id = call.get("id") or f"call_{step}_{len(outputs_for_step)}"
-            function = call.get("function") if isinstance(call.get("function"), dict) else {}
-            tool_name = str(function.get("name") or "")
-            try:
-                tool_args = json.loads(function.get("arguments") or "{}")
-            except Exception:
-                tool_args = {}
-            assistant_entry["tool_calls"].append(
-                {
+            call_id = str(call.get("id") or "")
+            tool_name = str(call.get("name") or "")
+            tool_args = call.get("arguments") if isinstance(call.get("arguments"), dict) else {}
+            if call_id and call_id in executed_call_ids:
+                # Idempotent: never re-execute the same Responses tool call on retry/continuation.
+                cached = next((o for o in tool_outputs if o.get("id") == call_id), None)
+                output_payload = cached or {
                     "id": call_id,
-                    "type": "function",
-                    "function": {
-                        "name": tool_name,
-                        "arguments": json.dumps(tool_args, ensure_ascii=False),
-                    },
+                    "tool": tool_name,
+                    "status": "duplicate_skipped",
+                    "result": {"safe_user_message": "Already executed."},
                 }
-            )
-            tool_result = _execute_tool(tool_name, tool_args, request, state, graph_state, scope)
-            outputs_for_step.append({"id": call_id, "tool": tool_name, **tool_result})
+            else:
+                tool_result = _execute_tool(tool_name, tool_args, request, state, graph_state, scope)
+                output_payload = {"id": call_id, "tool": tool_name, **tool_result}
+                if call_id:
+                    executed_call_ids.add(call_id)
+                tool_sequence.append(tool_name)
+            outputs_for_step.append(output_payload)
             last_action_type = tool_name
-            last_status = tool_result.get("status") or "completed"
-        messages.append(assistant_entry)
-        for output in outputs_for_step:
-            messages.append(
+            last_status = output_payload.get("status") or "completed"
+            input_items.append(
                 {
-                    "role": "tool",
-                    "tool_call_id": output["id"],
-                    "content": json.dumps({k: v for k, v in output.items() if k != "id"}, ensure_ascii=False, default=str),
+                    "type": "function_call_output",
+                    "call_id": call_id,
+                    "output": json.dumps(
+                        {k: v for k, v in output_payload.items() if k != "id"},
+                        ensure_ascii=False,
+                        default=str,
+                    ),
                 }
             )
         tool_outputs.extend(outputs_for_step)
@@ -1834,7 +2274,7 @@ def _handle_toolcall_whatsapp_turn_impl(request: Any) -> dict[str, Any]:
             final_reply = "I ran out of steps reasoning about that. Try rephrasing the request."
             last_status = "failed"
 
-    if tool_outputs:
+    if tool_outputs and not cancelled:
         last_output = tool_outputs[-1]
         status_for_reply = str(last_output.get("status") or "").lower()
         result_for_reply = last_output.get("result") if isinstance(last_output.get("result"), dict) else {}
@@ -1849,11 +2289,17 @@ def _handle_toolcall_whatsapp_turn_impl(request: Any) -> dict[str, Any]:
         "graph": TOOLCALL_GRAPH_VERSION,
         "state_summary": state_summary,
         "tool_outputs": tool_outputs,
-        "messages_count": len(messages),
+        "messages_count": len(input_items),
+        "api": "openai-responses",
+        "model": (_toolcall_provider_config() or {}).get("model"),
+        "reasoning_effort": reasoning_effort,
+        "tool_sequence": tool_sequence,
+        "previous_response_id": previous_response_id,
         "context_assembly": {
             "history_messages": len(history),
             "scope_policy": "same_company_admin_conversation_channel_module_session_only",
             "fresh_session_opener": _is_fresh_session_opener(getattr(request, "raw_text", "")),
+            "cancelled": cancelled,
         },
     }
     _record_turn_result(turn_id, last_action_type, last_status, audit_payload, final_reply, scope)
@@ -1866,6 +2312,8 @@ def _handle_toolcall_whatsapp_turn_impl(request: Any) -> dict[str, Any]:
         "last_tool_outputs": _json_safe(tool_outputs[-3:]),
         "updated_at": _now_iso(),
         "graph": TOOLCALL_GRAPH_VERSION,
+        "reasoning_effort": reasoning_effort,
+        "tool_sequence": tool_sequence,
     }
     _save_state(turn_id, saved_state, scope)
     return {
@@ -1881,5 +2329,9 @@ def _handle_toolcall_whatsapp_turn_impl(request: Any) -> dict[str, Any]:
             "tool_outputs": _json_safe(tool_outputs),
             "state_summary": _json_safe(state_summary),
             "memory_scope": _json_safe(scope),
+            "api": "openai-responses",
+            "reasoning_effort": reasoning_effort,
+            "tool_sequence": tool_sequence,
+            "model": (_toolcall_provider_config() or {}).get("model"),
         },
     }

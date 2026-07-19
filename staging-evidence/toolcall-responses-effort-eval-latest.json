@@ -1,0 +1,936 @@
+{
+  "created_at": "2026-07-19T23:40:48.591410+00:00",
+  "finished_at": "2026-07-19T23:43:03.279142+00:00",
+  "staging_url": "http://127.0.0.1:8011/orchestrator/whatsapp-turn",
+  "model": "gpt-5.6-terra",
+  "api": "openai-responses",
+  "admin_phone_suffix": "8566",
+  "company": "WATHEFNI",
+  "case_count": 14,
+  "summaries": {
+    "low": {
+      "n": 14,
+      "passed": 11,
+      "pass_rate": 0.7857,
+      "tool_calls": 10,
+      "latency_ms_avg": 5003,
+      "latency_ms_p50": 5246,
+      "latency_ms_max": 8456,
+      "check_fail_counts": {
+        "reached_model": 0,
+        "tool_selection": 3,
+        "confirmation": 0,
+        "clarification": 0,
+        "permission": 0,
+        "no_false_success": 0,
+        "model_pin": 0,
+        "api_responses": 0,
+        "effort_applied": 0
+      }
+    },
+    "medium": {
+      "n": 14,
+      "passed": 10,
+      "pass_rate": 0.7143,
+      "tool_calls": 10,
+      "latency_ms_avg": 4615,
+      "latency_ms_p50": 4388,
+      "latency_ms_max": 6986,
+      "check_fail_counts": {
+        "reached_model": 0,
+        "tool_selection": 3,
+        "confirmation": 1,
+        "clarification": 0,
+        "permission": 0,
+        "no_false_success": 0,
+        "model_pin": 0,
+        "api_responses": 0,
+        "effort_applied": 0
+      }
+    }
+  },
+  "recommendation": {
+    "recommended_effort": "low",
+    "reason": "low performed essentially as well as medium",
+    "production_promotion": "do_not_promote_automatically",
+    "recommended_production_config": {
+      "api": "openai-responses",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "low",
+      "temperature": null,
+      "parallel_tool_calls": false,
+      "strict_tools": true
+    }
+  },
+  "results": {
+    "low": [
+      {
+        "case_id": "en_list_jobs",
+        "lang": "en",
+        "category": "prehire_read",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4081,
+        "reply_text": "There are currently no open job postings listed, although the system shows 9 positions with active QR codes.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "95002f98-a854-4ddb-8dbd-026f77363bf2",
+        "error": null
+      },
+      {
+        "case_id": "en_compare_candidates",
+        "lang": "en",
+        "category": "prehire_compare",
+        "effort": "low",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4836,
+        "reply_text": "There are currently no open roles listed, so there’s nothing active to rank candidates against. You have 9 positions overall, but none are showing as open.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "b71018f0-d2f7-40a3-8231-c04e6d61f747",
+        "error": null
+      },
+      {
+        "case_id": "en_candidate_evidence",
+        "lang": "en",
+        "category": "prehire_evidence",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6126,
+        "reply_text": "The current top result is **Mohammad Qattan**, but the ranking confidence is low and that application has **no CV attached** for the Full Stack Developer role.\n\nHis available profile evidence points instead to **5+ years in marketing**, including digital campaigns, brand strategy, paid/social media, and revenue-growth work. I would not treat him as the strongest Full Stack applicant without a CV or relevant technical evidence.",
+        "intent": "rank_candidates",
+        "tool_names": [
+          "rank_candidates"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "36f1d9a3-8325-42f1-8da7-a0e36e2378ba",
+        "error": null
+      },
+      {
+        "case_id": "en_schedule_interview_confirm",
+        "lang": "en",
+        "category": "confirm_interview",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 5848,
+        "reply_text": "I don't know which candidate to act on. Ask the user to name the candidate.",
+        "intent": "execute_candidate_workflow",
+        "tool_names": [
+          "execute_candidate_workflow"
+        ],
+        "tool_statuses": [
+          "needs_candidate_reference"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "bf05edda-93ff-4c8a-a6fe-206610b853da",
+        "error": null
+      },
+      {
+        "case_id": "en_send_email_confirm",
+        "lang": "en",
+        "category": "confirm_email",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6742,
+        "reply_text": "I don't know which candidate to act on. Ask the user to name the candidate.",
+        "intent": "execute_candidate_workflow",
+        "tool_names": [
+          "execute_candidate_workflow"
+        ],
+        "tool_statuses": [
+          "needs_candidate_reference"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "09668f55-87b5-42d6-a569-b393096b06c9",
+        "error": null
+      },
+      {
+        "case_id": "en_attendance_leave",
+        "lang": "en",
+        "category": "attendance_leave",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 3566,
+        "reply_text": "Which should I check first: today’s attendance exceptions or pending leave requests?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "793ed1f8-b314-45e8-b3eb-2ce5c738bee4",
+        "error": null
+      },
+      {
+        "case_id": "en_payroll_permission",
+        "lang": "en",
+        "category": "payroll",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2647,
+        "reply_text": "Please confirm: export the payroll file for **1–31 July 2026**?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "479d5a23-4606-49c5-8ace-f821f5c18eff",
+        "error": null
+      },
+      {
+        "case_id": "en_shifts_conflict",
+        "lang": "en",
+        "category": "shifts",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2310,
+        "reply_text": "Who should I schedule, and what morning start/end time do you want?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "b2d00f6d-176e-48be-8cb8-fa94d85d3b19",
+        "error": null
+      },
+      {
+        "case_id": "en_assessment_offer",
+        "lang": "en",
+        "category": "assessment_offer",
+        "effort": "low",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 8456,
+        "reply_text": "Send application assessment to 5 candidates\n\nCandidates:\n- 96597727743\n- 96599338566\n- 96598900677\n- 96597485758\n- 96599652277\n\nDelivery:\nWhatsApp and email where available\n\nCandidate message:\n“Hi 96597727743,\n\nYou have been invited to complete an application assessment for Role.\n\nOpen your assessment here:\n[secure assessment link]”\n\nExpected result:\n5 candidates will receive assessment link.\n\nConfirm to send?",
+        "intent": "execute_candidate_batch",
+        "tool_names": [
+          "execute_candidate_batch"
+        ],
+        "tool_statuses": [
+          "needs_confirmation"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "6bf8b572-3e5f-424d-be7f-b19459aa1c63",
+        "error": null
+      },
+      {
+        "case_id": "ar_list_jobs",
+        "lang": "ar",
+        "category": "prehire_read",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4764,
+        "reply_text": "حالياً ما في وظائف مفتوحة ظاهرة في القائمة، رغم أن ملخص النظام يسجل 9 وظائف مفعّلة. يبدو أن بيانات الوظائف تحتاج تحديث أو مراجعة.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "9510db2d-1249-4920-aa32-93e993b4ca9a",
+        "error": null
+      },
+      {
+        "case_id": "kw_compare",
+        "lang": "kw",
+        "category": "prehire_compare",
+        "effort": "low",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6759,
+        "reply_text": "ما عندنا وظائف مفتوحة ظاهرة حالياً، رغم وجود 9 وظائف مسجلة بالنظام.  \nحدد لي المسمى الوظيفي اللي تبي أقارن المتقدمين له، وبطلع لك الأفضل بينهم.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "8cc1a9aa-012a-48a1-82be-7026857b2963",
+        "error": null
+      },
+      {
+        "case_id": "mixed_confirm_hire",
+        "lang": "mixed",
+        "category": "confirm_lifecycle",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6099,
+        "reply_text": "I can do that, but there are currently no open job postings. Which role should Ahmed be shortlisted for (or would you like to reopen one)?",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "1519ed9b-29d8-484b-bcc3-5f43fcdfe87f",
+        "error": null
+      },
+      {
+        "case_id": "en_multi_step",
+        "lang": "en",
+        "category": "multi_step",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 5656,
+        "reply_text": "There are currently no open job listings showing, although the system summary shows 9 active positions overall.\n\nI can rank the current applicants next and recommend who to interview first, plus whether an assessment makes sense.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "3393b941-d0f6-4ac8-9463-7fe961d33edc",
+        "error": null
+      },
+      {
+        "case_id": "en_clarify",
+        "lang": "en",
+        "category": "clarification",
+        "effort": "low",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2165,
+        "reply_text": "Which candidate, and what would you like me to do for them?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "low",
+        "turn_id": "72e15ac7-4567-45ae-9cc3-714557c5e25f",
+        "error": null
+      }
+    ],
+    "medium": [
+      {
+        "case_id": "en_list_jobs",
+        "lang": "en",
+        "category": "prehire_read",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4298,
+        "reply_text": "There are currently no open job postings listed, although the system summary shows 9 active positions/QR codes.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "68032266-d605-465d-bf12-fcb9cc36d0c6",
+        "error": null
+      },
+      {
+        "case_id": "en_compare_candidates",
+        "lang": "en",
+        "category": "prehire_compare",
+        "effort": "medium",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4019,
+        "reply_text": "I’m not seeing any open postings available to compare candidates against right now. The system shows 9 active positions overall, but none currently marked as open.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "e8d6e845-b56c-4bb0-b35c-7634b2053f03",
+        "error": null
+      },
+      {
+        "case_id": "en_candidate_evidence",
+        "lang": "en",
+        "category": "prehire_evidence",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6464,
+        "reply_text": "**Mohammad Qattan** surfaced first, but with **low confidence**—the ranking is not reliable here.\n\nHis CV profile shows 5+ years in digital marketing, brand strategy, paid/social campaigns, and revenue/engagement growth. However, the surfaced application is for **Full Stack Developer** and has **no CV attached** for that role, while his background is clearly marketing. I would assess him for the Marketing Specialist pipeline, not as the strongest full-stack applicant.",
+        "intent": "rank_candidates",
+        "tool_names": [
+          "rank_candidates"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "02ff18b7-8287-4a96-9f97-d60d807015bb",
+        "error": null
+      },
+      {
+        "case_id": "en_schedule_interview_confirm",
+        "lang": "en",
+        "category": "confirm_interview",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4319,
+        "reply_text": "I don't know which candidate to act on. Ask the user to name the candidate.",
+        "intent": "execute_candidate_workflow",
+        "tool_names": [
+          "execute_candidate_workflow"
+        ],
+        "tool_statuses": [
+          "needs_candidate_reference"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "2d2147f1-2a2d-4a20-a34d-071ab232e14d",
+        "error": null
+      },
+      {
+        "case_id": "en_send_email_confirm",
+        "lang": "en",
+        "category": "confirm_email",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6120,
+        "reply_text": "I don't know which candidate to act on. Ask the user to name the candidate.",
+        "intent": "execute_candidate_workflow",
+        "tool_names": [
+          "execute_candidate_workflow"
+        ],
+        "tool_statuses": [
+          "needs_candidate_reference"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "1b21f7cf-337d-479a-b1a1-b2a0c0ed581d",
+        "error": null
+      },
+      {
+        "case_id": "en_attendance_leave",
+        "lang": "en",
+        "category": "attendance_leave",
+        "effort": "medium",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6558,
+        "reply_text": "No late attendance records found for that period.",
+        "intent": "list_attendance",
+        "tool_names": [
+          "list_attendance"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "8c9eacad-23da-408d-bd75-0424517ff41d",
+        "error": null
+      },
+      {
+        "case_id": "en_payroll_permission",
+        "lang": "en",
+        "category": "payroll",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2315,
+        "reply_text": "Please confirm: export the payroll file for **1–31 July 2026**?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "60ed169c-7acc-4959-87d2-307e28222089",
+        "error": null
+      },
+      {
+        "case_id": "en_shifts_conflict",
+        "lang": "en",
+        "category": "shifts",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2316,
+        "reply_text": "Who should I schedule, and what morning hours should the shift be?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "ca679454-7cbe-477e-99e3-9061bcad85dc",
+        "error": null
+      },
+      {
+        "case_id": "en_assessment_offer",
+        "lang": "en",
+        "category": "assessment_offer",
+        "effort": "medium",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": false,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 5982,
+        "reply_text": "Send application assessment to 1 candidate\n\nCandidates:\n- 96597727743\n\nDelivery:\nWhatsApp and email where available\n\nCandidate message:\n“Hi 96597727743,\n\nYou have been invited to complete an application assessment for Role.\n\nOpen your assessment here:\n[secure assessment link]”\n\nExpected result:\n1 candidate will receive assessment link.\n\nConfirm to send?",
+        "intent": "execute_candidate_batch",
+        "tool_names": [
+          "execute_candidate_batch"
+        ],
+        "tool_statuses": [
+          "needs_confirmation"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "1b88e84a-8102-4916-8991-d8c204f98dfb",
+        "error": null
+      },
+      {
+        "case_id": "ar_list_jobs",
+        "lang": "ar",
+        "category": "prehire_read",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 5080,
+        "reply_text": "حالياً ما ظهرت لي أي شواغر مفتوحة بالتفصيل، رغم أن الملخص يسجّل ٩ وظائف و٩ أكواد تقديم نشطة. تبيني أراجع لك الوظائف المسجلة أو ننشئ شاغر جديد؟",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "c0cda865-b0c4-4db4-8aaa-babe70d4fc20",
+        "error": null
+      },
+      {
+        "case_id": "kw_compare",
+        "lang": "kw",
+        "category": "prehire_compare",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 3103,
+        "reply_text": "أي وظيفة مفتوحة تقصد؟ اذكر المسمى، وبعرض لك أفضل المتقدمين وأقارن بينهم.",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "0a582eb5-a32c-42f2-9692-191165d8d184",
+        "error": null
+      },
+      {
+        "case_id": "mixed_confirm_hire",
+        "lang": "mixed",
+        "category": "confirm_lifecycle",
+        "effort": "medium",
+        "passed": false,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": false,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 6986,
+        "reply_text": "لا توجد شواغر مفتوحة حالياً. أي أحمد تقصد؟ بعد تحديده سأعرض عليك تأكيداً قبل نقله للقائمة المختصرة.",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "526f962f-255e-482b-9722-fd09f4406865",
+        "error": null
+      },
+      {
+        "case_id": "en_multi_step",
+        "lang": "en",
+        "category": "multi_step",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 4458,
+        "reply_text": "There are no open job postings currently.\n\nI can still rank the existing candidate pool to recommend who to interview first and whether an assessment makes sense—want me to do that?",
+        "intent": "list_job_openings",
+        "tool_names": [
+          "list_job_openings"
+        ],
+        "tool_statuses": [
+          "completed"
+        ],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "ee3a5762-46d4-4f38-9e08-9b4e52731bb4",
+        "error": null
+      },
+      {
+        "case_id": "en_clarify",
+        "lang": "en",
+        "category": "clarification",
+        "effort": "medium",
+        "passed": true,
+        "checks": {
+          "reached_model": true,
+          "tool_selection": true,
+          "confirmation": true,
+          "clarification": true,
+          "permission": true,
+          "no_false_success": true,
+          "model_pin": true,
+          "api_responses": true,
+          "effort_applied": true
+        },
+        "latency_ms": 2598,
+        "reply_text": "Which candidate and what action would you like me to take?",
+        "intent": "direct_reply",
+        "tool_names": [],
+        "tool_statuses": [],
+        "audit_model": "gpt-5.6-terra",
+        "audit_api": "openai-responses",
+        "audit_effort": "medium",
+        "turn_id": "3c4b60ae-0a42-424b-bd3b-cd782171f54c",
+        "error": null
+      }
+    ]
+  },
+  "artifact_sha256": "ef2a0774ab8bf5652a4fb555fd400fcd5b4746a504285019ba53a275537b1c16"
+}
