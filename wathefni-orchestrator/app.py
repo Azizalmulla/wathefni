@@ -77,6 +77,7 @@ import company_setup as _company_setup  # noqa: E402
 import cv_docx as _cv_docx  # noqa: E402
 import cv_extraction as _cv_extraction  # noqa: E402
 import candidate_messages as _candidate_messages  # noqa: E402
+import candidate_semantic_router as _candidate_semantic_router  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
@@ -3451,6 +3452,17 @@ def _whatsapp_provider_message_id(request: WhatsAppTurnRequest) -> str | None:
         value = str(metadata.get(key) or "").strip()
         if value:
             return value[:500]
+    # Defense in depth: Octopus may nest the WhatsApp id inside provider_payload.
+    payload = metadata.get("provider_payload") if isinstance(metadata.get("provider_payload"), dict) else {}
+    nested_candidates = [
+        payload.get("message_id"),
+        payload.get("messageId"),
+        ((payload.get("messages") or [{}])[0] or {}).get("id") if isinstance(payload.get("messages"), list) else None,
+    ]
+    for candidate in nested_candidates:
+        value = str(candidate or "").strip()
+        if value:
+            return value[:500]
     return None
 
 
@@ -4952,6 +4964,43 @@ def planner_provider_config() -> dict[str, str] | None:
         models = provider_cfg.get("models") if isinstance(provider_cfg.get("models"), list) else []
         model = (models[0].get("id") if models and isinstance(models[0], dict) else None) or ("openai/gpt-4o-mini" if "openrouter" in url else "gpt-4o-mini")
     return {"api_key": str(api_key), "url": str(url), "model": str(model), "api": str(api_kind), "provider": str(configured_provider)}
+
+
+def candidate_semantic_provider_config() -> dict[str, str] | None:
+    """Dedicated GPT-5.6 Luna provider for candidate NL intent routing only."""
+    env_values = planner_env()
+    base = planner_provider_config()
+    if not base:
+        return None
+    model = (
+        env_values.get("WATHEFNI_CANDIDATE_SEMANTIC_MODEL")
+        or _candidate_semantic_router.MODEL_ID
+    )
+    api_kind = (
+        env_values.get("WATHEFNI_CANDIDATE_SEMANTIC_API")
+        or env_values.get("WATHEFNI_TOOL_AGENT_API")
+        or base.get("api")
+        or "openai-responses"
+    )
+    base_url = (
+        env_values.get("WATHEFNI_CANDIDATE_SEMANTIC_BASE_URL")
+        or env_values.get("WATHEFNI_TOOL_AGENT_BASE_URL")
+        or "https://api.openai.com/v1"
+    )
+    explicit_url = env_values.get("WATHEFNI_CANDIDATE_SEMANTIC_URL")
+    if explicit_url:
+        url = explicit_url
+    elif api_kind == "openai-responses":
+        url = f"{str(base_url).rstrip('/')}/responses"
+    else:
+        url = f"{str(base_url).rstrip('/')}/chat/completions"
+    return {
+        "api_key": str(base["api_key"]),
+        "url": str(url),
+        "model": str(model),
+        "api": str(api_kind),
+        "provider": str(env_values.get("WATHEFNI_CANDIDATE_SEMANTIC_PROVIDER") or base.get("provider") or "openai"),
+    }
 
 
 
@@ -23708,7 +23757,7 @@ def parse_screening_reply_with_gpt(
     corrections = result.get("corrections") if isinstance(result.get("corrections"), dict) else {}
     clean_answers = {str(k): str(v).strip() for k, v in answers.items() if str(k) in allowed_keys and str(v).strip()}
     clean_corrections = {str(k): str(v).strip() for k, v in corrections.items() if str(k) in allowed_keys and str(v).strip()}
-    if confidence < 0.55 and not clean_answers and not clean_corrections and not result.get("candidate_question"):
+    if confidence < 0.80 and not clean_answers and not clean_corrections and not result.get("candidate_question"):
         return None
     return {
         "answers": clean_answers,
@@ -23731,10 +23780,459 @@ def format_next_screening_question(questions: list[dict[str, Any]], pending_keys
     return key
 
 
+def application_has_pending_screening(application: dict[str, Any] | None) -> bool:
+    if not isinstance(application, dict):
+        return False
+    raw_json = application.get("raw_json") if isinstance(application.get("raw_json"), dict) else {}
+    screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
+    status = str(screening.get("status") or application.get("screening_status") or application.get("current_step") or "").lower()
+    if status in {"complete", "completed"}:
+        return False
+    questions = screening_questions_from_raw(application)
+    existing_answers = screening.get("answers") if isinstance(screening.get("answers"), dict) else {}
+    required_keys = [str(q.get("key") or f"q{idx}") for idx, q in enumerate(questions, 1) if q.get("required") is True]
+    missing = [key for key in required_keys if not str(existing_answers.get(key) or "").strip()]
+    return bool(missing) or status in {"pending", "screening"} or str(application.get("current_step") or "").lower() == "screening"
+
+
+def resolve_bound_screening_application(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    """Exact company/conversation/application binding for screening answers."""
+    if not request.conversation_id or not str(request.raw_text or "").strip():
+        return None
+    resolution = resolve_candidate_request_application(request)
+    if not resolution.get("ok"):
+        return None
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not application or not application_has_pending_screening(application):
+        return None
+    binding = resolution.get("binding") if isinstance(resolution.get("binding"), dict) else {}
+    bound_app_key = str(binding.get("app_key") or "")
+    app_key = str(application.get("app_key") or "")
+    if bound_app_key and app_key and bound_app_key != app_key:
+        return None
+    company = str(application.get("company_code") or "").strip().upper()
+    if company and active_company_code() and company != str(active_company_code() or "").strip().upper():
+        # Allow when request company is unset/default; otherwise require exact match.
+        request_company = request_company_code(request)
+        if request_company and str(request_company).strip().upper() not in {company, "WATHEFNI"}:
+            return None
+    return application
+
+
+def persist_candidate_locale(
+    request: WhatsAppTurnRequest,
+    *,
+    application: dict[str, Any] | None,
+    locale: str | None,
+) -> None:
+    loc = _candidate_messages.normalize_locale(locale)
+    if not application or not application.get("app_key"):
+        return
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE applications
+                    SET raw_json = COALESCE(raw_json, '{}'::jsonb) || %s::jsonb,
+                        updated_at = now()
+                    WHERE app_key=%s
+                    """,
+                    (
+                        Json(
+                            {
+                                "candidate_locale": loc,
+                                "candidate_communication": {"locale": loc, "updated_at": now_iso()},
+                            }
+                        ),
+                        application.get("app_key"),
+                    ),
+                )
+            conn.commit()
+    except Exception:
+        return
+    if request.conversation_id:
+        try:
+            import recruiting_lifecycle as _rl
+
+            _rl.update_candidate_conversation_state(
+                sys.modules[__name__],
+                company_code=str(application.get("company_code") or ""),
+                conversation_id=str(request.conversation_id),
+                phone=str(application.get("phone") or request.sender_phone),
+                app_key=str(application.get("app_key") or ""),
+                updates={"candidate_locale": loc},
+            )
+        except Exception:
+            return
+
+
+def store_candidate_clarification_state(
+    request: WhatsAppTurnRequest,
+    *,
+    router_result: dict[str, Any],
+) -> dict[str, Any]:
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not application or not request.conversation_id:
+        return {"ok": False, "error": "no_binding_for_clarification"}
+    import recruiting_lifecycle as _rl
+
+    pending = {
+        "type": "intent_clarification",
+        "status": "pending",
+        "created_at": now_iso(),
+        "prompt_version": router_result.get("prompt_version"),
+        "schema_version": router_result.get("schema_version"),
+        "model": router_result.get("model"),
+        "confidence": router_result.get("confidence"),
+        "intent_hint": router_result.get("intent"),
+        "clarification_reason": router_result.get("clarification_reason"),
+        "secondary_intents": router_result.get("secondary_intents") or [],
+        "raw_text": str(request.raw_text or "")[:500],
+    }
+    return _rl.update_candidate_conversation_state(
+        sys.modules[__name__],
+        company_code=str(application.get("company_code") or ""),
+        conversation_id=str(request.conversation_id),
+        phone=str(application.get("phone") or request.sender_phone),
+        app_key=str(application.get("app_key") or ""),
+        updates={"pending_candidate_action": pending, "candidate_locale": router_result.get("language")},
+    )
+
+
+def execute_candidate_semantic_intent(
+    request: WhatsAppTurnRequest,
+    *,
+    intent: str,
+    router_result: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Backend authority actions for accepted Luna intents. Model never mutates directly."""
+    locale = _candidate_messages.normalize_locale(router_result.get("language"))
+    if intent == "apply_role":
+        role_text = str(router_result.get("role_text") or request.raw_text or "").strip()
+        if not role_text:
+            return None
+        patched = request.model_copy(update={"raw_text": role_text}) if hasattr(request, "model_copy") else request
+        if not hasattr(request, "model_copy"):
+            # Pydantic v1 fallback
+            patched = WhatsAppTurnRequest(**{**request.model_dump(), "raw_text": role_text})
+        result = handle_public_candidate_apply_interest_turn(patched) or handle_public_candidate_role_selection_turn(patched)
+        if result:
+            result["semantic_router"] = json_safe(router_result)
+            result["locale"] = locale
+            return result
+        return {
+            **candidate_message_result("welcome", request=request, locale=locale),
+            "intent": "apply_role_unresolved",
+            "semantic_router": json_safe(router_result),
+        }
+    if intent == "replace_cv":
+        resolution = resolve_candidate_request_application(request)
+        application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+        if not resolution.get("ok") or not application:
+            return candidate_resolution_failure_message(request, resolution)
+        persist_candidate_locale(request, application=application, locale=locale)
+        return {
+            **candidate_message_result("cv_replacement_requested", request=request, application=application, locale=locale),
+            "application": json_safe(application),
+            "intent": "candidate_cv_update_request",
+            "turn_focus": "candidate_cv_update",
+            "semantic_router": json_safe(router_result),
+        }
+    if intent == "cv_received":
+        application = find_candidate_application_for_file(request.sender_phone)
+        if not application:
+            resolution = resolve_candidate_request_application(request)
+            if not resolution.get("ok"):
+                return candidate_resolution_failure_message(request, resolution)
+            application = resolution.get("application")
+        if not application:
+            return candidate_message_result("no_active_application", request=request, locale=locale)
+        persist_candidate_locale(request, application=application, locale=locale)
+        truth = candidate_cv_truth(application)
+        if truth.get("cv_received") and truth.get("storage_ok"):
+            reply = candidate_message_payload("cv_accepted", request=request, application=application, locale=locale)["text"]
+        elif truth.get("cv_received"):
+            reply = candidate_message_payload("cv_invalid", request=request, application=application, locale=locale)["text"]
+        else:
+            reply = candidate_message_payload("no_active_application", request=request, application=application, locale=locale)["text"]
+            # Prefer a clearer "not received yet" when application exists but CV missing.
+            if locale == "ar":
+                reply = "ما شفت سيرة ذاتية محفوظة لطلبك بعد. أرسل سيرتك كملف PDF أو DOCX أو صورة واضحة."
+            else:
+                reply = "I do not see a CV saved for your application yet. Please send your CV as a PDF, DOCX, or clear image."
+        return {
+            "reply": reply,
+            "application": json_safe(application),
+            "truth": truth,
+            "intent": "candidate_cv_received_inquiry",
+            "semantic_router": json_safe(router_result),
+        }
+    if intent == "status":
+        resolution = resolve_candidate_request_application(request)
+        application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+        if not resolution.get("ok") or not application:
+            return candidate_resolution_failure_message(request, resolution)
+        persist_candidate_locale(request, application=application, locale=locale)
+        return {
+            **candidate_message_result(
+                "application_status",
+                request=request,
+                application=application,
+                locale=locale,
+                role=application.get("position_title") or application.get("position_code") or "the role",
+                status=_candidate_messages.status_label(application.get("status"), locale),
+            ),
+            "application": json_safe(application),
+            "intent": "candidate_application_status",
+            "turn_focus": "candidate_status",
+            "semantic_router": json_safe(router_result),
+        }
+    if intent in {"withdraw", "confirm_withdraw", "cancel_withdraw"}:
+        # Reuse withdrawal authority path. Pending confirmations stay deterministic-first;
+        # Luna only reaches here when those did not already resolve.
+        if intent == "confirm_withdraw":
+            patched_text = "CONFIRM"
+        elif intent == "cancel_withdraw":
+            patched_text = "CANCEL"
+        else:
+            patched_text = "I want to withdraw my application"
+        if hasattr(request, "model_copy"):
+            patched = request.model_copy(update={"raw_text": patched_text})
+        else:
+            patched = WhatsAppTurnRequest(**{**request.model_dump(), "raw_text": patched_text})
+        # For initial withdraw, force the intent branch by calling the handler after
+        # temporarily satisfying the withdraw detector via English canonical text.
+        result = handle_candidate_withdrawal_turn(patched)
+        if result:
+            result["semantic_router"] = json_safe(router_result)
+            return result
+        return None
+    if intent == "hr_handoff":
+        resolution = resolve_candidate_request_application(request)
+        application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+        if not resolution.get("ok") or not application:
+            return candidate_resolution_failure_message(request, resolution)
+        import recruiting_lifecycle as _rl
+
+        persist_candidate_locale(request, application=application, locale=locale)
+        handoff = _rl.request_candidate_handoff(
+            sys.modules[__name__],
+            application=application,
+            conversation_id=str(request.conversation_id or ""),
+            account_id=request.account_id,
+            locale=locale,
+        )
+        if not handoff.get("ok"):
+            return {
+                "ok": False,
+                "error": handoff.get("error") or "handoff_failed",
+                **candidate_message_result("ambiguous_application", request=request, application=application, locale=locale),
+                "semantic_router": json_safe(router_result),
+            }
+        return {
+            "ok": True,
+            **candidate_message_result("hr_handoff_confirmation", request=request, application=application, locale=locale),
+            "intent": "candidate_hr_handoff",
+            "handoff": json_safe(handoff),
+            "semantic_router": json_safe(router_result),
+        }
+    if intent in {"assessment", "interview", "offer"}:
+        return execute_candidate_stage_inquiry(request, intent=intent, router_result=router_result, locale=locale)
+    return None
+
+
+def execute_candidate_stage_inquiry(
+    request: WhatsAppTurnRequest,
+    *,
+    intent: str,
+    router_result: dict[str, Any],
+    locale: str,
+) -> dict[str, Any]:
+    """Read-only stage inquiries. Never issues new secure tokens or mutates lifecycle."""
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return {
+            **candidate_resolution_failure_message(request, resolution),
+            "semantic_router": json_safe(router_result),
+        }
+    persist_candidate_locale(request, application=application, locale=locale)
+    raw = application.get("raw_json") if isinstance(application.get("raw_json"), dict) else {}
+    role = application.get("position_title") or application.get("position_code") or "the role"
+    if intent == "assessment":
+        assessment = raw.get("assessment") if isinstance(raw.get("assessment"), dict) else {}
+        link = str(assessment.get("secure_link") or assessment.get("link") or "").strip()
+        if link:
+            return {
+                **candidate_message_result(
+                    "assessment_invitation",
+                    request=request,
+                    application=application,
+                    locale=locale,
+                    role=role,
+                    link=link,
+                ),
+                "intent": "candidate_assessment_inquiry",
+                "mutation_attempt": False,
+                "semantic_router": json_safe(router_result),
+            }
+        return {
+            **candidate_message_result("assessment_inquiry_none", request=request, application=application, locale=locale),
+            "intent": "candidate_assessment_inquiry",
+            "mutation_attempt": False,
+            "semantic_router": json_safe(router_result),
+        }
+    if intent == "interview":
+        interview = raw.get("interview") if isinstance(raw.get("interview"), dict) else {}
+        link = str(interview.get("secure_link") or interview.get("link") or "").strip() or ""
+        details = str(interview.get("details") or interview.get("summary") or "").strip()
+        if link or details:
+            return {
+                **candidate_message_result(
+                    "interview_invitation",
+                    request=request,
+                    application=application,
+                    locale=locale,
+                    role=role,
+                    details=details or ("Details are available in your secure link." if locale == "en" else "التفاصيل متاحة في الرابط الآمن."),
+                    link=link,
+                ),
+                "intent": "candidate_interview_inquiry",
+                "mutation_attempt": False,
+                "semantic_router": json_safe(router_result),
+            }
+        return {
+            **candidate_message_result("interview_inquiry_none", request=request, application=application, locale=locale),
+            "intent": "candidate_interview_inquiry",
+            "mutation_attempt": False,
+            "semantic_router": json_safe(router_result),
+        }
+    offer = raw.get("offer") if isinstance(raw.get("offer"), dict) else {}
+    link = str(offer.get("secure_link") or offer.get("link") or "").strip()
+    if link:
+        return {
+            **candidate_message_result(
+                "offer_invitation",
+                request=request,
+                application=application,
+                locale=locale,
+                role=role,
+                link=link,
+            ),
+            "intent": "candidate_offer_inquiry",
+            "mutation_attempt": False,
+            "semantic_router": json_safe(router_result),
+        }
+    return {
+        **candidate_message_result("offer_inquiry_none", request=request, application=application, locale=locale),
+        "intent": "candidate_offer_inquiry",
+        "mutation_attempt": False,
+        "semantic_router": json_safe(router_result),
+    }
+
+
+def handle_candidate_semantic_router_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    """Luna NL router after deterministic APPLY/media/pending/token paths."""
+    if has_current_media_upload(request.media or {}):
+        return None
+    text = str(request.raw_text or "").strip()
+    if not text:
+        return None
+    # APPLY codes and active public option ordinals stay deterministic-first.
+    if parse_apply_code_text(text):
+        return None
+    application, pending = candidate_pending_action(request)
+    if pending and pending.get("status") == "pending" and pending.get("type") in {"withdraw", "intent_clarification"}:
+        # Pending confirmations / clarifications: only continue with Luna when the
+        # deterministic pending withdraw path did not already claim the turn.
+        if pending.get("type") == "withdraw":
+            return None
+    provider = candidate_semantic_provider_config()
+    context = {
+        "has_active_application": bool(candidate_active_application(request.sender_phone)),
+        "pending_action_type": (pending or {}).get("type") if isinstance(pending, dict) else None,
+        "conversation_id": request.conversation_id,
+        "account_id": request.account_id,
+    }
+    router_result = _candidate_semantic_router.classify_candidate_intent(
+        text,
+        provider=provider,
+        context=context,
+    )
+    telemetry_provider = {
+        **(provider or {}),
+        "model": _candidate_semantic_router.MODEL_ID,
+    }
+    record_llm_call(
+        call_name="candidate_semantic_router_v1",
+        provider=telemetry_provider,
+        prompt_mode=_candidate_semantic_router.PROMPT_VERSION,
+        prompt_docs_loaded=False,
+        prompt_hash=_candidate_semantic_router.SCHEMA_VERSION,
+        estimated_input_tokens=router_result.get("input_tokens"),
+        latency_ms=router_result.get("latency_ms"),
+        status="ok" if router_result.get("ok") else "error",
+        parsed={
+            "id": router_result.get("response_id"),
+            "usage": {
+                "input_tokens": router_result.get("input_tokens"),
+                "output_tokens": router_result.get("output_tokens"),
+                "total_tokens": router_result.get("total_tokens"),
+                "input_tokens_details": {"cached_tokens": router_result.get("cached_tokens")},
+            },
+        },
+        error=router_result.get("error"),
+        metadata={
+            "prompt_version": _candidate_semantic_router.PROMPT_VERSION,
+            "schema_version": _candidate_semantic_router.SCHEMA_VERSION,
+            "catalog_version": _candidate_semantic_router.CATALOG_VERSION,
+            "confidence": router_result.get("confidence"),
+            "intent": router_result.get("intent"),
+            "accepted_intent": router_result.get("accepted_intent"),
+            "needs_clarification": router_result.get("needs_clarification"),
+            "language": router_result.get("language"),
+            "estimated_cost_usd": router_result.get("estimated_cost_usd"),
+            "threshold": _candidate_semantic_router.CONFIDENCE_THRESHOLD,
+            "secondary_intents": router_result.get("secondary_intents"),
+            "mutation_attempt": False,
+        },
+    )
+    locale = _candidate_messages.normalize_locale(router_result.get("language") or _candidate_messages.infer_locale(text))
+    if application:
+        persist_candidate_locale(request, application=application, locale=locale)
+
+    if not _candidate_semantic_router.should_accept(router_result):
+        store_candidate_clarification_state(request, router_result=router_result)
+        return {
+            **candidate_message_result("intent_clarification", request=request, application=application, locale=locale),
+            "intent": "candidate_intent_clarification",
+            "turn_focus": "candidate_clarification",
+            "semantic_router": json_safe(router_result),
+            "mutation_attempt": False,
+        }
+
+    accepted = str(router_result.get("accepted_intent") or "")
+    executed = execute_candidate_semantic_intent(request, intent=accepted, router_result=router_result)
+    if executed:
+        executed.setdefault("mutation_attempt", False)
+        executed["semantic_router"] = json_safe(router_result)
+        return executed
+    store_candidate_clarification_state(request, router_result=router_result)
+    return {
+        **candidate_message_result("intent_clarification", request=request, application=application, locale=locale),
+        "intent": "candidate_intent_clarification",
+        "turn_focus": "candidate_clarification",
+        "semantic_router": json_safe(router_result),
+        "mutation_attempt": False,
+    }
+
+
 def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
     if has_current_media_upload(request.media or {}):
         return None
-    application = active_candidate_screening_application(request.sender_phone)
+    application = resolve_bound_screening_application(request)
     if not application:
         return None
     if not company_has_module(application.get("company_code"), "pre_hiring"):
@@ -23749,6 +24247,11 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
     missing_before = [key for key in required_keys if not str(existing_answers.get(key) or "").strip()]
     if not missing_before:
         return None
+    screening_binding = {
+        "company_code": application.get("company_code"),
+        "conversation_id": request.conversation_id,
+        "app_key": application.get("app_key"),
+    }
     normalized = normalize_text(request.raw_text)
     if normalized in {"hi", "hello", "hey", "salam", "thanks", "thank you", "ok", "okay"}:
         next_question = format_next_screening_question(questions, missing_before)
@@ -23759,6 +24262,7 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
             "pending_keys": missing_before,
             "intent": "await_screening_answer",
             "turn_focus": "candidate_screening",
+            "screening_binding": screening_binding,
         }
     parsed_structured = parse_screening_reply_with_gpt(
         request.raw_text,
@@ -23784,6 +24288,7 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
                 "pending_keys": missing_before,
                 "intent": "candidate_screening_question",
                 "turn_focus": "candidate_screening",
+                "screening_binding": screening_binding,
             }
     if not parsed_answers and not parsed_corrections:
         parsed_answers = parse_screening_reply_answers(request.raw_text, questions, missing_before)
@@ -23796,6 +24301,7 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
             "pending_keys": missing_before,
             "intent": "await_screening_answer",
             "turn_focus": "candidate_screening",
+            "screening_binding": screening_binding,
         }
     answers = {**existing_answers, **parsed_answers, **parsed_corrections}
     answer_sources = screening.get("answer_sources") if isinstance(screening.get("answer_sources"), dict) else {}
@@ -23839,8 +24345,17 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
                     current_step=CASE WHEN %s='complete' THEN 'screening_complete' ELSE current_step END,
                     updated_at=COALESCE(updated_at, CURRENT_DATE)
                 WHERE app_key=%s
+                  AND company_code=%s
                 """,
-                (Json(json_safe(raw_next)), status, status, status, status, application.get("app_key")),
+                (
+                    Json(json_safe(raw_next)),
+                    status,
+                    status,
+                    status,
+                    status,
+                    application.get("app_key"),
+                    application.get("company_code"),
+                ),
             )
         conn.commit()
     if status == "complete":
@@ -23859,6 +24374,7 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
         "screening_status": status,
         "intent": "handle_candidate_screening_answer",
         "turn_focus": "candidate_screening",
+        "screening_binding": screening_binding,
     }
 
 
@@ -23907,6 +24423,7 @@ def handle_non_hr_conversational_turn(request: WhatsAppTurnRequest) -> dict[str,
         ("candidate_process", "candidate_process_question", "candidate_process", handle_candidate_process_faq_turn),
         ("candidate_truth", "answer_candidate_cv_status", "candidate_cv_status", handle_candidate_truth_turn),
         ("employee_onboarding", "handle_employee_onboarding_reply", "employee_onboarding", handle_employee_onboarding_turn),
+        ("candidate_semantic_router", "candidate_semantic_router", "candidate_semantic", handle_candidate_semantic_router_turn),
         ("candidate_casual", "candidate_casual", "candidate_casual", handle_candidate_casual_turn),
         ("candidate_fallback", "candidate_safe_fallback", "candidate_fallback", handle_candidate_safe_fallback_turn),
     ]

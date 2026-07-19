@@ -82,6 +82,22 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "en": "Your request to speak to HR was recorded. Automated application messages are paused until HR completes the handoff.",
         "ar": "تم تسجيل طلبك للتحدث مع الموارد البشرية. تم إيقاف رسائل الطلب التلقائية مؤقتاً حتى ينهي فريق الموارد البشرية المتابعة.",
     },
+    "intent_clarification": {
+        "en": "I want to help, but I am not sure what you need. Reply with one of: apply for a role, application status, replace CV, withdraw, speak to HR, assessment, interview, or offer.",
+        "ar": "ودي أساعدك، بس مو واضح المطلوب. رد بواحد فقط: تقديم على وظيفة، حالة الطلب، استبدال السيرة، سحب الطلب، التحدث مع الموارد البشرية، التقييم، المقابلة، أو العرض الوظيفي.",
+    },
+    "assessment_inquiry_none": {
+        "en": "I do not see an active assessment for your application right now. HR will send a secure assessment link when it is ready.",
+        "ar": "ما عندي تقييم نشط لطلبك حالياً. يرسل فريق الموارد البشرية رابط التقييم الآمن عند الجاهزية.",
+    },
+    "interview_inquiry_none": {
+        "en": "I do not see an interview invitation for your application right now. HR will share interview details when scheduled.",
+        "ar": "ما عندي دعوة مقابلة لطلبك حالياً. يشارك فريق الموارد البشرية تفاصيل المقابلة عند جدولتها.",
+    },
+    "offer_inquiry_none": {
+        "en": "I do not see an employment offer for your application right now. HR will send a secure offer link if an offer is issued.",
+        "ar": "ما عندي عرض وظيفي لطلبك حالياً. يرسل فريق الموارد البشرية رابط العرض الآمن إذا صدر عرض.",
+    },
 }
 
 STATUS_LABELS: dict[str, dict[str, str]] = {

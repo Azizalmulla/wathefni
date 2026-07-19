@@ -1,0 +1,199 @@
+{
+  "model_id": "gpt-5.6-luna",
+  "prompt_version": "candidate_intent_prompt_v1",
+  "schema_version": "candidate_intent_v1",
+  "catalog_version": "candidate_flow_v1",
+  "confidence_threshold": 0.8,
+  "case_count": 200,
+  "overall_intent_accuracy_pct": 92.5,
+  "entity_extraction_pct": 100.0,
+  "language_accuracy_pct": 100.0,
+  "false_mutation_attempts": 0,
+  "ambiguous_safe_handling_pct": 100.0,
+  "by_language_intent_accuracy_pct": {
+    "arabizi_mixed": 90.0,
+    "en": 92.0,
+    "gulf": 92.0,
+    "msa": 96.0
+  },
+  "by_intent_accuracy_pct": {
+    "apply_code": 100.0,
+    "apply_role": 100.0,
+    "assessment": 100.0,
+    "cancel_withdraw": 37.5,
+    "confirm_withdraw": 68.75,
+    "cv_received": 100.0,
+    "hr_handoff": 100.0,
+    "interview": 100.0,
+    "offer": 100.0,
+    "replace_cv": 100.0,
+    "status": 100.0,
+    "unknown": 100.0,
+    "withdraw": 100.0
+  },
+  "arabizi_mixed_intent_accuracy_pct": 90.0,
+  "latency_ms": {
+    "count": 192,
+    "p50": 1398.0,
+    "avg": 1543.3,
+    "p95": 2716.0,
+    "max": 3981.0
+  },
+  "tokens": {
+    "input_total": 98499,
+    "output_total": 19309,
+    "input_avg": 513.0,
+    "output_avg": 100.6
+  },
+  "cost_usd": {
+    "total": 0.214353,
+    "avg_per_call": 0.001116
+  },
+  "targets": {
+    "overall_intent_ge_90": true,
+    "each_language_ge_85": true,
+    "arabizi_mixed_ge_80": true,
+    "entity_ge_95": true,
+    "false_mutations_eq_0": true,
+    "ambiguous_safe_eq_100": true
+  },
+  "failed_examples": [
+    {
+      "id": 81,
+      "language": "en",
+      "expected": "confirm_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.45,
+      "text": "CONFIRM",
+      "error": null
+    },
+    {
+      "id": 85,
+      "language": "msa",
+      "expected": "confirm_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.98,
+      "text": "تأكيد",
+      "error": null
+    },
+    {
+      "id": 89,
+      "language": "gulf",
+      "expected": "confirm_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.99,
+      "text": "تأكيد",
+      "error": null
+    },
+    {
+      "id": 93,
+      "language": "arabizi_mixed",
+      "expected": "confirm_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.35,
+      "text": "confirm",
+      "error": null
+    },
+    {
+      "id": 95,
+      "language": "arabizi_mixed",
+      "expected": "confirm_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.55,
+      "text": "akked",
+      "error": null
+    },
+    {
+      "id": 97,
+      "language": "en",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.62,
+      "text": "CANCEL",
+      "error": null
+    },
+    {
+      "id": 99,
+      "language": "en",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.62,
+      "text": "Keep my application",
+      "error": null
+    },
+    {
+      "id": 100,
+      "language": "en",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.98,
+      "text": "No keep it",
+      "error": null
+    },
+    {
+      "id": 101,
+      "language": "msa",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.72,
+      "text": "إلغاء",
+      "error": null
+    },
+    {
+      "id": 105,
+      "language": "gulf",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.72,
+      "text": "الغاء",
+      "error": null
+    },
+    {
+      "id": 106,
+      "language": "gulf",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.94,
+      "text": "لا خله",
+      "error": null
+    },
+    {
+      "id": 108,
+      "language": "gulf",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.55,
+      "text": "خليه فعال",
+      "error": null
+    },
+    {
+      "id": 109,
+      "language": "arabizi_mixed",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.55,
+      "text": "cancel",
+      "error": null
+    },
+    {
+      "id": 110,
+      "language": "arabizi_mixed",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.98,
+      "text": "la tkhalleh",
+      "error": null
+    },
+    {
+      "id": 111,
+      "language": "arabizi_mixed",
+      "expected": "cancel_withdraw",
+      "predicted": "unknown",
+      "confidence": 0.15,
+      "text": "keep it",
+      "error": null
+    }
+  ],
+  "run_id": "64fa2b26-080e-4ac5-9802-1becdade63be",
+  "generated_at": "2026-07-19T20:13:35Z"
+}

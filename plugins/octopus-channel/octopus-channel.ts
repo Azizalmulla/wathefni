@@ -1,4 +1,5 @@
 /// <reference path="./node-shims.d.ts" />
+import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
@@ -110,6 +111,10 @@ const FAST_INTENT_AGENT_IDS = new Set(
     .map((value) => value.trim())
     .filter(Boolean),
 );
+const HR_ORCHESTRATOR_URL = env.WATHEFNI_HR_ORCHESTRATOR_URL?.trim()
+  || "http://127.0.0.1:8010/orchestrator/whatsapp-turn";
+const HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY =
+  "The Wathefni HR orchestrator could not return a grounded reply right now. Please try again in a moment.";
 
 const workspacePromptRevisionCache = new Map<string, { signature: string; revision: string }>();
 
@@ -160,6 +165,11 @@ const CLOSED_CONVERSATION_ALERTS_PATH = path.join(
   `.openclaw-${OPENCLAW_PROFILE}`,
   "closed-conversation-alerts.json",
 );
+const PENDING_ACTIONS_PATH = path.join(
+  HOME_DIR,
+  `.openclaw-${OPENCLAW_PROFILE}`,
+  "pending-actions.json",
+);
 
 type PersistedClosedConversationAlert = {
   accountId: string;
@@ -173,6 +183,21 @@ type PersistedClosedConversationAlert = {
 
 type ClosedConversationAlertState = Record<string, PersistedClosedConversationAlert>;
 type OctopusReplySource = "reply";
+
+type PendingAction = {
+  accountId: string;
+  conversationId: string;
+  replyTarget: string;
+  actionType: string;
+  subjectType: string | null;
+  subjectName: string | null;
+  promptText: string;
+  createdAtTs: number;
+  expiresAtTs: number;
+};
+
+type PendingActionState = Record<string, PendingAction>;
+type TurnFocus = "onboarding_status" | "generic";
 
 // ---------------------------------------------------------------------------
 // Persistence helpers
@@ -195,6 +220,140 @@ async function saveClosedConversationAlertState(state: ClosedConversationAlertSt
   } catch {}
 }
 
+function pendingActionKey(accountId: string, replyTarget: string): string {
+  return `${accountId}:${normalizePhoneDigits(replyTarget) || replyTarget}`;
+}
+
+async function loadPendingActionState(): Promise<PendingActionState> {
+  try {
+    const raw = await fs.readFile(PENDING_ACTIONS_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    const now = Date.now();
+    if (!parsed || typeof parsed !== "object") return {};
+    const state: PendingActionState = {};
+    for (const [key, value] of Object.entries(parsed as Record<string, any>)) {
+      if (value && typeof value === "object" && Number(value.expiresAtTs || 0) > now) {
+        state[key] = value as PendingAction;
+      }
+    }
+    return state;
+  } catch {
+    return {};
+  }
+}
+
+async function savePendingActionState(state: PendingActionState): Promise<void> {
+  try {
+    await fs.mkdir(path.dirname(PENDING_ACTIONS_PATH), { recursive: true });
+    await fs.writeFile(PENDING_ACTIONS_PATH, JSON.stringify(state), "utf-8");
+  } catch {}
+}
+
+function extractSubjectNameFromActionPrompt(replyText: string, actionType: string): string | null {
+  const compact = replyText.replace(/\s+/g, " ").trim();
+  if (actionType === "start_onboarding") {
+    const hiredMatch = compact.match(/\b([A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF\s.'’]{1,80}?)\s+(?:is|was)\s+hired\b/i);
+    if (hiredMatch?.[1]) return hiredMatch[1].trim();
+    const onboardingMatch = compact.match(/start\s+(?:his|her|their)?\s*onboarding\s+for\s+([A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF\s.'’]{1,80})/i);
+    if (onboardingMatch?.[1]) return onboardingMatch[1].replace(/[?.!]+$/, "").trim();
+  }
+  return null;
+}
+
+function inferPendingActionFromReply(replyText: string): { actionType: string; subjectType: string | null } | null {
+  if (
+    /\bshould\s+i\s+start\b[\s\S]{0,80}\bonboarding\b/i.test(replyText)
+    || /\bdo\s+you\s+want\s+me\s+to\s+start\b[\s\S]{0,80}\bonboarding\b/i.test(replyText)
+  ) {
+    return { actionType: "start_onboarding", subjectType: "employee" };
+  }
+  return null;
+}
+
+function isPendingActionApprovalTurn(text: string): boolean {
+  const normalized = text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized || normalized.length > 120) return false;
+  if (/\b(no|not|dont|don't|do not|wait|later|hold)\b/i.test(normalized)) return false;
+  const hasApproval = /\b(yes|yep|yeah|ok|okay|approve|approved|go ahead|start|begin|do it|proceed)\b/i.test(normalized);
+  const hasActionWord = /\b(onboarding|onboard|send|schedule|email|message|notify|hire|reject|shortlist|assessment)\b/i.test(normalized);
+  return hasApproval || hasActionWord;
+}
+
+function isPendingActionRejectionTurn(text: string): boolean {
+  const normalized = text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized || normalized.length > 120) return false;
+  return /\b(no|not now|dont|don't|do not|wait|later|hold|stop)\b/i.test(normalized);
+}
+
+function confirmsPendingActionCompleted(action: PendingAction, replyText: string): boolean {
+  if (action.actionType === "start_onboarding") {
+    return /\bonboarding\b[\s\S]{0,80}\b(started|sent|begun|initiated)\b/i.test(replyText)
+      || /\b(started|sent|begun|initiated)\b[\s\S]{0,80}\bonboarding\b/i.test(replyText);
+  }
+  return false;
+}
+
+function buildPendingActionConfirmation(action: PendingAction): string | null {
+  if (action.actionType === "start_onboarding") {
+    const name = action.subjectName?.trim();
+    return name ? `Onboarding started for ${name}.` : "Onboarding started.";
+  }
+  return null;
+}
+
+async function recordPendingActionFromReply(params: {
+  accountId: string;
+  conversationId: string;
+  replyTarget: string;
+  replyText: string;
+}): Promise<void> {
+  const inferred = inferPendingActionFromReply(params.replyText);
+  if (!inferred) return;
+  const state = await loadPendingActionState();
+  state[pendingActionKey(params.accountId, params.replyTarget)] = {
+    accountId: params.accountId,
+    conversationId: params.conversationId,
+    replyTarget: params.replyTarget,
+    actionType: inferred.actionType,
+    subjectType: inferred.subjectType,
+    subjectName: extractSubjectNameFromActionPrompt(params.replyText, inferred.actionType),
+    promptText: params.replyText,
+    createdAtTs: Date.now(),
+    expiresAtTs: Date.now() + 12 * 60 * 60_000,
+  };
+  await savePendingActionState(state);
+}
+
+async function resolvePendingAction(params: {
+  accountId: string;
+  replyTarget: string;
+  rawBody: string;
+}): Promise<PendingAction | null> {
+  const state = await loadPendingActionState();
+  const pending = state[pendingActionKey(params.accountId, params.replyTarget)] || null;
+  if (!pending) return null;
+  if (isPendingActionRejectionTurn(params.rawBody)) {
+    delete state[pendingActionKey(params.accountId, params.replyTarget)];
+    await savePendingActionState(state);
+    return null;
+  }
+  return isPendingActionApprovalTurn(params.rawBody) ? pending : null;
+}
+
+async function clearPendingAction(accountId: string, replyTarget: string): Promise<void> {
+  const state = await loadPendingActionState();
+  delete state[pendingActionKey(accountId, replyTarget)];
+  await savePendingActionState(state);
+}
+
 // ---------------------------------------------------------------------------
 // Language detection (inlined — no external dependency)
 // ---------------------------------------------------------------------------
@@ -208,6 +367,148 @@ function detectConversationLanguage(text: string | null): "ar" | "en" {
     if (ARABIC_CHAR_RE.test(ch)) arabicCount++;
   }
   return arabicCount / chars.length > 0.3 ? "ar" : "en";
+}
+
+function resolveConfigTemplate(value: unknown): string | null {
+  const text = asTrimmedString(value);
+  if (!text) return null;
+  const match = text.match(/^\$\{([A-Z0-9_]+)\}$/);
+  if (match) return asTrimmedString(env[match[1]]) || null;
+  return text;
+}
+
+function buildBodyForAgentWithRuntimeContext(params: {
+  rawBody: string;
+  latestLanguage: "ar" | "en";
+  senderRole: "hr_admin" | "candidate";
+  senderPhone: string | null;
+  pendingAction?: PendingAction | null;
+  turnFocus?: TurnFocus;
+}): string {
+  const languageLabel = params.latestLanguage === "ar" ? "Arabic" : "English";
+  const roleLabel = params.senderRole === "hr_admin" ? "HR admin" : "candidate";
+  const pendingAction = params.pendingAction || null;
+  const turnFocus = params.turnFocus || "generic";
+  const effectiveUserMessage = pendingAction
+    ? pendingAction.actionType === "start_onboarding" && pendingAction.subjectName
+      ? `Start onboarding for ${pendingAction.subjectName} now.`
+      : `Execute pending action ${pendingAction.actionType} now. Pending prompt: ${pendingAction.promptText}`
+    : params.rawBody;
+  return [
+    "Runtime context for this WhatsApp turn:",
+    `- latest_user_language: ${languageLabel}`,
+    `- sender_role: ${roleLabel}`,
+    params.senderPhone ? `- sender_phone: ${params.senderPhone}` : null,
+    pendingAction ? "- structured_pending_action_approval: true" : null,
+    pendingAction ? `- pending_action_type: ${pendingAction.actionType}` : null,
+    pendingAction?.subjectType ? `- pending_action_subject_type: ${pendingAction.subjectType}` : null,
+    pendingAction?.subjectName ? `- pending_action_subject_name: ${pendingAction.subjectName}` : null,
+    pendingAction ? `- pending_action_prompt: ${pendingAction.promptText}` : null,
+    turnFocus !== "generic" ? `- structured_turn_focus: ${turnFocus}` : null,
+    turnFocus === "onboarding_status"
+      ? "- Answer only the onboarding status question. Do not mention hire status, candidate status, or sheet status unless the HR message explicitly asks for those."
+      : null,
+    pendingAction
+      ? "- This HR turn approves the pending action. Execute exactly that action now, then send one short result confirmation. Do not restate old status and do not ask again."
+      : null,
+    "- Reply in latest_user_language only.",
+    "- For HR admin writes: use DB-first helpers, verify the result, then send one concise final answer.",
+    "- Do not narrate intermediate tool work or partial success to WhatsApp.",
+    "",
+    pendingAction ? "Resolved user message:" : "Latest user message:",
+    effectiveUserMessage,
+  ].filter((line): line is string => line !== null).join("\n");
+}
+
+function deriveTurnFocus(rawBody: string, senderRole: "hr_admin" | "candidate"): TurnFocus {
+  if (senderRole !== "hr_admin") return "generic";
+  const normalized = rawBody.toLowerCase();
+  const asksQuestion = /\b(did|is|was|has|have|really|status|when|started|start)\b/i.test(normalized) || normalized.includes("?");
+  if (asksQuestion && /\b(onboarding|onboard)\b/i.test(normalized)) return "onboarding_status";
+  return "generic";
+}
+
+function normalizeReplyForTurnFocus(replyText: string, turnFocus: TurnFocus): string {
+  if (turnFocus !== "onboarding_status") return replyText;
+  if (!/\b(onboarding|onboard)\b/i.test(replyText)) return replyText;
+
+  let cleaned = replyText
+    .replace(/\bYes[,.]?\s*/i, "Yes. ")
+    .replace(/\b(?:[A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF\s.'’]{1,80}?)\s+(?:is|was)\s+hired,\s*(?:and\s*)?/gi, "")
+    .replace(/\b(?:candidate|application|sheet|dashboard)\b[^.\n]*(?:\.|\n|$)/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  cleaned = cleaned.replace(/^Yes\.\s*Yes\.\s*/i, "Yes. ");
+  if (!cleaned) return replyText;
+  if (/^and\s+/i.test(cleaned)) cleaned = cleaned.replace(/^and\s+/i, "");
+  if (!/^yes\b/i.test(cleaned) && /\b(in progress|started|sent|begun|initiated)\b/i.test(cleaned)) {
+    cleaned = `Yes. ${cleaned}`;
+  }
+  return cleaned;
+}
+
+async function callHrOrchestratorTurn(params: {
+  api: OpenClawPluginApi;
+  account: ResolvedOctopusAccount;
+  conversationId: string;
+  replyTarget: string;
+  senderRole: "hr_admin" | "candidate";
+  rawBody: string;
+  latestLanguage: "ar" | "en";
+  mediaPath: string | null;
+  mediaType: string | null;
+  payload: any;
+  providerMessageId: string | null;
+}): Promise<{ authoritative: boolean; reply_text?: string | null; final_reply_source?: string | null } | null> {
+  if (params.account.agentId !== "wathefni-hr") return null;
+  try {
+    const response = await fetch(HR_ORCHESTRATOR_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        account_id: params.account.accountId,
+        conversation_id: params.conversationId,
+        sender_phone: params.replyTarget,
+        sender_role: params.senderRole,
+        raw_text: params.rawBody,
+        media: params.mediaPath ? { path: params.mediaPath, type: params.mediaType } : null,
+        metadata: {
+          source: "openclaw_octopus_channel",
+          latest_user_language: params.latestLanguage,
+          provider: "octopus",
+          provider_message_id: params.providerMessageId || undefined,
+          message_id: params.providerMessageId || undefined,
+          wamid: params.providerMessageId || undefined,
+          provider_payload: params.payload,
+        },
+      }),
+    });
+    if (!response.ok) {
+      params.api.logger.warn(`[octopus] hr orchestrator turn failed status=${response.status}`);
+      return null;
+    }
+    const parsed = await response.json();
+    if (!parsed || typeof parsed !== "object" || typeof parsed.authoritative !== "boolean") {
+      params.api.logger.warn(`[octopus] hr orchestrator turn invalid response shape`);
+      return null;
+    }
+    return parsed;
+  } catch (error) {
+    params.api.logger.warn(`[octopus] hr orchestrator turn error=${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  }
+}
+
+function selectFinalReplyText(replyTexts: string[]): string | null {
+  const cleaned = replyTexts.map((text) => text.trim()).filter(Boolean);
+  if (cleaned.length === 0) return null;
+  return cleaned[cleaned.length - 1] || null;
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
 }
 
 
@@ -628,9 +929,41 @@ async function resolveAgentWorkspacePromptRevision(
 // ---------------------------------------------------------------------------
 
 function extractConversationId(payload: any): string | number | null {
-  const candidate = payload?.conversation_id ?? payload?.conversationId ?? payload?.conversation?.id;
+  // AI Octopus documents the top-level webhook `conversation_id` as the ID
+  // that must be reused for /client/conversation/* calls. Do not fall back to
+  // nested WhatsApp-style `conversation.id`; that can be a different platform
+  // object and AI Octopus rejects it for outbound replies.
+  const candidate =
+    payload?.conversation_id
+    ?? payload?.conversationId
+    ?? payload?.data?.conversation_id
+    ?? payload?.data?.conversationId;
   if (candidate === undefined || candidate === null || candidate === "") return null;
   return candidate;
+}
+
+function formatConversationIdForApi(conversationId: string | number): string | number {
+  if (typeof conversationId === "number") return conversationId;
+  const trimmed = conversationId.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const numeric = Number(trimmed);
+    if (Number.isSafeInteger(numeric)) return numeric;
+  }
+  return trimmed;
+}
+
+function summarizeConversationIdCandidates(payload: any): string {
+  const candidates = {
+    conversation_id: payload?.conversation_id,
+    conversationId: payload?.conversationId,
+    "data.conversation_id": payload?.data?.conversation_id,
+    "data.conversationId": payload?.data?.conversationId,
+    "conversation.id": payload?.conversation?.id,
+  };
+  return Object.entries(candidates)
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([key, value]) => `${key}:${typeof value}:${String(value).slice(0, 80)}`)
+    .join(",");
 }
 
 function extractWhatsAppMessages(payload: any): any[] {
@@ -808,6 +1141,15 @@ type FastIntentPosition = {
   active: boolean;
 };
 
+type ActiveApplicationRef = {
+  company_code: string;
+  position_code: string;
+  apply_code?: string;
+  conversation_id?: string;
+  account_id?: string;
+  updated_at?: string;
+};
+
 function isFastIntentEnabled(agentId: string): boolean {
   return FAST_INTENT_AGENT_IDS.has(agentId);
 }
@@ -841,6 +1183,123 @@ async function readJsonFileSafe<T = any>(filePath: string): Promise<T | null> {
 async function writeJsonFile(filePath: string, value: unknown): Promise<void> {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf-8");
+}
+
+async function mirrorWorkspaceStateToPostgres(workspaceRoot: string): Promise<void> {
+  const migrationPath = path.join(workspaceRoot, "tools", "db", "migrate_json_to_postgres.py");
+  if (!(await pathExists(migrationPath))) return;
+  await new Promise<void>((resolve, reject) => {
+    execFile(migrationPath, { timeout: 30_000 }, (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+}
+
+async function runDbFirstStateHelper(workspaceRoot: string, args: string[]): Promise<boolean> {
+  const helperPath = path.join(workspaceRoot, "tools", "db", "update_state.py");
+  if (!(await pathExists(helperPath))) return false;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      execFile(helperPath, args, { timeout: 30_000 }, (error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function applicationStorageKey(companyCode: string, positionCode: string): string {
+  return `${companyCode}-${positionCode}`;
+}
+
+function applicationPathFor(workspaceRoot: string, phone: string, companyCode: string, positionCode: string): string {
+  return path.join(
+    workspaceRoot,
+    "data",
+    "candidates",
+    phone,
+    "applications",
+    `${applicationStorageKey(companyCode, positionCode)}.json`,
+  );
+}
+
+function activeConversationKey(accountId: string, conversationId: string): string {
+  return `${accountId}:${conversationId}`;
+}
+
+function applicationRefFromApplication(application: any, accountId?: string, conversationId?: string): ActiveApplicationRef | null {
+  const companyCode = asTrimmedString(application?.company_code);
+  const positionCode = asTrimmedString(application?.position_code);
+  if (!companyCode || !positionCode) return null;
+  return {
+    company_code: companyCode,
+    position_code: positionCode,
+    apply_code: asTrimmedString(application?.apply_code) || undefined,
+    account_id: accountId || undefined,
+    conversation_id: conversationId || undefined,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function readApplicationByRef(
+  workspaceRoot: string,
+  phone: string,
+  ref: ActiveApplicationRef | null | undefined,
+): Promise<any | null> {
+  const companyCode = asTrimmedString(ref?.company_code);
+  const positionCode = asTrimmedString(ref?.position_code);
+  if (!companyCode || !positionCode) return null;
+  return readJsonFileSafe<any>(applicationPathFor(workspaceRoot, phone, companyCode, positionCode));
+}
+
+async function setActiveCandidateApplication(params: {
+  workspaceRoot: string;
+  phone: string;
+  accountId: string;
+  conversationId: string;
+  application: any;
+}): Promise<void> {
+  const ref = applicationRefFromApplication(params.application, params.accountId, params.conversationId);
+  if (!ref) return;
+  const profilePath = path.join(params.workspaceRoot, "data", "candidates", params.phone, "profile.json");
+  const profile = (await readJsonFileSafe<any>(profilePath)) || { phone: params.phone, applications: [] };
+  profile.phone = params.phone;
+  profile.active_application = ref;
+  const activeConversations =
+    profile.active_conversations && typeof profile.active_conversations === "object"
+      ? profile.active_conversations
+      : {};
+  activeConversations[activeConversationKey(params.accountId, params.conversationId)] = ref;
+  profile.active_conversations = activeConversations;
+  await writeJsonFile(profilePath, profile);
+  await mirrorWorkspaceStateToPostgres(params.workspaceRoot).catch(() => {});
+}
+
+async function resolveActiveCandidateApplication(params: {
+  workspaceRoot: string;
+  phone: string;
+  accountId: string;
+  conversationId: string;
+}): Promise<any | null> {
+  const profilePath = path.join(params.workspaceRoot, "data", "candidates", params.phone, "profile.json");
+  const profile = await readJsonFileSafe<any>(profilePath);
+  const conversationRef =
+    profile?.active_conversations?.[activeConversationKey(params.accountId, params.conversationId)];
+  const conversationApp = await readApplicationByRef(params.workspaceRoot, params.phone, conversationRef);
+  if (conversationApp) return conversationApp;
+  const profileApp = await readApplicationByRef(params.workspaceRoot, params.phone, profile?.active_application);
+  if (profileApp) return profileApp;
+  return null;
+}
+
+function isApplicationWaitingForCv(application: any): boolean {
+  const status = asTrimmedString(application?.status);
+  const currentStep = asTrimmedString(application?.current_step);
+  return status === "awaiting_cv" || currentStep === "cv_request";
 }
 
 function hydrateTemplate(rawTemplate: string, replacements: Record<string, string>): any {
@@ -924,10 +1383,10 @@ function rankApplication(app: any): number {
   if (!app || typeof app !== "object") return 0;
   const status = asTrimmedString(app.status) || "";
   const currentStep = asTrimmedString(app.current_step) || "";
+  if (currentStep === "screening" || app?.screening?.status === "in_progress") return 500;
+  if (currentStep === "cv_upload" || status === "cv_received") return 450;
   if (status === "awaiting_cv" || currentStep === "cv_request") return 400;
-  if (currentStep === "cv_upload" || status === "cv_received") return 350;
-  if (currentStep === "screening") return 300;
-  if (currentStep === "review_pending" || status === "screening_complete") return 250;
+  if (currentStep === "review_pending" || status === "screening_complete") return 300;
   if (status === "hired") return 100;
   return 50;
 }
@@ -1080,8 +1539,8 @@ function buildCvAckReply(language: "ar" | "en", application: any | null, positio
   if (application) {
     const title = asTrimmedString(application?.position_title) || "the role";
     return language === "ar"
-      ? `استلمت الـ CV الخاص فيك على ${title}. قاعد اراجعه الحين وبرجع لك بالخطوة اللي بعدها.`
-      : `I received your CV for ${title}. I am reviewing it now and will send the next step shortly.`;
+      ? `شكرا، استلمنا الـ CV الخاص فيك لتقديم ${title}. عطنا لحظة نراجعه ونجهز لك أسئلة الفرز المناسبة.`
+      : `Thank you, we received your CV for ${title}. Give us a moment while we review it and prepare the screening questions.`;
   }
   if (positions.length > 0) {
     return language === "ar"
@@ -1089,8 +1548,8 @@ function buildCvAckReply(language: "ar" | "en", application: any | null, positio
       : `I received your CV. To link it to a position, please send the relevant apply code, for example \`${positions[0].applyCode}\`.`;
   }
   return language === "ar"
-    ? "استلمت الـ CV. ارسل كود التقديم عشان اكمل الطلب."
-    : "I received your CV. Please send your apply code so I can continue the application.";
+    ? "شكرا، استلمنا الـ CV. ارسل كود التقديم عشان اربطه بالوظيفة الصحيحة."
+    : "Thank you, we received your CV. Please send your apply code so I can connect it to the right role.";
 }
 
 async function ensureFastApplyState(params: {
@@ -1113,6 +1572,20 @@ async function ensureFastApplyState(params: {
   const profilePath = path.join(candidateRoot, "profile.json");
   const existingApp = await readJsonFileSafe<any>(applicationPath);
   if (existingApp) return existingApp;
+
+  const dbFirstCreated = await runDbFirstStateHelper(workspaceRoot, [
+    "start-application",
+    "--phone",
+    phone,
+    "--company",
+    position.companyCode,
+    "--position",
+    position.positionCode,
+  ]);
+  if (dbFirstCreated) {
+    const createdApp = await readJsonFileSafe<any>(applicationPath);
+    if (createdApp) return createdApp;
+  }
 
   const templateApplication = await loadTemplateJson(
     workspaceRoot,
@@ -1178,6 +1651,7 @@ async function ensureFastApplyState(params: {
   profile.applications = applications;
   await writeJsonFile(profilePath, profile);
   await writeJsonFile(applicationPath, application);
+  await mirrorWorkspaceStateToPostgres(workspaceRoot).catch(() => {});
   return application;
 }
 
@@ -1197,11 +1671,18 @@ async function maybeHandleFastTextIntent(params: {
   const phone = normalizePhoneDigits(replyTarget);
   if (!workspaceRoot || !phone) return false;
   if (await isHrSender(workspaceRoot, phone)) return false;
+  if (account.agentId === "wathefni-hr") return false;
 
   const language = detectConversationLanguage(text);
   const positions = await listActivePositions(workspaceRoot);
   const applications = await listCandidateApplications(workspaceRoot, phone);
-  const currentApplication = pickMostRelevantApplication(applications);
+  const activeApplication = await resolveActiveCandidateApplication({
+    workspaceRoot,
+    phone,
+    accountId: account.accountId,
+    conversationId,
+  });
+  const currentApplication = activeApplication || pickMostRelevantApplication(applications);
 
   if (isGreetingOnlyText(text) && !currentApplication) {
     await sendOctopusTextReply({ api, account, conversationId, replyTarget, text: buildGreetingReply(language, positions) });
@@ -1224,12 +1705,21 @@ async function maybeHandleFastTextIntent(params: {
     );
     if (!matchedPosition) return false;
     const application = (await pathExists(
-      path.join(workspaceRoot, "data", "candidates", phone, "applications", `${matchedPosition.companyCode}-${matchedPosition.positionCode}.json`),
+      applicationPathFor(workspaceRoot, phone, matchedPosition.companyCode, matchedPosition.positionCode),
     ))
       ? await readJsonFileSafe<any>(
-        path.join(workspaceRoot, "data", "candidates", phone, "applications", `${matchedPosition.companyCode}-${matchedPosition.positionCode}.json`),
+        applicationPathFor(workspaceRoot, phone, matchedPosition.companyCode, matchedPosition.positionCode),
       )
       : await ensureFastApplyState({ workspaceRoot, phone, position: matchedPosition });
+    if (application) {
+      await setActiveCandidateApplication({
+        workspaceRoot,
+        phone,
+        accountId: account.accountId,
+        conversationId,
+        application,
+      });
+    }
     await sendOctopusTextReply({
       api,
       account,
@@ -1242,15 +1732,18 @@ async function maybeHandleFastTextIntent(params: {
   }
 
   if (looksLikeCandidateStatusQuery(text) && currentApplication) {
-    await sendOctopusTextReply({
-      api,
-      account,
-      conversationId,
-      replyTarget,
-      text: buildStatusReply(language, currentApplication),
-    });
-    api.logger.info(`[octopus] fast intent handled kind=status conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`);
-    return true;
+    if (account.agentId !== "wathefni-hr") {
+      await sendOctopusTextReply({
+        api,
+        account,
+        conversationId,
+        replyTarget,
+        text: buildStatusReply(language, currentApplication),
+      });
+      api.logger.info(`[octopus] fast intent handled kind=status conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`);
+      return true;
+    }
+    api.logger.info(`[octopus] fast intent status bypassed for wathefni orchestrator conversation=${conversationId}`);
   }
 
   return false;
@@ -1264,20 +1757,42 @@ async function maybeSendFastCvAcknowledgement(params: {
   replyTarget: string | null;
   messageText: string | null;
   receivedAtMs: number;
+  mediaKind: "audio" | "image" | "document";
 }): Promise<boolean> {
-  const { api, cfg, account, conversationId, replyTarget, messageText, receivedAtMs } = params;
+  const { api, cfg, account, conversationId, replyTarget, messageText, receivedAtMs, mediaKind } = params;
   if (!replyTarget || !isFastIntentEnabled(account.agentId)) return false;
+  if (account.agentId === "wathefni-hr") return false;
   const workspaceRoot = resolveAgentWorkspacePath(cfg, account.agentId);
   const phone = normalizePhoneDigits(replyTarget);
   if (!workspaceRoot || !phone) return false;
   if (await isHrSender(workspaceRoot, phone)) return false;
   const language = detectConversationLanguage(messageText);
-  const currentApplication = pickMostRelevantApplication(await listCandidateApplications(workspaceRoot, phone));
-  const positions = currentApplication ? [] : await listActivePositions(workspaceRoot);
+  const activeApplication = await resolveActiveCandidateApplication({
+    workspaceRoot,
+    phone,
+    accountId: account.accountId,
+    conversationId,
+  });
+  if (!activeApplication) {
+    if (mediaKind === "document") {
+      const positions = await listActivePositions(workspaceRoot);
+      const ackText = buildCvAckReply(language, null, positions);
+      if (!ackText) return false;
+      await sendOctopusTextReply({ api, account, conversationId, replyTarget, text: ackText });
+      api.logger.info(`[octopus] fast cv ack sent conversation=${conversationId} mediaKind=${mediaKind} activeApplication=none elapsedMs=${Date.now() - receivedAtMs}`);
+      return true;
+    }
+    return false;
+  }
+  if (!isApplicationWaitingForCv(activeApplication)) return false;
+  const currentApplication = activeApplication;
+  const positions: FastIntentPosition[] = [];
   const ackText = buildCvAckReply(language, currentApplication, positions);
   if (!ackText) return false;
   await sendOctopusTextReply({ api, account, conversationId, replyTarget, text: ackText });
-  api.logger.info(`[octopus] fast cv ack sent conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`);
+  api.logger.info(
+    `[octopus] fast cv ack sent conversation=${conversationId} mediaKind=${mediaKind} application=${asTrimmedString(currentApplication.company_code)}-${asTrimmedString(currentApplication.position_code)} elapsedMs=${Date.now() - receivedAtMs}`,
+  );
   return true;
 }
 
@@ -1575,7 +2090,7 @@ async function sendTypingIndicator(
       },
       body: JSON.stringify({
         messaging_product: "whatsapp",
-        conversation_id: conversationId,
+        conversation_id: formatConversationIdForApi(conversationId),
         status: "read",
         message_id: messageId,
         typing_indicator: { type: "text" },
@@ -1651,7 +2166,7 @@ async function sendOctopusTextReply(params: {
     try {
       await aiOctopusRequest(account, "/client/conversation/reply", {
         messaging_product: "whatsapp",
-        conversation_id: conversationId,
+        conversation_id: formatConversationIdForApi(conversationId),
         to: replyTarget,
         type: "text",
         recipient_type: "individual",
@@ -1665,7 +2180,7 @@ async function sendOctopusTextReply(params: {
     }
   }
   if (shouldMoveToHumanAgent(sanitized.replyText)) {
-    await aiOctopusRequest(account, "/client/conversation/toagent", { conversation_id: conversationId });
+    await aiOctopusRequest(account, "/client/conversation/toagent", { conversation_id: formatConversationIdForApi(conversationId) });
   }
   if (source === "reply") {
     const cleared = await clearClosedConversationAlerts({ accountId: account.accountId, replyTarget });
@@ -1901,6 +2416,7 @@ async function handleInboundMessage(params: {
       replyTarget,
       messageText: resolvedText,
       receivedAtMs,
+      mediaKind: documentMessage ? "document" : imageMessage ? "image" : "audio",
     }).catch((error) => {
       api.logger.warn(
         `[octopus] fast cv ack failed conversation=${conversationId} error=${error instanceof Error ? error.message : String(error)}`,
@@ -1921,14 +2437,104 @@ async function handleInboundMessage(params: {
   });
 
   const senderId = replyTarget || conversationId;
+  const workspaceRootForContext = resolveAgentWorkspacePath(api.config, account.agentId);
+  const senderPhone = normalizePhoneDigits(replyTarget || "");
+  const latestUserLanguage = detectConversationLanguage(rawBody);
+  const senderRole: "hr_admin" | "candidate" =
+    workspaceRootForContext && senderPhone && await isHrSender(workspaceRootForContext, senderPhone)
+      ? "hr_admin"
+      : "candidate";
+  const orchestratorOwnsHrDialog =
+    account.agentId === "wathefni-hr" && senderRole === "hr_admin";
+  const pendingAction =
+    senderRole === "hr_admin" && replyTarget && !orchestratorOwnsHrDialog
+      ? await resolvePendingAction({
+          accountId: account.accountId,
+          replyTarget,
+          rawBody,
+        })
+      : null;
+  const turnFocus = orchestratorOwnsHrDialog ? "generic" : deriveTurnFocus(rawBody, senderRole);
+  const bodyForAgent = buildBodyForAgentWithRuntimeContext({
+    rawBody,
+    latestLanguage: latestUserLanguage,
+    senderRole,
+    senderPhone: senderPhone || null,
+    pendingAction,
+    turnFocus,
+  });
+
+  if (replyTarget && account.agentId === "wathefni-hr") {
+    // Candidate/HR WhatsApp turns require a provider message ID for ingress dedupe.
+    // Without it, do not fall through to the generic OpenClaw agent.
+    if (!messageId) {
+      api.logger.warn(
+        `[octopus] hr orchestrator skipped missing_provider_message_id conversation=${conversationId} role=${senderRole} elapsedMs=${Date.now() - receivedAtMs}`,
+      );
+      if (senderRole === "hr_admin") {
+        await sendOctopusTextReply({
+          api,
+          account,
+          conversationId,
+          replyTarget,
+          text: HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY,
+          source: "reply",
+        });
+      }
+      return;
+    }
+    const orchestratorReply = await callHrOrchestratorTurn({
+      api,
+      account,
+      conversationId,
+      replyTarget,
+      senderRole,
+      rawBody,
+      latestLanguage: latestUserLanguage,
+      mediaPath,
+      mediaType,
+      payload,
+      providerMessageId: messageId,
+    });
+    if (orchestratorReply?.authoritative) {
+      if (orchestratorReply.reply_text) {
+        await sendOctopusTextReply({
+          api,
+          account,
+          conversationId,
+          replyTarget,
+          text: orchestratorReply.reply_text,
+          source: "reply",
+        });
+      }
+      api.logger.info(
+        `[octopus] timing stage=hr_orchestrator_authoritative conversation=${conversationId} source=${orchestratorReply.final_reply_source || "-"} has_reply=${Boolean(orchestratorReply.reply_text)} elapsedMs=${Date.now() - receivedAtMs}`,
+      );
+      // Authoritative with empty reply (dedupe reject / silent ack) must not
+      // fall through to the generic agent.
+      return;
+    }
+    await sendOctopusTextReply({
+      api,
+      account,
+      conversationId,
+      replyTarget,
+      text: HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY,
+      source: "reply",
+    });
+    api.logger.warn(
+      `[octopus] hr orchestrator fail-closed conversation=${conversationId} role=${senderRole} authoritative=${orchestratorReply?.authoritative ?? "null"} source=${orchestratorReply?.final_reply_source || "-"} elapsedMs=${Date.now() - receivedAtMs}`,
+    );
+    return;
+  }
 
   // --- Build inbound context ---
   const storePath = api.runtime.channel.session.resolveStorePath(api.config.session?.store);
   const ctxPayload = api.runtime.channel.reply.finalizeInboundContext({
     Body: rawBody,
-    BodyForAgent: rawBody,
+    BodyForAgent: bodyForAgent,
     RawBody: rawBody,
-    CommandBody: rawBody,
+    CommandBody: bodyForAgent,
     From: replyTarget ? `octopus:${replyTarget}` : `octopus:conversation:${conversationId}`,
     To: `octopus:${conversationId}`,
     SessionKey: sessionKey,
@@ -1949,6 +2555,8 @@ async function handleInboundMessage(params: {
     NativeChannelId: conversationId,
     OriginatingChannel: PROVIDER_NAME,
     OriginatingTo: `octopus:${conversationId}`,
+    LatestUserLanguage: latestUserLanguage,
+    SenderRole: senderRole,
     Metadata: payload,
   });
 
@@ -1970,12 +2578,14 @@ async function handleInboundMessage(params: {
   }
 
   api.logger.info(
-    `[octopus] inbound routed account=${account.accountId} conversation=${conversationId} agent=${account.agentId} replyTarget=${replyTarget || ""} promptSessionRevision=${promptSessionRevision}`,
+    `[octopus] inbound routed account=${account.accountId} conversation=${conversationId} agent=${account.agentId} replyTarget=${replyTarget || ""} senderRole=${senderRole} latestLanguage=${latestUserLanguage} promptSessionRevision=${promptSessionRevision}`,
   );
   api.logger.info(
     `[octopus] timing stage=dispatch_ready conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`,
   );
 
+  const bufferedReplyTexts: string[] = [];
+  const bufferedMediaUrls: string[] = [];
   try {
     await api.runtime.channel.reply.dispatchReplyWithBufferedBlockDispatcher({
       ctx: ctxPayload,
@@ -1985,27 +2595,9 @@ async function handleInboundMessage(params: {
           if (!replyTarget) return;
           const { replyText, mediaUrls } = extractReplyTextAndMedia(replyPayload);
           if (replyText) {
-            await sendOctopusTextReply({
-              api, account, conversationId, replyTarget,
-              text: replyText, source: "reply",
-            });
-            api.logger.info(
-              `[octopus] timing stage=first_text_reply conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`,
-            );
+            bufferedReplyTexts.push(replyText);
           }
-          for (const mediaUrl of mediaUrls) {
-            await octopusPlugin.outbound.sendMedia({
-              cfg: api.config,
-              accountId: account.accountId,
-              to: replyTarget,
-              mediaUrl,
-              mediaReadFile: async (mediaPath: string) => fs.readFile(mediaPath),
-            });
-            api.logger.info(`[octopus] outbound media sent conversation=${conversationId} media=${JSON.stringify(mediaUrl)}`);
-          }
-          api.logger.info(
-            `[octopus] timing stage=deliver_complete conversation=${conversationId} elapsedMs=${Date.now() - receivedAtMs}`,
-          );
+          bufferedMediaUrls.push(...mediaUrls);
         },
         onError: (error: unknown, info: { kind: string }) => {
           api.logger.error(
@@ -2014,6 +2606,46 @@ async function handleInboundMessage(params: {
         },
       },
     });
+    if (replyTarget) {
+      const finalReplyText = selectFinalReplyText(bufferedReplyTexts);
+      if (finalReplyText) {
+        const outboundReplyText =
+          pendingAction && confirmsPendingActionCompleted(pendingAction, finalReplyText)
+            ? buildPendingActionConfirmation(pendingAction) || finalReplyText
+            : normalizeReplyForTurnFocus(finalReplyText, turnFocus);
+        await sendOctopusTextReply({
+          api, account, conversationId, replyTarget,
+          text: outboundReplyText, source: "reply",
+        });
+        if (!orchestratorOwnsHrDialog) {
+          await recordPendingActionFromReply({
+            accountId: account.accountId,
+            conversationId,
+            replyTarget,
+            replyText: outboundReplyText,
+          });
+        }
+        if (pendingAction && confirmsPendingActionCompleted(pendingAction, finalReplyText)) {
+          await clearPendingAction(account.accountId, replyTarget);
+        }
+        api.logger.info(
+          `[octopus] timing stage=first_text_reply conversation=${conversationId} bufferedTexts=${bufferedReplyTexts.length} elapsedMs=${Date.now() - receivedAtMs}`,
+        );
+      }
+      for (const mediaUrl of uniqueStrings(bufferedMediaUrls)) {
+        await octopusPlugin.outbound.sendMedia({
+          cfg: api.config,
+          accountId: account.accountId,
+          to: replyTarget,
+          mediaUrl,
+          mediaReadFile: async (mediaPath: string) => fs.readFile(mediaPath),
+        });
+        api.logger.info(`[octopus] outbound media sent conversation=${conversationId} media=${JSON.stringify(mediaUrl)}`);
+      }
+      api.logger.info(
+        `[octopus] timing stage=deliver_complete conversation=${conversationId} bufferedTexts=${bufferedReplyTexts.length} mediaCount=${uniqueStrings(bufferedMediaUrls).length} elapsedMs=${Date.now() - receivedAtMs}`,
+      );
+    }
   } finally {
     await typingLoop.stop();
     api.logger.info(
@@ -2134,7 +2766,7 @@ const octopusPlugin: ChannelPlugin<ResolvedOctopusAccount> = {
       if (!sanitized.replyText) return { channel: PROVIDER_NAME, messageId: `suppressed-${Date.now()}` };
       const result = await aiOctopusRequest(account, "/client/conversation/reply", {
         messaging_product: "whatsapp",
-        conversation_id: conversationId,
+        conversation_id: formatConversationIdForApi(conversationId),
         to,
         type: "text",
         recipient_type: "individual",
@@ -2193,7 +2825,7 @@ const octopusPlugin: ChannelPlugin<ResolvedOctopusAccount> = {
         });
         await aiOctopusRequest(account, "/client/conversation/reply", {
           messaging_product: "whatsapp",
-          conversation_id: conversationId,
+          conversation_id: formatConversationIdForApi(conversationId),
           to,
           type: isImage ? "image" : "document",
           recipient_type: "individual",
@@ -2206,7 +2838,7 @@ const octopusPlugin: ChannelPlugin<ResolvedOctopusAccount> = {
         const dataUri = `data:${mimeType};base64,${b64}`;
         await aiOctopusRequest(account, "/client/conversation/reply", {
           messaging_product: "whatsapp",
-          conversation_id: conversationId,
+          conversation_id: formatConversationIdForApi(conversationId),
           to,
           type: isImage ? "image" : "document",
           recipient_type: "individual",
@@ -2217,7 +2849,7 @@ const octopusPlugin: ChannelPlugin<ResolvedOctopusAccount> = {
       } else if (!isLocalFile) {
         await aiOctopusRequest(account, "/client/conversation/reply", {
           messaging_product: "whatsapp",
-          conversation_id: conversationId,
+          conversation_id: formatConversationIdForApi(conversationId),
           to,
           type: isImage ? "image" : "document",
           recipient_type: "individual",
@@ -2238,6 +2870,19 @@ const plugin = {
   id: "octopus-channel",
   name: "AI Octopus Channel",
   description: "Generic AI Octopus channel transport for OpenClaw.",
+  kind: "channel",
+  channels: [PROVIDER_NAME],
+  channelConfigs: {
+    [PROVIDER_NAME]: {
+      label: "AI Octopus",
+      description: "Native AI Octopus WhatsApp webhook channel.",
+      schema: {
+        type: "object",
+        additionalProperties: true,
+        properties: {},
+      },
+    },
+  },
   configSchema: {
     type: "object",
     additionalProperties: false,
@@ -2312,8 +2957,9 @@ const plugin = {
             return true;
           }
           const conversationId = String(conversationIdValue);
+          const conversationIdCandidates = summarizeConversationIdCandidates(parsed);
           api.logger.info(
-            `[octopus] timing stage=webhook_received conversation=${conversationId} method=${req.method} elapsedMs=${Date.now() - receivedAtMs}`,
+            `[octopus] timing stage=webhook_received conversation=${conversationId} method=${req.method} elapsedMs=${Date.now() - receivedAtMs} conversationIdCandidates=${JSON.stringify(conversationIdCandidates)}`,
           );
           writeJson(res, 200, {
             ok: true,

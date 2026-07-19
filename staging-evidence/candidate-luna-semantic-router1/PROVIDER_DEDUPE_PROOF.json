@@ -1,0 +1,101 @@
+{
+  "changed_payload_duplicate": true,
+  "changed_payload_identity_match": false,
+  "concurrent_claims": [
+    {
+      "claimed": true,
+      "dedupe_available": true,
+      "identity": {
+        "account_id": "internal-luna-proof",
+        "conversation_id": "900001",
+        "payload_sha256": "d2991529e5bd412cfcb0760e7c2da500f5742130c9c03f552b89afbfe32c34d3",
+        "provider": "luna-proof",
+        "provider_message_id": "luna-dedupe-55d03dc8f8e34a0abc8d2b867a55c11c",
+        "sender_phone": "96550000001"
+      },
+      "inbound_id": "89de8b50-1bcb-424c-a327-857f83aa23a2"
+    },
+    {
+      "claimed": false,
+      "dedupe_available": true,
+      "duplicate": true,
+      "existing": {
+        "conversation_id": "900001",
+        "error": null,
+        "inbound_id": "89de8b50-1bcb-424c-a327-857f83aa23a2",
+        "payload_sha256": "d2991529e5bd412cfcb0760e7c2da500f5742130c9c03f552b89afbfe32c34d3",
+        "response_json": null,
+        "sender_phone": "96550000001",
+        "status": "processing"
+      },
+      "identity": {
+        "account_id": "internal-luna-proof",
+        "conversation_id": "900001",
+        "payload_sha256": "d2991529e5bd412cfcb0760e7c2da500f5742130c9c03f552b89afbfe32c34d3",
+        "provider": "luna-proof",
+        "provider_message_id": "luna-dedupe-55d03dc8f8e34a0abc8d2b867a55c11c",
+        "sender_phone": "96550000001"
+      },
+      "identity_match": true
+    }
+  ],
+  "concurrent_single_claim": true,
+  "extracted_at_channel": "wamid.HBgLLUNA0001PROOF",
+  "fixed_metadata_keys": [
+    "latest_user_language",
+    "message_id",
+    "provider",
+    "provider_message_id",
+    "provider_payload",
+    "source",
+    "wamid"
+  ],
+  "generic_agent_bypass_checks": {
+    "authoritative_with_reply": {
+      "falls_through_to_generic_agent": false,
+      "reason": "authoritative_return_even_without_reply"
+    },
+    "authoritative_without_reply": {
+      "falls_through_to_generic_agent": false,
+      "reason": "authoritative_return_even_without_reply"
+    },
+    "missing_message_id": {
+      "falls_through_to_generic_agent": false,
+      "reason": "missing_provider_message_id_return"
+    },
+    "orchestrator_null": {
+      "falls_through_to_generic_agent": false,
+      "reason": "orchestrator_fail_closed_safe_reply"
+    }
+  },
+  "legacy_metadata_keys": [
+    "latest_user_language",
+    "provider_payload",
+    "source"
+  ],
+  "mapping_ok": true,
+  "missing_id_dedupe_available": false,
+  "mode": "staging_db_synthetic_no_delivery",
+  "nested_provider_payload_fallback_ok": true,
+  "no_generic_agent_bypass": true,
+  "orchestrator_id_from_fixed_top_level": "wamid.HBgLLUNA0001PROOF",
+  "orchestrator_id_from_legacy_nested_only": "wamid.HBgLLUNA0001PROOF",
+  "pass": true,
+  "production_shaped_payload": {
+    "conversation_id": "900001",
+    "messages": [
+      {
+        "from": "96550000001",
+        "id": "wamid.HBgLLUNA0001PROOF",
+        "text": {
+          "body": "status?"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "provider_field": "messages[0].id",
+  "row_count_after_cleanup": 0,
+  "row_count_before_cleanup": 1,
+  "top_level_forwarding_ok": true
+}
