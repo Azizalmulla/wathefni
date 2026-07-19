@@ -670,10 +670,7 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
                 "actor_type": "ai" if actor_type == "ai" else "human",
                 "actor_phone": getattr(ctx.request, "sender_phone", None),
                 "channel": "whatsapp" if not meta.get("dashboard") else "web",
-                "permissions": set(permissions) if permissions else {
-                    "candidate.manage",
-                    "candidate.decide",
-                },
+                "permissions": set(permissions),
                 "expected_from_stage": str(app.get("status") or "") or None,
                 "idempotency_key": str(ctx.action.get("idempotency_key") or "") or None,
             }
@@ -750,7 +747,7 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
             legacy,
             company_code=company_code,
             app_key=str(app.get("app_key") or ""),
-            permissions=set(permissions) if permissions else {"candidate.decide"},
+            permissions=set(permissions),
             hire_override=hire_override and actor_type == "human",
             override_reason=str(ctx.action.get("override_reason") or (meta.get("override_reason") if isinstance(meta, dict) else "") or "")
             or None,
@@ -798,7 +795,7 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "actor_type": "human",
             "actor_phone": getattr(ctx.request, "sender_phone", None),
             "channel": "whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
-            "permissions": set(permissions) if permissions else {"candidate.decide"},
+            "permissions": set(permissions),
             "expected_from_stage": str(app.get("status") or "") or None,
         }
     update = legacy.update_application_status(app, "hired", **kwargs) if kwargs else legacy.update_application_status(app, "hired")
@@ -2053,7 +2050,7 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
                 actor_type="human",
                 actor_phone=getattr(ctx.request, "sender_phone", None),
                 channel="whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
-                permissions=set(permissions) if permissions else {"interview.manage", "candidate.manage"},
+                permissions=set(permissions),
                 expected_from_stage=str(app.get("status") or "") or None,
             )
             if isinstance(interview, dict):

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 import uuid
 
+import candidate_messages
 import offer_lifecycle as offers
 
 
@@ -665,12 +666,17 @@ def send_offer(
     delivery_result = None
     outbound_event_id = None
     try:
-        message = (
-            f"You have received an employment offer"
-            f"{(' for ' + str(offer.get('position_title'))) if offer.get('position_title') else ''}.\n"
-            f"Review and respond: {respond_url}"
+        application = legacy.find_application_by_key(str(offer.get("app_key") or "")) if hasattr(legacy, "find_application_by_key") else None
+        app_raw = application.get("raw_json") if isinstance(application, dict) and isinstance(application.get("raw_json"), dict) else {}
+        locale = candidate_messages.normalize_locale(app_raw.get("candidate_locale") or app_raw.get("locale") or "en")
+        candidate_template = candidate_messages.render(
+            "offer_invitation",
+            locale,
+            role=offer.get("position_title") or (application or {}).get("position_title") or "the role",
+            link=respond_url,
         )
-        if recipient and hasattr(legacy, "send_company_whatsapp_message"):
+        message = candidate_template["text"]
+        if hasattr(legacy, "send_company_whatsapp_message"):
             send_result = legacy.send_company_whatsapp_message(
                 company,
                 recipient,
@@ -682,10 +688,11 @@ def send_offer(
                     "offer_id": offer_id,
                     "offer_version": version,
                     "document_sha256": version_row.get("document_sha256"),
+                    "candidate_template": candidate_template,
                 },
             )
             if isinstance(send_result, dict) and send_result.get("ok"):
-                delivery_status = "sent"
+                delivery_status = "intentionally_skipped" if send_result.get("dry_run") else "sent"
                 outbound_event_id = str(send_result.get("event_id") or send_result.get("outbound_event_id") or "") or None
             else:
                 delivery_status = "failed"
@@ -698,6 +705,12 @@ def send_offer(
     except Exception as exc:
         delivery_status = "failed"
         delivery_result = str(exc)
+    if delivery_status == "failed":
+        raise offers.OfferAuthorityError(
+            "offer_delivery_failed",
+            f"Offer delivery failed: {delivery_result or 'send_failed'}",
+            status_code=502,
+        )
 
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
@@ -757,6 +770,7 @@ def send_offer(
                             "token_purpose": "respond",
                             "offer_id": offer_id,
                             "offer_version": version,
+                            "candidate_template": candidate_template,
                         }
                     ),
                 ),
@@ -775,6 +789,7 @@ def send_offer(
                     "delivery_status": delivery_status,
                     "document_sha256": version_row.get("document_sha256"),
                     "offer_version": version,
+                    "candidate_template": candidate_template,
                 },
             )
         conn.commit()

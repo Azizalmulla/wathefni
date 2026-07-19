@@ -1,0 +1,144 @@
+"""Versioned bilingual copy for the contained candidate WhatsApp flow.
+
+Only candidate-visible, externally meaningful moments belong here. Internal
+workflow states, ranking, AI analysis, and HR task details are intentionally
+excluded.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any
+
+CATALOG_VERSION = "candidate_flow_v1"
+SUPPORTED_LOCALES = frozenset({"en", "ar"})
+
+TEMPLATES: dict[str, dict[str, str]] = {
+    "welcome": {
+        "en": "Welcome to Wathefni. Send your APPLY code, or tell me which role you want to apply for.",
+        "ar": "حياك في وظفني. أرسل رمز التقديم (APPLY)، أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها.",
+    },
+    "role_resolved_cv_request": {
+        "en": "Your application for {role} is ready. Please send your CV as a PDF, DOCX, or clear image.",
+        "ar": "تم تحديد طلبك لوظيفة {role}. أرسل سيرتك الذاتية بصيغة PDF أو DOCX أو صورة واضحة.",
+    },
+    "file_received_checking": {
+        "en": "We received your file and are checking that it is a supported, readable CV.",
+        "ar": "استلمنا الملف ونتحقق الآن من أنه سيرة ذاتية مدعومة وقابلة للقراءة.",
+    },
+    "cv_accepted": {
+        "en": "Your CV was accepted successfully. HR will handle the next step of your application.",
+        "ar": "تم قبول سيرتك الذاتية بنجاح. سيتولى فريق الموارد البشرية الخطوة التالية في طلبك.",
+    },
+    "cv_invalid": {
+        "en": "We could not accept this CV because it is unsupported, blank, corrupt, password-protected, or unreadable. Please send a readable PDF, DOCX, or clear image.",
+        "ar": "تعذر قبول السيرة الذاتية لأنها غير مدعومة أو فارغة أو تالفة أو محمية بكلمة مرور أو غير قابلة للقراءة. أرسل ملف PDF أو DOCX قابلاً للقراءة أو صورة واضحة.",
+    },
+    "ambiguous_application": {
+        "en": "You have more than one active application. Please send the APPLY code for the application you mean.",
+        "ar": "لديك أكثر من طلب توظيف نشط. أرسل رمز التقديم (APPLY) الخاص بالطلب المقصود.",
+    },
+    "no_active_application": {
+        "en": "I could not find an active application for you. Please send an APPLY code or tell me which role you want to apply for.",
+        "ar": "لم أجد لك طلب توظيف نشطاً. أرسل رمز التقديم (APPLY) أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها.",
+    },
+    "cv_replacement_requested": {
+        "en": "Please send the replacement CV as a PDF, DOCX, or clear image. We will check it before updating your application.",
+        "ar": "أرسل السيرة الذاتية البديلة بصيغة PDF أو DOCX أو صورة واضحة. سنتحقق منها قبل تحديث طلبك.",
+    },
+    "cv_updated_accepted": {
+        "en": "Your updated CV was accepted successfully and is now attached to your application.",
+        "ar": "تم قبول سيرتك الذاتية المحدثة بنجاح وإرفاقها بطلبك.",
+    },
+    "application_status": {
+        "en": "Your application for {role} is currently: {status}.",
+        "ar": "حالة طلبك لوظيفة {role} حالياً: {status}.",
+    },
+    "assessment_invitation": {
+        "en": "You have an assessment for {role}. Open your secure link: {link}",
+        "ar": "لديك تقييم خاص بطلبك لوظيفة {role}. افتح الرابط الآمن: {link}",
+    },
+    "interview_invitation": {
+        "en": "You have an interview for {role}. {details} {link}",
+        "ar": "لديك مقابلة لوظيفة {role}. {details} {link}",
+    },
+    "interview_update": {
+        "en": "Your interview for {role} was updated. {details} {link}",
+        "ar": "تم تحديث مقابلتك لوظيفة {role}. {details} {link}",
+    },
+    "offer_invitation": {
+        "en": "You have an employment offer for {role}. Review and respond using this secure link: {link}",
+        "ar": "لديك عرض وظيفي لوظيفة {role}. راجع العرض وأرسل ردك عبر الرابط الآمن: {link}",
+    },
+    "withdrawal_confirm_prompt": {
+        "en": "Please confirm that you want to withdraw your application for {role}. Reply CONFIRM to withdraw or CANCEL to keep it active.",
+        "ar": "يرجى تأكيد رغبتك في سحب طلبك لوظيفة {role}. أرسل «تأكيد» للسحب أو «إلغاء» للإبقاء على الطلب.",
+    },
+    "withdrawal_confirmation": {
+        "en": "Your application for {role} has been withdrawn.",
+        "ar": "تم سحب طلبك لوظيفة {role}.",
+    },
+    "hr_handoff_confirmation": {
+        "en": "Your request to speak to HR was recorded. Automated application messages are paused until HR completes the handoff.",
+        "ar": "تم تسجيل طلبك للتحدث مع الموارد البشرية. تم إيقاف رسائل الطلب التلقائية مؤقتاً حتى ينهي فريق الموارد البشرية المتابعة.",
+    },
+}
+
+STATUS_LABELS: dict[str, dict[str, str]] = {
+    "awaiting_cv": {"en": "waiting for your CV", "ar": "بانتظار السيرة الذاتية"},
+    "cv_processing": {"en": "CV being checked", "ar": "جارٍ التحقق من السيرة الذاتية"},
+    "ready_for_review": {"en": "with HR for review", "ar": "قيد مراجعة الموارد البشرية"},
+    "shortlisted": {"en": "with HR for the next step", "ar": "لدى الموارد البشرية للخطوة التالية"},
+    "interview": {"en": "interview stage", "ar": "مرحلة المقابلة"},
+    "hired": {"en": "hired", "ar": "تم التوظيف"},
+    "rejected": {"en": "closed", "ar": "مغلق"},
+    "withdrawn": {"en": "withdrawn", "ar": "تم السحب"},
+}
+
+
+def normalize_locale(value: Any) -> str:
+    raw = str(value or "").strip().lower().replace("_", "-")
+    return "ar" if raw == "ar" or raw.startswith("ar-") else "en"
+
+
+def infer_locale(text: Any = None, *, preferred: Any = None) -> str:
+    if str(preferred or "").strip():
+        return normalize_locale(preferred)
+    return "ar" if re.search(r"[\u0600-\u06FF]", str(text or "")) else "en"
+
+
+def status_label(status: Any, locale: Any = "en") -> str:
+    loc = normalize_locale(locale)
+    key = str(status or "").strip().lower()
+    labels = STATUS_LABELS.get(key)
+    if labels:
+        return labels[loc]
+    return key.replace("_", " ") or ("غير معروف" if loc == "ar" else "unknown")
+
+
+def render(template_key: str, locale: Any = "en", **values: Any) -> dict[str, str]:
+    if template_key not in TEMPLATES:
+        raise KeyError(f"unknown_candidate_template:{template_key}")
+    loc = normalize_locale(locale)
+    safe_values = {key: str(value or "").strip() for key, value in values.items()}
+    text = " ".join(TEMPLATES[template_key][loc].format(**safe_values).split())
+    return {
+        "template_key": template_key,
+        "template_version": CATALOG_VERSION,
+        "locale": loc,
+        "text": text,
+    }
+
+
+def inventory() -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for key in sorted(TEMPLATES):
+        rows.append(
+            {
+                "template_key": key,
+                "template_version": CATALOG_VERSION,
+                "en": TEMPLATES[key]["en"],
+                "ar": TEMPLATES[key]["ar"],
+            }
+        )
+    return rows

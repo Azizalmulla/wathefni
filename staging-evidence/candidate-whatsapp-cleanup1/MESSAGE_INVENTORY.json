@@ -1,0 +1,104 @@
+[
+  {
+    "template_key": "ambiguous_application",
+    "template_version": "candidate_flow_v1",
+    "en": "You have more than one active application. Please send the APPLY code for the application you mean.",
+    "ar": "لديك أكثر من طلب توظيف نشط. أرسل رمز التقديم (APPLY) الخاص بالطلب المقصود."
+  },
+  {
+    "template_key": "application_status",
+    "template_version": "candidate_flow_v1",
+    "en": "Your application for {role} is currently: {status}.",
+    "ar": "حالة طلبك لوظيفة {role} حالياً: {status}."
+  },
+  {
+    "template_key": "assessment_invitation",
+    "template_version": "candidate_flow_v1",
+    "en": "You have an assessment for {role}. Open your secure link: {link}",
+    "ar": "لديك تقييم خاص بطلبك لوظيفة {role}. افتح الرابط الآمن: {link}"
+  },
+  {
+    "template_key": "cv_accepted",
+    "template_version": "candidate_flow_v1",
+    "en": "Your CV was accepted successfully. HR will handle the next step of your application.",
+    "ar": "تم قبول سيرتك الذاتية بنجاح. سيتولى فريق الموارد البشرية الخطوة التالية في طلبك."
+  },
+  {
+    "template_key": "cv_invalid",
+    "template_version": "candidate_flow_v1",
+    "en": "We could not accept this CV because it is unsupported, blank, corrupt, password-protected, or unreadable. Please send a readable PDF, DOCX, or clear image.",
+    "ar": "تعذر قبول السيرة الذاتية لأنها غير مدعومة أو فارغة أو تالفة أو محمية بكلمة مرور أو غير قابلة للقراءة. أرسل ملف PDF أو DOCX قابلاً للقراءة أو صورة واضحة."
+  },
+  {
+    "template_key": "cv_replacement_requested",
+    "template_version": "candidate_flow_v1",
+    "en": "Please send the replacement CV as a PDF, DOCX, or clear image. We will check it before updating your application.",
+    "ar": "أرسل السيرة الذاتية البديلة بصيغة PDF أو DOCX أو صورة واضحة. سنتحقق منها قبل تحديث طلبك."
+  },
+  {
+    "template_key": "cv_updated_accepted",
+    "template_version": "candidate_flow_v1",
+    "en": "Your updated CV was accepted successfully and is now attached to your application.",
+    "ar": "تم قبول سيرتك الذاتية المحدثة بنجاح وإرفاقها بطلبك."
+  },
+  {
+    "template_key": "file_received_checking",
+    "template_version": "candidate_flow_v1",
+    "en": "We received your file and are checking that it is a supported, readable CV.",
+    "ar": "استلمنا الملف ونتحقق الآن من أنه سيرة ذاتية مدعومة وقابلة للقراءة."
+  },
+  {
+    "template_key": "hr_handoff_confirmation",
+    "template_version": "candidate_flow_v1",
+    "en": "Your request to speak to HR was recorded. Automated application messages are paused until HR completes the handoff.",
+    "ar": "تم تسجيل طلبك للتحدث مع الموارد البشرية. تم إيقاف رسائل الطلب التلقائية مؤقتاً حتى ينهي فريق الموارد البشرية المتابعة."
+  },
+  {
+    "template_key": "interview_invitation",
+    "template_version": "candidate_flow_v1",
+    "en": "You have an interview for {role}. {details} {link}",
+    "ar": "لديك مقابلة لوظيفة {role}. {details} {link}"
+  },
+  {
+    "template_key": "interview_update",
+    "template_version": "candidate_flow_v1",
+    "en": "Your interview for {role} was updated. {details} {link}",
+    "ar": "تم تحديث مقابلتك لوظيفة {role}. {details} {link}"
+  },
+  {
+    "template_key": "no_active_application",
+    "template_version": "candidate_flow_v1",
+    "en": "I could not find an active application for you. Please send an APPLY code or tell me which role you want to apply for.",
+    "ar": "لم أجد لك طلب توظيف نشطاً. أرسل رمز التقديم (APPLY) أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها."
+  },
+  {
+    "template_key": "offer_invitation",
+    "template_version": "candidate_flow_v1",
+    "en": "You have an employment offer for {role}. Review and respond using this secure link: {link}",
+    "ar": "لديك عرض وظيفي لوظيفة {role}. راجع العرض وأرسل ردك عبر الرابط الآمن: {link}"
+  },
+  {
+    "template_key": "role_resolved_cv_request",
+    "template_version": "candidate_flow_v1",
+    "en": "Your application for {role} is ready. Please send your CV as a PDF, DOCX, or clear image.",
+    "ar": "تم تحديد طلبك لوظيفة {role}. أرسل سيرتك الذاتية بصيغة PDF أو DOCX أو صورة واضحة."
+  },
+  {
+    "template_key": "welcome",
+    "template_version": "candidate_flow_v1",
+    "en": "Welcome to Wathefni. Send your APPLY code, or tell me which role you want to apply for.",
+    "ar": "حياك في وظفني. أرسل رمز التقديم (APPLY)، أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها."
+  },
+  {
+    "template_key": "withdrawal_confirm_prompt",
+    "template_version": "candidate_flow_v1",
+    "en": "Please confirm that you want to withdraw your application for {role}. Reply CONFIRM to withdraw or CANCEL to keep it active.",
+    "ar": "يرجى تأكيد رغبتك في سحب طلبك لوظيفة {role}. أرسل «تأكيد» للسحب أو «إلغاء» للإبقاء على الطلب."
+  },
+  {
+    "template_key": "withdrawal_confirmation",
+    "template_version": "candidate_flow_v1",
+    "en": "Your application for {role} has been withdrawn.",
+    "ar": "تم سحب طلبك لوظيفة {role}."
+  }
+]

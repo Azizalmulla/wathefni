@@ -257,6 +257,21 @@ def ensure_lifecycle_schema(cur: Any) -> None:
           ON conversation_application_bindings (company_code, app_key)
         """
     )
+    cur.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS hr_tasks_candidate_handoff_open_uq
+          ON hr_tasks (
+            company_code,
+            task_type,
+            (metadata->>'app_key'),
+            (metadata->>'conversation_id')
+          )
+          WHERE status = 'open'
+            AND task_type = 'candidate_handoff'
+            AND metadata ? 'app_key'
+            AND metadata ? 'conversation_id'
+        """
+    )
     # Idempotent ready-for-review tasks: one open task per (company, app_key, cv_version).
     cur.execute(
         """
@@ -297,6 +312,17 @@ def bind_conversation_application(
         return {"ok": False, "error": "invalid_binding_inputs"}
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT app_key
+                FROM applications
+                WHERE app_key=%s AND company_code=%s AND phone=%s
+                LIMIT 1
+                """,
+                (app, company, phone_digits),
+            )
+            if not cur.fetchone():
+                return {"ok": False, "error": "application_binding_mismatch"}
             cur.execute(
                 """
                 INSERT INTO conversation_application_bindings
@@ -470,6 +496,225 @@ def resolve_conversation_application(
                     for r in eligible
                 ],
             }
+
+
+def candidate_conversation_binding(
+    legacy: Any,
+    *,
+    company_code: str,
+    conversation_id: str | None,
+    phone: str | None,
+) -> dict[str, Any] | None:
+    company = str(company_code or "").strip().upper()
+    conv = str(conversation_id or "").strip()
+    phone_digits = legacy.digits(phone)
+    if not company or not conv or not phone_digits:
+        return None
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM conversation_application_bindings
+                WHERE company_code=%s AND conversation_id=%s AND phone=%s
+                LIMIT 1
+                """,
+                (company, conv, phone_digits),
+            )
+            row = cur.fetchone()
+    return dict(row) if row else None
+
+
+def update_candidate_conversation_state(
+    legacy: Any,
+    *,
+    company_code: str,
+    conversation_id: str,
+    phone: str,
+    app_key: str,
+    updates: dict[str, Any],
+) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    conv = str(conversation_id or "").strip()
+    phone_digits = legacy.digits(phone)
+    app = str(app_key or "").strip()
+    if not company or not conv or not phone_digits or not app:
+        return {"ok": False, "error": "invalid_binding_inputs"}
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE conversation_application_bindings
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE company_code=%s AND conversation_id=%s AND phone=%s AND app_key=%s
+                RETURNING *
+                """,
+                (legacy.Json(legacy.json_safe(updates or {})), company, conv, phone_digits, app),
+            )
+            row = cur.fetchone()
+        conn.commit()
+    if not row:
+        return {"ok": False, "error": "binding_not_found"}
+    return {"ok": True, "binding": legacy.json_safe(dict(row))}
+
+
+def request_candidate_handoff(
+    legacy: Any,
+    *,
+    application: dict[str, Any],
+    conversation_id: str,
+    account_id: str | None,
+    locale: str,
+) -> dict[str, Any]:
+    company = str(application.get("company_code") or "").strip().upper()
+    app_key = str(application.get("app_key") or "").strip()
+    phone = legacy.digits(application.get("phone"))
+    conv = str(conversation_id or "").strip()
+    if not company or not app_key or not phone or not conv:
+        return {"ok": False, "error": "invalid_handoff_binding"}
+    binding = bind_conversation_application(
+        legacy,
+        company_code=company,
+        conversation_id=conv,
+        phone=phone,
+        app_key=app_key,
+        account_id=account_id,
+        bound_reason="candidate_handoff",
+    )
+    if not binding.get("ok"):
+        return binding
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO hr_tasks
+                  (company_code, task_type, source, title, detail, status, priority, metadata)
+                VALUES (%s,'candidate_handoff','candidate_whatsapp',
+                        'Candidate requested HR handoff',
+                        'Candidate asked to speak to HR. Automated application messages are paused.',
+                        'open','high',%s)
+                ON CONFLICT DO NOTHING
+                RETURNING *
+                """,
+                (
+                    company,
+                    legacy.Json(
+                        legacy.json_safe(
+                            {
+                                "app_key": app_key,
+                                "phone": phone,
+                                "conversation_id": conv,
+                                "account_id": account_id,
+                                "locale": locale,
+                                "automation_pause_required": True,
+                            }
+                        )
+                    ),
+                ),
+            )
+            task = cur.fetchone()
+            if not task:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM hr_tasks
+                    WHERE company_code=%s
+                      AND task_type='candidate_handoff'
+                      AND status='open'
+                      AND metadata->>'app_key'=%s
+                      AND metadata->>'conversation_id'=%s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """,
+                    (company, app_key, conv),
+                )
+                task = cur.fetchone()
+            task_dict = dict(task) if task else {}
+            cur.execute(
+                """
+                UPDATE conversation_application_bindings
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE company_code=%s AND conversation_id=%s AND phone=%s AND app_key=%s
+                RETURNING *
+                """,
+                (
+                    legacy.Json(
+                        legacy.json_safe(
+                            {
+                                "automation_paused": True,
+                                "automation_pause_reason": "candidate_requested_hr",
+                                "handoff_task_id": str(task_dict.get("task_id") or ""),
+                                "handoff_requested_at": legacy.now_iso(),
+                            }
+                        )
+                    ),
+                    company,
+                    conv,
+                    phone,
+                    app_key,
+                ),
+            )
+            updated = cur.fetchone()
+        conn.commit()
+    return {
+        "ok": bool(task_dict and updated),
+        "task": legacy.json_safe(task_dict),
+        "binding": legacy.json_safe(dict(updated)) if updated else None,
+    }
+
+
+def resume_candidate_handoff(
+    legacy: Any,
+    *,
+    company_code: str,
+    task: dict[str, Any],
+    resumed_by: str | None,
+) -> dict[str, Any]:
+    metadata = task.get("metadata") if isinstance(task.get("metadata"), dict) else {}
+    company = str(company_code or "").strip().upper()
+    app_key = str(metadata.get("app_key") or "").strip()
+    conv = str(metadata.get("conversation_id") or "").strip()
+    phone = legacy.digits(metadata.get("phone"))
+    if str(task.get("task_type") or "") != "candidate_handoff":
+        return {"ok": True, "skipped": "not_candidate_handoff"}
+    if not company or not app_key or not conv or not phone:
+        return {"ok": False, "error": "invalid_handoff_task_binding"}
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE conversation_application_bindings
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE company_code=%s AND conversation_id=%s AND phone=%s AND app_key=%s
+                RETURNING *
+                """,
+                (
+                    legacy.Json(
+                        legacy.json_safe(
+                            {
+                                "automation_paused": False,
+                                "automation_pause_reason": None,
+                                "handoff_resumed_at": legacy.now_iso(),
+                                "handoff_resumed_by": resumed_by,
+                            }
+                        )
+                    ),
+                    company,
+                    conv,
+                    phone,
+                    app_key,
+                ),
+            )
+            row = cur.fetchone()
+        conn.commit()
+    return {
+        "ok": bool(row),
+        "binding": legacy.json_safe(dict(row)) if row else None,
+        "error": None if row else "handoff_binding_not_found",
+    }
 
 
 # ---------------------------------------------------------------------------

@@ -76,6 +76,7 @@ import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
 import cv_docx as _cv_docx  # noqa: E402
 import cv_extraction as _cv_extraction  # noqa: E402
+import candidate_messages as _candidate_messages  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
@@ -1355,6 +1356,25 @@ def _ensure_schema_impl() -> None:
       updated_at timestamptz NOT NULL DEFAULT now(),
       expires_at timestamptz NOT NULL DEFAULT now() + interval '2 hours'
     );
+    CREATE TABLE IF NOT EXISTS whatsapp_inbound_messages (
+      inbound_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      provider text NOT NULL DEFAULT 'octopus',
+      account_id text NOT NULL DEFAULT 'default',
+      provider_message_id text NOT NULL,
+      sender_phone text NOT NULL,
+      conversation_id text,
+      company_code text,
+      payload_sha256 text NOT NULL,
+      status text NOT NULL DEFAULT 'processing',
+      response_json jsonb,
+      error text,
+      first_seen_at timestamptz NOT NULL DEFAULT now(),
+      completed_at timestamptz,
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (provider, account_id, provider_message_id)
+    );
+    CREATE INDEX IF NOT EXISTS whatsapp_inbound_messages_sender_idx
+      ON whatsapp_inbound_messages (sender_phone, first_seen_at DESC);
     CREATE TABLE IF NOT EXISTS file_registry (
       file_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       company_code text NOT NULL,
@@ -3378,6 +3398,176 @@ class WhatsAppTurnRequest(BaseModel):
     raw_text: str = ""
     media: dict[str, Any] | None = None
     metadata: dict[str, Any] | None = None
+
+
+def candidate_message_payload(
+    template_key: str,
+    *,
+    request: WhatsAppTurnRequest | None = None,
+    application: dict[str, Any] | None = None,
+    locale: str | None = None,
+    **values: Any,
+) -> dict[str, str]:
+    preferred = locale
+    if not preferred and request and isinstance(request.metadata, dict):
+        preferred = str(request.metadata.get("locale") or request.metadata.get("language") or "")
+    if not preferred and isinstance(application, dict):
+        raw = application.get("raw_json") if isinstance(application.get("raw_json"), dict) else {}
+        communication = raw.get("candidate_communication") if isinstance(raw.get("candidate_communication"), dict) else {}
+        preferred = str(
+            raw.get("candidate_locale")
+            or raw.get("locale")
+            or communication.get("locale")
+            or ""
+        )
+    loc = _candidate_messages.infer_locale(
+        request.raw_text if request else "",
+        preferred=preferred,
+    )
+    return _candidate_messages.render(template_key, loc, **values)
+
+
+def candidate_message_result(
+    template_key: str,
+    *,
+    request: WhatsAppTurnRequest | None = None,
+    application: dict[str, Any] | None = None,
+    locale: str | None = None,
+    **values: Any,
+) -> dict[str, Any]:
+    template = candidate_message_payload(
+        template_key,
+        request=request,
+        application=application,
+        locale=locale,
+        **values,
+    )
+    return {"reply": template["text"], "candidate_template": template}
+
+
+def _whatsapp_provider_message_id(request: WhatsAppTurnRequest) -> str | None:
+    metadata = request.metadata if isinstance(request.metadata, dict) else {}
+    for key in ("provider_message_id", "message_id", "wamid", "external_message_id"):
+        value = str(metadata.get(key) or "").strip()
+        if value:
+            return value[:500]
+    return None
+
+
+def _whatsapp_inbound_identity(request: WhatsAppTurnRequest) -> dict[str, str] | None:
+    provider_message_id = _whatsapp_provider_message_id(request)
+    if not provider_message_id:
+        return None
+    metadata = request.metadata if isinstance(request.metadata, dict) else {}
+    provider = str(metadata.get("provider") or "octopus").strip().lower() or "octopus"
+    account_id = str(request.account_id or metadata.get("account_id") or "default").strip() or "default"
+    payload = {
+        "sender_phone": digits(request.sender_phone),
+        "conversation_id": str(request.conversation_id or ""),
+        "raw_text": str(request.raw_text or ""),
+        "media": request.media or {},
+    }
+    return {
+        "provider": provider,
+        "account_id": account_id,
+        "provider_message_id": provider_message_id,
+        "sender_phone": digits(request.sender_phone),
+        "conversation_id": str(request.conversation_id or ""),
+        "payload_sha256": hashlib.sha256(
+            json.dumps(json_safe(payload), ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
+    }
+
+
+def claim_whatsapp_inbound(request: WhatsAppTurnRequest) -> dict[str, Any]:
+    identity = _whatsapp_inbound_identity(request)
+    if not identity:
+        return {"claimed": False, "dedupe_available": False, "reason": "provider_message_id_missing"}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO whatsapp_inbound_messages
+                  (provider, account_id, provider_message_id, sender_phone,
+                   conversation_id, company_code, payload_sha256, status)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,'processing')
+                ON CONFLICT (provider, account_id, provider_message_id) DO NOTHING
+                RETURNING inbound_id::text
+                """,
+                (
+                    identity["provider"],
+                    identity["account_id"],
+                    identity["provider_message_id"],
+                    identity["sender_phone"],
+                    identity["conversation_id"] or None,
+                    request_company_code(request),
+                    identity["payload_sha256"],
+                ),
+            )
+            inserted = cur.fetchone()
+            if inserted:
+                conn.commit()
+                return {
+                    "claimed": True,
+                    "dedupe_available": True,
+                    "inbound_id": inserted["inbound_id"],
+                    "identity": identity,
+                }
+            cur.execute(
+                """
+                SELECT inbound_id::text, sender_phone, conversation_id,
+                       payload_sha256, status, response_json, error
+                FROM whatsapp_inbound_messages
+                WHERE provider=%s AND account_id=%s AND provider_message_id=%s
+                LIMIT 1
+                """,
+                (identity["provider"], identity["account_id"], identity["provider_message_id"]),
+            )
+            existing = dict(cur.fetchone() or {})
+        conn.commit()
+    identity_match = (
+        digits(existing.get("sender_phone")) == identity["sender_phone"]
+        and str(existing.get("conversation_id") or "") == identity["conversation_id"]
+        and str(existing.get("payload_sha256") or "") == identity["payload_sha256"]
+    )
+    return {
+        "claimed": False,
+        "dedupe_available": True,
+        "duplicate": True,
+        "identity_match": identity_match,
+        "identity": identity,
+        "existing": json_safe(existing),
+    }
+
+
+def complete_whatsapp_inbound(claim: dict[str, Any], response: OrchestratorResponse | dict[str, Any], *, error: str | None = None) -> None:
+    inbound_id = str(claim.get("inbound_id") or "")
+    if not inbound_id:
+        return
+    if isinstance(response, BaseModel):
+        payload = response.model_dump() if hasattr(response, "model_dump") else response.dict()
+    else:
+        payload = dict(response or {})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE whatsapp_inbound_messages
+                SET status=%s,
+                    response_json=%s,
+                    error=%s,
+                    completed_at=now(),
+                    updated_at=now()
+                WHERE inbound_id=%s
+                """,
+                (
+                    "failed" if error else "completed",
+                    Json(json_safe(payload)),
+                    str(error or "")[:1000] or None,
+                    inbound_id,
+                ),
+            )
+        conn.commit()
 
 
 class OrchestratorResponse(BaseModel):
@@ -20336,6 +20526,9 @@ def register_candidate_cv_file(
     company_code = str(application.get("company_code") or "WATHEFNI").upper()
     phone = digits(application.get("phone"))
     app_key = str(application.get("app_key") or f"{phone}-{company_code}-{application.get('position_code') or 'APPLICATION'}")
+    raw_json = dict(application.get("raw_json") or {})
+    prior_cv = dict(raw_json.get("cv") or {})
+    is_replacement = bool(prior_cv.get("filename") or prior_cv.get("storage"))
     storage_result = store_subject_file(
         company_code=company_code,
         owner_phone=phone,
@@ -20349,31 +20542,53 @@ def register_candidate_cv_file(
     storage_result["size_bytes"] = storage_result.get("size_bytes") or size_bytes
     original_filename = Path(str(media.get("path") or "")).name
     storage_metadata = storage_result.get("metadata") if isinstance(storage_result.get("metadata"), dict) else {}
+    checksum = storage_result.get("content_sha256") or checksum
+    if storage_result.get("ok") and checksum:
+        cur.execute(
+            """
+            SELECT fr.file_id::text,
+                   cd.document_id::text,
+                   cd.extraction_status
+            FROM file_registry fr
+            LEFT JOIN candidate_documents cd
+              ON cd.app_key=fr.subject_key
+             AND cd.document_type='cv'
+             AND cd.raw_json->'storage'->>'sha256'=fr.content_sha256
+            WHERE fr.company_code=%s
+              AND fr.subject_type='application'
+              AND fr.subject_key=%s
+              AND fr.file_kind=%s
+              AND fr.content_sha256=%s
+            ORDER BY cd.updated_at DESC NULLS LAST, fr.updated_at DESC
+            LIMIT 1
+            """,
+            (company_code, app_key, file_kind, checksum),
+        )
+        duplicate = cur.fetchone()
+        if duplicate:
+            return {
+                "ok": True,
+                "duplicate": True,
+                "already_validated": str(duplicate.get("extraction_status") or "") == "ok",
+                "app_key": app_key,
+                "document_id": str(duplicate.get("document_id") or "") or None,
+                "file_id": str(duplicate.get("file_id") or "") or None,
+                "storage": storage_result,
+                "is_replacement": is_replacement,
+            }
     registry_metadata = {
         "phone": phone,
         "app_key": app_key,
         "company_code": company_code,
         "position_code": application.get("position_code"),
         "source": "candidate_whatsapp_media",
-        "latest": True,
+        "latest": False,
+        "validation_status": "pending",
         "versioned_at": now_iso(),
+        "content_sha256": checksum,
+        "is_replacement": is_replacement,
         **(metadata or {}),
     }
-    try:
-        cur.execute(
-            """
-            UPDATE candidate_documents
-            SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
-                updated_at=now()
-            WHERE app_key=%s AND document_type='cv'
-            """,
-            (
-                Json({"latest": False, "superseded_at": now_iso(), "superseded_by_filename": original_filename}),
-                app_key,
-            ),
-        )
-    except Exception:
-        pass
     upsert_file_registry(
         cur,
         company_code=company_code,
@@ -20388,7 +20603,6 @@ def register_candidate_cv_file(
         storage_result=storage_result,
         metadata=registry_metadata,
     )
-    raw_json = dict(application.get("raw_json") or {})
     cv_json = dict(raw_json.get("cv") or {})
     cv_storage = {
         "provider": storage_result.get("provider"),
@@ -20416,18 +20630,25 @@ def register_candidate_cv_file(
     cv_json["previous_versions"] = previous_versions
     cv_json["latest"] = True
     cv_json["versioned_at"] = registry_metadata["versioned_at"]
-    cv_json.setdefault("path", str(source))
-    cv_json.setdefault("filename", original_filename)
-    cv_json.setdefault("source", "whatsapp_document")
-    raw_json["cv"] = cv_json
+    cv_json["path"] = str(source)
+    cv_json["filename"] = original_filename
+    cv_json["source"] = "whatsapp_document"
+    cv_json["is_replacement"] = is_replacement
+    if is_replacement:
+        raw_json["cv_pending"] = cv_json
+    else:
+        raw_json["cv"] = cv_json
+    if str((metadata or {}).get("candidate_locale") or "").strip():
+        raw_json["candidate_locale"] = _candidate_messages.normalize_locale((metadata or {}).get("candidate_locale"))
     sync_json = dict(raw_json.get("sync") or {})
     sync_json["file_registry"] = {"status": "ok" if storage_result.get("ok") else "failed", "updated_at": now_iso()}
     raw_json["sync"] = sync_json
     received_ok = bool(storage_result.get("ok"))
     if received_ok:
         raw_json["cv_received"] = True
-        raw_json["status"] = "screening"
-        raw_json["current_step"] = "screening"
+        if not is_replacement:
+            raw_json["status"] = "cv_processing"
+            raw_json["current_step"] = "cv_processing"
         cv_json["processing"] = {
             "file_received": True,
             "file_stored": bool(storage_result.get("ok")),
@@ -20439,16 +20660,18 @@ def register_candidate_cv_file(
             "status": "pending_async_processing",
             "updated_at": now_iso(),
         }
-        raw_json["cv"] = cv_json
+        if is_replacement:
+            raw_json["cv_pending"] = cv_json
+        else:
+            raw_json["cv"] = cv_json
     cur.execute(
         """
         UPDATE applications
         SET raw_json=%s,
             cv_received=CASE WHEN %s THEN true ELSE cv_received END,
             cv_received_at=CASE WHEN %s THEN COALESCE(cv_received_at, CURRENT_DATE) ELSE cv_received_at END,
-            status=CASE WHEN %s AND status IN ('awaiting_cv','cv_received') THEN 'screening' ELSE status END,
-            current_step=CASE WHEN %s AND current_step IN ('cv_request','cv_upload') THEN 'screening' ELSE current_step END,
-            screening_status=CASE WHEN %s AND (screening_status IS NULL OR screening_status IN ('not_started','awaiting_cv')) THEN 'pending' ELSE screening_status END,
+            status=CASE WHEN %s AND NOT %s AND status IN ('awaiting_cv','cv_received') THEN 'cv_processing' ELSE status END,
+            current_step=CASE WHEN %s AND NOT %s AND current_step IN ('cv_request','cv_upload') THEN 'cv_processing' ELSE current_step END,
             drive_sync_status=CASE WHEN %s='google_drive' AND %s THEN 'ok' ELSE drive_sync_status END,
             updated_at=COALESCE(updated_at, CURRENT_DATE)
         WHERE app_key=%s
@@ -20458,84 +20681,58 @@ def register_candidate_cv_file(
             received_ok,
             received_ok,
             received_ok,
+            canonical_lifecycle_enabled(),
             received_ok,
-            received_ok,
+            canonical_lifecycle_enabled(),
             storage_result.get("provider"),
             received_ok,
             app_key,
         ),
     )
+    document_id = None
     try:
-        cur.execute(
-            """
-            SELECT document_id
-            FROM candidate_documents
-            WHERE app_key=%s AND document_type='cv' AND filename=%s
-            ORDER BY created_at DESC
-            LIMIT 1
-            """,
-            (app_key, original_filename),
-        )
-        existing_doc = cur.fetchone()
         doc_payload = {
             **cv_json,
             "received_at": now_iso(),
             "storage": cv_storage,
         }
-        if existing_doc:
-            cur.execute(
-                """
-                UPDATE candidate_documents
-                SET local_path=%s,
-                    source=%s,
-                    extraction_status=COALESCE(extraction_status, %s),
-                    drive_file_id=%s,
-                    drive_url=%s,
-                    metadata=%s,
-                    raw_json=%s,
-                    updated_at=now()
-                WHERE document_id=%s
-                """,
-                (
-                    storage_metadata.get("local_path") or str(source),
-                    cv_json.get("source") or "whatsapp_document",
-                    "pending_extraction",
-                    storage_result.get("external_file_id"),
-                    storage_result.get("storage_url"),
-                    Json(registry_metadata),
-                    Json(doc_payload),
-                    existing_doc.get("document_id"),
-                ),
-            )
-        else:
-            cur.execute(
-                """
-                INSERT INTO candidate_documents
-                (app_key, phone, document_type, filename, local_path, source, extraction_status,
-                 extraction_method, extraction_chars, drive_file_id, drive_url, metadata, raw_json, received_at)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,CURRENT_DATE)
-                """,
-                (
-                    app_key,
-                    phone,
-                    "cv",
-                    original_filename,
-                    storage_metadata.get("local_path") or str(source),
-                    cv_json.get("source") or "whatsapp_document",
-                    "pending_extraction" if received_ok else "failed",
-                    None,
-                    None,
-                    storage_result.get("external_file_id"),
-                    storage_result.get("storage_url"),
-                    Json(registry_metadata),
-                    Json(doc_payload),
-                ),
-            )
+        cur.execute(
+            """
+            INSERT INTO candidate_documents
+            (app_key, phone, document_type, filename, local_path, source, extraction_status,
+             extraction_method, extraction_chars, drive_file_id, drive_url, metadata, raw_json, received_at)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,CURRENT_DATE)
+            RETURNING document_id::text
+            """,
+            (
+                app_key,
+                phone,
+                "cv",
+                original_filename,
+                storage_metadata.get("local_path") or str(source),
+                cv_json.get("source") or "whatsapp_document",
+                "pending_extraction" if received_ok else "failed",
+                None,
+                None,
+                storage_result.get("external_file_id"),
+                storage_result.get("storage_url"),
+                Json(registry_metadata),
+                Json(doc_payload),
+            ),
+        )
+        inserted_doc = cur.fetchone()
+        document_id = str((inserted_doc or {}).get("document_id") or "") or None
     except Exception:
         # Older deployments may not have candidate_documents; canonical application
         # truth above is still the authority used by HR chat.
         pass
-    return {"ok": bool(storage_result.get("ok")), "app_key": app_key, "storage": storage_result}
+    return {
+        "ok": bool(storage_result.get("ok")),
+        "app_key": app_key,
+        "document_id": document_id,
+        "storage": storage_result,
+        "is_replacement": is_replacement,
+    }
 
 
 # --- Bulk CV import: shared import core -------------------------------------
@@ -20802,12 +20999,14 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
     media_type = str(media.get("type") or media.get("mime_type") or "").lower()
     allowed_media = {
         "application/pdf",
-        "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
     }
     if not (media_type.startswith("image/") or media_type in allowed_media):
-        return None
+        return {
+            "ok": False,
+            "error": "unsupported_candidate_cv_media",
+            **candidate_message_result("cv_invalid", request=request),
+        }
     if canonical_lifecycle_enabled():
         import recruiting_lifecycle as _rl
 
@@ -20821,32 +21020,20 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
         if not resolved.get("ok"):
             error = str(resolved.get("error") or "ambiguous_applications")
             if error == "no_eligible_application":
-                reply = "I received your file, but I don’t have an open application for you yet. Please send your job APPLY code first, then resend your CV."
-            elif error == "ambiguous_applications":
-                matches = resolved.get("matches") if isinstance(resolved.get("matches"), list) else []
-                roles = ", ".join(
-                    str(m.get("position_code") or m.get("app_key") or "role")
-                    for m in matches[:5]
-                    if isinstance(m, dict)
-                )
-                reply = (
-                    "I received your file, but you have more than one open application. "
-                    f"Please reply with the APPLY code for the role you want this CV to update"
-                    + (f" ({roles})." if roles else ".")
-                )
+                message = candidate_message_result("no_active_application", request=request)
             else:
-                reply = "I received your file, but I could not safely match it to one application. Please send your APPLY code, then resend your CV."
+                message = candidate_message_result("ambiguous_application", request=request)
             return {
                 "ok": False,
                 "error": error,
-                "reply": reply,
+                **message,
                 "matches": resolved.get("matches") or [],
             }
         application = resolved.get("application")
         if not isinstance(application, dict):
             return None
         if resolved.get("requires_bind") and request.conversation_id:
-            _rl.bind_conversation_application(
+            binding = _rl.bind_conversation_application(
                 sys.modules[__name__],
                 company_code=str(application.get("company_code") or ""),
                 conversation_id=str(request.conversation_id),
@@ -20855,10 +21042,20 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
                 account_id=request.account_id,
                 bound_reason="single_eligible",
             )
+            if not binding.get("ok"):
+                return {
+                    "ok": False,
+                    "error": binding.get("error") or "application_binding_failed",
+                    **candidate_message_result("ambiguous_application", request=request),
+                }
     else:
         application = find_candidate_application_for_file(request.sender_phone)
     if not application:
-        return None
+        return {
+            "ok": False,
+            "error": "no_active_application",
+            **candidate_message_result("no_active_application", request=request),
+        }
     if not company_has_module(application.get("company_code"), "pre_hiring"):
         return {
             "ok": False,
@@ -20866,16 +21063,26 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             "company_code": application.get("company_code"),
             "required_module": "pre_hiring",
         }
+    locale = candidate_message_payload("file_received_checking", request=request, application=application)["locale"]
     with db_connect() as conn:
         with conn.cursor() as cur:
             result = register_candidate_cv_file(
                 cur,
                 application=application,
                 media=media,
-                metadata={"conversation_id": request.conversation_id, "raw_text": request.raw_text},
+                metadata={
+                    "conversation_id": request.conversation_id,
+                    "account_id": request.account_id,
+                    "raw_text": request.raw_text,
+                    "candidate_locale": locale,
+                },
             )
         conn.commit()
     if result.get("ok"):
+        if result.get("duplicate") and result.get("already_validated"):
+            template_key = "cv_updated_accepted" if result.get("is_replacement") else "cv_accepted"
+            result.update(candidate_message_result(template_key, request=request, application=application, locale=locale))
+            return result
         if canonical_lifecycle_enabled():
             import recruiting_lifecycle as _rl
 
@@ -20885,9 +21092,9 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
                 channel="whatsapp",
                 conversation_id=request.conversation_id,
             )
-        result["reply"] = "Got it — I received your CV and I’m processing it now. I’ll continue with the next step once it’s ready."
+        result.update(candidate_message_result("file_received_checking", request=request, application=application, locale=locale))
     else:
-        result["reply"] = "I received your file, but I could not save it safely. Please resend your CV as a clear PDF, Word document, or image."
+        result.update(candidate_message_result("cv_invalid", request=request, application=application, locale=locale))
     return result
 
 
@@ -21105,6 +21312,27 @@ def cv_text_quality_ok(text: str | None) -> bool:
     return _cv_extraction.cv_text_quality_ok(text)
 
 
+def candidate_name_is_generic_heading(value: Any) -> bool:
+    normalized = re.sub(r"[\W_]+", " ", str(value or "").strip().lower(), flags=re.UNICODE)
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    generic = {
+        "cv",
+        "resume",
+        "curriculum vitae",
+        "professional resume",
+        "professional profile",
+        "personal profile",
+        "personal information",
+        "candidate profile",
+        "السيرة الذاتية",
+        "سيرة ذاتية",
+        "الملف الشخصي",
+        "المعلومات الشخصية",
+        "بيانات شخصية",
+    }
+    return not normalized or normalized in generic
+
+
 def parse_candidate_profile_from_cv_text(text: str, *, fallback_name: str | None = None, fallback_phone: str | None = None) -> dict[str, Any]:
     contacts = _cv_extraction.deterministic_contact_profile(text)
     normalized = _cv_extraction.normalize_cv_text_for_contacts(text)
@@ -21114,7 +21342,7 @@ def parse_candidate_profile_from_cv_text(text: str, *, fallback_name: str | None
     if not phone:
         phone_match = re.search(r"(?:\+?965)?\s?([569]\d{7})\b", normalized or "")
         phone = digits(phone_match.group(0)) if phone_match else digits(fallback_phone)
-    name = fallback_name
+    name = fallback_name if not candidate_name_is_generic_heading(fallback_name) else None
     if lines:
         first = lines[0]
         # Allow bilingual names (Arabic and/or Latin letters), still reject emails/phones.
@@ -21123,6 +21351,7 @@ def parse_candidate_profile_from_cv_text(text: str, *, fallback_name: str | None
             and not _extract_email_from_text(first)
             and not re.search(r"\d", _cv_extraction.normalize_digits(first))
             and re.search(r"[A-Za-z\u0600-\u06FF]", first)
+            and not candidate_name_is_generic_heading(first)
         ):
             name = first
     skills: list[str] = []
@@ -21253,7 +21482,10 @@ def merge_candidate_profiles_with_authority(
     llm_profile: dict[str, Any] | None,
 ) -> dict[str, Any]:
     merged = merge_candidate_profiles(regex_profile, llm_profile)
-    return _cv_extraction.preserve_human_fields(existing_profile, merged)
+    merged = _cv_extraction.preserve_human_fields(existing_profile, merged)
+    if candidate_name_is_generic_heading(merged.get("name")):
+        merged["name"] = None
+    return merged
 
 
 def screening_questions_for_application(application: dict[str, Any]) -> list[dict[str, Any]]:
@@ -21436,14 +21668,85 @@ def upsert_application_semantic_document(
     return {"ok": True, "semantic_id": semantic_id, "embedded": bool(embedding), "content_hash": content_hash}
 
 
-def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, send_screening: bool = True) -> dict[str, Any]:
+def notify_candidate_cv_validation(
+    application: dict[str, Any],
+    *,
+    document_id: str,
+    accepted: bool,
+) -> dict[str, Any]:
+    app_key = str(application.get("app_key") or "")
+    company = str(application.get("company_code") or "").upper()
+    phone = digits(application.get("phone"))
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE candidate_documents
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE document_id=%s
+                  AND COALESCE(metadata->'candidate_validation_notification'->>'attempted_at','')=''
+                RETURNING metadata
+                """,
+                (
+                    Json({"candidate_validation_notification": {"attempted_at": now_iso(), "status": "sending"}}),
+                    document_id,
+                ),
+            )
+            reserved = cur.fetchone()
+        conn.commit()
+    if not reserved:
+        return {"ok": True, "idempotent": True, "skipped": "candidate_validation_already_notified"}
+    metadata = reserved.get("metadata") if isinstance(reserved.get("metadata"), dict) else {}
+    locale = str(metadata.get("candidate_locale") or "")
+    is_replacement = bool(metadata.get("is_replacement"))
+    template_key = "cv_invalid"
+    if accepted:
+        template_key = "cv_updated_accepted" if is_replacement else "cv_accepted"
+    template = candidate_message_payload(template_key, application=application, locale=locale)
+    result = send_octopus_whatsapp(
+        account_id=metadata.get("account_id"),
+        phone=phone,
+        text=template["text"],
+        subject_type="candidate",
+        subject_key=app_key,
+        message_kind=template["template_key"],
+        company_code=company,
+        audience="candidate",
+    )
+    notification = {
+        **template,
+        "attempted_at": now_iso(),
+        "status": "dry_run" if result.get("dry_run") else "sent" if result.get("ok") else "failed",
+        "send_result": json_safe(result),
+    }
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE candidate_documents
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE document_id=%s
+                """,
+                (Json({"candidate_validation_notification": notification}), document_id),
+            )
+        conn.commit()
+    return {"ok": bool(result.get("ok")), "template": template, "send": json_safe(result)}
+
+
+def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, send_screening: bool = False) -> dict[str, Any]:
+    # Candidate screening is deliberately not auto-sent from CV validation.
+    send_screening = False
     lease_owner = f"cv-worker-{os.getpid()}-{uuid.uuid4().hex[:8]}"
     lease_key: str | None = None
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT cd.*, a.*, c.name AS candidate_name, c.email AS candidate_email, c.profile AS candidate_profile, c.raw_json AS candidate_raw_json
+                SELECT cd.*, cd.raw_json AS document_raw_json, cd.metadata AS document_metadata,
+                       a.*, c.name AS candidate_name, c.email AS candidate_email,
+                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json
                 FROM candidate_documents cd
                 JOIN applications a ON a.app_key=cd.app_key
                 LEFT JOIN candidates c ON c.phone=a.phone
@@ -21460,6 +21763,10 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                 "status", "current_step", "cv_received", "cv_received_at", "screening_status", "raw_json",
             )}
             raw_json = app.get("raw_json") if isinstance(app.get("raw_json"), dict) else {}
+            document_raw_json = item.get("document_raw_json") if isinstance(item.get("document_raw_json"), dict) else {}
+            document_metadata = item.get("document_metadata") if isinstance(item.get("document_metadata"), dict) else {}
+            document_cv = document_raw_json if "storage" in document_raw_json else {}
+            is_replacement = bool(document_metadata.get("is_replacement") or document_cv.get("is_replacement"))
             # Imported candidates (held in the Intake queue OR auto-admitted into
             # Candidates) get their CV extracted and indexed, but are NEVER auto-messaged.
             # HR drives all outreach manually. Held imports also never auto-advance status.
@@ -21467,7 +21774,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
             imported_app = isinstance(raw_json.get("import"), dict)
             if held_import or imported_app:
                 send_screening = False
-            local_path = item.get("local_path") or ((raw_json.get("cv") or {}).get("path") if isinstance(raw_json.get("cv"), dict) else None)
+            local_path = item.get("local_path") or document_cv.get("path") or ((raw_json.get("cv") or {}).get("path") if isinstance(raw_json.get("cv"), dict) else None)
             company_code = str(app.get("company_code") or "WATHEFNI").upper()
             db_exec = _cv_db_execute_factory(cur)
             lease = _cv_extraction.acquire_extraction_lease(
@@ -21488,7 +21795,11 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
             lease_key = str(lease.get("lease_key") or "")
             try:
                 mime = None
-                if isinstance(raw_json.get("cv"), dict):
+                if isinstance(document_cv, dict) and document_cv:
+                    storage = document_cv.get("storage")
+                    if isinstance(storage, dict):
+                        mime = storage.get("mime_type")
+                if not mime and isinstance(raw_json.get("cv"), dict):
                     storage = raw_json.get("cv", {}).get("storage")
                     if isinstance(storage, dict):
                         mime = storage.get("mime_type")
@@ -21620,8 +21931,12 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                     required_keys = [str(q.get("key") or "") for q in screening_questions if q.get("required") is True and q.get("key")]
                     pending_keys = [key for key in required_keys if not str(merged_answers.get(key) or "").strip()]
                     screening_status = "complete" if not pending_keys and required_keys else "pending"
+                    processing_raw = dict(raw_json)
+                    if document_cv:
+                        processing_raw["cv"] = document_cv
+                    processing_raw.pop("cv_pending", None)
                     next_raw = update_cv_processing_flags(
-                        raw_json,
+                        processing_raw,
                         file_received=True,
                         file_stored=True,
                         text_extracted=True,
@@ -21714,6 +22029,42 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                     cur.execute(
                         """
                         UPDATE candidate_documents
+                        SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE app_key=%s AND document_type='cv' AND document_id<>%s
+                        """,
+                        (
+                            Json({"latest": False, "superseded_at": now_iso(), "superseded_by_document_id": str(document_id)}),
+                            app.get("app_key"),
+                            document_id,
+                        ),
+                    )
+                    cur.execute(
+                        """
+                        UPDATE file_registry
+                        SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE company_code=%s
+                          AND subject_type='application'
+                          AND subject_key=%s
+                          AND file_kind='candidate_cv'
+                        """,
+                        (Json({"latest": False}), company_code, app.get("app_key")),
+                    )
+                    current_sha = ((document_cv.get("storage") or {}).get("sha256") if isinstance(document_cv.get("storage"), dict) else None)
+                    if current_sha:
+                        cur.execute(
+                            """
+                            UPDATE file_registry
+                            SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                                updated_at=now()
+                            WHERE company_code=%s AND subject_key=%s AND content_sha256=%s
+                            """,
+                            (Json({"latest": True, "validation_status": "accepted"}), company_code, app.get("app_key"), current_sha),
+                        )
+                    cur.execute(
+                        """
+                        UPDATE candidate_documents
                         SET text_path=%s,
                             extraction_status=%s,
                             extraction_method=%s,
@@ -21732,6 +22083,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                                     {
                                         "semantic": semantic,
                                         "profile": profile,
+                                        "latest": True,
+                                        "validation_status": "accepted",
+                                        "validated_at": now_iso(),
                                         "extraction": {
                                             k: v
                                             for k, v in extraction.to_dict().items()
@@ -21786,6 +22140,13 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                                 )
                                 flag_cur.execute("UPDATE applications SET raw_json=%s WHERE app_key=%s", (Json(json_safe(latest_raw)), app.get("app_key")))
                             flag_conn.commit()
+                    candidate_notification = None
+                    if not imported_app:
+                        candidate_notification = notify_candidate_cv_validation(
+                            dict(refreshed_after_cv) if refreshed_after_cv else app,
+                            document_id=str(document_id),
+                            accepted=True,
+                        )
                     return {
                         "ok": True,
                         "document_id": document_id,
@@ -21794,6 +22155,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         "method": method,
                         "semantic": semantic,
                         "screening": json_safe(screening_result),
+                        "candidate_notification": json_safe(candidate_notification),
                         "extraction_meta": {
                             "stage": (extraction.metadata or {}).get("stage"),
                             "tier": (extraction.metadata or {}).get("tier"),
@@ -21805,23 +22167,36 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             "estimated_cost_usd": (extraction.metadata or {}).get("estimated_cost_usd"),
                         },
                     }
-                next_raw = update_cv_processing_flags(
-                    raw_json,
-                    file_received=True,
-                    file_stored=True,
-                    text_extracted=False,
-                    profile_parsed=False,
-                    semantic_indexed=False,
-                    screening_prefill_ready=False,
-                    status="failed",
-                    failed_reason=error or "no_text_extracted",
-                    extraction_method=method,
-                    extraction_stage=(extraction.metadata or {}).get("stage"),
-                    extraction_tier=(extraction.metadata or {}).get("tier"),
-                    extraction_provider=(extraction.metadata or {}).get("provider"),
-                    actual_request_model=(extraction.metadata or {}).get("actual_request_model"),
-                    provider_response_model=(extraction.metadata or {}).get("provider_response_model"),
-                )
+                if is_replacement:
+                    next_raw = dict(raw_json)
+                    next_raw.pop("cv_pending", None)
+                    next_raw["cv_replacement_failed"] = {
+                        "document_id": str(document_id),
+                        "failed_at": now_iso(),
+                        "reason": error or "no_text_extracted",
+                        "filename": document_cv.get("filename"),
+                    }
+                else:
+                    failure_raw = dict(raw_json)
+                    if document_cv:
+                        failure_raw["cv"] = document_cv
+                    next_raw = update_cv_processing_flags(
+                        failure_raw,
+                        file_received=True,
+                        file_stored=True,
+                        text_extracted=False,
+                        profile_parsed=False,
+                        semantic_indexed=False,
+                        screening_prefill_ready=False,
+                        status="failed",
+                        failed_reason=error or "no_text_extracted",
+                        extraction_method=method,
+                        extraction_stage=(extraction.metadata or {}).get("stage"),
+                        extraction_tier=(extraction.metadata or {}).get("tier"),
+                        extraction_provider=(extraction.metadata or {}).get("provider"),
+                        actual_request_model=(extraction.metadata or {}).get("actual_request_model"),
+                        provider_response_model=(extraction.metadata or {}).get("provider_response_model"),
+                    )
                 cur.execute("UPDATE applications SET raw_json=%s, updated_at=COALESCE(updated_at, CURRENT_DATE) WHERE app_key=%s", (Json(json_safe(next_raw)), app.get("app_key")))
                 cur.execute(
                     """
@@ -21839,6 +22214,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             json_safe(
                                 {
                                     "extraction_error": error or "no_text_extracted",
+                                    "latest": False,
+                                    "validation_status": "rejected",
+                                    "validated_at": now_iso(),
                                     "extraction_meta": {
                                         k: v
                                         for k, v in extraction.to_dict().items()
@@ -21850,7 +22228,34 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         document_id,
                     ),
                 )
+                failed_sha = ((document_cv.get("storage") or {}).get("sha256") if isinstance(document_cv.get("storage"), dict) else None)
+                if failed_sha:
+                    cur.execute(
+                        """
+                        UPDATE file_registry
+                        SET metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE company_code=%s AND subject_key=%s AND content_sha256=%s
+                        """,
+                        (Json({"latest": False, "validation_status": "rejected"}), company_code, app.get("app_key"), failed_sha),
+                    )
                 conn.commit()
+                failure_transition = None
+                if canonical_lifecycle_enabled() and not held_import and not imported_app and not is_replacement:
+                    import recruiting_lifecycle as _rl
+
+                    failure_transition = _rl.transition_application(
+                        sys.modules[__name__],
+                        app_key=str(app.get("app_key") or ""),
+                        company_code=company_code,
+                        to_stage="awaiting_cv",
+                        trigger="cv_processing_failed",
+                        actor_type="system",
+                        channel="system",
+                        human_confirmed=False,
+                        expected_from_stage="cv_processing",
+                        metadata={"document_id": document_id, "reason": error or "no_text_extracted"},
+                    )
                 screening_result = None
                 if send_screening:
                     ctx = _action_registry.ExecutionContext(
@@ -21881,13 +22286,22 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             )
                             flag_cur.execute("UPDATE applications SET raw_json=%s WHERE app_key=%s", (Json(json_safe(latest_raw)), app.get("app_key")))
                         flag_conn.commit()
+                candidate_notification = None
+                if not imported_app:
+                    candidate_notification = notify_candidate_cv_validation(
+                        app,
+                        document_id=str(document_id),
+                        accepted=False,
+                    )
                 return {
                     "ok": False,
                     "document_id": document_id,
                     "app_key": app.get("app_key"),
                     "method": method,
                     "error": error,
+                    "lifecycle": json_safe(failure_transition),
                     "screening": json_safe(screening_result),
+                    "candidate_notification": json_safe(candidate_notification),
                 }
             finally:
                 if lease_key:
@@ -21904,7 +22318,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         logger.warning("cv_extraction_lease_release_failed document_id=%s", document_id)
 
 
-def run_candidate_cv_processing_worker(*, dry_run: bool = True, limit: int = 10, force: bool = False, send_screening: bool = True) -> dict[str, Any]:
+def run_candidate_cv_processing_worker(*, dry_run: bool = True, limit: int = 10, force: bool = False, send_screening: bool = False) -> dict[str, Any]:
     ensure_schema()
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -22038,13 +22452,300 @@ def candidate_active_application(phone: str | None) -> dict[str, Any] | None:
     return find_candidate_application_for_file(phone)
 
 
+def resolve_candidate_request_application(request: WhatsAppTurnRequest) -> dict[str, Any]:
+    if not canonical_lifecycle_enabled():
+        return {"ok": False, "error": "canonical_lifecycle_disabled"}
+    import recruiting_lifecycle as _rl
+
+    resolved = _rl.resolve_conversation_application(
+        sys.modules[__name__],
+        phone=request.sender_phone,
+        conversation_id=request.conversation_id,
+        account_id=request.account_id,
+        allow_single_eligible=True,
+    )
+    application = resolved.get("application") if isinstance(resolved.get("application"), dict) else None
+    if resolved.get("ok") and application and resolved.get("requires_bind"):
+        if not request.conversation_id:
+            return {"ok": False, "error": "conversation_id_required", "application": None}
+        binding = _rl.bind_conversation_application(
+            sys.modules[__name__],
+            company_code=str(application.get("company_code") or ""),
+            conversation_id=str(request.conversation_id),
+            phone=str(application.get("phone") or request.sender_phone or ""),
+            app_key=str(application.get("app_key") or ""),
+            account_id=request.account_id,
+            bound_reason="candidate_explicit_action",
+        )
+        if not binding.get("ok"):
+            return {"ok": False, "error": binding.get("error") or "application_binding_failed", "application": None}
+        resolved["binding"] = binding.get("binding")
+        resolved["requires_bind"] = False
+    return resolved
+
+
+def candidate_resolution_failure_message(request: WhatsAppTurnRequest, resolution: dict[str, Any]) -> dict[str, Any]:
+    error = str(resolution.get("error") or "")
+    template_key = "no_active_application" if error in {"no_eligible_application", "missing_phone"} else "ambiguous_application"
+    return {
+        "ok": False,
+        "error": error or "application_resolution_failed",
+        **candidate_message_result(template_key, request=request),
+        "matches": resolution.get("matches") or [],
+    }
+
+
+def is_candidate_status_intent(text: str | None) -> bool:
+    normalized = normalize_text(text)
+    raw = str(text or "")
+    return bool(
+        re.search(r"\b(status|application status|where.*application|where.*cv|did you receive|received.*cv)\b", normalized)
+        or re.search(r"(حالة طلبي|حالة الطلب|وين وصل|أين وصل|اين وصل|وش صار|استلمت.*سير|وصلت.*سير)", raw)
+    )
+
+
+def is_candidate_cv_replace_intent(text: str | None) -> bool:
+    normalized = normalize_text(text)
+    raw = str(text or "")
+    english = bool(
+        re.search(r"\b(update|change|replace|resend|send another|forgot|new cv|latest cv)\b", normalized)
+        and re.search(r"\b(cv|resume|file|document)\b", normalized)
+    )
+    arabic = bool(
+        re.search(r"(تحديث|أحدث|احدث|تغيير|استبدال|بدل|جديدة|إعادة|اعادة)", raw)
+        and re.search(r"(السيرة|سيرتي|ملف)", raw)
+    )
+    return english or arabic
+
+
+def is_candidate_withdraw_intent(text: str | None) -> bool:
+    normalized = normalize_text(text)
+    raw = str(text or "")
+    return bool(
+        re.search(r"\b(withdraw|withdrawal|cancel my application|remove my application)\b", normalized)
+        or re.search(r"(سحب طلبي|سحب الطلب|انسحاب|أنسحب|الغاء طلبي|إلغاء طلبي|إلغاء الطلب|الغاء الطلب)", raw)
+    )
+
+
+def is_candidate_hr_handoff_intent(text: str | None) -> bool:
+    normalized = normalize_text(text)
+    raw = str(text or "")
+    return bool(
+        re.search(r"\b(speak|talk|chat|contact).*\b(hr|human|recruiter|person)\b", normalized)
+        or re.search(r"\b(hr|human|recruiter).*\b(speak|talk|chat|contact)\b", normalized)
+        or re.search(r"(أتكلم|اتكلم|أتحدث|اتحدث|أبي أكلم|ابي اكلم|تواصل).*(الموارد البشرية|موارد بشرية|الموظف|المسؤول|شخص)", raw)
+        or re.search(r"(الموارد البشرية|موارد بشرية).*(أتكلم|اتكلم|أتحدث|اتحدث|تواصل)", raw)
+    )
+
+
+def candidate_pending_action(request: WhatsAppTurnRequest) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    if not request.conversation_id:
+        return None, None
+    import recruiting_lifecycle as _rl
+
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return application, None
+    binding = _rl.candidate_conversation_binding(
+        sys.modules[__name__],
+        company_code=str(application.get("company_code") or ""),
+        conversation_id=request.conversation_id,
+        phone=request.sender_phone,
+    )
+    metadata = binding.get("metadata") if binding and isinstance(binding.get("metadata"), dict) else {}
+    pending = metadata.get("pending_candidate_action") if isinstance(metadata.get("pending_candidate_action"), dict) else None
+    return application, pending
+
+
+def handle_candidate_withdrawal_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    if has_current_media_upload(request.media or {}):
+        return None
+    raw = str(request.raw_text or "")
+    normalized = normalize_text(raw)
+    application, pending = candidate_pending_action(request)
+    confirm = normalized in {"confirm", "yes", "yes withdraw", "withdraw now"} or bool(
+        re.fullmatch(r"\s*(تأكيد|نعم|اسحب|اسحب الطلب)\s*", raw)
+    )
+    cancel = normalized in {"cancel", "no", "keep it", "do not withdraw"} or bool(
+        re.fullmatch(r"\s*(إلغاء|الغاء|لا|خله|خليه)\s*", raw)
+    )
+    if pending and pending.get("type") == "withdraw" and pending.get("status") == "pending":
+        if not application:
+            return {**candidate_message_result("no_active_application", request=request), "error": "pending_application_missing"}
+        import recruiting_lifecycle as _rl
+
+        if cancel:
+            _rl.update_candidate_conversation_state(
+                sys.modules[__name__],
+                company_code=str(application.get("company_code") or ""),
+                conversation_id=str(request.conversation_id or ""),
+                phone=str(application.get("phone") or request.sender_phone),
+                app_key=str(application.get("app_key") or ""),
+                updates={"pending_candidate_action": {**pending, "status": "cancelled", "resolved_at": now_iso()}},
+            )
+            locale = candidate_message_payload(
+                "application_status",
+                request=request,
+                application=application,
+                role="",
+                status="",
+            )["locale"]
+            return {
+                **candidate_message_result(
+                    "application_status",
+                    request=request,
+                    application=application,
+                    locale=locale,
+                    role=application.get("position_title") or application.get("position_code") or "the role",
+                    status=_candidate_messages.status_label(application.get("status"), locale),
+                ),
+                "intent": "candidate_withdrawal_cancelled",
+            }
+        if not confirm:
+            return {
+                **candidate_message_result(
+                    "withdrawal_confirm_prompt",
+                    request=request,
+                    application=application,
+                    role=application.get("position_title") or application.get("position_code") or "the role",
+                ),
+                "intent": "candidate_withdrawal_confirmation_required",
+            }
+        provider_message_id = _whatsapp_provider_message_id(request)
+        transition = _rl.transition_application(
+            sys.modules[__name__],
+            app_key=str(application.get("app_key") or ""),
+            company_code=str(application.get("company_code") or ""),
+            to_stage="withdrawn",
+            trigger="candidate_withdrawal_confirmed",
+            actor_type="candidate",
+            actor_phone=request.sender_phone,
+            channel="whatsapp",
+            confirmation_token=provider_message_id,
+            idempotency_key=f"candidate-withdraw:{provider_message_id}" if provider_message_id else None,
+            human_confirmed=True,
+            expected_from_stage=str(application.get("status") or "") or None,
+            metadata={"conversation_id": request.conversation_id, "account_id": request.account_id},
+        )
+        if not transition.get("ok"):
+            return {
+                "ok": False,
+                "error": transition.get("error") or "withdrawal_failed",
+                **candidate_message_result("no_active_application", request=request, application=application),
+                "transition": json_safe(transition),
+            }
+        _rl.update_candidate_conversation_state(
+            sys.modules[__name__],
+            company_code=str(application.get("company_code") or ""),
+            conversation_id=str(request.conversation_id or ""),
+            phone=str(application.get("phone") or request.sender_phone),
+            app_key=str(application.get("app_key") or ""),
+            updates={"pending_candidate_action": {**pending, "status": "completed", "resolved_at": now_iso()}},
+        )
+        return {
+            "ok": True,
+            **candidate_message_result(
+                "withdrawal_confirmation",
+                request=request,
+                application=application,
+                role=application.get("position_title") or application.get("position_code") or "the role",
+            ),
+            "intent": "candidate_withdrawal_confirmed",
+            "transition": json_safe(transition),
+        }
+    if not is_candidate_withdraw_intent(raw):
+        return None
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return candidate_resolution_failure_message(request, resolution)
+    import recruiting_lifecycle as _rl
+
+    pending = {
+        "type": "withdraw",
+        "status": "pending",
+        "app_key": application.get("app_key"),
+        "company_code": application.get("company_code"),
+        "requested_at": now_iso(),
+    }
+    state = _rl.update_candidate_conversation_state(
+        sys.modules[__name__],
+        company_code=str(application.get("company_code") or ""),
+        conversation_id=str(request.conversation_id or ""),
+        phone=str(application.get("phone") or request.sender_phone),
+        app_key=str(application.get("app_key") or ""),
+        updates={"pending_candidate_action": pending},
+    )
+    if not state.get("ok"):
+        return candidate_resolution_failure_message(request, {"error": state.get("error")})
+    return {
+        "ok": True,
+        **candidate_message_result(
+            "withdrawal_confirm_prompt",
+            request=request,
+            application=application,
+            role=application.get("position_title") or application.get("position_code") or "the role",
+        ),
+        "intent": "candidate_withdrawal_confirmation_required",
+    }
+
+
+def handle_candidate_hr_handoff_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    if has_current_media_upload(request.media or {}) or not is_candidate_hr_handoff_intent(request.raw_text):
+        return None
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return candidate_resolution_failure_message(request, resolution)
+    import recruiting_lifecycle as _rl
+
+    locale = candidate_message_payload("hr_handoff_confirmation", request=request, application=application)["locale"]
+    handoff = _rl.request_candidate_handoff(
+        sys.modules[__name__],
+        application=application,
+        conversation_id=str(request.conversation_id or ""),
+        account_id=request.account_id,
+        locale=locale,
+    )
+    if not handoff.get("ok"):
+        return {
+            "ok": False,
+            "error": handoff.get("error") or "handoff_failed",
+            **candidate_message_result("ambiguous_application", request=request, application=application, locale=locale),
+        }
+    return {
+        "ok": True,
+        **candidate_message_result("hr_handoff_confirmation", request=request, application=application, locale=locale),
+        "intent": "candidate_hr_handoff",
+        "handoff": json_safe(handoff),
+    }
+
+
+def handle_candidate_automation_pause_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    if not request.conversation_id:
+        return None
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    binding = resolution.get("binding") if isinstance(resolution.get("binding"), dict) else {}
+    metadata = binding.get("metadata") if isinstance(binding.get("metadata"), dict) else {}
+    if not application or metadata.get("automation_paused") is not True:
+        return None
+    return {
+        "ok": True,
+        **candidate_message_result("hr_handoff_confirmation", request=request, application=application),
+        "intent": "candidate_automation_paused",
+        "handoff_task_id": metadata.get("handoff_task_id"),
+    }
+
+
 def candidate_missing_or_next_reply(application: dict[str, Any]) -> str:
     raw_json = application.get("raw_json") if isinstance(application.get("raw_json"), dict) else {}
     screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
     processing = (raw_json.get("cv") or {}).get("processing") if isinstance(raw_json.get("cv"), dict) else {}
     title = application.get("position_title") or application.get("position_code") or "this role"
     if not application.get("cv_received"):
-        return f"Your application for {title} is started. Next step: please send your CV here as a PDF, Word document, image, or clear text."
+        return f"Your application for {title} is started. Next step: please send your CV as a PDF, DOCX, or clear image."
     if isinstance(processing, dict) and processing.get("status") in {"pending_async_processing", "processing"}:
         return "I received your CV and I’m still processing it. I’ll continue with the next step once it’s ready."
     pending_keys = screening.get("pending_keys") if isinstance(screening.get("pending_keys"), list) else []
@@ -22085,30 +22786,21 @@ def public_candidate_roles(company_code: str | None = "WATHEFNI", *, limit: int 
             return roles
 
 
-def public_candidate_welcome_reply(company_code: str | None = "WATHEFNI") -> str:
-    roles = public_candidate_roles(company_code, limit=5)
-    lines = [
-        "Hi, welcome to Wathefni.",
-        "",
-        "I can help you apply or continue an application.",
-        "",
-        "If you have an APPLY code, send it here.",
-    ]
-    if roles:
-        lines.append("If not, tell me which role you’re interested in. Current open roles include:")
-        for idx, role in enumerate(roles, 1):
-            title = role.get("title") or role.get("position_code")
-            lines.append(f"{idx}. {title}")
-    else:
-        lines.append("If you don’t have a code, please ask the company for the job QR or APPLY code.")
-    return "\n".join(lines)
+def public_candidate_welcome_reply(company_code: str | None = "WATHEFNI", *, locale: str = "en") -> str:
+    del company_code
+    return _candidate_messages.render("welcome", locale)["text"]
 
 
 def role_interest_from_text(text: str | None) -> str | None:
     normalized = normalize_text(text)
-    if not re.search(r"\b(apply|application|interested|job|role|position)\b", normalized):
+    raw = str(text or "")
+    if not re.search(r"\b(apply|application|interested|job|role|position)\b", normalized) and not re.search(
+        r"(أقدم|اقدم|تقديم|وظيفة|الوظيفة|دور|منصب|مهتم)",
+        raw,
+    ):
         return None
     cleaned = re.sub(r"\b(i|want|wanna|wana|would like|to|apply|application|for|job|role|position|at|wathefni|here is my cv|cv|resume|please|pls)\b", " ", normalized)
+    cleaned = re.sub(r"(أريد|اريد|أرغب|ارغب|أن|ان|أتقدم|اتقدم|أقدم|اقدم|للتقديم|تقديم|على|وظيفة|الوظيفة|منصب|مهتم|في|لوظيفة)", " ", cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned or None
 
@@ -22125,7 +22817,10 @@ def public_role_matches(query: str | None, *, company_code: str | None = "WATHEF
         if score:
             scored.append((score, role))
     scored.sort(key=lambda item: item[0], reverse=True)
-    return [role for _, role in scored[:5]]
+    if not scored:
+        return []
+    best_score = scored[0][0]
+    return [role for score, role in scored if score == best_score][:5]
 
 
 def parse_apply_code_text(text: str | None) -> dict[str, str] | None:
@@ -22308,7 +23003,21 @@ def start_public_candidate_application(request: WhatsAppTurnRequest, role: dict[
                 (
                     data_source,
                     data_source_detail,
-                    Json(json_safe({"data_source": data_source, "data_source_detail": data_source_detail, "source_conversation_id": request.conversation_id})),
+                    Json(
+                        json_safe(
+                            {
+                                "data_source": data_source,
+                                "data_source_detail": data_source_detail,
+                                "source_conversation_id": request.conversation_id,
+                                "candidate_locale": _candidate_messages.infer_locale(
+                                    request.raw_text,
+                                    preferred=(request.metadata or {}).get("locale")
+                                    if isinstance(request.metadata, dict)
+                                    else None,
+                                ),
+                            }
+                        )
+                    ),
                     app_key,
                 ),
             )
@@ -22326,6 +23035,23 @@ def start_public_candidate_application(request: WhatsAppTurnRequest, role: dict[
     if not row:
         return None
     app_row = json_safe(dict(row))
+    if canonical_lifecycle_enabled() and request.conversation_id:
+        import recruiting_lifecycle as _rl
+
+        binding = _rl.bind_conversation_application(
+            sys.modules[__name__],
+            company_code=str(app_row.get("company_code") or company),
+            conversation_id=str(request.conversation_id),
+            phone=str(app_row.get("phone") or request.sender_phone),
+            app_key=str(app_row.get("app_key") or app_key),
+            account_id=request.account_id,
+            bound_reason="explicit_apply",
+            metadata={"candidate_locale": (app_row.get("raw_json") or {}).get("candidate_locale")},
+        )
+        if not binding.get("ok"):
+            app_row["binding_error"] = binding.get("error") or "application_binding_failed"
+        else:
+            app_row["conversation_binding"] = binding.get("binding")
     app_row["start_result"] = json_safe(result)
     return app_row
 
@@ -22346,9 +23072,25 @@ def attach_public_pending_cv_to_application(request: WhatsAppTurnRequest, applic
                     "raw_text": pending_media.get("raw_text") or request.raw_text,
                     "source": "public_candidate_pending_cv",
                     "public_session_id": (session or {}).get("session_id"),
+                    "account_id": request.account_id,
+                    "candidate_locale": _candidate_messages.infer_locale(
+                        pending_media.get("raw_text") or request.raw_text,
+                        preferred=((session or {}).get("metadata") or {}).get("candidate_locale")
+                        if isinstance((session or {}).get("metadata"), dict)
+                        else None,
+                    ),
                 },
             )
         conn.commit()
+    if result.get("ok") and not result.get("duplicate") and canonical_lifecycle_enabled():
+        import recruiting_lifecycle as _rl
+
+        result["lifecycle"] = _rl.mark_cv_received(
+            sys.modules[__name__],
+            application=application,
+            channel="whatsapp",
+            conversation_id=request.conversation_id,
+        )
     return result
 
 
@@ -22472,16 +23214,27 @@ def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) ->
         return None
     session = active_public_candidate_session(request)
     normalized = normalize_text(request.raw_text)
-    if session and session.get("selected_position_code") and normalized in {"yes", "y", "confirm", "go ahead", "start", "start it", "apply"}:
+    confirmation_words = {"yes", "y", "confirm", "go ahead", "start", "start it", "apply", "نعم", "تأكيد", "ابدأ", "ابدا", "قدم"}
+    if session and session.get("selected_position_code") and normalized in confirmation_words:
         role = next((item for item in roles if str(item.get("position_code") or "") == str(session.get("selected_position_code") or "")), None)
         if role:
             application = start_public_candidate_application(request, role)
             if application:
+                if application.get("binding_error"):
+                    return {
+                        "error": application.get("binding_error"),
+                        **candidate_message_result("ambiguous_application", request=request),
+                        "application": application,
+                    }
                 cv_result = attach_public_pending_cv_to_application(request, application, session)
                 complete_public_candidate_session(request)
                 if cv_result and cv_result.get("ok"):
                     return {
-                        "reply": f"Done, your {role.get('title') or role.get('position_code')} application is started. I received your CV and I’m processing it now.",
+                        **candidate_message_result(
+                            "file_received_checking",
+                            request=request,
+                            application=application,
+                        ),
                         "role": role,
                         "application": application,
                         "cv_result": json_safe(cv_result),
@@ -22489,7 +23242,12 @@ def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) ->
                         "turn_focus": "public_candidate",
                     }
                 return {
-                    "reply": f"Done, your {role.get('title') or role.get('position_code')} application is started. Please send your CV here as a PDF, Word document, image, or clear text.",
+                    **candidate_message_result(
+                        "role_resolved_cv_request",
+                        request=request,
+                        application=application,
+                        role=role.get("title") or role.get("position_code") or "the role",
+                    ),
                     "role": role,
                     "application": application,
                     "intent": "public_candidate_application_started",
@@ -22502,14 +23260,24 @@ def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) ->
         return None
     role = roles[selected - 1]
     session = upsert_public_candidate_session(request, selected_position_code=str(role.get("position_code") or ""), metadata={"selected_role": role})
-    if normalized in {"yes", "y", "confirm", "go ahead", "start", "start it", "apply"} or "start" in normalized:
+    if normalized in confirmation_words or "start" in normalized:
         application = start_public_candidate_application(request, role)
         if application:
+            if application.get("binding_error"):
+                return {
+                    "error": application.get("binding_error"),
+                    **candidate_message_result("ambiguous_application", request=request),
+                    "application": application,
+                }
             cv_result = attach_public_pending_cv_to_application(request, application, session)
             complete_public_candidate_session(request)
             if cv_result and cv_result.get("ok"):
                 return {
-                    "reply": f"Done, your {role.get('title') or role.get('position_code')} application is started. I received your CV and I’m processing it now.",
+                    **candidate_message_result(
+                        "file_received_checking",
+                        request=request,
+                        application=application,
+                    ),
                     "role": role,
                     "application": application,
                     "cv_result": json_safe(cv_result),
@@ -22517,7 +23285,12 @@ def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) ->
                     "turn_focus": "public_candidate",
                 }
             return {
-                "reply": f"Done, your {role.get('title') or role.get('position_code')} application is started. Please send your CV here as a PDF, Word document, image, or clear text.",
+                **candidate_message_result(
+                    "role_resolved_cv_request",
+                    request=request,
+                    application=application,
+                    role=role.get("title") or role.get("position_code") or "the role",
+                ),
                 "role": role,
                 "application": application,
                 "intent": "public_candidate_application_started",
@@ -22562,12 +23335,30 @@ def handle_public_candidate_apply_code_turn(request: WhatsAppTurnRequest) -> dic
             "intent": "public_candidate_apply_code_start_failed",
             "turn_focus": "public_candidate",
         }
+    if application.get("binding_error"):
+        return {
+            "error": application.get("binding_error"),
+            **candidate_message_result("ambiguous_application", request=request),
+            "role": role,
+            "application": application,
+            "intent": "public_candidate_application_binding_failed",
+            "turn_focus": "public_candidate",
+        }
     cv_result = attach_public_pending_cv_to_application(request, application, session)
     complete_public_candidate_session(request)
     if cv_result and cv_result.get("ok"):
-        reply = f"Your application for {role.get('title') or role.get('position_code')} is started. I received your CV and I’m processing it now."
+        reply = candidate_message_payload(
+            "file_received_checking",
+            request=request,
+            application=application,
+        )["text"]
     else:
-        reply = f"Your application for {role.get('title') or role.get('position_code')} is started. Please send your CV here as a PDF, Word document, image, or clear text."
+        reply = candidate_message_payload(
+            "role_resolved_cv_request",
+            request=request,
+            application=application,
+            role=role.get("title") or role.get("position_code") or "the role",
+        )["text"]
     return {
         "reply": reply,
         "role": role,
@@ -22595,7 +23386,7 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
         roles = public_candidate_roles(request_company_code(request), limit=5)
         upsert_public_candidate_session(request, roles=roles, pending_media=pending_media, metadata={"source": "pending_cv_without_role"})
         return {
-            "reply": "Thanks, I received your CV. Which role do you want to apply for?",
+            **candidate_message_result("no_active_application", request=request),
             "roles": roles,
             "intent": "public_candidate_pending_cv_needs_role",
             "turn_focus": "public_candidate",
@@ -22605,34 +23396,47 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
         if pending_media:
             upsert_public_candidate_session(request, pending_media=pending_media, metadata={"source": "pending_cv_no_role_match", "query": query})
         return {
-            "reply": "Thanks, I received your CV. I couldn’t confidently match the role. Please tell me which role you want to apply for, or send an APPLY code.",
+            **candidate_message_result("ambiguous_application", request=request),
             "intent": "public_candidate_apply_help",
             "turn_focus": "public_candidate",
         }
     if len(matches) == 1:
         role = matches[0]
-        upsert_public_candidate_session(
+        session = upsert_public_candidate_session(
             request,
             roles=matches,
             selected_position_code=str(role.get("position_code") or ""),
             pending_media=pending_media,
             metadata={"source": "single_role_match", "query": query},
         )
-        suffix = "\n\nReply “start” and I’ll start it and attach the CV you already sent." if pending_media else "\n\nOr scan the job QR if you have it."
+        application = start_public_candidate_application(request, role)
+        if not application or application.get("binding_error"):
+            return {
+                "error": (application or {}).get("binding_error") or "application_start_failed",
+                **candidate_message_result("ambiguous_application", request=request),
+                "role": role,
+                "intent": "public_candidate_role_start_failed",
+                "turn_focus": "public_candidate",
+            }
+        cv_result = attach_public_pending_cv_to_application(request, application, session)
+        complete_public_candidate_session(request)
+        template_key = "file_received_checking" if cv_result and cv_result.get("ok") else "role_resolved_cv_request"
         return {
-            "reply": f"I found {role.get('title') or role.get('position_code')}. To apply, send this APPLY code:\n\n{role.get('apply_code')}{suffix}",
+            **candidate_message_result(
+                template_key,
+                request=request,
+                application=application,
+                role=role.get("title") or role.get("position_code") or "the role",
+            ),
             "role": role,
-            "intent": "public_candidate_role_match",
+            "application": application,
+            "cv_result": json_safe(cv_result) if cv_result else None,
+            "intent": "public_candidate_role_started",
             "turn_focus": "public_candidate",
         }
-    lines = ["I found a few matching roles. Which one do you want to apply for?"]
-    for idx, role in enumerate(matches, 1):
-        lines.append(f"{idx}. {role.get('title') or role.get('position_code')} — {role.get('apply_code')}")
-    if pending_media:
-        lines.append("\nI received your CV too. Once you choose the role, I’ll attach it to that application.")
     upsert_public_candidate_session(request, roles=matches, pending_media=pending_media, metadata={"source": "role_options", "query": query})
     return {
-        "reply": "\n".join(lines),
+        **candidate_message_result("ambiguous_application", request=request),
         "roles": matches,
         "intent": "public_candidate_role_options",
         "turn_focus": "public_candidate",
@@ -22642,16 +23446,14 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
 def handle_candidate_cv_update_request_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
     if has_current_media_upload(request.media or {}):
         return None
-    normalized = normalize_text(request.raw_text)
-    if not re.search(r"\b(update|change|replace|resend|send another|forgot|add something|new cv|latest cv)\b", normalized):
+    if not is_candidate_cv_replace_intent(request.raw_text):
         return None
-    if not re.search(r"\b(cv|resume|file|document)\b", normalized):
-        return None
-    application = candidate_active_application(request.sender_phone)
-    if not application:
-        return None
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return candidate_resolution_failure_message(request, resolution)
     return {
-        "reply": "No problem — please send the updated CV here as a PDF, Word document, image, or clear text. I’ll save the new version to your application and process it again.",
+        **candidate_message_result("cv_replacement_requested", request=request, application=application),
         "application": json_safe(application),
         "intent": "candidate_cv_update_request",
         "turn_focus": "candidate_cv_update",
@@ -22678,14 +23480,28 @@ def handle_candidate_process_faq_turn(request: WhatsAppTurnRequest) -> dict[str,
 def handle_candidate_application_status_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
     if has_current_media_upload(request.media or {}):
         return None
-    normalized = normalize_text(request.raw_text)
-    if not re.search(r"\b(status|application|where.*application|did you receive|received|missing|cv|resume)\b", normalized):
+    if not is_candidate_status_intent(request.raw_text):
         return None
-    application = candidate_active_application(request.sender_phone)
-    if not application:
-        return None
+    resolution = resolve_candidate_request_application(request)
+    application = resolution.get("application") if isinstance(resolution.get("application"), dict) else None
+    if not resolution.get("ok") or not application:
+        return candidate_resolution_failure_message(request, resolution)
+    locale = candidate_message_payload(
+        "application_status",
+        request=request,
+        application=application,
+        role="",
+        status="",
+    )["locale"]
     return {
-        "reply": candidate_missing_or_next_reply(application),
+        **candidate_message_result(
+            "application_status",
+            request=request,
+            application=application,
+            locale=locale,
+            role=application.get("position_title") or application.get("position_code") or "the role",
+            status=_candidate_messages.status_label(application.get("status"), locale),
+        ),
         "application": json_safe(application),
         "intent": "candidate_application_status",
         "turn_focus": "candidate_status",
@@ -22696,11 +23512,24 @@ def handle_candidate_casual_turn(request: WhatsAppTurnRequest) -> dict[str, Any]
     if has_current_media_upload(request.media or {}):
         return None
     normalized = normalize_text(request.raw_text)
-    if normalized in {"hi", "hello", "hey", "salam", "thanks", "thank you", "ok", "okay"}:
+    raw = str(request.raw_text or "").strip()
+    if normalized in {"hi", "hello", "hey", "salam", "thanks", "thank you", "ok", "okay"} or raw in {
+        "مرحبا",
+        "مرحباً",
+        "هلا",
+        "السلام عليكم",
+        "شكرا",
+        "شكراً",
+        "تمام",
+    }:
         application = candidate_active_application(request.sender_phone)
         if not application:
+            locale = _candidate_messages.infer_locale(
+                request.raw_text,
+                preferred=(request.metadata or {}).get("locale") if isinstance(request.metadata, dict) else None,
+            )
             return {
-                "reply": public_candidate_welcome_reply(request_company_code(request)),
+                **candidate_message_result("welcome", request=request, locale=locale),
                 "application": {},
                 "intent": "public_candidate_welcome",
                 "turn_focus": "public_candidate",
@@ -22722,8 +23551,12 @@ def handle_candidate_safe_fallback_turn(request: WhatsAppTurnRequest) -> dict[st
         return None
     application = candidate_active_application(request.sender_phone)
     if not application:
+        locale = _candidate_messages.infer_locale(
+            request.raw_text,
+            preferred=(request.metadata or {}).get("locale") if isinstance(request.metadata, dict) else None,
+        )
         return {
-            "reply": public_candidate_welcome_reply(request_company_code(request)),
+            **candidate_message_result("welcome", request=request, locale=locale),
             "application": {},
             "intent": "public_candidate_fallback",
             "turn_focus": "public_candidate",
@@ -23060,17 +23893,20 @@ def handle_non_hr_conversational_turn(request: WhatsAppTurnRequest) -> dict[str,
         ("employee_attendance", "handle_employee_attendance", "employee_attendance", handle_employee_attendance_turn),
         ("employee_payroll", "handle_employee_payroll", "employee_payroll", handle_employee_payroll_turn),
         ("employee_shift", "answer_employee_shift_status", "employee_shift", handle_employee_shift_turn),
+        ("candidate_withdrawal", "candidate_withdrawal", "candidate_withdrawal", handle_candidate_withdrawal_turn),
+        ("candidate_handoff", "candidate_hr_handoff", "candidate_handoff", handle_candidate_hr_handoff_turn),
+        ("candidate_cv_update", "candidate_cv_update_request", "candidate_cv_update", handle_candidate_cv_update_request_turn),
+        ("candidate_status", "candidate_application_status", "candidate_status", handle_candidate_application_status_turn),
+        ("candidate_handoff_pause", "candidate_automation_paused", "candidate_handoff", handle_candidate_automation_pause_turn),
+        ("candidate_file", "handle_candidate_file", "candidate_file", handle_candidate_file_turn),
         ("candidate_assessment", "handle_candidate_assessment", "candidate_assessment", handle_candidate_assessment_turn),
         ("public_candidate_apply_code", "public_candidate_apply_code_started", "public_candidate", handle_public_candidate_apply_code_turn),
         ("public_candidate_selection", "public_candidate_role_selected", "public_candidate", handle_public_candidate_role_selection_turn),
         ("public_candidate_apply", "public_candidate_apply_help", "public_candidate", handle_public_candidate_apply_interest_turn),
-        ("candidate_cv_update", "candidate_cv_update_request", "candidate_cv_update", handle_candidate_cv_update_request_turn),
         ("candidate_screening", "handle_candidate_screening_answer", "candidate_screening", handle_candidate_screening_turn),
-        ("candidate_status", "candidate_application_status", "candidate_status", handle_candidate_application_status_turn),
         ("candidate_process", "candidate_process_question", "candidate_process", handle_candidate_process_faq_turn),
         ("candidate_truth", "answer_candidate_cv_status", "candidate_cv_status", handle_candidate_truth_turn),
         ("employee_onboarding", "handle_employee_onboarding_reply", "employee_onboarding", handle_employee_onboarding_turn),
-        ("candidate_file", "handle_candidate_file", "candidate_file", handle_candidate_file_turn),
         ("candidate_casual", "candidate_casual", "candidate_casual", handle_candidate_casual_turn),
         ("candidate_fallback", "candidate_safe_fallback", "candidate_fallback", handle_candidate_safe_fallback_turn),
     ]
@@ -24461,6 +25297,45 @@ def run_gog(args: list[str], timeout: int = 60) -> dict[str, Any]:
     }
 
 
+def valid_whatsapp_recipient(phone: Any) -> bool:
+    normalized = digits(phone)
+    return bool(re.fullmatch(r"\d{8,15}", normalized))
+
+
+def invalid_whatsapp_recipient_result(
+    *,
+    account_id: str | None,
+    phone: Any,
+    text: str,
+    subject_type: str | None,
+    subject_key: str | None,
+    message_kind: str,
+    channel: str = "octopus",
+    company_code: str | None = None,
+) -> dict[str, Any]:
+    result = {
+        "ok": False,
+        "error": "invalid_recipient",
+        "phone": digits(phone),
+        "dry_run": delivery_is_dry_run(),
+    }
+    record_outbound_delivery_event(
+        account_id=account_id,
+        target_phone=str(phone or ""),
+        target_conversation_id=None,
+        status="failed",
+        message_text=text,
+        last_error="invalid_recipient",
+        payload={"send_result": result, "recipient_validation": "failed"},
+        subject_type=subject_type,
+        subject_key=subject_key,
+        message_kind=message_kind,
+        channel=channel,
+        company_code=company_code,
+    )
+    return result
+
+
 def send_octopus_whatsapp(
     *,
     account_id: str | None,
@@ -24475,6 +25350,16 @@ def send_octopus_whatsapp(
     # Optional company_code enables Phase 7D account selection. When omitted (all
     # legacy callers) or when WATHEFNI_COMPANY_CHANNEL_ACCOUNTS is OFF, routing is
     # unchanged: use the caller-supplied account_id / shared default.
+    if not valid_whatsapp_recipient(phone):
+        return invalid_whatsapp_recipient_result(
+            account_id=account_id,
+            phone=phone,
+            text=text,
+            subject_type=subject_type,
+            subject_key=subject_key,
+            message_kind=message_kind,
+            company_code=company_code,
+        )
     route_meta: dict[str, Any] | None = None
     if company_code is not None:
         route_meta = resolve_company_outbound_whatsapp_route(
@@ -24662,6 +25547,31 @@ def send_octopus_whatsapp(
     return result
 
 
+def send_company_whatsapp_message(
+    company_code: str,
+    phone: str,
+    text: str,
+    *,
+    account_id: str | None = None,
+    subject_key: str | None = None,
+    message_kind: str = "text",
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    result = send_octopus_whatsapp(
+        account_id=account_id,
+        phone=phone,
+        text=text,
+        subject_type="candidate",
+        subject_key=subject_key,
+        message_kind=message_kind,
+        company_code=company_code,
+        audience="candidate",
+    )
+    if metadata:
+        result["metadata"] = json_safe(metadata)
+    return result
+
+
 def octopus_send_template(
     *,
     account_id: str | None,
@@ -24686,6 +25596,17 @@ def octopus_send_template(
     "template_provider_unconfigured") so the layer falls through to email / HR
     task. It never silently succeeds.
     """
+    if not valid_whatsapp_recipient(phone):
+        return invalid_whatsapp_recipient_result(
+            account_id=account_id,
+            phone=phone,
+            text=fallback_text or f"[template:{template_key}]",
+            subject_type=subject_type,
+            subject_key=subject_key,
+            message_kind=message_kind,
+            channel="whatsapp_template",
+            company_code=company_code,
+        )
     variables = variables or {}
     if not outbound_templates_enabled():
         return {"ok": False, "error": "template_disabled", "template_key": template_key}
@@ -24818,6 +25739,15 @@ def send_octopus_whatsapp_image(
     subject_key: str | None = None,
     conversation_id: str | None = None,
 ) -> dict[str, Any]:
+    if not valid_whatsapp_recipient(phone):
+        return invalid_whatsapp_recipient_result(
+            account_id=account_id,
+            phone=phone,
+            text=caption or "",
+            subject_type=subject_type,
+            subject_key=subject_key,
+            message_kind="image",
+        )
     if delivery_is_dry_run():
         result = {"ok": True, "dry_run": True, "status": 200, "phone": digits(phone), "simulated": True, "media_url": image_url}
         record_outbound_delivery_event(
@@ -25633,6 +26563,78 @@ def active_assessment_battery(company_code: str | None) -> dict[str, Any] | None
             )
             row = cur.fetchone()
             return dict(row) if row else None
+
+
+def _battery_approved_for_use_beta(battery: dict[str, Any] | None) -> bool:
+    if not battery:
+        return False
+    raw = battery.get("raw_json") if isinstance(battery.get("raw_json"), dict) else {}
+    return bool(
+        raw.get("approved_for_use_beta") is True
+        or str(raw.get("approved_for_use_status") or "") == "approved_for_use_beta"
+    )
+
+
+def resolve_assessment_battery(
+    company_code: str | None,
+    *,
+    battery_key: str | None = None,
+) -> dict[str, Any] | None:
+    """Resolve the battery for a send.
+
+    Explicit battery_key may select a company beta battery that is approved for
+    use but intentionally not the default active battery. Without battery_key,
+    preserve the existing active-battery default (GLOBAL ability for WATHEFNI).
+    """
+    company = (company_code or "WATHEFNI").upper()
+    selected = str(battery_key or "").strip()
+    if not selected:
+        return active_assessment_battery(company)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM assessment_batteries
+                WHERE battery_key=%s
+                  AND company_code IN (%s, 'GLOBAL')
+                  AND retired_at IS NULL
+                ORDER BY CASE WHEN company_code=%s THEN 0 ELSE 1 END, updated_at DESC
+                LIMIT 1
+                """,
+                (selected, company, company),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            battery = dict(row)
+            if battery.get("is_active") is True or _battery_approved_for_use_beta(battery):
+                return battery
+            return None
+
+
+def list_selectable_assessment_batteries(company_code: str | None) -> list[dict[str, Any]]:
+    company = (company_code or "WATHEFNI").upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM assessment_batteries
+                WHERE retired_at IS NULL
+                  AND company_code IN (%s, 'GLOBAL')
+                  AND (
+                    is_active IS TRUE
+                    OR COALESCE(raw_json->>'approved_for_use_beta','') = 'true'
+                    OR COALESCE(raw_json->>'approved_for_use_status','') = 'approved_for_use_beta'
+                  )
+                ORDER BY CASE WHEN company_code=%s THEN 0 ELSE 1 END,
+                         CASE WHEN is_active IS TRUE THEN 0 ELSE 1 END,
+                         name, battery_key
+                """,
+                (company, company),
+            )
+            return [dict(row) for row in cur.fetchall()]
 
 
 def assessment_items_for_battery(battery_key: str) -> list[dict[str, Any]]:
@@ -26532,7 +27534,14 @@ def public_assessment_state(attempt_id: str, token: str | None, *, start: bool =
     }
 
 
-def create_or_resume_assessment_attempt(app: dict[str, Any], *, source: str, requested_by: str | None = None) -> dict[str, Any]:
+def create_or_resume_assessment_attempt(
+    app: dict[str, Any],
+    *,
+    source: str,
+    requested_by: str | None = None,
+    battery_key: str | None = None,
+    expires_days: int | None = None,
+) -> dict[str, Any]:
     import assessment_lifecycle as _assessment_lifecycle
     import assessment_service as _assessment_service
 
@@ -26542,11 +27551,22 @@ def create_or_resume_assessment_attempt(app: dict[str, Any], *, source: str, req
     phone = digits(contact.get("phone"))
     if not app_key or not phone:
         return {"ok": False, "error": "missing_candidate_contact", "candidate": contact}
-    battery = active_assessment_battery(company)
+    battery = resolve_assessment_battery(company, battery_key=battery_key)
     if not battery:
-        return {"ok": False, "error": "missing_active_assessment_battery", "candidate": contact}
+        return {
+            "ok": False,
+            "error": "missing_active_assessment_battery" if not battery_key else "assessment_battery_not_selectable",
+            "candidate": contact,
+            "battery_key": battery_key,
+        }
     seed = hashlib.sha256(f"{app_key}:{battery['battery_key']}:v1".encode("utf-8")).hexdigest()[:16]
     created = False
+    ttl_days = _assessment_lifecycle.DEFAULT_ATTEMPT_TTL_DAYS
+    if expires_days is not None:
+        try:
+            ttl_days = max(1, min(60, int(expires_days)))
+        except (TypeError, ValueError):
+            ttl_days = _assessment_lifecycle.DEFAULT_ATTEMPT_TTL_DAYS
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -26602,7 +27622,8 @@ def create_or_resume_assessment_attempt(app: dict[str, Any], *, source: str, req
                     created_by_user_id=requested_by,
                 )
                 items = _assessment_service.version_items(version)
-                expires_at = datetime.now(timezone.utc) + timedelta(days=_assessment_lifecycle.DEFAULT_ATTEMPT_TTL_DAYS)
+                expires_at = datetime.now(timezone.utc) + timedelta(days=ttl_days)
+                battery_raw = battery.get("raw_json") if isinstance(battery.get("raw_json"), dict) else {}
                 cur.execute(
                     """
                     INSERT INTO assessment_attempts
@@ -26627,7 +27648,17 @@ def create_or_resume_assessment_attempt(app: dict[str, Any], *, source: str, req
                         len(items),
                         seed,
                         expires_at,
-                        Json({"source": source, "requested_by": requested_by, "candidate": contact}),
+                        Json(
+                            {
+                                "source": source,
+                                "requested_by": requested_by,
+                                "candidate": contact,
+                                "locale": battery_raw.get("locale"),
+                                "approved_for_use_status": battery_raw.get("approved_for_use_status"),
+                                "scores_are_supporting_evidence_only": True,
+                                "expires_days": ttl_days,
+                            }
+                        ),
                     ),
                 )
                 inserted = cur.fetchone()
@@ -27388,16 +28419,14 @@ def deliver_assessment_invitation(
     if expired:
         return {"ok": False, "error": "attempt_expired", "attempt": json_safe(locked)}
     contact = candidate_contact(app)
-    name = contact.get("name") or "there"
     title = contact.get("position_title") or "the role"
-    note_text = str(note or "").strip()
-    body = (
-        f"Hi {name},\n\n"
-        + (f"{note_text}\n\n" if note_text else "")
-        + f"You have been invited to complete an application assessment for {title}.\n\n"
-        f"Open your assessment here:\n{link}\n\n"
-        "Complete it in your browser. Your answers are saved after each question."
+    candidate_template = candidate_message_payload(
+        "assessment_invitation",
+        application=app,
+        role=title,
+        link=link,
     )
+    body = candidate_template["text"]
     delivery = candidate_communication_router(
         app,
         account_id=account_id,
@@ -27409,6 +28438,8 @@ def deliver_assessment_invitation(
             "message_text": body,
             "send_both": True,
             "assessment_link": link,
+            "candidate_template": candidate_template,
+            "note": str(note or "").strip() or None,
         },
     )
     channel_attempts = {
@@ -27488,6 +28519,7 @@ def deliver_assessment_invitation(
         "delivery": delivery,
         "delivery_status": attempt.get("delivery_status"),
         "message": body,
+        "candidate_template": candidate_template,
         "assessment_link": link,
         "candidate": contact,
         "attempt": json_safe(attempt),
@@ -27501,11 +28533,15 @@ def send_assessment(
     *,
     note: str | None = None,
     requested_by: str | None = None,
+    battery_key: str | None = None,
+    expires_days: int | None = None,
 ) -> dict[str, Any]:
     attempt_result = create_or_resume_assessment_attempt(
         app,
         source="dashboard_or_hr_action",
         requested_by=requested_by,
+        battery_key=battery_key,
+        expires_days=expires_days,
     )
     if not attempt_result.get("ok"):
         return attempt_result
@@ -28512,7 +29548,7 @@ def send_outbound_email(
 def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
     contact = candidate_contact(app)
     email = contact.get("email")
-    if not email:
+    if not email or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", str(email).strip()):
         return {"ok": False, "error": "missing_candidate_email", "candidate": contact}
     content = compose_email_content(app, action)
     subject = content["subject"]
@@ -33705,6 +34741,9 @@ PREHIRE_DASHBOARD_ACTION_TYPES = [
 class DashboardCandidateMessage(BaseModel):
     message: str | None = None
     account_id: str | None = "default"
+    battery_key: str | None = Field(default=None, max_length=120)
+    locale: str | None = Field(default=None, max_length=8)
+    expires_days: int | None = Field(default=None, ge=1, le=60)
 
 
 class DashboardAssessmentCancelRequest(BaseModel):
@@ -33907,8 +34946,9 @@ def public_assessment_html() -> str:
     :root { color-scheme: light; --ink:#171d29; --bg:#f6f1e8; --panel:#fffdf8; --line:#e7dece; --muted:#746b5f; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(circle at top left,#fffaf0 0,#f7f3eb 40%,#f1eadf 100%); color:var(--ink); }
-    main { min-height:100vh; display:grid; place-items:center; padding:24px; }
-    .shell { width:min(760px,100%); border:1px solid var(--line); background:rgba(255,253,248,.94); border-radius:32px; box-shadow:0 24px 70px rgba(23,29,41,.12); overflow:hidden; }
+    main { min-height:100vh; min-height:100svh; display:grid; place-items:center; padding:24px; }
+    .shell { width:min(760px,100%); border:1px solid var(--line); background:rgba(255,253,248,.94); border-radius:32px; box-shadow:0 24px 70px rgba(23,29,41,.12); }
+    .pending { color:var(--muted); line-height:1.6; padding:8px 0 4px; min-height:3.2em; }
     header { padding:28px 28px 20px; border-bottom:1px solid var(--line); }
     .brand { font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#a39a8d; font-weight:700; }
     h1 { margin:12px 0 8px; font-size:clamp(28px,6vw,44px); letter-spacing:-.05em; }
@@ -33918,8 +34958,8 @@ def public_assessment_html() -> str:
     .bar { height:100%; width:0%; background:var(--ink); transition:width .25s ease; }
     .question { font-size:22px; line-height:1.45; font-weight:650; margin:0 0 22px; letter-spacing:-.02em; }
     .choices { display:grid; gap:12px; }
-    button.choice { width:100%; text-align:left; border:1px solid var(--line); background:#fffaf2; color:var(--ink); border-radius:20px; padding:16px 18px; font-size:16px; line-height:1.45; cursor:pointer; transition:.15s ease; }
-    button.choice:hover:not(:disabled) { transform:translateY(-1px); border-color:#1b2230; background:white; }
+    button.choice { width:100%; text-align:left; border:1px solid var(--line); background:#fffaf2; color:var(--ink); border-radius:20px; padding:16px 18px; font-size:16px; line-height:1.45; cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+    button.choice:hover:not(:disabled) { border-color:#1b2230; background:white; }
     button.choice:disabled { opacity:.6; cursor:not-allowed; }
     .key { display:inline-grid; place-items:center; width:28px; height:28px; margin-right:10px; border-radius:999px; background:var(--ink); color:white; font-size:13px; font-weight:700; }
     .done { text-align:center; padding:34px 10px; }
@@ -33966,7 +35006,10 @@ def public_assessment_html() -> str:
       content.innerHTML = `<div class="error">${escapeHtml(message || 'This link is no longer available. Please contact the hiring team if you need a new link.')}</div>`;
     }
     async function request(path, init) {
-      const res = await fetch(path + '?token=' + encodeURIComponent(token), init);
+      const res = await fetch(path + '?token=' + encodeURIComponent(token), {
+        cache: 'no-store',
+        ...(init || {}),
+      });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         const err = new Error(candidateSafeAssessmentError(json.detail?.error || json.error || res.status));
@@ -33974,6 +35017,13 @@ def public_assessment_html() -> str:
         throw err;
       }
       return json;
+    }
+    function setContentHtml(html) {
+      // Single atomic replace so Mobile Safari does not paint an empty frame
+      // between wipe and rebuild when advancing items.
+      const next = document.createElement('div');
+      next.innerHTML = html;
+      content.replaceChildren(...next.childNodes);
     }
     function render(state) {
       const attempt = state.attempt || {};
@@ -33984,24 +35034,36 @@ def public_assessment_html() -> str:
       meta.textContent = [attempt.candidate_name, total ? `Question ${nextQuestion} of ${total}` : ''].filter(Boolean).join(' · ');
       bar.style.width = `${attempt.percent_complete || 0}%`;
       if (state.completed) {
-        content.innerHTML = '<div class="done"><div class="done-icon">✓</div><h2>Your assessment has been submitted</h2><p class="subtle">Thank you. The hiring team will review it with the rest of your application. You can close this page.</p></div>';
+        setContentHtml('<div class="done"><div class="done-icon">✓</div><h2>Your assessment has been submitted</h2><p class="subtle">Thank you. The hiring team will review it with the rest of your application. You can close this page.</p></div>');
         bar.style.width = '100%';
         return;
       }
       const item = state.item;
       if (!item) {
-        content.innerHTML = '<div class="error">Something went wrong loading your questions. Please contact the hiring team.</div>';
+        setContentHtml('<div class="error">Something went wrong loading your questions. Please contact the hiring team.</div>');
         return;
       }
-      content.innerHTML = `<p class="question">${escapeHtml(item.prompt_text)}</p><div class="choices">${(item.choices || []).map(choice => `<button class="choice" data-key="${escapeHtml(choice.key)}"><span class="key">${escapeHtml(choice.key)}</span>${escapeHtml(choice.text)}</button>`).join('')}</div>`;
+      const questionHtml = `<p class="question">${escapeHtml(item.prompt_text)}</p><div class="choices">${(item.choices || []).map(choice => `<button class="choice" data-key="${escapeHtml(choice.key)}"><span class="key">${escapeHtml(choice.key)}</span>${escapeHtml(choice.text)}</button>`).join('')}</div>`;
+      setContentHtml(questionHtml);
       content.querySelectorAll('button.choice').forEach(button => {
         button.addEventListener('click', async () => {
           content.querySelectorAll('button.choice').forEach(b => b.disabled = true);
+          // Keep non-empty pending chrome so the pane never blanks during save.
+          setContentHtml(`<p class="question">${escapeHtml(item.prompt_text)}</p><div class="pending" aria-live="polite">Saving your answer…</div>`);
           try {
-            const next = await request(`/assessment/${attemptId}/answer`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ selected_key: button.dataset.key, response_text: button.innerText, item_id: item.item_id, progress_version: data.attempt.progress_version }) });
+            const next = await request(`/assessment/${attemptId}/answer`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                selected_key: button.dataset.key,
+                response_text: button.innerText,
+                item_id: item.item_id,
+                progress_version: state.attempt.progress_version,
+              }),
+            });
             render(next);
           } catch (err) {
-            content.innerHTML = `<div class="error">${escapeHtml(err.message || 'We could not save your answer. Please try again.')}</div>`;
+            setContentHtml(`<div class="error">${escapeHtml(err.message || 'We could not save your answer. Please try again.')}</div>`);
           }
         });
       });
@@ -36550,6 +37612,16 @@ def dashboard_hr_task_resolve(task_id: str, request: HrTaskResolveRequest, conte
     result = _outbound_delivery.resolve_hr_task(company_code=company, task_id=task_id, status=request.status, resolver_phone=context.get("hr_phone"))
     if not result.get("ok"):
         raise HTTPException(status_code=404, detail={"error": result.get("error") or "task_not_found", "message": "This task was not found."})
+    task = result.get("task") if isinstance(result.get("task"), dict) else {}
+    if str(task.get("task_type") or "") == "candidate_handoff" and str(request.status or "").lower() != "open":
+        import recruiting_lifecycle as _rl
+
+        result["handoff_resume"] = _rl.resume_candidate_handoff(
+            sys.modules[__name__],
+            company_code=company,
+            task=task,
+            resumed_by=context.get("hr_phone") or context.get("actor_user_id"),
+        )
     record_admin_audit(context, "hr_task_resolved", summary=f"Marked HR task {request.status}.", target_type="hr_task", target=task_id, details={"status": request.status, "source": result.get("task", {}).get("source")})
     return json_safe(result)
 
@@ -39388,23 +40460,20 @@ def interview_time_label(interview: dict[str, Any]) -> str:
 
 
 def compose_interview_invite_message(application: dict[str, Any], interview: dict[str, Any]) -> str:
-    name = interview.get("candidate_name") or application.get("candidate_name") or "there"
     role = interview.get("position_title") or application.get("position_title") or application.get("position_code") or "the role"
     time_label = interview_time_label(interview)
     meet_link = str(interview.get("meet_link") or "").strip()
-    lines = [
-        f"Hi {name},",
-        "",
-        f"Your Wathefni interview for {role} is scheduled" + (f" for {time_label}." if time_label else "."),
-    ]
-    if meet_link:
-        lines.append(f"Google Meet: {meet_link}")
-    elif interview.get("calendar_event_id") or interview.get("calendar_invite_sent"):
-        lines.append("The Google Calendar invite contains the joining link/details.")
-    else:
-        lines.append("Wathefni HR will send the joining details separately.")
-    lines.extend(["", "Best,", "Wathefni HR"])
-    return "\n".join(lines)
+    details = time_label or "HR will share the confirmed time and joining details."
+    if not meet_link and (interview.get("calendar_event_id") or interview.get("calendar_invite_sent")):
+        details = f"{details} The calendar invitation contains the joining details."
+    template_key = "interview_update" if interview.get("candidate_notified") or interview.get("invite_sent_at") else "interview_invitation"
+    return candidate_message_payload(
+        template_key,
+        application=application,
+        role=role,
+        details=details,
+        link=meet_link,
+    )["text"]
 
 
 def update_interview_invite_delivery(interview_id: str, delivery: dict[str, Any], *, subject: str, body: str) -> None:
@@ -40910,24 +41979,15 @@ def create_or_resume_async_video_interview(
 
 
 def compose_async_video_interview_invite(application: dict[str, Any], interview: dict[str, Any], public_link: str, *, note: str | None = None) -> str:
-    name = interview.get("candidate_name") or application.get("candidate_name") or "there"
-    note_text = str(note or "").strip()
-    lines = [
-        f"Hi {name},",
-        "",
-        *([note_text, ""] if note_text else []),
-        "You have been invited to complete a short video interview for your application.",
-        "",
-        "Please open the link below when you are ready. You will be asked to review the instructions, give consent, and answer a few questions by video.",
-        "",
-        public_link,
-        "",
-        "This video interview helps the hiring team review your application. The final decision is always made by the hiring team.",
-        "",
-        "Thank you,",
-        "Wathefni HR",
-    ]
-    return "\n".join(lines)
+    del note
+    role = interview.get("position_title") or application.get("position_title") or application.get("position_code") or "the role"
+    return candidate_message_payload(
+        "interview_invitation",
+        application=application,
+        role=role,
+        details="Complete the short video interview when you are ready.",
+        link=public_link,
+    )["text"]
 
 
 def send_async_video_interview_invite(
@@ -42413,6 +43473,7 @@ def dashboard_assessments_payload(
 
 def dashboard_assessment_config_payload(company: str) -> dict[str, Any]:
     battery = active_assessment_battery(company)
+    selectable = list_selectable_assessment_batteries(company)
     battery_key = str((battery or {}).get("battery_key") or ASSESSMENT_BATTERY_KEY)
     validation = validate_assessment_item_bank()
     with db_connect() as conn:
@@ -42446,10 +43507,30 @@ def dashboard_assessment_config_payload(company: str) -> dict[str, Any]:
         count = int(row.get("count") or 0)
         section_totals[section] = section_totals.get(section, 0) + count
         difficulty_totals[difficulty] = difficulty_totals.get(difficulty, 0) + count
+    available_batteries = []
+    for row in selectable:
+        raw = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
+        available_batteries.append(
+            {
+                "battery_key": row.get("battery_key"),
+                "company_code": row.get("company_code"),
+                "name": row.get("name"),
+                "version": row.get("version"),
+                "is_active": row.get("is_active"),
+                "locale": raw.get("locale"),
+                "approved_for_use_status": raw.get("approved_for_use_status")
+                or ("approved_for_use_beta" if raw.get("approved_for_use_beta") else ("active" if row.get("is_active") else None)),
+                "scores_are_supporting_evidence_only": bool(raw.get("scores_are_supporting_evidence_only")),
+                "selectable_for_hr_send": bool(raw.get("selectable_for_hr_send") or row.get("is_active")),
+                "assessment_version_id": raw.get("frozen_assessment_version_id"),
+                "content_sha256": raw.get("frozen_content_sha256"),
+            }
+        )
     return {
         "company_code": company,
         "ok": True,
         "battery": json_safe(battery) if battery else None,
+        "available_batteries": available_batteries,
         "item_bank": {
             "total_items": sum(section_totals.values()),
             "section_totals": section_totals,
@@ -42469,6 +43550,8 @@ def dashboard_assessment_config_payload(company: str) -> dict[str, Any]:
             "deterministic_scoring": True,
             "ai_may_change_scores": False,
             "unknown_jobs_use_general_profile_until_profiled": True,
+            "beta_scores_supporting_evidence_only": True,
+            "no_automatic_hiring_actions": True,
         },
     }
 
@@ -43482,6 +44565,62 @@ def dashboard_prehire_assessments(
 def dashboard_prehire_assessment_config(context: dict[str, Any] = Depends(assessments_dashboard_context)):
     company = context["company_code"]
     return dashboard_assessment_config_payload(company)
+
+
+@app.get("/dashboard/prehire/assessments/batteries/{battery_key}/items")
+def dashboard_prehire_assessment_battery_items(
+    battery_key: str,
+    include_keys: bool = Query(default=False),
+    context: dict[str, Any] = Depends(assessments_dashboard_context),
+):
+    company = context["company_code"]
+    battery = resolve_assessment_battery(company, battery_key=battery_key)
+    if not battery:
+        raise HTTPException(status_code=404, detail={"error": "assessment_battery_not_found"})
+    can_manage = False
+    try:
+        require_entitlement(context, "assessments", "assessment.manage")
+        can_manage = True
+    except HTTPException:
+        can_manage = False
+    show_keys = bool(include_keys and can_manage)
+    items = []
+    for item in assessment_items_for_battery(str(battery["battery_key"])):
+        raw = item.get("raw_json") if isinstance(item.get("raw_json"), dict) else {}
+        payload = {
+            "item_id": item.get("item_id"),
+            "item_order": item.get("item_order"),
+            "section": item.get("section"),
+            "difficulty": item.get("difficulty"),
+            "prompt_text": item.get("prompt_text"),
+            "choices": item.get("choices"),
+            "locale": raw.get("locale"),
+            "monitoring_flag": raw.get("monitoring_flag"),
+            "source_draft_revision_id": raw.get("source_draft_revision_id"),
+        }
+        if show_keys:
+            payload["answer_key"] = item.get("answer_key")
+            payload["scoring"] = item.get("scoring")
+            payload["rationale"] = raw.get("rationale")
+            payload["explanation"] = raw.get("explanation")
+        items.append(payload)
+    raw_battery = battery.get("raw_json") if isinstance(battery.get("raw_json"), dict) else {}
+    return {
+        "ok": True,
+        "company_code": company,
+        "battery": {
+            "battery_key": battery.get("battery_key"),
+            "name": battery.get("name"),
+            "version": battery.get("version"),
+            "locale": raw_battery.get("locale"),
+            "approved_for_use_status": raw_battery.get("approved_for_use_status"),
+            "assessment_version_id": raw_battery.get("frozen_assessment_version_id"),
+            "content_sha256": raw_battery.get("frozen_content_sha256"),
+        },
+        "include_keys": show_keys,
+        "item_count": len(items),
+        "items": json_safe(items),
+    }
 
 
 @app.post("/dashboard/prehire/assessments/norms/recalculate")
@@ -47246,14 +48385,29 @@ def dashboard_prehire_assessment(
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
     payload = request or DashboardCandidateMessage()
+    selected_battery_key = str(payload.battery_key or "").strip() or None
+    locale = str(payload.locale or "").strip().lower() or None
+    if locale and not selected_battery_key:
+        # Locale maps onto the Battery-1 beta pair when HR chooses EN/AR without an explicit key.
+        locale_map = {
+            "en": "wathefni_gawj_v1_en_beta",
+            "ar": "wathefni_gawj_v1_ar_beta",
+        }
+        selected_battery_key = locale_map.get(locale)
     if _prehire_registry_enabled("send_assessment"):
         extra = {"message_text": payload.message} if payload.message else {}
+        if selected_battery_key:
+            extra["battery_key"] = selected_battery_key
+        if payload.expires_days is not None:
+            extra["expires_days"] = payload.expires_days
         return run_prehire_registry_action(context, "send_assessment", extra, app_key=app_key)
     result = send_assessment(
         application,
         payload.account_id or "default",
         note=payload.message,
         requested_by=assessment_dashboard_actor_id(context),
+        battery_key=selected_battery_key,
+        expires_days=payload.expires_days,
     )
     status = "completed" if result.get("ok") else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
@@ -47267,7 +48421,14 @@ def dashboard_prehire_assessment(
     result_payload = {
         **result,
         "application": json_safe(application),
-        "action": {"type": "send_assessment", "target_type": "application", "target": app_key},
+        "action": {
+            "type": "send_assessment",
+            "target_type": "application",
+            "target": app_key,
+            "battery_key": selected_battery_key,
+            "locale": locale,
+            "expires_days": payload.expires_days,
+        },
         "source": "dashboard",
         "company_code": company,
         "requested_by": context.get("hr_user"),
@@ -52654,9 +53815,73 @@ def dashboard_posthire_compliance(
 
 @app.post("/orchestrator/whatsapp-turn", response_model=OrchestratorResponse)
 def whatsapp_turn(request: WhatsAppTurnRequest):
+    ensure_schema()
+    inbound_claim = claim_whatsapp_inbound(request)
+    metadata = request.metadata if isinstance(request.metadata, dict) else {}
+    if (
+        not inbound_claim.get("dedupe_available")
+        and str(metadata.get("channel") or "") != "web_dashboard"
+        and metadata.get("smoke") is not True
+    ):
+        return OrchestratorResponse(
+            authoritative=True,
+            reply_text=None,
+            final_reply_source="provider_message_id_required",
+            intent="ingress_rejected",
+            turn_focus="ingress_dedupe",
+            audit={"ingress_dedupe": {"dedupe_available": False, "error": "provider_message_id_required"}},
+        )
+    if inbound_claim.get("duplicate"):
+        existing = inbound_claim.get("existing") if isinstance(inbound_claim.get("existing"), dict) else {}
+        if not inbound_claim.get("identity_match"):
+            return OrchestratorResponse(
+                authoritative=True,
+                reply_text=None,
+                final_reply_source="whatsapp_duplicate_identity_mismatch",
+                intent="duplicate_rejected",
+                turn_focus="ingress_dedupe",
+                audit={"ingress_dedupe": {"duplicate": True, "identity_match": False}},
+            )
+        stored = existing.get("response_json") if isinstance(existing.get("response_json"), dict) else None
+        if stored:
+            stored_audit = stored.get("audit") if isinstance(stored.get("audit"), dict) else {}
+            stored["audit"] = {**stored_audit, "ingress_dedupe": {"duplicate": True, "replayed": True}}
+            return OrchestratorResponse(**stored)
+        return OrchestratorResponse(
+            authoritative=True,
+            reply_text=None,
+            final_reply_source="whatsapp_duplicate_inflight",
+            intent="duplicate_ignored",
+            turn_focus="ingress_dedupe",
+            audit={"ingress_dedupe": {"duplicate": True, "status": existing.get("status")}},
+        )
+    if request.sender_role != "hr_admin" and not is_hr_phone(request.sender_phone) and not canonical_lifecycle_enabled():
+        blocked = OrchestratorResponse(
+            authoritative=True,
+            reply_text="Wathefni candidate intake is temporarily unavailable. Please contact HR.",
+            final_reply_source="canonical_lifecycle_required",
+            intent="candidate_intake_disabled",
+            turn_focus="candidate_safety",
+            audit={"canonical_lifecycle_enabled": False},
+        )
+        complete_whatsapp_inbound(inbound_claim, blocked, error="canonical_lifecycle_disabled")
+        return blocked
     token = set_active_company_code(request_company_code(request))
     try:
-        return _whatsapp_turn_impl(request)
+        response = _whatsapp_turn_impl(request)
+        complete_whatsapp_inbound(inbound_claim, response)
+        return response
+    except Exception as exc:
+        failure = OrchestratorResponse(
+            authoritative=True,
+            reply_text="I hit a Wathefni backend issue before I could safely answer. Please try again in a moment.",
+            final_reply_source="whatsapp_turn_error",
+            intent="orchestrator_error",
+            turn_focus="ingress",
+            audit={"ingress_dedupe": {"claimed": bool(inbound_claim.get("claimed"))}},
+        )
+        complete_whatsapp_inbound(inbound_claim, failure, error=str(exc))
+        return failure
     finally:
         reset_active_company_code(token)
 
@@ -52864,7 +54089,7 @@ def prehire_cv_process(
     dry_run: bool = True,
     limit: int = 10,
     force: bool = False,
-    send_screening: bool = True,
+    send_screening: bool = False,
     _internal: dict[str, Any] = Depends(require_internal_access),
 ):
     ensure_schema()
