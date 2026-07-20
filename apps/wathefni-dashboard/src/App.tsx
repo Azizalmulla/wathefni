@@ -152,6 +152,7 @@ import type {
   PrehireNextAction,
   PrehireReportsResponse,
   PrehireRolePriority,
+  PrehireWorkQueueItem,
   PrehireWorkQueueResponse,
   RankingCandidate,
   RankingResponse,
@@ -1915,12 +1916,6 @@ function App() {
                   onOpenRolePriority={() => viewRolePriority(summary?.role_priority)}
                   onOpenDestination={applyOverviewDestination}
                   onOpenRoleCandidates={viewJobCandidates}
-                  onViewAllQueue={() => {
-                    const action = summary?.next_action?.action
-                    if (action === 'follow_up_failed_delivery') viewFollowUpCandidates()
-                    else if (action === 'send_pending_assessments') viewPendingAssessmentCandidates()
-                    else viewReadyForReviewCandidates()
-                  }}
                   positions={allPositionsForSelectors}
                 />
               )}
@@ -2354,6 +2349,109 @@ const pageSubtitles: Record<Page, string> = {
   settings: 'Manage your workspace, team access, and account settings.',
 }
 
+function overviewCountDetail(
+  locale: RecruitingLocale,
+  count: number,
+  oneKey: Parameters<typeof recruitingCopy>[1],
+  manyKey: Parameters<typeof recruitingCopy>[1],
+  emptyKey: Parameters<typeof recruitingCopy>[1],
+) {
+  if (!count) return recruitingCopy(locale, emptyKey)
+  if (count === 1) return recruitingCopy(locale, oneKey)
+  return recruitingCopy(locale, manyKey, { count })
+}
+
+function overviewDaysFromReason(reason?: string | null) {
+  const match = String(reason || '').match(/(\d+)\s*day/i)
+  if (match) return Math.max(1, Number(match[1]))
+  const hours = String(reason || '').match(/~?(\d+)\s*h/i)
+  if (hours) return Math.max(1, Math.round(Number(hours[1]) / 24))
+  return null
+}
+
+function overviewHeroReason(nextAction: PrehireNextAction | null | undefined, locale: RecruitingLocale, fallback: string) {
+  if (!nextAction || nextAction.action === 'none') return fallback
+  const count = Number(nextAction.total_matching || 0)
+  const days = overviewDaysFromReason(nextAction.reason)
+  const action = String(nextAction.action || '')
+  if (action === 'follow_up_failed_delivery') {
+    if (count <= 1) return recruitingCopy(locale, 'overviewHeroFollowUpReasonOne')
+    return recruitingCopy(locale, 'overviewHeroFollowUpReason', { count, days: days || 1 })
+  }
+  if (action === 'ready_for_review') {
+    return count <= 1
+      ? recruitingCopy(locale, 'overviewHeroReadyReasonOne')
+      : recruitingCopy(locale, 'overviewHeroReadyReason', { count })
+  }
+  if (action === 'send_pending_assessments') {
+    return count <= 1
+      ? recruitingCopy(locale, 'overviewHeroAssessmentReasonOne')
+      : recruitingCopy(locale, 'overviewHeroAssessmentReason', { count })
+  }
+  if (action === 'interview_scheduling_debt') {
+    return count <= 1
+      ? recruitingCopy(locale, 'overviewHeroInterviewReasonOne')
+      : recruitingCopy(locale, 'overviewHeroInterviewReason', { count })
+  }
+  if (action === 'prioritize_role' && nextAction.role?.position_title) {
+    return locale === 'ar'
+      ? `وظيفة ${nextAction.role.position_title} تحتاج انتباهًا الآن.`
+      : `${nextAction.role.position_title} needs attention now.`
+  }
+  return nextAction.reason || fallback
+}
+
+function overviewPrimaryCtaLabel(action: string | undefined, locale: RecruitingLocale) {
+  if (action === 'follow_up_failed_delivery') return recruitingCopy(locale, 'overviewOpenFollowUps')
+  if (action === 'ready_for_review') return recruitingCopy(locale, 'overviewOpenReady')
+  if (action === 'send_pending_assessments') return recruitingCopy(locale, 'overviewOpenAssessments')
+  if (action === 'prioritize_role') return recruitingCopy(locale, 'overviewOpenRoleRanking')
+  return recruitingCopy(locale, 'overviewOpenWorkQueue')
+}
+
+function overviewQueueBadge(actionType: string, locale: RecruitingLocale) {
+  if (actionType.includes('follow')) return recruitingCopy(locale, 'overviewBadgeFollowUp')
+  if (actionType.includes('assessment')) return recruitingCopy(locale, 'overviewBadgeAssessment')
+  if (actionType.includes('interview')) return recruitingCopy(locale, 'overviewBadgeInterview')
+  if (actionType.includes('role')) return recruitingCopy(locale, 'overviewBadgeRole')
+  return recruitingCopy(locale, 'overviewBadgeReady')
+}
+
+function overviewQueueReason(actionType: string, locale: RecruitingLocale) {
+  if (actionType.includes('follow')) return recruitingCopy(locale, 'overviewQueueFollowUp')
+  if (actionType.includes('assessment')) return recruitingCopy(locale, 'overviewQueueAssessment')
+  if (actionType.includes('interview')) return recruitingCopy(locale, 'overviewQueueInterview')
+  return recruitingCopy(locale, 'overviewQueueReady')
+}
+
+function overviewRoleReason(role: PrehireRolePriority, locale: RecruitingLocale) {
+  const parts: string[] = []
+  const follow = Number(role.follow_up_count || 0)
+  const ready = Number(role.ready_count || 0)
+  const pending = Number(role.assessment_pending_count || 0)
+  const days = Math.max(1, Math.round(Number(role.oldest_ready_hours || 0) / 24))
+  if (locale === 'ar') {
+    if (follow === 1) parts.push('مرشح واحد يحتاج متابعة')
+    else if (follow > 1) parts.push(`${follow} مرشحين يحتاجون متابعة`)
+    if (ready === 1) parts.push('مرشح واحد جاهز للمراجعة')
+    else if (ready > 1) parts.push(`${ready} مرشحين جاهزين للمراجعة`)
+    if (pending === 1) parts.push('مرشح واحد بانتظار التقييم')
+    else if (pending > 1) parts.push(`${pending} مرشحين بانتظار التقييم`)
+    if (ready > 0 && Number(role.oldest_ready_hours || 0) >= 48) parts.push(`أقدمهم بانتظار منذ ${days} يومًا`)
+    if (Number(role.active_count || 0) > 0 && Number(role.active_count || 0) <= 2) parts.push('معروض المرشحين منخفض')
+  } else {
+    if (follow === 1) parts.push('1 candidate needs follow-up')
+    else if (follow > 1) parts.push(`${follow} candidates need follow-up`)
+    if (ready === 1) parts.push('1 ready for review')
+    else if (ready > 1) parts.push(`${ready} ready for review`)
+    if (pending === 1) parts.push('1 awaiting assessment')
+    else if (pending > 1) parts.push(`${pending} awaiting assessment`)
+    if (ready > 0 && Number(role.oldest_ready_hours || 0) >= 48) parts.push(`oldest waiting ${days} day${days === 1 ? '' : 's'}`)
+    if (Number(role.active_count || 0) > 0 && Number(role.active_count || 0) <= 2) parts.push('low candidate supply')
+  }
+  return parts.join(locale === 'ar' ? ' · ' : '; ') || role.reason
+}
+
 function OverviewPage({
   assessmentEnabled,
   readyForReviewTotal,
@@ -2371,7 +2469,6 @@ function OverviewPage({
   onOpenRolePriority,
   onOpenDestination,
   onOpenRoleCandidates,
-  onViewAllQueue,
   positions,
 }: {
   assessmentEnabled: boolean
@@ -2390,18 +2487,21 @@ function OverviewPage({
   onOpenRolePriority: () => void
   onOpenDestination: (destination?: { page?: string; filters?: Record<string, string> } | null) => void
   onOpenRoleCandidates: (job: PositionSummary) => void
-  onViewAllQueue: () => void
   positions: PositionSummary[]
 }) {
+  const [expandedQueue, setExpandedQueue] = useState(false)
   const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
   const reviewCount = typeof readyForReviewTotal === 'number' ? readyForReviewTotal : 0
   const assessmentCount = typeof assessmentPendingTotal === 'number' ? assessmentPendingTotal : 0
   const followUpCount = typeof followUpNeededTotal === 'number' ? followUpNeededTotal : 0
+  const roleAttentionValue = rolePriority
+    ? Number(rolePriority.follow_up_count || 0) + Number(rolePriority.ready_count || 0) + Number(rolePriority.assessment_pending_count || 0)
+    : 0
   const topActions = [
     {
       label: t('overviewReviewReady'),
       value: reviewCount,
-      detail: reviewCount ? t('overviewReviewReadyDetail', { count: reviewCount }) : t('overviewReviewReadyEmpty'),
+      detail: overviewCountDetail(locale, reviewCount, 'overviewReviewReadyDetailOne', 'overviewReviewReadyDetail', 'overviewReviewReadyEmpty'),
       icon: UserCheck,
       tone: reviewCount ? ('warning' as const) : ('success' as const),
       onClick: onOpenReadyForReview,
@@ -2411,9 +2511,13 @@ function OverviewPage({
           {
             label: t('overviewSendAssessments'),
             value: assessmentCount,
-            detail: assessmentCount
-              ? t('overviewSendAssessmentsDetail', { count: assessmentCount })
-              : t('overviewSendAssessmentsEmpty'),
+            detail: overviewCountDetail(
+              locale,
+              assessmentCount,
+              'overviewSendAssessmentsDetailOne',
+              'overviewSendAssessmentsDetail',
+              'overviewSendAssessmentsEmpty',
+            ),
             icon: ClipboardCheck,
             tone: assessmentCount ? ('warning' as const) : ('success' as const),
             onClick: onOpenPendingAssessments,
@@ -2423,32 +2527,49 @@ function OverviewPage({
     {
       label: t('overviewFollowUp'),
       value: followUpCount,
-      detail: followUpCount ? t('overviewFollowUpDetail', { count: followUpCount }) : t('overviewFollowUpEmpty'),
+      detail: overviewCountDetail(locale, followUpCount, 'overviewFollowUpDetailOne', 'overviewFollowUpDetail', 'overviewFollowUpEmpty'),
       icon: Bell,
       tone: followUpCount ? ('danger' as const) : ('success' as const),
       onClick: onOpenFollowUps,
     },
     {
-      label: rolePriority ? `${t('overviewPrioritizeRole')}: ${rolePriority.position_title}` : t('overviewPrioritizeRole'),
-      value: rolePriority ? Number(rolePriority.ready_count || 0) + Number(rolePriority.follow_up_count || 0) || rolePriority.priority : 0,
-      detail: rolePriority ? rolePriority.reason : t('overviewPrioritizeRoleEmpty'),
+      label: rolePriority ? rolePriority.position_title || rolePriority.position_code : t('overviewPrioritizeRole'),
+      value: roleAttentionValue,
+      detail: rolePriority ? overviewRoleReason(rolePriority, locale) : t('overviewPrioritizeRoleEmpty'),
       icon: Medal,
       tone: rolePriority ? ('warning' as const) : ('default' as const),
       onClick: onOpenRolePriority,
+      eyebrow: rolePriority ? t('overviewPrioritizeRole') : undefined,
     },
   ]
-  const heroLabel = nextAction?.reason || topActions.find((item) => item.value > 0)?.detail || t('overviewEmptyQueue')
+  const heroLabel = overviewHeroReason(nextAction, locale, topActions.find((item) => item.value > 0)?.detail || t('overviewEmptyQueue'))
   const heroTitle = (() => {
     const action = String(nextAction?.action || '')
     if (action === 'follow_up_failed_delivery') return t('overviewFollowUp')
     if (action === 'send_pending_assessments') return t('overviewSendAssessments')
     if (action === 'ready_for_review') return t('overviewReviewReady')
-    if (action === 'prioritize_role') return rolePriority ? `${t('overviewPrioritizeRole')}: ${rolePriority.position_title}` : t('overviewPrioritizeRole')
-    if (action === 'interview_scheduling_debt') return locale === 'ar' ? 'جدولة المقابلات' : 'Schedule interviews'
+    if (action === 'prioritize_role') return rolePriority?.position_title || t('overviewPrioritizeRole')
+    if (action === 'interview_scheduling_debt') return t('overviewScheduleInterviews')
     return topActions.find((item) => item.value > 0)?.label || t('overviewNextAction')
   })()
-  const queueItems = workQueue?.items || []
-  const queueTotal = Number(workQueue?.total || 0)
+  const uniqueQueueItems = (() => {
+    const seen = new Set<string>()
+    const out: PrehireWorkQueueItem[] = []
+    for (const item of workQueue?.items || []) {
+      const person = String(item.candidate_name || item.app_key || item.position_code || '')
+        .trim()
+        .toLowerCase()
+      const key = `${item.action_type}:${person || item.reason}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(item)
+    }
+    return out
+  })()
+  const queueTotal = Number(workQueue?.total || uniqueQueueItems.length || 0)
+  const visibleQueue = expandedQueue ? uniqueQueueItems : uniqueQueueItems.slice(0, 5)
+  const canExpandQueue = uniqueQueueItems.length > 5
+  const showRankingCta = String(nextAction?.action || '') === 'prioritize_role'
   return (
     <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex justify-end">
@@ -2468,15 +2589,17 @@ function OverviewPage({
               onClick={() => onOpenDestination(nextAction?.destination)}
               type="button"
             >
-              {t('overviewOpenWorkQueue')}
+              {overviewPrimaryCtaLabel(nextAction?.action, locale)}
             </button>
-            <button
-              className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
-              onClick={onOpenRolePriority}
-              type="button"
-            >
-              {t('overviewCheckRanking')}
-            </button>
+            {showRankingCta ? (
+              <button
+                className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
+                onClick={onOpenRolePriority}
+                type="button"
+              >
+                {t('overviewCheckRanking')}
+              </button>
+            ) : null}
           </div>
         </div>
       </section>
@@ -2501,18 +2624,18 @@ function OverviewPage({
                 <CardTitle>{t('overviewTopPriorities')}</CardTitle>
                 <CardDescription>
                   {t('overviewPriorityQueueDescription')}
-                  {queueTotal > 0 ? ` · ${queueTotal}` : ''}
+                  {queueTotal > 0 ? ` · ${t('overviewQueueCount', { count: queueTotal })}` : ''}
                 </CardDescription>
               </div>
-              {queueTotal > 5 ? (
-                <Button onClick={onViewAllQueue} type="button" variant="ghost">
-                  {t('overviewViewAll')}
+              {canExpandQueue ? (
+                <Button onClick={() => setExpandedQueue((current) => !current)} type="button" variant="ghost">
+                  {expandedQueue ? t('overviewShowLess') : t('overviewViewAll')}
                 </Button>
               ) : null}
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {queueItems.slice(0, 5).map((item) => {
+            {visibleQueue.map((item) => {
               const clickable = Boolean(item.app_key)
               const body = (
                 <>
@@ -2520,16 +2643,18 @@ function OverviewPage({
                     <div className="font-medium">
                       {item.candidate_name || item.position_title || item.app_key || item.action_type}
                     </div>
-                    <Badge tone={item.action_type.includes('follow') ? 'danger' : 'warning'}>{item.priority}</Badge>
+                    <Badge tone={item.action_type.includes('follow') ? 'danger' : 'warning'}>
+                      {overviewQueueBadge(item.action_type, locale)}
+                    </Badge>
                   </div>
-                  <div className="mt-1 text-sm text-subtle">{item.reason}</div>
+                  <div className="mt-1 text-sm text-subtle">{overviewQueueReason(item.action_type, locale)}</div>
                 </>
               )
               return clickable ? (
                 <button
                   type="button"
                   onClick={() => onOpenCandidate(item.app_key)}
-                  className="block w-full rounded-3xl border border-white/70 bg-white/48 p-4 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft"
+                  className="block w-full rounded-3xl border border-white/70 bg-white/48 p-4 text-start shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft"
                   key={`${item.action_type}-${item.app_key}`}
                 >
                   {body}
@@ -2543,7 +2668,7 @@ function OverviewPage({
                 </div>
               )
             })}
-            {!queueItems.length ? <EmptyState text={t('overviewEmptyQueue')} /> : null}
+            {!uniqueQueueItems.length ? <EmptyState text={t('overviewEmptyQueue')} /> : null}
           </CardContent>
         </Card>
 
@@ -6124,6 +6249,7 @@ function ActionCard({
     icon: typeof Users
     tone: 'default' | 'success' | 'warning' | 'danger' | 'muted'
     onClick: () => void
+    eyebrow?: string
   }
 }) {
   const Icon = item.icon
@@ -6139,22 +6265,23 @@ function ActionCard({
       : 'bg-[#c89445] shadow-[0_0_14px_rgba(200,148,69,0.46)]'
   return (
     <button
-      className="group rounded-[1.35rem] border border-line/60 bg-white/36 p-4 text-left transition duration-200 hover:border-[#c89445]/35 hover:bg-panel/72"
+      className="group rounded-[1.35rem] border border-line/60 bg-white/36 p-4 text-start transition duration-200 hover:border-[#c89445]/35 hover:bg-panel/72"
       onClick={item.onClick}
       type="button"
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-subtle">{item.label}</div>
-          <div className="mt-2 text-3xl font-semibold tracking-[-0.035em]">{item.value}</div>
+        <div className="min-w-0">
+          {item.eyebrow ? <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-mist">{item.eyebrow}</div> : null}
+          <div className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-subtle ${item.eyebrow ? 'mt-1' : ''}`}>{item.label}</div>
+          <div className="mt-2 text-3xl font-semibold tracking-[-0.035em] tabular-nums">{item.value}</div>
         </div>
-        <div className="grid h-10 w-10 place-items-center rounded-2xl border border-line/60 bg-panel/65 text-slate transition group-hover:border-[#c89445]/30 group-hover:text-ink">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-line/60 bg-panel/65 text-slate transition group-hover:border-[#c89445]/30 group-hover:text-ink">
           <Icon size={18} />
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-3 flex items-start justify-between gap-3">
         <div className="text-sm leading-5 text-subtle">{item.detail}</div>
-        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.value ? dotClass : 'bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.34)]'}`} />
+        <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${item.value ? dotClass : 'bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.34)]'}`} />
       </div>
     </button>
   )
@@ -6163,7 +6290,7 @@ function ActionCard({
 function RoleBottleneck({ assessmentEnabled, job, onOpenCandidates }: { assessmentEnabled: boolean; job: PositionSummary; onOpenCandidates: () => void }) {
   return (
     <button
-      className="w-full rounded-2xl border border-line/60 bg-white/34 p-3.5 text-left transition duration-200 hover:border-[#c89445]/30 hover:bg-panel/72"
+      className="w-full rounded-2xl border border-line/60 bg-white/34 p-3.5 text-start transition duration-200 hover:border-[#c89445]/30 hover:bg-panel/72"
       onClick={onOpenCandidates}
       type="button"
     >
