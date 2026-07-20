@@ -111,6 +111,12 @@ import {
   workflowItemLabel,
   type RecruitingLocale,
 } from '@/lib/recruitingLifecycle'
+import {
+  dedupeWorkQueueItems,
+  roleActiveBadge,
+  roleBottleneckLabel,
+  workQueueDisplayTotal,
+} from '@/lib/prehireOverviewPresentation'
 import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
 import { ActivityLog } from '@/components/ActivityLog'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
@@ -1816,16 +1822,22 @@ function App() {
           <header className="mb-9 flex flex-col gap-5 border-b border-line/50 pb-8 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' || activePage === 'activity' || activePage === 'notifications' ? 'Workspace' : 'Pre-hiring'}</div>
-              <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl">
-                {showingInviteAcceptance ? 'Complete your Wathefni invite' : accessIssue ? 'Verify your Wathefni access' : activePage === 'overview' ? 'Wathefni Pre-Hiring Control Center' : pageTitle}
+              <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl" dir={activePage === 'overview' && recruitingLocale === 'ar' ? 'rtl' : undefined}>
+                {showingInviteAcceptance
+                  ? 'Complete your Wathefni invite'
+                  : accessIssue
+                  ? 'Verify your Wathefni access'
+                  : activePage === 'overview'
+                  ? recruitingCopy(recruitingLocale, 'overviewPageTitle')
+                  : pageTitle}
               </h1>
-              <p className="mt-4 max-w-3xl text-[15px] leading-7 text-subtle/90">
+              <p className="mt-4 max-w-3xl text-[15px] leading-7 text-subtle/90" dir={activePage === 'overview' && recruitingLocale === 'ar' ? 'rtl' : undefined}>
                 {showingInviteAcceptance
                   ? 'Create your workspace login to join this Wathefni company workspace.'
                   : accessIssue
                   ? 'Sign in with your workspace account, or use a backup access code only if you need to set up or recover the workspace.'
                   : activePage === 'overview'
-                  ? 'A clean view of who needs review, who needs follow-up, and what HR should do next.'
+                  ? recruitingCopy(recruitingLocale, 'overviewPageSubtitle')
                   : pageSubtitles[activePage]}
               </p>
             </div>
@@ -2553,23 +2565,22 @@ function OverviewPage({
     return topActions.find((item) => item.value > 0)?.label || t('overviewNextAction')
   })()
   const uniqueQueueItems = (() => {
-    const seen = new Set<string>()
-    const out: PrehireWorkQueueItem[] = []
-    for (const item of workQueue?.items || []) {
-      const person = String(item.candidate_name || item.app_key || item.position_code || '')
-        .trim()
-        .toLowerCase()
-      const key = `${item.action_type}:${person || item.reason}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      out.push(item)
-    }
-    return out
+    return dedupeWorkQueueItems(workQueue?.items || [])
   })()
-  const queueTotal = Number(workQueue?.total || uniqueQueueItems.length || 0)
+  const queueTotal = workQueueDisplayTotal(workQueue?.total, (workQueue?.items || []).length, uniqueQueueItems.length)
   const visibleQueue = expandedQueue ? uniqueQueueItems : uniqueQueueItems.slice(0, 5)
   const canExpandQueue = uniqueQueueItems.length > 5
   const showRankingCta = String(nextAction?.action || '') === 'prioritize_role'
+  const actionNone = !nextAction?.action || nextAction.action === 'none'
+  const isQuietOverview =
+    actionNone &&
+    reviewCount === 0 &&
+    assessmentCount === 0 &&
+    followUpCount === 0 &&
+    !rolePriority &&
+    uniqueQueueItems.length === 0
+  const quietHeroTitle = isQuietOverview ? t('overviewEmptyHeroTitle') : heroTitle
+  const quietHeroLabel = isQuietOverview ? t('overviewEmptyHeroReason') : heroLabel
   return (
     <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex justify-end">
@@ -2581,26 +2592,28 @@ function OverviewPage({
         <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full bg-[#c89445]/10 blur-3xl" />
         <div className="p-6 lg:p-8">
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/45">{t('overviewNextAction')}</div>
-          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{heroTitle}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{heroLabel}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-ink shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f4e7cf] hover:shadow-[0_16px_36px_rgba(0,0,0,0.25),0_0_0_1px_rgba(200,148,69,0.22)]"
-              onClick={() => onOpenDestination(nextAction?.destination)}
-              type="button"
-            >
-              {overviewPrimaryCtaLabel(nextAction?.action, locale)}
-            </button>
-            {showRankingCta ? (
+          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{quietHeroTitle}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{quietHeroLabel}</p>
+          {!isQuietOverview ? (
+            <div className="mt-6 flex flex-wrap gap-3">
               <button
-                className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
-                onClick={onOpenRolePriority}
+                className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-ink shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f4e7cf] hover:shadow-[0_16px_36px_rgba(0,0,0,0.25),0_0_0_1px_rgba(200,148,69,0.22)]"
+                onClick={() => onOpenDestination(nextAction?.destination)}
                 type="button"
               >
-                {t('overviewCheckRanking')}
+                {overviewPrimaryCtaLabel(nextAction?.action, locale)}
               </button>
-            ) : null}
-          </div>
+              {showRankingCta ? (
+                <button
+                  className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
+                  onClick={onOpenRolePriority}
+                  type="button"
+                >
+                  {t('overviewCheckRanking')}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -2679,7 +2692,13 @@ function OverviewPage({
           </CardHeader>
           <CardContent className="space-y-3">
             {positions.slice(0, 5).map((position) => (
-              <RoleBottleneck assessmentEnabled={assessmentEnabled} job={position} key={position.position_code} onOpenCandidates={() => onOpenRoleCandidates(position)} />
+              <RoleBottleneck
+                assessmentEnabled={assessmentEnabled}
+                job={position}
+                key={position.position_code}
+                locale={locale}
+                onOpenCandidates={() => onOpenRoleCandidates(position)}
+              />
             ))}
             {!positions.length ? <EmptyState text={t('overviewNoRoles')} /> : null}
           </CardContent>
@@ -6287,7 +6306,17 @@ function ActionCard({
   )
 }
 
-function RoleBottleneck({ assessmentEnabled, job, onOpenCandidates }: { assessmentEnabled: boolean; job: PositionSummary; onOpenCandidates: () => void }) {
+function RoleBottleneck({
+  assessmentEnabled,
+  job,
+  locale,
+  onOpenCandidates,
+}: {
+  assessmentEnabled: boolean
+  job: PositionSummary
+  locale: RecruitingLocale
+  onOpenCandidates: () => void
+}) {
   return (
     <button
       className="w-full rounded-2xl border border-line/60 bg-white/34 p-3.5 text-start transition duration-200 hover:border-[#c89445]/30 hover:bg-panel/72"
@@ -6296,9 +6325,9 @@ function RoleBottleneck({ assessmentEnabled, job, onOpenCandidates }: { assessme
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="font-medium">{job.position_title || job.position_code}</div>
-        <Badge tone={Number(job.active_count || 0) ? 'warning' : 'muted'}>{job.active_count || 0} active</Badge>
+        <Badge tone={Number(job.active_count || 0) ? 'warning' : 'muted'}>{roleActiveBadge(Number(job.active_count || 0), locale)}</Badge>
       </div>
-      <div className="mt-1 text-sm text-subtle">{roleBottleneckLabel(job, assessmentEnabled)}</div>
+      <div className="mt-1 text-sm text-subtle">{roleBottleneckLabel(job, locale, assessmentEnabled)}</div>
     </button>
   )
 }
@@ -6811,26 +6840,6 @@ function assessmentQueue(applications: ApplicationSummary[]) {
     const stage = String(application.status || '').toLowerCase()
     return (!status || status === 'pending') && application.cv?.received && ['screening_complete', 'review_pending', 'ready_for_review', 'shortlisted'].includes(stage)
   })
-}
-
-function roleBottleneckLabel(job: PositionSummary, assessmentEnabled = true) {
-  const stageCounts = job.stage_counts || []
-  if (!stageCounts.length) {
-    return Number(job.application_count || 0) ? 'Open the candidate list and decide who needs review first.' : 'No applicants yet. Share the QR or application link.'
-  }
-  const sorted = [...stageCounts].sort((a, b) => Number(b.count || 0) - Number(a.count || 0))
-  const top = sorted[0]
-  if (!top || !Number(top.count || 0)) return 'No urgent action for this opening right now.'
-  if (top.status === 'screening') return `Help ${top.count} candidate${top.count === 1 ? '' : 's'} finish screening.`
-  if (top.status === 'screening_complete' || top.status === 'review_pending' || top.status === 'ready_for_review') {
-    return `Review ${top.count} candidate${top.count === 1 ? '' : 's'} and decide who moves forward.`
-  }
-  if (top.status === 'shortlisted') {
-    return assessmentEnabled
-      ? `Plan interviews or assessments for ${top.count} shortlisted candidate${top.count === 1 ? '' : 's'}.`
-      : `Plan interviews for ${top.count} shortlisted candidate${top.count === 1 ? '' : 's'}.`
-  }
-  return `Open this role and move ${top.count} candidate${top.count === 1 ? '' : 's'} forward.`
 }
 
 function assessmentModuleEnabled(state: DashboardModuleState, summary?: SummaryResponse | null) {
