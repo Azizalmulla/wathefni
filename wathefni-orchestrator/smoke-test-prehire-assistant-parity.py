@@ -165,6 +165,21 @@ def main() -> None:
         dash_scope = tco._base_memory_scope(dash_req)
         assert_true(dash_scope.get("permission_authority") == "backend_current", "dashboard metadata scope must stay backend_current")
         assert_true(isinstance(dash_scope.get("hr_user"), dict), "dashboard admin_user becomes hr_user")
+        assert_true(dash_scope.get("admin_user_id") == linked["actor_user_id"], "dashboard admin_user_id must be session UUID")
+        assert_true(dash_scope.get("permission_subject_user_id") == linked["actor_user_id"], "dashboard subject must match session UUID")
+        assert_true(dash_scope.get("admin_user_id") == dash_scope.get("permission_subject_user_id"), "dashboard actor/subject must align")
+
+        # Phone-less dashboard (or non-digit sender) must still keep UUID actor/subject alignment.
+        dash_phone_less = FakeRequest(
+            sender_phone="dashboard",
+            metadata=dict(dash_req.metadata),
+        )
+        phone_less_scope = tco._base_memory_scope(dash_phone_less)
+        assert_true(phone_less_scope.get("permission_authority") == "backend_current", "phone-less dashboard keeps backend_current")
+        assert_true(phone_less_scope.get("admin_user_id") == linked["actor_user_id"], "phone-less dashboard uses session UUID not phone")
+        ent_dash = tco._entitlement_context(phone_less_scope)
+        assert_true(ent_dash.get("actor_user_id") == linked["actor_user_id"], "entitlement actor is session UUID")
+        assert_true(ent_dash.get("permission_subject_user_id") == linked["actor_user_id"], "entitlement subject is session UUID")
     finally:
         tco._legacy = real_legacy  # type: ignore[assignment]
 

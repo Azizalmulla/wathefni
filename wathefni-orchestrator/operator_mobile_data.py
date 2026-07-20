@@ -2331,6 +2331,36 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             limit=limit,
         )
 
+    @app_mod.app.get("/dashboard/mobile/positions")
+    def mobile_prehire_positions(
+        q: str = Query(default=""),
+        status: str = Query(default="open"),
+        limit: int = Query(default=50, ge=1, le=100),
+        offset: int = Query(default=0, ge=0),
+        context: dict[str, Any] = Depends(dependency),
+    ):
+        """Same Pre-Hiring positions payload as the web Jobs page / Assistant list tool."""
+        app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
+        company = str(context.get("company_code") or "").strip().upper()
+        status_filter = str(status or "open").strip().lower() or "open"
+        positions, total_count = app_mod._dashboard_prehire_positions_query(
+            company,
+            limit=limit,
+            offset=offset,
+            search=q or None,
+            status=None if status_filter in {"", "all"} else status_filter,
+        )
+        return {
+            "company_code": company,
+            "positions": positions,
+            "total_count": total_count,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + len(positions)) < total_count,
+            "status_filter": status_filter,
+            "summary": app_mod.dashboard_prehire_positions_summary(company),
+        }
+
     @app_mod.app.get("/dashboard/mobile/candidates/{app_key}")
     def mobile_candidate(
         app_key: str,

@@ -286,6 +286,11 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
     Dashboard injects access/permissions/admin_user; WhatsApp must hydrate the same
     permission_authority=backend_current subject markers from the linked actor or the
     entitlement gate fail-closes even when permissions are listed.
+
+    Critical invariant: admin_user_id must equal permission_subject_user_id whenever
+    authority is backend_current. Dashboard sessions identify actors by user_id UUID;
+    phone digits must never become admin_user_id in that path or require_entitlement
+    sees an empty grant set and returns a false permission_denied.
     """
     legacy = _legacy()
     company_id = None
@@ -296,6 +301,9 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
             company_id = None
     metadata = getattr(request, "metadata", None) if isinstance(getattr(request, "metadata", None), dict) else {}
     access = metadata.get("access") if isinstance(metadata.get("access"), dict) else {}
+    access_user = access.get("user") if isinstance(access.get("user"), dict) else {}
+    channel = _channel_for_request(request)
+    dashboard_channel = channel == WEB_DASHBOARD_CHANNEL or bool(metadata.get("dashboard"))
     permissions = (
         metadata.get("permissions")
         if isinstance(metadata.get("permissions"), list)
@@ -307,43 +315,96 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
             actor_context = legacy.whatsapp_actor_context_for_phone(getattr(request, "sender_phone", None), company_id)
         except Exception:
             actor_context = None
-    if isinstance(actor_context, dict):
+    # Dashboard metadata is the session authority. Do not let a WhatsApp phone link
+    # overwrite dashboard permissions/role/user id (phone may be empty/"dashboard"
+    # or resolve to a different linked actor than the signed-in user).
+    if isinstance(actor_context, dict) and not dashboard_channel:
         if isinstance(actor_context.get("permissions"), list):
             permissions = actor_context.get("permissions") or []
         if actor_context.get("company_code") and not company_id:
             company_id = actor_context.get("company_code")
     permissions = sorted({str(item) for item in permissions if str(item).strip()})
-    role_scope = str(
-        (actor_context or {}).get("actor_role")
-        or access.get("role")
-        or getattr(request, "sender_role", None)
-        or "hr_admin"
-    )
-    admin_user_id = str(
-        (actor_context or {}).get("actor_user_id")
-        or legacy.digits(getattr(request, "sender_phone", None))
-        or "unknown_admin"
-    )
-    company_key = str(company_id or getattr(request, "account_id", None) or "default").strip().upper() or "default"
-    authority = str(
-        (actor_context or {}).get("permission_authority")
-        or access.get("permission_authority")
-        or metadata.get("permission_authority")
-        or ""
-    ).strip()
-    subject_user_id = str(
-        (actor_context or {}).get("permission_subject_user_id")
+    admin_meta = metadata.get("admin_user") if isinstance(metadata.get("admin_user"), dict) else {}
+    hr_meta = metadata.get("hr_user") if isinstance(metadata.get("hr_user"), dict) else {}
+    admin_user_from_dashboard = str(
+        admin_meta.get("user_id")
+        or hr_meta.get("user_id")
         or access.get("permission_subject_user_id")
-        or (actor_context or {}).get("actor_user_id")
+        or access_user.get("user_id")
         or ""
     ).strip()
-    subject_company = str(
-        (actor_context or {}).get("permission_subject_company")
-        or access.get("permission_subject_company")
-        or (actor_context or {}).get("company_code")
-        or company_key
-        or ""
-    ).strip().upper()
+    phone_digits = legacy.digits(getattr(request, "sender_phone", None)) or ""
+    if dashboard_channel:
+        role_scope = str(
+            access.get("role")
+            or admin_meta.get("role")
+            or hr_meta.get("role")
+            or (actor_context or {}).get("actor_role")
+            or getattr(request, "sender_role", None)
+            or "hr_admin"
+        )
+        admin_user_id = str(
+            admin_user_from_dashboard
+            or (actor_context or {}).get("actor_user_id")
+            or phone_digits
+            or "unknown_admin"
+        )
+        authority = str(
+            access.get("permission_authority")
+            or metadata.get("permission_authority")
+            or (actor_context or {}).get("permission_authority")
+            or ""
+        ).strip()
+        subject_user_id = str(
+            access.get("permission_subject_user_id")
+            or admin_user_from_dashboard
+            or (actor_context or {}).get("permission_subject_user_id")
+            or (actor_context or {}).get("actor_user_id")
+            or ""
+        ).strip()
+        subject_company = str(
+            access.get("permission_subject_company")
+            or (actor_context or {}).get("permission_subject_company")
+            or (actor_context or {}).get("company_code")
+            or company_id
+            or ""
+        ).strip().upper()
+        actor_email = str(admin_meta.get("email") or access_user.get("email") or (actor_context or {}).get("actor_email") or "")
+    else:
+        role_scope = str(
+            (actor_context or {}).get("actor_role")
+            or access.get("role")
+            or getattr(request, "sender_role", None)
+            or "hr_admin"
+        )
+        admin_user_id = str(
+            (actor_context or {}).get("actor_user_id")
+            or phone_digits
+            or "unknown_admin"
+        )
+        authority = str(
+            (actor_context or {}).get("permission_authority")
+            or access.get("permission_authority")
+            or metadata.get("permission_authority")
+            or ""
+        ).strip()
+        subject_user_id = str(
+            (actor_context or {}).get("permission_subject_user_id")
+            or access.get("permission_subject_user_id")
+            or (actor_context or {}).get("actor_user_id")
+            or ""
+        ).strip()
+        subject_company = str(
+            (actor_context or {}).get("permission_subject_company")
+            or access.get("permission_subject_company")
+            or (actor_context or {}).get("company_code")
+            or company_id
+            or ""
+        ).strip().upper()
+        actor_email = str((actor_context or {}).get("actor_email") or "")
+    company_key = str(company_id or getattr(request, "account_id", None) or "default").strip().upper() or "default"
+    if not subject_company:
+        subject_company = company_key
     # Only advertise backend_current when a trusted linked actor (or dashboard access) provided it.
     if authority != "backend_current":
         authority = ""
@@ -354,6 +415,9 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
         if not subject_user_id:
             authority = ""
             subject_company = ""
+    # Keep actor id aligned with subject when authority is trusted.
+    if authority == "backend_current" and subject_user_id:
+        admin_user_id = subject_user_id
 
     hr_user = None
     if isinstance(metadata.get("admin_user"), dict):
@@ -375,9 +439,9 @@ def _base_memory_scope(request: Any) -> dict[str, Any]:
         "company_id": company_key,
         "account_id": getattr(request, "account_id", None) or "default",
         "admin_user_id": admin_user_id,
-        "actor_email": (actor_context or {}).get("actor_email") or "",
+        "actor_email": actor_email,
         "conversation_id": getattr(request, "conversation_id", None) or "no_conversation",
-        "channel": _channel_for_request(request),
+        "channel": channel,
         "module": _module_for_request(request),
         "role_scope": role_scope,
         "permissions": permissions,

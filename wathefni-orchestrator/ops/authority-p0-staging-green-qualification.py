@@ -154,13 +154,14 @@ def prove_identity(app: Any, results: dict[str, Any]) -> None:
 
 def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
     import action_registry
+    import re
 
     # Web API
     web = requests.get(f"{BASE}/dashboard/prehire/positions", headers=auth_headers(token), params={"status": "open", "limit": 200}, timeout=30)
     web_body = web.json() if web.ok else {"error": web.status_code, "text": web.text[:300]}
     web_total = int(web_body.get("total_count") or web_body.get("total_matching") or len(web_body.get("positions") or []))
 
-    # Mobile API
+    # Mobile API (shared positions authority)
     mobile = requests.get(f"{BASE}/dashboard/mobile/positions", headers=auth_headers(token), params={"status": "open", "limit": 100}, timeout=30)
     mobile_body = mobile.json() if mobile.ok else {"error": mobile.status_code, "text": mobile.text[:300]}
     mobile_total = int(mobile_body.get("total_count") or len(mobile_body.get("positions") or []))
@@ -230,8 +231,8 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
     chat_body = chat.json() if chat.ok else {"error": chat.status_code, "text": chat.text[:400]}
     reply = str(chat_body.get("reply_text") or chat_body.get("reply") or chat_body.get("message") or chat_body.get("final_reply") or "")
     # Must mention 10 and must not invent a different count from dual fields.
-    mentions_10 = bool(__import__("re").search(r"\b10\b", reply))
-    invents_other = bool(__import__("re").search(r"\b(0|11|9)\b", reply)) and not mentions_10
+    mentions_10 = bool(re.search(r"\b10\b", reply))
+    invents_other = bool(re.search(r"\b(0|11|9)\b", reply)) and not mentions_10
     _check(
         results,
         "web_assistant_jobs_count_backend_authority",
@@ -239,7 +240,8 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
         {"http": chat.status_code, "reply_excerpt": reply[:280], "mentions_10": mentions_10},
     )
 
-    # WhatsApp Admin Assistant authenticated path (HR turn)
+    # WhatsApp Admin Assistant authenticated path (HR turn) — requires provider_message_id
+    wa_msg_id = f"p0-qual-wamid-{uuid.uuid4().hex}"
     wa_turn = requests.post(
         f"{BASE}/orchestrator/whatsapp-turn",
         headers={"Content-Type": "application/json"},
@@ -249,18 +251,38 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
             "sender_phone": "96599338566",
             "sender_role": "hr_admin",
             "raw_text": "How many job openings do we have?",
-            "metadata": {"company_code": COMPANY, "channel": "whatsapp"},
+            "metadata": {
+                "company_code": COMPANY,
+                "channel": "whatsapp",
+                "provider": "p0-qual",
+                "provider_message_id": wa_msg_id,
+                "message_id": wa_msg_id,
+                "wamid": wa_msg_id,
+                "provider_payload": {"messages": [{"id": wa_msg_id}]},
+            },
         },
         timeout=120,
     )
     wa_body = wa_turn.json() if wa_turn.ok else {"error": wa_turn.status_code, "text": wa_turn.text[:400]}
-    wa_reply = str(wa_body.get("reply") or wa_body.get("final_reply") or wa_body.get("message") or "")
-    wa_mentions_10 = bool(__import__("re").search(r"\b10\b", wa_reply))
+    wa_reply = str(
+        wa_body.get("reply_text")
+        or wa_body.get("reply")
+        or wa_body.get("final_reply")
+        or wa_body.get("message")
+        or ""
+    )
+    wa_mentions_10 = bool(re.search(r"\b10\b", wa_reply))
     _check(
         results,
         "whatsapp_assistant_jobs_count_backend_authority",
-        wa_turn.ok and wa_mentions_10,
-        {"http": wa_turn.status_code, "reply_excerpt": wa_reply[:280], "mentions_10": wa_mentions_10},
+        wa_turn.ok and wa_mentions_10 and "permission" not in wa_reply.lower(),
+        {
+            "http": wa_turn.status_code,
+            "reply_excerpt": wa_reply[:280],
+            "mentions_10": wa_mentions_10,
+            "intent": wa_body.get("intent"),
+            "final_reply_source": wa_body.get("final_reply_source"),
+        },
     )
 
 
@@ -273,9 +295,11 @@ def prove_employee_clarification_surfaces(app: Any, token: str, results: dict[st
         timeout=120,
     )
     body = chat.json() if chat.ok else {}
-    reply = str(body.get("reply") or body.get("message") or body.get("final_reply") or "").lower()
+    reply = str(
+        body.get("reply_text") or body.get("reply") or body.get("message") or body.get("final_reply") or ""
+    ).lower()
     # Confirmation pending is OK; inventing a single employee without clarification is not.
-    clarified = any(tok in reply for tok in ("which", "choose", "multiple", "match", "clarify", "who"))
+    clarified = any(tok in reply for tok in ("which", "choose", "multiple", "match", "clarify", "who", "twin"))
     typed = app.resolve_employee_typed(employee_name=FIXTURE_NAME, company_code=COMPANY)
     _check(
         results,
@@ -286,8 +310,16 @@ def prove_employee_clarification_surfaces(app: Any, token: str, results: dict[st
     _check(
         results,
         "web_assistant_ambiguous_employee_no_guess",
-        chat.ok and (clarified or "confirm" in reply or "pending" in str(body).lower() or body.get("needs_clarification") or body.get("status") in {"needs_clarification", "pending_confirmation"}),
-        {"http": chat.status_code, "reply_excerpt": reply[:280], "status": body.get("status")},
+        chat.ok
+        and (
+            clarified
+            or "confirm" in reply
+            or "pending" in str(body).lower()
+            or body.get("needs_clarification")
+            or body.get("status") in {"needs_clarification", "pending_confirmation"}
+            or bool(body.get("confirmation"))
+        ),
+        {"http": chat.status_code, "reply_excerpt": reply[:280], "status": body.get("status"), "intent": body.get("intent")},
     )
 
 
@@ -347,9 +379,7 @@ def prove_shift_overlap_and_reschedule(app: Any, token: str, results: dict[str, 
         },
         timeout=30,
     )
-    # Same window as self with exclude should succeed only if times change without overlap with OTHER shifts.
-    # Overlapping itself excluded — 10-12 doesn't overlap other shifts besides self excluded, so may 200.
-    # Create a second shift then reschedule into it.
+    # Create a second shift then reschedule into it — refresh expected_updated_at first.
     with app.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -363,7 +393,10 @@ def prove_shift_overlap_and_reschedule(app: Any, token: str, results: dict[str, 
                 (COMPANY, emp_key, "96500001001", FIXTURE_NAME, day, time(13, 0), time(15, 0), json.dumps({"p0": True})),
             )
             other_id = str(cur.fetchone()["shift_id"])
+            cur.execute("SELECT updated_at FROM shift_assignments WHERE shift_id=%s", (shift_id,))
+            fresh = cur.fetchone()["updated_at"]
         conn.commit()
+    fresh_iso = fresh.isoformat() if hasattr(fresh, "isoformat") else str(fresh)
 
     into_overlap = requests.post(
         f"{BASE}/dashboard/posthire/shifts/{shift_id}/reschedule",
@@ -372,7 +405,7 @@ def prove_shift_overlap_and_reschedule(app: Any, token: str, results: dict[str, 
             "shift_date": day.isoformat(),
             "start_time": "13:30",
             "end_time": "14:30",
-            "expected_updated_at": updated_iso,
+            "expected_updated_at": fresh_iso,
         },
         timeout=30,
     )
@@ -380,7 +413,7 @@ def prove_shift_overlap_and_reschedule(app: Any, token: str, results: dict[str, 
         results,
         "reschedule_overlap_rejected",
         into_overlap.status_code == 409 and "overlap" in into_overlap.text.lower(),
-        {"http": into_overlap.status_code, "body": into_overlap.text[:300]},
+        {"http": into_overlap.status_code, "body": into_overlap.text[:300], "other_shift_id": other_id},
     )
 
     # Stale expected_updated_at fails closed
