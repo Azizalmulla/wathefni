@@ -87,14 +87,21 @@ def ensure_duplicate_fixture(app: Any) -> dict[str, Any]:
                 cur.execute(
                     """
                     INSERT INTO employees (
-                      employee_key, company_code, phone, name, status, employment_status, metadata
-                    ) VALUES (%s,%s,%s,%s,'active','active',%s::jsonb)
+                      employee_key, company_code, phone, name, employment_status, profile, raw_json
+                    ) VALUES (%s,%s,%s,%s,'active',%s::jsonb,%s::jsonb)
                     ON CONFLICT (employee_key) DO UPDATE
                       SET name=EXCLUDED.name, phone=EXCLUDED.phone, updated_at=now(),
-                          metadata=EXCLUDED.metadata
+                          employment_status='active', profile=EXCLUDED.profile, raw_json=EXCLUDED.raw_json
                     RETURNING employee_key, name, phone, updated_at
                     """,
-                    (key, COMPANY, phone, FIXTURE_NAME, json.dumps({"p0_fixture": True, "idx": idx})),
+                    (
+                        key,
+                        COMPANY,
+                        phone,
+                        FIXTURE_NAME,
+                        json.dumps({"p0_fixture": True, "idx": idx}),
+                        json.dumps({"p0_fixture": True, "idx": idx}),
+                    ),
                 )
                 keys.append(dict(cur.fetchone())["employee_key"])
             # Bump twin-2 updated_at later so a latest-updated guess would prefer it.
@@ -221,7 +228,7 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
         timeout=120,
     )
     chat_body = chat.json() if chat.ok else {"error": chat.status_code, "text": chat.text[:400]}
-    reply = str(chat_body.get("reply") or chat_body.get("message") or chat_body.get("final_reply") or "")
+    reply = str(chat_body.get("reply_text") or chat_body.get("reply") or chat_body.get("message") or chat_body.get("final_reply") or "")
     # Must mention 10 and must not invent a different count from dual fields.
     mentions_10 = bool(__import__("re").search(r"\b10\b", reply))
     invents_other = bool(__import__("re").search(r"\b(0|11|9)\b", reply)) and not mentions_10
