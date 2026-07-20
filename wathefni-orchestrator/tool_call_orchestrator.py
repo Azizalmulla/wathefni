@@ -86,7 +86,7 @@ JOB_OPENING_TRIGGER_RE = re.compile(
     re.IGNORECASE,
 )
 LIST_JOB_OPENINGS_RE = re.compile(
-    r"\b(what|which|show|list|any|have|do we|we have|available|current)\b.*\b(job|jobs|opening|openings|position|positions|role|roles|vacanc(?:y|ies))\b|"
+    r"\b(what|which|show|list|any|have|do we|we have|available|current|how many|count|number of)\b.*\b(job|jobs|opening|openings|position|positions|role|roles|vacanc(?:y|ies))\b|"
     r"\b(job|jobs|opening|openings|position|positions)\b.*\b(open|available|active|current)\b|"
     r"\bopen\s+(jobs?|openings?|positions?|roles?)\b",
     re.IGNORECASE,
@@ -101,6 +101,7 @@ TOOL_PERMISSION_MAP = {
     "get_candidate_status": "prehire.read",
     "get_interview_invite_status": "prehire.read",
     "list_job_openings": "prehire.read",
+    "search_job_openings": "prehire.read",
     "create_job_opening": "settings.manage",
     "close_job_opening": "settings.manage",
     "reopen_job_opening": "settings.manage",
@@ -206,13 +207,14 @@ Calling a tool:
 - For plural/batch candidate mutations where all candidates get the same action ("top 5", "all these candidates", "send to Foad and Sara"), call execute_candidate_batch, not atomic tools. The backend previews exact candidates and asks for confirmation.
 - For multi-step candidate operations (shortlist + email, shortlist + schedule interview, schedule + notify, video interview link, assessment + notify), call execute_candidate_workflow once immediately. Do NOT ask a generic confirmation yourself first. Do NOT call multiple sensitive tools separately for one user request.
 - For "did you notify/invite/email him?" after an interview, call get_interview_invite_status. Do not start a new notification unless the user explicitly asks you to send/resend.
-- For listing/reading open jobs or positions ("what jobs are open", "show openings", "list positions"), call list_job_openings. Do NOT use rank_candidates for job-opening inventory.
+- For listing/reading open jobs or positions ("what jobs are open", "how many openings", "list positions"), call list_job_openings. Do NOT pass search/query text. Do NOT use rank_candidates for job-opening inventory.
+- For finding a named role/title ("Finance", "IT Manager"), call search_job_openings with that search term only.
 - For job opening / position creation / QR-code requests, call create_job_opening immediately for backend preflight. Do NOT say job openings are unsupported.
 - For closing/pausing/stopping a job posting, use close_job_opening. For reopening/resuming a closed one, use reopen_job_opening (do not use create_job_opening for this — it would ask for salary again unnecessarily). Both are PREFLIGHT-THEN-CONFIRM: identify the exact job by title or APPLY code, then confirm before executing.
 - For employee leave requests (only when the leave tools are present in your catalog): use list_leave_requests to read leave ("show pending leave", "who is off next week"); request_leave to file a new request for an employee with their dates; approve_leave_request / reject_leave_request / cancel_leave_request for decisions. The decision tools are PREFLIGHT-THEN-CONFIRM: call the tool to let the backend identify the exact request and flag shift conflicts, then ask the user for one explicit confirmation before it executes. Identify a request by employee name/phone + dates, or by leave_id from prior state.
 - For post-hire operations, only use a tool when it is present in your catalog (it is hidden if the company has not enabled that module or you lack permission):
   * Attendance: list_attendance to read ("who was late today"); check_in_employee / check_out_employee to clock an employee in/out. mark_attendance_absent and correct_attendance_record are SENSITIVE — confirm in your own words first.
-  * Shifts: list_shifts / list_availability / list_shift_swaps to read; create_shift_assignment to schedule; request_availability / request_shift_swap to ask employees. cancel_shift_assignment, replace_conflicting_shift_assignment, approve_shift_swap, reject_shift_swap are SENSITIVE — confirm first.
+  * Shifts: list_shifts / list_availability / list_shift_swaps to read; create_shift_assignment to schedule (SENSITIVE — confirm first); request_availability / request_shift_swap to ask employees. cancel_shift_assignment, replace_conflicting_shift_assignment, approve_shift_swap, reject_shift_swap are SENSITIVE — confirm first.
   * Onboarding: send_onboarding_reminder to nudge a new hire about onboarding.
   * Compliance: compliance_send_reminder to nudge an employee about a missing/expiring/expired document (name a document_type to target one, or omit it for all outstanding); compliance_mark_reviewed to clear the 'needs review' flag once HR has checked a document (needs the employee + document_type).
   * Payroll: list_payroll_hours / list_timesheets / show_payroll_policy / preview_payroll / list_payroll_exports to read; create_timesheet_review to open a review. approve_timesheet, reject_timesheet, set_payroll_policy are SENSITIVE money actions and export_payroll is the most sensitive — always confirm the exact target/period in your own words before calling, and never call export_payroll on first mention.
@@ -1235,7 +1237,12 @@ def _build_action_payload(tool_name: str, args: dict[str, Any], request: Any, re
     }
     action.update({k: v for k, v in args.items() if v not in (None, "", [], {})})
     action["prompt_text"] = getattr(request, "raw_text", None)
-    action["query"] = args.get("query") or getattr(request, "raw_text", None)
+    # Never inject the full user utterance as a hard inventory filter.
+    if tool_name == "list_job_openings":
+        action.pop("query", None)
+        action.pop("search", None)
+    else:
+        action["query"] = args.get("query") or getattr(request, "raw_text", None)
     if resolved_app:
         action["app_key"] = resolved_app.get("app_key")
         action["subject_key"] = resolved_app.get("app_key")
@@ -1421,11 +1428,25 @@ def _looks_like_list_job_openings_request(text: str) -> bool:
     return bool(LIST_JOB_OPENINGS_RE.search(normalized))
 
 
+def _looks_like_search_job_openings_request(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
+    if not normalized or _looks_like_list_job_openings_request(normalized):
+        return False
+    # Explicit role/title search, e.g. "search Finance jobs", "find IT Manager opening".
+    if re.search(r"\b(search|find|look\s+up|lookup)\b.*\b(job|jobs|opening|openings|position|positions|role|roles)\b", normalized):
+        return True
+    if re.search(r"\b(job|jobs|opening|openings|position|positions|role|roles)\b.*\b(named|called|titled|for)\b", normalized):
+        return True
+    return False
+
+
 def _forced_tool_for_turn(request: Any, tools: list[dict[str, Any]]) -> str | None:
     text = str(getattr(request, "raw_text", "") or "")
     tool_names = {str((tool.get("function") or {}).get("name") or "") for tool in tools}
     if "list_job_openings" in tool_names and _looks_like_list_job_openings_request(text):
         return "list_job_openings"
+    if "search_job_openings" in tool_names and _looks_like_search_job_openings_request(text):
+        return "search_job_openings"
     if "create_job_opening" in tool_names and JOB_OPENING_TRIGGER_RE.search(text):
         return "create_job_opening"
     if "rank_candidates" in tool_names and _looks_like_candidate_list_request(text):

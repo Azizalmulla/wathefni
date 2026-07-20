@@ -4936,7 +4936,15 @@ def extract_json_object(text: str) -> dict[str, Any] | None:
         return None
 
 
+DEFAULT_TOOL_AGENT_MODEL = "gpt-5.6-terra"
+
+
 def planner_provider_config() -> dict[str, str] | None:
+    """Provider for Pre-Hiring Assistant toolcall (dashboard chat + WhatsApp HR).
+
+    Default model is GPT-5.6 Terra. Candidate NL routing uses a separate Luna pin
+    via candidate_semantic_provider_config().
+    """
     env_values = planner_env()
     cfg = openclaw_config()
     configured_provider = env_values.get("WATHEFNI_TOOL_AGENT_PROVIDER") or "openai-sse"
@@ -4959,10 +4967,11 @@ def planner_provider_config() -> dict[str, str] | None:
         url = f"{base_url.rstrip('/')}/responses"
     else:
         url = "https://openrouter.ai/api/v1/chat/completions" if env_values.get("OPENROUTER_API_KEY") else f"{base_url.rstrip('/')}/chat/completions"
-    model = env_values.get("WATHEFNI_TOOL_AGENT_MODEL") or env_values.get("WATHEFNI_PLANNER_MODEL")
-    if not model:
-        models = provider_cfg.get("models") if isinstance(provider_cfg.get("models"), list) else []
-        model = (models[0].get("id") if models and isinstance(models[0], dict) else None) or ("openai/gpt-4o-mini" if "openrouter" in url else "gpt-4o-mini")
+    model = (
+        env_values.get("WATHEFNI_TOOL_AGENT_MODEL")
+        or env_values.get("WATHEFNI_PLANNER_MODEL")
+        or DEFAULT_TOOL_AGENT_MODEL
+    )
     return {"api_key": str(api_key), "url": str(url), "model": str(model), "api": str(api_kind), "provider": str(configured_provider)}
 
 
@@ -5005,18 +5014,27 @@ def candidate_semantic_provider_config() -> dict[str, str] | None:
 
 
 
-def convert_chat_tools_to_responses(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def convert_chat_tools_to_responses(tools: list[dict[str, Any]], *, strict: bool = False) -> list[dict[str, Any]]:
     converted: list[dict[str, Any]] = []
     for tool in tools:
         fn = tool.get("function") or {}
-        converted.append(
-            {
-                "type": "function",
-                "name": fn.get("name"),
-                "description": fn.get("description"),
-                "parameters": fn.get("parameters") or {"type": "object", "properties": {}},
-            }
-        )
+        parameters = fn.get("parameters") or {"type": "object", "properties": {}}
+        item: dict[str, Any] = {
+            "type": "function",
+            "name": fn.get("name"),
+            "description": fn.get("description"),
+            "parameters": parameters,
+        }
+        if strict:
+            # Best-effort strict shaping for callers that opt in. HR toolcall uses
+            # tool_call_orchestrator._convert_tools_for_responses for full strict mode.
+            params = dict(parameters) if isinstance(parameters, dict) else {"type": "object", "properties": {}}
+            props = params.get("properties") if isinstance(params.get("properties"), dict) else {}
+            params["additionalProperties"] = False
+            params["required"] = list(props.keys())
+            item["parameters"] = params
+            item["strict"] = True
+        converted.append(item)
     return converted
 
 
@@ -9115,66 +9133,103 @@ def candidate_clarification_reply(matches: list[dict[str, Any]], *, action_type:
 
 
 def find_employee_by_name(name: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
-    if not name:
-        return None
+    """Return a unique company-scoped employee match, or None.
+
+    Never falls back to recently-updated employees. Never guesses among
+    multiple ILIKE hits. Callers that need clarification must use
+    `resolve_employee_typed`.
+    """
+    resolved = resolve_employee_typed(employee_name=name, company_code=company_code)
+    if resolved.get("status") == "resolved" and resolved.get("employee"):
+        return resolved["employee"]
+    return None
+
+
+def resolve_employee_typed(
+    *,
+    employee_key: str | None = None,
+    employee_phone: str | None = None,
+    employee_name: str | None = None,
+    company_code: str | None = None,
+) -> dict[str, Any]:
+    """Authoritative employee identity for leave/shifts/attendance/payroll.
+
+    Returns:
+      status: resolved | employee_not_found | ambiguous | no_input
+      employee: single row when resolved
+      matches: safe choice list when ambiguous
+    """
     company = resolved_company_scope(company_code)
     if not company:
-        return None
+        return {"status": "employee_not_found", "employee": None, "matches": [], "error": "company_required"}
+
+    key = str(employee_key or "").strip()
+    if key:
+        employee = find_employee_by_key(key, company_code=company)
+        if employee:
+            return {"status": "resolved", "employee": employee, "matches": [employee]}
+        return {"status": "employee_not_found", "employee": None, "matches": [], "searched": {"employee_key": key}}
+
+    phone = digits(str(employee_phone or ""))
+    if phone:
+        employee = find_employee_by_phone(phone, company_code=company)
+        if employee:
+            return {"status": "resolved", "employee": employee, "matches": [employee]}
+        return {"status": "employee_not_found", "employee": None, "matches": [], "searched": {"employee_phone": phone}}
+
+    name = clean_subject_name(employee_name) if employee_name else None
+    if not name:
+        return {"status": "no_input", "employee": None, "matches": []}
+
     pattern = f"%{name.strip()}%"
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT * FROM employees WHERE company_code=%s AND name ILIKE %s ORDER BY updated_at DESC LIMIT 1",
-                (company, pattern),
-            )
-            row = cur.fetchone()
-            if row:
-                return dict(row)
-            cur.execute(
                 """
-                SELECT e.*
+                SELECT DISTINCT ON (e.employee_key) e.*
                 FROM employees e
-                JOIN candidates c ON c.phone = e.phone
-                WHERE e.company_code=%s AND c.name ILIKE %s
-                ORDER BY e.updated_at DESC
-                LIMIT 1
-                """,
-                (company, pattern),
-            )
-            row = cur.fetchone()
-            if row:
-                return dict(row)
-            cur.execute(
-                """
-                SELECT e.*
-                FROM employees e
-                JOIN applications a ON a.app_key = e.app_key
-                JOIN candidates c ON c.phone = a.phone
+                LEFT JOIN candidates c ON c.phone = e.phone
+                LEFT JOIN applications a ON a.app_key = e.app_key
                 WHERE e.company_code=%s
-                  AND COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.raw_json->>'name') ILIKE %s
-                ORDER BY e.updated_at DESC
-                LIMIT 1
+                  AND (
+                    e.name ILIKE %s
+                    OR c.name ILIKE %s
+                    OR COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.raw_json->>'name') ILIKE %s
+                  )
+                ORDER BY e.employee_key, e.updated_at DESC NULLS LAST
+                LIMIT 10
                 """,
-                (company, pattern),
+                (company, pattern, pattern, pattern),
             )
-            row = cur.fetchone()
-            if row:
-                return dict(row)
-            cur.execute(
-                """
-                SELECT * FROM employees
-                WHERE company_code=%s
-                  AND updated_at >= now() - interval '30 minutes'
-                ORDER BY updated_at DESC
-                LIMIT 1
-                """,
-                (company,),
-            )
-            row = cur.fetchone()
-            if row:
-                return dict(row)
-            cur.execute("SELECT * FROM employees WHERE company_code=%s ORDER BY updated_at DESC LIMIT 200", (company,))
-            return best_name_match(name, [dict(candidate) for candidate in cur.fetchall()], "name")
+            matches = [dict(row) for row in cur.fetchall()]
+
+    if not matches:
+        return {"status": "employee_not_found", "employee": None, "matches": [], "searched": {"employee_name": name}}
+    if len(matches) == 1:
+        return {"status": "resolved", "employee": matches[0], "matches": matches, "searched": {"employee_name": name}}
+
+    # Prefer exact comparable-name uniqueness before asking for clarification.
+    exact = [row for row in matches if comparable_name(str(row.get("name") or "")) == comparable_name(name)]
+    if len(exact) == 1:
+        return {"status": "resolved", "employee": exact[0], "matches": exact, "searched": {"employee_name": name}}
+
+    safe_choices = [
+        {
+            "employee_key": row.get("employee_key"),
+            "employee_name": row.get("name"),
+            "employee_phone": row.get("phone"),
+            "role_title": row.get("role_title") or row.get("position_title"),
+        }
+        for row in matches[:5]
+    ]
+    return {
+        "status": "ambiguous",
+        "employee": None,
+        "matches": matches,
+        "choices": safe_choices,
+        "searched": {"employee_name": name},
+        "message": "Multiple employees match that name. Please choose one.",
+    }
 
 
 def find_application_by_candidate_name(name: str | None, company_code: str | None = None) -> dict[str, Any] | None:
@@ -13743,20 +13798,30 @@ def shift_query_window(action: dict[str, Any]) -> tuple[date, date]:
     return min(dates), max(dates)
 
 
-def resolve_shift_employee(action: dict[str, Any], *, required: bool = True) -> dict[str, Any] | None:
-    phone = digits(str(action.get("subject_phone") or ""))
-    if phone:
-        employee = find_employee_by_phone(phone)
-        if employee:
-            return employee
-    name = clean_subject_name(action.get("subject_name")) if action.get("subject_name") else None
-    if name:
-        employee = find_employee_by_name(name)
-        if employee:
-            return employee
-    if required:
-        return employee_mentioned_in_text(str(action.get("prompt_text") or "")) or None
-    return employee_mentioned_in_text(str(action.get("prompt_text") or "")) or None
+def resolve_shift_employee(action: dict[str, Any], *, required: bool = True, company_code: str | None = None) -> dict[str, Any] | None:
+    """Resolve one employee for shift/attendance/leave/payroll mutations.
+
+    Uses typed company-scoped identity only. Never selects by update time.
+    Ambiguous matches are stashed on the action for clarification replies.
+    """
+    company = resolved_company_scope(company_code or action.get("company_code"))
+    typed = resolve_employee_typed(
+        employee_key=action.get("employee_key"),
+        employee_phone=action.get("subject_phone") or action.get("employee_phone"),
+        employee_name=action.get("subject_name") or action.get("employee_name"),
+        company_code=company,
+    )
+    action["_employee_resolution"] = {
+        "status": typed.get("status"),
+        "choices": typed.get("choices") or [],
+        "searched": typed.get("searched") or {},
+    }
+    if typed.get("status") == "resolved":
+        return typed.get("employee")
+    if not required:
+        return None
+    # Explicit typed identifiers only — never fuzzy-guess from free text.
+    return None
 
 
 def company_employees(company_code: str | None) -> list[dict[str, Any]]:
@@ -14082,9 +14147,14 @@ def employee_specs_from_action(action: dict[str, Any]) -> list[Any]:
 
 
 def resolve_shift_employees(action: dict[str, Any], *, company_code: str | None, required: bool = True) -> list[dict[str, Any]]:
-    company = (company_code or "WATHEFNI").upper()
+    company = resolved_company_scope(company_code)
+    if not company:
+        action["_employee_resolution"] = {"status": "employee_not_found", "choices": [], "error": "company_required"}
+        return []
+    company = str(company).upper()
     resolved: list[dict[str, Any]] = []
     seen: set[str] = set()
+    ambiguous_choices: list[dict[str, Any]] = []
 
     def add(employee: dict[str, Any] | None) -> None:
         if not employee:
@@ -14100,22 +14170,33 @@ def resolve_shift_employees(action: dict[str, Any], *, company_code: str | None,
 
     for spec in employee_specs_from_action(action):
         if isinstance(spec, dict):
-            phone = digits(str(spec.get("subject_phone") or spec.get("phone") or ""))
-            if phone:
-                add(find_employee_by_phone(phone))
-            name = clean_subject_name(spec.get("subject_name") or spec.get("name")) if (spec.get("subject_name") or spec.get("name")) else None
-            if name:
-                add(find_employee_by_name(name))
+            typed = resolve_employee_typed(
+                employee_key=spec.get("employee_key"),
+                employee_phone=spec.get("subject_phone") or spec.get("phone"),
+                employee_name=spec.get("subject_name") or spec.get("name"),
+                company_code=company,
+            )
         elif isinstance(spec, str):
-            name = clean_subject_name(spec)
-            if name:
-                add(find_employee_by_name(name))
+            typed = resolve_employee_typed(employee_name=spec, company_code=company)
+        else:
+            continue
+        if typed.get("status") == "resolved":
+            add(typed.get("employee"))
+        elif typed.get("status") == "ambiguous":
+            ambiguous_choices.extend(typed.get("choices") or [])
 
-    for employee in employees_mentioned_in_text(str(action.get("prompt_text") or action.get("query") or ""), company):
-        add(employee)
+    # Bulk "all staff" remains an explicit roster read, not identity guessing.
+    prompt = str(action.get("prompt_text") or action.get("query") or "")
+    if re.search(r"\b(all employees|all staff|everyone|the team|all workers)\b", normalize_text(prompt)):
+        for employee in company_employees(company):
+            add(employee)
 
     if not resolved and required:
-        add(resolve_shift_employee(action, required=True))
+        add(resolve_shift_employee(action, required=True, company_code=company))
+    if not resolved and ambiguous_choices:
+        action["_employee_resolution"] = {"status": "ambiguous", "choices": ambiguous_choices[:5]}
+    elif resolved:
+        action["_employee_resolution"] = {"status": "resolved", "choices": []}
     return resolved
 
 
@@ -14155,19 +14236,39 @@ def record_shift_event(cur: Any, *, shift: dict[str, Any] | None, company_code: 
     )
 
 
-def shift_conflicts(cur: Any, *, employee_key: str, shift_date: date, start_time: Any, end_time: Any) -> list[dict[str, Any]]:
+def shift_conflicts(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    shift_date: date,
+    start_time: Any,
+    end_time: Any,
+    exclude_shift_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Canonical tenant-scoped overlap check for create/reschedule/swap/bulk."""
+    company = str(company_code or "").upper().strip()
+    if not company or not employee_key or not shift_date:
+        return []
+    params: list[Any] = [company, employee_key, shift_date, end_time, start_time]
+    exclude_clause = ""
+    if exclude_shift_id:
+        exclude_clause = "AND shift_id <> %s"
+        params.append(str(exclude_shift_id))
     cur.execute(
-        """
+        f"""
         SELECT *
         FROM shift_assignments
-        WHERE employee_key=%s
+        WHERE company_code=%s
+          AND employee_key=%s
           AND shift_date=%s
           AND status='scheduled'
           AND start_time < %s
           AND end_time > %s
+          {exclude_clause}
         ORDER BY start_time
         """,
-        (employee_key, shift_date, end_time, start_time),
+        params,
     )
     return [dict(row) for row in cur.fetchall()]
 
@@ -14255,36 +14356,62 @@ def attendance_minutes_early_leave(check_out_at: Any, shift: dict[str, Any] | No
 
 def resolve_attendance_employee(action: dict[str, Any], *, company_code: str | None, required: bool = True) -> dict[str, Any] | None:
     employees = resolve_shift_employees(action, company_code=company_code, required=False)
-    if employees:
-        return employees[0] if len(employees) == 1 else None
-    if required:
-        return resolve_shift_employee(action, required=True)
-    return None
+    if len(employees) == 1:
+        return employees[0]
+    if len(employees) > 1:
+        action["_employee_resolution"] = {
+            "status": "ambiguous",
+            "choices": [
+                {
+                    "employee_key": row.get("employee_key"),
+                    "employee_name": row.get("name"),
+                    "employee_phone": row.get("phone"),
+                    "role_title": row.get("role_title") or row.get("position_title"),
+                }
+                for row in employees[:5]
+            ],
+        }
+        return None
+    return resolve_shift_employee(action, required=required, company_code=company_code)
 
 
-def active_shift_for_attendance(cur: Any, *, employee_key: str, attendance_date: date, shift_id: str | None = None) -> dict[str, Any] | None:
+def active_shift_for_attendance(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    attendance_date: date,
+    shift_id: str | None = None,
+) -> dict[str, Any] | None:
+    company = str(company_code or "").upper().strip()
+    if not company or not employee_key:
+        return None
     if shift_id:
         cur.execute(
             """
             SELECT *
             FROM shift_assignments
-            WHERE shift_id=%s AND employee_key=%s AND status='scheduled'
+            WHERE shift_id=%s
+              AND company_code=%s
+              AND employee_key=%s
+              AND status='scheduled'
             LIMIT 1
             """,
-            (shift_id, employee_key),
+            (shift_id, company, employee_key),
         )
     else:
         cur.execute(
             """
             SELECT *
             FROM shift_assignments
-            WHERE employee_key=%s
+            WHERE company_code=%s
+              AND employee_key=%s
               AND shift_date=%s
               AND status='scheduled'
             ORDER BY start_time
             LIMIT 1
             """,
-            (employee_key, attendance_date),
+            (company, employee_key, attendance_date),
         )
     row = cur.fetchone()
     return dict(row) if row else None
@@ -14642,6 +14769,10 @@ def list_payroll_hours(action: dict[str, Any], *, company_code: str | None) -> d
         "count": len(out),
         "source_counts": {"shifts": len(shifts), "attendance": len(attendance_rows), "approved_leave": len(leaves)},
         "scope": json_safe(scope),
+        # Live calculated hours are provisional until an approved timesheet exists.
+        "authority": "provisional",
+        "label": "provisional",
+        "money_authority": "approved_timesheets",
     }
     return result
 
@@ -14839,6 +14970,220 @@ def record_timesheet_event(cur: Any, *, timesheet: dict[str, Any] | None, compan
     )
 
 
+def invalidate_provisional_timesheets(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str | None,
+    start_date: date,
+    end_date: date,
+    reason: str,
+    created_by_phone: str | None = None,
+    leave_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Mark overlapping non-approved timesheets dirty so payroll must regenerate.
+
+    Approved timesheets remain money authority and are never modified here.
+    """
+    company = str(company_code or "").upper()
+    if not company or not employee_key or not start_date or not end_date:
+        return []
+    cur.execute(
+        """
+        UPDATE payroll_timesheets
+        SET status='draft',
+            payroll_status='recalculation_required',
+            decided_by_phone=NULL,
+            decision_note=NULL,
+            approved_at=NULL,
+            rejected_at=NULL,
+            snapshot=COALESCE(snapshot, '{}'::jsonb) || %s,
+            updated_at=now()
+        WHERE company_code=%s
+          AND employee_key=%s
+          AND status IN ('draft', 'rejected')
+          AND period_start <= %s
+          AND period_end >= %s
+        RETURNING *
+        """,
+        (
+            Json(
+                {
+                    "provisional": True,
+                    "recalculation_required": True,
+                    "invalidation_reason": reason,
+                    "leave_id": leave_id,
+                    "invalidated_at": now_iso(),
+                }
+            ),
+            company,
+            employee_key,
+            end_date,
+            start_date,
+        ),
+    )
+    rows = [dict(row) for row in cur.fetchall()]
+    for row in rows:
+        record_timesheet_event(
+            cur,
+            timesheet=row,
+            company_code=company,
+            event_type="recalculation_required",
+            payload={"timesheet": row, "reason": reason, "leave_id": leave_id},
+            created_by_phone=created_by_phone,
+        )
+    return rows
+
+
+def apply_leave_attendance_effect(
+    cur: Any,
+    *,
+    company: str,
+    leave: dict[str, Any],
+    created_by_phone: str | None = None,
+) -> list[dict[str, Any]]:
+    """Derive attendance rows from an approved leave and stamp leave provenance."""
+    leave_id = str(leave.get("leave_id") or "")
+    employee_key = str(leave.get("employee_key") or "")
+    start_date = parse_shift_date_value(leave.get("start_date"))
+    end_date = parse_shift_date_value(leave.get("end_date"))
+    if not leave_id or not employee_key or not start_date or not end_date:
+        return []
+    employee = {
+        "employee_key": employee_key,
+        "phone": leave.get("employee_phone"),
+        "name": leave.get("employee_name"),
+        "company_code": company,
+    }
+    # Convert any existing absences in the leave window.
+    cur.execute(
+        """
+        UPDATE attendance_records
+        SET status='approved_leave',
+            notes=COALESCE(NULLIF(notes,''), 'Approved leave'),
+            metadata=metadata || %s,
+            updated_at=now()
+        WHERE company_code=%s
+          AND employee_key=%s
+          AND attendance_date BETWEEN %s AND %s
+          AND status='absent'
+        RETURNING *
+        """,
+        (
+            Json({"leave_id": leave_id, "derived_from_leave": True, "source": "leave_approval"}),
+            company,
+            employee_key,
+            start_date,
+            end_date,
+        ),
+    )
+    updated = [dict(row) for row in cur.fetchall()]
+    # Create leave-derived attendance for scheduled shifts that have no attendance yet.
+    cur.execute(
+        """
+        SELECT s.*
+        FROM shift_assignments s
+        LEFT JOIN attendance_records ar
+          ON ar.company_code=s.company_code
+         AND ar.employee_key=s.employee_key
+         AND ar.shift_id=s.shift_id
+        WHERE s.company_code=%s
+          AND s.employee_key=%s
+          AND s.status='scheduled'
+          AND s.shift_date BETWEEN %s AND %s
+          AND ar.attendance_id IS NULL
+        ORDER BY s.shift_date, s.start_time
+        """,
+        (company, employee_key, start_date, end_date),
+    )
+    shifts = [dict(row) for row in cur.fetchall()]
+    for shift in shifts:
+        attendance = upsert_attendance_record(
+            cur,
+            company=company,
+            employee=employee,
+            shift=shift,
+            attendance_date=parse_shift_date_value(shift.get("shift_date")) or start_date,
+            status="approved_leave",
+            notes="Approved leave",
+            source_text="leave_approval",
+            created_by_phone=created_by_phone,
+            action={"action_type": "leave_approval_attendance", "leave_id": leave_id, "derived_from_leave": True},
+        )
+        # Ensure leave provenance is explicit even if upsert merged metadata.
+        cur.execute(
+            """
+            UPDATE attendance_records
+            SET metadata=metadata || %s, updated_at=now()
+            WHERE attendance_id=%s AND company_code=%s
+            RETURNING *
+            """,
+            (
+                Json({"leave_id": leave_id, "derived_from_leave": True, "source": "leave_approval"}),
+                attendance.get("attendance_id"),
+                company,
+            ),
+        )
+        stamped = cur.fetchone()
+        if stamped:
+            updated.append(dict(stamped))
+            record_attendance_event(
+                cur,
+                attendance=dict(stamped),
+                company_code=company,
+                event_type="approved_leave",
+                payload={"attendance": dict(stamped), "leave_id": leave_id, "shift": shift},
+                created_by_phone=created_by_phone,
+            )
+    return updated
+
+
+def reverse_leave_derived_attendance(
+    cur: Any,
+    *,
+    company: str,
+    leave: dict[str, Any],
+    created_by_phone: str | None = None,
+) -> list[dict[str, Any]]:
+    """Reverse only attendance records derived from this leave; preserve manual edits."""
+    leave_id = str(leave.get("leave_id") or "")
+    employee_key = str(leave.get("employee_key") or "")
+    start_date = parse_shift_date_value(leave.get("start_date"))
+    end_date = parse_shift_date_value(leave.get("end_date"))
+    if not leave_id or not employee_key or not start_date or not end_date:
+        return []
+    cur.execute(
+        """
+        DELETE FROM attendance_records
+        WHERE company_code=%s
+          AND employee_key=%s
+          AND attendance_date BETWEEN %s AND %s
+          AND status='approved_leave'
+          AND (
+            metadata->>'leave_id' = %s
+            OR (
+              COALESCE(metadata->>'leave_id', '') = ''
+              AND COALESCE(notes, '') = 'Approved leave'
+            )
+          )
+          AND COALESCE(metadata->>'manual_edit', 'false') <> 'true'
+        RETURNING *
+        """,
+        (company, employee_key, start_date, end_date, leave_id),
+    )
+    deleted = [dict(row) for row in cur.fetchall()]
+    for row in deleted:
+        record_attendance_event(
+            cur,
+            attendance=row,
+            company_code=company,
+            event_type="leave_derived_reversed",
+            payload={"attendance": row, "leave_id": leave_id},
+            created_by_phone=created_by_phone,
+        )
+    return deleted
+
+
 def create_timesheet_review(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     payroll = list_payroll_hours(action, company_code=company)
@@ -14916,7 +15261,7 @@ def create_timesheet_review(action: dict[str, Any], *, company_code: str | None,
                         int(summary.get("early_leave_minutes") or 0),
                         int(summary.get("overtime_minutes") or 0),
                         summary.get("payroll_status"),
-                        Json(json_safe(summary)),
+                        Json(json_safe({**summary, "provisional": True, "recalculation_required": False, "authority": "provisional"})),
                         Json(json_safe(payroll.get("source_counts") or {})),
                         digits(created_by_phone),
                     ),
@@ -15002,6 +15347,21 @@ def decide_timesheets(action: dict[str, Any], *, company_code: str | None, creat
     target_rows = resolve_timesheets(action, company_code=company, statuses=("draft",))
     if not target_rows:
         return {"ok": False, "error": "timesheet_not_found", "action": action}
+    dirty = [
+        row
+        for row in target_rows
+        if str(row.get("payroll_status") or "") == "recalculation_required"
+        or bool((row.get("snapshot") or {}).get("recalculation_required") if isinstance(row.get("snapshot"), dict) else False)
+    ]
+    if decision == "approved" and dirty:
+        return {
+            "ok": False,
+            "error": "recalculation_required",
+            "needs_clarification": True,
+            "message": "Regenerate provisional timesheets before approval or export.",
+            "timesheets": json_safe(dirty),
+            "action": action,
+        }
     decision_note = str(action.get("decision_note") or action.get("query") or action.get("prompt_text") or "").strip() or None
     updated_rows: list[dict[str, Any]] = []
     status_value = "approved" if decision == "approved" else "rejected"
@@ -15014,6 +15374,7 @@ def decide_timesheets(action: dict[str, Any], *, company_code: str | None, creat
                     UPDATE payroll_timesheets
                     SET status=%s, decided_by_phone=%s, decision_note=%s, {timestamp_col}=now(), updated_at=now()
                     WHERE timesheet_id=%s AND company_code=%s AND status='draft'
+                      AND COALESCE(payroll_status, '') <> 'recalculation_required'
                     RETURNING *
                     """,
                     (status_value, digits(created_by_phone), decision_note, row.get("timesheet_id"), company),
@@ -15025,6 +15386,8 @@ def decide_timesheets(action: dict[str, Any], *, company_code: str | None, creat
                 updated_rows.append(updated_dict)
                 record_timesheet_event(cur, timesheet=updated_dict, company_code=company, event_type=status_value, payload={"timesheet": updated_dict, "action": action}, created_by_phone=created_by_phone)
         conn.commit()
+    if decision == "approved" and not updated_rows:
+        return {"ok": False, "error": "recalculation_required", "action": action}
     return {"ok": True, "company_code": company, "decision": status_value, "timesheets": json_safe(updated_rows), "count": len(updated_rows), "action": action}
 
 
@@ -15994,7 +16357,7 @@ def approve_leave_request(action: dict[str, Any], *, company_code: str | None, c
     leave = resolve_leave_request(action, company_code=company, statuses=("requested",))
     if not leave:
         return {"ok": False, "error": "leave_request_not_found", "action": action}
-    employee = find_employee_by_phone(leave.get("employee_phone"))
+    employee = find_employee_by_phone(leave.get("employee_phone"), company_code=company) or find_employee_by_key(leave.get("employee_key"), company_code=company)
     if action.get("viewer_phone") and not manager_scope_allows_employee(employee or {"employee_key": leave.get("employee_key"), "company_code": company}, company_code=company, viewer_phone=action.get("viewer_phone")):
         return {"ok": False, "error": "employee_outside_manager_scope", "leave": json_safe(leave), "action": action}
     with db_connect() as conn:
@@ -16012,38 +16375,44 @@ def approve_leave_request(action: dict[str, Any], *, company_code: str | None, c
                 """
                 UPDATE leave_requests
                 SET status='approved', decision_note=%s, decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE leave_id=%s AND company_code=%s
+                WHERE leave_id=%s AND company_code=%s AND status='requested'
                 RETURNING *
                 """,
                 (str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), leave.get("leave_id"), company),
             )
-            updated = dict(cur.fetchone())
+            updated_row = cur.fetchone()
+            if not updated_row:
+                return {"ok": False, "error": "leave_request_not_found", "action": action}
+            updated = dict(updated_row)
             record_leave_event(cur, leave=updated, company_code=company, event_type="approved", payload={"action": action, "leave": updated, "shift_conflicts": conflicts}, created_by_phone=created_by_phone)
-            cur.execute(
-                """
-                UPDATE attendance_records
-                SET status='approved_leave', notes=COALESCE(NULLIF(notes,''), 'Approved leave'), updated_at=now()
-                WHERE company_code=%s
-                  AND employee_key=%s
-                  AND attendance_date BETWEEN %s AND %s
-                  AND status='absent'
-                RETURNING *
-                """,
-                (company, updated.get("employee_key"), updated.get("start_date"), updated.get("end_date")),
+            attendance_updates = apply_leave_attendance_effect(cur, company=company, leave=updated, created_by_phone=created_by_phone)
+            payroll_invalidated = invalidate_provisional_timesheets(
+                cur,
+                company_code=company,
+                employee_key=str(updated.get("employee_key") or ""),
+                start_date=parse_shift_date_value(updated.get("start_date")) or kuwait_today(),
+                end_date=parse_shift_date_value(updated.get("end_date")) or kuwait_today(),
+                reason="leave_approved",
+                created_by_phone=created_by_phone,
+                leave_id=str(updated.get("leave_id") or ""),
             )
-            attendance_updates = [dict(row) for row in cur.fetchall()]
-            # Observe-only leave-balance consumption (dark-launched). Tracks the
-            # charge against the balance for validation but NEVER blocks/changes
-            # the approval. Fully wrapped so a balance failure cannot break it.
             if leave_balances_enabled():
                 try:
                     observe_leave_consumption(cur, company_code=company, leave=updated, kind="consume", actor_phone=created_by_phone)
                 except Exception:
                     logger.warning("observe-only leave consumption failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
-    employee = find_employee_by_phone(updated.get("employee_phone"))
+    employee = find_employee_by_phone(updated.get("employee_phone"), company_code=company) or find_employee_by_key(updated.get("employee_key"), company_code=company)
     notification = notify_employee_leave_decision(employee or updated, updated, "approved", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
-    return {"ok": True, "leave": json_safe(updated), "shift_conflicts": json_safe(conflicts), "attendance_updates": json_safe(attendance_updates), "employee_notification": json_safe(notification)}
+    return {
+        "ok": True,
+        "leave": json_safe(updated),
+        "shift_conflicts": json_safe(conflicts),
+        "attendance_updates": json_safe(attendance_updates),
+        "payroll_invalidated": json_safe(payroll_invalidated),
+        "payroll_impact": "recalculation_required",
+        "employee_notification": json_safe(notification),
+    }
 
 
 def reject_leave_request(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None, account_id: str | None = None) -> dict[str, Any]:
@@ -16051,7 +16420,7 @@ def reject_leave_request(action: dict[str, Any], *, company_code: str | None, cr
     leave = resolve_leave_request(action, company_code=company, statuses=("requested",))
     if not leave:
         return {"ok": False, "error": "leave_request_not_found", "action": action}
-    employee = find_employee_by_phone(leave.get("employee_phone"))
+    employee = find_employee_by_phone(leave.get("employee_phone"), company_code=company) or find_employee_by_key(leave.get("employee_key"), company_code=company)
     if action.get("viewer_phone") and not manager_scope_allows_employee(employee or {"employee_key": leave.get("employee_key"), "company_code": company}, company_code=company, viewer_phone=action.get("viewer_phone")):
         return {"ok": False, "error": "employee_outside_manager_scope", "leave": json_safe(leave), "action": action}
     with db_connect() as conn:
@@ -16068,7 +16437,7 @@ def reject_leave_request(action: dict[str, Any], *, company_code: str | None, cr
             updated = dict(cur.fetchone())
             record_leave_event(cur, leave=updated, company_code=company, event_type="rejected", payload={"action": action, "leave": updated}, created_by_phone=created_by_phone)
         conn.commit()
-    employee = find_employee_by_phone(updated.get("employee_phone"))
+    employee = find_employee_by_phone(updated.get("employee_phone"), company_code=company) or find_employee_by_key(updated.get("employee_key"), company_code=company)
     notification = notify_employee_leave_decision(employee or updated, updated, "rejected", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
     return {"ok": True, "leave": json_safe(updated), "employee_notification": json_safe(notification)}
 
@@ -16078,33 +16447,58 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
     leave = resolve_leave_request(action, company_code=company, statuses=("requested", "approved"))
     if not leave:
         return {"ok": False, "error": "leave_request_not_found", "action": action}
-    employee = find_employee_by_phone(leave.get("employee_phone"))
+    employee = find_employee_by_phone(leave.get("employee_phone"), company_code=company) or find_employee_by_key(leave.get("employee_key"), company_code=company)
     if action.get("viewer_phone") and not manager_scope_allows_employee(employee or {"employee_key": leave.get("employee_key"), "company_code": company}, company_code=company, viewer_phone=action.get("viewer_phone")):
         return {"ok": False, "error": "employee_outside_manager_scope", "leave": json_safe(leave), "action": action}
+    was_approved = str(leave.get("status") or "") == "approved"
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 UPDATE leave_requests
                 SET status='cancelled', decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE leave_id=%s AND company_code=%s
+                WHERE leave_id=%s AND company_code=%s AND status IN ('requested', 'approved')
                 RETURNING *
                 """,
                 (digits(created_by_phone), leave.get("leave_id"), company),
             )
-            updated = dict(cur.fetchone())
+            updated_row = cur.fetchone()
+            if not updated_row:
+                return {"ok": False, "error": "leave_request_not_found", "action": action}
+            updated = dict(updated_row)
             record_leave_event(cur, leave=updated, company_code=company, event_type="cancelled", payload={"action": action, "leave": updated}, created_by_phone=created_by_phone)
-            # Observe-only: reverse a previously-consumed charge if this leave was
-            # approved before cancellation. Never blocks; fully wrapped.
-            if leave_balances_enabled() and str(leave.get("status")) == "approved":
+            attendance_reversed: list[dict[str, Any]] = []
+            payroll_invalidated: list[dict[str, Any]] = []
+            if was_approved:
+                attendance_reversed = reverse_leave_derived_attendance(
+                    cur, company=company, leave=updated, created_by_phone=created_by_phone
+                )
+                payroll_invalidated = invalidate_provisional_timesheets(
+                    cur,
+                    company_code=company,
+                    employee_key=str(updated.get("employee_key") or ""),
+                    start_date=parse_shift_date_value(updated.get("start_date")) or kuwait_today(),
+                    end_date=parse_shift_date_value(updated.get("end_date")) or kuwait_today(),
+                    reason="leave_cancelled",
+                    created_by_phone=created_by_phone,
+                    leave_id=str(updated.get("leave_id") or ""),
+                )
+            if leave_balances_enabled() and was_approved:
                 try:
                     observe_leave_consumption(cur, company_code=company, leave=updated, kind="reversal", actor_phone=created_by_phone)
                 except Exception:
                     logger.warning("observe-only leave reversal failed for %s", updated.get("leave_id"), exc_info=True)
         conn.commit()
-    employee = find_employee_by_phone(updated.get("employee_phone"))
+    employee = find_employee_by_phone(updated.get("employee_phone"), company_code=company) or find_employee_by_key(updated.get("employee_key"), company_code=company)
     notification = notify_employee_leave_decision(employee or updated, updated, "cancelled", account_id=account_id) if employee else {"ok": False, "skipped": True, "reason": "employee_not_found"}
-    return {"ok": True, "leave": json_safe(updated), "employee_notification": json_safe(notification)}
+    return {
+        "ok": True,
+        "leave": json_safe(updated),
+        "attendance_reversed": json_safe(attendance_reversed),
+        "payroll_invalidated": json_safe(payroll_invalidated),
+        "payroll_impact": "recalculation_required" if was_approved else None,
+        "employee_notification": json_safe(notification),
+    }
 
 
 def list_leave_requests(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
@@ -16626,7 +17020,14 @@ def create_shift_assignment_for_employee(action: dict[str, Any], *, employee: di
     with db_connect() as conn:
         with conn.cursor() as cur:
             for shift_date in dates[:14]:
-                existing = shift_conflicts(cur, employee_key=str(employee["employee_key"]), shift_date=shift_date, start_time=start_time, end_time=end_time)
+                existing = shift_conflicts(
+                    cur,
+                    company_code=company,
+                    employee_key=str(employee["employee_key"]),
+                    shift_date=shift_date,
+                    start_time=start_time,
+                    end_time=end_time,
+                )
                 if existing:
                     conflicts.extend(existing)
                     continue
@@ -16671,11 +17072,31 @@ def create_shift_assignment(action: dict[str, Any], *, company_code: str | None,
     for assignment_action in assignment_actions_from_bulk(action):
         employees = resolve_shift_employees(assignment_action, company_code=company, required=True)
         if not employees:
+            resolution = assignment_action.get("_employee_resolution") if isinstance(assignment_action.get("_employee_resolution"), dict) else {}
+            if resolution.get("status") == "ambiguous":
+                return {
+                    "ok": False,
+                    "error": "ambiguous_employee",
+                    "needs_clarification": True,
+                    "choices": resolution.get("choices") or [],
+                    "message": "Multiple employees match. Please choose one.",
+                    "action": action,
+                }
             unresolved.append({"action": json_safe(assignment_action), "error": "employee_not_found"})
             continue
         for employee in employees:
             work_items.append((assignment_action, employee))
     if not work_items:
+        resolution = action.get("_employee_resolution") if isinstance(action.get("_employee_resolution"), dict) else {}
+        if resolution.get("status") == "ambiguous":
+            return {
+                "ok": False,
+                "error": "ambiguous_employee",
+                "needs_clarification": True,
+                "choices": resolution.get("choices") or [],
+                "message": "Multiple employees match. Please choose one.",
+                "action": action,
+            }
         return {"ok": False, "error": "employee_not_found", "action": action, "unresolved": unresolved}
     single_shape = len(work_items) == 1 and not action.get("assignments") and len(resolve_shift_employees(action, company_code=company, required=False)) <= 1
     if single_shape:
@@ -17005,12 +17426,21 @@ def record_shift_swap_event(cur: Any, *, swap: dict[str, Any] | None, company_co
     )
 
 
-def shift_by_id(shift_id: str | None) -> dict[str, Any] | None:
+def shift_by_id(shift_id: str | None, *, company_code: str | None = None) -> dict[str, Any] | None:
     if not shift_id:
         return None
+    company = resolved_company_scope(company_code)
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM shift_assignments WHERE shift_id=%s LIMIT 1", (shift_id,))
+            if company:
+                cur.execute(
+                    "SELECT * FROM shift_assignments WHERE shift_id=%s AND company_code=%s LIMIT 1",
+                    (shift_id, company),
+                )
+            else:
+                # Fail closed for cross-tenant probes when company is known elsewhere;
+                # unscoped reads remain only for legacy harnesses that pass no company.
+                cur.execute("SELECT * FROM shift_assignments WHERE shift_id=%s LIMIT 1", (shift_id,))
             row = cur.fetchone()
             return dict(row) if row else None
 
@@ -17176,22 +17606,36 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
     with db_connect() as conn:
         with conn.cursor() as cur:
             if decision == "approved":
-                requester_shift = shift_by_id(str(swap.get("requester_shift_id") or ""))
+                requester_shift = shift_by_id(str(swap.get("requester_shift_id") or ""), company_code=company)
                 if not requester_shift or requester_shift.get("status") != "scheduled":
                     return {"ok": False, "error": "requester_shift_not_active", "swap": json_safe(swap)}
                 if not target:
                     return {"ok": False, "error": "missing_target_employee", "swap": json_safe(swap)}
-                target_shift = shift_by_id(str(swap.get("target_shift_id") or ""))
+                target_shift = shift_by_id(str(swap.get("target_shift_id") or ""), company_code=company)
                 conflicts = shift_conflicts(
                     cur,
+                    company_code=company,
                     employee_key=str(target.get("employee_key")),
                     shift_date=requester_shift.get("shift_date"),
                     start_time=requester_shift.get("start_time"),
                     end_time=requester_shift.get("end_time"),
+                    exclude_shift_id=str((target_shift or {}).get("shift_id") or "") or None,
                 )
-                conflicts = [item for item in conflicts if str(item.get("shift_id")) != str((target_shift or {}).get("shift_id"))]
                 if conflicts:
                     return {"ok": False, "error": "target_shift_conflict", "swap": json_safe(swap), "conflicts": json_safe(conflicts)}
+                # Also ensure requester won't collide with target's existing window after swap.
+                if target_shift:
+                    requester_conflicts = shift_conflicts(
+                        cur,
+                        company_code=company,
+                        employee_key=str(requester.get("employee_key")),
+                        shift_date=target_shift.get("shift_date"),
+                        start_time=target_shift.get("start_time"),
+                        end_time=target_shift.get("end_time"),
+                        exclude_shift_id=str(requester_shift.get("shift_id") or "") or None,
+                    )
+                    if requester_conflicts:
+                        return {"ok": False, "error": "requester_shift_conflict", "swap": json_safe(swap), "conflicts": json_safe(requester_conflicts)}
                 cur.execute(
                     """
                     UPDATE shift_assignments
@@ -17199,7 +17643,7 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
                         notes=COALESCE(notes,'') || CASE WHEN COALESCE(notes,'')='' THEN '' ELSE ' | ' END || %s,
                         metadata=metadata || %s,
                         updated_at=now()
-                    WHERE shift_id=%s AND status='scheduled'
+                    WHERE shift_id=%s AND company_code=%s AND status='scheduled'
                     RETURNING *
                     """,
                     (
@@ -17209,6 +17653,7 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
                         "Assigned by approved shift swap",
                         Json({"approved_shift_swap_id": str(swap.get("swap_id"))}),
                         requester_shift.get("shift_id"),
+                        company,
                     ),
                 )
                 updated = cur.fetchone()
@@ -17224,7 +17669,7 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
                             notes=COALESCE(notes,'') || CASE WHEN COALESCE(notes,'')='' THEN '' ELSE ' | ' END || %s,
                             metadata=metadata || %s,
                             updated_at=now()
-                        WHERE shift_id=%s AND status='scheduled'
+                        WHERE shift_id=%s AND company_code=%s AND status='scheduled'
                         RETURNING *
                         """,
                         (
@@ -17234,6 +17679,7 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
                             "Assigned by approved shift swap",
                             Json({"approved_shift_swap_id": str(swap.get("swap_id"))}),
                             target_shift.get("shift_id"),
+                            company,
                         ),
                     )
                     updated = cur.fetchone()
@@ -17245,10 +17691,10 @@ def decide_shift_swap(action: dict[str, Any], *, company_code: str | None, creat
                 """
                 UPDATE shift_swap_requests
                 SET status=%s, decision_note=%s, decided_by_phone=%s, decided_at=now(), updated_at=now()
-                WHERE swap_id=%s
+                WHERE swap_id=%s AND company_code=%s
                 RETURNING *
                 """,
-                (status_value, str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), swap.get("swap_id")),
+                (status_value, str(action.get("decision_note") or "").strip() or None, digits(created_by_phone), swap.get("swap_id"), company),
             )
             decided = dict(cur.fetchone())
             record_shift_swap_event(cur, swap=decided, company_code=company, event_type=status_value, payload={"action": action, "swap": decided, "updated_shifts": updated_shifts}, created_by_phone=created_by_phone)
@@ -17394,7 +17840,7 @@ def check_in_employee(action: dict[str, Any], *, company_code: str | None, creat
     check_in_at = attendance_timestamp_from_action(action, attendance_date)
     with db_connect() as conn:
         with conn.cursor() as cur:
-            shift = active_shift_for_attendance(cur, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
+            shift = active_shift_for_attendance(cur, company_code=company, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
             if not shift:
                 return {"ok": False, "error": "no_scheduled_shift", "employee": json_safe(employee), "attendance_date": attendance_date.isoformat(), "action": action}
             attendance = upsert_attendance_record(
@@ -17426,7 +17872,7 @@ def check_out_employee(action: dict[str, Any], *, company_code: str | None, crea
     check_out_at = attendance_timestamp_from_action(action, attendance_date)
     with db_connect() as conn:
         with conn.cursor() as cur:
-            shift = active_shift_for_attendance(cur, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
+            shift = active_shift_for_attendance(cur, company_code=company, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
             cur.execute(
                 """
                 SELECT *
@@ -17485,7 +17931,7 @@ def mark_attendance_absent(action: dict[str, Any], *, company_code: str | None, 
             approved_leave = cur.fetchone()
             if approved_leave:
                 return {"ok": False, "error": "approved_leave_exists", "employee": json_safe(employee), "attendance_date": attendance_date.isoformat(), "leave": json_safe(dict(approved_leave)), "action": action}
-            shift = active_shift_for_attendance(cur, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
+            shift = active_shift_for_attendance(cur, company_code=company, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
             if not shift and not action.get("allow_without_shift"):
                 return {"ok": False, "error": "no_scheduled_shift", "needs_confirmation": True, "employee": json_safe(employee), "attendance_date": attendance_date.isoformat(), "action": action}
             attendance = upsert_attendance_record(
@@ -17526,7 +17972,7 @@ def correct_attendance_record(action: dict[str, Any], *, company_code: str | Non
             status = "present"
     with db_connect() as conn:
         with conn.cursor() as cur:
-            shift = active_shift_for_attendance(cur, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
+            shift = active_shift_for_attendance(cur, company_code=company, employee_key=str(employee.get("employee_key")), attendance_date=attendance_date, shift_id=action.get("shift_id"))
             if not shift and not action.get("allow_without_shift"):
                 return {"ok": False, "error": "no_scheduled_shift", "needs_confirmation": True, "employee": json_safe(employee), "attendance_date": attendance_date.isoformat(), "action": action}
             check_time = attendance_timestamp_from_action(action, attendance_date) if action.get("time") else None
@@ -17818,7 +18264,10 @@ def format_payroll_hours_reply(result: dict[str, Any], *, employee_view: bool = 
     period = format_shift_date_range(result.get("start_date"), result.get("end_date"))
     if not rows:
         return f"I do not see payroll hours for you in {period}." if employee_view else f"No payroll hours found for {period}."
-    lines = [f"Your payroll hours ({period}):" if employee_view else f"Payroll hours ({period}):"]
+    lines = [
+        f"Your provisional payroll hours ({period}):" if employee_view else f"Provisional payroll hours ({period}):",
+        "Approved timesheets remain the money authority.",
+    ]
     for row in rows[:12]:
         name = "" if employee_view else f"{row.get('employee_name') or row.get('employee_phone') or 'Employee'}: "
         pieces = [
@@ -18685,7 +19134,7 @@ def replace_conflicting_shift_assignment(
         return {"ok": False, "error": action.get("error"), "action": json_safe(action)}
     employee = action.get("employee") if isinstance(action.get("employee"), dict) else None
     if not employee:
-        employee = resolve_shift_employee(action, required=True)
+        employee = resolve_shift_employee(action, required=True, company_code=company_code)
     if not employee:
         return {"ok": False, "error": "employee_not_found", "action": json_safe(action)}
     company = (company_code or employee.get("company_code") or "WATHEFNI").upper()
@@ -30587,24 +31036,27 @@ def find_employee_by_key(employee_key: str | None, *, company_code: str | None =
 
 
 def resolve_employee_for_direct_action(action: dict[str, Any], *, allow_latest: bool = False) -> dict[str, Any] | None:
-    company = action.get("company_code")
-    key = action.get("employee_key")
-    if key:
-        employee = find_employee_by_key(key, company_code=company)
-        if employee:
-            return employee
-    phone = action.get("subject_phone")
-    if phone:
-        employee = find_employee_by_phone(phone, company_code=company)
-        if employee:
-            return employee
-    subject_name = action.get("subject_name")
-    if subject_name:
-        employee = find_employee_by_name(subject_name, company_code=company)
-        if employee:
-            return employee
-    if allow_latest:
-        return latest_employee(company_code=company)
+    """Company-scoped typed employee identity. Never uses update-time fallbacks.
+
+    `allow_latest` is ignored (kept for call-site compatibility). Identity must be
+    an exact employee ID or one unique typed match.
+    """
+    del allow_latest  # never use latest-updated employee as identity authority
+    company = resolved_company_scope(action.get("company_code"))
+    typed = resolve_employee_typed(
+        employee_key=action.get("employee_key"),
+        employee_phone=action.get("subject_phone") or action.get("employee_phone"),
+        employee_name=action.get("subject_name") or action.get("employee_name"),
+        company_code=company,
+    )
+    action["_employee_resolution"] = {
+        "status": typed.get("status"),
+        "choices": typed.get("choices") or [],
+        "searched": typed.get("searched") or {},
+        "message": typed.get("message"),
+    }
+    if typed.get("status") == "resolved":
+        return typed.get("employee")
     return None
 
 
@@ -39911,15 +40363,27 @@ def dashboard_position_summary(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _dashboard_prehire_positions_query(
-    company: str, *, limit: int = 200, offset: int = 0, search: str | None = None
+    company: str,
+    *,
+    limit: int = 200,
+    offset: int = 0,
+    search: str | None = None,
+    status: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
-    """Core, paginated + searchable positions read shared by the summary card
-    (top-N glance), the legacy uncapped-ish endpoint, and the paginated Jobs
-    page. `total_count` reflects the full (optionally search-filtered) set so
-    callers can page through everything — no silent truncation once a company
-    passes the page size."""
+    """Canonical Jobs inventory: `positions` is the sole authority for whether a
+    job opening exists. Application aggregates are LEFT JOINed for counts only —
+    orphan/imported applications never synthesize a parent job row.
+
+    `status` may be open/closed/all (or empty). `search` is title/code ILIKE only
+    (used by search_job_openings; inventory list_job_openings must pass None).
+    """
     term = (search or "").strip()
     like = f"%{_ilike_escape(term)}%" if term else ""
+    status_filter = str(status or "").strip().lower()
+    if status_filter in {"", "all", "*"}:
+        status_filter = ""
+    elif status_filter not in {"open", "closed"}:
+        status_filter = ""
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -39934,6 +40398,7 @@ def _dashboard_prehire_positions_query(
                     MAX(updated_at) AS latest_application_at
                   FROM applications
                   WHERE company_code=%s
+                    AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
                     AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
                     AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
                   GROUP BY company_code, position_code
@@ -39948,16 +40413,18 @@ def _dashboard_prehire_positions_query(
                   FROM applications a
                   LEFT JOIN candidates c ON c.phone=a.phone
                   WHERE a.company_code=%s
+                    AND NULLIF(TRIM(COALESCE(a.position_code, '')), '') IS NOT NULL
                     AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
                     AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
                   ORDER BY a.company_code, a.position_code, a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST
                 ),
                 combined AS (
                   SELECT
-                    COALESCE(p.company_code, s.company_code) AS company_code,
-                    COALESCE(p.position_code, s.position_code) AS position_code,
-                    COALESCE(p.title, s.position_title, p.position_code, s.position_code) AS position_title,
+                    p.company_code AS company_code,
+                    p.position_code AS position_code,
+                    COALESCE(p.title, p.position_code) AS position_title,
                     p.status,
+                    lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) AS effective_status,
                     p.apply_code,
                     p.requirements,
                     p.metadata,
@@ -39971,17 +40438,19 @@ def _dashboard_prehire_positions_query(
                     l.latest_phone,
                     l.latest_candidate_name
                   FROM positions p
-                  FULL OUTER JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
-                  LEFT JOIN latest l ON l.company_code=COALESCE(p.company_code, s.company_code) AND l.position_code=COALESCE(p.position_code, s.position_code)
-                  WHERE COALESCE(p.company_code, s.company_code)=%s
+                  LEFT JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
+                  LEFT JOIN latest l ON l.company_code=p.company_code AND l.position_code=p.position_code
+                  WHERE p.company_code=%s
+                    AND NULLIF(TRIM(COALESCE(p.position_code, '')), '') IS NOT NULL
                 )
                 SELECT *, COUNT(*) OVER() AS total_count
                 FROM combined
                 WHERE (%s = '' OR position_title ILIKE %s OR position_code ILIKE %s)
+                  AND (%s = '' OR effective_status = %s)
                 ORDER BY active_count DESC, application_count DESC, COALESCE(updated_at, latest_application_at) DESC NULLS LAST, position_code
                 LIMIT %s OFFSET %s
                 """,
-                (company, company, company, term, like, like, limit, offset),
+                (company, company, company, term, like, like, status_filter, status_filter, limit, offset),
             )
             rows = [dict(row) for row in cur.fetchall()]
             total_count = int(rows[0]["total_count"]) if rows else 0
@@ -40071,15 +40540,63 @@ def _dashboard_prehire_positions_query(
     return enriched, total_count
 
 
-def dashboard_prehire_positions_payload(company: str, *, limit: int = 200) -> list[dict[str, Any]]:
-    rows, _ = _dashboard_prehire_positions_query(company, limit=limit)
+def dashboard_prehire_positions_payload(
+    company: str,
+    *,
+    limit: int = 200,
+    offset: int = 0,
+    search: str | None = None,
+    status: str | None = None,
+) -> list[dict[str, Any]]:
+    rows, _ = _dashboard_prehire_positions_query(
+        company,
+        limit=limit,
+        offset=offset,
+        search=search,
+        status=status,
+    )
     return rows
 
 
+def format_list_job_openings_reply(result: dict[str, Any] | None) -> str:
+    data = result if isinstance(result, dict) else {}
+    positions = data.get("positions") if isinstance(data.get("positions"), list) else []
+    status = str(data.get("status_filter") or "open").strip().lower() or "open"
+    try:
+        total = int(data.get("total_matching") if data.get("total_matching") is not None else len(positions))
+    except Exception:
+        total = len(positions)
+    if total <= 0 or not positions:
+        if status == "open":
+            return "No open job openings right now."
+        if status == "closed":
+            return "No closed job openings right now."
+        return "No job openings found."
+    lines: list[str] = []
+    label = "Open roles" if status == "open" else ("Closed roles" if status == "closed" else "Roles")
+    lines.append(f"{label} ({total}):")
+    for item in positions[:20]:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("position_title") or item.get("position_code") or "Role").strip()
+        code = str(item.get("apply_code") or "").strip()
+        active = int(item.get("active_count") or 0)
+        apps = int(item.get("application_count") or 0)
+        detail = f"{title}"
+        if code:
+            detail += f" — `{code}`"
+        if active or apps:
+            detail += f" ({active} active / {apps} total applicants)"
+        lines.append(f"- {detail}")
+    remaining = total - min(len(positions), 20)
+    if remaining > 0:
+        lines.append(f"…and {remaining} more.")
+    return "\n".join(lines)
+
+
 def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
-    """Lightweight aggregate counts over the FULL positions set (not the current
-    page/search filter), so the Jobs page headline stat cards stay accurate no
-    matter how many pages of postings a company has."""
+    """Lightweight aggregate counts over the FULL canonical `positions` set
+    (not application-synthesized rows), so Jobs headline cards match inventory."""
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -40090,26 +40607,24 @@ def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
                          COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_count
                   FROM applications
                   WHERE company_code=%s
+                    AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
                     AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
                     AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
                   GROUP BY company_code, position_code
-                ),
-                combined AS (
-                  SELECT
-                    lower(COALESCE(p.status, CASE WHEN COALESCE(s.active_count, 0) > 0 THEN 'open' ELSE 'closed' END)) AS status,
-                    p.apply_code,
-                    COALESCE(s.application_count, 0) AS application_count
-                  FROM positions p
-                  FULL OUTER JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
-                  WHERE COALESCE(p.company_code, s.company_code)=%s
                 )
                 SELECT
                   COUNT(*) AS total_positions,
-                  COUNT(*) FILTER (WHERE status = 'open') AS open_positions,
-                  COUNT(*) FILTER (WHERE status != 'open') AS closed_positions,
-                  COUNT(*) FILTER (WHERE status = 'open' AND apply_code IS NOT NULL) AS active_qr_codes,
-                  COALESCE(SUM(application_count), 0) AS total_applications
-                FROM combined
+                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open') AS open_positions,
+                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) != 'open') AS closed_positions,
+                  COUNT(*) FILTER (
+                    WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open'
+                      AND p.apply_code IS NOT NULL
+                  ) AS active_qr_codes,
+                  COALESCE(SUM(COALESCE(s.application_count, 0)), 0) AS total_applications
+                FROM positions p
+                LEFT JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
+                WHERE p.company_code=%s
+                  AND NULLIF(TRIM(COALESCE(p.position_code, '')), '') IS NOT NULL
                 """,
                 (company, company),
             )
@@ -40123,13 +40638,74 @@ def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
     }
 
 
+def dashboard_unassigned_applications_payload(company: str, *, limit: int = 100) -> dict[str, Any]:
+    """Applications that do not map to a real `positions` row (blank code or orphan)."""
+    company_code = str(company or "").strip().upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT
+                  a.app_key,
+                  a.phone,
+                  COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.raw_json->>'name') AS candidate_name,
+                  a.position_code,
+                  a.position_title,
+                  a.status,
+                  a.ingested_at,
+                  a.updated_at,
+                  CASE
+                    WHEN NULLIF(TRIM(COALESCE(a.position_code, '')), '') IS NULL THEN 'blank_position_code'
+                    ELSE 'missing_positions_row'
+                  END AS unassigned_reason
+                FROM applications a
+                LEFT JOIN candidates c ON c.phone=a.phone
+                LEFT JOIN positions p
+                  ON p.company_code=a.company_code
+                 AND p.position_code=a.position_code
+                WHERE a.company_code=%s
+                  AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
+                  AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
+                  AND (
+                    NULLIF(TRIM(COALESCE(a.position_code, '')), '') IS NULL
+                    OR p.position_code IS NULL
+                  )
+                ORDER BY a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST
+                LIMIT %s
+                """,
+                (company_code, max(1, min(int(limit or 100), 200))),
+            )
+            rows = [json_safe(dict(row)) for row in cur.fetchall()]
+            cur.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM applications a
+                LEFT JOIN positions p
+                  ON p.company_code=a.company_code
+                 AND p.position_code=a.position_code
+                WHERE a.company_code=%s
+                  AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
+                  AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
+                  AND (
+                    NULLIF(TRIM(COALESCE(a.position_code, '')), '') IS NULL
+                    OR p.position_code IS NULL
+                  )
+                """,
+                (company_code,),
+            )
+            total = int((cur.fetchone() or {}).get("total") or 0)
+    return {
+        "company_code": company_code,
+        "total": total,
+        "items": rows,
+        "canonical_table": "applications",
+        "queue": "unassigned_applications",
+        "as_of": now_iso(),
+    }
+
+
 def dashboard_set_position_status(company: str, position_code: str, status: str) -> dict[str, Any]:
-    """Open/close a job posting. Closing stops new WhatsApp/QR applicants —
-    `public_role_by_apply_code` already filters `positions.status IN ('open','active')`
-    — without touching candidates already in the pipeline for that role. Reopening
-    is a plain reversal: apply_code/QR stay identical either way, nothing is
-    regenerated. Raises ValueError if the status is invalid or the position
-    doesn't exist (no `positions` row AND no applications reference the code)."""
+    """Open/close a canonical `positions` row only. Applications never create jobs."""
     status = str(status or "").strip().lower()
     if status not in ("open", "closed"):
         raise ValueError("status must be 'open' or 'closed'")
@@ -40139,33 +40715,21 @@ def dashboard_set_position_status(company: str, position_code: str, status: str)
         raise ValueError("company and position_code are required")
     with db_connect() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT title FROM positions WHERE company_code=%s AND position_code=%s", (company, code))
-            existing = cur.fetchone()
-            if existing is not None:
-                fallback_title = str(existing.get("title") or code)
-            else:
-                cur.execute(
-                    "SELECT COUNT(*) AS n, MAX(position_title) AS position_title FROM applications WHERE company_code=%s AND position_code=%s",
-                    (company, code),
-                )
-                app_row = cur.fetchone() or {}
-                if int(app_row.get("n") or 0) == 0:
-                    raise ValueError("job opening not found")
-                fallback_title = str(app_row.get("position_title") or code)
             cur.execute(
                 """
-                INSERT INTO positions (company_code, position_code, title, status, created_at, updated_at)
-                VALUES (%s,%s,%s,%s, now(), now())
-                ON CONFLICT (company_code, position_code) DO UPDATE SET
-                  status = EXCLUDED.status,
-                  updated_at = now()
+                UPDATE positions
+                SET status=%s, updated_at=now()
+                WHERE company_code=%s AND position_code=%s
                 RETURNING company_code, position_code, title, status, apply_code
                 """,
-                (company, code, fallback_title, status),
+                (status, company, code),
             )
-            row = dict(cur.fetchone())
+            row = cur.fetchone()
+            if not row:
+                raise ValueError("job opening not found")
+            updated = dict(row)
         conn.commit()
-    return json_safe(row)
+    return json_safe(updated)
 
 
 def dashboard_record_action_result(action_type: str, status: str, result_payload: dict[str, Any], final_reply: str) -> dict[str, Any]:
@@ -44183,12 +44747,19 @@ def dashboard_prehire_positions(
     offset: int = 0,
     limit: int = 100,
     search: str = "",
+    status: str = "",
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
     company = context["company_code"]
     eff_limit = max(1, min(int(limit or 100), 200))
     eff_offset = max(0, int(offset or 0))
-    positions, total_count = _dashboard_prehire_positions_query(company, limit=eff_limit, offset=eff_offset, search=search)
+    positions, total_count = _dashboard_prehire_positions_query(
+        company,
+        limit=eff_limit,
+        offset=eff_offset,
+        search=search,
+        status=status,
+    )
     return {
         "company_code": company,
         "positions": positions,
@@ -44197,6 +44768,7 @@ def dashboard_prehire_positions(
         "offset": eff_offset,
         "has_more": (eff_offset + len(positions)) < total_count,
         "summary": dashboard_prehire_positions_summary(company),
+        "status_filter": str(status or "all").strip().lower() or "all",
     }
 
 
@@ -54063,6 +54635,8 @@ class ShiftRescheduleRequest(BaseModel):
     shift_date: str
     start_time: str
     end_time: str
+    expected_updated_at: str | None = None
+    confirm_overlap: bool = False
 
 
 @app.post("/dashboard/posthire/shifts/{shift_id}/reschedule")
@@ -54076,10 +54650,33 @@ def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleR
         raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "Enter a valid date, start time, and end time."})
     if end_clock <= start_clock:
         raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "The end time must be after the start time."})
-    _dashboard_scheduled_shift_or_error(company, shift_id, context)
+    current = _dashboard_scheduled_shift_or_error(company, shift_id, context)
+    if request.expected_updated_at:
+        current_updated = current.get("updated_at")
+        current_iso = current_updated.isoformat() if hasattr(current_updated, "isoformat") else str(current_updated or "")
+        if current_iso and str(request.expected_updated_at).strip() and str(request.expected_updated_at).strip() not in {current_iso, current_iso.replace("+00:00", "Z")}:
+            raise HTTPException(status_code=409, detail={"error": "stale_state", "message": "That shift changed. Refresh and try again."})
     actor_phone = context.get("hr_phone")
     with db_connect() as conn:
         with conn.cursor() as cur:
+            conflicts = shift_conflicts(
+                cur,
+                company_code=company,
+                employee_key=str(current.get("employee_key")),
+                shift_date=new_date,
+                start_time=start_clock,
+                end_time=end_clock,
+                exclude_shift_id=str(shift_id),
+            )
+            if conflicts:
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "shift_overlap",
+                        "message": "That reschedule overlaps another scheduled shift.",
+                        "conflicts": json_safe(conflicts),
+                    },
+                )
             cur.execute(
                 "UPDATE shift_assignments SET shift_date=%s, start_time=%s, end_time=%s, updated_at=now() WHERE shift_id=%s AND company_code=%s AND status='scheduled' RETURNING *",
                 (new_date, start_clock, end_clock, str(shift_id), company),

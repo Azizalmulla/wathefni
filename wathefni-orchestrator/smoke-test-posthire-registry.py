@@ -40,7 +40,7 @@ POSTHIRE_ACTIONS = {
     "list_shifts": ("shifts", "shifts.read", "read"),
     "list_availability": ("shifts", "shifts.read", "read"),
     "list_shift_swaps": ("shifts", "shifts.read", "read"),
-    "create_shift_assignment": ("shifts", "shifts.manage", "write"),
+    "create_shift_assignment": ("shifts", "shifts.manage", "sensitive"),
     "cancel_shift_assignment": ("shifts", "shifts.manage", "sensitive"),
     "replace_conflicting_shift_assignment": ("shifts", "shifts.manage", "sensitive"),
     "request_availability": ("shifts", "shifts.manage", "write"),

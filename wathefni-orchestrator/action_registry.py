@@ -275,7 +275,12 @@ def build_tool_schemas(legacy: Any, request: Any) -> list[dict[str, Any]]:
             if field_name == "app_key" or field_name in properties:
                 continue
             properties[field_name] = _properties_for_field(field_name, catalog)
-        if "query" not in properties and spec.entity_type is None:
+        # Inventory tools must not expose free-text query (prevents accidental filters).
+        if (
+            "query" not in properties
+            and spec.entity_type is None
+            and name not in {"list_job_openings"}
+        ):
             properties["query"] = _properties_for_field("query", catalog)
         confirmation_hint = ""
         if (isinstance(spec.requires_confirmation, bool) and spec.requires_confirmation) or callable(spec.requires_confirmation):
@@ -2859,10 +2864,8 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 
 def _find_job_opening_matches(legacy: Any, company: str, *, position_code: str | None, title: str | None) -> list[dict[str, Any]]:
-    """Resolve a job opening by exact APPLY/position code or fuzzy title match,
-    over the union of real `positions` rows and inferred `applications` position
-    codes — the same universe the Jobs dashboard shows. Lets chat say "close the
-    welder job" without knowing the exact position_code."""
+    """Resolve a job opening by exact APPLY/position code or fuzzy title match
+    against the canonical `positions` table only. Applications never synthesize jobs."""
     code = str(position_code or "").strip().upper()
     term = str(title or "").strip()
     if not code and not term:
@@ -2872,25 +2875,23 @@ def _find_job_opening_matches(legacy: Any, company: str, *, position_code: str |
             if code:
                 cur.execute(
                     """
-                    SELECT DISTINCT COALESCE(p.position_code, a.position_code) AS position_code,
-                           COALESCE(p.title, a.position_title, p.position_code, a.position_code) AS position_title
-                    FROM positions p
-                    FULL OUTER JOIN applications a ON a.company_code=p.company_code AND a.position_code=p.position_code
-                    WHERE COALESCE(p.company_code, a.company_code)=%s
-                      AND COALESCE(p.position_code, a.position_code)=%s
+                    SELECT position_code, COALESCE(title, position_code) AS position_title
+                    FROM positions
+                    WHERE company_code=%s
+                      AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
+                      AND (upper(position_code)=%s OR upper(COALESCE(apply_code, ''))=%s)
                     """,
-                    (company, code),
+                    (company, code, code),
                 )
             else:
                 like = f"%{legacy._ilike_escape(term)}%"
                 cur.execute(
                     """
-                    SELECT DISTINCT COALESCE(p.position_code, a.position_code) AS position_code,
-                           COALESCE(p.title, a.position_title, p.position_code, a.position_code) AS position_title
-                    FROM positions p
-                    FULL OUTER JOIN applications a ON a.company_code=p.company_code AND a.position_code=p.position_code
-                    WHERE COALESCE(p.company_code, a.company_code)=%s
-                      AND COALESCE(p.title, a.position_title, p.position_code, a.position_code) ILIKE %s
+                    SELECT position_code, COALESCE(title, position_code) AS position_title
+                    FROM positions
+                    WHERE company_code=%s
+                      AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
+                      AND COALESCE(title, position_code) ILIKE %s
                     """,
                     (company, like),
                 )
@@ -3501,6 +3502,240 @@ register(
     )
 )
 
+
+def _positions_authority_payload(
+    legacy: Any,
+    *,
+    company_code: str,
+    status_filter: str,
+    search: str | None,
+    limit: int,
+    offset: int = 0,
+    operation: str,
+) -> dict[str, Any]:
+    """Shared positions authority: one tenant-scoped query for items + SQL total."""
+    status_arg = None if status_filter == "all" else status_filter
+    rows, total_count = legacy._dashboard_prehire_positions_query(
+        company_code,
+        limit=limit,
+        offset=offset,
+        search=search,
+        status=status_arg,
+    )
+    # Reject synthesized/blank parents if any slip through.
+    clean_rows = [
+        row
+        for row in rows
+        if isinstance(row, dict) and str(row.get("position_code") or "").strip()
+    ]
+    if len(clean_rows) != len(rows):
+        return {
+            "action_type": operation,
+            "success": False,
+            "status": "failed",
+            "error": "positions_authority_invariant_failed",
+            "message": "Job inventory rejected a synthesized or blank position row.",
+            "safe_user_message": "I could not load job openings safely. Please try again.",
+        }
+    if offset == 0 and len(clean_rows) > total_count:
+        return {
+            "action_type": operation,
+            "success": False,
+            "status": "failed",
+            "error": "positions_authority_count_mismatch",
+            "message": "Job inventory page metadata contradicted the SQL total.",
+            "safe_user_message": "I could not load job openings safely. Please try again.",
+        }
+    if offset == 0 and limit >= total_count and len(clean_rows) != total_count:
+        return {
+            "action_type": operation,
+            "success": False,
+            "status": "failed",
+            "error": "positions_authority_unpaginated_mismatch",
+            "message": "Unpaginated job inventory count did not match returned items.",
+            "safe_user_message": "I could not load job openings safely. Please try again.",
+        }
+    summary = {}
+    if hasattr(legacy, "dashboard_prehire_positions_summary"):
+        try:
+            summary = legacy.dashboard_prehire_positions_summary(company_code) or {}
+        except Exception:
+            summary = {}
+    # Inventory summary must agree with open filter when status=open and no search.
+    if operation == "list_job_openings" and status_filter == "open" and not search and offset == 0:
+        open_summary = int((summary or {}).get("open_positions") or -1)
+        if open_summary >= 0 and open_summary != total_count:
+            return {
+                "action_type": operation,
+                "success": False,
+                "status": "failed",
+                "error": "positions_authority_summary_mismatch",
+                "message": "Job inventory total contradicted the open-positions summary.",
+                "safe_user_message": "I could not load job openings safely. Please try again.",
+                "summary": legacy.json_safe(summary),
+                "total_matching": total_count,
+            }
+    provenance = {
+        "canonical_table": "positions",
+        "company_code": company_code,
+        "filters": {"status": status_filter, "search": search},
+        "pagination": {"limit": limit, "offset": offset, "total_count": total_count},
+        "as_of": legacy.now_iso() if hasattr(legacy, "now_iso") else None,
+        "operation": operation,
+    }
+    result = {
+        "action_type": operation,
+        "success": True,
+        "status": "completed",
+        "company_code": company_code,
+        "status_filter": status_filter,
+        "positions": legacy.json_safe(clean_rows),
+        "total_matching": int(total_count),
+        "summary": legacy.json_safe(summary),
+        "provenance": provenance,
+        "authority": "positions",
+    }
+    if hasattr(legacy, "format_list_job_openings_reply"):
+        result["message"] = legacy.format_list_job_openings_reply(result)
+    else:
+        result["message"] = f"Found {total_count} job opening(s)."
+    result["safe_user_message"] = result["message"]
+    return result
+
+
+def _list_job_openings_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    """Inventory-only job openings from canonical `positions` (no free-text filter)."""
+    legacy = ctx.legacy
+    action = ctx.action if isinstance(ctx.action, dict) else {}
+    company_code = _resolve_company_code(legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "list_job_openings",
+            "success": False,
+            "status": "failed",
+            "error": "company_required",
+            "message": "I need a company context before listing job openings.",
+            "safe_user_message": "I need a company context before listing job openings.",
+        }
+    status_raw = str(action.get("status") or action.get("status_filter") or "open").strip().lower()
+    if status_raw in {"", "all", "*"}:
+        status_filter = "all"
+    elif status_raw in {"open", "closed"}:
+        status_filter = status_raw
+    else:
+        status_filter = "open"
+    try:
+        limit = max(1, min(int(action.get("top_n") or action.get("limit") or 100), 100))
+    except Exception:
+        limit = 100
+    # Inventory must ignore free-text query/search — those belong to search_job_openings.
+    return _positions_authority_payload(
+        legacy,
+        company_code=str(company_code).upper(),
+        status_filter=status_filter,
+        search=None,
+        limit=limit,
+        offset=0,
+        operation="list_job_openings",
+    )
+
+
+def _search_job_openings_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    """Explicit role/title search over canonical `positions`."""
+    legacy = ctx.legacy
+    action = ctx.action if isinstance(ctx.action, dict) else {}
+    company_code = _resolve_company_code(legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "search_job_openings",
+            "success": False,
+            "status": "failed",
+            "error": "company_required",
+            "message": "I need a company context before searching job openings.",
+            "safe_user_message": "I need a company context before searching job openings.",
+        }
+    search = str(action.get("search") or action.get("query") or action.get("title") or "").strip()
+    # Reject whole-utterance inventory questions masquerading as search.
+    lowered = search.lower()
+    inventory_like = bool(
+        re.search(
+            r"\b(how many|what|which|list|show|any|do we have|we have)\b.*\b(job|jobs|opening|openings|position|positions|role|roles)\b",
+            lowered,
+        )
+        or re.search(r"\bopen\s+(jobs?|openings?|positions?|roles?)\b", lowered)
+    )
+    if not search or inventory_like or len(search.split()) > 6:
+        return {
+            "action_type": "search_job_openings",
+            "success": False,
+            "status": "needs_clarification",
+            "error": "search_term_required",
+            "message": "Tell me which role or title to search for (for example Finance or IT Manager).",
+            "safe_user_message": "Tell me which role or title to search for (for example Finance or IT Manager).",
+        }
+    status_raw = str(action.get("status") or action.get("status_filter") or "all").strip().lower()
+    if status_raw in {"", "all", "*"}:
+        status_filter = "all"
+    elif status_raw in {"open", "closed"}:
+        status_filter = status_raw
+    else:
+        status_filter = "all"
+    try:
+        limit = max(1, min(int(action.get("top_n") or action.get("limit") or 50), 100))
+    except Exception:
+        limit = 50
+    return _positions_authority_payload(
+        legacy,
+        company_code=str(company_code).upper(),
+        status_filter=status_filter,
+        search=search,
+        limit=limit,
+        offset=0,
+        operation="search_job_openings",
+    )
+
+
+register(
+    ActionSpec(
+        name="list_job_openings",
+        description=(
+            "List Pre-Hiring job openings from the canonical positions table only. "
+            "Use for inventory/count questions like what jobs are open or how many openings. "
+            "Do NOT pass search/query text. For role/title lookup use search_job_openings. "
+            "Do NOT use rank_candidates for job inventory."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("status", "top_n", "limit"),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_list_job_openings_executor,
+        result_keys=("action_type", "success", "status", "message", "positions", "total_matching", "summary", "status_filter", "provenance", "safe_user_message"),
+        sensitive=False,
+        notes="Positions-only authority via dashboard_prehire_positions query. No free-text filter.",
+    )
+)
+
+
+register(
+    ActionSpec(
+        name="search_job_openings",
+        description=(
+            "Search Pre-Hiring job openings by role title or position code (for example Finance, IT Manager). "
+            "Use only when HR names a specific role/title to find. "
+            "For 'how many openings' or 'list open jobs' use list_job_openings instead."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("search", "query", "title", "status", "top_n", "limit"),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_search_job_openings_executor,
+        result_keys=("action_type", "success", "status", "message", "positions", "total_matching", "summary", "status_filter", "provenance", "safe_user_message"),
+        sensitive=False,
+        notes="Positions-only search; rejects inventory-like free-text.",
+    )
+)
 
 register(
     ActionSpec(
@@ -4586,11 +4821,12 @@ register(ActionSpec(
 
 register(ActionSpec(
     name="create_shift_assignment",
-    description="Schedule a shift for one or more employees (date + start/end time). Notifies the employee(s). Use for 'schedule Sara 9-5 tomorrow', 'assign the morning shift'.",
+    description="Schedule a shift for one or more employees (date + start/end time). Notifies the employee(s). Use for 'schedule Sara 9-5 tomorrow', 'assign the morning shift'. SENSITIVE: confirm first.",
     required_fields=(), optional_fields=("employee_name", "employee_phone", "shift_date", "start_time", "end_time"),
-    module="shifts", requires_confirmation=False,
+    module="shifts", requires_confirmation=True,
     executor=_posthire_executor("create_shift_assignment", "create_shift_assignment", created_by=True, reply_fn="format_create_shift_reply", post_hooks=(_hook_notify_shift_created,)),
-    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=False, notes="Wraps app.create_shift_assignment; notifies employees.",
+    preflight=_posthire_confirm_preflight("create_shift_assignment", "Schedule the shift"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True, notes="Wraps app.create_shift_assignment; notifies employees.",
 ))
 
 register(ActionSpec(
