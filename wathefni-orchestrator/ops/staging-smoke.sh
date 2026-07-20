@@ -21,6 +21,9 @@ export WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
 export WATHEFNI_EXPECTED_DATABASE_PORT=5432
 export WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging
 export WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-hr2-isolation-v1
+# Staging APPLY destination for Jobs QR / wa.me proofs (matches staging unit).
+export WATHEFNI_APPLY_WHATSAPP_NUMBER="${WATHEFNI_APPLY_WHATSAPP_NUMBER:-96599338566}"
+export WATHEFNI_FILE_POSITIONS_ENABLED="${WATHEFNI_FILE_POSITIONS_ENABLED:-false}"
 
 # HR-0A: mint a backend-current operator session. Shared dashboard tokens must
 # not establish authority on staging or production-like paths.
