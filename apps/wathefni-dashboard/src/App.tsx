@@ -158,7 +158,6 @@ import type {
   PrehireNextAction,
   PrehireReportsResponse,
   PrehireRolePriority,
-  PrehireWorkQueueItem,
   PrehireWorkQueueResponse,
   RankingCandidate,
   RankingResponse,
