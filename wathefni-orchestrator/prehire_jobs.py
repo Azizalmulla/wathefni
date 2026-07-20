@@ -180,7 +180,15 @@ def transition_action(from_status: str, to_status: str) -> str | None:
 
 def assert_transition(from_status: str, to_status: str) -> str:
     src = normalize_status(from_status)
-    dst = normalize_status(to_status)
+    dst_raw = str(to_status or "").strip().lower()
+    if dst_raw not in JOB_STATUSES:
+        raise JobsError(
+            "invalid_job_status",
+            f"Unknown job status '{to_status}'. Allowed: {', '.join(JOB_STATUSES)}.",
+            http_status=422,
+            details={"to": dst_raw, "allowed": list(JOB_STATUSES)},
+        )
+    dst = dst_raw
     if dst not in TRANSITIONS.get(src, frozenset()):
         raise JobsError(
             "invalid_job_transition",
