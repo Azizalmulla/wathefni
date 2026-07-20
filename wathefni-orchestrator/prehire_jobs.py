@@ -108,7 +108,7 @@ SET employment_type = COALESCE(
 )
 WHERE employment_type IS NULL OR TRIM(employment_type) = '';
 
--- Normalize legacy active -> open; blank -> closed.
+-- Normalize legacy active to open, blank to closed.
 UPDATE positions SET status = 'open' WHERE LOWER(COALESCE(status, '')) IN ('', 'active');
 UPDATE positions SET status = 'closed' WHERE LOWER(COALESCE(status, '')) NOT IN ('draft','open','paused','closed');
 """
@@ -151,8 +151,14 @@ def apply_link(apply_code: str | None) -> str | None:
 def ensure_jobs_schema(cur: Any) -> None:
     for statement in SCHEMA_SQL.split(";"):
         sql = statement.strip()
-        if sql:
-            cur.execute(sql)
+        if not sql:
+            continue
+        # Skip comment-only fragments (semicolons inside `--` comments can split poorly).
+        executable = "\n".join(
+            line for line in sql.splitlines() if line.strip() and not line.strip().startswith("--")
+        ).strip()
+        if executable:
+            cur.execute(executable)
 
 
 def normalize_status(value: str | None) -> str:
