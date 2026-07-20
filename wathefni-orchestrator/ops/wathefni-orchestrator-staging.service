@@ -14,6 +14,10 @@ Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging
 Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-hr2-isolation-v1
 Environment=WATHEFNI_DASHBOARD_DIST=/opt/wathefni/staging/dashboard-dist
 Environment=WATHEFNI_DELIVERY_MODE=dry_run
+# Single APPLY destination for staging candidate WhatsApp / QR / wa.me links.
+Environment=WATHEFNI_APPLY_WHATSAPP_NUMBER=96599338566
+# Postgres positions is sole Jobs authority; file inventory stays quarantined.
+Environment=WATHEFNI_FILE_POSITIONS_ENABLED=false
 Environment=PUBLIC_CANDIDATE_BASE_URL=http://127.0.0.1:8011
 Environment=WATHEFNI_TOOLCALL_ORCHESTRATOR_ENABLED=true
 Environment=WATHEFNI_ONBOARDING_HR_MUTATE=true

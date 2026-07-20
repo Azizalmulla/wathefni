@@ -177,6 +177,9 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-compliance-search.py | sed 
 log "jobs pagination (summary over full set + paging/search bounded, no silent 25-cap truncation, tenant-scoped, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-pagination.py | sed 's/^/    /'
 
+log "jobs phase1 (draft/publish/pause/resume/close/reopen, no silent reopen, vacancies, intake gate, staging DB)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-phase1.py | sed 's/^/    /'
+
 log "job close/reopen (status flip stops/resumes public intake, orphan positions, tenant-scoped, chat title/code resolution, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-job-close-reopen.py | sed 's/^/    /'
 

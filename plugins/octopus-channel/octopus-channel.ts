@@ -1326,6 +1326,12 @@ async function loadTemplateJson(
 }
 
 async function listActivePositions(workspaceRoot: string): Promise<FastIntentPosition[]> {
+  // Quarantined: Postgres `positions` is the sole Jobs authority. File-based
+  // inventory must not override live truth unless explicitly enabled for migration.
+  const enabled = String(process.env.WATHEFNI_FILE_POSITIONS_ENABLED || "").trim().toLowerCase();
+  if (!["1", "true", "yes", "on"].includes(enabled)) {
+    return [];
+  }
   const companiesRoot = path.join(workspaceRoot, "data", "companies");
   let companyEntries: any[] = [];
   try {

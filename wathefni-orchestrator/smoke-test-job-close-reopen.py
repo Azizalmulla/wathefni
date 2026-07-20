@@ -171,14 +171,23 @@ def run_checks(checks: Checks) -> None:
     checks.check("reopen sets status=open", lambda: reopened["status"] == "open")
     checks.check("reopen preserves apply_code (QR unchanged)", lambda: reopened["apply_code"] == "APPLY-JOBCLOSEA-WELDER")
 
-    # 2) Invalid status is rejected.
-    checks.check_raises("invalid status raises ValueError", lambda: app.dashboard_set_position_status(COMPANY_A, "WELDER", "paused"))
+    # 2) Truly invalid status is rejected; pause is a valid lifecycle state now.
+    checks.check_raises(
+        "invalid status raises JobsError",
+        lambda: app.dashboard_set_position_status(COMPANY_A, "WELDER", "archived"),
+        getattr(app, "_prehire_jobs").JobsError,
+    )
+    paused = app.dashboard_set_position_status(COMPANY_A, "WELDER", "paused")
+    checks.check("pause sets status=paused", lambda: paused["status"] == "paused")
+    resumed = app.dashboard_set_position_status(COMPANY_A, "WELDER", "open")
+    checks.check("resume sets status=open", lambda: resumed["status"] == "open")
 
     # 3) Unknown position_code (no positions row, no applications) is rejected —
     # must never silently create a phantom job from a typo'd code.
     checks.check_raises(
-        "unknown position_code raises ValueError",
+        "unknown position_code raises JobsError",
         lambda: app.dashboard_set_position_status(COMPANY_A, "NO-SUCH-CODE", "closed"),
+        getattr(app, "_prehire_jobs").JobsError,
     )
 
     # 4) Orphan application (no positions row): must NOT synthesize a job.
@@ -186,6 +195,7 @@ def run_checks(checks: Checks) -> None:
     checks.check_raises(
         "orphan application cannot synthesize a job on close",
         lambda: app.dashboard_set_position_status(COMPANY_A, "ORPHANROLE", "closed"),
+        getattr(app, "_prehire_jobs").JobsError,
     )
     if hasattr(app, "dashboard_unassigned_applications_payload"):
         unassigned = app.dashboard_unassigned_applications_payload(COMPANY_A)

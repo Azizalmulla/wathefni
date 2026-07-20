@@ -142,11 +142,12 @@ TOOL_PERMISSION_MAP = {
     "get_prehire_priorities": "prehire.read",
     "get_prehire_work_queue": "prehire.read",
     "get_interview_invite_status": "prehire.read",
-    "list_job_openings": "prehire.read",
-    "search_job_openings": "prehire.read",
-    "create_job_opening": "settings.manage",
-    "close_job_opening": "settings.manage",
-    "reopen_job_opening": "settings.manage",
+    "list_job_openings": "jobs.read",
+    "search_job_openings": "jobs.read",
+    "create_job_opening": "jobs.create",
+    "close_job_opening": "jobs.close",
+    "pause_job_opening": "jobs.close",
+    "reopen_job_opening": "jobs.publish",
     "execute_mixed_candidate_batch": "candidate.manage",
     "execute_candidate_batch": "candidate.manage",
     "execute_candidate_workflow": "candidate.manage",
@@ -252,7 +253,7 @@ Calling a tool:
 - For listing/reading open jobs or positions ("what jobs are open", "how many openings", "list positions"), call list_job_openings. Do NOT pass search/query text. Do NOT use rank_candidates for job-opening inventory.
 - For finding a named role/title ("Finance", "IT Manager"), call search_job_openings with that search term only.
 - For job opening / position creation / QR-code requests, call create_job_opening immediately for backend preflight. Do NOT say job openings are unsupported.
-- For closing/pausing/stopping a job posting, use close_job_opening. For reopening/resuming a closed one, use reopen_job_opening (do not use create_job_opening for this — it would ask for salary again unnecessarily). Both are PREFLIGHT-THEN-CONFIRM: identify the exact job by title or APPLY code, then confirm before executing.
+- For permanently closing a job posting, use close_job_opening. For temporarily pausing intake, use pause_job_opening. For reopening a closed role or resuming a paused one, use reopen_job_opening (do not use create_job_opening for this — it would ask for salary again unnecessarily). These are PREFLIGHT-THEN-CONFIRM: identify the exact job by title or APPLY code, then confirm before executing. Never create/publish/pause/close/reopen without confirmation.
 - For employee leave requests (only when the leave tools are present in your catalog): use list_leave_requests to read leave ("show pending leave", "who is off next week"); request_leave to file a new request for an employee with their dates; approve_leave_request / reject_leave_request / cancel_leave_request for decisions. The decision tools are PREFLIGHT-THEN-CONFIRM: call the tool to let the backend identify the exact request and flag shift conflicts, then ask the user for one explicit confirmation before it executes. Identify a request by employee name/phone + dates, or by leave_id from prior state.
 - For post-hire operations, only use a tool when it is present in your catalog (it is hidden if the company has not enabled that module or you lack permission):
   * Attendance: list_attendance to read ("who was late today"); check_in_employee / check_out_employee to clock an employee in/out. mark_attendance_absent and correct_attendance_record are SENSITIVE — confirm in your own words first.
@@ -731,7 +732,14 @@ def _tool_allowed(tool_name: str, scope: dict[str, Any]) -> tuple[bool, str | No
             return False, required
         # Flag off, or a read-only tool: keep legacy admin-capable behaviour.
         return True, required
-    return required in permissions, required
+    if required in permissions:
+        return True, required
+    # Temporary Jobs compatibility (matches dashboard_has_jobs_permission).
+    if required == "jobs.read" and "prehire.read" in permissions:
+        return True, required
+    if required in {"jobs.create", "jobs.edit", "jobs.publish", "jobs.close"} and "settings.manage" in permissions:
+        return True, required
+    return False, required
 
 
 def _visible_tools(tools: list[dict[str, Any]], scope: dict[str, Any]) -> list[dict[str, Any]]:

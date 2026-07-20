@@ -81,6 +81,7 @@ import candidate_semantic_router as _candidate_semantic_router  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import prehire_overview as _prehire_overview  # noqa: E402
+import prehire_jobs as _prehire_jobs  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
 
 logger = logging.getLogger("wathefni")
@@ -2793,6 +2794,7 @@ def _ensure_schema_impl() -> None:
             import assessment_ai_service as _assessment_ai
 
             _assessment_ai.seed_product2_defaults(cur)
+            _prehire_jobs.ensure_jobs_schema(cur)
         conn.commit()
     sync_company_module_registry()
     sync_company_org_registry()
@@ -6077,12 +6079,12 @@ _POSTHIRE_PERMS_TEAM_MANAGER = {
 }
 
 ROLE_PERMISSIONS = {
-    "owner": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
-    "hr_manager": {"prehire.read", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
+    "owner": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
+    "hr_manager": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
     "manager": set(_POSTHIRE_PERMS_TEAM_MANAGER),
-    "recruiter": {"prehire.read", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.send", "offer.withdraw", "report.export"},
-    "hiring_manager": {"prehire.read", "interview.manage", "offer.approve", "report.export", *_POSTHIRE_PERMS_MANAGER},
-    "viewer": {"prehire.read", *_POSTHIRE_PERMS_VIEWER},
+    "recruiter": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.send", "offer.withdraw", "report.export"},
+    "hiring_manager": {"prehire.read", "jobs.read", "interview.manage", "offer.approve", "report.export", *_POSTHIRE_PERMS_MANAGER},
+    "viewer": {"prehire.read", "jobs.read", *_POSTHIRE_PERMS_VIEWER},
 }
 
 EMPLOYEE_PERMISSION_SCOPES = {
@@ -6103,7 +6105,29 @@ KNOWN_DASHBOARD_PERMISSIONS = set().union(
     EMPLOYEE_PERMISSION_SCOPES,
     OFFER_GRANT_ONLY_PERMISSIONS,
     ASSESSMENT_GRANT_ONLY_PERMISSIONS,
+    set(_prehire_jobs.JOBS_PERMISSIONS),
 )
+
+
+def dashboard_has_jobs_permission(context: dict[str, Any], permission: str) -> bool:
+    """Jobs permissions with temporary settings.manage compatibility for admins."""
+    if dashboard_context_has_permission(context, permission):
+        return True
+    if permission in _prehire_jobs.SETTINGS_MANAGE_COMPAT_JOBS and dashboard_context_has_permission(context, "settings.manage"):
+        return True
+    if permission == "jobs.read" and dashboard_context_has_permission(context, "prehire.read"):
+        return True
+    return False
+
+
+def require_jobs_permission(context: dict[str, Any], permission: str) -> str:
+    require_entitlement(context, "pre_hiring", "prehire.read")
+    if not dashboard_has_jobs_permission(context, permission):
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "permission_denied", "message": f"Missing permission {permission} for Jobs.", "permission": permission},
+        )
+    return context["company_code"]
 
 
 def normalize_hr_role(role: str | None) -> str:
@@ -23266,7 +23290,7 @@ def public_candidate_roles(company_code: str | None = "WATHEFNI", *, limit: int 
                 SELECT position_code, title, salary_min, salary_max, currency, apply_code
                 FROM positions
                 WHERE company_code=%s
-                  AND COALESCE(status, 'open') IN ('open','active')
+                  AND COALESCE(status, 'open') = 'open'
                 ORDER BY updated_at DESC NULLS LAST, created_at DESC
                 LIMIT %s
                 """,
@@ -23341,7 +23365,7 @@ def public_role_by_apply_code(apply_code: str | None) -> dict[str, Any] | None:
                 FROM positions
                 WHERE company_code=%s
                   AND position_code=%s
-                  AND COALESCE(status, 'open') IN ('open','active')
+                  AND COALESCE(status, 'open') = 'open'
                 LIMIT 1
                 """,
                 (parsed["company_code"], parsed["position_code"]),
@@ -40321,46 +40345,32 @@ def dashboard_delivery_status(row: dict[str, Any]) -> str:
 
 
 def dashboard_apply_whatsapp_number() -> str:
-    return digits(os.environ.get("WATHEFNI_APPLY_WHATSAPP_NUMBER") or os.environ.get("WATHEFNI_WHATSAPP_NUMBER") or "96599338566")
+    return _prehire_jobs.apply_whatsapp_number()
 
 
 def dashboard_apply_link(apply_code: str | None) -> str | None:
-    code = str(apply_code or "").strip()
-    number = dashboard_apply_whatsapp_number()
-    if not code or not number:
-        return None
-    return f"https://wa.me/{number}?text={urllib.parse.quote(code)}"
+    return _prehire_jobs.apply_link(apply_code)
 
 
 def dashboard_position_summary(row: dict[str, Any]) -> dict[str, Any]:
-    company = str(row.get("company_code") or "WATHEFNI").upper()
-    position_code = str(row.get("position_code") or "").strip()
-    apply_code = str(row.get("apply_code") or "").strip() or (f"APPLY-{company}-{position_code}" if position_code else None)
-    status = str(row.get("status") or "").strip().lower() or ("open" if int(row.get("active_count") or 0) > 0 else "closed")
-    latest_name = row.get("latest_candidate_name") or row.get("latest_phone")
-    return {
-        "company_code": company,
-        "position_code": position_code,
-        "position_title": row.get("position_title") or row.get("title") or position_code,
-        "job_key": row.get("job_key") or position_code,
-        "application_key": row.get("application_key") or apply_code,
-        "apply_code": apply_code,
-        "application_link": dashboard_apply_link(apply_code),
-        "qr_value": dashboard_apply_link(apply_code),
-        "status": status,
-        "description": row.get("description"),
-        "requirements": json_safe(row.get("requirements") or []),
-        "application_count": int(row.get("application_count") or 0),
-        "active_count": int(row.get("active_count") or 0),
-        "latest_application_at": json_safe(row.get("latest_application_at")),
-        "latest_applicant": latest_name,
-        "latest_applicant_app_key": row.get("latest_applicant_app_key"),
-        "created_at": json_safe(row.get("created_at")),
-        "updated_at": json_safe(row.get("updated_at")),
-        "stage_counts": json_safe(row.get("stage_counts") or []),
-        "recent_applicants": json_safe(row.get("recent_applicants") or []),
-        "notifications": json_safe(row.get("notifications") or []),
+    """Serialize a positions inventory row via the Jobs authority module."""
+    vacancy = {
+        "vacancies": row.get("vacancies"),
+        "filled_vacancies": row.get("filled_vacancies"),
+        "remaining_vacancies": row.get("remaining_vacancies"),
     }
+    payload = _prehire_jobs.serialize_job(row, vacancy=vacancy, include_salary=True)
+    # Preserve inventory aliases used by Overview / pickers / legacy UI.
+    payload["position_title"] = payload.get("title") or payload.get("position_code")
+    payload["stage_counts"] = json_safe(row.get("stage_counts") or [])
+    payload["recent_applicants"] = json_safe(row.get("recent_applicants") or [])
+    payload["notifications"] = json_safe(row.get("notifications") or [])
+    payload["latest_applicant"] = row.get("latest_candidate_name") or row.get("latest_phone") or payload.get("latest_applicant")
+    payload["latest_applicant_app_key"] = row.get("latest_applicant_app_key") or payload.get("latest_applicant_app_key")
+    payload["latest_application_at"] = json_safe(row.get("latest_application_at") or payload.get("latest_application_at"))
+    payload["application_count"] = int(row.get("application_count") or payload.get("application_count") or 0)
+    payload["active_count"] = int(row.get("active_count") or payload.get("active_count") or 0)
+    return payload
 
 
 def _dashboard_prehire_positions_query(
@@ -40370,21 +40380,45 @@ def _dashboard_prehire_positions_query(
     offset: int = 0,
     search: str | None = None,
     status: str | None = None,
+    department: str | None = None,
+    location: str | None = None,
+    recruiter_user_id: str | None = None,
+    hiring_manager_user_id: str | None = None,
+    deadline: str | None = None,
+    has_remaining_vacancies: bool | None = None,
+    cursor: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     """Canonical Jobs inventory: `positions` is the sole authority for whether a
     job opening exists. Application aggregates are LEFT JOINed for counts only —
     orphan/imported applications never synthesize a parent job row.
 
-    `status` may be open/closed/all (or empty). `search` is title/code ILIKE only
-    (used by search_job_openings; inventory list_job_openings must pass None).
+    `status` may be draft/open/paused/closed/all. `search` is title/code ILIKE.
+    Optional filters: department, location, recruiter, hiring manager, deadline
+    window (overdue|upcoming|none), remaining vacancies.
+    Offset pagination is primary; optional `cursor` is `updated_at|position_code`
+    for stable continuation when the first page shifts.
     """
     term = (search or "").strip()
     like = f"%{_ilike_escape(term)}%" if term else ""
     status_filter = str(status or "").strip().lower()
     if status_filter in {"", "all", "*"}:
         status_filter = ""
-    elif status_filter not in {"open", "closed"}:
+    elif status_filter not in {"draft", "open", "paused", "closed"}:
         status_filter = ""
+    dept_filter = str(department or "").strip()
+    loc_filter = str(location or "").strip()
+    recruiter_filter = str(recruiter_user_id or "").strip()
+    hm_filter = str(hiring_manager_user_id or "").strip()
+    deadline_filter = str(deadline or "").strip().lower()
+    if deadline_filter not in {"overdue", "upcoming", "none", ""}:
+        deadline_filter = ""
+    remaining_only = bool(has_remaining_vacancies) if has_remaining_vacancies is not None else False
+    cursor_updated_at = None
+    cursor_code = ""
+    if cursor and "|" in str(cursor):
+        parts = str(cursor).split("|", 1)
+        cursor_updated_at = parts[0].strip() or None
+        cursor_code = parts[1].strip() if len(parts) > 1 else ""
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -40396,6 +40430,7 @@ def _dashboard_prehire_positions_query(
                     COALESCE(MAX(position_title), position_code) AS position_title,
                     COUNT(*) AS application_count,
                     COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_count,
+                    COUNT(*) FILTER (WHERE LOWER(COALESCE(status, '')) = 'hired') AS filled_vacancies,
                     MAX(updated_at) AS latest_application_at
                   FROM applications
                   WHERE company_code=%s
@@ -40421,19 +40456,16 @@ def _dashboard_prehire_positions_query(
                 ),
                 combined AS (
                   SELECT
-                    p.company_code AS company_code,
-                    p.position_code AS position_code,
+                    p.*,
                     COALESCE(p.title, p.position_code) AS position_title,
-                    p.status,
                     lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) AS effective_status,
-                    p.apply_code,
-                    p.requirements,
-                    p.metadata,
-                    p.raw_json,
-                    p.created_at,
-                    p.updated_at,
                     COALESCE(s.application_count, 0) AS application_count,
                     COALESCE(s.active_count, 0) AS active_count,
+                    COALESCE(s.filled_vacancies, 0) AS filled_vacancies,
+                    CASE
+                      WHEN p.vacancies IS NULL THEN NULL
+                      ELSE GREATEST(0, p.vacancies - COALESCE(s.filled_vacancies, 0))
+                    END AS remaining_vacancies,
                     s.latest_application_at,
                     l.latest_applicant_app_key,
                     l.latest_phone,
@@ -40446,12 +40478,57 @@ def _dashboard_prehire_positions_query(
                 )
                 SELECT *, COUNT(*) OVER() AS total_count
                 FROM combined
-                WHERE (%s = '' OR position_title ILIKE %s OR position_code ILIKE %s)
+                WHERE (%s = '' OR position_title ILIKE %s OR position_code ILIKE %s OR COALESCE(title_ar, '') ILIKE %s)
                   AND (%s = '' OR effective_status = %s)
-                ORDER BY active_count DESC, application_count DESC, COALESCE(updated_at, latest_application_at) DESC NULLS LAST, position_code
+                  AND (%s = '' OR LOWER(COALESCE(department, '')) = LOWER(%s))
+                  AND (%s = '' OR LOWER(COALESCE(location, '')) = LOWER(%s))
+                  AND (%s = '' OR CAST(recruiter_user_id AS text) = %s)
+                  AND (%s = '' OR CAST(hiring_manager_user_id AS text) = %s)
+                  AND (
+                    %s = ''
+                    OR (%s = 'none' AND application_deadline IS NULL)
+                    OR (%s = 'overdue' AND application_deadline IS NOT NULL AND application_deadline < CURRENT_DATE)
+                    OR (%s = 'upcoming' AND application_deadline IS NOT NULL AND application_deadline >= CURRENT_DATE)
+                  )
+                  AND (%s = FALSE OR (remaining_vacancies IS NOT NULL AND remaining_vacancies > 0))
+                  AND (
+                    %s IS NULL
+                    OR updated_at < %s::timestamptz
+                    OR (updated_at = %s::timestamptz AND position_code > %s)
+                  )
+                ORDER BY COALESCE(updated_at, latest_application_at) DESC NULLS LAST, position_code ASC
                 LIMIT %s OFFSET %s
                 """,
-                (company, company, company, term, like, like, status_filter, status_filter, limit, offset),
+                (
+                    company,
+                    company,
+                    company,
+                    term,
+                    like,
+                    like,
+                    like,
+                    status_filter,
+                    status_filter,
+                    dept_filter,
+                    dept_filter,
+                    loc_filter,
+                    loc_filter,
+                    recruiter_filter,
+                    recruiter_filter,
+                    hm_filter,
+                    hm_filter,
+                    deadline_filter,
+                    deadline_filter,
+                    deadline_filter,
+                    deadline_filter,
+                    remaining_only,
+                    cursor_updated_at,
+                    cursor_updated_at,
+                    cursor_updated_at,
+                    cursor_code,
+                    limit,
+                    offset if not cursor_updated_at else 0,
+                ),
             )
             rows = [dict(row) for row in cur.fetchall()]
             total_count = int(rows[0]["total_count"]) if rows else 0
@@ -40532,8 +40609,10 @@ def _dashboard_prehire_positions_query(
         code = str(row.get("position_code") or "")
         metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
         raw_json = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
-        row["description"] = metadata.get("description") or raw_json.get("description")
-        row["requirements"] = row.get("requirements") or metadata.get("requirements") or raw_json.get("requirements")
+        if not row.get("description"):
+            row["description"] = metadata.get("description") or raw_json.get("description")
+        if not row.get("requirements"):
+            row["requirements"] = metadata.get("requirements") or raw_json.get("requirements")
         row["stage_counts"] = stage_counts.get(code, [])
         row["recent_applicants"] = recent.get(code, [])
         row["notifications"] = notifications.get(code, [])
@@ -40548,6 +40627,13 @@ def dashboard_prehire_positions_payload(
     offset: int = 0,
     search: str | None = None,
     status: str | None = None,
+    department: str | None = None,
+    location: str | None = None,
+    recruiter_user_id: str | None = None,
+    hiring_manager_user_id: str | None = None,
+    deadline: str | None = None,
+    has_remaining_vacancies: bool | None = None,
+    cursor: str | None = None,
 ) -> list[dict[str, Any]]:
     rows, _ = _dashboard_prehire_positions_query(
         company,
@@ -40555,6 +40641,13 @@ def dashboard_prehire_positions_payload(
         offset=offset,
         search=search,
         status=status,
+        department=department,
+        location=location,
+        recruiter_user_id=recruiter_user_id,
+        hiring_manager_user_id=hiring_manager_user_id,
+        deadline=deadline,
+        has_remaining_vacancies=has_remaining_vacancies,
+        cursor=cursor,
     )
     return rows
 
@@ -40616,11 +40709,13 @@ def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
                 SELECT
                   COUNT(*) AS total_positions,
                   COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open') AS open_positions,
-                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) != 'open') AS closed_positions,
+                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'draft') AS draft_positions,
+                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'paused') AS paused_positions,
+                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'closed') AS closed_positions,
                   COUNT(*) FILTER (
                     WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open'
-                      AND p.apply_code IS NOT NULL
-                  ) AS active_qr_codes,
+                      AND NULLIF(TRIM(COALESCE(p.apply_code, '')), '') IS NOT NULL
+                  ) AS open_roles_with_apply_code,
                   COALESCE(SUM(COALESCE(s.application_count, 0)), 0) AS total_applications
                 FROM positions p
                 LEFT JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
@@ -40630,11 +40725,16 @@ def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
                 (company, company),
             )
             row = dict(cur.fetchone() or {})
+    open_roles = int(row.get("open_positions") or 0)
     return {
         "total_positions": int(row.get("total_positions") or 0),
-        "open_positions": int(row.get("open_positions") or 0),
+        "open_positions": open_roles,
+        "draft_positions": int(row.get("draft_positions") or 0),
+        "paused_positions": int(row.get("paused_positions") or 0),
         "closed_positions": int(row.get("closed_positions") or 0),
-        "active_qr_codes": int(row.get("active_qr_codes") or 0),
+        # Honest metric: open roles that already have an APPLY code (not "active QR health").
+        "open_roles_with_apply_code": int(row.get("open_roles_with_apply_code") or 0),
+        "active_qr_codes": open_roles,  # backward-compatible alias = open roles
         "total_applications": int(row.get("total_applications") or 0),
     }
 
@@ -40705,32 +40805,25 @@ def dashboard_unassigned_applications_payload(company: str, *, limit: int = 100)
     }
 
 
-def dashboard_set_position_status(company: str, position_code: str, status: str) -> dict[str, Any]:
-    """Open/close a canonical `positions` row only. Applications never create jobs."""
-    status = str(status or "").strip().lower()
-    if status not in ("open", "closed"):
-        raise ValueError("status must be 'open' or 'closed'")
-    company = str(company or "").strip().upper()
-    code = str(position_code or "").strip()
-    if not company or not code:
-        raise ValueError("company and position_code are required")
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE positions
-                SET status=%s, updated_at=now()
-                WHERE company_code=%s AND position_code=%s
-                RETURNING company_code, position_code, title, status, apply_code
-                """,
-                (status, company, code),
-            )
-            row = cur.fetchone()
-            if not row:
-                raise ValueError("job opening not found")
-            updated = dict(row)
-        conn.commit()
-    return json_safe(updated)
+def dashboard_set_position_status(
+    company: str,
+    position_code: str,
+    status: str,
+    *,
+    actor_user_id: str | None = None,
+    expected_updated_at: str | None = None,
+    expected_version: int | None = None,
+) -> dict[str, Any]:
+    """Lifecycle transition on canonical `positions` only. Applications never create jobs."""
+    return _prehire_jobs.transition_job(
+        company=company,
+        position_code=position_code,
+        db_connect=db_connect,
+        actor_user_id=actor_user_id,
+        to_status=status,
+        expected_updated_at=expected_updated_at,
+        expected_version=expected_version,
+    )
 
 
 def dashboard_record_action_result(action_type: str, status: str, result_payload: dict[str, Any], final_reply: str) -> dict[str, Any]:
@@ -44762,9 +44855,17 @@ def dashboard_prehire_positions(
     limit: int = 100,
     search: str = "",
     status: str = "",
+    department: str = "",
+    location: str = "",
+    recruiter_user_id: str = "",
+    hiring_manager_user_id: str = "",
+    deadline: str = "",
+    has_remaining_vacancies: bool = False,
+    cursor: str = "",
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
     company = context["company_code"]
+    require_jobs_permission(context, "jobs.read")
     eff_limit = max(1, min(int(limit or 100), 200))
     eff_offset = max(0, int(offset or 0))
     positions, total_count = _dashboard_prehire_positions_query(
@@ -44773,7 +44874,18 @@ def dashboard_prehire_positions(
         offset=eff_offset,
         search=search,
         status=status,
+        department=department or None,
+        location=location or None,
+        recruiter_user_id=recruiter_user_id or None,
+        hiring_manager_user_id=hiring_manager_user_id or None,
+        deadline=deadline or None,
+        has_remaining_vacancies=bool(has_remaining_vacancies) or None,
+        cursor=cursor or None,
     )
+    next_cursor = None
+    if positions and (eff_offset + len(positions)) < total_count:
+        last = positions[-1]
+        next_cursor = f"{last.get('updated_at') or ''}|{last.get('position_code') or ''}"
     return {
         "company_code": company,
         "positions": positions,
@@ -44781,6 +44893,7 @@ def dashboard_prehire_positions(
         "limit": eff_limit,
         "offset": eff_offset,
         "has_more": (eff_offset + len(positions)) < total_count,
+        "next_cursor": next_cursor,
         "summary": dashboard_prehire_positions_summary(company),
         "status_filter": str(status or "all").strip().lower() or "all",
     }
@@ -44788,14 +44901,114 @@ def dashboard_prehire_positions(
 
 class DashboardPositionStatus(BaseModel):
     status: str
+    expected_updated_at: str | None = None
+    expected_version: int | None = None
+
+
+class DashboardJobUpsert(BaseModel):
+    title: str | None = None
+    title_en: str | None = None
+    title_ar: str | None = None
+    position_code: str | None = None
+    description: str | None = None
+    description_en: str | None = None
+    description_ar: str | None = None
+    requirements: list[Any] | None = None
+    requirements_en: list[Any] | None = None
+    requirements_ar: list[Any] | None = None
+    department: str | None = None
+    location: str | None = None
+    employment_type: str | None = None
+    work_arrangement: str | None = None
+    contract_type: str | None = None
+    salary_min: float | None = None
+    salary_max: float | None = None
+    currency: str | None = None
+    salary_visibility: str | None = None
+    vacancies: int | None = None
+    application_deadline: str | None = None
+    expected_start_date: str | None = None
+    hiring_manager_user_id: str | None = None
+    recruiter_user_id: str | None = None
+    save_as_draft: bool = True
+    expected_updated_at: str | None = None
+    expected_version: int | None = None
 
 
 def require_prehire_settings_admin(context: dict[str, Any]) -> str:
-    """Gate for job-opening lifecycle changes (close/reopen): same settings.manage
-    permission already required to create a job opening via the Assistant, so
-    whoever can open a role is the one who can close it."""
-    require_entitlement(context, "pre_hiring", "settings.manage")
-    return context["company_code"]
+    """Legacy gate kept for compatibility; prefer require_jobs_permission."""
+    return require_jobs_permission(context, "jobs.close")
+
+
+def _jobs_http_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, _prehire_jobs.JobsError):
+        return HTTPException(
+            status_code=exc.http_status,
+            detail={"error": exc.code, "message": exc.message, **(exc.details or {})},
+        )
+    return HTTPException(status_code=400, detail={"error": "jobs_error", "message": str(exc)})
+
+
+@app.post("/dashboard/prehire/positions")
+def dashboard_prehire_create_position(
+    request: DashboardJobUpsert,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = require_jobs_permission(context, "jobs.create")
+    if not request.save_as_draft:
+        require_jobs_permission(context, "jobs.publish")
+    payload = request.model_dump()
+    try:
+        job = _prehire_jobs.create_job(
+            company=company,
+            db_connect=db_connect,
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            payload=payload,
+            as_draft=bool(request.save_as_draft),
+        )
+    except Exception as exc:
+        raise _jobs_http_error(exc) from exc
+    record_admin_audit(
+        context,
+        "job_opening_created",
+        summary=f"Created job {job.get('title') or job.get('position_code')} as {job.get('status')}.",
+        target_type="position",
+        target=str(job.get("position_code") or ""),
+        details={"status": job.get("status"), "job_id": job.get("job_id")},
+    )
+    return {"ok": True, "position": job}
+
+
+@app.patch("/dashboard/prehire/positions/{position_code}")
+def dashboard_prehire_update_position(
+    position_code: str,
+    request: DashboardJobUpsert,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = require_jobs_permission(context, "jobs.edit")
+    payload = {k: v for k, v in request.model_dump().items() if k not in {"save_as_draft"} and v is not None}
+    # Allow explicit null clears for optional text via present keys in raw body is complex; Phase 1 keeps provided fields.
+    try:
+        job = _prehire_jobs.update_job(
+            company=company,
+            position_code=position_code,
+            db_connect=db_connect,
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            payload=payload,
+            expected_updated_at=request.expected_updated_at,
+            expected_version=request.expected_version,
+        )
+    except Exception as exc:
+        raise _jobs_http_error(exc) from exc
+    record_admin_audit(
+        context,
+        "job_opening_updated",
+        summary=f"Updated job {job.get('title') or position_code}.",
+        target_type="position",
+        target=position_code,
+        details={"version": job.get("version")},
+    )
+    return {"ok": True, "position": job}
 
 
 @app.post("/dashboard/prehire/positions/{position_code}/status")
@@ -44804,25 +45017,32 @@ def dashboard_prehire_set_position_status(
     request: DashboardPositionStatus,
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
-    company = require_prehire_settings_admin(context)
     target = str(request.status or "").strip().lower()
-    if target not in ("open", "closed"):
-        raise HTTPException(status_code=422, detail={"error": "invalid_status", "message": "status must be 'open' or 'closed'."})
+    if target not in _prehire_jobs.JOB_STATUSES:
+        raise HTTPException(status_code=422, detail={"error": "invalid_status", "message": "status must be draft, open, paused, or closed."})
+    # Permission by intended transition action approximated from target; precise check after load.
+    company = context["company_code"]
     try:
-        result = dashboard_set_position_status(company, position_code, target)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail={"error": "position_not_found", "message": str(exc)}) from exc
+        current = _prehire_jobs.get_job(company=company, position_code=position_code, db_connect=db_connect)
+        action = _prehire_jobs.assert_transition(current.get("status"), target)
+        require_jobs_permission(context, _prehire_jobs.permission_for_transition(action))
+        result = dashboard_set_position_status(
+            company,
+            position_code,
+            target,
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            expected_updated_at=request.expected_updated_at,
+            expected_version=request.expected_version,
+        )
+    except Exception as exc:
+        raise _jobs_http_error(exc) from exc
     record_admin_audit(
         context,
-        "job_opening_closed" if target == "closed" else "job_opening_reopened",
-        summary=(
-            f"Closed {result.get('title') or position_code} to new applicants."
-            if target == "closed"
-            else f"Reopened {result.get('title') or position_code} to new applicants."
-        ),
+        f"job_opening_{result.get('transition_action') or target}",
+        summary=f"{str(result.get('transition_action') or target).title()} {result.get('title') or position_code}.",
         target_type="position",
         target=position_code,
-        details={"status": target},
+        details={"status": target, "from": current.get("status"), "action": result.get("transition_action")},
     )
     return {"ok": True, "position": result}
 

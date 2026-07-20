@@ -17,6 +17,7 @@ Design rules:
 from __future__ import annotations
 
 import logging
+import os
 import re
 import json
 from urllib.parse import quote_plus
@@ -2750,7 +2751,14 @@ def _create_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
     company_code = _resolve_company_code(ctx.legacy, ctx.request) or "WATHEFNI"
     position_code = str(ctx.action.get("position_code") or "").strip().upper() or _slug_position_code(title)
     apply_code = f"APPLY-{company_code}-{position_code}"
-    apply_link = f"https://wa.me/{ctx.action.get('whatsapp_number') or '96597453460'}?text={quote_plus(apply_code)}"
+    try:
+        import prehire_jobs as jobs
+
+        apply_link = jobs.apply_link(apply_code) or f"https://wa.me/{jobs.apply_whatsapp_number()}?text={quote_plus(apply_code)}"
+        wa_number = jobs.apply_whatsapp_number()
+    except Exception:
+        wa_number = str(ctx.action.get("whatsapp_number") or os.environ.get("WATHEFNI_APPLY_WHATSAPP_NUMBER") or "").strip()
+        apply_link = f"https://wa.me/{wa_number}?text={quote_plus(apply_code)}" if wa_number else None
     requirements = ctx.action.get("requirements") if isinstance(ctx.action.get("requirements"), list) else []
     screening_questions = _generate_screening_questions_for_role(ctx, title=title, requirements=requirements)
     return {
@@ -2770,7 +2778,8 @@ def _create_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
         "screening_questions": screening_questions,
         "apply_code": apply_code,
         "apply_link": apply_link,
-        "qr_image_url": f"https://quickchart.io/qr?text={quote_plus(apply_link)}&size=512",
+        "qr_image_url": f"https://quickchart.io/qr?text={quote_plus(apply_link or apply_code)}&size=512",
+        "whatsapp_number": wa_number,
     }
 
 
@@ -2779,67 +2788,49 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
     plan = _create_job_opening_preflight(ctx)
     if plan.get("status") != "ready":
         return plan
-    raw_json = {
-        "code": plan["position_code"],
-        "title": plan["title"],
-        "active": True,
-        "apply_code": plan["apply_code"],
-        "company_code": plan["company_code"],
-        "salary_min_kd": plan["salary_min"],
-        "salary_max_kd": plan["salary_max"],
-        "employment_type": plan.get("employment_type"),
-        "description": plan.get("description") or "",
-        "requirements": plan.get("requirements") or [],
-        "screening_questions": plan.get("screening_questions") or [],
-        "created_by": getattr(ctx.request, "sender_phone", None),
-    }
-    metadata = {
-        "description": plan.get("description") or "",
-        "requirements": plan.get("requirements") or [],
-        "screening_questions": plan.get("screening_questions") or [],
-        "employment_type": plan.get("employment_type") or "",
-        "qr_image_url": plan["qr_image_url"],
-        "apply_link": plan["apply_link"],
-    }
-    with legacy.db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO positions
-                (company_code, position_code, title, status, salary_min, salary_max, currency, apply_code, requirements, metadata, raw_json, created_at, updated_at)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now(),now())
-                ON CONFLICT (company_code, position_code) DO UPDATE SET
-                  title=EXCLUDED.title,
-                  status='open',
-                  salary_min=EXCLUDED.salary_min,
-                  salary_max=EXCLUDED.salary_max,
-                  currency=EXCLUDED.currency,
-                  apply_code=EXCLUDED.apply_code,
-                  requirements=EXCLUDED.requirements,
-                  metadata=positions.metadata || EXCLUDED.metadata,
-                  raw_json=positions.raw_json || EXCLUDED.raw_json,
-                  updated_at=now()
-                RETURNING *
-                """,
-                (
-                    plan["company_code"],
-                    plan["position_code"],
-                    plan["title"],
-                    "open",
-                    plan["salary_min"],
-                    plan["salary_max"],
-                    plan["currency"],
-                    plan["apply_code"],
-                    legacy.Json(legacy.json_safe(plan.get("requirements") or [])),
-                    legacy.Json(legacy.json_safe(metadata)),
-                    legacy.Json(legacy.json_safe(raw_json)),
-                ),
-            )
-            row = dict(cur.fetchone())
-        conn.commit()
+    import prehire_jobs as jobs
+
+    # Never silently reopen an existing role via upsert.
+    try:
+        created = jobs.create_job(
+            company=str(plan["company_code"]),
+            db_connect=legacy.db_connect,
+            actor_user_id=str(getattr(ctx.request, "actor_user_id", None) or "") or None,
+            payload={
+                "title": plan["title"],
+                "position_code": plan["position_code"],
+                "salary_min": plan["salary_min"],
+                "salary_max": plan["salary_max"],
+                "currency": plan.get("currency") or "KD",
+                "employment_type": plan.get("employment_type"),
+                "description": plan.get("description") or "",
+                "requirements": plan.get("requirements") or [],
+                "requirements_en": plan.get("requirements") or [],
+            },
+            as_draft=False,
+        )
+    except jobs.JobsError as exc:
+        if exc.code == "position_code_conflict":
+            return {
+                "action_type": "create_job_opening",
+                "success": False,
+                "status": "needs_clarification",
+                "needs_clarification": True,
+                "error": exc.code,
+                "message": exc.message,
+                "details": exc.details,
+            }
+        return {
+            "action_type": "create_job_opening",
+            "success": False,
+            "status": "failed",
+            "error": exc.code,
+            "message": exc.message,
+        }
+    apply_link = created.get("application_link") or plan["apply_link"]
     caption = (
         f"{plan['title']} QR attached. It opens {plan['apply_code']}.\n"
-        f"Apply link: {plan['apply_link']}"
+        f"Apply link: {apply_link}"
     )
     send_result = None
     if hasattr(legacy, "send_octopus_whatsapp_image"):
@@ -2857,11 +2848,12 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
         "success": True,
         "status": "completed",
         "message": f"Opened {plan['title']} and generated the QR code.",
-        "position": legacy.json_safe(row),
+        "position": legacy.json_safe(created),
         "apply_code": plan["apply_code"],
-        "apply_link": plan["apply_link"],
+        "apply_link": apply_link,
         "qr_image_url": plan["qr_image_url"],
         "qr_send_result": legacy.json_safe(send_result) if send_result is not None else None,
+        "authority_source": "positions",
     }
 
 
@@ -2903,8 +2895,16 @@ def _find_job_opening_matches(legacy: Any, company: str, *, position_code: str |
 
 def _job_opening_status_preflight(ctx: ExecutionContext, *, target_status: str) -> dict[str, Any]:
     legacy = ctx.legacy
-    action_name = "close_job_opening" if target_status == "closed" else "reopen_job_opening"
-    verb = "close" if target_status == "closed" else "reopen"
+    action_name = {
+        "closed": "close_job_opening",
+        "paused": "pause_job_opening",
+        "open": "reopen_job_opening",
+    }.get(target_status, "close_job_opening")
+    verb = {
+        "closed": "close",
+        "paused": "pause",
+        "open": "reopen or resume",
+    }.get(target_status, "update")
     company_code = _resolve_company_code(legacy, ctx.request) or "WATHEFNI"
     position_code = str(ctx.action.get("position_code") or "").strip()
     title = str(ctx.action.get("title") or ctx.action.get("position_title") or "").strip()
@@ -2954,7 +2954,11 @@ def _job_opening_status_executor(ctx: ExecutionContext, *, target_status: str) -
     if plan.get("status") != "ready":
         return plan
     row = legacy.dashboard_set_position_status(plan["company_code"], plan["position_code"], target_status)
-    verb = "closed to new applicants" if target_status == "closed" else "reopened to new applicants"
+    verb = {
+        "closed": "closed to new applicants",
+        "paused": "paused (not accepting new applicants)",
+        "open": "open to new applicants",
+    }.get(target_status, f"set to {target_status}")
     return {
         **plan,
         "status": "completed",
@@ -2969,6 +2973,14 @@ def _close_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
 
 def _close_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
     return _job_opening_status_executor(ctx, target_status="closed")
+
+
+def _pause_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_preflight(ctx, target_status="paused")
+
+
+def _pause_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    return _job_opening_status_executor(ctx, target_status="paused")
 
 
 def _reopen_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
@@ -3776,7 +3788,8 @@ register(
         description=(
             "Close a job opening so its APPLY code / QR / link stop accepting NEW applicants. "
             "Does NOT touch candidates already in that job's pipeline — they stay fully manageable (review, interview, decide). "
-            "Use when HR asks to close, pause, stop, or take down a role/posting. "
+            "Use when HR asks to close, stop hiring, or take down a role/posting. "
+            "Do NOT use this for temporary pause — use pause_job_opening instead. "
             "This is a PREFLIGHT-THEN-CONFIRM workflow: call it to resolve the exact job by title or APPLY code before confirmation; it executes only after explicit approval."
         ),
         entity_type=None,
@@ -3794,10 +3807,31 @@ register(
 
 register(
     ActionSpec(
+        name="pause_job_opening",
+        description=(
+            "Temporarily pause an open job opening so it stops accepting NEW applicants while preserving the existing pipeline. "
+            "Use when HR asks to pause or temporarily stop intake (not permanent close). "
+            "This is a PREFLIGHT-THEN-CONFIRM workflow."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("title", "position_code"),
+        module="pre_hiring",
+        requires_confirmation=True,
+        preflight=_pause_job_opening_preflight,
+        executor=_pause_job_opening_executor,
+        result_keys=("action_type", "success", "status", "message", "position", "position_code", "position_title"),
+        sensitive=True,
+        notes="Sets positions.status='paused'. Resume with reopen_job_opening.",
+    )
+)
+
+register(
+    ActionSpec(
         name="reopen_job_opening",
         description=(
-            "Reopen a previously closed job opening — its existing APPLY code / QR / link start accepting new applicants again, unchanged. "
-            "Use when HR asks to reopen, resume, or restart a closed role/posting. Does NOT ask for title/salary again (unlike create_job_opening) since the job already exists. "
+            "Reopen a closed job or resume a paused job — its existing APPLY code / QR / link start accepting new applicants again, unchanged. "
+            "Use when HR asks to reopen, resume, or restart a closed/paused role/posting. Does NOT ask for title/salary again (unlike create_job_opening). "
             "This is a PREFLIGHT-THEN-CONFIRM workflow: call it to resolve the exact job by title or APPLY code before confirmation; it executes only after explicit approval."
         ),
         entity_type=None,
@@ -3809,7 +3843,7 @@ register(
         executor=_reopen_job_opening_executor,
         result_keys=("action_type", "success", "status", "message", "position", "position_code", "position_title"),
         sensitive=True,
-        notes="Sets positions.status='open'. apply_code/QR are unchanged — nothing is regenerated.",
+        notes="Sets positions.status='open' from closed (reopen) or paused (resume). apply_code/QR are unchanged.",
     )
 )
 

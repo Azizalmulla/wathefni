@@ -85,7 +85,7 @@ def main() -> None:
     # --- Registry presence ---
     spec = action_registry.spec_for("list_job_openings")
     assert_true(spec is not None and spec.module == "pre_hiring", "list_job_openings registered under pre_hiring")
-    assert_true(tco.TOOL_PERMISSION_MAP.get("list_job_openings") == "prehire.read", "list_job_openings requires prehire.read")
+    assert_true(tco.TOOL_PERMISSION_MAP.get("list_job_openings") == "jobs.read", "list_job_openings requires jobs.read")
     assert_true("list_job_openings" in tco.TOOLCALL_SYSTEM, "system prompt must mention list_job_openings")
 
     # --- Scope authority parity ---
@@ -146,7 +146,7 @@ def main() -> None:
 
         # Soft allow + hard entitlement should both pass for owner
         allowed, required = tco._tool_allowed("list_job_openings", wa_scope)
-        assert_true(allowed and required == "prehire.read", "owner soft-allow list_job_openings")
+        assert_true(allowed and required == "jobs.read", "owner soft-allow list_job_openings")
         allowed_rank, required_rank = tco._tool_allowed("rank_candidates", wa_scope)
         assert_true(allowed_rank and required_rank == "prehire.read", "owner soft-allow rank_candidates")
 
