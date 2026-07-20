@@ -2117,19 +2117,27 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
             }
         )
 
-    if (recruiting_features.get("candidate_rankings") or {}).get("enabled"):
-        # Shared pre-hire priorities contract (same action_counts / next_action
-        # authority as desktop Overview and Admin Assistant tools).
+    # Shared pre-hire priorities contract (same action_counts / next_action
+    # authority as desktop Overview and Admin Assistant tools). Emit whenever
+    # the tenant has pre_hiring + prehire.read — do not hide behind ranking
+    # action enablement.
+    company_code = str(context.get("company_code") or "")
+    access = context.get("access") if isinstance(context.get("access"), dict) else {}
+    permissions = set(context.get("permissions") or access.get("permissions") or [])
+    has_prehire = False
+    try:
+        has_prehire = bool(app_mod.company_has_module(company_code, "pre_hiring")) and (
+            not permissions or "prehire.read" in permissions or "candidate.manage" in permissions
+        )
+    except Exception:
+        has_prehire = False
+    if has_prehire:
         try:
             overview = app_mod._prehire_overview.build_overview_authority(
-                company=str(context.get("company_code") or ""),
+                company=company_code,
                 db_connect=app_mod.db_connect,
                 get_company_settings=app_mod.get_company_settings,
-                assessments_enabled=bool(
-                    (recruiting_features.get("assessments") or {}).get("enabled")
-                    if isinstance(recruiting_features.get("assessments"), dict)
-                    else app_mod.company_has_module(context.get("company_code"), "assessments")
-                ),
+                assessments_enabled=bool(app_mod.company_has_module(company_code, "assessments")),
                 interviews_enabled=True,
             )
             counts = overview.get("action_counts") or {}
@@ -2166,7 +2174,7 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
                         "authority_source": "prehire_overview.ready_for_review",
                     }
                 )
-            if int(counts.get("assessment_pending") or 0):
+            if int(counts.get("assessment_pending") or 0) and app_mod.company_has_module(company_code, "assessments"):
                 prehire_items.append(
                     {
                         "type": "prehire_assessment_pending",
@@ -2209,6 +2217,8 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
             )
         except Exception:
             pass
+
+    if (recruiting_features.get("candidate_rankings") or {}).get("enabled"):
         candidates = mobile_candidate_rankings(app_mod, context, limit=max_items)
         decision_items = [
             item for item in candidates["items"] if item.get("allowed_actions")
