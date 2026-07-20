@@ -91,6 +91,45 @@ LIST_JOB_OPENINGS_RE = re.compile(
     r"\bopen\s+(jobs?|openings?|positions?|roles?)\b",
     re.IGNORECASE,
 )
+# Inventory-style filler words — not a concrete role/title search token.
+_JOB_TITLE_STOPWORDS = {
+    "a",
+    "an",
+    "the",
+    "our",
+    "my",
+    "all",
+    "any",
+    "open",
+    "opened",
+    "available",
+    "current",
+    "active",
+    "new",
+    "job",
+    "jobs",
+    "opening",
+    "openings",
+    "position",
+    "positions",
+    "role",
+    "roles",
+    "vacancy",
+    "vacancies",
+    "how",
+    "many",
+    "number",
+    "of",
+    "we",
+    "have",
+    "do",
+    "me",
+    "us",
+}
+CREATE_SHIFT_RE = re.compile(
+    r"\b(create|schedule|assign|book)\b.{0,60}\bshift\b|\bshift\b.{0,40}\b(for|to)\b",
+    re.IGNORECASE,
+)
 APPROVAL_RE = re.compile(r"^\s*(yes|yeah|yep|ok|okay|go ahead|confirm|approved|do it|sure|نعم|اي|إي|تمام)\b", re.IGNORECASE)
 REJECTION_RE = re.compile(r"^\s*(no|nah|cancel|stop|don't|dont|لا|لأ)\b", re.IGNORECASE)
 
@@ -1482,6 +1521,9 @@ def _looks_like_list_job_openings_request(text: str) -> bool:
     normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
     if not normalized:
         return False
+    # Named-role searches belong to search_job_openings, not the inventory list.
+    if _named_job_title_query(normalized):
+        return False
     # Create / lifecycle intents belong to create/close/reopen tools.
     if re.search(r"\b(create|publish|add|make|generate)\b.*\b(job|position|opening|role|vacancy|qr)\b", normalized):
         return False
@@ -1492,9 +1534,66 @@ def _looks_like_list_job_openings_request(text: str) -> bool:
     return bool(LIST_JOB_OPENINGS_RE.search(normalized))
 
 
+def _named_job_title_query(text: str) -> str | None:
+    """Return a concrete role/title token when the user is searching, not listing inventory."""
+    normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
+    if not normalized:
+        return None
+
+    def clean_title(raw: str) -> str | None:
+        token = re.sub(r"\s+", " ", str(raw or "").strip(" .,:;!-"))
+        if not token:
+            return None
+        parts = [p for p in re.split(r"\s+", token) if p and p not in _JOB_TITLE_STOPWORDS]
+        if not parts:
+            return None
+        if all(part in _JOB_TITLE_STOPWORDS for part in parts):
+            return None
+        return " ".join(parts)
+
+    # show/find/search me Finance openings (not "show open positions")
+    match = re.search(
+        r"\b(?:show|find|search|look\s*up|lookup)\s+(?:me\s+|us\s+)?"
+        r"(?!open\b|all\b|available\b|current\b|active\b|any\b)"
+        r"(.+?)\s+(?:job|jobs|opening|openings|position|positions|role|roles)\b",
+        normalized,
+    )
+    if match:
+        title = clean_title(match.group(1))
+        if title:
+            return title
+
+    # openings for Finance / jobs named Finance
+    match = re.search(
+        r"\b(?:job|jobs|opening|openings|position|positions|role|roles)\s+"
+        r"(?:for|named|called|titled)\s+(.+)$",
+        normalized,
+    )
+    if match:
+        title = clean_title(match.group(1))
+        if title:
+            return title
+
+    # Bare "Finance openings" / "IT_MANAGER jobs" — single title token only.
+    match = re.search(
+        r"^(?!how\b|what\b|which\b|show\b|list\b|any\b|do\b|we\b|have\b|hello\b|hi\b|please\b|can\b|could\b)"
+        r"([a-z0-9][a-z0-9_/-]{1,40})\s+(?:job|jobs|opening|openings|position|positions|role|roles)\b",
+        normalized,
+    )
+    if match:
+        title = clean_title(match.group(1))
+        if title:
+            return title
+    return None
+
+
 def _looks_like_search_job_openings_request(text: str) -> bool:
     normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
-    if not normalized or _looks_like_list_job_openings_request(normalized):
+    if not normalized:
+        return False
+    if _named_job_title_query(normalized):
+        return True
+    if _looks_like_list_job_openings_request(normalized):
         return False
     # Explicit role/title search, e.g. "search Finance jobs", "find IT Manager opening".
     if re.search(r"\b(search|find|look\s+up|lookup)\b.*\b(job|jobs|opening|openings|position|positions|role|roles)\b", normalized):
@@ -1504,15 +1603,25 @@ def _looks_like_search_job_openings_request(text: str) -> bool:
     return False
 
 
+def _looks_like_create_shift_request(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", str(text or "").lower()).strip()
+    if not normalized:
+        return False
+    return bool(CREATE_SHIFT_RE.search(normalized))
+
+
 def _forced_tool_for_turn(request: Any, tools: list[dict[str, Any]]) -> str | None:
     text = str(getattr(request, "raw_text", "") or "")
     tool_names = {str((tool.get("function") or {}).get("name") or "") for tool in tools}
-    if "list_job_openings" in tool_names and _looks_like_list_job_openings_request(text):
-        return "list_job_openings"
+    # Prefer named-role search over inventory list when both patterns could match.
     if "search_job_openings" in tool_names and _looks_like_search_job_openings_request(text):
         return "search_job_openings"
+    if "list_job_openings" in tool_names and _looks_like_list_job_openings_request(text):
+        return "list_job_openings"
     if "create_job_opening" in tool_names and JOB_OPENING_TRIGGER_RE.search(text):
         return "create_job_opening"
+    if "create_shift_assignment" in tool_names and _looks_like_create_shift_request(text):
+        return "create_shift_assignment"
     if "rank_candidates" in tool_names and _looks_like_candidate_list_request(text):
         return "rank_candidates"
     if "get_interview_invite_status" in tool_names and INVITE_STATUS_RE.search(text):

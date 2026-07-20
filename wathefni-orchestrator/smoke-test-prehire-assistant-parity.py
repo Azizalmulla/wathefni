@@ -39,7 +39,13 @@ def main() -> None:
     import tool_call_orchestrator as tco
 
     # --- Forced routing ---
-    tools = [{"function": {"name": "list_job_openings"}}, {"function": {"name": "create_job_opening"}}, {"function": {"name": "rank_candidates"}}]
+    tools = [
+        {"function": {"name": "list_job_openings"}},
+        {"function": {"name": "search_job_openings"}},
+        {"function": {"name": "create_job_opening"}},
+        {"function": {"name": "create_shift_assignment"}},
+        {"function": {"name": "rank_candidates"}},
+    ]
     list_req = FakeRequest(raw_text="Hello what job openings do we have open")
     assert_true(
         tco._forced_tool_for_turn(list_req, tools) == "list_job_openings",
@@ -52,6 +58,19 @@ def main() -> None:
     assert_true(
         not tco._looks_like_list_job_openings_request("create a new marketing job"),
         "create phrasing must not force list",
+    )
+    assert_true(
+        tco._forced_tool_for_turn(FakeRequest(raw_text="Show me Finance openings."), tools) == "search_job_openings",
+        "named Finance openings must force search_job_openings",
+    )
+    assert_true(
+        not tco._looks_like_list_job_openings_request("Show me Finance openings."),
+        "Finance openings must not force inventory list",
+    )
+    assert_true(
+        tco._forced_tool_for_turn(FakeRequest(raw_text="Create a shift for Authority P0 Twin."), tools)
+        == "create_shift_assignment",
+        "create shift for named employee must force create_shift_assignment",
     )
     create_req = FakeRequest(raw_text="create a new marketing job with salary 800")
     assert_true(
