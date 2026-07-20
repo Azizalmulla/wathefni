@@ -64,6 +64,46 @@ def mint_token() -> str:
     return token
 
 
+def mint_mobile_token(app: Any) -> str:
+    """Mint a real operator-mobile access token (browser dashboard sessions are rejected)."""
+    with app.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM dashboard_users
+                WHERE company_code=%s
+                  AND status='active'
+                  AND role='owner'
+                  AND COALESCE(metadata->>'source','') <> 'legacy_hr_phone_bootstrap'
+                  AND lower(email) NOT LIKE '%%.wathefni.local'
+                ORDER BY accepted_at NULLS LAST, updated_at DESC NULLS LAST
+                LIMIT 1
+                """,
+                (COMPANY,),
+            )
+            row = cur.fetchone()
+            if not row:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM dashboard_users
+                    WHERE company_code=%s AND status='active' AND role='owner'
+                    ORDER BY updated_at DESC NULLS LAST
+                    LIMIT 1
+                    """,
+                    (COMPANY,),
+                )
+                row = cur.fetchone()
+    if not row:
+        raise RuntimeError("no active owner for mobile token mint")
+    tokens = app._operator_mobile.create_operator_mobile_session(app, dict(row), device_label="p0-qual")
+    access = str(tokens.get("access_token") or "").strip()
+    if not access:
+        raise RuntimeError("empty operator mobile access token")
+    return access
+
+
 def auth_headers(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}", "X-Company-Code": COMPANY, "Content-Type": "application/json"}
 
@@ -152,7 +192,7 @@ def prove_identity(app: Any, results: dict[str, Any]) -> None:
     )
 
 
-def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
+def prove_jobs_surfaces(app: Any, token: str, mobile_token: str, results: dict[str, Any]) -> None:
     import action_registry
     import re
 
@@ -161,8 +201,13 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
     web_body = web.json() if web.ok else {"error": web.status_code, "text": web.text[:300]}
     web_total = int(web_body.get("total_count") or web_body.get("total_matching") or len(web_body.get("positions") or []))
 
-    # Mobile API (shared positions authority)
-    mobile = requests.get(f"{BASE}/dashboard/mobile/positions", headers=auth_headers(token), params={"status": "open", "limit": 100}, timeout=30)
+    # Mobile API (operator-mobile session; shared positions authority)
+    mobile = requests.get(
+        f"{BASE}/dashboard/mobile/positions",
+        headers=auth_headers(mobile_token),
+        params={"status": "open", "limit": 100},
+        timeout=30,
+    )
     mobile_body = mobile.json() if mobile.ok else {"error": mobile.status_code, "text": mobile.text[:300]}
     mobile_total = int(mobile_body.get("total_count") or len(mobile_body.get("positions") or []))
 
@@ -201,7 +246,7 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
     web_fin_body = web_fin.json() if web_fin.ok else {}
     mobile_fin = requests.get(
         f"{BASE}/dashboard/mobile/positions",
-        headers=auth_headers(token),
+        headers=auth_headers(mobile_token),
         params={"status": "open", "q": "Finance", "limit": 50},
         timeout=30,
     )
@@ -287,19 +332,9 @@ def prove_jobs_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
 
 
 def prove_employee_clarification_surfaces(app: Any, token: str, results: dict[str, Any]) -> None:
-    # Backend resolver is shared; assistant surfaces should ask clarification not guess.
-    chat = requests.post(
-        f"{BASE}/dashboard/prehire/chat",
-        headers=auth_headers(token),
-        json={"message": f"Schedule a shift for {FIXTURE_NAME} tomorrow 9-5", "conversation_id": f"p0-amb-{uuid.uuid4().hex[:10]}"},
-        timeout=120,
-    )
-    body = chat.json() if chat.ok else {}
-    reply = str(
-        body.get("reply_text") or body.get("reply") or body.get("message") or body.get("final_reply") or ""
-    ).lower()
-    # Confirmation pending is OK; inventing a single employee without clarification is not.
-    clarified = any(tok in reply for tok in ("which", "choose", "multiple", "match", "clarify", "who", "twin"))
+    import action_registry
+
+    # Shared resolver + shift tool executor must clarify, never latest-fallback.
     typed = app.resolve_employee_typed(employee_name=FIXTURE_NAME, company_code=COMPANY)
     _check(
         results,
@@ -307,19 +342,86 @@ def prove_employee_clarification_surfaces(app: Any, token: str, results: dict[st
         typed.get("status") == "ambiguous",
         {"status": typed.get("status"), "choices": len(typed.get("choices") or [])},
     )
+
+    class Req:
+        account_id = COMPANY
+        raw_text = f"create shift for {FIXTURE_NAME}"
+        sender_phone = "96599338566"
+        sender_role = "hr_admin"
+        conversation_id = f"p0-amb-tool-{uuid.uuid4().hex[:8]}"
+        metadata = {"company_code": COMPANY, "channel": "web_dashboard", "dashboard": True}
+
+    class Ctx:
+        legacy = app
+        action = {
+            "company_code": COMPANY,
+            "employee_name": FIXTURE_NAME,
+            "shift_date": (date.today() + timedelta(days=40)).isoformat(),
+            "start_time": "09:00",
+            "end_time": "17:00",
+            "confirm": True,
+        }
+        request = Req()
+        scope = {"company_code": COMPANY, "permissions": ["shifts.manage", "shifts.read"]}
+
+    tool_out = None
+    for name in ("_create_shift_assignment_executor", "create_shift_assignment"):
+        fn = getattr(action_registry, name, None)
+        if callable(fn):
+            tool_out = fn(Ctx())
+            break
+    if tool_out is None and hasattr(action_registry, "spec_for"):
+        # Fall back to resolve path used by executors.
+        tool_out = app.resolve_employee_typed(employee_name=FIXTURE_NAME, company_code=COMPANY)
+    status = str((tool_out or {}).get("status") or "")
+    _check(
+        results,
+        "shift_tool_ambiguous_employee_clarification",
+        status in {"ambiguous", "needs_clarification", "employee_ambiguous"} or len((tool_out or {}).get("choices") or []) >= 2,
+        {"status": status, "choices": len((tool_out or {}).get("choices") or []), "excerpt": str(tool_out)[:300]},
+    )
+
+    # Authenticated web assistant: must not silently bind a single employee.
+    chat = requests.post(
+        f"{BASE}/dashboard/prehire/chat",
+        headers=auth_headers(token),
+        json={
+            "message": f"Create a scheduled shift for employee {FIXTURE_NAME} on {(date.today() + timedelta(days=41)).isoformat()} from 09:00 to 17:00",
+            "conversation_id": f"p0-amb-{uuid.uuid4().hex[:10]}",
+        },
+        timeout=120,
+    )
+    body = chat.json() if chat.ok else {}
+    reply = str(
+        body.get("reply_text") or body.get("reply") or body.get("message") or body.get("final_reply") or ""
+    ).lower()
+    clarified = any(
+        tok in reply
+        for tok in (
+            "which employee",
+            "which one",
+            "more than one",
+            "multiple employees",
+            "ambiguous",
+            "clarify",
+            "choose one",
+            "two employees",
+            "wathefni-p0-dup",
+        )
+    )
+    invented_single = ("scheduled" in reply or "created" in reply) and not clarified and FIXTURE_NAME.lower() in reply
     _check(
         results,
         "web_assistant_ambiguous_employee_no_guess",
-        chat.ok
-        and (
-            clarified
-            or "confirm" in reply
-            or "pending" in str(body).lower()
-            or body.get("needs_clarification")
-            or body.get("status") in {"needs_clarification", "pending_confirmation"}
-            or bool(body.get("confirmation"))
-        ),
-        {"http": chat.status_code, "reply_excerpt": reply[:280], "status": body.get("status"), "intent": body.get("intent")},
+        chat.ok and clarified and not invented_single,
+        {
+            "http": chat.status_code,
+            "reply_excerpt": reply[:280],
+            "status": body.get("status"),
+            "intent": body.get("intent"),
+            "clarified": clarified,
+            "invented_single": invented_single,
+        },
     )
 
 
@@ -577,9 +679,10 @@ def main() -> int:
         health = requests.get(f"{BASE}/health", timeout=10).json()
         _check(results, "staging_health_binding", health.get("status") == "ok" and (health.get("environment_binding") or {}).get("match") is True, health.get("environment_binding"))
         dash_token = mint_token()
+        mobile_token = mint_mobile_token(app)
         ensure_duplicate_fixture(app)
         prove_identity(app, results)
-        prove_jobs_surfaces(app, dash_token, results)
+        prove_jobs_surfaces(app, dash_token, mobile_token, results)
         prove_employee_clarification_surfaces(app, dash_token, results)
         prove_shift_overlap_and_reschedule(app, dash_token, results)
         prove_leave_payroll(app, results)

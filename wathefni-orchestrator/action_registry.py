@@ -4523,6 +4523,75 @@ def _posthire_confirm_preflight(action_type: str, phrase: str) -> ExecutorCallab
     return preflight
 
 
+def _posthire_identity_confirm_preflight(action_type: str, phrase: str) -> ExecutorCallable:
+    """Confirm-preflight that resolves employee identity before asking to confirm.
+
+    Prevents the Assistant from confirming a bare duplicate name as if it were
+    one person. Ambiguous / missing matches return clarification instead of ready.
+    """
+
+    def preflight(ctx: ExecutionContext) -> dict[str, Any]:
+        action = _posthire_action(ctx)
+        legacy = ctx.legacy
+        company = str(action.get("company_code") or getattr(ctx.request, "account_id", None) or "").strip().upper()
+        typed = None
+        if hasattr(legacy, "resolve_employee_typed"):
+            typed = legacy.resolve_employee_typed(
+                employee_key=action.get("employee_key"),
+                employee_phone=action.get("subject_phone") or action.get("employee_phone"),
+                employee_name=action.get("subject_name") or action.get("employee_name"),
+                company_code=company or None,
+            )
+        status = str((typed or {}).get("status") or "")
+        if status == "ambiguous":
+            choices = typed.get("choices") or typed.get("matches") or []
+            lines = [
+                f"I found {len(choices)} employees named "
+                f"{action.get('employee_name') or action.get('subject_name') or 'that'}. "
+                "Which one should I use?"
+            ]
+            for item in choices[:5]:
+                if not isinstance(item, dict):
+                    continue
+                key = item.get("employee_key") or item.get("phone") or ""
+                name = item.get("name") or "Employee"
+                lines.append(f"- {name} (`{key}`)")
+            message = "\n".join(lines)
+            return {
+                "action_type": action_type,
+                "status": "needs_clarification",
+                "success": False,
+                "error": "ambiguous_employee",
+                "choices": choices[:5],
+                "message": message,
+                "safe_user_message": message,
+                "confirmation_text": message,
+            }
+        if status == "employee_not_found":
+            message = "I could not find that employee. Please use the exact employee key, name, or phone."
+            return {
+                "action_type": action_type,
+                "status": "needs_clarification",
+                "success": False,
+                "error": "employee_not_found",
+                "message": message,
+                "safe_user_message": message,
+                "confirmation_text": message,
+            }
+        who = None
+        if status == "resolved" and isinstance((typed or {}).get("employee"), dict):
+            emp = typed["employee"]
+            who = f"{emp.get('name') or 'Employee'} (`{emp.get('employee_key') or emp.get('phone') or ''}`)"
+            action["employee_key"] = emp.get("employee_key") or action.get("employee_key")
+        if not who:
+            who = action.get("employee_name") or action.get("subject_name") or action.get("employee_phone") or action.get("subject_phone")
+        suffix = f" for {who}" if who else ""
+        text = f"{phrase}{suffix}?"
+        return {"action_type": action_type, "status": "ready", "success": True, "message": text, "confirmation_text": text}
+
+    return preflight
+
+
 def _posthire_executor(
     action_type: str,
     fn_name: str,
@@ -4827,7 +4896,7 @@ register(ActionSpec(
     required_fields=(), optional_fields=("employee_name", "employee_phone", "shift_date", "start_time", "end_time"),
     module="shifts", requires_confirmation=True,
     executor=_posthire_executor("create_shift_assignment", "create_shift_assignment", created_by=True, reply_fn="format_create_shift_reply", post_hooks=(_hook_notify_shift_created,)),
-    preflight=_posthire_confirm_preflight("create_shift_assignment", "Schedule the shift"),
+    preflight=_posthire_identity_confirm_preflight("create_shift_assignment", "Schedule the shift"),
     result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True, notes="Wraps app.create_shift_assignment; notifies employees.",
 ))
 
