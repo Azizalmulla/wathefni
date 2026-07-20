@@ -271,10 +271,74 @@ export type SummaryResponse = {
   action_counts?: {
     ready_for_review?: number
     assessment_pending?: number
+    follow_up_needed?: number
   }
+  next_action?: PrehireNextAction
+  role_priority?: PrehireRolePriority | null
+  definitions?: Record<string, unknown>
+  overview_as_of?: string
   status_counts: Array<{ status: string; count: number }>
   positions: PositionSummary[]
   recent_applications: ApplicationSummary[]
+}
+
+export type PrehireNextAction = {
+  action: string
+  priority: number
+  reason: string
+  total_matching: number
+  destination?: {
+    page?: string
+    filters?: Record<string, string>
+  }
+  authority_source?: string
+  label?: string
+  as_of?: string
+  role?: { position_code?: string; position_title?: string }
+  alternatives?: Array<{ action: string; priority: number; total_matching: number }>
+  sla_hours?: Record<string, number>
+}
+
+export type PrehireRolePriority = {
+  position_code: string
+  position_title: string
+  ready_count?: number
+  follow_up_count?: number
+  assessment_pending_count?: number
+  active_count?: number
+  oldest_ready_hours?: number
+  priority: number
+  reason: string
+  destination?: { page?: string; filters?: Record<string, string> }
+  ranking_destination?: { page?: string; filters?: Record<string, string> }
+}
+
+export type PrehireWorkQueueItem = {
+  action_type: string
+  app_key?: string
+  candidate_name?: string
+  position_code?: string
+  position_title?: string
+  reason: string
+  priority: number
+  age_hours?: number
+  destination?: { page?: string; filters?: Record<string, string> }
+  authority_source?: string
+  as_of?: string
+}
+
+export type PrehireWorkQueueResponse = {
+  company_code: string
+  ok: boolean
+  as_of: string
+  authority_source?: string
+  total: number
+  limit: number
+  cursor?: string | null
+  next_cursor?: string | null
+  has_more?: boolean
+  items: PrehireWorkQueueItem[]
+  sla_hours?: Record<string, number>
 }
 
 export type PositionsResponse = {
@@ -722,6 +786,7 @@ export type PrehireReportsResponse = {
     interview_completed: number
     interview_no_show: number
     followups: number
+    followup_delivery_events?: number
   }
   breakdowns: {
     applications_by_stage: ReportBreakdownRow[]

@@ -64,6 +64,7 @@ import {
   setPositionStatus,
   getInterviews,
   getNotifications,
+  getPrehireWorkQueue,
   getRanking,
   getSetupReadiness,
   getSummary,
@@ -145,10 +146,14 @@ import type {
   InterviewsResponse,
   NotificationActionItem,
   NotificationsResponse,
-  PositionsResponse,
-  PrehireReportsResponse,
   NotificationRow,
+  PositionsResponse,
   PositionSummary,
+  PrehireNextAction,
+  PrehireReportsResponse,
+  PrehireRolePriority,
+  PrehireWorkQueueItem,
+  PrehireWorkQueueResponse,
   RankingCandidate,
   RankingResponse,
   SetupReadinessResponse,
@@ -217,6 +222,7 @@ type CandidateFilters = {
   assessmentStatus: string
   interviewStatus: string
   followUp: string
+  reviewStatus: string
   activityFrom: string
   activityTo: string
   sort: string
@@ -529,10 +535,12 @@ function App() {
     assessmentStatus: '',
     interviewStatus: '',
     followUp: '',
+    reviewStatus: '',
     activityFrom: '',
     activityTo: '',
     sort: 'newest',
   })
+  const [workQueue, setWorkQueue] = useState<PrehireWorkQueueResponse | null>(null)
   const [candidateOffset, setCandidateOffset] = useState(0)
   const [rankPosition, setRankPosition] = useState('')
   const [interviewTab, setInterviewTab] = useState('upcoming')
@@ -594,7 +602,6 @@ function App() {
   const enabledNotificationModules = notifications?.enabled_modules
   const notificationIssues = moduleScopedNotificationRows(notifications?.notifications || [], enabledNotificationModules)
   const assessmentModuleOn = assessmentModuleEnabled(moduleState, summary)
-  const needsReview = reviewQueue(allApplications, notificationIssues, assessmentModuleOn)
   const availableNavItems = navItems.filter((item) => {
     if (item.id === 'employees') return anyPeopleModuleEnabled(moduleState)
     if (item.id === 'notifications') return isAlertsAndDeliveryRelevant(moduleState?.enabled_modules, workspaceCatalog(moduleState))
@@ -669,6 +676,7 @@ function App() {
           assessment_status: candidateFilters.assessmentStatus,
           interview_status: candidateFilters.interviewStatus,
           follow_up: candidateFilters.followUp,
+          review_status: candidateFilters.reviewStatus,
           activity_from: candidateFilters.activityFrom,
           activity_to: candidateFilters.activityTo,
           sort: candidateFilters.sort,
@@ -920,10 +928,11 @@ function App() {
           setWorkspaceBootstrap(null)
         }
 
-        const [summaryData, notificationsData, reportsData] = await Promise.all([
+        const [summaryData, notificationsData, reportsData, workQueueData] = await Promise.all([
           getSummary(effectiveAccess),
           getNotifications(effectiveAccess),
           getPrehireReports(effectiveAccess),
+          getPrehireWorkQueue(effectiveAccess, { limit: 25 }).catch(() => null),
         ])
         let assessmentConfigData: AssessmentConfigResponse | null = null
         if (assessmentModuleEnabled(bootstrapData || summaryData, summaryData)) {
@@ -937,6 +946,7 @@ function App() {
         setAssessmentConfig(assessmentConfigData)
         setNotifications(notificationsData)
         setReports(reportsData)
+        setWorkQueue(workQueueData)
         if (!silent) setNoticeOk('You’re viewing the latest data.')
       } catch (error) {
         if (!silent) {
@@ -1466,7 +1476,7 @@ function App() {
     setQuery('')
     setStatus('')
     setCandidateOffset(0)
-    setCandidateFilters((current) => ({ ...current, position: job.position_code || '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'newest' }))
+    setCandidateFilters((current) => ({ ...current, position: job.position_code || '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: '', reviewStatus: '', activityFrom: '', activityTo: '', sort: 'newest' }))
     openPage('candidates')
   }
 
@@ -1477,31 +1487,108 @@ function App() {
     setQuery('')
     setStatus('')
     setCandidateOffset(0)
-    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'ready_for_review' }))
+    setCandidateFilters((current) => ({
+      ...current,
+      position: '',
+      cvStatus: '',
+      assessmentStatus: '',
+      interviewStatus: '',
+      followUp: '',
+      reviewStatus: 'ready',
+      activityFrom: '',
+      activityTo: '',
+      sort: 'ready_for_review',
+    }))
     openPage('candidates')
   }
 
   // "Follow up with candidates": apply the real follow-up filter so the table
-  // shows exactly the cohort the overview card counted, not just the capped
-  // 6-item queue at the top of the page.
+  // shows exactly the cohort the overview card counted (company-wide
+  // follow_up_needed applications).
   function viewFollowUpCandidates() {
     setQuery('')
     setStatus('')
     setCandidateOffset(0)
-    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: '', interviewStatus: '', followUp: 'needed', activityFrom: '', activityTo: '', sort: 'newest' }))
+    setCandidateFilters((current) => ({
+      ...current,
+      position: '',
+      cvStatus: '',
+      assessmentStatus: '',
+      interviewStatus: '',
+      followUp: 'needed',
+      reviewStatus: '',
+      activityFrom: '',
+      activityTo: '',
+      sort: 'newest',
+    }))
     openPage('candidates')
   }
 
-  // "Awaiting assessment": the Assessments page queue only ever shows the
-  // currently-loaded page of candidates. This lands HR on the exact same
-  // cohort the "pending" headline count reflects, in full, instead of a
-  // dead-end "open Candidates yourself" message.
+  // "Awaiting assessment": same cohort as action_counts.assessment_pending.
   function viewPendingAssessmentCandidates() {
     setQuery('')
     setStatus('')
     setCandidateOffset(0)
-    setCandidateFilters((current) => ({ ...current, position: '', cvStatus: '', assessmentStatus: 'awaiting', interviewStatus: '', followUp: '', activityFrom: '', activityTo: '', sort: 'newest' }))
+    setCandidateFilters((current) => ({
+      ...current,
+      position: '',
+      cvStatus: '',
+      assessmentStatus: 'awaiting',
+      interviewStatus: '',
+      followUp: '',
+      reviewStatus: '',
+      activityFrom: '',
+      activityTo: '',
+      sort: 'newest',
+    }))
     openPage('candidates')
+  }
+
+  function viewRolePriority(role?: PrehireRolePriority | null) {
+    if (!role?.position_code) {
+      openPage('ranking')
+      return
+    }
+    setRankPosition(role.position_code)
+    openPage('ranking')
+  }
+
+  function applyOverviewDestination(destination?: { page?: string; filters?: Record<string, string> } | null) {
+    if (!destination?.page) return
+    const filters = destination.filters || {}
+    if (destination.page === 'candidates') {
+      setQuery(filters.q || '')
+      setStatus('')
+      setCandidateOffset(0)
+      setCandidateFilters((current) => ({
+        ...current,
+        position: filters.position || '',
+        cvStatus: '',
+        assessmentStatus: filters.assessment_status || '',
+        interviewStatus: '',
+        followUp: filters.follow_up || '',
+        reviewStatus: filters.review_status || '',
+        activityFrom: '',
+        activityTo: '',
+        sort: filters.sort || 'newest',
+      }))
+      openPage('candidates')
+      return
+    }
+    if (destination.page === 'ranking') {
+      if (filters.position_code) setRankPosition(filters.position_code)
+      openPage('ranking')
+      return
+    }
+    if (destination.page === 'interviews') {
+      openPage('interviews')
+      return
+    }
+    if (destination.page === 'assessments') {
+      viewPendingAssessmentCandidates()
+      return
+    }
+    openPage(destination.page as Page)
   }
 
   function openCandidateByKey(appKey?: string) {
@@ -1818,19 +1905,31 @@ function App() {
               ) : null}
               {activePage === 'overview' && (
                 <OverviewPage
-                  applications={allApplications}
                   assessmentEnabled={assessmentModuleOn}
                   readyForReviewTotal={summary?.action_counts?.ready_for_review}
                   assessmentPendingTotal={summary?.action_counts?.assessment_pending}
-                  needsReview={needsReview}
-                  notificationIssues={notificationIssues}
+                  followUpNeededTotal={summary?.action_counts?.follow_up_needed}
+                  nextAction={summary?.next_action || null}
+                  rolePriority={summary?.role_priority || null}
+                  workQueue={workQueue}
+                  locale={recruitingLocale}
+                  onLocaleChange={(next) => {
+                    setRecruitingLocale(next)
+                    localStorage.setItem('wathefni_recruiting_locale', next)
+                  }}
                   onOpenCandidate={openCandidateByKey}
                   onOpenFollowUps={viewFollowUpCandidates}
-                  onOpenInterviews={() => openPage('interviews')}
-                  onOpenRanking={() => openPage('ranking')}
-                  onOpenAssessments={() => openPage('assessments')}
+                  onOpenPendingAssessments={viewPendingAssessmentCandidates}
                   onOpenReadyForReview={viewReadyForReviewCandidates}
+                  onOpenRolePriority={() => viewRolePriority(summary?.role_priority)}
+                  onOpenDestination={applyOverviewDestination}
                   onOpenRoleCandidates={viewJobCandidates}
+                  onViewAllQueue={() => {
+                    const action = summary?.next_action?.action
+                    if (action === 'follow_up_failed_delivery') viewFollowUpCandidates()
+                    else if (action === 'send_pending_assessments') viewPendingAssessmentCandidates()
+                    else viewReadyForReviewCandidates()
+                  }}
                   positions={allPositionsForSelectors}
                 />
               )}
@@ -2265,116 +2364,127 @@ const pageSubtitles: Record<Page, string> = {
 }
 
 function OverviewPage({
-  applications,
   assessmentEnabled,
   readyForReviewTotal,
   assessmentPendingTotal,
-  needsReview,
-  notificationIssues,
-  onOpenAssessments,
+  followUpNeededTotal,
+  nextAction,
+  rolePriority,
+  workQueue,
+  locale,
+  onLocaleChange,
   onOpenCandidate,
   onOpenFollowUps,
-  onOpenInterviews,
-  onOpenRanking,
+  onOpenPendingAssessments,
   onOpenReadyForReview,
+  onOpenRolePriority,
+  onOpenDestination,
   onOpenRoleCandidates,
+  onViewAllQueue,
   positions,
 }: {
-  applications: ApplicationSummary[]
   assessmentEnabled: boolean
   readyForReviewTotal?: number
   assessmentPendingTotal?: number
-  needsReview: OverviewQueueItem[]
-  notificationIssues: NotificationRow[]
-  onOpenAssessments: () => void
+  followUpNeededTotal?: number
+  nextAction?: PrehireNextAction | null
+  rolePriority?: PrehireRolePriority | null
+  workQueue?: PrehireWorkQueueResponse | null
+  locale: RecruitingLocale
+  onLocaleChange: (locale: RecruitingLocale) => void
   onOpenCandidate: (appKey?: string) => void
   onOpenFollowUps: () => void
-  onOpenInterviews: () => void
-  onOpenRanking: () => void
+  onOpenPendingAssessments: () => void
   onOpenReadyForReview: () => void
+  onOpenRolePriority: () => void
+  onOpenDestination: (destination?: { page?: string; filters?: Record<string, string> } | null) => void
   onOpenRoleCandidates: (job: PositionSummary) => void
+  onViewAllQueue: () => void
   positions: PositionSummary[]
 }) {
-  const interviewReady = applications.filter((application) => application.cv?.received && application.interview?.interview_type !== 'async_video')
-  const activeRoles = positions.filter((position) => Number(position.active_count || 0) > 0)
-  // Counts come from company-wide summary totals (full workspace), not the loaded
-  // candidate window; fall back to the loaded set only if totals are unavailable.
-  const reviewCount = typeof readyForReviewTotal === 'number' ? readyForReviewTotal : applications.filter(isReadyForReview).length
-  const assessmentCount = typeof assessmentPendingTotal === 'number' ? assessmentPendingTotal : (assessmentEnabled ? assessmentQueue(applications).length : 0)
-  const assessmentAction = {
-    label: 'Send pending assessments',
-    value: assessmentCount,
-    detail: assessmentCount
-      ? `${assessmentCount} candidate${assessmentCount === 1 ? '' : 's'} are ready for assessment.`
-      : 'No assessment sends are pending.',
-    icon: ClipboardCheck,
-    tone: assessmentCount ? ('warning' as const) : ('success' as const),
-    onClick: onOpenAssessments,
-  }
-  const interviewAction = {
-    label: 'Review interview next steps',
-    value: interviewReady.length,
-    detail: interviewReady.length
-      ? `${interviewReady.length} candidate${interviewReady.length === 1 ? '' : 's'} have enough profile information for an interview next step.`
-      : 'No interview next steps need attention.',
-    icon: CalendarCheck,
-    tone: interviewReady.length ? ('warning' as const) : ('success' as const),
-    onClick: onOpenInterviews,
-  }
+  const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
+  const reviewCount = typeof readyForReviewTotal === 'number' ? readyForReviewTotal : 0
+  const assessmentCount = typeof assessmentPendingTotal === 'number' ? assessmentPendingTotal : 0
+  const followUpCount = typeof followUpNeededTotal === 'number' ? followUpNeededTotal : 0
   const topActions = [
     {
-      label: 'Review ready candidates',
+      label: t('overviewReviewReady'),
       value: reviewCount,
-      detail: reviewCount
-        ? `${reviewCount} candidate${reviewCount === 1 ? '' : 's'} ready for an HR decision.`
-        : 'No candidates are waiting for HR review.',
+      detail: reviewCount ? t('overviewReviewReadyDetail', { count: reviewCount }) : t('overviewReviewReadyEmpty'),
       icon: UserCheck,
       tone: reviewCount ? ('warning' as const) : ('success' as const),
       onClick: onOpenReadyForReview,
     },
-    assessmentEnabled ? assessmentAction : interviewAction,
+    ...(assessmentEnabled
+      ? [
+          {
+            label: t('overviewSendAssessments'),
+            value: assessmentCount,
+            detail: assessmentCount
+              ? t('overviewSendAssessmentsDetail', { count: assessmentCount })
+              : t('overviewSendAssessmentsEmpty'),
+            icon: ClipboardCheck,
+            tone: assessmentCount ? ('warning' as const) : ('success' as const),
+            onClick: onOpenPendingAssessments,
+          },
+        ]
+      : []),
     {
-      label: 'Follow up with candidates',
-      value: notificationIssues.length,
-      detail: notificationIssues.length
-        ? `${notificationIssues.length} candidate${notificationIssues.length === 1 ? '' : 's'} need HR follow-up.`
-        : 'No candidate follow-ups need attention.',
+      label: t('overviewFollowUp'),
+      value: followUpCount,
+      detail: followUpCount ? t('overviewFollowUpDetail', { count: followUpCount }) : t('overviewFollowUpEmpty'),
       icon: Bell,
-      tone: notificationIssues.length ? ('danger' as const) : ('success' as const),
+      tone: followUpCount ? ('danger' as const) : ('success' as const),
       onClick: onOpenFollowUps,
     },
     {
-      label: 'Prioritize by role',
-      value: activeRoles.length,
-      detail: activeRoles.length ? 'Run ranking for the role you are hiring now.' : 'No active role demand found.',
+      label: rolePriority ? `${t('overviewPrioritizeRole')}: ${rolePriority.position_title}` : t('overviewPrioritizeRole'),
+      value: rolePriority ? Number(rolePriority.ready_count || 0) + Number(rolePriority.follow_up_count || 0) || rolePriority.priority : 0,
+      detail: rolePriority ? rolePriority.reason : t('overviewPrioritizeRoleEmpty'),
       icon: Medal,
-      tone: 'default' as const,
-      onClick: onOpenRanking,
+      tone: rolePriority ? ('warning' as const) : ('default' as const),
+      onClick: onOpenRolePriority,
     },
   ]
-  const nextAction = topActions.find((item) => item.value > 0) || topActions[0]
+  const heroLabel = nextAction?.reason || topActions.find((item) => item.value > 0)?.detail || t('overviewEmptyQueue')
+  const heroTitle = (() => {
+    const action = String(nextAction?.action || '')
+    if (action === 'follow_up_failed_delivery') return t('overviewFollowUp')
+    if (action === 'send_pending_assessments') return t('overviewSendAssessments')
+    if (action === 'ready_for_review') return t('overviewReviewReady')
+    if (action === 'prioritize_role') return rolePriority ? `${t('overviewPrioritizeRole')}: ${rolePriority.position_title}` : t('overviewPrioritizeRole')
+    if (action === 'interview_scheduling_debt') return locale === 'ar' ? 'جدولة المقابلات' : 'Schedule interviews'
+    return topActions.find((item) => item.value > 0)?.label || t('overviewNextAction')
+  })()
+  const queueItems = workQueue?.items || []
+  const queueTotal = Number(workQueue?.total || 0)
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <div className="flex justify-end">
+        <Button onClick={() => onLocaleChange(locale === 'ar' ? 'en' : 'ar')} type="button" variant="ghost">
+          {t('language')}
+        </Button>
+      </div>
       <section className="relative overflow-hidden rounded-3xl border border-line/80 bg-ink text-white shadow-soft">
         <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full bg-[#c89445]/10 blur-3xl" />
         <div className="p-6 lg:p-8">
-          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/45">Next best action</div>
-          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{nextAction.label}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{nextAction.detail}</p>
+          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/45">{t('overviewNextAction')}</div>
+          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] lg:text-4xl">{heroTitle}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{heroLabel}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-ink shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f4e7cf] hover:shadow-[0_16px_36px_rgba(0,0,0,0.25),0_0_0_1px_rgba(200,148,69,0.22)]"
-              onClick={nextAction.onClick}
+              onClick={() => onOpenDestination(nextAction?.destination)}
               type="button"
             >
-              Open work queue
+              {t('overviewOpenWorkQueue')}
             </button>
             <button
               className="inline-flex h-10 items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:bg-white/15"
-              onClick={onOpenRanking}
+              onClick={onOpenRolePriority}
               type="button"
             >
-              Check ranking
+              {t('overviewCheckRanking')}
             </button>
           </div>
         </div>
@@ -2382,8 +2492,8 @@ function OverviewPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>What needs attention today</CardTitle>
-          <CardDescription>Start with the hiring actions that move candidates forward.</CardDescription>
+          <CardTitle>{t('overviewNeedsAttention')}</CardTitle>
+          <CardDescription>{t('overviewNeedsAttentionDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {topActions.map((item) => (
@@ -2395,50 +2505,67 @@ function OverviewPage({
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Priority queue</CardTitle>
-            <CardDescription>Specific candidate actions, written as the next HR step.</CardDescription>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <CardTitle>{t('overviewTopPriorities')}</CardTitle>
+                <CardDescription>
+                  {t('overviewPriorityQueueDescription')}
+                  {queueTotal > 0 ? ` · ${queueTotal}` : ''}
+                </CardDescription>
+              </div>
+              {queueTotal > 5 ? (
+                <Button onClick={onViewAllQueue} type="button" variant="ghost">
+                  {t('overviewViewAll')}
+                </Button>
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {needsReview.slice(0, 5).map((item) => {
-              const clickable = Boolean(item.appKey)
+            {queueItems.slice(0, 5).map((item) => {
+              const clickable = Boolean(item.app_key)
               const body = (
                 <>
                   <div className="flex items-center justify-between gap-3">
-                    <div className="font-medium">{item.label}</div>
-                    {item.badge ? <Badge tone={item.tone}>{item.badge}</Badge> : <span className={`h-2.5 w-2.5 rounded-full ${item.tone === 'danger' ? 'bg-rose-500' : 'bg-amber-500'}`} />}
+                    <div className="font-medium">
+                      {item.candidate_name || item.position_title || item.app_key || item.action_type}
+                    </div>
+                    <Badge tone={item.action_type.includes('follow') ? 'danger' : 'warning'}>{item.priority}</Badge>
                   </div>
-                  <div className="mt-1 text-sm text-subtle">{item.detail}</div>
+                  <div className="mt-1 text-sm text-subtle">{item.reason}</div>
                 </>
               )
               return clickable ? (
                 <button
                   type="button"
-                  onClick={() => onOpenCandidate(item.appKey)}
+                  onClick={() => onOpenCandidate(item.app_key)}
                   className="block w-full rounded-3xl border border-white/70 bg-white/48 p-4 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:bg-panel/85 hover:shadow-soft"
-                  key={`${item.label}-${item.detail}`}
+                  key={`${item.action_type}-${item.app_key}`}
                 >
                   {body}
                 </button>
               ) : (
-                <div className="rounded-3xl border border-white/70 bg-white/48 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur" key={`${item.label}-${item.detail}`}>
+                <div
+                  className="rounded-3xl border border-white/70 bg-white/48 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_26px_rgba(24,20,15,0.045)] backdrop-blur"
+                  key={`${item.action_type}-${item.position_code || item.reason}`}
+                >
                   {body}
                 </div>
               )
             })}
-            {!needsReview.length ? <EmptyState text="No urgent hiring actions right now." /> : null}
+            {!queueItems.length ? <EmptyState text={t('overviewEmptyQueue')} /> : null}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Role next steps</CardTitle>
-            <CardDescription>What each opening needs from HR next.</CardDescription>
+            <CardTitle>{t('overviewRoleNextSteps')}</CardTitle>
+            <CardDescription>{t('overviewRoleNextStepsDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {positions.slice(0, 5).map((position) => (
               <RoleBottleneck assessmentEnabled={assessmentEnabled} job={position} key={position.position_code} onOpenCandidates={() => onOpenRoleCandidates(position)} />
             ))}
-            {!positions.length ? <EmptyState text="No active roles to analyze yet." /> : null}
+            {!positions.length ? <EmptyState text={t('overviewNoRoles')} /> : null}
           </CardContent>
         </Card>
       </div>
@@ -2453,6 +2580,7 @@ function candidateAdvancedFilterCount(filters: CandidateFilters) {
     filters.assessmentStatus,
     filters.interviewStatus,
     filters.followUp,
+    filters.reviewStatus,
     filters.activityFrom,
     filters.activityTo,
     filters.sort && filters.sort !== 'newest' ? filters.sort : '',
@@ -2514,6 +2642,7 @@ function CandidatesPage({
     assessmentStatus: '',
     interviewStatus: '',
     followUp: '',
+    reviewStatus: '',
     activityFrom: '',
     activityTo: '',
     sort: 'newest',
@@ -4854,6 +4983,9 @@ function ReportsPage({
           {assessmentEnabled ? <Info label="Assessment status" value={`${summary?.assessment_pending || 0} pending / ${summary?.assessment_completed || 0} completed`} /> : null}
           {interviewTotal ? <Info label="Interview status" value={`${summary?.interview_scheduled || 0} scheduled / ${summary?.interview_completed || 0} completed / ${summary?.interview_no_show || 0} no-show`} /> : null}
           <Info label="Follow-ups" value={`${summary?.followups || 0} candidates need contact`} />
+          {typeof summary?.followup_delivery_events === 'number' && summary.followup_delivery_events !== summary.followups ? (
+            <Info label="Failed delivery events" value={`${summary.followup_delivery_events} events`} />
+          ) : null}
         </CardContent>
       </Card>
 
@@ -6657,7 +6789,9 @@ function roleBottleneckLabel(job: PositionSummary, assessmentEnabled = true) {
   const top = sorted[0]
   if (!top || !Number(top.count || 0)) return 'No urgent action for this opening right now.'
   if (top.status === 'screening') return `Help ${top.count} candidate${top.count === 1 ? '' : 's'} finish screening.`
-  if (top.status === 'screening_complete' || top.status === 'review_pending') return `Review ${top.count} candidate${top.count === 1 ? '' : 's'} and decide who moves forward.`
+  if (top.status === 'screening_complete' || top.status === 'review_pending' || top.status === 'ready_for_review') {
+    return `Review ${top.count} candidate${top.count === 1 ? '' : 's'} and decide who moves forward.`
+  }
   if (top.status === 'shortlisted') {
     return assessmentEnabled
       ? `Plan interviews or assessments for ${top.count} shortlisted candidate${top.count === 1 ? '' : 's'}.`

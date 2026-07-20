@@ -51,7 +51,9 @@ import type {
   PosthireShiftsResponse,
   PositionsResponse,
   PositionSummary,
+  PrehireNextAction,
   PrehireReportsResponse,
+  PrehireWorkQueueResponse,
   Product2AuthoringStatus,
   Product2Blueprint,
   Product2BlueprintInput,
@@ -217,6 +219,17 @@ export function getSummary(access: DashboardAccess) {
   return request<SummaryResponse>('/dashboard/prehire/summary', access)
 }
 
+export function getPrehireWorkQueue(access: DashboardAccess, params: { limit?: number; cursor?: string } = {}) {
+  const search = new URLSearchParams()
+  search.set('limit', String(params.limit || 25))
+  if (params.cursor) search.set('cursor', params.cursor)
+  return request<PrehireWorkQueueResponse>(`/dashboard/prehire/overview/work-queue?${search.toString()}`, access)
+}
+
+export function getPrehireNextAction(access: DashboardAccess) {
+  return request<PrehireNextAction>(`/dashboard/prehire/overview/next-action`, access)
+}
+
 export function getDashboardBootstrap(access: DashboardAccess) {
   return request<DashboardBootstrapResponse>('/dashboard/bootstrap', access)
 }
@@ -332,6 +345,7 @@ export function getApplications(
     assessment_status?: string
     interview_status?: string
     follow_up?: string
+    review_status?: string
     activity_from?: string
     activity_to?: string
     sort?: string
@@ -349,6 +363,7 @@ export function getApplications(
   if (params.assessment_status) search.set('assessment_status', params.assessment_status)
   if (params.interview_status) search.set('interview_status', params.interview_status)
   if (params.follow_up) search.set('follow_up', params.follow_up)
+  if (params.review_status) search.set('review_status', params.review_status)
   if (params.activity_from) search.set('activity_from', params.activity_from)
   if (params.activity_to) search.set('activity_to', params.activity_to)
   if (params.sort) search.set('sort', params.sort)

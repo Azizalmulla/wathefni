@@ -2118,6 +2118,97 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
         )
 
     if (recruiting_features.get("candidate_rankings") or {}).get("enabled"):
+        # Shared pre-hire priorities contract (same action_counts / next_action
+        # authority as desktop Overview and Admin Assistant tools).
+        try:
+            overview = app_mod._prehire_overview.build_overview_authority(
+                company=str(context.get("company_code") or ""),
+                db_connect=app_mod.db_connect,
+                get_company_settings=app_mod.get_company_settings,
+                assessments_enabled=bool(
+                    (recruiting_features.get("assessments") or {}).get("enabled")
+                    if isinstance(recruiting_features.get("assessments"), dict)
+                    else app_mod.company_has_module(context.get("company_code"), "assessments")
+                ),
+                interviews_enabled=True,
+            )
+            counts = overview.get("action_counts") or {}
+            next_action = overview.get("next_action") or {}
+            role = overview.get("role_priority")
+            prehire_items: list[dict[str, Any]] = []
+            if int(counts.get("follow_up_needed") or 0):
+                prehire_items.append(
+                    {
+                        "type": "prehire_follow_up",
+                        "target_id": "follow_up_needed",
+                        "summary": f"{counts['follow_up_needed']} candidates need follow-up",
+                        "status": "follow_up_needed",
+                        "timestamp": overview.get("as_of"),
+                        "due_context": {"total": counts["follow_up_needed"]},
+                        "permitted_actions": [],
+                        "destination": "/candidates?follow_up=needed",
+                        "severity": "high",
+                        "authority_source": "prehire_overview.follow_up_needed",
+                    }
+                )
+            if int(counts.get("ready_for_review") or 0):
+                prehire_items.append(
+                    {
+                        "type": "prehire_ready_for_review",
+                        "target_id": "ready_for_review",
+                        "summary": f"{counts['ready_for_review']} candidates ready for review",
+                        "status": "ready_for_review",
+                        "timestamp": overview.get("as_of"),
+                        "due_context": {"total": counts["ready_for_review"]},
+                        "permitted_actions": [],
+                        "destination": "/candidates?review_status=ready",
+                        "severity": "high" if str(next_action.get("action")) == "ready_for_review" else None,
+                        "authority_source": "prehire_overview.ready_for_review",
+                    }
+                )
+            if int(counts.get("assessment_pending") or 0):
+                prehire_items.append(
+                    {
+                        "type": "prehire_assessment_pending",
+                        "target_id": "assessment_pending",
+                        "summary": f"{counts['assessment_pending']} candidates awaiting assessment",
+                        "status": "assessment_pending",
+                        "timestamp": overview.get("as_of"),
+                        "due_context": {"total": counts["assessment_pending"]},
+                        "permitted_actions": [],
+                        "destination": "/candidates?assessment_status=awaiting",
+                        "severity": None,
+                        "authority_source": "prehire_overview.assessment_pending",
+                    }
+                )
+            if role:
+                prehire_items.append(
+                    {
+                        "type": "prehire_role_priority",
+                        "target_id": role.get("position_code"),
+                        "summary": f"{role.get('position_title')}: {role.get('reason')}",
+                        "status": "role_priority",
+                        "timestamp": overview.get("as_of"),
+                        "due_context": {"priority": role.get("priority")},
+                        "permitted_actions": [],
+                        "destination": f"/ranking?position={role.get('position_code')}",
+                        "severity": None,
+                        "authority_source": "prehire_overview.role_priority",
+                    }
+                )
+            sections.append(
+                {
+                    "type": "prehire_priorities",
+                    "title": "Hiring priorities",
+                    "total": sum(int(counts.get(k) or 0) for k in ("follow_up_needed", "ready_for_review", "assessment_pending")),
+                    "items": prehire_items[:max_items],
+                    "action_counts": counts,
+                    "next_action": next_action,
+                    "authority_source": "prehire_overview",
+                }
+            )
+        except Exception:
+            pass
         candidates = mobile_candidate_rankings(app_mod, context, limit=max_items)
         decision_items = [
             item for item in candidates["items"] if item.get("allowed_actions")

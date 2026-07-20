@@ -4112,6 +4112,144 @@ register(
 )
 
 
+def _get_prehire_action_counts_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    company_code = _resolve_company_code(legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "get_prehire_action_counts",
+            "success": False,
+            "status": "failed",
+            "error": "company_required",
+            "message": "I need a company context before reading Overview counts.",
+        }
+    counts = legacy.prehire_action_counts(company_code)
+    return {
+        "action_type": "get_prehire_action_counts",
+        "success": True,
+        "status": "ok",
+        "message": (
+            f"{counts.get('ready_for_review', 0)} ready for review, "
+            f"{counts.get('assessment_pending', 0)} awaiting assessment, "
+            f"{counts.get('follow_up_needed', 0)} need follow-up."
+        ),
+        "company_code": company_code,
+        "action_counts": legacy.json_safe(counts),
+        "authority_source": "prehire_overview.action_counts",
+    }
+
+
+def _get_prehire_priorities_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    company_code = _resolve_company_code(legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "get_prehire_priorities",
+            "success": False,
+            "status": "failed",
+            "error": "company_required",
+            "message": "I need a company context before reading Overview priorities.",
+        }
+    overview = legacy._prehire_overview.build_overview_authority(
+        company=company_code,
+        db_connect=legacy.db_connect,
+        get_company_settings=legacy.get_company_settings,
+        assessments_enabled=legacy.company_has_module(company_code, "assessments"),
+        interviews_enabled=True,
+    )
+    return {
+        "action_type": "get_prehire_priorities",
+        "success": True,
+        "status": "ok",
+        "message": str((overview.get("next_action") or {}).get("reason") or "No urgent hiring priorities."),
+        "company_code": company_code,
+        "action_counts": legacy.json_safe(overview.get("action_counts")),
+        "next_action": legacy.json_safe(overview.get("next_action")),
+        "role_priority": legacy.json_safe(overview.get("role_priority")),
+        "definitions": legacy.json_safe(overview.get("definitions")),
+        "as_of": overview.get("as_of"),
+        "authority_source": "prehire_overview",
+    }
+
+
+def _get_prehire_work_queue_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    company_code = _resolve_company_code(legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "get_prehire_work_queue",
+            "success": False,
+            "status": "failed",
+            "error": "company_required",
+            "message": "I need a company context before reading the Overview work queue.",
+        }
+    limit = int(ctx.action.get("limit") or 25)
+    cursor = str(ctx.action.get("cursor") or "").strip() or None
+    payload = legacy._prehire_overview.compute_work_queue(
+        company=company_code,
+        db_connect=legacy.db_connect,
+        assessments_enabled=legacy.company_has_module(company_code, "assessments"),
+        interviews_enabled=True,
+        settings=legacy.get_company_settings(company_code),
+        limit=limit,
+        cursor=cursor,
+    )
+    return {
+        "action_type": "get_prehire_work_queue",
+        "success": True,
+        "status": "ok",
+        "message": f"{payload.get('total', 0)} prioritized hiring actions.",
+        "company_code": company_code,
+        **legacy.json_safe(payload),
+    }
+
+
+register(
+    ActionSpec(
+        name="get_prehire_action_counts",
+        description="Return canonical company-wide Overview action counts: ready_for_review, assessment_pending, follow_up_needed. Read-only backend facts — do not recalculate.",
+        entity_type=None,
+        required_fields=(),
+        optional_fields=(),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_get_prehire_action_counts_executor,
+        result_keys=("action_type", "success", "status", "message", "action_counts", "authority_source"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="get_prehire_priorities",
+        description="Return canonical Overview priorities: action_counts, suggested next_action with reason, and role_priority. Read-only backend facts.",
+        entity_type=None,
+        required_fields=(),
+        optional_fields=(),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_get_prehire_priorities_executor,
+        result_keys=("action_type", "success", "status", "message", "action_counts", "next_action", "role_priority", "authority_source"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="get_prehire_work_queue",
+        description="Return the company-wide prioritized pre-hiring work queue with cursor pagination. Read-only backend facts.",
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("limit", "cursor"),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_get_prehire_work_queue_executor,
+        result_keys=("action_type", "success", "status", "message", "total", "items", "next_cursor", "authority_source"),
+        sensitive=False,
+    )
+)
+
+
 # ---------------------------------------------------------------------------
 # Leave management (post-hire pilot)
 #

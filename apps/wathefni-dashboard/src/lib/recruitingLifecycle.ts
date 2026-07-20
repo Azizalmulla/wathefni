@@ -146,6 +146,31 @@ const COPY = {
     open: 'Open',
     candidateContacted: 'Candidate contacted',
     currentStage: 'Current stage',
+    // Overview / Control Center
+    overviewNextAction: 'Suggested next action',
+    overviewOpenWorkQueue: 'Open work queue',
+    overviewCheckRanking: 'Check ranking',
+    overviewNeedsAttention: 'What needs attention today',
+    overviewNeedsAttentionDescription: 'Start with the hiring actions that move candidates forward.',
+    overviewReviewReady: 'Review ready candidates',
+    overviewReviewReadyDetail: '{count} candidates ready for an HR decision.',
+    overviewReviewReadyEmpty: 'No candidates are waiting for HR review.',
+    overviewSendAssessments: 'Send pending assessments',
+    overviewSendAssessmentsDetail: '{count} candidates are ready for assessment.',
+    overviewSendAssessmentsEmpty: 'No assessment sends are pending.',
+    overviewFollowUp: 'Follow up with candidates',
+    overviewFollowUpDetail: '{count} candidates need HR follow-up.',
+    overviewFollowUpEmpty: 'No candidate follow-ups need attention.',
+    overviewPrioritizeRole: 'Prioritize by role',
+    overviewPrioritizeRoleEmpty: 'No role needs priority attention right now.',
+    overviewPriorityQueue: 'Priority queue',
+    overviewPriorityQueueDescription: 'Company-wide next HR steps, ranked by urgency.',
+    overviewTopPriorities: 'Top priorities',
+    overviewViewAll: 'View all',
+    overviewRoleNextSteps: 'Role next steps',
+    overviewRoleNextStepsDescription: 'What each opening needs from HR next.',
+    overviewEmptyQueue: 'No urgent hiring actions right now.',
+    overviewNoRoles: 'No active roles to analyze yet.',
   },
   ar: {
     language: 'English',
@@ -190,13 +215,43 @@ const COPY = {
     open: 'فتح',
     candidateContacted: 'تم التواصل مع المرشح',
     currentStage: 'المرحلة الحالية',
+    overviewNextAction: 'الإجراء التالي المقترح',
+    overviewOpenWorkQueue: 'فتح قائمة العمل',
+    overviewCheckRanking: 'عرض الترتيب',
+    overviewNeedsAttention: 'ما يحتاج انتباهك اليوم',
+    overviewNeedsAttentionDescription: 'ابدأ بإجراءات التوظيف التي تحرّك المرشحين إلى الأمام.',
+    overviewReviewReady: 'مراجعة المرشحين الجاهزين',
+    overviewReviewReadyDetail: '{count} مرشحون جاهزون لقرار الموارد البشرية.',
+    overviewReviewReadyEmpty: 'لا يوجد مرشحون بانتظار المراجعة.',
+    overviewSendAssessments: 'إرسال التقييمات المعلقة',
+    overviewSendAssessmentsDetail: '{count} مرشحون جاهزون للتقييم.',
+    overviewSendAssessmentsEmpty: 'لا توجد تقييمات معلّقة للإرسال.',
+    overviewFollowUp: 'متابعة المرشحين',
+    overviewFollowUpDetail: '{count} مرشحون يحتاجون متابعة من الموارد البشرية.',
+    overviewFollowUpEmpty: 'لا توجد متابعات تحتاج انتباهًا.',
+    overviewPrioritizeRole: 'أولوية حسب الوظيفة',
+    overviewPrioritizeRoleEmpty: 'لا توجد وظيفة تحتاج أولوية الآن.',
+    overviewPriorityQueue: 'قائمة الأولويات',
+    overviewPriorityQueueDescription: 'خطوات الموارد البشرية التالية على مستوى الشركة، مرتبة حسب الإلحاح.',
+    overviewTopPriorities: 'أعلى الأولويات',
+    overviewViewAll: 'عرض الكل',
+    overviewRoleNextSteps: 'الخطوات التالية للوظائف',
+    overviewRoleNextStepsDescription: 'ما تحتاجه كل وظيفة من الموارد البشرية تاليًا.',
+    overviewEmptyQueue: 'لا توجد إجراءات توظيف عاجلة الآن.',
+    overviewNoRoles: 'لا توجد وظائف نشطة للتحليل بعد.',
   },
 } as const
 
 export type RecruitingCopyKey = keyof (typeof COPY)['en']
 
-export function recruitingCopy(locale: RecruitingLocale, key: RecruitingCopyKey): string {
-  return COPY[locale][key]
+export function recruitingCopy(locale: RecruitingLocale, key: RecruitingCopyKey, vars?: Record<string, string | number>): string {
+  let text: string = COPY[locale][key]
+  if (vars) {
+    for (const [name, value] of Object.entries(vars)) {
+      text = text.replace(`{${name}}`, String(value))
+    }
+  }
+  return text
 }
 
 export function canonicalStage(value: string | null | undefined): CanonicalApplicationStage | null {

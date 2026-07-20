@@ -44,9 +44,16 @@ fi
 
 # 1) HTTP checks against the staging server
 h=$(code "$BASE/health"); [ "$h" = "200" ] || fail "health=$h"; log "health 200"
-for path in /dashboard/auth/me /dashboard/prehire/summary /dashboard/team /dashboard/prehire/import/batches /dashboard/posthire/compliance /dashboard/posthire/attendance /dashboard/posthire/payroll; do
+for path in /dashboard/auth/me /dashboard/prehire/summary /dashboard/prehire/overview/next-action /dashboard/prehire/overview/work-queue /dashboard/team /dashboard/prehire/import/batches /dashboard/posthire/compliance /dashboard/posthire/attendance /dashboard/posthire/payroll; do
   c=$(code "${AUTH[@]}" "$BASE$path"); [ "$c" = "200" ] || fail "$path=$c"; log "$path 200"
 done
+
+log "prehire overview remediation invariants"
+WATHEFNI_STAGING_BASE="$BASE" WATHEFNI_STAGING_TOKEN="$TOKEN" WATHEFNI_STAGING_COMPANY=WATHEFNI \
+  "$VENV_PY" "$STAGING_ORCH/smoke-test-prehire-overview-remediation.py" | sed 's/^/    /'
+
+log "prehire overview unit predicates"
+"$VENV_PY" "$STAGING_ORCH/smoke-test-prehire-overview-unit.py" | sed 's/^/    /'
 
 # Regression guard: post-hire reads must require auth. Their @app.get decorator must
 # sit on the real handler (with Depends(dashboard_context)), not on a helper defined

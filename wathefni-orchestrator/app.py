@@ -80,6 +80,7 @@ import candidate_messages as _candidate_messages  # noqa: E402
 import candidate_semantic_router as _candidate_semantic_router  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
+import prehire_overview as _prehire_overview  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
 
 logger = logging.getLogger("wathefni")
@@ -44035,6 +44036,7 @@ def prehire_applications_query(
     assessment_status: str | None = None,
     interview_status: str | None = None,
     follow_up: str | None = None,
+    review_status: str | None = None,
     activity_from: str | None = None,
     activity_to: str | None = None,
     sort: str | None = None,
@@ -44066,14 +44068,12 @@ def prehire_applications_query(
         if assessment_status == "none":
             where.append("COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '') = ''")
         elif assessment_status == "awaiting":
-            # Matches the exact "assessment_pending" definition used for the
-            # headline count (prehire_action_counts) and the Assessments page
-            # queue: candidate is in a stage ready for assessment, and the
-            # assessment itself is not sent yet or sent but not started. Keeps
-            # the "N pending" number and this filter in agreement.
+            # Canonical with prehire_overview.assessment_pending / Overview card.
             where.append(
-                "a.status IN ('screening_complete','review_pending','ready_for_review','shortlisted') "
-                "AND COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '') IN ('', 'pending')"
+                _prehire_overview.assessment_pending_predicate(
+                    "a",
+                    assessment_status_expr="COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '')",
+                )
             )
         else:
             where.append("COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status')=%s")
@@ -44085,18 +44085,11 @@ def prehire_applications_query(
             where.append("latest_interview.interview_status=%s")
             params.append(interview_status)
     if str(follow_up or "").strip().lower() in {"1", "true", "yes", "needed"}:
-        where.append(
-            """
-            EXISTS (
-              SELECT 1
-              FROM outbound_delivery_events ode
-              WHERE ode.subject_key=a.app_key
-                AND COALESCE(ode.status, '') NOT IN ('sent','recovered')
-                AND ode.recovered_at IS NULL
-                AND (ode.status='failed' OR ode.last_error IS NOT NULL)
-            )
-            """
-        )
+        # Canonical with prehire_overview.follow_up_needed / Overview follow-up card.
+        where.append(_prehire_overview.follow_up_needed_exists("a"))
+    if str(review_status or "").strip().lower() in {"ready", "ready_for_review", "needed"}:
+        # Canonical with prehire_overview.ready_for_review / Overview review card.
+        where.append(_prehire_overview.ready_for_review_predicate("a"))
     if activity_from:
         where.append("COALESCE(a.updated_at, a.ingested_at) >= %s::date")
         params.append(activity_from)
@@ -44638,47 +44631,21 @@ def dashboard_assessment_config_payload(company: str) -> dict[str, Any]:
 
 
 def prehire_action_counts(company: str) -> dict[str, int]:
-    """Company-wide counts for the Overview / Assessments summary cards.
+    """Company-wide Overview / Reports headline counts (canonical).
 
-    These intentionally mirror the dashboard's client-side predicates exactly, so the
-    headline numbers match the page/table definitions they summarize:
-      - ready_for_review   -> isReadyForReview(): status IN (screening_complete, review_pending)
-      - assessment_pending -> assessmentQueue(): assessment not sent/empty or pending,
-        AND status IN (screening_complete, review_pending, shortlisted)
-    Scoped to one company's reviewable production applications (CV received) so the total
-    reflects the whole workspace, not just the first page of loaded candidates.
+    Authority: prehire_overview.compute_action_counts
+      - ready_for_review  — distinct reviewable apps in screening_complete|
+        review_pending|ready_for_review (equals Candidates review_status=ready)
+      - assessment_pending — reviewable apps awaiting assessment send
+        (equals Candidates assessment_status=awaiting)
+      - follow_up_needed — distinct reviewable apps with failed delivery
+        (equals Candidates follow_up=needed). Counts applications, not events.
     """
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT
-                  COUNT(*) FILTER (
-                    WHERE a.status IN ('screening_complete','review_pending','ready_for_review')
-                  ) AS ready_for_review,
-                  COUNT(*) FILTER (
-                    WHERE a.status IN ('screening_complete','review_pending','ready_for_review','shortlisted')
-                      AND COALESCE(la.assessment_status, a.raw_json->'assessment'->>'status', '') IN ('', 'pending')
-                  ) AS assessment_pending
-                FROM applications a
-                LEFT JOIN LATERAL (
-                  SELECT aa.status AS assessment_status
-                  FROM assessment_attempts aa
-                  WHERE aa.company_code=a.company_code AND aa.app_key=a.app_key
-                  ORDER BY aa.updated_at DESC, aa.created_at DESC
-                  LIMIT 1
-                ) la ON TRUE
-                WHERE a.company_code=%s
-                  AND COALESCE(a.data_source, a.raw_json->>'data_source', 'production')='production'
-                  AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                """,
-                (company,),
-            )
-            row = cur.fetchone() or {}
-    return {
-        "ready_for_review": int(row.get("ready_for_review") or 0),
-        "assessment_pending": int(row.get("assessment_pending") or 0),
-    }
+    return _prehire_overview.compute_action_counts(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=company_has_module(company, "assessments"),
+    )
 
 
 @app.get("/dashboard/prehire/summary")
@@ -44726,6 +44693,13 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
         permissions=context.get("permissions") or [],
     )
     positions = dashboard_prehire_positions_payload(company, limit=25)
+    overview = _prehire_overview.build_overview_authority(
+        company=company,
+        db_connect=db_connect,
+        get_company_settings=get_company_settings,
+        assessments_enabled=assessments_enabled,
+        interviews_enabled=("interviews" in enabled_modules) or True,
+    )
     return {
         "company_code": company,
         "module": "pre_hiring",
@@ -44735,10 +44709,50 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
             "assessments_enabled": assessments_enabled,
         },
         "totals": totals,
-        "action_counts": prehire_action_counts(company),
+        "action_counts": overview["action_counts"],
+        "next_action": overview["next_action"],
+        "role_priority": overview["role_priority"],
+        "definitions": overview["definitions"],
+        "overview_as_of": overview["as_of"],
         "status_counts": status_counts,
         "positions": positions,
         "recent_applications": recent["applications"],
+    }
+
+
+@app.get("/dashboard/prehire/overview/work-queue")
+def dashboard_prehire_work_queue(
+    limit: int = Query(default=25, ge=1, le=100),
+    cursor: str | None = None,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = context["company_code"]
+    enabled_modules = sorted(configured_company_modules(company))
+    return _prehire_overview.compute_work_queue(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled="assessments" in enabled_modules,
+        interviews_enabled=("interviews" in enabled_modules) or True,
+        settings=get_company_settings(company),
+        limit=limit,
+        cursor=(cursor or "").strip() or None,
+    )
+
+
+@app.get("/dashboard/prehire/overview/next-action")
+def dashboard_prehire_next_action(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    company = context["company_code"]
+    enabled_modules = sorted(configured_company_modules(company))
+    return {
+        "company_code": company,
+        "ok": True,
+        **_prehire_overview.compute_next_action(
+            company=company,
+            db_connect=db_connect,
+            assessments_enabled="assessments" in enabled_modules,
+            interviews_enabled=("interviews" in enabled_modules) or True,
+            settings=get_company_settings(company),
+        ),
     }
 
 
@@ -44822,6 +44836,7 @@ def dashboard_prehire_applications(
     assessment_status: str | None = None,
     interview_status: str | None = None,
     follow_up: str | None = None,
+    review_status: str | None = None,
     activity_from: str | None = None,
     activity_to: str | None = None,
     sort: str | None = None,
@@ -44843,6 +44858,7 @@ def dashboard_prehire_applications(
             assessment_status=(assessment_status or "").strip() or None,
             interview_status=(interview_status or "").strip() or None,
             follow_up=(follow_up or "").strip() or None,
+            review_status=(review_status or "").strip() or None,
             activity_from=(activity_from or "").strip() or None,
             activity_to=(activity_to or "").strip() or None,
             sort=(sort or "").strip() or None,
@@ -46384,7 +46400,7 @@ def prehire_report_summary_payload(company: str) -> dict[str, Any]:
                        OR a.raw_json->'screening'->>'status'='complete'
                        OR a.status IN ('screening_complete','review_pending','shortlisted','interview','hired')
                   ) AS screening_complete,
-                  COUNT(*) FILTER (WHERE a.status IN ('screening_complete','review_pending')) AS ready_for_review
+                  COUNT(*) FILTER (WHERE {_prehire_overview.ready_for_review_predicate("a")}) AS ready_for_review
                 FROM applications a
                 WHERE a.company_code=%s AND {reviewable}
                 """,
@@ -46476,9 +46492,15 @@ def prehire_report_summary_payload(company: str) -> dict[str, Any]:
                 """,
                 (company,),
             )
-            followup_counts = [{"label": row["label"], "count": int(row["count"] or 0)} for row in cur.fetchall()]
+            followup_event_counts = [{"label": row["label"], "count": int(row["count"] or 0)} for row in cur.fetchall()]
 
-    assessment_pending = sum(item["count"] for item in assessment_counts if item["label"] not in {"completed", "expired", "cancelled"})
+            # Canonical headline counts (same as Overview action_counts).
+            action_counts = _prehire_overview.compute_action_counts(
+                company=company,
+                db_connect=db_connect,
+                assessments_enabled=company_has_module(company, "assessments"),
+            )
+
     assessment_completed = sum(item["count"] for item in assessment_counts if item["label"] == "completed")
     scheduled_interviews = sum(item["count"] for item in interview_counts if item["label"] in {"scheduled", "rescheduled"})
     completed_interviews = sum(item["count"] for item in interview_counts if item["label"] == "completed")
@@ -46491,27 +46513,30 @@ def prehire_report_summary_payload(company: str) -> dict[str, Any]:
             "role_rows": role_total,
             "assessment_rows": sum(item["count"] for item in assessment_counts),
             "interview_rows": sum(item["count"] for item in interview_counts),
-            "followup_rows": sum(item["count"] for item in followup_counts),
+            "followup_rows": sum(item["count"] for item in followup_event_counts),
         },
         "summary": {
             "cv_received": int(cv.get("received") or 0),
             "cv_missing": int(cv.get("missing") or 0),
             "screening_complete": int(progress.get("screening_complete") or 0),
-            "ready_for_review": int(progress.get("ready_for_review") or 0),
-            "assessment_pending": assessment_pending,
+            "ready_for_review": int(action_counts.get("ready_for_review") or 0),
+            "assessment_pending": int(action_counts.get("assessment_pending") or 0),
             "assessment_completed": assessment_completed,
             "interview_scheduled": scheduled_interviews,
             "interview_completed": completed_interviews,
             "interview_no_show": no_show_interviews,
-            "followups": sum(item["count"] for item in followup_counts),
+            # Distinct applications needing follow-up (not delivery event rows).
+            "followups": int(action_counts.get("follow_up_needed") or 0),
+            "followup_delivery_events": sum(item["count"] for item in followup_event_counts),
         },
         "breakdowns": {
             "applications_by_stage": stage_counts,
             "candidates_by_role": role_counts,
             "assessment_status": assessment_counts,
             "interview_status": interview_counts,
-            "followups_by_type": followup_counts,
+            "followups_by_type": followup_event_counts,
         },
+        "action_counts": action_counts,
     }
 
 
@@ -46571,7 +46596,7 @@ def prehire_report_export_rows(company: str, report_type: str):
                 COALESCE(MAX(a.position_title), a.position_code) AS position_title,
                 COUNT(*) AS application_count,
                 COUNT(*) FILTER (WHERE a.status NOT IN ('hired','rejected')) AS active_count,
-                COUNT(*) FILTER (WHERE a.status IN ('screening_complete','review_pending')) AS ready_for_review,
+                COUNT(*) FILTER (WHERE {_prehire_overview.ready_for_review_predicate("a")}) AS ready_for_review,
                 MAX(a.updated_at) AS latest_application_at
               FROM applications a
               WHERE a.company_code=%s AND {reviewable}
