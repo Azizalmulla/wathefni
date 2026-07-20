@@ -230,8 +230,16 @@ def main() -> None:
     # Vacancy math: remaining = vacancies - hired
     with orch.db_connect() as conn:
         with conn.cursor() as cur:
-            phone = f"+9650000{suffix[:6]}"
+            phone = f"9650000{suffix[:6]}"
             app_key = f"smoke-{suffix}"
+            cur.execute(
+                """
+                INSERT INTO candidates (phone, name, updated_at)
+                VALUES (%s, %s, now())
+                ON CONFLICT (phone) DO UPDATE SET name=EXCLUDED.name
+                """,
+                (phone, f"Smoke Hire {suffix}"),
+            )
             cur.execute(
                 """
                 INSERT INTO applications (
