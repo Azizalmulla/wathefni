@@ -296,13 +296,19 @@ export function JobsForm({
           <Field label={t('jobsFieldStartDate')}>
             <input className={inputClass} onChange={(e) => setField('expected_start_date', e.target.value)} type="date" value={values.expected_start_date} />
           </Field>
-          <Field label={t('jobsFieldRecruiter')}>
-            <input className={inputClass} onChange={(e) => setField('recruiter_user_id', e.target.value)} value={values.recruiter_user_id} />
-          </Field>
-          <Field label={t('jobsFieldHiringManager')}>
-            <input className={inputClass} onChange={(e) => setField('hiring_manager_user_id', e.target.value)} value={values.hiring_manager_user_id} />
-          </Field>
         </div>
+
+        <details className="mt-4 rounded-2xl border border-line bg-panel-muted/40 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-text">{t('jobsOwnershipOptional')}</summary>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <Field label={t('jobsFieldRecruiter')}>
+              <input className={inputClass} onChange={(e) => setField('recruiter_user_id', e.target.value)} placeholder={t('jobsOwnershipHint')} value={values.recruiter_user_id} />
+            </Field>
+            <Field label={t('jobsFieldHiringManager')}>
+              <input className={inputClass} onChange={(e) => setField('hiring_manager_user_id', e.target.value)} placeholder={t('jobsOwnershipHint')} value={values.hiring_manager_user_id} />
+            </Field>
+          </div>
+        </details>
 
         <div className="mt-4 grid gap-4">
           <Field label={t('jobsFieldDescriptionEn')}>
@@ -332,7 +338,7 @@ export function JobsForm({
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-line pt-4">
+        <div className="sticky bottom-0 mt-6 flex flex-wrap gap-2 border-t border-line bg-panel/95 py-4 backdrop-blur">
           <Button disabled={busy} onClick={() => setPreview((value) => !value)} type="button" variant="secondary">
             {preview ? t('jobsHidePreview') : t('jobsPreview')}
           </Button>

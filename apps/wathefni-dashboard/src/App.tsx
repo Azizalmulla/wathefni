@@ -24,7 +24,6 @@ import {
   PauseCircle,
   Pencil,
   Plus,
-  QrCode,
   RefreshCw,
   Search,
   Send,
@@ -812,24 +811,40 @@ function App() {
       const prompts: Record<string, { title: string; body: string; confirmLabel: string; destructive?: boolean }> = {
         closed: {
           title: recruitingCopy(recruitingLocale, 'jobsCloseConfirm'),
-          body: Number(job.active_count || 0) > 0
-            ? `${title}: ${job.active_count} active candidate(s) stay in the pipeline.`
-            : String(title),
+          body: [
+            String(title),
+            recruitingCopy(recruitingLocale, 'jobsCloseConfirmBody'),
+            Number(job.active_count || 0) > 0
+              ? recruitingCopy(recruitingLocale, 'jobsCloseConfirmActive', { count: String(job.active_count) })
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' '),
           confirmLabel: recruitingCopy(recruitingLocale, 'jobsClose'),
           destructive: true,
         },
         paused: {
           title: recruitingCopy(recruitingLocale, 'jobsPauseConfirm'),
-          body: String(title),
+          body: `${title}. ${recruitingCopy(recruitingLocale, 'jobsPauseConfirmBody')}`,
           confirmLabel: recruitingCopy(recruitingLocale, 'jobsPause'),
         },
         open: {
           title: normalizedJobStatus(job) === 'paused'
             ? recruitingCopy(recruitingLocale, 'jobsResumeConfirm')
+            : normalizedJobStatus(job) === 'draft'
+            ? recruitingCopy(recruitingLocale, 'jobsPublishConfirm')
             : recruitingCopy(recruitingLocale, 'jobsReopenConfirm'),
-          body: String(title),
+          body: `${title}. ${
+            normalizedJobStatus(job) === 'paused'
+              ? recruitingCopy(recruitingLocale, 'jobsResumeConfirmBody')
+              : normalizedJobStatus(job) === 'draft'
+              ? recruitingCopy(recruitingLocale, 'jobsPublishConfirmBody')
+              : recruitingCopy(recruitingLocale, 'jobsReopenConfirmBody')
+          }`,
           confirmLabel: normalizedJobStatus(job) === 'paused'
             ? recruitingCopy(recruitingLocale, 'jobsResume')
+            : normalizedJobStatus(job) === 'draft'
+            ? recruitingCopy(recruitingLocale, 'jobsPublish')
             : recruitingCopy(recruitingLocale, 'jobsReopen'),
         },
       }
@@ -875,6 +890,15 @@ function App() {
 
   const saveJobForm = useCallback(
     async (values: JobFormValues, opts: { publish?: boolean; draft?: boolean }) => {
+      if (opts.publish) {
+        const title = String(values.title || values.title_ar || values.position_code || 'this job')
+        const ok = await confirm({
+          title: recruitingCopy(recruitingLocale, 'jobsPublishConfirm'),
+          body: `${title}. ${recruitingCopy(recruitingLocale, 'jobsPublishConfirmBody')}`,
+          confirmLabel: recruitingCopy(recruitingLocale, 'jobsPublish'),
+        })
+        if (!ok) return
+      }
       setJobFormBusy(true)
       try {
         if (jobFormMode === 'create') {
@@ -911,7 +935,7 @@ function App() {
         setJobFormBusy(false)
       }
     },
-    [access, jobFormMode, loadAllPositions, loadJobs, selectedJob, setNoticeErr, setNoticeOk],
+    [access, confirm, jobFormMode, loadAllPositions, loadJobs, recruitingLocale, selectedJob, setNoticeErr, setNoticeOk],
   )
 
   // Interviews list: fetched on its own so the tab/search/date filters only
@@ -1922,22 +1946,26 @@ function App() {
           <header className="mb-9 flex flex-col gap-5 border-b border-line/50 pb-8 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">{accessIssue || showingInviteAcceptance ? 'Access' : isPostHirePage(activePage) ? 'Post-Hire' : activePage === 'settings' || activePage === 'activity' || activePage === 'notifications' ? 'Workspace' : 'Pre-hiring'}</div>
-              <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl" dir={activePage === 'overview' && recruitingLocale === 'ar' ? 'rtl' : undefined}>
+              <h1 className="mt-3 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-text lg:text-5xl" dir={(activePage === 'overview' || activePage === 'jobs') && recruitingLocale === 'ar' ? 'rtl' : undefined}>
                 {showingInviteAcceptance
                   ? 'Complete your Wathefni invite'
                   : accessIssue
                   ? 'Verify your Wathefni access'
                   : activePage === 'overview'
                   ? recruitingCopy(recruitingLocale, 'overviewPageTitle')
+                  : activePage === 'jobs'
+                  ? recruitingCopy(recruitingLocale, 'jobsPageTitle')
                   : pageTitle}
               </h1>
-              <p className="mt-4 max-w-3xl text-[15px] leading-7 text-subtle/90" dir={activePage === 'overview' && recruitingLocale === 'ar' ? 'rtl' : undefined}>
+              <p className="mt-4 max-w-3xl text-[15px] leading-7 text-subtle/90" dir={(activePage === 'overview' || activePage === 'jobs') && recruitingLocale === 'ar' ? 'rtl' : undefined}>
                 {showingInviteAcceptance
                   ? 'Create your workspace login to join this Wathefni company workspace.'
                   : accessIssue
                   ? 'Sign in with your workspace account, or use a backup access code only if you need to set up or recover the workspace.'
                   : activePage === 'overview'
                   ? recruitingCopy(recruitingLocale, 'overviewPageSubtitle')
+                  : activePage === 'jobs'
+                  ? recruitingCopy(recruitingLocale, 'jobsPageSubtitle')
                   : pageSubtitles[activePage]}
               </p>
             </div>
@@ -3592,6 +3620,14 @@ function jobStatusTone(status: string) {
   return 'muted'
 }
 
+function jobStatusLabel(status: string, locale: RecruitingLocale) {
+  if (status === 'open') return recruitingCopy(locale, 'jobsOpen')
+  if (status === 'draft') return recruitingCopy(locale, 'jobsDraft')
+  if (status === 'paused') return recruitingCopy(locale, 'jobsPaused')
+  if (status === 'closed') return recruitingCopy(locale, 'jobsClosed')
+  return status
+}
+
 function jobDisplayTitle(job: PositionSummary, locale: RecruitingLocale) {
   if (locale === 'ar') return job.title_ar || job.position_title || job.title || job.position_code
   return job.title_en || job.title || job.position_title || job.position_code
@@ -3646,7 +3682,7 @@ function JobDrawer({
       >
         <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
           <div>
-            <Badge tone={jobStatusTone(status)}>{stageLabel(status)}</Badge>
+            <Badge tone={jobStatusTone(status)}>{jobStatusLabel(status, locale)}</Badge>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">{title}</h2>
             <p className="mt-1 text-sm text-subtle">
               {(locale === 'ar' ? job.description_ar : job.description_en) || job.description || '—'}
@@ -3671,12 +3707,12 @@ function JobDrawer({
             {status === 'closed' && canPublishJobs ? (
               <Button disabled={statusBusy} onClick={() => onSetStatus('open')}>{t('jobsReopen')}</Button>
             ) : null}
-            <Button onClick={onClose} variant="secondary">{t('jobsCancel')}</Button>
+            <Button onClick={onClose} variant="secondary">{t('jobsDone')}</Button>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Info label={t('jobsColStatus')} value={stageLabel(status)} />
+          <Info label={t('jobsColStatus')} value={jobStatusLabel(status, locale)} />
           <Info label={t('jobsColApps')} value={String(job.application_count || 0)} />
           <Info label={t('jobsFieldDepartment')} value={job.department || '—'} />
           <Info label={t('jobsFieldLocation')} value={job.location || '—'} />
@@ -3865,11 +3901,7 @@ function JobsPage({
   return (
     <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">{t('jobsPageTitle')}</h2>
-          <p className="mt-1 text-sm text-subtle">{t('jobsPageSubtitle')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 xl:ms-auto">
           <Button onClick={() => onLocaleChange(locale === 'ar' ? 'en' : 'ar')} type="button" variant="ghost">
             {t('language')}
           </Button>
@@ -3892,19 +3924,18 @@ function JobsPage({
         metrics={[
           { label: t('jobsOpen'), value: summary?.open_positions ?? 0, icon: BriefcaseBusiness },
           { label: t('jobsDraft'), value: summary?.draft_positions ?? 0, icon: Pencil },
-          { label: t('jobsApplications'), value: summary?.total_applications ?? 0, icon: Users },
-          { label: t('jobsOpenRoles'), value: summary?.open_positions ?? summary?.active_qr_codes ?? 0, icon: QrCode },
           { label: t('jobsPaused'), value: summary?.paused_positions ?? 0, icon: PauseCircle },
           { label: t('jobsClosed'), value: summary?.closed_positions ?? 0, icon: PauseCircle },
+          { label: t('jobsApplications'), value: summary?.total_applications ?? 0, icon: Users },
         ]}
       />
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
           <div>
-            <CardTitle>{t('jobsPageTitle')}</CardTitle>
+            <CardTitle>{t('jobsOpeningsList')}</CardTitle>
             <CardDescription>
-              {isSearching ? t('jobsEmptySearch', { query: query.trim() }).replace('No job openings match', `${totalCount} result(s) for`) : t('jobsPageSubtitle')}
+              {isSearching ? t('jobsEmptySearch', { query: query.trim() }).replace('No job openings match', `${totalCount} result(s) for`) : t('jobsInventoryHint')}
             </CardDescription>
           </div>
           <SearchInput onChange={onQueryChange} placeholder={t('jobsSearchPlaceholder')} value={query} />
@@ -3912,7 +3943,7 @@ function JobsPage({
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onStatusFilterChange(e.target.value)} value={statusFilter}>
-              <option value="">{t('jobsFilterAll')}</option>
+              <option value="">{t('jobsFilterStatus')}: {t('jobsFilterAll')}</option>
               <option value="draft">{t('jobsDraft')}</option>
               <option value="open">{t('jobsOpen')}</option>
               <option value="paused">{t('jobsPaused')}</option>
@@ -3931,7 +3962,7 @@ function JobsPage({
               ))}
             </select>
             <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onDeadlineFilterChange(e.target.value)} value={deadlineFilter}>
-              <option value="">{t('jobsDeadlineAny')}</option>
+              <option value="">{t('jobsFilterDeadline')}: {t('jobsDeadlineAny')}</option>
               <option value="upcoming">{t('jobsDeadlineUpcoming')}</option>
               <option value="overdue">{t('jobsDeadlineOverdue')}</option>
               <option value="none">{t('jobsDeadlineNone')}</option>
@@ -3975,7 +4006,7 @@ function JobsPage({
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
-                      <Badge tone={jobStatusTone(status)}>{stageLabel(status)}</Badge>
+                      <Badge tone={jobStatusTone(status)}>{jobStatusLabel(status, locale)}</Badge>
                     </td>
                     <td className="px-4 py-2.5 text-subtle">
                       {job.vacancies != null
