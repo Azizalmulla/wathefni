@@ -3,9 +3,10 @@
 Proves prehire_action_counts() reports TRUE company-wide totals that:
   - EXCEED the dashboard's first-50 candidate load window (no silent capping), and
   - use the SAME definitions as the Overview / Assessments pages:
-      ready_for_review   = status IN (screening_complete, review_pending)
+      ready_for_review   = status IN (screening_complete, review_pending, ready_for_review)
       assessment_pending = (no/empty or pending assessment)
-                           AND status IN (screening_complete, review_pending, shortlisted)
+                           AND status IN (screening_complete, review_pending, ready_for_review, shortlisted)
+      follow_up_needed   = distinct apps matching Candidates follow_up=needed
   - stay scoped to one company and respect the reviewable (production + CV) predicate.
 
 Run on a host with the orchestrator venv + (staging) database, e.g.:

@@ -136,7 +136,12 @@ def compute_action_counts(
       ready_for_review  — reviewable apps in READY_FOR_REVIEW_STATUSES
       assessment_pending — reviewable apps eligible for assessment with status ''|pending
       follow_up_needed — distinct reviewable apps matching Candidates follow_up=needed
+
+    assessment_pending is always computed from the canonical application cohort so
+    Reports/Overview/Assistant share one number. Callers that lack the assessments
+    module should hide the card / next-action candidate, not redefine the count.
     """
+    del assessments_enabled  # reserved for callers; count stays definitionally stable
     reviewable = reviewable_predicate("a")
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -156,12 +161,11 @@ def compute_action_counts(
                 (company,),
             )
             row = cur.fetchone() or {}
-    counts = {
+    return {
         "ready_for_review": int(row.get("ready_for_review") or 0),
-        "assessment_pending": int(row.get("assessment_pending") or 0) if assessments_enabled else 0,
+        "assessment_pending": int(row.get("assessment_pending") or 0),
         "follow_up_needed": int(row.get("follow_up_needed") or 0),
     }
-    return counts
 
 
 def _destination_candidates(**filters: Any) -> dict[str, Any]:
