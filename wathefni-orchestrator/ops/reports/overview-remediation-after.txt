@@ -1,0 +1,15 @@
+AFTER (staging-green artifact ee8fd85394c1c47ef0f06c684b2efe5126106653ead18d2c7e669462f2b56293)
+
+Live WATHEFNI staging totals:
+- ready_for_review: 2 = Candidates review_status=ready total 2
+- assessment_pending: 2 = Candidates assessment_status=awaiting total 2
+- follow_up_needed: 4 = Candidates follow_up=needed total 4
+- Reports headlines match Overview action_counts
+- Reports followup_delivery_events=12 (events) kept separate from followups=4 (candidates)
+- Suggested next action: follow_up_failed_delivery priority 99 (not fixed card order)
+- Work queue: total 12, page size 5, has_more true, cursor pagination
+- Role priority: ACCOUNTING scoped ranking destination
+- Mobile prehire_priorities.action_counts == desktop action_counts
+- Assistant tools registered: get_prehire_action_counts, get_prehire_priorities, get_prehire_work_queue (prehire.read)
+- Overview EN/AR/RTL via recruitingCopy (Suggested next action / الإجراء التالي المقترح)
+- Production NOT promoted

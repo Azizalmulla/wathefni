@@ -1,0 +1,7 @@
+BEFORE (static audit / broken trust)
+- Follow-up card: notification event length (capped), not follow_up=needed apps
+- Assessment card click: Assessments page
+- Hero: "Next best action" = first non-zero fixed-order card
+- Queue: loaded 50 apps + capped notifications, silent sample
+- Role card: count of active roles
+- EN only
