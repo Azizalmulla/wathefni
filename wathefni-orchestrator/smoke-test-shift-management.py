@@ -163,13 +163,57 @@ def main() -> int:
 
         # reschedule validation -------------------------------------------
         try:
-            app.dashboard_posthire_reschedule_shift(sid, app.ShiftRescheduleRequest(shift_date=tomorrow, start_time="17:00", end_time="09:00"), context=owner)
+            app.dashboard_posthire_reschedule_shift(
+                sid,
+                app.ShiftRescheduleRequest(
+                    shift_date=tomorrow,
+                    start_time="17:00",
+                    end_time="09:00",
+                    expected_updated_at=str(shift_row().get("updated_at")),
+                ),
+                context=owner,
+            )
             check("end <= start -> 422", False)
         except app.HTTPException as exc:
             check("end <= start -> 422", exc.status_code == 422)
 
+        # reschedule requires expected_updated_at -------------------------
+        try:
+            app.ShiftRescheduleRequest(shift_date=tomorrow, start_time="10:00", end_time="14:00")
+            check("missing expected_updated_at rejected by schema", False)
+        except Exception:
+            check("missing expected_updated_at rejected by schema", True)
+
+        # stale expected_updated_at fails closed --------------------------
+        try:
+            app.dashboard_posthire_reschedule_shift(
+                sid,
+                app.ShiftRescheduleRequest(
+                    shift_date=tomorrow,
+                    start_time="10:00",
+                    end_time="14:00",
+                    expected_updated_at="2000-01-01T00:00:00+00:00",
+                ),
+                context=owner,
+            )
+            check("stale expected_updated_at -> 409", False)
+        except app.HTTPException as exc:
+            check("stale expected_updated_at -> 409", exc.status_code == 409)
+
         # reschedule (valid) ----------------------------------------------
-        res = app.dashboard_posthire_reschedule_shift(sid, app.ShiftRescheduleRequest(shift_date=tomorrow, start_time="10:00", end_time="14:00"), context=owner)
+        current = shift_row()
+        expected = current.get("updated_at")
+        expected_iso = expected.isoformat() if hasattr(expected, "isoformat") else str(expected)
+        res = app.dashboard_posthire_reschedule_shift(
+            sid,
+            app.ShiftRescheduleRequest(
+                shift_date=tomorrow,
+                start_time="10:00",
+                end_time="14:00",
+                expected_updated_at=expected_iso,
+            ),
+            context=owner,
+        )
         check("reschedule returns status=rescheduled", res.get("status") == "rescheduled")
         moved = shift_row()
         check("DB row moved to the new date", moved and str(moved.get("shift_date")) == tomorrow)

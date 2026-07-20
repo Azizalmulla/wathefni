@@ -5,11 +5,10 @@ to stop a role from accepting new applicants. This proves:
 
   - `dashboard_set_position_status()` flips `positions.status` open<->closed,
     preserves apply_code/title, and is idempotent + company-scoped,
-  - closing/reopening an "orphan" position (one that only exists via
-    `applications`, no `positions` row yet) creates the row with a sensible
-    derived title instead of erroring,
-  - an unknown position_code (no positions row AND no applications) is
-    rejected rather than silently creating a phantom job,
+  - an orphan application (no `positions` row) cannot synthesize a job —
+    close/reopen fail closed and the row stays in Unassigned Applications,
+  - an unknown position_code (no positions row) is rejected rather than
+    silently creating a phantom job,
   - closing a job takes effect immediately for new WhatsApp/QR applicants —
     `public_role_by_apply_code()` (the actual intake gate) stops returning the
     role the moment it's closed, and returns it again once reopened,
@@ -182,11 +181,19 @@ def run_checks(checks: Checks) -> None:
         lambda: app.dashboard_set_position_status(COMPANY_A, "NO-SUCH-CODE", "closed"),
     )
 
-    # 4) Orphan position (applications only, no positions row yet): closing
-    # creates the row with a title derived from the application data.
-    orphan = app.dashboard_set_position_status(COMPANY_A, "ORPHANROLE", "closed")
-    checks.check("orphan close derives title from applications", lambda: orphan["title"] == "Orphan Warehouse Lead")
-    checks.check("orphan close sets status=closed", lambda: orphan["status"] == "closed")
+    # 4) Orphan application (no positions row): must NOT synthesize a job.
+    # Positions are the sole authority; unmatched apps stay unassigned.
+    checks.check_raises(
+        "orphan application cannot synthesize a job on close",
+        lambda: app.dashboard_set_position_status(COMPANY_A, "ORPHANROLE", "closed"),
+    )
+    if hasattr(app, "dashboard_unassigned_applications_payload"):
+        unassigned = app.dashboard_unassigned_applications_payload(COMPANY_A)
+        checks.check(
+            "orphan application lands in unassigned queue",
+            lambda: any(str(item.get("position_code") or "") == "ORPHANROLE" or "Orphan" in str(item.get("position_title") or item.get("candidate_name") or "") for item in (unassigned.get("items") or unassigned.get("applications") or []))
+            or int(unassigned.get("total") or unassigned.get("count") or 0) >= 1,
+        )
 
     # 5) The actual intake gate: public_role_by_apply_code stops returning the
     # role once closed, and returns it again once reopened. This is the exact
@@ -215,8 +222,13 @@ def run_checks(checks: Checks) -> None:
     # ambiguous title (2 matches), and no match.
     by_code = action_registry._find_job_opening_matches(app, COMPANY_A, position_code="WELDER", title=None)
     checks.check("match by exact code finds exactly WELDER", lambda: len(by_code) == 1 and by_code[0]["position_code"] == "WELDER")
-    by_title = action_registry._find_job_opening_matches(app, COMPANY_A, position_code=None, title="orphan")
-    checks.check("match by unique fuzzy title finds ORPHANROLE", lambda: len(by_title) == 1 and by_title[0]["position_code"] == "ORPHANROLE")
+    by_orphan_title = action_registry._find_job_opening_matches(app, COMPANY_A, position_code=None, title="orphan")
+    checks.check(
+        "orphan application title is not a job match",
+        lambda: by_orphan_title == [],
+    )
+    by_title = action_registry._find_job_opening_matches(app, COMPANY_A, position_code=None, title="senior welder")
+    checks.check("match by unique fuzzy title finds WELDER", lambda: len(by_title) == 1 and by_title[0]["position_code"] == "WELDER")
     ambiguous = action_registry._find_job_opening_matches(app, COMPANY_A, position_code=None, title="delivery driver")
     checks.check("ambiguous title returns both drivers", lambda: len(ambiguous) == 2)
     no_match = action_registry._find_job_opening_matches(app, COMPANY_A, position_code=None, title="no-such-role-xyz")

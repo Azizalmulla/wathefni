@@ -54635,7 +54635,7 @@ class ShiftRescheduleRequest(BaseModel):
     shift_date: str
     start_time: str
     end_time: str
-    expected_updated_at: str | None = None
+    expected_updated_at: str
     confirm_overlap: bool = False
 
 
@@ -54650,12 +54650,20 @@ def dashboard_posthire_reschedule_shift(shift_id: str, request: ShiftRescheduleR
         raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "Enter a valid date, start time, and end time."})
     if end_clock <= start_clock:
         raise HTTPException(status_code=422, detail={"error": "invalid_shift", "message": "The end time must be after the start time."})
+    if not str(request.expected_updated_at or "").strip():
+        raise HTTPException(status_code=422, detail={"error": "expected_updated_at_required", "message": "Refresh the shift and confirm the current version before rescheduling."})
     current = _dashboard_scheduled_shift_or_error(company, shift_id, context)
-    if request.expected_updated_at:
-        current_updated = current.get("updated_at")
-        current_iso = current_updated.isoformat() if hasattr(current_updated, "isoformat") else str(current_updated or "")
-        if current_iso and str(request.expected_updated_at).strip() and str(request.expected_updated_at).strip() not in {current_iso, current_iso.replace("+00:00", "Z")}:
-            raise HTTPException(status_code=409, detail={"error": "stale_state", "message": "That shift changed. Refresh and try again."})
+    current_updated = current.get("updated_at")
+    current_iso = current_updated.isoformat() if hasattr(current_updated, "isoformat") else str(current_updated or "")
+    expected = str(request.expected_updated_at).strip()
+    accepted = {
+        current_iso,
+        current_iso.replace("+00:00", "Z"),
+        current_iso.replace("Z", "+00:00"),
+        current_iso.replace("+00:00", ""),
+    }
+    if expected not in accepted:
+        raise HTTPException(status_code=409, detail={"error": "stale_state", "message": "That shift changed. Refresh and try again."})
     actor_phone = context.get("hr_phone")
     with db_connect() as conn:
         with conn.cursor() as cur:
