@@ -152,7 +152,6 @@ import type {
   PrehireNextAction,
   PrehireReportsResponse,
   PrehireRolePriority,
-  PrehireWorkQueueItem,
   PrehireWorkQueueResponse,
   RankingCandidate,
   RankingResponse,
@@ -226,13 +225,6 @@ type CandidateFilters = {
   activityFrom: string
   activityTo: string
   sort: string
-}
-type OverviewQueueItem = {
-  label: string
-  detail: string
-  badge?: string
-  tone?: 'default' | 'success' | 'warning' | 'danger' | 'muted'
-  appKey?: string
 }
 const statuses = [
   '',
@@ -600,7 +592,6 @@ function App() {
   const prehireEnabled = dashboardModuleEnabled(moduleState, 'pre_hiring')
   const allApplications = applications?.applications || summary?.recent_applications || []
   const enabledNotificationModules = notifications?.enabled_modules
-  const notificationIssues = moduleScopedNotificationRows(notifications?.notifications || [], enabledNotificationModules)
   const assessmentModuleOn = assessmentModuleEnabled(moduleState, summary)
   const availableNavItems = navItems.filter((item) => {
     if (item.id === 'employees') return anyPeopleModuleEnabled(moduleState)
@@ -6545,18 +6536,6 @@ function moduleScopedNotificationRows(notifications: NotificationRow[], enabledM
   return enabledModules.includes('pre_hiring') ? rows : []
 }
 
-function hrFollowUpDetail(item: NotificationRow) {
-  const normalized = normalizedDeliveryStatus(item)
-  const candidate = item.candidate_name || item.target_phone || 'Candidate'
-  const role = item.position_title || item.position_code
-  const prefix = role ? `${candidate} for ${role}` : candidate
-  if (normalized.includes('closed') || normalized.includes('blocked')) return `Contact ${prefix}. Use the best available channel and keep the hiring step moving.`
-  if (normalized.includes('stale')) return `Follow up with ${prefix}. They have not responded recently.`
-  if (normalized.includes('no_usable')) return `Check contact details for ${prefix} before the next message.`
-  if (normalized.includes('failed')) return `Try another contact method for ${prefix}.`
-  return `Follow up with ${prefix}.`
-}
-
 function jobNotificationLabel(item: { status?: string; last_error?: string; created_at?: string }) {
   const normalized = String(item.status || '').toLowerCase()
   const lastError = String(item.last_error || '').toLowerCase()
@@ -6573,81 +6552,8 @@ function normalizedDeliveryStatus(item: NotificationRow) {
   return raw || 'unknown'
 }
 
-function reviewQueue(applications: ApplicationSummary[], notificationIssues: NotificationRow[], assessmentEnabled = true): OverviewQueueItem[] {
-  const items: OverviewQueueItem[] = []
-  const seen = new Set<string>()
-
-  function add(key: string, item: OverviewQueueItem) {
-    if (seen.has(key)) return
-    seen.add(key)
-    items.push(item)
-  }
-
-  applications
-    .filter(isReadyForReview)
-    .slice(0, 4)
-    .forEach((application) => {
-      add(`review:${application.app_key}`, {
-        label: `Review ${candidateName(application)}`,
-        detail: assessmentEnabled
-          ? `${candidateRoleText(application)} is ready for an HR decision. Open the profile, check fit, then shortlist, assess, or interview.`
-          : `${candidateRoleText(application)} is ready for an HR decision. Open the profile, check fit, then shortlist or interview.`,
-        badge: 'Ready for review',
-        tone: 'warning',
-        appKey: application.app_key,
-      })
-    })
-
-  if (assessmentEnabled) {
-    assessmentQueue(applications)
-      .slice(0, 4)
-      .forEach((application) => {
-        add(`assessment:${application.app_key}`, {
-          label: `Send assessment to ${candidateName(application)}`,
-          detail: `${candidateRoleText(application)} has enough profile information to move into assessment.`,
-          badge: 'Assessment pending',
-          tone: 'warning',
-          appKey: application.app_key,
-        })
-      })
-  }
-
-  uniqueNotificationFollowUps(notificationIssues)
-    .slice(0, 3)
-    .forEach((item) => {
-      const role = item.position_title || item.position_code
-      const name = item.candidate_name || item.target_phone || 'candidate'
-      const key = item.app_key || `${item.target_phone || name}:${role || ''}`
-      add(`contact:${key}`, {
-        label: `Contact ${name}`,
-        detail: role ? `${role}: ${hrFollowUpDetail(item)}` : hrFollowUpDetail(item),
-        badge: 'Follow up',
-        tone: 'danger',
-        appKey: item.app_key || undefined,
-      })
-    })
-
-  return items.slice(0, 8)
-}
-
 function candidateName(application: ApplicationSummary) {
   return application.candidate?.name || application.phone || 'Unknown candidate'
-}
-
-function candidateRoleText(application: ApplicationSummary) {
-  return application.position?.title || application.position?.code || 'This application'
-}
-
-function uniqueNotificationFollowUps(notifications: NotificationRow[]) {
-  const seen = new Set<string>()
-  const out: NotificationRow[] = []
-  notifications.forEach((item) => {
-    const key = item.app_key || `${item.target_phone || item.candidate_name || 'candidate'}:${item.position_code || item.position_title || ''}`
-    if (seen.has(key)) return
-    seen.add(key)
-    out.push(item)
-  })
-  return out
 }
 
 const STAGE_LABELS: Record<string, string> = {
