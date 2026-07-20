@@ -39,6 +39,7 @@ describe('dashboard initial load', () => {
           '/dashboard/prehire/interviews?limit=25&offset=0&status=upcoming',
           '/dashboard/prehire/notifications?limit=25',
           '/dashboard/prehire/reports',
+          '/dashboard/prehire/overview/work-queue?limit=25',
           '/dashboard/prehire/assessments?limit=50&offset=0',
           '/dashboard/prehire/assessments/config',
         ]),
@@ -49,7 +50,8 @@ describe('dashboard initial load', () => {
     expect(summaryHeaders.get('Authorization')).toBe('Bearer saved-token')
     expect(summaryHeaders.get('X-HR-Phone')).toBe('96555511122')
     expect(summaryHeaders.get('X-Company-Code')).toBe('WATHEFNI')
-    expect(screen.getByText('Priority queue')).toBeInTheDocument()
+    expect(screen.getByText('Top priorities')).toBeInTheDocument()
+    expect(screen.getByText('Suggested next action')).toBeInTheDocument()
     expect(screen.getByText('You’re viewing the latest data.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Alerts & Delivery' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Employee App' })).not.toBeInTheDocument()
@@ -127,7 +129,9 @@ describe('dashboard initial load', () => {
     expect(screen.queryByText('Send pending assessments')).not.toBeInTheDocument()
     expect(screen.queryByText('Ready for assessment')).not.toBeInTheDocument()
     expect(screen.queryByText('Assessment queue')).not.toBeInTheDocument()
-    expect(screen.getAllByText('Review interview next steps').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Review interview next steps')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Review ready candidates').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Follow up with candidates').length).toBeGreaterThan(0)
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/assessments?limit=50&offset=0')
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/assessments/config')
   })
@@ -189,6 +193,20 @@ function responseFor(path: string, options: { enabledModules?: string[] } = {}) 
       enabled_modules: enabledModules,
       features: { assessments_enabled: enabledModules.includes('assessments') },
       totals: { candidates: 1, applications: 1, active_applications: 1, hired_applications: 0 },
+      action_counts: {
+        ready_for_review: 1,
+        assessment_pending: enabledModules.includes('assessments') ? 1 : 0,
+        follow_up_needed: 0,
+      },
+      next_action: {
+        action: 'ready_for_review',
+        priority: 70,
+        reason: '1 candidate ready for an HR decision',
+        total_matching: 1,
+        destination: { page: 'candidates', filters: { review_status: 'ready' } },
+        label: 'suggested_next_action',
+      },
+      role_priority: null,
       status_counts: [{ status: 'screening', count: 1 }],
       positions: [
         {
@@ -199,6 +217,28 @@ function responseFor(path: string, options: { enabledModules?: string[] } = {}) 
         },
       ],
       recent_applications: [applicationSummary()],
+    }
+  }
+  if (path.startsWith('/dashboard/prehire/overview/work-queue')) {
+    return {
+      company_code: 'WATHEFNI',
+      ok: true,
+      as_of: '2026-07-20T00:00:00+00:00',
+      total: 1,
+      limit: 25,
+      items: [
+        {
+          action_type: 'ready_for_review',
+          app_key: 'APP-1',
+          candidate_name: 'Hamad Almulla',
+          reason: 'Candidate is ready for an HR decision',
+          priority: 70,
+          age_hours: 12,
+          destination: { page: 'candidates', filters: { review_status: 'ready' } },
+          authority_source: 'prehire_overview.ready_for_review',
+          as_of: '2026-07-20T00:00:00+00:00',
+        },
+      ],
     }
   }
   if (path === '/dashboard/prehire/applications?limit=50&offset=0&sort=newest') {
