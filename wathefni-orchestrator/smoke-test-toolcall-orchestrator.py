@@ -455,7 +455,7 @@ def main() -> None:
     assert_true("JOB_OPENING_TRIGGER_RE" in toolcall_source and "create_job_opening" in toolcall_source, "job opening requests must force create_job_opening preflight")
     assert_true("LIST_JOB_OPENINGS_RE" in toolcall_source and "list_job_openings" in toolcall_source, "list job openings must be forced for inventory asks")
     assert_true("list_job_openings" in tool_index, "list_job_openings must be in the tool catalog")
-    assert_true(tool_call_orchestrator.TOOL_PERMISSION_MAP.get("list_job_openings") == "prehire.read", "list_job_openings is a prehire.read tool")
+    assert_true(tool_call_orchestrator.TOOL_PERMISSION_MAP.get("list_job_openings") == "jobs.read", "list_job_openings is a jobs.read tool")
 
     for scoped_phrase in (
         "memory_scope",

@@ -348,10 +348,15 @@ export type PositionsResponse = {
   limit?: number
   offset?: number
   has_more?: boolean
+  next_cursor?: string | null
+  status_filter?: string
   summary?: {
     total_positions: number
     open_positions: number
+    draft_positions?: number
+    paused_positions?: number
     closed_positions: number
+    open_roles_with_apply_code?: number
     active_qr_codes: number
     total_applications: number
   }
@@ -359,16 +364,44 @@ export type PositionsResponse = {
 
 export type PositionSummary = {
   company_code?: string
+  job_id?: string | null
   position_code: string
   position_title: string
+  title?: string
+  title_en?: string
+  title_ar?: string | null
   job_key?: string
   application_key?: string
   apply_code?: string
   application_link?: string
   qr_value?: string
   status?: string
+  accepts_applications?: boolean
   description?: string
+  description_en?: string
+  description_ar?: string | null
   requirements?: unknown
+  requirements_en?: unknown
+  requirements_ar?: unknown
+  department?: string | null
+  location?: string | null
+  employment_type?: string | null
+  work_arrangement?: string | null
+  contract_type?: string | null
+  salary_min?: number | null
+  salary_max?: number | null
+  currency?: string | null
+  salary_visibility?: string | null
+  vacancies?: number | null
+  filled_vacancies?: number | null
+  remaining_vacancies?: number | null
+  application_deadline?: string | null
+  expected_start_date?: string | null
+  hiring_manager_user_id?: string | null
+  recruiter_user_id?: string | null
+  published_at?: string | null
+  closed_at?: string | null
+  version?: number
   application_count: number
   active_count: number
   latest_applicant?: string
@@ -376,6 +409,7 @@ export type PositionSummary = {
   created_at?: string
   updated_at?: string
   latest_application_at?: string
+  authority_source?: string
   stage_counts?: Array<{ status: string; count: number }>
   recent_applicants?: Array<{
     app_key: string

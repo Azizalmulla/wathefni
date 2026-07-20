@@ -61,6 +61,8 @@ import {
   updateImportSettings,
   getPrehireReports,
   getPrehirePositions,
+  createPrehirePosition,
+  updatePrehirePosition,
   setPositionStatus,
   getInterviews,
   getNotifications,
@@ -120,6 +122,7 @@ import {
 import { cn, compactNumber, formatDateTime, statusTone } from '@/lib/utils'
 import { ActivityLog } from '@/components/ActivityLog'
 import { ImportCvButton, ImportReviewQueue } from '@/components/ImportCenter'
+import { JobsForm, jobFormToPayload, type JobFormValues } from '@/components/JobsForm'
 import { OfferPanel } from '@/components/OfferPanel'
 import { Product2AuthoringPanel } from '@/components/Product2AuthoringPanel'
 import { Badge } from '@/components/ui/badge'
@@ -337,6 +340,16 @@ function hasDashboardPermission(access: DashboardUserAccess | null | undefined, 
   return Boolean(access?.permissions?.includes(permission))
 }
 
+function hasJobsPermission(access: DashboardUserAccess | null | undefined, permission: string) {
+  if (hasDashboardPermission(access, permission)) return true
+  // Temporary compatibility: existing administrators with settings.manage keep Jobs mutation access.
+  if (['jobs.create', 'jobs.edit', 'jobs.publish', 'jobs.close'].includes(permission) && hasDashboardPermission(access, 'settings.manage')) {
+    return true
+  }
+  if (permission === 'jobs.read' && hasDashboardPermission(access, 'prehire.read')) return true
+  return false
+}
+
 function dashboardModuleEnabled(state: DashboardModuleState, module: string) {
   if (!state || !Array.isArray(state.enabled_modules)) return false
   return state.enabled_modules.includes(module)
@@ -372,6 +385,11 @@ function pageAvailableForSummary(page: Page, state: DashboardModuleState) {
 
 const PERMISSION_CAPABILITY_LABELS: Record<string, string> = {
   'prehire.read': 'View hiring dashboards, candidates, and reports',
+  'jobs.read': 'View Jobs inventory and openings',
+  'jobs.create': 'Create job openings',
+  'jobs.edit': 'Edit job openings',
+  'jobs.publish': 'Publish, resume, and reopen jobs',
+  'jobs.close': 'Pause and close jobs',
   'candidate.manage': 'Manage candidate profiles and application details',
   'candidate.import': 'Bulk import candidate CVs',
   'candidate.decide': 'Make final candidate decisions',
@@ -524,7 +542,14 @@ function App() {
   const [allPositions, setAllPositions] = useState<PositionSummary[]>([])
   const [jobsQuery, setJobsQuery] = useState('')
   const debouncedJobsQuery = useDebouncedValue(jobsQuery.trim(), 350)
+  const [jobsStatusFilter, setJobsStatusFilter] = useState('')
+  const [jobsDepartmentFilter, setJobsDepartmentFilter] = useState('')
+  const [jobsLocationFilter, setJobsLocationFilter] = useState('')
+  const [jobsDeadlineFilter, setJobsDeadlineFilter] = useState('')
+  const [jobsRemainingOnly, setJobsRemainingOnly] = useState(false)
   const [jobsLoadingMore, setJobsLoadingMore] = useState(false)
+  const [jobFormMode, setJobFormMode] = useState<'create' | 'edit' | null>(null)
+  const [jobFormBusy, setJobFormBusy] = useState(false)
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('')
   const [candidateFilters, setCandidateFilters] = useState<CandidateFilters>({
@@ -618,7 +643,10 @@ function App() {
   const canManageAssessments = hasDashboardPermission(userAccess, 'assessment.manage')
   const canExportReports = hasDashboardPermission(userAccess, 'report.export')
   const canManageWorkspace = hasDashboardPermission(userAccess, 'users.manage')
-  const canManageJobs = hasDashboardPermission(userAccess, 'settings.manage')
+  const canCreateJobs = hasJobsPermission(userAccess, 'jobs.create')
+  const canEditJobs = hasJobsPermission(userAccess, 'jobs.edit')
+  const canPublishJobs = hasJobsPermission(userAccess, 'jobs.publish')
+  const canCloseJobs = hasJobsPermission(userAccess, 'jobs.close')
   // Position pickers (candidate filter, CV-import assignment, ranking, overview
   // breakdown) need the FULL roster of jobs, not just the top 25 by activity
   // that `summary.positions` carries for the dashboard glance. Loaded via its
@@ -710,6 +738,11 @@ function App() {
         const data = await getPrehirePositions(effectiveAccess, {
           limit: 100,
           ...(debouncedJobsQuery ? { search: debouncedJobsQuery } : {}),
+          ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
+          ...(jobsDepartmentFilter ? { department: jobsDepartmentFilter } : {}),
+          ...(jobsLocationFilter ? { location: jobsLocationFilter } : {}),
+          ...(jobsDeadlineFilter ? { deadline: jobsDeadlineFilter } : {}),
+          ...(jobsRemainingOnly ? { has_remaining_vacancies: true } : {}),
         })
         setJobsData(data)
       } catch (error) {
@@ -723,7 +756,7 @@ function App() {
         }
       }
     },
-    [access, debouncedJobsQuery],
+    [access, debouncedJobsQuery, jobsStatusFilter, jobsDepartmentFilter, jobsLocationFilter, jobsDeadlineFilter, jobsRemainingOnly],
   )
 
   // Full, unsearched, unpaginated position roster for the pickers reused
@@ -753,6 +786,11 @@ function App() {
         limit: 100,
         offset: jobsData?.positions.length || 0,
         ...(debouncedJobsQuery ? { search: debouncedJobsQuery } : {}),
+        ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
+        ...(jobsDepartmentFilter ? { department: jobsDepartmentFilter } : {}),
+        ...(jobsLocationFilter ? { location: jobsLocationFilter } : {}),
+        ...(jobsDeadlineFilter ? { deadline: jobsDeadlineFilter } : {}),
+        ...(jobsRemainingOnly ? { has_remaining_vacancies: true } : {}),
       })
       setJobsData((current) =>
         current
@@ -764,39 +802,61 @@ function App() {
     } finally {
       setJobsLoadingMore(false)
     }
-  }, [access, jobsData, debouncedJobsQuery])
+  }, [access, jobsData, debouncedJobsQuery, jobsStatusFilter, jobsDepartmentFilter, jobsLocationFilter, jobsDeadlineFilter, jobsRemainingOnly])
 
   const [jobStatusBusy, setJobStatusBusy] = useState(false)
 
-  // Close stops new WhatsApp/QR applicants; reopen resumes the same
-  // apply_code/QR unchanged. Existing candidates in the pipeline are never
-  // affected either way.
   const setJobStatus = useCallback(
-    async (job: PositionSummary, status: 'open' | 'closed') => {
-      if (status === 'closed') {
-        const ok = await confirm({
-          title: `Close ${job.position_title || job.position_code}?`,
+    async (job: PositionSummary, status: 'open' | 'paused' | 'closed') => {
+      const title = job.position_title || job.title || job.position_code
+      const prompts: Record<string, { title: string; body: string; confirmLabel: string; destructive?: boolean }> = {
+        closed: {
+          title: recruitingCopy(recruitingLocale, 'jobsCloseConfirm'),
           body: Number(job.active_count || 0) > 0
-            ? `This stops new applicants from applying. ${job.active_count} candidate${Number(job.active_count) === 1 ? ' is' : 's are'} still active in this pipeline — closing won’t affect them.`
-            : 'This stops new applicants from applying. You can reopen it anytime.',
-          confirmLabel: 'Close job',
+            ? `${title}: ${job.active_count} active candidate(s) stay in the pipeline.`
+            : String(title),
+          confirmLabel: recruitingCopy(recruitingLocale, 'jobsClose'),
           destructive: true,
-        })
-        if (!ok) return
+        },
+        paused: {
+          title: recruitingCopy(recruitingLocale, 'jobsPauseConfirm'),
+          body: String(title),
+          confirmLabel: recruitingCopy(recruitingLocale, 'jobsPause'),
+        },
+        open: {
+          title: normalizedJobStatus(job) === 'paused'
+            ? recruitingCopy(recruitingLocale, 'jobsResumeConfirm')
+            : recruitingCopy(recruitingLocale, 'jobsReopenConfirm'),
+          body: String(title),
+          confirmLabel: normalizedJobStatus(job) === 'paused'
+            ? recruitingCopy(recruitingLocale, 'jobsResume')
+            : recruitingCopy(recruitingLocale, 'jobsReopen'),
+        },
       }
+      const prompt = prompts[status]
+      const ok = await confirm({
+        title: prompt.title,
+        body: prompt.body,
+        confirmLabel: prompt.confirmLabel,
+        destructive: prompt.destructive,
+      })
+      if (!ok) return
       setJobStatusBusy(true)
       try {
-        const result = await setPositionStatus(access, job.position_code, status)
+        const result = await setPositionStatus(access, job.position_code, status, {
+          expected_updated_at: job.updated_at,
+          expected_version: job.version,
+        })
         setJobsData((current) =>
           current
             ? {
                 ...current,
-                positions: current.positions.map((p) => (p.position_code === job.position_code ? { ...p, status: result.position.status } : p)),
+                positions: current.positions.map((p) => (p.position_code === job.position_code ? { ...p, ...result.position } : p)),
               }
             : current,
         )
-        setSelectedJob((current) => (current && current.position_code === job.position_code ? { ...current, status: result.position.status } : current))
-        setNoticeOk(status === 'closed' ? `${job.position_title || job.position_code} is closed to new applicants.` : `${job.position_title || job.position_code} is reopened.`)
+        setSelectedJob((current) => (current && current.position_code === job.position_code ? { ...current, ...result.position } : current))
+        setNoticeOk(`${result.position.position_title || title} → ${result.position.status}`)
         void loadJobs(access, { silent: true })
       } catch (error) {
         const issue = accessIssueFromError(error)
@@ -810,7 +870,48 @@ function App() {
         setJobStatusBusy(false)
       }
     },
-    [access, confirm, loadJobs, setNoticeErr, setNoticeOk],
+    [access, confirm, loadJobs, recruitingLocale, setNoticeErr, setNoticeOk],
+  )
+
+  const saveJobForm = useCallback(
+    async (values: JobFormValues, opts: { publish?: boolean; draft?: boolean }) => {
+      setJobFormBusy(true)
+      try {
+        if (jobFormMode === 'create') {
+          const created = await createPrehirePosition(access, {
+            ...jobFormToPayload(values),
+            save_as_draft: !opts.publish,
+          })
+          setNoticeOk(`${created.position.position_title || created.position.position_code} saved as ${created.position.status}.`)
+          setJobFormMode(null)
+          setSelectedJob(created.position)
+        } else if (selectedJob) {
+          const updated = await updatePrehirePosition(access, selectedJob.position_code, {
+            ...jobFormToPayload(values),
+            expected_updated_at: selectedJob.updated_at,
+            expected_version: selectedJob.version,
+          })
+          let position = updated.position
+          if (opts.publish && normalizedJobStatus(position) === 'draft') {
+            const published = await setPositionStatus(access, position.position_code, 'open', {
+              expected_updated_at: position.updated_at,
+              expected_version: position.version,
+            })
+            position = published.position
+          }
+          setSelectedJob(position)
+          setJobFormMode(null)
+          setNoticeOk(`${position.position_title || position.position_code} updated.`)
+        }
+        void loadJobs(access, { silent: true })
+        void loadAllPositions(access)
+      } catch (error) {
+        setNoticeErr(friendlyDashboardError(error, 'Could not save this job.'))
+      } finally {
+        setJobFormBusy(false)
+      }
+    },
+    [access, jobFormMode, loadAllPositions, loadJobs, selectedJob, setNoticeErr, setNoticeOk],
   )
 
   // Interviews list: fetched on its own so the tab/search/date filters only
@@ -1959,21 +2060,47 @@ function App() {
               )}
               {activePage === 'jobs' && (
                 <JobsPage
+                  canCloseJobs={canCloseJobs}
+                  canCreateJobs={canCreateJobs}
+                  canEditJobs={canEditJobs}
                   canExportReports={canExportReports}
-                  canManageJobs={canManageJobs}
+                  canPublishJobs={canPublishJobs}
+                  deadlineFilter={jobsDeadlineFilter}
+                  departmentFilter={jobsDepartmentFilter}
                   jobsData={jobsData}
                   loadingMore={jobsLoadingMore}
-                  onCreate={() => {
+                  locale={recruitingLocale}
+                  locationFilter={jobsLocationFilter}
+                  onAssistantCreate={() => {
                     setPage('ai')
-                    void askDashboardAssistant('I want to create a new job opening.')
+                    void askDashboardAssistant('I want to create a new job opening. Draft fields only — wait for my confirmation before creating.')
+                  }}
+                  onCreate={() => {
+                    setSelectedJob(null)
+                    setJobFormMode('create')
+                  }}
+                  onDeadlineFilterChange={setJobsDeadlineFilter}
+                  onDepartmentFilterChange={setJobsDepartmentFilter}
+                  onEdit={(job) => {
+                    setSelectedJob(job)
+                    setJobFormMode('edit')
                   }}
                   onExport={() => exportReport('roles', 'Role report')}
                   onLoadMore={loadMoreJobs}
+                  onLocaleChange={(next) => {
+                    setRecruitingLocale(next)
+                    localStorage.setItem('wathefni_recruiting_locale', next)
+                  }}
+                  onLocationFilterChange={setJobsLocationFilter}
                   onQueryChange={setJobsQuery}
                   onRefresh={() => refreshEverything()}
+                  onRemainingOnlyChange={setJobsRemainingOnly}
                   onSelect={setSelectedJob}
+                  onStatusFilterChange={setJobsStatusFilter}
                   onViewCandidates={viewJobCandidates}
                   query={jobsQuery}
+                  remainingOnly={jobsRemainingOnly}
+                  statusFilter={jobsStatusFilter}
                 />
               )}
               {activePage === 'candidates' && (
@@ -2247,17 +2374,35 @@ function App() {
             />
           ) : null}
 
-          {selectedJob ? (
+          {selectedJob && !jobFormMode ? (
             <JobDrawer
               job={selectedJob}
-              canManageJobs={canManageJobs}
+              canCloseJobs={canCloseJobs}
+              canEditJobs={canEditJobs}
+              canPublishJobs={canPublishJobs}
+              locale={recruitingLocale}
               statusBusy={jobStatusBusy}
               onClose={() => setSelectedJob(null)}
               onCopy={copyToClipboard}
               onDownloadQr={() => downloadQr(jobQrDataUrl, selectedJob)}
+              onEdit={() => setJobFormMode('edit')}
               onSetStatus={(status) => setJobStatus(selectedJob, status)}
               onViewCandidates={() => viewJobCandidates(selectedJob)}
               qrDataUrl={jobQrDataUrl}
+            />
+          ) : null}
+
+          {jobFormMode ? (
+            <JobsForm
+              busy={jobFormBusy}
+              canPublish={canPublishJobs}
+              initial={jobFormMode === 'edit' ? selectedJob : null}
+              locale={recruitingLocale}
+              mode={jobFormMode}
+              onCancel={() => setJobFormMode(null)}
+              onPublish={(values) => saveJobForm(values, { publish: true })}
+              onSaveChanges={(values) => saveJobForm(values, {})}
+              onSaveDraft={(values) => saveJobForm(values, { draft: true })}
             />
           ) : null}
 
@@ -3440,60 +3585,119 @@ function DrawerDecisionContext({
   )
 }
 
+function jobStatusTone(status: string) {
+  if (status === 'open') return 'success'
+  if (status === 'draft') return 'warning'
+  if (status === 'paused') return 'warning'
+  return 'muted'
+}
+
+function jobDisplayTitle(job: PositionSummary, locale: RecruitingLocale) {
+  if (locale === 'ar') return job.title_ar || job.position_title || job.title || job.position_code
+  return job.title_en || job.title || job.position_title || job.position_code
+}
+
+function jobAgeDays(job: PositionSummary) {
+  const raw = job.created_at || job.published_at
+  if (!raw) return null
+  const ms = Date.now() - new Date(raw).getTime()
+  if (!Number.isFinite(ms) || ms < 0) return null
+  return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)))
+}
+
 function JobDrawer({
   job,
-  canManageJobs,
+  canCloseJobs,
+  canEditJobs,
+  canPublishJobs,
+  locale,
   statusBusy,
   onClose,
   onCopy,
   onDownloadQr,
+  onEdit,
   onSetStatus,
   onViewCandidates,
   qrDataUrl,
 }: {
   job: PositionSummary
-  canManageJobs: boolean
+  canCloseJobs: boolean
+  canEditJobs: boolean
+  canPublishJobs: boolean
+  locale: RecruitingLocale
   statusBusy: boolean
   onClose: () => void
   onCopy: (value: string | undefined, label: string) => void
   onDownloadQr: () => void
-  onSetStatus: (status: 'open' | 'closed') => void
+  onEdit: () => void
+  onSetStatus: (status: 'open' | 'paused' | 'closed') => void
   onViewCandidates: () => void
   qrDataUrl: string
 }) {
-  const isOpen = normalizedJobStatus(job) === 'open'
+  const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
+  const status = normalizedJobStatus(job)
+  const title = jobDisplayTitle(job, locale)
   return (
     <div className="fixed inset-0 z-30 bg-ink/30" onClick={onClose}>
       <aside
         className="ml-auto flex h-full w-full max-w-3xl flex-col overflow-y-auto border-l border-line bg-panel p-6 shadow-soft"
+        dir={locale === 'ar' ? 'rtl' : 'ltr'}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
           <div>
-            <Badge tone={isOpen ? 'success' : 'muted'}>{stageLabel(normalizedJobStatus(job))}</Badge>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">{job.position_title || job.position_code}</h2>
-            <p className="mt-1 text-sm text-subtle">{job.description || 'Application opening.'}</p>
+            <Badge tone={jobStatusTone(status)}>{stageLabel(status)}</Badge>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight">{title}</h2>
+            <p className="mt-1 text-sm text-subtle">
+              {(locale === 'ar' ? job.description_ar : job.description_en) || job.description || '—'}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={!canManageJobs || statusBusy}
-              onClick={() => onSetStatus(isOpen ? 'closed' : 'open')}
-              title={!canManageJobs ? 'Managing job openings is disabled for your role' : undefined}
-              variant="secondary"
-            >
-              {isOpen ? 'Close job' : 'Reopen job'}
-            </Button>
-            <Button onClick={onClose} variant="secondary">
-              Close
-            </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {canEditJobs ? (
+              <Button disabled={statusBusy} onClick={onEdit} variant="secondary">{t('jobsEdit')}</Button>
+            ) : null}
+            {status === 'open' && canCloseJobs ? (
+              <Button disabled={statusBusy} onClick={() => onSetStatus('paused')} variant="secondary">{t('jobsPause')}</Button>
+            ) : null}
+            {status === 'paused' && canPublishJobs ? (
+              <Button disabled={statusBusy} onClick={() => onSetStatus('open')} variant="secondary">{t('jobsResume')}</Button>
+            ) : null}
+            {status === 'draft' && canPublishJobs ? (
+              <Button disabled={statusBusy} onClick={() => onSetStatus('open')}>{t('jobsPublish')}</Button>
+            ) : null}
+            {(status === 'open' || status === 'paused' || status === 'draft') && canCloseJobs ? (
+              <Button disabled={statusBusy} onClick={() => onSetStatus('closed')} variant="secondary">{t('jobsClose')}</Button>
+            ) : null}
+            {status === 'closed' && canPublishJobs ? (
+              <Button disabled={statusBusy} onClick={() => onSetStatus('open')}>{t('jobsReopen')}</Button>
+            ) : null}
+            <Button onClick={onClose} variant="secondary">{t('jobsCancel')}</Button>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Info label="Status" value={stageLabel(normalizedJobStatus(job))} />
-          <Info label="Candidate count" value={String(job.application_count || 0)} />
-          <Info label="Latest applicant" value={job.latest_applicant || 'No applicants yet'} />
-          <Info label="Created" value={formatDateTime(job.created_at || job.latest_application_at)} />
+          <Info label={t('jobsColStatus')} value={stageLabel(status)} />
+          <Info label={t('jobsColApps')} value={String(job.application_count || 0)} />
+          <Info label={t('jobsFieldDepartment')} value={job.department || '—'} />
+          <Info label={t('jobsFieldLocation')} value={job.location || '—'} />
+          <Info
+            label={t('jobsColVacancies')}
+            value={
+              job.vacancies != null
+                ? t('jobsRemaining', { remaining: job.remaining_vacancies ?? 0, total: job.vacancies })
+                : '—'
+            }
+          />
+          <Info label={t('jobsFieldRecruiter')} value={job.recruiter_user_id || '—'} />
+          <Info label={t('jobsFieldDeadline')} value={job.application_deadline ? formatDateTime(job.application_deadline) : '—'} />
+          <Info label={t('jobsColAge')} value={jobAgeDays(job) != null ? t('jobsAgeDays', { days: jobAgeDays(job)! }) : '—'} />
+          <Info label={job.accepts_applications ? t('jobsIntakeOpen') : t('jobsIntakeClosed')} value={job.apply_code || '—'} />
+          {job.salary_visibility !== 'public' && (job.salary_min != null || job.salary_max != null) ? (
+            <Info
+              label={t('jobsFieldSalaryMin')}
+              value={`${job.salary_min ?? '—'} – ${job.salary_max ?? '—'} ${job.currency || 'KD'}`}
+            />
+          ) : null}
         </div>
 
         <details className="mt-6 rounded-2xl border border-line bg-panel-muted/60 p-4">
@@ -3508,7 +3712,7 @@ function JobDrawer({
           <div className="rounded-lg border border-line bg-panel-muted/60 p-4">
             <div className="text-sm font-semibold">QR code</div>
             {qrDataUrl ? (
-              <img alt={`QR code for ${job.position_title || job.position_code}`} className="mt-4 rounded-lg border border-line bg-white p-3" src={qrDataUrl} />
+              <img alt={`QR code for ${title}`} className="mt-4 rounded-lg border border-line bg-white p-3" src={qrDataUrl} />
             ) : (
               <EmptyState text="QR link is not available for this job yet." />
             )}
@@ -3528,8 +3732,8 @@ function JobDrawer({
           <div className="space-y-4">
             <section>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-subtle">Requirements</h3>
-              <div className="mt-3 rounded-lg border border-line bg-panel-muted/60 p-4 text-sm leading-6 text-subtle">
-                {formatRequirements(job.requirements)}
+              <div className="mt-3 rounded-lg border border-line bg-panel-muted/60 p-4 text-sm leading-6 text-subtle whitespace-pre-wrap">
+                {formatRequirements(locale === 'ar' ? (job.requirements_ar || job.requirements) : (job.requirements_en || job.requirements))}
               </div>
             </section>
             <section>
@@ -3589,147 +3793,234 @@ function JobDrawer({
 }
 
 function JobsPage({
+  canCloseJobs,
+  canCreateJobs,
+  canEditJobs,
   canExportReports,
-  canManageJobs,
+  canPublishJobs,
+  deadlineFilter,
+  departmentFilter,
   jobsData,
   loadingMore,
+  locale,
+  locationFilter,
+  onAssistantCreate,
   onCreate,
+  onDeadlineFilterChange,
+  onDepartmentFilterChange,
+  onEdit,
   onExport,
   onLoadMore,
+  onLocaleChange,
+  onLocationFilterChange,
   onQueryChange,
   onRefresh,
+  onRemainingOnlyChange,
   onSelect,
+  onStatusFilterChange,
   onViewCandidates,
   query,
+  remainingOnly,
+  statusFilter,
 }: {
+  canCloseJobs: boolean
+  canCreateJobs: boolean
+  canEditJobs: boolean
   canExportReports: boolean
-  canManageJobs: boolean
+  canPublishJobs: boolean
+  deadlineFilter: string
+  departmentFilter: string
   jobsData: PositionsResponse | null
   loadingMore: boolean
+  locale: RecruitingLocale
+  locationFilter: string
+  onAssistantCreate: () => void
   onCreate: () => void
+  onDeadlineFilterChange: (value: string) => void
+  onDepartmentFilterChange: (value: string) => void
+  onEdit: (job: PositionSummary) => void
   onExport: () => void
   onLoadMore: () => void
+  onLocaleChange: (locale: RecruitingLocale) => void
+  onLocationFilterChange: (value: string) => void
   onQueryChange: (value: string) => void
   onRefresh: () => void
+  onRemainingOnlyChange: (value: boolean) => void
   onSelect: (job: PositionSummary) => void
+  onStatusFilterChange: (value: string) => void
   onViewCandidates: (job: PositionSummary) => void
   query: string
+  remainingOnly: boolean
+  statusFilter: string
 }) {
+  const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
   const positions = jobsData?.positions || []
   const summary = jobsData?.summary
   const totalCount = jobsData?.total_count ?? positions.length
   const isSearching = query.trim().length > 0
+  void canCloseJobs
+  void canPublishJobs
+  const departments = Array.from(new Set(positions.map((job) => String(job.department || '').trim()).filter(Boolean))).sort()
+  const locations = Array.from(new Set(positions.map((job) => String(job.location || '').trim()).filter(Boolean))).sort()
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Jobs</h2>
-          <p className="mt-1 text-sm text-subtle">Manage job openings, application links, QR codes, and applicant demand.</p>
+          <h2 className="text-2xl font-semibold tracking-tight">{t('jobsPageTitle')}</h2>
+          <p className="mt-1 text-sm text-subtle">{t('jobsPageSubtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button disabled={!canManageJobs} onClick={onCreate} title={!canManageJobs ? 'Creating job openings is disabled for your role' : undefined}>
-            <Plus size={16} /> Create with Assistant
+          <Button onClick={() => onLocaleChange(locale === 'ar' ? 'en' : 'ar')} type="button" variant="ghost">
+            {t('language')}
+          </Button>
+          <Button disabled={!canCreateJobs} onClick={onCreate} title={!canCreateJobs ? 'Creating job openings is disabled for your role' : undefined}>
+            <Plus size={16} /> {t('jobsCreate')}
+          </Button>
+          <Button disabled={!canCreateJobs} onClick={onAssistantCreate} variant="secondary">
+            {t('jobsCreateAssistant')}
           </Button>
           <Button onClick={onRefresh} variant="secondary">
-            <RefreshCw size={16} /> Refresh
+            <RefreshCw size={16} /> {t('jobsRefresh')}
           </Button>
           <Button disabled={!canExportReports} onClick={onExport} title={!canExportReports ? 'Exports are disabled for your role' : undefined} variant="secondary">
-            <Download size={16} /> Export
+            <Download size={16} /> {t('jobsExport')}
           </Button>
         </div>
       </div>
 
       <MetricGrid
         metrics={[
-          { label: 'Open jobs', value: summary?.open_positions ?? 0, icon: BriefcaseBusiness },
-          { label: 'Total applications', value: summary?.total_applications ?? 0, icon: Users },
-          { label: 'Active QR codes', value: summary?.active_qr_codes ?? 0, icon: QrCode },
-          { label: 'Closed jobs', value: summary?.closed_positions ?? 0, icon: PauseCircle },
+          { label: t('jobsOpen'), value: summary?.open_positions ?? 0, icon: BriefcaseBusiness },
+          { label: t('jobsDraft'), value: summary?.draft_positions ?? 0, icon: Pencil },
+          { label: t('jobsApplications'), value: summary?.total_applications ?? 0, icon: Users },
+          { label: t('jobsOpenRoles'), value: summary?.open_positions ?? summary?.active_qr_codes ?? 0, icon: QrCode },
+          { label: t('jobsPaused'), value: summary?.paused_positions ?? 0, icon: PauseCircle },
+          { label: t('jobsClosed'), value: summary?.closed_positions ?? 0, icon: PauseCircle },
         ]}
       />
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
           <div>
-            <CardTitle>Job openings</CardTitle>
+            <CardTitle>{t('jobsPageTitle')}</CardTitle>
             <CardDescription>
-              {isSearching
-                ? `${totalCount} result${totalCount === 1 ? '' : 's'} for “${query.trim()}”`
-                : 'Application links, QR codes, and applicant demand by role.'}
+              {isSearching ? t('jobsEmptySearch', { query: query.trim() }).replace('No job openings match', `${totalCount} result(s) for`) : t('jobsPageSubtitle')}
             </CardDescription>
           </div>
-          <SearchInput onChange={onQueryChange} placeholder="Search jobs by title or code…" value={query} />
+          <SearchInput onChange={onQueryChange} placeholder={t('jobsSearchPlaceholder')} value={query} />
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onStatusFilterChange(e.target.value)} value={statusFilter}>
+              <option value="">{t('jobsFilterAll')}</option>
+              <option value="draft">{t('jobsDraft')}</option>
+              <option value="open">{t('jobsOpen')}</option>
+              <option value="paused">{t('jobsPaused')}</option>
+              <option value="closed">{t('jobsClosed')}</option>
+            </select>
+            <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onDepartmentFilterChange(e.target.value)} value={departmentFilter}>
+              <option value="">{t('jobsFilterDepartment')}</option>
+              {departments.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+            <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onLocationFilterChange(e.target.value)} value={locationFilter}>
+              <option value="">{t('jobsFilterLocation')}</option>
+              {locations.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+            <select className="rounded-xl border border-line bg-white px-3 py-2 text-sm" onChange={(e) => onDeadlineFilterChange(e.target.value)} value={deadlineFilter}>
+              <option value="">{t('jobsDeadlineAny')}</option>
+              <option value="upcoming">{t('jobsDeadlineUpcoming')}</option>
+              <option value="overdue">{t('jobsDeadlineOverdue')}</option>
+              <option value="none">{t('jobsDeadlineNone')}</option>
+            </select>
+            <label className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3 py-2 text-sm">
+              <input checked={remainingOnly} onChange={(e) => onRemainingOnlyChange(e.target.checked)} type="checkbox" />
+              {t('jobsFilterRemaining')}
+            </label>
+          </div>
           {positions.length === 0 ? (
-            <EmptyState
-              text={
-                isSearching
-                  ? `No job openings match “${query.trim()}”.`
-                  : 'No job openings yet. Use “Create with Assistant” to add your first opening — you’ll get an application link and QR code to share.'
-              }
-            />
+            <EmptyState text={isSearching ? t('jobsEmptySearch', { query: query.trim() }) : t('jobsEmpty')} />
           ) : (
           <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
-            <table className="w-full min-w-[900px] text-left text-sm">
+            <table className="w-full min-w-[1100px] text-left text-sm">
               <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                 <tr>
-                  <th className="px-4 py-3">Job</th>
-                  <th className="px-4 py-3">Application code</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Applications</th>
-                  <th className="px-4 py-3">Latest applicant</th>
-                  <th className="px-4 py-3">Created</th>
-                  <th className="px-4 py-3">Action</th>
+                  <th className="px-4 py-3">{t('jobsColJob')}</th>
+                  <th className="px-4 py-3">{t('jobsColCode')}</th>
+                  <th className="px-4 py-3">{t('jobsColStatus')}</th>
+                  <th className="px-4 py-3">{t('jobsColVacancies')}</th>
+                  <th className="px-4 py-3">{t('jobsColApps')}</th>
+                  <th className="px-4 py-3">{t('jobsColOwner')}</th>
+                  <th className="px-4 py-3">{t('jobsColDeadline')}</th>
+                  <th className="px-4 py-3">{t('jobsColAge')}</th>
+                  <th className="px-4 py-3">{t('jobsColAction')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/45 bg-panel/42">
-                {positions.map((job) => (
+                {positions.map((job) => {
+                  const status = normalizedJobStatus(job)
+                  const age = jobAgeDays(job)
+                  return (
                   <tr className="cursor-pointer transition duration-150 hover:bg-white/55" key={job.position_code} onClick={() => onSelect(job)}>
                     <td className="px-4 py-2.5">
-                      <div className="font-semibold">{job.position_title || job.position_code}</div>
+                      <div className="font-semibold">{jobDisplayTitle(job, locale)}</div>
+                      <div className="text-xs text-subtle">{[job.department, job.location].filter(Boolean).join(' · ') || '—'}</div>
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex max-w-[220px] items-center rounded-full border border-line bg-panel-muted px-2.5 py-1 font-mono text-xs text-text">
-                        <span className="truncate">{job.apply_code || 'Not generated yet'}</span>
+                        <span className="truncate">{job.apply_code || '—'}</span>
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
-                      <Badge tone={normalizedJobStatus(job) === 'open' ? 'success' : 'muted'}>
-                        {stageLabel(normalizedJobStatus(job))}
-                      </Badge>
+                      <Badge tone={jobStatusTone(status)}>{stageLabel(status)}</Badge>
+                    </td>
+                    <td className="px-4 py-2.5 text-subtle">
+                      {job.vacancies != null
+                        ? t('jobsRemaining', { remaining: job.remaining_vacancies ?? 0, total: job.vacancies })
+                        : '—'}
                     </td>
                     <td className="px-4 py-2.5">
                       <button className="font-semibold underline-offset-4 hover:underline" onClick={(event) => { event.stopPropagation(); onViewCandidates(job) }} type="button">
                         {job.application_count || 0}
                       </button>
-                      {Number(job.active_count || 0) > 0 ? (
-                        <div className="text-xs font-medium text-amber-600">{job.active_count} waiting for review</div>
-                      ) : (
-                        <div className="text-xs text-subtle">No one waiting</div>
-                      )}
                     </td>
-                    <td className="px-4 py-2.5 text-subtle">{job.latest_applicant || 'No applicants yet'}</td>
-                    <td className="px-4 py-2.5 text-subtle">{formatDateTime(job.created_at || job.latest_application_at)}</td>
+                    <td className="px-4 py-2.5 text-subtle">{job.recruiter_user_id || '—'}</td>
+                    <td className="px-4 py-2.5 text-subtle">{job.application_deadline ? formatDateTime(job.application_deadline) : '—'}</td>
+                    <td className="px-4 py-2.5 text-subtle">{age != null ? t('jobsAgeDays', { days: age }) : '—'}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-2">
                         <Button onClick={(event) => { event.stopPropagation(); onSelect(job) }} size="sm" variant="secondary">
-                          Manage
+                          {t('jobsManage')}
                         </Button>
+                        {canEditJobs ? (
+                          <Button onClick={(event) => { event.stopPropagation(); onEdit(job) }} size="sm" variant="secondary">
+                            {t('jobsEdit')}
+                          </Button>
+                        ) : null}
                         {job.application_count ? (
-                          <Button onClick={(event) => { event.stopPropagation(); onViewCandidates(job) }} size="sm" variant="ghost">
-                            View candidates
+                          <Button onClick={(event) => { event.stopPropagation(); onViewCandidates(job) }} size="sm" variant="secondary">
+                            {t('jobsColApps')}
                           </Button>
                         ) : null}
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
-            <LoadMoreBar loaded={positions.length} loading={loadingMore} noun="job" onLoadMore={onLoadMore} total={totalCount} />
           </div>
           )}
+          <LoadMoreBar
+            loaded={positions.length}
+            loading={loadingMore}
+            noun="job"
+            onLoadMore={onLoadMore}
+            total={totalCount}
+          />
         </CardContent>
       </Card>
     </div>

@@ -236,24 +236,100 @@ export function getDashboardBootstrap(access: DashboardAccess) {
 
 export function getPrehirePositions(
   access: DashboardAccess,
-  opts?: { offset?: number; limit?: number; search?: string },
+  opts?: {
+    offset?: number
+    limit?: number
+    search?: string
+    status?: string
+    department?: string
+    location?: string
+    recruiter_user_id?: string
+    hiring_manager_user_id?: string
+    deadline?: string
+    has_remaining_vacancies?: boolean
+    cursor?: string
+  },
 ) {
   const params = new URLSearchParams()
   if (opts?.offset) params.set('offset', String(opts.offset))
   if (opts?.limit) params.set('limit', String(opts.limit))
   if (opts?.search) params.set('search', opts.search)
+  if (opts?.status) params.set('status', opts.status)
+  if (opts?.department) params.set('department', opts.department)
+  if (opts?.location) params.set('location', opts.location)
+  if (opts?.recruiter_user_id) params.set('recruiter_user_id', opts.recruiter_user_id)
+  if (opts?.hiring_manager_user_id) params.set('hiring_manager_user_id', opts.hiring_manager_user_id)
+  if (opts?.deadline) params.set('deadline', opts.deadline)
+  if (opts?.has_remaining_vacancies) params.set('has_remaining_vacancies', 'true')
+  if (opts?.cursor) params.set('cursor', opts.cursor)
   const qs = params.toString()
   return request<PositionsResponse>(`/dashboard/prehire/positions${qs ? `?${qs}` : ''}`, access)
 }
 
-// Close a job opening so it stops accepting new applicants, or reopen a closed
-// one. apply_code/QR are unchanged either way; existing candidates in the
-// pipeline are never affected.
-export function setPositionStatus(access: DashboardAccess, positionCode: string, status: 'open' | 'closed') {
+export type JobUpsertPayload = {
+  title?: string
+  title_en?: string
+  title_ar?: string | null
+  position_code?: string
+  description?: string
+  description_en?: string
+  description_ar?: string | null
+  requirements?: string[]
+  requirements_en?: string[]
+  requirements_ar?: string[]
+  department?: string | null
+  location?: string | null
+  employment_type?: string | null
+  work_arrangement?: string | null
+  contract_type?: string | null
+  salary_min?: number | null
+  salary_max?: number | null
+  currency?: string | null
+  salary_visibility?: string | null
+  vacancies?: number | null
+  application_deadline?: string | null
+  expected_start_date?: string | null
+  hiring_manager_user_id?: string | null
+  recruiter_user_id?: string | null
+  save_as_draft?: boolean
+  expected_updated_at?: string | null
+  expected_version?: number | null
+}
+
+export function createPrehirePosition(access: DashboardAccess, payload: JobUpsertPayload) {
+  return request<{ ok: boolean; position: PositionSummary }>('/dashboard/prehire/positions', access, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updatePrehirePosition(access: DashboardAccess, positionCode: string, payload: JobUpsertPayload) {
+  return request<{ ok: boolean; position: PositionSummary }>(
+    `/dashboard/prehire/positions/${encodeURIComponent(positionCode)}`,
+    access,
+    { method: 'PATCH', body: JSON.stringify(payload) },
+  )
+}
+
+// Lifecycle transition only. Content edits must use updatePrehirePosition and
+// never change status. Existing candidates in the pipeline are never affected.
+export function setPositionStatus(
+  access: DashboardAccess,
+  positionCode: string,
+  status: 'draft' | 'open' | 'paused' | 'closed',
+  opts?: { expected_updated_at?: string | null; expected_version?: number | null },
+) {
   return request<{ ok: boolean; position: PositionSummary }>(
     `/dashboard/prehire/positions/${encodeURIComponent(positionCode)}/status`,
     access,
-    { method: 'POST', body: JSON.stringify({ status }) },
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        status,
+        expected_updated_at: opts?.expected_updated_at ?? undefined,
+        expected_version: opts?.expected_version ?? undefined,
+      }),
+    },
   )
 }
 
