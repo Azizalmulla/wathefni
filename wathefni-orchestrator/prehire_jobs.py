@@ -551,8 +551,27 @@ def transition_job(
                 raise JobsError("position_not_found", "Job opening not found.", http_status=404)
             current = dict(row)
             _assert_fresh(current, expected_updated_at=expected_updated_at, expected_version=expected_version)
+            dst_raw = str(to_status or "").strip().lower()
+            if dst_raw not in JOB_STATUSES:
+                raise JobsError(
+                    "invalid_job_status",
+                    f"Unknown job status '{to_status}'. Allowed: {', '.join(JOB_STATUSES)}.",
+                    http_status=422,
+                    details={"to": dst_raw, "allowed": list(JOB_STATUSES)},
+                )
+            # Idempotent no-op when already in the requested status.
+            if normalize_status(current.get("status")) == dst_raw:
+                vac = vacancy_counts(
+                    cur,
+                    company=company,
+                    position_code=code,
+                    approved_headcount=current.get("vacancies"),
+                )
+                result = serialize_job(current, vacancy=vac)
+                result["transition_action"] = "noop"
+                return result
             action = assert_transition(current.get("status"), to_status)
-            dst = normalize_status(to_status)
+            dst = dst_raw
             published_at = current.get("published_at")
             closed_at = current.get("closed_at")
             if action == "publish" or action == "reopen" or action == "resume":
