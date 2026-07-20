@@ -150,8 +150,23 @@ def main() -> int:
 
     def run_hire(update_ok: bool, transition_ok: bool):
         legacy = FakeLegacy(update_ok=update_ok, transition_ok=transition_ok)
+        request = type(
+            "Req",
+            (),
+            {
+                "metadata": {
+                    "company_code": "WATHEFNI",
+                    "dashboard": True,
+                    "permissions": ["candidate.decide", "candidate.manage", "prehire.read"],
+                    "actor_type": "human",
+                    "actor_user_id": "smoke-hire",
+                },
+                "sender_role": "hr_admin",
+                "sender_phone": "96599338566",
+            },
+        )()
         ctx = registry.ExecutionContext(
-            request=None,
+            request=request,
             action={"action_type": "hire_candidate", "app_key": "APP-HIRE", "subject_name": "Test Candidate"},
             state={},
             graph_state={},

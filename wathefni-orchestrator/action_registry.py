@@ -718,7 +718,9 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
     if not app:
         return _candidate_not_found_result(action_type, "hire")
     meta = getattr(ctx.request, "metadata", {}) or {}
-    permissions = meta.get("permissions") if isinstance(meta, dict) else []
+    if not isinstance(meta, dict):
+        meta = {}
+    permissions = list(meta.get("permissions") or [])
     # Offer-1 hire gate: when employment_offers is enabled, accepted offer is required.
     # AI must never pass hire_override (never available to AI).
     try:
