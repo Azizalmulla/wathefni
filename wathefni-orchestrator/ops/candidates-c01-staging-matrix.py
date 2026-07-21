@@ -32,6 +32,9 @@ MARKER = "temporary_candidates_c01_staging"
 ACTOR = "00000000-0000-4000-8000-c01c01c01c01"
 PHONE = "965580010011"
 PHONE_B = "965580010012"
+PHONE_INTERVIEW = "965580010013"
+PHONE_INTERVIEW_FAIL = "965580010014"
+PHONE_HIRE_ROLLBACK = "965580010015"
 
 
 class Matrix:
@@ -62,6 +65,7 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
                 ("hire_operations", "DELETE FROM hire_operations WHERE company_code=%s"),
                 ("candidate_action_confirmations", "DELETE FROM candidate_action_confirmations WHERE company_code=%s"),
                 ("application_lifecycle_events", "DELETE FROM application_lifecycle_events WHERE company_code=%s AND (metadata ? 'c01_marker' OR app_key LIKE 'c01-%%')"),
+                ("candidate_interview_events", "DELETE FROM candidate_interview_events WHERE company_code=%s"),
                 ("candidate_interviews", "DELETE FROM candidate_interviews WHERE company_code=%s"),
                 ("hr_tasks", "DELETE FROM hr_tasks WHERE company_code=%s"),
                 ("conversation_application_bindings", "DELETE FROM conversation_application_bindings WHERE company_code=%s"),
@@ -95,7 +99,10 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
             counts["candidate_documents"] = cur.rowcount
             cur.execute("DELETE FROM onboarding_items WHERE employee_key LIKE %s", (f"{company}-%",))
             counts["onboarding_items"] = cur.rowcount
-            cur.execute("DELETE FROM candidates WHERE phone = ANY(%s)", ([PHONE, PHONE_B],))
+            cur.execute(
+                "DELETE FROM candidates WHERE phone = ANY(%s)",
+                ([PHONE, PHONE_B, PHONE_INTERVIEW, PHONE_INTERVIEW_FAIL, PHONE_HIRE_ROLLBACK],),
+            )
             counts["candidates"] = cur.rowcount
             # also other company probe
             cur.execute("DELETE FROM applications WHERE company_code=%s", (OTHER,))
@@ -124,6 +131,16 @@ def seed_companies(orch: Any) -> None:
                         json.dumps({"c01_marker": MARKER, "smoke": True}),
                         json.dumps({"c01_marker": MARKER, "smoke": True}),
                     ),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO company_modules
+                      (company_code, module_key, enabled, source, updated_at)
+                    VALUES (%s,'pre_hiring',true,'c01_staging_matrix',now())
+                    ON CONFLICT (company_code, module_key) DO UPDATE
+                      SET enabled=true, source=EXCLUDED.source, updated_at=now()
+                    """,
+                    (company,),
                 )
         conn.commit()
 
@@ -181,6 +198,7 @@ def seed_app(orch: Any, *, app_key: str, status: str, phone: str = PHONE, positi
 def main() -> int:
     require_staging()
     os.environ.setdefault("WATHEFNI_CANONICAL_LIFECYCLE", "true")
+    import action_registry as registry
     import app as orch
     import hire_operations as hire
     import recruiting_lifecycle as rl
@@ -561,6 +579,210 @@ def main() -> int:
         )
         matrix.check("cv_failure_returns_awaiting", fail2.get("ok") is True and fail2.get("to_stage") == "awaiting_cv", fail2)
 
+        # Interview preparation, calendar failure, successful scheduling,
+        # rescheduling, and cancellation all preserve canonical lifecycle truth.
+        interview_app = f"c01-{uuid.uuid4().hex[:10]}"
+        seed_app(
+            orch,
+            app_key=interview_app,
+            status="ready_for_review",
+            phone=PHONE_INTERVIEW,
+            position="C01_ROLE_INTERVIEW",
+        )
+        interview_payload = {"interview_time": "2026-08-10T10:00:00+03:00"}
+        interview_mint = rl.mint_candidate_action_confirmation(
+            orch,
+            company_code=COMPANY,
+            app_key=interview_app,
+            action="schedule_interview",
+            observed_stage="ready_for_review",
+            observed_version=0,
+            target_payload=interview_payload,
+            actor_user_id=ACTOR,
+            actor_phone=None,
+            actor_type="human",
+            channel="web",
+            permissions={"interview.manage"},
+        )
+        matrix.check("interview_confirmation_minted", interview_mint.get("ok") is True, interview_mint)
+
+        request = type(
+            "C01Request",
+            (),
+            {
+                "metadata": {
+                    "company_code": COMPANY,
+                    "dashboard": True,
+                    "actor_user_id": ACTOR,
+                    "permissions": ["interview.manage", "prehire.read"],
+                },
+                "sender_phone": "96599338566",
+                "sender_role": "hr_admin",
+                "account_id": COMPANY,
+            },
+        )()
+        schedule_action = {
+            "action_type": "schedule_interview",
+            "app_key": interview_app,
+            "interview_time": interview_payload["interview_time"],
+            "human_confirmed": True,
+            "actor_user_id": ACTOR,
+            "expected_from_stage": "ready_for_review",
+            "expected_version": 0,
+            "confirmation_id": interview_mint["confirmation"]["confirmation_id"],
+            "confirmation_token": interview_mint["confirmation"]["confirmation_token"],
+            "confirmation_payload": interview_payload,
+            "idempotency_key": f"c01-interview:{interview_app}",
+        }
+        original_run_gog = orch.run_gog
+        company_token = orch.set_active_company_code(COMPANY)
+        try:
+            orch.run_gog = lambda *_args, **_kwargs: {
+                "ok": True,
+                "event": {
+                    "id": f"c01-calendar-{interview_app}",
+                    "conferenceData": {
+                        "entryPoints": [
+                            {"entryPointType": "video", "uri": "https://meet.google.com/c01-staging"}
+                        ]
+                    },
+                },
+            }
+            scheduled = registry.execute(
+                "schedule_interview",
+                registry.ExecutionContext(
+                    request=request,
+                    action=schedule_action,
+                    state={},
+                    graph_state={},
+                    intent={},
+                    legacy=orch,
+                ),
+            )
+        finally:
+            orch.run_gog = original_run_gog
+            orch.reset_active_company_code(company_token)
+        matrix.check("confirmed_schedule_succeeds", scheduled.get("success") is True, scheduled)
+        with orch.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT status FROM applications WHERE company_code=%s AND app_key=%s",
+                    (COMPANY, interview_app),
+                )
+                scheduled_stage = cur.fetchone()["status"]
+                cur.execute(
+                    "SELECT * FROM candidate_interviews WHERE company_code=%s AND app_key=%s ORDER BY created_at DESC LIMIT 1",
+                    (COMPANY, interview_app),
+                )
+                interview_row = dict(cur.fetchone() or {})
+        matrix.check(
+            "successful_schedule_advances_canonical_stage",
+            scheduled_stage == "interview" and interview_row.get("status") == "scheduled",
+            {"stage": scheduled_stage, "interview": interview_row},
+        )
+
+        failed_app = f"c01-{uuid.uuid4().hex[:10]}"
+        seed_app(
+            orch,
+            app_key=failed_app,
+            status="ready_for_review",
+            phone=PHONE_INTERVIEW_FAIL,
+            position="C01_ROLE_INTERVIEW_FAIL",
+        )
+        plan_ctx = registry.ExecutionContext(
+            request=request,
+            action={
+                "action_type": "execute_candidate_workflow",
+                "app_key": failed_app,
+                "workflow_goal": "schedule an interview",
+                "interview_time": interview_payload["interview_time"],
+            },
+            state={},
+            graph_state={},
+            intent={},
+            legacy=orch,
+        )
+        company_token = orch.set_active_company_code(COMPANY)
+        try:
+            plan = registry._candidate_workflow_plan(plan_ctx)
+        finally:
+            orch.reset_active_company_code(company_token)
+        plan_app = orch.find_application_by_key(failed_app, company_code=COMPANY) or {}
+        matrix.check(
+            "interview_preparation_does_not_advance",
+            plan.get("status") in {"ready", "needs_clarification"} and plan_app.get("status") == "ready_for_review",
+            {"plan": plan, "stage": plan_app.get("status")},
+        )
+        original_run_gog = orch.run_gog
+        company_token = orch.set_active_company_code(COMPANY)
+        try:
+            orch.run_gog = lambda *_args, **_kwargs: {"ok": False, "error": "calendar_unavailable"}
+            failed_schedule = registry.execute(
+                "schedule_interview",
+                registry.ExecutionContext(
+                    request=request,
+                    action={
+                        "action_type": "schedule_interview",
+                        "app_key": failed_app,
+                        "interview_time": interview_payload["interview_time"],
+                    },
+                    state={},
+                    graph_state={},
+                    intent={},
+                    legacy=orch,
+                ),
+            )
+        finally:
+            orch.run_gog = original_run_gog
+            orch.reset_active_company_code(company_token)
+        failed_stage = orch.find_application_by_key(failed_app, company_code=COMPANY) or {}
+        with orch.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT count(*) AS n FROM candidate_interviews WHERE company_code=%s AND app_key=%s",
+                    (COMPANY, failed_app),
+                )
+                failed_interviews = int(cur.fetchone()["n"])
+        matrix.check(
+            "calendar_failure_does_not_advance",
+            failed_schedule.get("success") is False
+            and failed_stage.get("status") == "ready_for_review"
+            and failed_interviews == 0,
+            {"result": failed_schedule, "stage": failed_stage.get("status"), "interviews": failed_interviews},
+        )
+
+        interview_context = {
+            "company_code": COMPANY,
+            "hr_phone": "96599338566",
+            "hr_user": {"phone": "96599338566", "role": "owner"},
+            "actor_user_id": ACTOR,
+            "permissions": ["interview.manage", "prehire.read"],
+        }
+        rescheduled = orch.dashboard_prehire_interview_update(
+            str(interview_row["interview_id"]),
+            orch.DashboardInterviewStateRequest(status="rescheduled"),
+            context=interview_context,
+        )
+        rescheduled_app = orch.find_application_by_key(interview_app, company_code=COMPANY) or {}
+        matrix.check(
+            "reschedule_remains_in_interview_stage",
+            rescheduled["interview"]["status"] == "rescheduled"
+            and rescheduled_app.get("status") == "interview",
+            {"interview": rescheduled["interview"], "stage": rescheduled_app.get("status")},
+        )
+        cancelled = orch.dashboard_prehire_interview_update(
+            str(interview_row["interview_id"]),
+            orch.DashboardInterviewStateRequest(status="cancelled"),
+            context=interview_context,
+        )
+        cancelled_app = orch.find_application_by_key(interview_app, company_code=COMPANY) or {}
+        matrix.check(
+            "cancellation_clears_false_interview_stage",
+            cancelled["interview"]["status"] == "cancelled"
+            and cancelled_app.get("status") == "shortlisted",
+            {"interview": cancelled["interview"], "stage": cancelled_app.get("status")},
+        )
+
         # Hiring atomicity
         hire_app = f"c01-{uuid.uuid4().hex[:10]}"
         seed_app(orch, app_key=hire_app, status="shortlisted", phone=PHONE, position="C01_ROLE_HIRE")
@@ -628,6 +850,92 @@ def main() -> int:
                 cur.execute("SELECT count(*) AS n FROM employees WHERE company_code=%s AND app_key=%s", (COMPANY, hire_app))
                 emp_n2 = int(cur.fetchone()["n"])
         matrix.check("hire_replay_no_duplicate_employee", emp_n2 == 1 and (replay.get("ok") or replay.get("error")), {"employees": emp_n2, "replay": replay})
+
+        rollback_app = f"c01-{uuid.uuid4().hex[:10]}"
+        seed_app(
+            orch,
+            app_key=rollback_app,
+            status="shortlisted",
+            phone=PHONE_HIRE_ROLLBACK,
+            position="C01_ROLE_HIRE_ROLLBACK",
+        )
+        rollback_prep = hire.prepare_hire_operation(
+            orch,
+            company_code=COMPANY,
+            app_key=rollback_app,
+            idempotency_key=f"c01-hire-rollback:{rollback_app}",
+            expected_from_stage="shortlisted",
+            expected_version=0,
+            actor_user_id=ACTOR,
+            actor_phone=None,
+            channel="web",
+            structured_reason={"hire_reference": f"c01-hire-rollback:{rollback_app}"},
+        )
+        rollback_payload = {
+            "hire_reference": f"c01-hire-rollback:{rollback_app}",
+            "hiring_reference": rollback_prep["operation"]["operation_id"],
+            "operation_id": rollback_prep["operation"]["operation_id"],
+        }
+        rollback_mint = rl.mint_candidate_action_confirmation(
+            orch,
+            company_code=COMPANY,
+            app_key=rollback_app,
+            action="hire",
+            observed_stage="shortlisted",
+            observed_version=0,
+            target_payload=rollback_payload,
+            actor_user_id=ACTOR,
+            actor_phone=None,
+            actor_type="human",
+            channel="web",
+            permissions={"candidate.decide"},
+        )
+        original_compliance_seed = orch._seed_employee_compliance_documents
+
+        def _raise_before_commit(*_args: Any, **_kwargs: Any) -> None:
+            raise RuntimeError("c01_forced_precommit_failure")
+
+        try:
+            orch._seed_employee_compliance_documents = _raise_before_commit
+            rollback_result = hire.execute_hire_operation(
+                orch,
+                operation_id=rollback_prep["operation"]["operation_id"],
+                confirmation_id=rollback_mint["confirmation"]["confirmation_id"],
+                confirmation_token=rollback_mint["confirmation"]["confirmation_token"],
+                permissions={"candidate.decide"},
+            )
+        finally:
+            orch._seed_employee_compliance_documents = original_compliance_seed
+        with orch.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT status FROM applications WHERE company_code=%s AND app_key=%s",
+                    (COMPANY, rollback_app),
+                )
+                rollback_stage = cur.fetchone()["status"]
+                cur.execute(
+                    "SELECT count(*) AS n FROM employees WHERE company_code=%s AND app_key=%s",
+                    (COMPANY, rollback_app),
+                )
+                rollback_employees = int(cur.fetchone()["n"])
+                cur.execute(
+                    "SELECT count(*) AS n FROM application_lifecycle_events WHERE company_code=%s AND app_key=%s AND to_stage='hired'",
+                    (COMPANY, rollback_app),
+                )
+                rollback_hire_events = int(cur.fetchone()["n"])
+        matrix.check(
+            "precommit_failure_leaves_no_half_hire",
+            rollback_result.get("ok") is False
+            and rollback_stage == "shortlisted"
+            and rollback_employees == 0
+            and rollback_hire_events == 0,
+            {
+                "result": rollback_result,
+                "stage": rollback_stage,
+                "employees": rollback_employees,
+                "hire_events": rollback_hire_events,
+            },
+        )
 
         # Duplicate protection / collision gates
         collisions = rl.active_same_role_collisions(orch)

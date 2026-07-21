@@ -46606,25 +46606,68 @@ def dashboard_prehire_interview_update(
     if not status:
         raise HTTPException(status_code=422, detail={"error": "invalid_interview_status", "allowed": sorted(INTERVIEW_STATUSES)})
     hr_phone = digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone"))
-    with db_connect() as conn:
-        with conn.cursor() as cur:
+    row: dict[str, Any] = {}
+    if status == "cancelled":
+        import recruiting_lifecycle as _rl
+
+        application = dashboard_application_or_404(str(interview.get("app_key") or ""), company)
+        side_effect_row: dict[str, Any] = {}
+
+        def _cancel_interview(cur: Any, _before: dict[str, Any], _after: dict[str, Any]) -> dict[str, Any]:
             cur.execute(
                 """
                 UPDATE candidate_interviews
-                SET status=%s,
-                    feedback_status=CASE
-                      WHEN %s='completed' AND COALESCE(notes, '')='' THEN 'notes_pending'
-                      ELSE feedback_status
-                    END,
-                    updated_by_phone=%s,
-                    updated_at=now()
+                SET status='cancelled', updated_by_phone=%s, updated_at=now()
                 WHERE interview_id=%s AND company_code=%s
                 RETURNING *
                 """,
-                (status, status, hr_phone, interview_id, company),
+                (hr_phone, interview_id, company),
             )
-            row = dict(cur.fetchone() or {})
-        conn.commit()
+            cancelled = cur.fetchone()
+            if not cancelled:
+                return {"ok": False, "error": "interview_not_found"}
+            side_effect_row.update(dict(cancelled))
+            return {"ok": True, "interview_id": str(cancelled["interview_id"]), "status": "cancelled"}
+
+        lifecycle_result = _rl.transition_application(
+            sys.modules[__name__],
+            app_key=str(application.get("app_key") or ""),
+            company_code=company,
+            to_stage="shortlisted",
+            trigger="interview_cancelled",
+            expected_from_stage="interview",
+            actor_type="human",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_phone=hr_phone,
+            channel="web",
+            idempotency_key=f"interview-cancel:{company}:{interview_id}",
+            metadata={"interview_id": interview_id, "interview_status": "cancelled"},
+            run_hire_side_effects=False,
+            transactional_side_effect=_cancel_interview,
+        )
+        if not lifecycle_result.get("ok"):
+            raise HTTPException(status_code=409, detail=lifecycle_result)
+        row = side_effect_row or (fetch_candidate_interview(interview_id, company) or {})
+    else:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE candidate_interviews
+                    SET status=%s,
+                        feedback_status=CASE
+                          WHEN %s='completed' AND COALESCE(notes, '')='' THEN 'notes_pending'
+                          ELSE feedback_status
+                        END,
+                        updated_by_phone=%s,
+                        updated_at=now()
+                    WHERE interview_id=%s AND company_code=%s
+                    RETURNING *
+                    """,
+                    (status, status, hr_phone, interview_id, company),
+                )
+                row = dict(cur.fetchone() or {})
+            conn.commit()
     if row:
         record_interview_event(str(row["interview_id"]), company, str(row.get("app_key") or ""), f"status_{status}", {"status": status}, hr_phone)
         update_application_interview_snapshot(str(row.get("app_key") or ""), row)

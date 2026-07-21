@@ -97,6 +97,7 @@ SYSTEM_TRIGGERS = frozenset(
         "cv_processing_failed",
         "explicit_apply",
         "intake_admit",
+        "interview_cancelled",
     }
 )
 
