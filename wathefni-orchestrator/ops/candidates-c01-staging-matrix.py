@@ -66,6 +66,9 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
                 ("employees", "DELETE FROM employees WHERE company_code=%s"),
                 ("applications", "DELETE FROM applications WHERE company_code=%s"),
                 ("positions", "DELETE FROM positions WHERE company_code=%s"),
+                ("company_settings", "DELETE FROM company_settings WHERE company_code=%s"),
+                ("company_modules", "DELETE FROM company_modules WHERE company_code=%s"),
+                ("companies", "DELETE FROM companies WHERE company_code=%s AND metadata->>'c01_marker'=%s"),
                 ("hr_admin_users", "DELETE FROM hr_admin_users WHERE company_code=%s") if False else ("noop", None),
             ]:
                 if sql is None:
@@ -76,7 +79,8 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
                         continue
                     if table == "noop":
                         continue
-                    cur.execute(sql, (company,))
+                    params = (company, MARKER) if table == "companies" else (company,)
+                    cur.execute(sql, params)
                     counts[table] = cur.rowcount
                 except Exception as exc:  # noqa: BLE001
                     counts[table] = -1
@@ -88,6 +92,30 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
             counts["other_apps"] = cur.rowcount
         conn.commit()
     return counts
+
+
+def seed_companies(orch: Any) -> None:
+    with orch.db_connect() as conn:
+        with conn.cursor() as cur:
+            for company in (COMPANY, OTHER):
+                cur.execute(
+                    """
+                    INSERT INTO companies
+                      (company_code, name, metadata, raw_json, created_at, updated_at)
+                    VALUES (%s,%s,%s::jsonb,%s::jsonb,now(),now())
+                    ON CONFLICT (company_code) DO UPDATE
+                      SET metadata=companies.metadata || EXCLUDED.metadata,
+                          raw_json=companies.raw_json || EXCLUDED.raw_json,
+                          updated_at=now()
+                    """,
+                    (
+                        company,
+                        f"Candidates C0/C1 Staging {company}",
+                        json.dumps({"c01_marker": MARKER, "smoke": True}),
+                        json.dumps({"c01_marker": MARKER, "smoke": True}),
+                    ),
+                )
+        conn.commit()
 
 
 def seed_app(orch: Any, *, app_key: str, status: str, phone: str = PHONE, position: str = "C01_ROLE_A") -> dict[str, Any]:
@@ -169,6 +197,7 @@ def main() -> int:
 
     cleanup(orch)
     cleanup(orch, OTHER)
+    seed_companies(orch)
 
     try:
         app_key = f"c01-{uuid.uuid4().hex[:10]}"
