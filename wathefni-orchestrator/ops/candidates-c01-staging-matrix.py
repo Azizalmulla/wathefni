@@ -776,8 +776,13 @@ def main() -> int:
         interview_context = {
             "company_code": COMPANY,
             "hr_phone": "96599338566",
-            "hr_user": {"phone": "96599338566", "role": "owner"},
+            "hr_user": {"phone": "96599338566", "role": "owner", "status": "active"},
             "actor_user_id": ACTOR,
+            "actor_role": "owner",
+            "access": {
+                "role": "owner",
+                "permissions": ["interview.manage", "prehire.read"],
+            },
             "permissions": ["interview.manage", "prehire.read"],
         }
         rescheduled = orch.dashboard_prehire_interview_update(
