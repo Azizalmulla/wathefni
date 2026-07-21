@@ -2737,8 +2737,6 @@ def _create_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
     missing: list[str] = []
     if not title:
         missing.append("title")
-    if salary_min is None:
-        missing.append("salary")
     if missing:
         return {
             "action_type": "create_job_opening",
@@ -2746,26 +2744,26 @@ def _create_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
             "status": "needs_clarification",
             "needs_clarification": True,
             "missing_fields": missing,
-            "message": "I need the job title and monthly salary before I can open the role and generate the QR code.",
+            "message": "I need the job title before I can save the draft.",
         }
-    company_code = _resolve_company_code(ctx.legacy, ctx.request) or "WATHEFNI"
+    company_code = _resolve_company_code(ctx.legacy, ctx.request)
+    if not company_code:
+        return {
+            "action_type": "create_job_opening",
+            "success": False,
+            "status": "failed",
+            "error": "company_context_required",
+            "message": "I could not verify the company context, so I did not create the job.",
+        }
     position_code = str(ctx.action.get("position_code") or "").strip().upper() or _slug_position_code(title)
     apply_code = f"APPLY-{company_code}-{position_code}"
-    try:
-        import prehire_jobs as jobs
-
-        apply_link = jobs.apply_link(apply_code) or f"https://wa.me/{jobs.apply_whatsapp_number()}?text={quote_plus(apply_code)}"
-        wa_number = jobs.apply_whatsapp_number()
-    except Exception:
-        wa_number = str(ctx.action.get("whatsapp_number") or os.environ.get("WATHEFNI_APPLY_WHATSAPP_NUMBER") or "").strip()
-        apply_link = f"https://wa.me/{wa_number}?text={quote_plus(apply_code)}" if wa_number else None
     requirements = ctx.action.get("requirements") if isinstance(ctx.action.get("requirements"), list) else []
     screening_questions = _generate_screening_questions_for_role(ctx, title=title, requirements=requirements)
     return {
         "action_type": "create_job_opening",
         "success": True,
         "status": "ready",
-        "message": f"Ready to open {title} at {salary_min:g} KD and generate QR code {apply_code}.",
+        "message": f"Ready to save {title} as a draft for HR review.",
         "company_code": company_code,
         "title": title,
         "position_code": position_code,
@@ -2777,9 +2775,9 @@ def _create_job_opening_preflight(ctx: ExecutionContext) -> dict[str, Any]:
         "requirements": requirements,
         "screening_questions": screening_questions,
         "apply_code": apply_code,
-        "apply_link": apply_link,
-        "qr_image_url": f"https://quickchart.io/qr?text={quote_plus(apply_link or apply_code)}&size=512",
-        "whatsapp_number": wa_number,
+        "apply_link": None,
+        "qr_image_url": None,
+        "whatsapp_number": None,
     }
 
 
@@ -2807,7 +2805,7 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
                 "requirements": plan.get("requirements") or [],
                 "requirements_en": plan.get("requirements") or [],
             },
-            as_draft=False,
+            as_draft=True,
         )
     except jobs.JobsError as exc:
         if exc.code == "position_code_conflict":
@@ -2827,32 +2825,16 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "error": exc.code,
             "message": exc.message,
         }
-    apply_link = created.get("application_link") or plan["apply_link"]
-    caption = (
-        f"{plan['title']} QR attached. It opens {plan['apply_code']}.\n"
-        f"Apply link: {apply_link}"
-    )
-    send_result = None
-    if hasattr(legacy, "send_octopus_whatsapp_image"):
-        send_result = legacy.send_octopus_whatsapp_image(
-            account_id=getattr(ctx.request, "account_id", None),
-            phone=getattr(ctx.request, "sender_phone", ""),
-            conversation_id=getattr(ctx.request, "conversation_id", None),
-            image_url=plan["qr_image_url"],
-            caption=caption,
-            subject_type="position",
-            subject_key=f"{plan['company_code']}:{plan['position_code']}",
-        )
     return {
         "action_type": "create_job_opening",
         "success": True,
         "status": "completed",
-        "message": f"Opened {plan['title']} and generated the QR code.",
+        "message": f"Saved {plan['title']} as a draft. HR must complete and approve the candidate-facing content before publishing.",
         "position": legacy.json_safe(created),
         "apply_code": plan["apply_code"],
-        "apply_link": apply_link,
-        "qr_image_url": plan["qr_image_url"],
-        "qr_send_result": legacy.json_safe(send_result) if send_result is not None else None,
+        "apply_link": None,
+        "qr_image_url": None,
+        "qr_send_result": None,
         "authority_source": "positions",
     }
 
@@ -3755,9 +3737,9 @@ register(
     ActionSpec(
         name="create_job_opening",
         description=(
-            "Create or reopen a pre-hiring job opening in Postgres and generate/send a QR code image for the APPLY code. "
-            "Use when HR asks to create/open/publish a job, add a position, set salary, or create/share a QR code for a role. "
-            "This is a PREFLIGHT-THEN-CONFIRM workflow: call it before confirmation so backend can validate title/salary and show the apply code; it executes only after explicit approval."
+            "Create a pre-hiring job draft in Postgres for HR to complete and approve. "
+            "Use when HR asks to create or add a position. This action never publishes the job or shares a QR code. "
+            "Publishing is a separate confirmed action after the backend validates all candidate-facing requirements."
         ),
         entity_type=None,
         required_fields=(),
@@ -3778,7 +3760,7 @@ register(
         executor=_create_job_opening_executor,
         result_keys=("action_type", "success", "status", "message", "position", "apply_code", "apply_link", "qr_image_url"),
         sensitive=True,
-        notes="Writes positions and sends QR image to the HR admin via AI Octopus. Google Sheets/dashboard read positions from Postgres.",
+        notes="Writes a draft position only. It does not publish, reopen, or share candidate APPLY links.",
     )
 )
 

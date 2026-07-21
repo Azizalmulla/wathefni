@@ -186,6 +186,16 @@ WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-phase1.py | sed 's/^/ 
 log "job close/reopen (status flip stops/resumes public intake, orphan positions, tenant-scoped, chat title/code resolution, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-job-close-reopen.py | sed 's/^/    /'
 
+log "jobs phase2 stage A unit (apply parse, publish blockers, eligibility fail-closed)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-phase2-stage-a-unit.py | sed 's/^/    /'
+
+log "jobs phase2 stage A matrix (22-case guarded staging DB authority; zero applications)"
+WATHEFNI_DELIVERY_MODE=dry_run \
+WATHEFNI_ENVIRONMENT=staging \
+WATHEFNI_STAGE_A_SMOKE_ACK=staging-only \
+SMOKE_COMPANY=WATHEFNI \
+"$VENV_PY" smoke-test-jobs-phase2-stage-a.py | sed 's/^/    /'
+
 log "assessments pagination (true company-wide totals/status-counts/average over paged attempts, awaiting-assessment filter matches headline count, tenant-scoped, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assessments-pagination.py | sed 's/^/    /'
 

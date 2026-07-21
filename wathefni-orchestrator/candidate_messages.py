@@ -22,6 +22,42 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "en": "Your application for {role} is ready. Please send your CV as a PDF, DOCX, or clear image.",
         "ar": "تم تحديد طلبك لوظيفة {role}. أرسل سيرتك الذاتية بصيغة PDF أو DOCX أو صورة واضحة.",
     },
+    "job_context_ready": {
+        "en": "{role} — {company}. {facts}. {summary} Ask me about the role, or tell me when you are ready to apply. Your application has not started yet.",
+        "ar": "{role} — {company}. {facts}. {summary} اسألني عن الوظيفة، أو قل لي عندما تكون جاهزاً للتقديم. لم يبدأ طلب التوظيف بعد.",
+    },
+    "job_context_existing_application": {
+        "en": "You already have an active application for {role}. I did not create or reset it. You can ask for its status or update your CV.",
+        "ar": "لديك طلب توظيف نشط بالفعل لوظيفة {role}. لم أنشئ طلباً جديداً ولم أعد ضبط طلبك. يمكنك السؤال عن الحالة أو تحديث سيرتك الذاتية.",
+    },
+    "job_unavailable": {
+        "en": "This job link is not available for new applications. Please check with the company for the latest role information.",
+        "ar": "رابط الوظيفة غير متاح لطلبات جديدة. يرجى التواصل مع الشركة للحصول على أحدث معلومات الوظيفة.",
+    },
+    "job_paused": {
+        "en": "This role is temporarily not accepting new applications.",
+        "ar": "هذه الوظيفة لا تستقبل طلبات جديدة مؤقتاً.",
+    },
+    "job_closed": {
+        "en": "This role is no longer accepting new applications.",
+        "ar": "هذه الوظيفة لم تعد تستقبل طلبات جديدة.",
+    },
+    "job_deadline_passed": {
+        "en": "The application period for this role has ended.",
+        "ar": "انتهت فترة التقديم على هذه الوظيفة.",
+    },
+    "job_vacancies_exhausted": {
+        "en": "This role is no longer accepting new applications.",
+        "ar": "هذه الوظيفة لم تعد تستقبل طلبات جديدة.",
+    },
+    "cv_held_needs_role": {
+        "en": "I am holding this file temporarily, but I need one exact job before an application can start. Send the APPLY code or tell me which role you mean.",
+        "ar": "سأحتفظ بالملف مؤقتاً، لكن أحتاج تحديد وظيفة واحدة بالضبط قبل بدء طلب التوظيف. أرسل رمز APPLY أو اكتب اسم الوظيفة المقصودة.",
+    },
+    "cv_held_for_job_context": {
+        "en": "I am holding this CV temporarily for {role}. Your application has not started yet.",
+        "ar": "سأحتفظ بالسيرة الذاتية مؤقتاً لوظيفة {role}. لم يبدأ طلب التوظيف بعد.",
+    },
     "file_received_checking": {
         "en": "We received your file and are checking that it is a supported, readable CV.",
         "ar": "استلمنا الملف ونتحقق الآن من أنه سيرة ذاتية مدعومة وقابلة للقراءة.",

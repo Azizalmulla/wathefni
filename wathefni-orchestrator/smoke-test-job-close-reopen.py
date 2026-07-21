@@ -78,11 +78,24 @@ class Checks:
 def _insert_position(cur: Any, company: str, code: str, title: str, status: str, apply_code: str | None) -> None:
     cur.execute(
         """
-        INSERT INTO positions (company_code, position_code, title, status, apply_code, created_at, updated_at)
-        VALUES (%s,%s,%s,%s,%s,now(),now())
-        ON CONFLICT (company_code, position_code) DO UPDATE SET status=EXCLUDED.status, apply_code=EXCLUDED.apply_code
+        INSERT INTO positions
+          (company_code,position_code,title,title_en,status,visibility,apply_code,
+           short_summary_en,requirements_en,content_approved_en_at,location,
+           employment_type,vacancies,salary_visibility,created_at,updated_at)
+        VALUES (%s,%s,%s,%s,%s,'public',%s,%s,%s,now(),'Kuwait','full_time',1,'hr_only',now(),now())
+        ON CONFLICT (company_code, position_code) DO UPDATE
+        SET status=EXCLUDED.status,
+            apply_code=EXCLUDED.apply_code,
+            title_en=EXCLUDED.title_en,
+            visibility='public',
+            short_summary_en=EXCLUDED.short_summary_en,
+            requirements_en=EXCLUDED.requirements_en,
+            content_approved_en_at=now(),
+            location='Kuwait',
+            employment_type='full_time',
+            vacancies=1
         """,
-        (company, code, title, status, apply_code),
+        (company, code, title, title, status, apply_code, f"Candidate summary for {title}.", Json(["Relevant experience"])),
     )
 
 
@@ -111,6 +124,7 @@ def _purge(cur: Any) -> None:
 def setup() -> None:
     with app.db_connect() as conn:
         with conn.cursor() as cur:
+            app._prehire_jobs.ensure_jobs_schema(cur)
             for company in (COMPANY_A, COMPANY_B):
                 cur.execute(
                     "INSERT INTO companies (company_code, name, metadata, raw_json, created_at, updated_at) "

@@ -270,6 +270,13 @@ export type JobUpsertPayload = {
   title?: string
   title_en?: string
   title_ar?: string | null
+  visibility?: 'public' | 'share_only' | 'internal'
+  short_summary_en?: string | null
+  short_summary_ar?: string | null
+  benefits_en?: string | null
+  benefits_ar?: string | null
+  approve_content_en?: boolean
+  approve_content_ar?: boolean
   position_code?: string
   description?: string
   description_en?: string

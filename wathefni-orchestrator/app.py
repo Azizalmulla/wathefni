@@ -21530,7 +21530,94 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             "error": "unsupported_candidate_cv_media",
             **candidate_message_result("cv_invalid", request=request),
         }
-    if canonical_lifecycle_enabled():
+    caption_application = None
+    caption_apply = parse_apply_code_text(request.raw_text)
+    if caption_apply:
+        resolved_caption_role = resolve_public_role_by_apply_code(caption_apply["apply_code"])
+        caption_role = (
+            resolved_caption_role.get("role")
+            if isinstance(resolved_caption_role.get("role"), dict)
+            else None
+        )
+        if not resolved_caption_role.get("ok") or not caption_role:
+            held = hold_candidate_pending_media(request)
+            unavailable = candidate_job_unavailable_message(
+                request,
+                str(resolved_caption_role.get("error") or ""),
+            )
+            return {
+                "ok": False,
+                "error": resolved_caption_role.get("error") or "apply_code_not_found",
+                "reply": unavailable["text"],
+                "pending_media": held,
+                "application_created": False,
+            }
+        caption_application = active_same_role_application(request, caption_role)
+        if not caption_application:
+            held = hold_candidate_pending_media(request)
+            preview = candidate_job_preview_stub(request, caption_role)
+            context = upsert_candidate_job_context(
+                request,
+                role=caption_role,
+                preview_locale=preview["locale"],
+                preview_template_version=preview["template_version"],
+            )
+            held_message = candidate_message_payload(
+                "cv_held_for_job_context",
+                request=request,
+                locale=preview["locale"],
+                role=caption_role.get("title_ar")
+                if preview["locale"] == "ar"
+                else caption_role.get("title_en")
+                or caption_role.get("title")
+                or caption_role.get("position_code")
+                or "the role",
+            )
+            return {
+                "ok": True,
+                "reply": f"{preview['text']}\n\n{held_message['text']}",
+                "pending_media": held,
+                "job_context": context,
+                "role": caption_role,
+                "application_created": False,
+                "intent": "candidate_cv_caption_job_context_bound",
+            }
+    job_context = None if caption_application else active_candidate_job_context(request)
+    if job_context:
+        held = hold_candidate_pending_media(request)
+        resolved_role = resolve_public_role_by_apply_code(str(job_context.get("apply_code") or ""))
+        role = resolved_role.get("role") if isinstance(resolved_role.get("role"), dict) else None
+        if not resolved_role.get("ok") or not role:
+            unavailable = candidate_job_unavailable_message(request, str(resolved_role.get("error") or ""))
+            return {
+                "ok": False,
+                "error": resolved_role.get("error") or "job_not_accepting",
+                "reply": unavailable["text"],
+                "pending_media": held,
+                "job_context": job_context,
+            }
+        locale = _candidate_messages.normalize_locale(job_context.get("preview_locale"))
+        title = (
+            role.get("title_ar")
+            if locale == "ar"
+            else role.get("title_en")
+            or role.get("title")
+            or role.get("position_code")
+            or "the role"
+        )
+        return {
+            "ok": True,
+            **candidate_message_result("cv_held_for_job_context", request=request, locale=locale, role=title),
+            "pending_media": held,
+            "job_context": job_context,
+            "role": role,
+            "application_created": False,
+            "cv_counts_as_apply_intent": bool(job_context.get("preview_sent_at")),
+            "intent": "candidate_cv_held_for_job_context",
+        }
+    if caption_application:
+        application = caption_application
+    elif canonical_lifecycle_enabled():
         import recruiting_lifecycle as _rl
 
         resolved = _rl.resolve_conversation_application(
@@ -21542,15 +21629,14 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
         )
         if not resolved.get("ok"):
             error = str(resolved.get("error") or "ambiguous_applications")
-            if error == "no_eligible_application":
-                message = candidate_message_result("no_active_application", request=request)
-            else:
-                message = candidate_message_result("ambiguous_application", request=request)
+            held = hold_candidate_pending_media(request)
             return {
-                "ok": False,
+                "ok": True,
                 "error": error,
-                **message,
+                **candidate_message_result("cv_held_needs_role", request=request),
                 "matches": resolved.get("matches") or [],
+                "pending_media": held,
+                "application_created": False,
             }
         application = resolved.get("application")
         if not isinstance(application, dict):
@@ -21574,10 +21660,13 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
     else:
         application = find_candidate_application_for_file(request.sender_phone)
     if not application:
+        held = hold_candidate_pending_media(request)
         return {
-            "ok": False,
+            "ok": True,
             "error": "no_active_application",
-            **candidate_message_result("no_active_application", request=request),
+            **candidate_message_result("cv_held_needs_role", request=request),
+            "pending_media": held,
+            "application_created": False,
         }
     if not company_has_module(application.get("company_code"), "pre_hiring"):
         return {
@@ -23281,35 +23370,47 @@ def candidate_missing_or_next_reply(application: dict[str, Any]) -> str:
     return "Your application is in progress. I can help with your CV, quick application questions, or application status."
 
 
-def public_candidate_roles(company_code: str | None = "WATHEFNI", *, limit: int = 5) -> list[dict[str, Any]]:
-    company = str(company_code or "WATHEFNI").upper()
+def public_candidate_roles(company_code: str | None, *, limit: int = 5) -> list[dict[str, Any]]:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return []
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT position_code, title, salary_min, salary_max, currency, apply_code
+                SELECT *
                 FROM positions
                 WHERE company_code=%s
-                  AND COALESCE(status, 'open') = 'open'
+                  AND status='open'
+                  AND visibility='public'
                 ORDER BY updated_at DESC NULLS LAST, created_at DESC
                 LIMIT %s
                 """,
-                (company, limit),
+                (company, min(200, max(1, int(limit)))),
             )
             roles: list[dict[str, Any]] = []
             for row in cur.fetchall():
                 item = dict(row)
-                for key in ("salary_min", "salary_max"):
-                    if item.get(key) is not None:
-                        try:
-                            item[key] = float(item[key])
-                        except Exception:
-                            item[key] = str(item[key])
-                roles.append(json_safe(item))
+                _prehire_jobs.attach_company_display_name(cur, item)
+                vacancy = _prehire_jobs.vacancy_counts(
+                    cur,
+                    company=company,
+                    position_code=str(item.get("position_code") or ""),
+                    approved_headcount=item.get("vacancies"),
+                )
+                try:
+                    _prehire_jobs.assert_job_accepts_applications(
+                        item,
+                        vacancy=vacancy,
+                        access_mode="discovery",
+                    )
+                except _prehire_jobs.JobsError:
+                    continue
+                roles.append(json_safe(_prehire_jobs.serialize_job(item, vacancy=vacancy, include_salary=False)))
             return roles
 
 
-def public_candidate_welcome_reply(company_code: str | None = "WATHEFNI", *, locale: str = "en") -> str:
+def public_candidate_welcome_reply(company_code: str | None = None, *, locale: str = "en") -> str:
     del company_code
     return _candidate_messages.render("welcome", locale)["text"]
 
@@ -23328,8 +23429,8 @@ def role_interest_from_text(text: str | None) -> str | None:
     return cleaned or None
 
 
-def public_role_matches(query: str | None, *, company_code: str | None = "WATHEFNI") -> list[dict[str, Any]]:
-    if not query:
+def public_role_matches(query: str | None, *, company_code: str | None = None) -> list[dict[str, Any]]:
+    if not query or not str(company_code or "").strip():
         return []
     roles = public_candidate_roles(company_code, limit=50)
     terms = [term for term in normalize_text(query).split() if len(term) >= 2]
@@ -23347,40 +23448,345 @@ def public_role_matches(query: str | None, *, company_code: str | None = "WATHEF
 
 
 def parse_apply_code_text(text: str | None) -> dict[str, str] | None:
-    match = re.search(r"\b(APPLY-([A-Z0-9_]+)-([A-Z0-9_]+))\b", str(text or "").upper())
-    if not match:
+    apply_code = _prehire_jobs.extract_apply_code(text)
+    if not apply_code:
         return None
-    return {"apply_code": match.group(1), "company_code": match.group(2), "position_code": match.group(3)}
+    return {"apply_code": apply_code}
+
+
+def resolve_public_role_by_apply_code(
+    apply_code: str | None,
+    *,
+    verified_company_code: str | None = None,
+) -> dict[str, Any]:
+    parsed = parse_apply_code_text(apply_code)
+    if not parsed:
+        return {"ok": False, "error": "apply_code_not_found", "role": None}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            company = str(verified_company_code or "").strip().upper()
+            if company:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM positions
+                    WHERE upper(apply_code)=%s AND company_code=%s
+                    LIMIT 2
+                    """,
+                    (parsed["apply_code"], company),
+                )
+            else:
+                cur.execute(
+                    "SELECT * FROM positions WHERE upper(apply_code)=%s LIMIT 2",
+                    (parsed["apply_code"],),
+                )
+            rows = [dict(row) for row in cur.fetchall()]
+            if not rows:
+                return {"ok": False, "error": "apply_code_not_found", "role": None}
+            if len(rows) != 1:
+                return {"ok": False, "error": "apply_code_ambiguous", "role": None}
+            item = rows[0]
+            _prehire_jobs.attach_company_display_name(cur, item)
+            vacancy = _prehire_jobs.vacancy_counts(
+                cur,
+                company=str(item.get("company_code") or ""),
+                position_code=str(item.get("position_code") or ""),
+                approved_headcount=item.get("vacancies"),
+            )
+            try:
+                eligibility = _prehire_jobs.assert_job_accepts_applications(
+                    item,
+                    vacancy=vacancy,
+                    access_mode="exact_token",
+                )
+            except _prehire_jobs.JobsError as exc:
+                return {
+                    "ok": False,
+                    "error": exc.code,
+                    "details": exc.details,
+                    "role": None,
+                }
+            role = _prehire_jobs.serialize_job(item, vacancy=vacancy, include_salary=False)
+            role["eligibility"] = eligibility
+            return {"ok": True, "error": None, "role": json_safe(role)}
 
 
 def public_role_by_apply_code(apply_code: str | None) -> dict[str, Any] | None:
-    parsed = parse_apply_code_text(apply_code)
-    if not parsed:
+    resolved = resolve_public_role_by_apply_code(apply_code)
+    return resolved.get("role") if resolved.get("ok") and isinstance(resolved.get("role"), dict) else None
+
+
+def active_candidate_job_context(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    phone = digits(request.sender_phone)
+    if not phone:
         return None
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT company_code, position_code, title, salary_min, salary_max, currency, apply_code
-                FROM positions
-                WHERE company_code=%s
+                SELECT *
+                FROM candidate_job_contexts
+                WHERE phone=%s
+                  AND COALESCE(account_id, '')=COALESCE(%s, '')
+                  AND (%s IS NULL OR conversation_id=%s)
+                  AND status='awaiting_apply_confirmation'
+                  AND expires_at > now()
+                ORDER BY updated_at DESC
+                LIMIT 2
+                """,
+                (phone, request.account_id, request.conversation_id, request.conversation_id),
+            )
+            rows = [dict(row) for row in cur.fetchall()]
+    return json_safe(rows[0]) if len(rows) == 1 else None
+
+
+def hold_candidate_pending_media(request: WhatsAppTurnRequest) -> dict[str, Any]:
+    phone = digits(request.sender_phone)
+    media = request.media or {}
+    if not phone or not has_current_media_upload(media):
+        raise _prehire_jobs.JobsError(
+            "invalid_pending_candidate_media",
+            "The candidate file could not be held safely.",
+            http_status=409,
+        )
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE candidate_pending_media
+                SET status='expired', updated_at=now()
+                WHERE phone=%s
+                  AND COALESCE(account_id, '')=COALESCE(%s, '')
+                  AND (%s IS NULL OR conversation_id=%s)
+                  AND status='pending'
+                """,
+                (phone, request.account_id, request.conversation_id, request.conversation_id),
+            )
+            cur.execute(
+                """
+                INSERT INTO candidate_pending_media
+                (phone,account_id,conversation_id,media,raw_text,status,expires_at)
+                VALUES (%s,%s,%s,%s,%s,'pending',now() + interval '2 hours')
+                RETURNING pending_id::text,status,created_at,expires_at
+                """,
+                (
+                    phone,
+                    request.account_id,
+                    request.conversation_id,
+                    Json(json_safe(media)),
+                    str(request.raw_text or "")[:1000],
+                ),
+            )
+            row = dict(cur.fetchone())
+        conn.commit()
+    return json_safe(row)
+
+
+def upsert_candidate_job_context(
+    request: WhatsAppTurnRequest,
+    *,
+    role: dict[str, Any],
+    preview_locale: str,
+    preview_template_version: str,
+) -> dict[str, Any]:
+    phone = digits(request.sender_phone)
+    company = str(role.get("company_code") or "").strip().upper()
+    position = str(role.get("position_code") or "").strip()
+    apply_code = str(role.get("apply_code") or "").strip().upper()
+    if not phone or not company or not position or not apply_code:
+        raise _prehire_jobs.JobsError(
+            "invalid_job_context",
+            "The job context could not be bound safely.",
+            http_status=409,
+        )
+    expires_at = _prehire_jobs.job_context_expires_at(role)
+    data_source, data_source_detail = data_source_from_request(request)
+    metadata = {
+        "data_source_detail": data_source_detail,
+        "bound_reason": "exact_apply_code",
+    }
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            lock_key = "|".join((phone, str(request.account_id or ""), str(request.conversation_id or "")))
+            cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
+            cur.execute(
+                """
+                UPDATE candidate_job_contexts
+                SET status='expired', updated_at=now()
+                WHERE phone=%s
+                  AND COALESCE(account_id, '')=COALESCE(%s, '')
+                  AND (%s IS NULL OR conversation_id=%s)
+                  AND status='awaiting_apply_confirmation'
+                  AND (company_code<>%s OR position_code<>%s)
+                """,
+                (
+                    phone,
+                    request.account_id,
+                    request.conversation_id,
+                    request.conversation_id,
+                    company,
+                    position,
+                ),
+            )
+            cur.execute(
+                """
+                SELECT context_id
+                FROM candidate_job_contexts
+                WHERE phone=%s
+                  AND COALESCE(account_id, '')=COALESCE(%s, '')
+                  AND (%s IS NULL OR conversation_id=%s)
+                  AND company_code=%s
                   AND position_code=%s
-                  AND COALESCE(status, 'open') = 'open'
+                  AND status='awaiting_apply_confirmation'
+                ORDER BY updated_at DESC
+                LIMIT 1
+                FOR UPDATE
+                """,
+                (
+                    phone,
+                    request.account_id,
+                    request.conversation_id,
+                    request.conversation_id,
+                    company,
+                    position,
+                ),
+            )
+            existing = cur.fetchone()
+            if existing:
+                cur.execute(
+                    """
+                    UPDATE candidate_job_contexts
+                    SET job_id=%s,
+                        apply_code=%s,
+                        preview_rendered_at=now(),
+                        preview_locale=%s,
+                        preview_template_version=%s,
+                        metadata=COALESCE(metadata, '{}'::jsonb) || %s::jsonb,
+                        data_source=%s,
+                        updated_at=now(),
+                        expires_at=%s
+                    WHERE context_id=%s
+                    RETURNING *
+                    """,
+                    (
+                        role.get("job_id"),
+                        apply_code,
+                        preview_locale,
+                        preview_template_version,
+                        Json(json_safe(metadata)),
+                        data_source,
+                        expires_at,
+                        existing.get("context_id"),
+                    ),
+                )
+            else:
+                cur.execute(
+                    """
+                    INSERT INTO candidate_job_contexts
+                    (phone,account_id,conversation_id,company_code,position_code,job_id,apply_code,
+                     status,preview_rendered_at,preview_locale,preview_template_version,metadata,data_source,expires_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,'awaiting_apply_confirmation',now(),%s,%s,%s,%s,%s)
+                    RETURNING *
+                    """,
+                    (
+                        phone,
+                        request.account_id,
+                        request.conversation_id,
+                        company,
+                        position,
+                        role.get("job_id"),
+                        apply_code,
+                        preview_locale,
+                        preview_template_version,
+                        Json(json_safe(metadata)),
+                        data_source,
+                        expires_at,
+                    ),
+                )
+            row = dict(cur.fetchone())
+        conn.commit()
+    return json_safe(row)
+
+
+def active_same_role_application(request: WhatsAppTurnRequest, role: dict[str, Any]) -> dict[str, Any] | None:
+    phone = digits(request.sender_phone)
+    company = str(role.get("company_code") or "").strip().upper()
+    position = str(role.get("position_code") or "").strip()
+    if not phone or not company or not position:
+        return None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM applications
+                WHERE phone=%s
+                  AND company_code=%s
+                  AND position_code=%s
+                  AND LOWER(COALESCE(status, '')) NOT IN ('rejected','withdrawn','hired')
+                ORDER BY updated_at DESC NULLS LAST, ingested_at DESC NULLS LAST
                 LIMIT 1
                 """,
-                (parsed["company_code"], parsed["position_code"]),
+                (phone, company, position),
             )
             row = cur.fetchone()
-    if not row:
-        return None
-    item = dict(row)
-    for key in ("salary_min", "salary_max"):
-        if item.get(key) is not None:
-            try:
-                item[key] = float(item[key])
-            except Exception:
-                item[key] = str(item[key])
-    return json_safe(item)
+    return json_safe(dict(row)) if row else None
+
+
+def candidate_job_preview_stub(
+    request: WhatsAppTurnRequest,
+    role: dict[str, Any],
+) -> dict[str, str]:
+    requested_locale = _candidate_messages.infer_locale(
+        request.raw_text,
+        preferred=(request.metadata or {}).get("locale") if isinstance(request.metadata, dict) else None,
+    )
+    approved_en = bool(role.get("content_approved_en"))
+    approved_ar = bool(role.get("content_approved_ar"))
+    if requested_locale == "ar" and approved_ar:
+        locale = "ar"
+    elif requested_locale == "en" and approved_en:
+        locale = "en"
+    elif approved_ar:
+        locale = "ar"
+    else:
+        locale = "en"
+    title = (
+        role.get("title_ar")
+        if locale == "ar" and role.get("title_ar")
+        else role.get("title_en")
+        or role.get("title")
+        or role.get("position_code")
+    )
+    summary = (
+        role.get("short_summary_ar")
+        if locale == "ar"
+        else role.get("short_summary_en")
+        or ""
+    )
+    location = str(role.get("location") or "").strip()
+    arrangement = str(role.get("work_arrangement") or "").strip()
+    employment = str(role.get("employment_type") or "").strip()
+    place = location or arrangement
+    facts = " · ".join(item for item in (place, employment) if item)
+    return _candidate_messages.render(
+        "job_context_ready",
+        locale,
+        role=title,
+        company=role.get("company_display_name") or role.get("company_code") or "",
+        facts=facts,
+        summary=summary,
+    )
+
+
+def candidate_job_unavailable_message(request: WhatsAppTurnRequest, reason: str | None) -> dict[str, str]:
+    key = {
+        "job_paused": "job_paused",
+        "job_closed": "job_closed",
+        "job_deadline_passed": "job_deadline_passed",
+        "job_vacancies_exhausted": "job_vacancies_exhausted",
+    }.get(str(reason or ""), "job_unavailable")
+    return candidate_message_payload(key, request=request)
 
 
 PUBLIC_CANDIDATE_SCOPE = "public_candidate_options"
@@ -23415,8 +23821,24 @@ def upsert_public_candidate_session(
     pending_media: dict[str, Any] | None = None,
     metadata: dict[str, Any] | None = None,
     status: str = "active",
+    company_code: str | None = None,
 ) -> dict[str, Any]:
-    company_code = request_company_code(request) or "WATHEFNI"
+    role_company = next(
+        (str(role.get("company_code") or "").strip().upper() for role in roles or [] if str(role.get("company_code") or "").strip()),
+        "",
+    )
+    company_code = str(
+        company_code
+        or role_company
+        or request_company_code(request, default=None)
+        or ""
+    ).strip().upper()
+    if not company_code:
+        raise _prehire_jobs.JobsError(
+            "candidate_company_context_required",
+            "A verified company or exact APPLY code is required.",
+            http_status=409,
+        )
     existing = active_public_candidate_session(request)
     merged_metadata = {}
     if existing and isinstance(existing.get("metadata"), dict):
@@ -23492,7 +23914,7 @@ def complete_public_candidate_session(request: WhatsAppTurnRequest) -> None:
 
 def start_public_candidate_application(request: WhatsAppTurnRequest, role: dict[str, Any]) -> dict[str, Any] | None:
     phone = digits(request.sender_phone)
-    company = str(role.get("company_code") or request_company_code(request) or "WATHEFNI").upper()
+    company = str(role.get("company_code") or "").strip().upper()
     position = str(role.get("position_code") or "").strip()
     if not phone or not position:
         return None
@@ -23730,171 +24152,98 @@ def parse_public_role_selection_with_gpt(text: str, roles: list[dict[str, Any]])
 def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
     if has_current_media_upload(request.media or {}):
         return None
-    if candidate_active_application(request.sender_phone):
-        return None
     roles = load_public_candidate_options(request)
     if not roles:
         return None
-    session = active_public_candidate_session(request)
-    normalized = normalize_text(request.raw_text)
-    confirmation_words = {"yes", "y", "confirm", "go ahead", "start", "start it", "apply", "نعم", "تأكيد", "ابدأ", "ابدا", "قدم"}
-    if session and session.get("selected_position_code") and normalized in confirmation_words:
-        role = next((item for item in roles if str(item.get("position_code") or "") == str(session.get("selected_position_code") or "")), None)
-        if role:
-            application = start_public_candidate_application(request, role)
-            if application:
-                if application.get("binding_error"):
-                    return {
-                        "error": application.get("binding_error"),
-                        **candidate_message_result("ambiguous_application", request=request),
-                        "application": application,
-                    }
-                cv_result = attach_public_pending_cv_to_application(request, application, session)
-                complete_public_candidate_session(request)
-                if cv_result and cv_result.get("ok"):
-                    return {
-                        **candidate_message_result(
-                            "file_received_checking",
-                            request=request,
-                            application=application,
-                        ),
-                        "role": role,
-                        "application": application,
-                        "cv_result": json_safe(cv_result),
-                        "intent": "public_candidate_application_started_with_cv",
-                        "turn_focus": "public_candidate",
-                    }
-                return {
-                    **candidate_message_result(
-                        "role_resolved_cv_request",
-                        request=request,
-                        application=application,
-                        role=role.get("title") or role.get("position_code") or "the role",
-                    ),
-                    "role": role,
-                    "application": application,
-                    "intent": "public_candidate_application_started",
-                    "turn_focus": "public_candidate",
-                }
     selected = parse_public_role_selection_deterministic(request.raw_text, roles)
     if selected is None:
         selected = parse_public_role_selection_with_gpt(request.raw_text or "", roles)
     if selected is None or not (1 <= selected <= len(roles)):
         return None
     role = roles[selected - 1]
-    session = upsert_public_candidate_session(request, selected_position_code=str(role.get("position_code") or ""), metadata={"selected_role": role})
-    if normalized in confirmation_words or "start" in normalized:
-        application = start_public_candidate_application(request, role)
-        if application:
-            if application.get("binding_error"):
-                return {
-                    "error": application.get("binding_error"),
-                    **candidate_message_result("ambiguous_application", request=request),
-                    "application": application,
-                }
-            cv_result = attach_public_pending_cv_to_application(request, application, session)
-            complete_public_candidate_session(request)
-            if cv_result and cv_result.get("ok"):
-                return {
-                    **candidate_message_result(
-                        "file_received_checking",
-                        request=request,
-                        application=application,
-                    ),
-                    "role": role,
-                    "application": application,
-                    "cv_result": json_safe(cv_result),
-                    "intent": "public_candidate_application_started_with_cv",
-                    "turn_focus": "public_candidate",
-                }
-            return {
-                **candidate_message_result(
-                    "role_resolved_cv_request",
-                    request=request,
-                    application=application,
-                    role=role.get("title") or role.get("position_code") or "the role",
-                ),
-                "role": role,
-                "application": application,
-                "intent": "public_candidate_application_started",
-                "turn_focus": "public_candidate",
-            }
-    has_pending_cv = isinstance((session or {}).get("pending_media"), dict) and bool((session or {}).get("pending_media", {}).get("media"))
-    suffix = "\n\nReply “start” and I’ll start it and attach the CV you already sent." if has_pending_cv else "\n\nOr reply “start” and I’ll start it for you."
+    preview = candidate_job_preview_stub(request, role)
+    context = upsert_candidate_job_context(
+        request,
+        role=role,
+        preview_locale=preview["locale"],
+        preview_template_version=preview["template_version"],
+    )
+    session = upsert_public_candidate_session(
+        request,
+        roles=roles,
+        selected_position_code=str(role.get("position_code") or ""),
+        metadata={"selected_role": role},
+        company_code=str(role.get("company_code") or ""),
+    )
     return {
-        "reply": f"Great — {role.get('title') or role.get('position_code')}.\n\nSend this APPLY code to start:\n\n{role.get('apply_code')}{suffix}",
+        "reply": preview["text"],
         "role": role,
         "session": session,
-        "intent": "public_candidate_role_selected",
+        "job_context": context,
+        "application_created": False,
+        "intent": "public_candidate_job_context_bound",
         "turn_focus": "public_candidate",
     }
 
 
 def handle_public_candidate_apply_code_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
-    if candidate_active_application(request.sender_phone):
-        return None
     parsed = parse_apply_code_text(request.raw_text)
     if not parsed:
         return None
-    role = public_role_by_apply_code(parsed["apply_code"])
-    if not role:
+    resolved = resolve_public_role_by_apply_code(parsed["apply_code"])
+    role = resolved.get("role") if isinstance(resolved.get("role"), dict) else None
+    if not resolved.get("ok") or not role:
+        message = candidate_job_unavailable_message(request, str(resolved.get("error") or ""))
         return {
-            "reply": "I couldn’t find an open role for that APPLY code. Please check the code or ask the company for the latest job QR.",
+            "reply": message["text"],
+            "error": resolved.get("error") or "apply_code_not_found",
+            "eligibility": resolved.get("details"),
             "intent": "public_candidate_apply_code_not_found",
             "turn_focus": "public_candidate",
         }
+    existing_application = active_same_role_application(request, role)
+    if existing_application:
+        payload = candidate_message_payload(
+            "job_context_existing_application",
+            request=request,
+            application=existing_application,
+            role=role.get("title_en") or role.get("title") or role.get("position_code") or "the role",
+        )
+        return {
+            "reply": payload["text"],
+            "role": role,
+            "application": existing_application,
+            "application_created": False,
+            "intent": "public_candidate_existing_application",
+            "turn_focus": "public_candidate",
+        }
+    preview = candidate_job_preview_stub(request, role)
+    context = upsert_candidate_job_context(
+        request,
+        role=role,
+        preview_locale=preview["locale"],
+        preview_template_version=preview["template_version"],
+    )
     session = upsert_public_candidate_session(
         request,
         roles=[role],
         selected_position_code=str(role.get("position_code") or ""),
         metadata={"source": "apply_code", "apply_code": parsed["apply_code"]},
+        company_code=str(role.get("company_code") or ""),
     )
-    application = start_public_candidate_application(request, role)
-    if not application:
-        return {
-            "reply": "I found the role, but I couldn’t start the application safely. Please try again in a moment.",
-            "role": role,
-            "session": session,
-            "intent": "public_candidate_apply_code_start_failed",
-            "turn_focus": "public_candidate",
-        }
-    if application.get("binding_error"):
-        return {
-            "error": application.get("binding_error"),
-            **candidate_message_result("ambiguous_application", request=request),
-            "role": role,
-            "application": application,
-            "intent": "public_candidate_application_binding_failed",
-            "turn_focus": "public_candidate",
-        }
-    cv_result = attach_public_pending_cv_to_application(request, application, session)
-    complete_public_candidate_session(request)
-    if cv_result and cv_result.get("ok"):
-        reply = candidate_message_payload(
-            "file_received_checking",
-            request=request,
-            application=application,
-        )["text"]
-    else:
-        reply = candidate_message_payload(
-            "role_resolved_cv_request",
-            request=request,
-            application=application,
-            role=role.get("title") or role.get("position_code") or "the role",
-        )["text"]
     return {
-        "reply": reply,
+        "reply": preview["text"],
         "role": role,
-        "application": application,
-        "cv_result": json_safe(cv_result) if cv_result else None,
-        "intent": "public_candidate_apply_code_started",
+        "session": session,
+        "job_context": context,
+        "application": None,
+        "application_created": False,
+        "intent": "public_candidate_apply_code_context_bound",
         "turn_focus": "public_candidate",
     }
 
 
 def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
-    if candidate_active_application(request.sender_phone):
-        return None
     pending_media = None
     if has_current_media_upload(request.media or {}):
         pending_media = {
@@ -23905,21 +24254,35 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
     query = role_interest_from_text(request.raw_text)
     if not query and not pending_media:
         return None
+    company = request_company_code(request, default=None)
     if not query and pending_media:
-        roles = public_candidate_roles(request_company_code(request), limit=5)
-        upsert_public_candidate_session(request, roles=roles, pending_media=pending_media, metadata={"source": "pending_cv_without_role"})
+        roles = public_candidate_roles(company, limit=5) if company else []
+        if company:
+            upsert_public_candidate_session(
+                request,
+                roles=roles,
+                pending_media=pending_media,
+                metadata={"source": "pending_cv_without_role"},
+                company_code=company,
+            )
         return {
             **candidate_message_result("no_active_application", request=request),
             "roles": roles,
             "intent": "public_candidate_pending_cv_needs_role",
             "turn_focus": "public_candidate",
         }
-    matches = public_role_matches(query)
+    matches = public_role_matches(query, company_code=company)
     if not matches:
         if pending_media:
-            upsert_public_candidate_session(request, pending_media=pending_media, metadata={"source": "pending_cv_no_role_match", "query": query})
+            if company:
+                upsert_public_candidate_session(
+                    request,
+                    pending_media=pending_media,
+                    metadata={"source": "pending_cv_no_role_match", "query": query},
+                    company_code=company,
+                )
         return {
-            **candidate_message_result("ambiguous_application", request=request),
+            **candidate_message_result("welcome", request=request),
             "intent": "public_candidate_apply_help",
             "turn_focus": "public_candidate",
         }
@@ -23931,33 +24294,32 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
             selected_position_code=str(role.get("position_code") or ""),
             pending_media=pending_media,
             metadata={"source": "single_role_match", "query": query},
+            company_code=str(role.get("company_code") or ""),
         )
-        application = start_public_candidate_application(request, role)
-        if not application or application.get("binding_error"):
-            return {
-                "error": (application or {}).get("binding_error") or "application_start_failed",
-                **candidate_message_result("ambiguous_application", request=request),
-                "role": role,
-                "intent": "public_candidate_role_start_failed",
-                "turn_focus": "public_candidate",
-            }
-        cv_result = attach_public_pending_cv_to_application(request, application, session)
-        complete_public_candidate_session(request)
-        template_key = "file_received_checking" if cv_result and cv_result.get("ok") else "role_resolved_cv_request"
+        preview = candidate_job_preview_stub(request, role)
+        context = upsert_candidate_job_context(
+            request,
+            role=role,
+            preview_locale=preview["locale"],
+            preview_template_version=preview["template_version"],
+        )
         return {
-            **candidate_message_result(
-                template_key,
-                request=request,
-                application=application,
-                role=role.get("title") or role.get("position_code") or "the role",
-            ),
+            "reply": preview["text"],
             "role": role,
-            "application": application,
-            "cv_result": json_safe(cv_result) if cv_result else None,
-            "intent": "public_candidate_role_started",
+            "session": session,
+            "job_context": context,
+            "application": None,
+            "application_created": False,
+            "intent": "public_candidate_role_context_bound",
             "turn_focus": "public_candidate",
         }
-    upsert_public_candidate_session(request, roles=matches, pending_media=pending_media, metadata={"source": "role_options", "query": query})
+    upsert_public_candidate_session(
+        request,
+        roles=matches,
+        pending_media=pending_media,
+        metadata={"source": "role_options", "query": query},
+        company_code=company,
+    )
     return {
         **candidate_message_result("ambiguous_application", request=request),
         "roles": matches,
@@ -40457,6 +40819,7 @@ def _dashboard_prehire_positions_query(
                 combined AS (
                   SELECT
                     p.*,
+                    NULLIF(TRIM(c.name), '') AS company_display_name,
                     COALESCE(p.title, p.position_code) AS position_title,
                     lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) AS effective_status,
                     COALESCE(s.application_count, 0) AS application_count,
@@ -40471,6 +40834,7 @@ def _dashboard_prehire_positions_query(
                     l.latest_phone,
                     l.latest_candidate_name
                   FROM positions p
+                  LEFT JOIN companies c ON c.company_code=p.company_code
                   LEFT JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
                   LEFT JOIN latest l ON l.company_code=p.company_code AND l.position_code=p.position_code
                   WHERE p.company_code=%s
@@ -44913,6 +45277,12 @@ class DashboardJobUpsert(BaseModel):
     description: str | None = None
     description_en: str | None = None
     description_ar: str | None = None
+    short_summary_en: str | None = None
+    short_summary_ar: str | None = None
+    benefits_en: str | None = None
+    benefits_ar: str | None = None
+    approve_content_en: bool | None = None
+    approve_content_ar: bool | None = None
     requirements: list[Any] | None = None
     requirements_en: list[Any] | None = None
     requirements_ar: list[Any] | None = None
@@ -44921,6 +45291,7 @@ class DashboardJobUpsert(BaseModel):
     employment_type: str | None = None
     work_arrangement: str | None = None
     contract_type: str | None = None
+    visibility: str | None = None
     salary_min: float | None = None
     salary_max: float | None = None
     currency: str | None = None
@@ -44986,8 +45357,12 @@ def dashboard_prehire_update_position(
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
     company = require_jobs_permission(context, "jobs.edit")
-    payload = {k: v for k, v in request.model_dump().items() if k not in {"save_as_draft"} and v is not None}
-    # Allow explicit null clears for optional text via present keys in raw body is complex; Phase 1 keeps provided fields.
+    controls = {"save_as_draft", "expected_updated_at", "expected_version"}
+    payload = {
+        key: value
+        for key, value in request.model_dump().items()
+        if key in request.model_fields_set and key not in controls
+    }
     try:
         job = _prehire_jobs.update_job(
             company=company,

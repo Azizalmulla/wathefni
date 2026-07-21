@@ -364,12 +364,25 @@ export type PositionsResponse = {
 
 export type PositionSummary = {
   company_code?: string
+  company_display_name?: string | null
   job_id?: string | null
   position_code: string
   position_title: string
   title?: string
   title_en?: string
   title_ar?: string | null
+  visibility?: 'public' | 'share_only' | 'internal'
+  short_summary_en?: string | null
+  short_summary_ar?: string | null
+  benefits_en?: string | null
+  benefits_ar?: string | null
+  content_approved_en?: boolean
+  content_approved_ar?: boolean
+  content_approved_en_at?: string | null
+  content_approved_ar_at?: string | null
+  publish_ready?: boolean
+  publish_blockers?: string[]
+  eligibility_reason?: string | null
   job_key?: string
   application_key?: string
   apply_code?: string
