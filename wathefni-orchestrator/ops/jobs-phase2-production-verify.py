@@ -509,7 +509,7 @@ def main() -> int:
                     """,
                     (
                         f"{MARKER}-FULL-HIRED",
-                        PHONES[1],
+                        PHONES[0],
                         COMPANY,
                         full_code,
                         orch.Json({"marker": MARKER}),
