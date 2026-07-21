@@ -37,8 +37,8 @@ not be changed without a new, explicitly approved Jobs change contract:
 
 - Position: `J2P2_PROD_TEST`
 - APPLY code: `APPLY-WATHEFNI-J2P2_PROD_TEST`
-- WhatsApp: `96599338566`
-- Link: `https://wa.me/96599338566?text=APPLY-WATHEFNI-J2P2_PROD_TEST`
+- WhatsApp: `96597453460`
+- Link: `https://wa.me/96597453460?text=APPLY-WATHEFNI-J2P2_PROD_TEST`
 - State: open, public, shareable, accepts applications, 25 vacancies.
 
 ## Backup and rollback

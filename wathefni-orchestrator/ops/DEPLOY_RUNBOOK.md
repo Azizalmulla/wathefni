@@ -19,7 +19,7 @@ Staging is internal-only. Reach it with an SSH tunnel:
 ```
 ssh -N -L 8011:127.0.0.1:8011 root@<vps>
 # then open http://127.0.0.1:8011/dashboard  (use the STAGING dashboard token from
-#   /root/.openclaw/secrets/postgres.staging.env, with an HR phone e.g. 96599338566)
+#   /root/.openclaw/secrets/postgres.staging.env, with the Wathefni business number 96597453460)
 ```
 
 ## Delivery safety

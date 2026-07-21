@@ -263,7 +263,7 @@ def main() -> int:
     os.environ["WATHEFNI_STAGE_B_PUBLIC_POSITIONS"] = OWNER_JOB
     os.environ["WATHEFNI_STAGE_B_PUBLIC_APPLY_CODES"] = OWNER_APPLY
     os.environ["WATHEFNI_STAGE_B_RATE_LIMIT_PER_HOUR"] = "8"
-    os.environ["WATHEFNI_APPLY_WHATSAPP_NUMBER"] = "96599338566"
+    os.environ["WATHEFNI_APPLY_WHATSAPP_NUMBER"] = "96597453460"
 
     orch.ensure_schema(force=True)
     owner_job = ensure_owner_job()
