@@ -1,6 +1,6 @@
 # Jobs Phase 2 — Stage B Assessment & Contained Implementation Plan
 
-**Mode:** Design / audit only. **Do not implement until owner approval.**  
+**Mode:** Implemented on staging (allowlisted canary). Production remains unchanged / not enabled.  
 **Depends on frozen Stage A:** authority `6745622…`, share-surface `62f13c9…`, staging-green `faab3619…`.
 
 ## 1. Goal

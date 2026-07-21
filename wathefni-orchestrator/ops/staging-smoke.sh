@@ -196,6 +196,16 @@ WATHEFNI_STAGE_A_SMOKE_ACK=staging-only \
 SMOKE_COMPANY=WATHEFNI \
 "$VENV_PY" smoke-test-jobs-phase2-stage-a.py | sed 's/^/    /'
 
+log "jobs phase2 stage B unit (confirm parse + exact job scope fail-closed)"
+WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-jobs-phase2-stage-b-unit.py | sed 's/^/    /'
+
+log "jobs phase2 stage B matrix (convert + public canary job isolation; staging DB only)"
+WATHEFNI_DELIVERY_MODE=dry_run \
+WATHEFNI_ENVIRONMENT=staging \
+WATHEFNI_STAGE_B_SMOKE_ACK=staging-only \
+SMOKE_COMPANY=WATHEFNI \
+"$VENV_PY" smoke-test-jobs-phase2-stage-b.py | sed 's/^/    /'
+
 log "assessments pagination (true company-wide totals/status-counts/average over paged attempts, awaiting-assessment filter matches headline count, tenant-scoped, staging DB)"
 WATHEFNI_DELIVERY_MODE=dry_run "$VENV_PY" smoke-test-assessments-pagination.py | sed 's/^/    /'
 

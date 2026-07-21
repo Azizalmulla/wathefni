@@ -82,6 +82,7 @@ import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import prehire_overview as _prehire_overview  # noqa: E402
 import prehire_jobs as _prehire_jobs  # noqa: E402
+import jobs_phase2_stage_b as _jobs_stage_b  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
 
 logger = logging.getLogger("wathefni")
@@ -21562,6 +21563,18 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
                 preview_locale=preview["locale"],
                 preview_template_version=preview["template_version"],
             )
+            delivery = None
+            if _jobs_stage_b.stage_b_enabled():
+                delivery = _jobs_stage_b.deliver_and_stamp_job_preview(
+                    sys.modules[__name__],
+                    request=request,
+                    context=context,
+                    preview_text=preview["text"],
+                    company_code=str(caption_role.get("company_code") or ""),
+                )
+                refreshed = active_candidate_job_context(request)
+                if refreshed:
+                    context = refreshed
             held_message = candidate_message_payload(
                 "cv_held_for_job_context",
                 request=request,
@@ -21573,11 +21586,16 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
                 or caption_role.get("position_code")
                 or "the role",
             )
+            reply_text = f"{preview['text']}\n\n{held_message['text']}"
+            if delivery and delivery.get("suppress_reply"):
+                # Preview already live-sent; still send held note via channel.
+                reply_text = held_message["text"]
             return {
                 "ok": True,
-                "reply": f"{preview['text']}\n\n{held_message['text']}",
+                "reply": reply_text,
                 "pending_media": held,
                 "job_context": context,
+                "preview_delivery": delivery,
                 "role": caption_role,
                 "application_created": False,
                 "intent": "candidate_cv_caption_job_context_bound",
@@ -21605,6 +21623,82 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             or role.get("position_code")
             or "the role"
         )
+        # Stage B: CV after preview_sent_at counts as apply intent → convert
+        # only for the dedicated public canary job.
+        if job_context.get("preview_sent_at") and _jobs_stage_b.stage_b_convert_allowed_for_job(
+            position_code=str(job_context.get("position_code") or ""),
+            apply_code=str(job_context.get("apply_code") or ""),
+        ):
+            provider_id = ""
+            if isinstance(request.metadata, dict):
+                provider_id = str(
+                    request.metadata.get("provider_message_id")
+                    or request.metadata.get("message_id")
+                    or ""
+                )
+            pending_id = str(held.get("pending_id") or "")
+            idem = f"{_jobs_stage_b.CONVERT_CV_PREFIX}{job_context.get('context_id')}:{pending_id or provider_id or 'cv'}"
+            converted = _jobs_stage_b.convert_job_context_to_application(
+                sys.modules[__name__],
+                request,
+                trigger="qualifying_cv",
+                idempotency_key=idem,
+                media=media,
+            )
+            if converted.get("ok"):
+                application = converted.get("application") if isinstance(converted.get("application"), dict) else None
+                if converted.get("existing_application"):
+                    return {
+                        "ok": True,
+                        **candidate_message_result(
+                            "job_context_existing_application",
+                            request=request,
+                            application=application,
+                            locale=locale,
+                            role=title,
+                        ),
+                        "application": application,
+                        "application_created": False,
+                        "job_context": converted.get("job_context"),
+                        "convert": converted,
+                        "pending_media": held,
+                        "cv_counts_as_apply_intent": True,
+                        "intent": "candidate_cv_qualifying_existing",
+                    }
+                cv_attach = converted.get("cv_attach") if isinstance(converted.get("cv_attach"), dict) else None
+                if cv_attach and cv_attach.get("ok"):
+                    return {
+                        "ok": True,
+                        **candidate_message_result(
+                            "file_received_checking",
+                            request=request,
+                            application=application,
+                            locale=locale,
+                        ),
+                        "application": application,
+                        "application_created": bool(converted.get("application_created")),
+                        "job_context": converted.get("job_context"),
+                        "convert": converted,
+                        "cv_counts_as_apply_intent": True,
+                        "intent": "candidate_cv_qualifying_converted",
+                    }
+                return {
+                    "ok": True,
+                    **candidate_message_result(
+                        "role_resolved_cv_request",
+                        request=request,
+                        application=application,
+                        locale=locale,
+                        role=title,
+                    ),
+                    "application": application,
+                    "application_created": bool(converted.get("application_created")),
+                    "job_context": converted.get("job_context"),
+                    "convert": converted,
+                    "cv_counts_as_apply_intent": True,
+                    "intent": "candidate_cv_qualifying_converted_no_attach",
+                }
+            # Convert failed after hold — keep Stage A hold reply for safety.
         return {
             "ok": True,
             **candidate_message_result("cv_held_for_job_context", request=request, locale=locale, role=title),
@@ -23601,6 +23695,19 @@ def upsert_candidate_job_context(
         )
     expires_at = _prehire_jobs.job_context_expires_at(role)
     data_source, data_source_detail = data_source_from_request(request)
+    request_metadata = request.metadata if isinstance(request.metadata, dict) else {}
+    source_channel = str(
+        request_metadata.get("source_channel")
+        or request_metadata.get("provider")
+        or request_metadata.get("channel")
+        or ""
+    ).strip() or None
+    source_ref_token = str(
+        request_metadata.get("source_ref_token")
+        or request_metadata.get("ref_token")
+        or ""
+    ).strip() or None
+    source_campaign = str(request_metadata.get("source_campaign") or "").strip() or None
     metadata = {
         "data_source_detail": data_source_detail,
         "bound_reason": "exact_apply_code",
@@ -23663,6 +23770,9 @@ def upsert_candidate_job_context(
                         preview_template_version=%s,
                         metadata=COALESCE(metadata, '{}'::jsonb) || %s::jsonb,
                         data_source=%s,
+                        source_channel=%s,
+                        source_ref_token=%s,
+                        source_campaign=%s,
                         updated_at=now(),
                         expires_at=%s
                     WHERE context_id=%s
@@ -23675,6 +23785,9 @@ def upsert_candidate_job_context(
                         preview_template_version,
                         Json(json_safe(metadata)),
                         data_source,
+                        source_channel,
+                        source_ref_token,
+                        source_campaign,
                         expires_at,
                         existing.get("context_id"),
                     ),
@@ -23684,8 +23797,9 @@ def upsert_candidate_job_context(
                     """
                     INSERT INTO candidate_job_contexts
                     (phone,account_id,conversation_id,company_code,position_code,job_id,apply_code,
-                     status,preview_rendered_at,preview_locale,preview_template_version,metadata,data_source,expires_at)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,'awaiting_apply_confirmation',now(),%s,%s,%s,%s,%s)
+                     status,preview_rendered_at,preview_locale,preview_template_version,metadata,data_source,
+                     source_channel,source_ref_token,source_campaign,expires_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,'awaiting_apply_confirmation',now(),%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING *
                     """,
                     (
@@ -23700,6 +23814,9 @@ def upsert_candidate_job_context(
                         preview_template_version,
                         Json(json_safe(metadata)),
                         data_source,
+                        source_channel,
+                        source_ref_token,
+                        source_campaign,
                         expires_at,
                     ),
                 )
@@ -24175,11 +24292,27 @@ def handle_public_candidate_role_selection_turn(request: WhatsAppTurnRequest) ->
         metadata={"selected_role": role},
         company_code=str(role.get("company_code") or ""),
     )
+    reply_text = preview["text"]
+    delivery = None
+    if _jobs_stage_b.stage_b_enabled():
+        delivery = _jobs_stage_b.deliver_and_stamp_job_preview(
+            sys.modules[__name__],
+            request=request,
+            context=context,
+            preview_text=preview["text"],
+            company_code=str(role.get("company_code") or ""),
+        )
+        if delivery.get("suppress_reply"):
+            reply_text = None
+        refreshed = active_candidate_job_context(request)
+        if refreshed:
+            context = refreshed
     return {
-        "reply": preview["text"],
+        "reply": reply_text,
         "role": role,
         "session": session,
         "job_context": context,
+        "preview_delivery": delivery,
         "application_created": False,
         "intent": "public_candidate_job_context_bound",
         "turn_focus": "public_candidate",
@@ -24231,14 +24364,177 @@ def handle_public_candidate_apply_code_turn(request: WhatsAppTurnRequest) -> dic
         metadata={"source": "apply_code", "apply_code": parsed["apply_code"]},
         company_code=str(role.get("company_code") or ""),
     )
+    delivery = None
+    reply_text = preview["text"]
+    if _jobs_stage_b.stage_b_enabled():
+        delivery = _jobs_stage_b.deliver_and_stamp_job_preview(
+            sys.modules[__name__],
+            request=request,
+            context=context,
+            preview_text=preview["text"],
+            company_code=str(role.get("company_code") or ""),
+        )
+        if delivery.get("suppress_reply"):
+            reply_text = None
+        # Refresh context after stamp
+        refreshed = active_candidate_job_context(request)
+        if refreshed:
+            context = refreshed
     return {
-        "reply": preview["text"],
+        "reply": reply_text,
         "role": role,
         "session": session,
         "job_context": context,
+        "preview_delivery": delivery,
         "application": None,
         "application_created": False,
         "intent": "public_candidate_apply_code_context_bound",
+        "turn_focus": "public_candidate",
+    }
+
+
+def handle_candidate_apply_confirm_turn(request: WhatsAppTurnRequest) -> dict[str, Any] | None:
+    """Stage B: explicit ready-to-apply confirmation while a unique context is bound."""
+    if has_current_media_upload(request.media or {}):
+        return None
+    if not _jobs_stage_b.parse_apply_confirm(request.raw_text):
+        return None
+    if not _jobs_stage_b.stage_b_enabled():
+        return None
+    context = active_candidate_job_context(request)
+    if not context:
+        return None
+    # Public canary job gate: Stage B convert only for dedicated position/APPLY code.
+    if not _jobs_stage_b.stage_b_convert_allowed_for_job(
+        position_code=str(context.get("position_code") or ""),
+        apply_code=str(context.get("apply_code") or ""),
+    ):
+        # Non-canary contexts stay Stage A (no convert). Do not claim success.
+        return None
+    if not context.get("preview_sent_at"):
+        # Deterministic nudge — do not convert without delivery truth.
+        locale = _candidate_messages.normalize_locale(context.get("preview_locale"))
+        return {
+            **candidate_message_result(
+                "apply_confirm_needed",
+                request=request,
+                locale=locale,
+                role=context.get("position_code") or "the role",
+            ),
+            "job_context": context,
+            "application_created": False,
+            "intent": "candidate_apply_confirm_awaiting_preview_sent",
+            "turn_focus": "public_candidate",
+        }
+    provider_id = ""
+    if isinstance(request.metadata, dict):
+        provider_id = str(
+            request.metadata.get("provider_message_id")
+            or request.metadata.get("message_id")
+            or request.metadata.get("wamid")
+            or ""
+        )
+    idem = f"{_jobs_stage_b.CONVERT_CONFIRM_PREFIX}{context.get('context_id')}:{provider_id or 'confirm'}"
+    converted = _jobs_stage_b.convert_job_context_to_application(
+        sys.modules[__name__],
+        request,
+        trigger="apply_confirm",
+        idempotency_key=idem,
+    )
+    if not converted.get("ok"):
+        error = str(converted.get("error") or "convert_failed")
+        if error in {
+            "job_paused",
+            "job_closed",
+            "job_deadline_passed",
+            "job_vacancies_exhausted",
+            "job_visibility_denied",
+            "job_content_incomplete",
+            "job_not_accepting",
+            "apply_code_not_found",
+        }:
+            unavailable = candidate_job_unavailable_message(request, error)
+            return {
+                "reply": unavailable["text"],
+                "error": error,
+                "application_created": False,
+                "intent": "candidate_apply_confirm_rejected",
+                "turn_focus": "public_candidate",
+            }
+        if error == "stage_b_rate_limited":
+            return {
+                "reply": (
+                    "Please wait before starting another application. "
+                    "If you already applied for this role, ask for your status or send your CV."
+                ),
+                "error": error,
+                "application_created": False,
+                "intent": "candidate_apply_confirm_rate_limited",
+                "turn_focus": "public_candidate",
+            }
+        return {
+            **candidate_message_result("no_active_application", request=request),
+            "error": error,
+            "application_created": False,
+            "intent": "candidate_apply_confirm_rejected",
+            "turn_focus": "public_candidate",
+        }
+    application = converted.get("application") if isinstance(converted.get("application"), dict) else None
+    role = converted.get("role") if isinstance(converted.get("role"), dict) else {}
+    locale = _candidate_messages.normalize_locale((application or {}).get("raw_json", {}).get("candidate_locale") if application else context.get("preview_locale"))
+    title = (
+        role.get("title_ar")
+        if locale == "ar" and role.get("title_ar")
+        else role.get("title_en")
+        or role.get("title")
+        or role.get("position_code")
+        or "the role"
+    )
+    if converted.get("existing_application"):
+        return {
+            **candidate_message_result(
+                "job_context_existing_application",
+                request=request,
+                application=application,
+                locale=locale,
+                role=title,
+            ),
+            "application": application,
+            "application_created": False,
+            "job_context": converted.get("job_context"),
+            "convert": converted,
+            "intent": "candidate_apply_confirm_existing",
+            "turn_focus": "public_candidate",
+        }
+    cv_attach = converted.get("cv_attach") if isinstance(converted.get("cv_attach"), dict) else None
+    if cv_attach and cv_attach.get("ok"):
+        return {
+            **candidate_message_result(
+                "file_received_checking",
+                request=request,
+                application=application,
+                locale=locale,
+            ),
+            "application": application,
+            "application_created": bool(converted.get("application_created")),
+            "job_context": converted.get("job_context"),
+            "convert": converted,
+            "intent": "candidate_apply_confirm_converted_with_cv",
+            "turn_focus": "public_candidate",
+        }
+    return {
+        **candidate_message_result(
+            "role_resolved_cv_request",
+            request=request,
+            application=application,
+            locale=locale,
+            role=title,
+        ),
+        "application": application,
+        "application_created": bool(converted.get("application_created")),
+        "job_context": converted.get("job_context"),
+        "convert": converted,
+        "intent": "candidate_apply_confirm_converted",
         "turn_focus": "public_candidate",
     }
 
@@ -24303,11 +24599,27 @@ def handle_public_candidate_apply_interest_turn(request: WhatsAppTurnRequest) ->
             preview_locale=preview["locale"],
             preview_template_version=preview["template_version"],
         )
+        reply_text = preview["text"]
+        delivery = None
+        if _jobs_stage_b.stage_b_enabled():
+            delivery = _jobs_stage_b.deliver_and_stamp_job_preview(
+                sys.modules[__name__],
+                request=request,
+                context=context,
+                preview_text=preview["text"],
+                company_code=str(role.get("company_code") or ""),
+            )
+            if delivery.get("suppress_reply"):
+                reply_text = None
+            refreshed = active_candidate_job_context(request)
+            if refreshed:
+                context = refreshed
         return {
-            "reply": preview["text"],
+            "reply": reply_text,
             "role": role,
             "session": session,
             "job_context": context,
+            "preview_delivery": delivery,
             "application": None,
             "application_created": False,
             "intent": "public_candidate_role_context_bound",
@@ -25251,6 +25563,7 @@ def handle_non_hr_conversational_turn(request: WhatsAppTurnRequest) -> dict[str,
         ("candidate_status", "candidate_application_status", "candidate_status", handle_candidate_application_status_turn),
         ("candidate_handoff_pause", "candidate_automation_paused", "candidate_handoff", handle_candidate_automation_pause_turn),
         ("candidate_file", "handle_candidate_file", "candidate_file", handle_candidate_file_turn),
+        ("candidate_apply_confirm", "candidate_apply_confirm", "public_candidate", handle_candidate_apply_confirm_turn),
         ("candidate_assessment", "handle_candidate_assessment", "candidate_assessment", handle_candidate_assessment_turn),
         ("public_candidate_apply_code", "public_candidate_apply_code_started", "public_candidate", handle_public_candidate_apply_code_turn),
         ("public_candidate_selection", "public_candidate_role_selected", "public_candidate", handle_public_candidate_role_selection_turn),
@@ -26699,10 +27012,13 @@ def send_octopus_whatsapp(
     message_kind: str = "text",
     company_code: str | None = None,
     audience: str | None = None,
+    force_live: bool = False,
 ) -> dict[str, Any]:
     # Optional company_code enables Phase 7D account selection. When omitted (all
     # legacy callers) or when WATHEFNI_COMPANY_CHANNEL_ACCOUNTS is OFF, routing is
     # unchanged: use the caller-supplied account_id / shared default.
+    # force_live: Stage B canary may override staging dry_run for allowlisted
+    # preview delivery so preview_sent_at reflects a real Octopus accept.
     if not valid_whatsapp_recipient(phone):
         return invalid_whatsapp_recipient_result(
             account_id=account_id,
@@ -26721,7 +27037,7 @@ def send_octopus_whatsapp(
             shared_account_id=account_id or _channel_account_routing.SHARED_ACCOUNT_ID,
         )
         account_id = route_meta.get("account_id") or account_id or _channel_account_routing.SHARED_ACCOUNT_ID
-    if delivery_is_dry_run():
+    if delivery_is_dry_run() and not force_live:
         result = {
             "ok": True,
             "dry_run": True,

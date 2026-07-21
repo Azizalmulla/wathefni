@@ -31,6 +31,11 @@ Environment=WATHEFNI_CV_MISTRAL_OCR=true
 Environment=WATHEFNI_CV_GPT_VISION_RESCUE=true
 # Canonical Recruiting Lifecycle — staging proof ON; production remains OFF until approved.
 Environment=WATHEFNI_CANONICAL_LIFECYCLE=true
+# Jobs Phase 2 Stage B — defaults; allowlist/live flags come from canary EnvironmentFile.
+Environment=WATHEFNI_STAGE_B_ENABLED=1
+Environment=WATHEFNI_STAGE_B_CANARY_ONLY=1
+Environment=WATHEFNI_STAGE_B_STAMP_DRY_RUN=1
+EnvironmentFile=-/root/.openclaw/secrets/wathefni-stage-b-canary.env
 # Product-2 stays dark until an explicit, time-bounded synthetic staging pilot.
 Environment=WATHEFNI_ASSESSMENT_AUTHORING=false
 # Bound to localhost only — reach it via SSH tunnel (see DEPLOY_RUNBOOK.md). No public domain.

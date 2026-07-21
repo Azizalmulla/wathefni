@@ -26,6 +26,10 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "en": "{role} — {company}. {facts}. {summary} Ask me about the role, or tell me when you are ready to apply. Your application has not started yet.",
         "ar": "{role} — {company}. {facts}. {summary} اسألني عن الوظيفة، أو قل لي عندما تكون جاهزاً للتقديم. لم يبدأ طلب التوظيف بعد.",
     },
+    "apply_confirm_needed": {
+        "en": "Your application for {role} has not started yet. Reply \"ready to apply\" when you want to start, or send your CV after you have reviewed the role.",
+        "ar": "لم يبدأ طلبك لوظيفة {role} بعد. اكتب \"جاهز للتقديم\" عندما تريد البدء، أو أرسل سيرتك الذاتية بعد مراجعة الوظيفة.",
+    },
     "job_context_existing_application": {
         "en": "You already have an active application for {role}. I did not create or reset it. You can ask for its status or update your CV.",
         "ar": "لديك طلب توظيف نشط بالفعل لوظيفة {role}. لم أنشئ طلباً جديداً ولم أعد ضبط طلبك. يمكنك السؤال عن الحالة أو تحديث سيرتك الذاتية.",

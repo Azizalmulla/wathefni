@@ -125,6 +125,13 @@ CREATE TABLE IF NOT EXISTS candidate_job_contexts (
     CHECK (status IN ('awaiting_apply_confirmation','declined','converted','expired'))
 );
 ALTER TABLE IF EXISTS candidate_job_contexts ADD COLUMN IF NOT EXISTS preview_rendered_at timestamptz;
+ALTER TABLE IF EXISTS candidate_job_contexts ADD COLUMN IF NOT EXISTS converted_at timestamptz;
+ALTER TABLE IF EXISTS candidate_job_contexts ADD COLUMN IF NOT EXISTS application_app_key text;
+ALTER TABLE IF EXISTS candidate_job_contexts ADD COLUMN IF NOT EXISTS convert_idempotency_key text;
+ALTER TABLE IF EXISTS candidate_job_contexts ADD COLUMN IF NOT EXISTS preview_delivery_id text;
+CREATE UNIQUE INDEX IF NOT EXISTS candidate_job_contexts_convert_idem_uidx
+  ON candidate_job_contexts (convert_idempotency_key)
+  WHERE convert_idempotency_key IS NOT NULL;
 CREATE INDEX IF NOT EXISTS candidate_job_contexts_phone_active_idx
   ON candidate_job_contexts (phone, status)
   WHERE status = 'awaiting_apply_confirmation';
