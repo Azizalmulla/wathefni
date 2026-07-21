@@ -46,16 +46,21 @@ def assert_true(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-# applications.phone has a FK to candidates(phone); one seeded candidate per company is
-# reused for every application row (app_key stays unique, phone may repeat).
-PHONE = {COMPANY: f"{COMPANY}-cand", OTHER: f"{OTHER}-cand"}
-
-
 def _insert_application(cur: Any, company: str, app_key: str, status: str, *, cv: bool = True, assessment_status: str | None = None) -> None:
-    phone = PHONE[company]
+    # One person per application keeps the fixture valid under the database's
+    # active same-person + same-company + same-role uniqueness authority.
+    phone = f"{app_key}-cand"
     raw: dict[str, Any] = {"smoke": MARKER}
     if cv:
         raw["cv"] = {"received": True}
+    cur.execute(
+        """
+        INSERT INTO candidates (phone, name, email, raw_json, data_source)
+        VALUES (%s,'Summary Smoke',%s,%s,'staging_smoke')
+        ON CONFLICT (phone) DO NOTHING
+        """,
+        (phone, f"{phone}@example.com", Json({"smoke": MARKER})),
+    )
     cur.execute(
         """
         INSERT INTO applications
@@ -82,7 +87,7 @@ def _purge(cur: Any) -> None:
     companies = [COMPANY, OTHER]
     cur.execute("DELETE FROM assessment_attempts WHERE company_code = ANY(%s)", (companies,))
     cur.execute("DELETE FROM applications WHERE company_code = ANY(%s)", (companies,))
-    cur.execute("DELETE FROM candidates WHERE phone = ANY(%s)", (list(PHONE.values()),))
+    cur.execute("DELETE FROM candidates WHERE raw_json->>'smoke'=%s", (MARKER,))
 
 
 def setup() -> None:
@@ -95,11 +100,6 @@ def setup() -> None:
                     (company, name, Json({"smoke": MARKER}), Json({"smoke": MARKER})),
                 )
             _purge(cur)
-            for company in (COMPANY, OTHER):
-                cur.execute(
-                    "INSERT INTO candidates (phone, name, email) VALUES (%s,%s,%s) ON CONFLICT (phone) DO NOTHING",
-                    (PHONE[company], "Summary Smoke", f"{PHONE[company]}@example.com"),
-                )
             n = 0
             for _ in range(READY_NO_ASSESS):
                 _insert_application(cur, COMPANY, f"{COMPANY}-ready-{n}", "screening_complete")
