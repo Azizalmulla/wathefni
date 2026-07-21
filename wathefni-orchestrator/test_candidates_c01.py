@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -471,7 +472,15 @@ class CandidateAuthoritySourceContractTests(unittest.TestCase):
         self.assertIn("transactional_side_effect=_employee_transaction", hire)
 
     def test_dashboard_has_bilingual_consequence_copy(self) -> None:
-        source = (self.ROOT.parent / "apps" / "wathefni-dashboard" / "src" / "App.tsx").read_text(encoding="utf-8")
+        source_path = self.ROOT.parent / "apps" / "wathefni-dashboard" / "src" / "App.tsx"
+        if source_path.exists():
+            source = source_path.read_text(encoding="utf-8")
+        else:
+            dist = Path(os.environ.get("WATHEFNI_DASHBOARD_DIST", "/opt/wathefni/staging/dashboard-dist"))
+            source = "\n".join(
+                asset.read_text(encoding="utf-8")
+                for asset in sorted((dist / "assets").glob("*.js"))
+            )
         self.assertIn("Hire this candidate?", source)
         self.assertIn("توظيف هذا المرشح؟", source)
         self.assertIn("Reject this candidate?", source)
