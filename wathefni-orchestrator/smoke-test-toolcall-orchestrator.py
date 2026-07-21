@@ -7,6 +7,7 @@ from pathlib import Path
 class FakeLegacy:
     APP = {
         "app_key": "96597485758-WATHEFNI-HR",
+        "company_code": "WATHEFNI",
         "candidate_name": "Hamad Almulla",
         "candidate_email": "h.almulla@almulla-media.com",
         "phone": "96597485758",
@@ -16,6 +17,7 @@ class FakeLegacy:
     }
     APP_FAISAL = {
         "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "company_code": "WATHEFNI",
         "candidate_name": "Faisal Almulla",
         "candidate_email": None,
         "phone": "96599652277",
