@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import os
 import sys
+import uuid
 from pathlib import Path
 
 os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
@@ -302,64 +303,79 @@ def main() -> int:
     dry = app.send_octopus_whatsapp(account_id="WATHEFNI", phone="96599338566", text="parity smoke", subject_type="candidate", subject_key="APP-SMOKE")
     check("send returns a simulated dry-run result (no real send)", isinstance(dry, dict) and dry.get("ok") is True and dry.get("dry_run") is True)
 
-    # --- 8) behaviour against the DB: real shortlist via the registry harness -
-    real_app: dict | None = None
+    # --- 8) isolated DB behaviour: shortlist + idempotent repeat -------------
+    suffix = uuid.uuid4().hex[:10]
+    app_key = f"registry-parity-{suffix}"
+    phone = f"9657{uuid.uuid4().int % 10_000_000:07d}"
+    company = "WATHEFNI"
+    real_ctx = {
+        "company_code": company,
+        "hr_phone": "96599338566",
+        "hr_user": {"role": "owner", "status": "active", "company_code": company, "user_id": "smoke-owner"},
+        "access": {"role": "owner", "permissions": sorted(app.hr_role_permissions("owner"))},
+        "permissions": sorted(app.hr_role_permissions("owner")),
+        "actor_user_id": "smoke-owner",
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": "smoke-owner",
+        "permission_subject_company": company,
+        "actor_email": "owner@example.com",
+        "actor_role": "owner",
+    }
     try:
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT a.app_key, a.company_code, a.status
-                    FROM applications a
-                    JOIN candidates c ON c.phone = a.phone
-                    WHERE a.app_key <> '' AND a.company_code IS NOT NULL
-                    ORDER BY a.updated_at DESC NULLS LAST
-                    LIMIT 1
-                    """
+                    INSERT INTO candidates
+                      (phone, name, current_status, active_company_code, raw_json, data_source, updated_at)
+                    VALUES (%s, 'Registry Parity Smoke', 'ready_for_review', %s,
+                            jsonb_build_object('smoke', true, 'registry_parity', true),
+                            'staging_smoke', now())
+                    """,
+                    (phone, company),
                 )
-                row = cur.fetchone()
-                if row:
-                    real_app = dict(row)
-    except Exception as exc:  # pragma: no cover - environment dependent
-        print(f"    (could not read applications: {exc} — skipping DB behaviour)")
+                cur.execute(
+                    """
+                    INSERT INTO applications
+                      (app_key, phone, company_code, position_code, position_title,
+                       status, current_step, cv_received, raw_json, data_source,
+                       ingested_at, updated_at)
+                    VALUES (%s,%s,%s,'REGISTRY_SMOKE','Registry Smoke',
+                            'ready_for_review','ready_for_review',true,
+                            jsonb_build_object('smoke', true, 'registry_parity', true),
+                            'staging_smoke',now(),now())
+                    """,
+                    (app_key, phone, company),
+                )
+            conn.commit()
 
-    if not real_app:
-        print("    (no applications on this DB — skipping DB behaviour checks)")
-    else:
-        app_key = str(real_app["app_key"])
-        company = str(real_app["company_code"]).upper()
-        original_status = real_app.get("status")
-        real_ctx = {
-            "company_code": company,
-            "hr_phone": "96599338566",
-            "hr_user": {"role": "owner", "status": "active", "company_code": company, "user_id": "smoke-owner"},
-            "access": {"role": "owner", "permissions": sorted(app.hr_role_permissions("owner"))},
-            "permissions": sorted(app.hr_role_permissions("owner")),
-            "actor_user_id": "smoke-owner",
-            "permission_authority": "backend_current",
-            "permission_subject_user_id": "smoke-owner",
-            "permission_subject_company": company,
-            "actor_email": "owner@example.com",
-            "actor_role": "owner",
-        }
-        try:
-            resp = app.run_prehire_registry_action(real_ctx, "shortlist_candidate", {}, app_key=app_key)
-            check("real shortlist via registry completes", resp.get("ok") is True and resp.get("status") == "completed")
-            check("real shortlist returns the refreshed application", isinstance(resp.get("application"), dict) and resp["application"].get("app_key") == app_key)
-            check("real shortlist writes an audit row", bool(resp.get("audit")))
-            refreshed = app.find_application_by_key(app_key, company_code=company) or {}
-            check("application is now shortlisted in the DB", str(refreshed.get("status") or "").lower() == "shortlisted")
+        resp = app.run_prehire_registry_action(real_ctx, "shortlist_candidate", {}, app_key=app_key)
+        check("isolated shortlist via registry completes", resp.get("ok") is True and resp.get("status") == "completed")
+        check("isolated shortlist returns the refreshed application", isinstance(resp.get("application"), dict) and resp["application"].get("app_key") == app_key)
+        check("isolated shortlist writes an audit row", bool(resp.get("audit")))
+        refreshed = app.find_application_by_key(app_key, company_code=company) or {}
+        check("isolated application is now shortlisted", str(refreshed.get("status") or "").lower() == "shortlisted")
 
-            resp2 = app.run_prehire_registry_action(real_ctx, "shortlist_candidate", {}, app_key=app_key)
-            check("repeated submit is idempotent / safe", resp2.get("ok") is True and resp2.get("status") == "completed")
-        finally:
-            if original_status:
-                try:
-                    restore = app.find_application_by_key(app_key, company_code=company)
-                    if restore:
-                        app.update_application_status(restore, str(original_status))
-                except Exception:
-                    print("    (warning: could not restore original application status)")
+        resp2 = app.run_prehire_registry_action(real_ctx, "shortlist_candidate", {}, app_key=app_key)
+        check("repeated submit is idempotent / safe", resp2.get("ok") is True and resp2.get("status") == "completed")
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT count(*) AS n FROM application_lifecycle_events WHERE company_code=%s AND app_key=%s",
+                    (company, app_key),
+                )
+                event_count = int(cur.fetchone()["n"])
+        check("repeated submit emits exactly one lifecycle event", event_count == 1)
+    finally:
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM action_results WHERE result::text LIKE %s", (f"%{app_key}%",))
+                cur.execute("DELETE FROM pending_actions WHERE metadata::text LIKE %s", (f"%{app_key}%",))
+                cur.execute("DELETE FROM candidate_action_confirmations WHERE company_code=%s AND app_key=%s", (company, app_key))
+                cur.execute("DELETE FROM application_lifecycle_events WHERE company_code=%s AND app_key=%s", (company, app_key))
+                cur.execute("DELETE FROM applications WHERE company_code=%s AND app_key=%s", (company, app_key))
+                cur.execute("DELETE FROM candidates WHERE phone=%s", (phone,))
+            conn.commit()
 
     print(f"\n    {PASS} passed, {FAIL} failed")
     if FAIL:
