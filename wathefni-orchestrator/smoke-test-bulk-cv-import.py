@@ -64,6 +64,14 @@ def teardown() -> None:
             if _created_app_keys:
                 cur.execute("DELETE FROM candidate_documents WHERE app_key = ANY(%s)", (_created_app_keys,))
                 cur.execute("DELETE FROM file_registry WHERE subject_key = ANY(%s)", (_created_app_keys,))
+                cur.execute(
+                    "DELETE FROM application_lifecycle_events WHERE app_key = ANY(%s) OR company_code = ANY(%s)",
+                    (_created_app_keys, [COMPANY_A, COMPANY_B]),
+                )
+                cur.execute(
+                    "DELETE FROM candidate_action_confirmations WHERE app_key = ANY(%s) OR company_code = ANY(%s)",
+                    (_created_app_keys, [COMPANY_A, COMPANY_B]),
+                )
                 cur.execute("DELETE FROM applications WHERE app_key = ANY(%s)", (_created_app_keys,))
             if _created_surrogates:
                 cur.execute("DELETE FROM candidates WHERE phone = ANY(%s)", (_created_surrogates,))
@@ -274,6 +282,11 @@ def run_checks() -> None:
                 WHERE app_key=%s AND company_code=%s
                 """,
                 (ali_app, COMPANY_A),
+            )
+            # Drop any leftover smoke idempotency events for this stable app_key.
+            cur.execute(
+                "DELETE FROM application_lifecycle_events WHERE company_code=%s AND idempotency_key=%s",
+                (COMPANY_A, f"bulk-import-smoke-admit:{ali_app}"),
             )
         conn.commit()
     admit = app.update_application_status(

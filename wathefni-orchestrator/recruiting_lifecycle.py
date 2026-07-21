@@ -1387,12 +1387,31 @@ def transition_application(
                         (ev.get("app_key") or app_key, company),
                     )
                     app_now = cur.fetchone()
+                    if not app_now:
+                        return {
+                            "ok": False,
+                            "error": "stale_idempotency_key",
+                            "idempotency_key": idem,
+                            "message": "A prior lifecycle event exists but the application is missing.",
+                        }
+                    app_now = dict(app_now)
+                    current_stage = normalize_stage(app_now.get("status")) or str(app_now.get("status") or "").strip().lower()
+                    event_target = normalize_stage(ev.get("to_stage")) or str(ev.get("to_stage") or "").strip().lower()
+                    if current_stage != event_target:
+                        return {
+                            "ok": False,
+                            "error": "stale_idempotency_key",
+                            "idempotency_key": idem,
+                            "current_stage": current_stage,
+                            "event_to_stage": event_target,
+                            "message": "A prior lifecycle event exists but the application is not at the committed stage.",
+                        }
                     return {
                         "ok": True,
                         "idempotent": True,
                         "from_stage": ev.get("from_stage"),
                         "to_stage": ev.get("to_stage"),
-                        "application": legacy.json_safe(dict(app_now)) if app_now else None,
+                        "application": legacy.json_safe(app_now),
                         "event": legacy.json_safe(ev),
                     }
 
@@ -1415,8 +1434,10 @@ def transition_application(
                 }
 
             from_stage = normalize_stage(raw_status)
+            event_from_stage = from_stage or raw_status or None
             if from_stage is None and trigger == "intake_admit":
-                from_stage = "ready_for_review"
+                # Intake states are outside the canonical matrix; admit enters at target.
+                from_stage = target
             if from_stage is None:
                 return {
                     "ok": False,
@@ -1578,6 +1599,8 @@ def transition_application(
             event_metadata = dict(metadata or {})
             if actor_user_id and not actor_uuid:
                 event_metadata.setdefault("actor_user_id_raw", str(actor_user_id))
+            if intake_admission:
+                event_metadata.setdefault("intake_from_status", raw_status)
             cur.execute(
                 """
                 INSERT INTO application_lifecycle_events (
@@ -1592,7 +1615,7 @@ def transition_application(
                     event_id,
                     app_company,
                     app["app_key"],
-                    from_stage,
+                    event_from_stage,
                     target,
                     trigger,
                     actor_type,
