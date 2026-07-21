@@ -298,10 +298,17 @@ def convert_job_context_to_application(
     marker = canary_marker or STAGE_B_MARKER
     data_source, data_source_detail = legacy.data_source_from_request(request)
 
+    # DDL must commit before the conversion transaction. Keeping schema setup in
+    # the transaction below leaves AccessExclusive locks on applications while
+    # role resolution opens another connection, causing a self-deadlock.
+    with legacy.db_connect() as schema_conn:
+        with schema_conn.cursor() as schema_cur:
+            ensure_stage_b_schema(schema_cur)
+            _rl.ensure_lifecycle_schema(schema_cur)
+        schema_conn.commit()
+
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
-            ensure_stage_b_schema(cur)
-            _rl.ensure_lifecycle_schema(cur)
             cur.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
                 (_lock_key(phone, request.account_id, request.conversation_id),),
