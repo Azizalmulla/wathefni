@@ -779,6 +779,9 @@ def main() -> int:
             "hr_user": {"phone": "96599338566", "role": "owner", "status": "active"},
             "actor_user_id": ACTOR,
             "actor_role": "owner",
+            "permission_authority": "backend_current",
+            "permission_subject_user_id": ACTOR,
+            "permission_subject_company": COMPANY,
             "access": {
                 "role": "owner",
                 "permissions": ["interview.manage", "prehire.read"],
