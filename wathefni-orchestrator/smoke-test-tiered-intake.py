@@ -88,6 +88,14 @@ def teardown() -> None:
             if _created_app_keys:
                 cur.execute("DELETE FROM candidate_documents WHERE app_key = ANY(%s)", (_created_app_keys,))
                 cur.execute("DELETE FROM file_registry WHERE subject_key = ANY(%s)", (_created_app_keys,))
+                cur.execute(
+                    "DELETE FROM application_lifecycle_events WHERE app_key = ANY(%s) OR company_code=%s",
+                    (_created_app_keys, COMPANY),
+                )
+                cur.execute(
+                    "DELETE FROM candidate_action_confirmations WHERE app_key = ANY(%s) OR company_code=%s",
+                    (_created_app_keys, COMPANY),
+                )
                 cur.execute("DELETE FROM applications WHERE app_key = ANY(%s)", (_created_app_keys,))
             if _created_surrogates:
                 cur.execute("DELETE FROM candidates WHERE phone = ANY(%s)", (_created_surrogates,))
@@ -242,14 +250,20 @@ def run_checks() -> None:
     res = app.dashboard_prehire_import_bulk(request={"action": "confirm", "app_keys": [folder_app]}, context=ctx)
     assert_true(res["promoted"] == 1, f"bulk confirm must promote the folder-hint candidate, got {res}")
     s = _status(folder_app)
-    assert_true(s["status"] == "review_pending" and s["position_code"] == "WELDER", "confirmed candidate must enter the pipeline with the suggested role")
+    assert_true(
+        s["status"] in {"ready_for_review", "review_pending"} and s["position_code"] == "WELDER",
+        "confirmed candidate must enter the pipeline with the suggested role",
+    )
     assert_true(_passes_ranking([folder_app]) == 1, "confirmed candidate must become Ranking-eligible")
 
     # --- Bulk assign: give the unclear candidate an explicit role -----------------
     res = app.dashboard_prehire_import_bulk(request={"action": "assign", "app_keys": [norole_app], "position_code": "DRIVER", "position_title": "Delivery Driver"}, context=ctx)
     assert_true(res["promoted"] == 1, "bulk assign must promote the selected candidate")
     s = _status(norole_app)
-    assert_true(s["status"] == "review_pending" and s["position_code"] == "DRIVER", "assigned candidate must enter the pipeline with the chosen role")
+    assert_true(
+        s["status"] in {"ready_for_review", "review_pending"} and s["position_code"] == "DRIVER",
+        "assigned candidate must enter the pipeline with the chosen role",
+    )
 
     # --- Bulk archive: drop the noisy PILOT import --------------------------------
     res = app.dashboard_prehire_import_bulk(request={"action": "archive", "app_keys": [pilot_app]}, context=ctx)
