@@ -1282,6 +1282,49 @@ def consume_candidate_action_confirmation(
     return {"ok": True, "result": legacy.json_safe(result)}
 
 
+def validate_candidate_action_confirmation(
+    legacy: Any,
+    *,
+    company_code: str,
+    app_key: str,
+    action: str,
+    confirmation_id: str,
+    confirmation_token: str,
+    target_payload: dict[str, Any],
+    actor_user_id: str | None,
+    actor_phone: str | None,
+) -> dict[str, Any]:
+    """Validate a capability without consuming it or committing state.
+
+    Use this before irreversible external work. The canonical transition
+    validates again and consumes the same capability atomically.
+    """
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            application = _load_application(cur, app_key=app_key, company_code=company)
+            if not application:
+                conn.rollback()
+                return {"ok": False, "error": "application_not_found"}
+            _confirmation, error = _verify_confirmation_for_transition(
+                legacy,
+                cur,
+                application=application,
+                action=action,
+                confirmation_id=confirmation_id,
+                confirmation_secret=confirmation_token,
+                target_payload=legacy.json_safe(target_payload),
+                actor_user_id=actor_user_id,
+                actor_phone=actor_phone,
+            )
+            conn.rollback()
+            if error:
+                return error
+    return {"ok": True}
+
+
 def transition_application(
     legacy: Any,
     *,

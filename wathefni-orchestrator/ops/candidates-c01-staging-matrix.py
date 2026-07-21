@@ -599,7 +599,7 @@ def main() -> int:
             observed_version=0,
             target_payload=interview_payload,
             actor_user_id=ACTOR,
-            actor_phone=None,
+            actor_phone="96599338566",
             actor_type="human",
             channel="web",
             permissions={"interview.manage"},
@@ -713,6 +713,20 @@ def main() -> int:
             plan.get("status") in {"ready", "needs_clarification"} and plan_app.get("status") == "ready_for_review",
             {"plan": plan, "stage": plan_app.get("status")},
         )
+        failed_mint = rl.mint_candidate_action_confirmation(
+            orch,
+            company_code=COMPANY,
+            app_key=failed_app,
+            action="schedule_interview",
+            observed_stage="ready_for_review",
+            observed_version=0,
+            target_payload=interview_payload,
+            actor_user_id=ACTOR,
+            actor_phone="96599338566",
+            actor_type="human",
+            channel="web",
+            permissions={"interview.manage"},
+        )
         original_run_gog = orch.run_gog
         company_token = orch.set_active_company_code(COMPANY)
         try:
@@ -725,6 +739,14 @@ def main() -> int:
                         "action_type": "schedule_interview",
                         "app_key": failed_app,
                         "interview_time": interview_payload["interview_time"],
+                        "human_confirmed": True,
+                        "actor_user_id": ACTOR,
+                        "expected_from_stage": "ready_for_review",
+                        "expected_version": 0,
+                        "confirmation_id": failed_mint["confirmation"]["confirmation_id"],
+                        "confirmation_token": failed_mint["confirmation"]["confirmation_token"],
+                        "confirmation_payload": interview_payload,
+                        "idempotency_key": f"c01-interview-fail:{failed_app}",
                     },
                     state={},
                     graph_state={},

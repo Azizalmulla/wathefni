@@ -2058,6 +2058,46 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "error": "missing_candidate_email",
             "application": legacy.json_safe(app),
         }
+    meta = getattr(ctx.request, "metadata", {}) or {}
+    if not isinstance(meta, dict):
+        meta = {}
+    if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
+        import recruiting_lifecycle as _lifecycle
+
+        confirmation_payload = (
+            ctx.action.get("confirmation_payload")
+            if isinstance(ctx.action.get("confirmation_payload"), dict)
+            else {}
+        )
+        precheck = _lifecycle.validate_candidate_action_confirmation(
+            legacy,
+            company_code=str(app.get("company_code") or ""),
+            app_key=str(app.get("app_key") or ""),
+            action="schedule_interview",
+            confirmation_id=str(ctx.action.get("confirmation_id") or ""),
+            confirmation_token=str(ctx.action.get("confirmation_token") or ""),
+            target_payload=confirmation_payload,
+            actor_user_id=str(
+                ctx.action.get("actor_user_id")
+                or meta.get("actor_user_id")
+                or ""
+            )
+            or None,
+            actor_phone=getattr(ctx.request, "sender_phone", None),
+        )
+        if not bool(ctx.action.get("human_confirmed", False)) or not precheck.get("ok"):
+            return {
+                "action_type": "schedule_interview",
+                "success": False,
+                "status": "failed",
+                "message": f"I could not schedule the interview with {name}.",
+                "error": (
+                    precheck.get("error")
+                    if not precheck.get("ok")
+                    else "confirmation_required"
+                ),
+                "application": legacy.json_safe(app),
+            }
     summary = f"Wathefni interview with {name}"
     account = legacy.openclaw_env().get("GOG_ACCOUNT", "") if hasattr(legacy, "openclaw_env") else ""
     args = [
@@ -2091,7 +2131,6 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
         )
         # Canonical lifecycle: scheduling moves the application into `interview`.
         if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-            meta = getattr(ctx.request, "metadata", {}) or {}
             permissions = meta.get("permissions") if isinstance(meta, dict) else []
             stage_update = legacy.update_application_status(
                 app,
