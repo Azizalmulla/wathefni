@@ -14,9 +14,13 @@ AI may propose transitions but never execute them without a separate human confi
 from __future__ import annotations
 
 import hashlib
+import hmac
+import json
 import os
+import secrets
 import uuid
-from typing import Any
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable
 
 # ---------------------------------------------------------------------------
 # Canonical vocabulary
@@ -76,9 +80,15 @@ ALLOWED_TRANSITIONS: dict[str, frozenset[str]] = {
 HUMAN_DECISION_ACTIONS: dict[str, dict[str, str]] = {
     "shortlist": {"target": "shortlisted", "permission": "candidate.manage"},
     "reject": {"target": "rejected", "permission": "candidate.decide"},
+    "withdraw": {"target": "withdrawn", "permission": "candidate.decide"},
     "hire": {"target": "hired", "permission": "candidate.decide"},
     "schedule_interview": {"target": "interview", "permission": "interview.manage"},
 }
+
+TARGET_TO_CONFIRMATION_ACTION = {
+    spec["target"]: action for action, spec in HUMAN_DECISION_ACTIONS.items()
+}
+CONFIRMATION_TTL_SECONDS = 600
 
 SYSTEM_TRIGGERS = frozenset(
     {
@@ -196,6 +206,18 @@ def human_confirmation_required(to_stage: str, *, trigger: str) -> bool:
 def ensure_lifecycle_schema(cur: Any) -> None:
     cur.execute(
         """
+        ALTER TABLE IF EXISTS applications
+          ADD COLUMN IF NOT EXISTS lifecycle_version bigint NOT NULL DEFAULT 0
+        """
+    )
+    cur.execute(
+        """
+        COMMENT ON COLUMN candidates.current_status IS
+          'Derived compatibility mirror of applications.status; non-authoritative'
+        """
+    )
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS application_lifecycle_events (
           event_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
           company_code text NOT NULL,
@@ -226,6 +248,87 @@ def ensure_lifecycle_schema(cur: Any) -> None:
         """
         CREATE INDEX IF NOT EXISTS application_lifecycle_events_app_idx
           ON application_lifecycle_events (company_code, app_key, created_at DESC)
+        """
+    )
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS candidate_action_confirmations (
+          confirmation_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          company_code text NOT NULL,
+          app_key text NOT NULL,
+          action text NOT NULL,
+          observed_stage text NOT NULL,
+          observed_version bigint NOT NULL,
+          target_payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+          request_hash text NOT NULL,
+          token_hash text NOT NULL,
+          actor_user_id text,
+          actor_phone text,
+          actor_type text NOT NULL DEFAULT 'human',
+          channel text NOT NULL,
+          idempotency_key text,
+          status text NOT NULL DEFAULT 'pending',
+          expires_at timestamptz NOT NULL,
+          consumed_at timestamptz,
+          result jsonb,
+          created_at timestamptz NOT NULL DEFAULT now(),
+          updated_at timestamptz NOT NULL DEFAULT now(),
+          CHECK (status IN ('pending','processing','consumed','expired','cancelled','failed')),
+          CHECK (actor_type IN ('human','candidate'))
+        )
+        """
+    )
+    cur.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS candidate_action_confirmations_idem_uq
+          ON candidate_action_confirmations (company_code, idempotency_key)
+          WHERE idempotency_key IS NOT NULL AND idempotency_key <> ''
+        """
+    )
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS candidate_action_confirmations_target_idx
+          ON candidate_action_confirmations
+            (company_code, app_key, action, status, expires_at)
+        """
+    )
+    cur.execute(
+        """
+        CREATE OR REPLACE FUNCTION enforce_application_lifecycle_authority()
+        RETURNS trigger AS $$
+        BEGIN
+          IF (
+            NEW.status IS DISTINCT FROM OLD.status
+            OR NEW.current_step IS DISTINCT FROM OLD.current_step
+          )
+          AND NOT (
+            lower(COALESCE(OLD.status,'')) IN ('needs_role','import_review','import_archived')
+            AND lower(COALESCE(NEW.status,'')) IN ('needs_role','import_review','import_archived')
+          )
+          AND COALESCE(current_setting('wathefni.lifecycle_authority', true), '') <> 'canonical'
+          THEN
+            RAISE EXCEPTION 'application_lifecycle_direct_write_blocked'
+              USING ERRCODE = 'P0001';
+          END IF;
+          RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql
+        """
+    )
+    cur.execute(
+        """
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_trigger
+            WHERE tgname='applications_lifecycle_authority_guard' AND NOT tgisinternal
+          ) THEN
+            CREATE TRIGGER applications_lifecycle_authority_guard
+            BEFORE UPDATE OF status, current_step ON applications
+            FOR EACH ROW EXECUTE FUNCTION enforce_application_lifecycle_authority();
+          END IF;
+        END
+        $$
         """
     )
     cur.execute(
@@ -287,6 +390,111 @@ def ensure_lifecycle_schema(cur: Any) -> None:
             AND metadata ? 'app_key'
         """
     )
+
+
+def active_same_role_collisions(legacy: Any) -> list[dict[str, Any]]:
+    """Return unresolved rows that block the transitional active-role constraint."""
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT phone, company_code, position_code, count(*) AS active_count,
+                       array_agg(app_key ORDER BY updated_at DESC NULLS LAST) AS app_keys,
+                       array_agg(status ORDER BY updated_at DESC NULLS LAST) AS statuses
+                FROM applications
+                WHERE phone IS NOT NULL AND phone <> ''
+                  AND company_code IS NOT NULL AND company_code <> ''
+                  AND position_code IS NOT NULL AND position_code <> ''
+                  AND lower(COALESCE(status,'')) NOT IN
+                    ('rejected','withdrawn','hired','needs_role','import_review','import_archived')
+                GROUP BY phone, company_code, position_code
+                HAVING count(*) > 1
+                ORDER BY active_count DESC, company_code, phone
+                """
+            )
+            return [dict(row) for row in (cur.fetchall() or [])]
+
+
+def install_active_same_role_constraint(legacy: Any) -> dict[str, Any]:
+    """Install the partial unique index only after an explicit clean collision check."""
+    collisions = active_same_role_collisions(legacy)
+    if collisions:
+        return {
+            "ok": False,
+            "error": "active_same_role_collisions",
+            "collisions": legacy.json_safe(collisions),
+        }
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS applications_one_active_same_role_uq
+                  ON applications (phone, company_code, position_code)
+                  WHERE phone IS NOT NULL AND phone <> ''
+                    AND company_code IS NOT NULL AND company_code <> ''
+                    AND position_code IS NOT NULL AND position_code <> ''
+                    AND lower(COALESCE(status,'')) NOT IN
+                      ('rejected','withdrawn','hired','needs_role','import_review','import_archived')
+                """
+            )
+        conn.commit()
+    return {"ok": True, "constraint": "applications_one_active_same_role_uq"}
+
+
+def interview_lifecycle_consistency_report(
+    legacy: Any,
+    *,
+    company_code: str,
+    limit: int = 500,
+) -> dict[str, Any]:
+    """Report live-interview/application drift without changing either authority."""
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
+    bounded_limit = max(1, min(int(limit or 500), 2000))
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT a.app_key, a.status AS application_stage, NULL::uuid AS interview_id,
+                       'application_interview_without_live_schedule' AS drift
+                FROM applications a
+                WHERE a.company_code=%s
+                  AND lower(COALESCE(a.status,''))='interview'
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM candidate_interviews ci
+                    WHERE ci.company_code=a.company_code
+                      AND ci.app_key=a.app_key
+                      AND lower(COALESCE(ci.status,'')) IN ('scheduled','rescheduled')
+                      AND lower(COALESCE(ci.interview_type,'live')) <> 'async_video'
+                  )
+                UNION ALL
+                SELECT ci.app_key, a.status AS application_stage, ci.interview_id,
+                       CASE
+                         WHEN a.app_key IS NULL THEN 'live_schedule_without_application'
+                         ELSE 'live_schedule_application_not_interview'
+                       END AS drift
+                FROM candidate_interviews ci
+                LEFT JOIN applications a
+                  ON a.company_code=ci.company_code AND a.app_key=ci.app_key
+                WHERE ci.company_code=%s
+                  AND lower(COALESCE(ci.status,'')) IN ('scheduled','rescheduled')
+                  AND lower(COALESCE(ci.interview_type,'live')) <> 'async_video'
+                  AND (a.app_key IS NULL OR lower(COALESCE(a.status,'')) <> 'interview')
+                ORDER BY app_key
+                LIMIT %s
+                """,
+                (company, company, bounded_limit),
+            )
+            rows = [dict(row) for row in (cur.fetchall() or [])]
+    return {
+        "ok": True,
+        "company_code": company,
+        "consistent": not rows,
+        "drift_count": len(rows),
+        "drifts": legacy.json_safe(rows),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -370,7 +578,9 @@ def resolve_conversation_application(
     phone_digits = legacy.digits(phone)
     if not phone_digits:
         return {"ok": False, "error": "missing_phone", "application": None}
-    company = str(company_code or "").strip().upper() or None
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required", "application": None}
     conv = str(conversation_id or "").strip() or None
 
     with legacy.db_connect() as conn:
@@ -381,12 +591,11 @@ def resolve_conversation_application(
                     """
                     SELECT *
                     FROM conversation_application_bindings
-                    WHERE conversation_id=%s
-                      AND (%s IS NULL OR company_code=%s)
+                    WHERE conversation_id=%s AND company_code=%s
                     ORDER BY updated_at DESC
                     LIMIT 1
                     """,
-                    (conv, company, company),
+                    (conv, company),
                 )
                 binding = cur.fetchone()
                 if binding:
@@ -404,10 +613,10 @@ def resolve_conversation_application(
                         FROM applications
                         WHERE app_key=%s
                           AND phone=%s
-                          AND (%s IS NULL OR company_code=%s)
+                          AND company_code=%s
                         LIMIT 1
                         """,
-                        (binding["app_key"], phone_digits, company or binding.get("company_code"), company or binding.get("company_code")),
+                        (binding["app_key"], phone_digits, company),
                     )
                     app_row = cur.fetchone()
                     if not app_row:
@@ -448,11 +657,11 @@ def resolve_conversation_application(
                 SELECT *
                 FROM applications
                 WHERE phone=%s
-                  AND (%s IS NULL OR company_code=%s)
+                  AND company_code=%s
                   AND COALESCE(LOWER(status), '') NOT IN ('needs_role','import_review','import_archived')
                 ORDER BY updated_at DESC NULLS LAST, ingested_at DESC NULLS LAST
                 """,
-                (phone_digits, company, company),
+                (phone_digits, company),
             )
             rows = [dict(r) for r in (cur.fetchall() or [])]
             eligible = []
@@ -721,16 +930,344 @@ def resume_candidate_handoff(
 # Transition authority
 # ---------------------------------------------------------------------------
 
-def _load_application(cur: Any, *, app_key: str, company_code: str | None) -> dict[str, Any] | None:
-    if company_code:
-        cur.execute(
-            "SELECT * FROM applications WHERE app_key=%s AND company_code=%s FOR UPDATE",
-            (app_key, company_code),
-        )
-    else:
-        cur.execute("SELECT * FROM applications WHERE app_key=%s FOR UPDATE", (app_key,))
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
+
+
+def _confirmation_token_hash(token: str) -> str:
+    return hashlib.sha256(str(token or "").encode("utf-8")).hexdigest()
+
+
+def _confirmation_request_hash(
+    *,
+    company_code: str,
+    app_key: str,
+    action: str,
+    observed_stage: str,
+    observed_version: int,
+    target_payload: dict[str, Any],
+    actor_user_id: str | None,
+    actor_phone: str | None,
+) -> str:
+    material = {
+        "company_code": company_code,
+        "app_key": app_key,
+        "action": action,
+        "observed_stage": observed_stage,
+        "observed_version": int(observed_version),
+        "target_payload": target_payload,
+        "actor_user_id": str(actor_user_id or ""),
+        "actor_phone": str(actor_phone or ""),
+    }
+    return hashlib.sha256(_canonical_json(material).encode("utf-8")).hexdigest()
+
+
+def _validate_structured_reason(action: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+    if action == "reject" and not str(payload.get("reason_code") or "").strip():
+        return {"ok": False, "error": "rejection_reason_required"}
+    if action == "withdraw":
+        if not str(payload.get("reason_code") or "").strip() or str(payload.get("source") or "").lower() not in {"candidate", "hr"}:
+            return {"ok": False, "error": "withdrawal_reason_required"}
+    if action == "hire" and not str(
+        payload.get("hiring_reference")
+        or payload.get("operation_id")
+        or payload.get("offer_id")
+        or payload.get("hire_override_audit_id")
+        or ""
+    ).strip():
+        return {"ok": False, "error": "hiring_reference_required"}
+    return None
+
+
+def mint_candidate_action_confirmation(
+    legacy: Any,
+    *,
+    company_code: str,
+    app_key: str,
+    action: str,
+    observed_stage: str,
+    observed_version: int,
+    target_payload: dict[str, Any] | None,
+    actor_user_id: str | None,
+    actor_phone: str | None,
+    actor_type: str,
+    channel: str,
+    permissions: set[str] | list[str] | None,
+    idempotency_key: str | None = None,
+    ttl_seconds: int = CONFIRMATION_TTL_SECONDS,
+) -> dict[str, Any]:
+    """Mint a one-time actor-, tenant-, payload-, and state-bound capability."""
+    company = str(company_code or "").strip().upper()
+    key = str(app_key or "").strip()
+    requested = str(action or "").strip().lower()
+    actor_kind = str(actor_type or "").strip().lower()
+    actor_id = str(actor_user_id or "").strip() or None
+    actor_digits = legacy.digits(actor_phone) or None
+    payload = legacy.json_safe(target_payload or {})
+    if not company or not key:
+        return {"ok": False, "error": "tenant_scope_required"}
+    if requested not in HUMAN_DECISION_ACTIONS and requested != "replace_cv":
+        return {"ok": False, "error": "unsupported_confirmation_action"}
+    if actor_kind not in {"human", "candidate"}:
+        return {"ok": False, "error": "human_actor_required"}
+    if not actor_id and not actor_digits:
+        return {"ok": False, "error": "actor_identity_required"}
+    if requested in HUMAN_DECISION_ACTIONS:
+        required = HUMAN_DECISION_ACTIONS[requested]["permission"]
+        if actor_kind != "candidate" and required not in {str(p) for p in (permissions or [])}:
+            return {"ok": False, "error": "permission_denied", "required_permission": required}
+        reason_error = _validate_structured_reason(requested, payload)
+        if reason_error:
+            return reason_error
+    ttl = max(60, min(int(ttl_seconds or CONFIRMATION_TTL_SECONDS), 1800))
+    idem = str(idempotency_key or "").strip() or None
+    token = secrets.token_urlsafe(32)
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_lifecycle_schema(cur)
+            app = _load_application(cur, app_key=key, company_code=company)
+            if not app:
+                return {"ok": False, "error": "application_not_found"}
+            stage = normalize_stage(app.get("status"))
+            version = int(app.get("lifecycle_version") or 0)
+            expected_stage = normalize_stage(observed_stage)
+            if not expected_stage or expected_stage != stage or int(observed_version) != version:
+                return {
+                    "ok": False,
+                    "error": "stale_state",
+                    "observed_stage": expected_stage,
+                    "current_stage": stage,
+                    "observed_version": int(observed_version),
+                    "current_version": version,
+                }
+            if requested in HUMAN_DECISION_ACTIONS:
+                target = HUMAN_DECISION_ACTIONS[requested]["target"]
+                if not transition_is_allowed(stage or "", target):
+                    return {"ok": False, "error": "transition_not_allowed", "from_stage": stage, "to_stage": target}
+            request_hash = _confirmation_request_hash(
+                company_code=company,
+                app_key=key,
+                action=requested,
+                observed_stage=stage or "",
+                observed_version=version,
+                target_payload=payload,
+                actor_user_id=actor_id,
+                actor_phone=actor_digits,
+            )
+            if idem:
+                cur.execute(
+                    "SELECT * FROM candidate_action_confirmations WHERE company_code=%s AND idempotency_key=%s LIMIT 1",
+                    (company, idem),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    row = dict(existing)
+                    if not hmac.compare_digest(str(row.get("request_hash") or ""), request_hash):
+                        return {"ok": False, "error": "idempotency_conflict"}
+                    if str(row.get("status") or "") == "pending":
+                        cur.execute(
+                            """
+                            UPDATE candidate_action_confirmations
+                            SET token_hash=%s, expires_at=%s, updated_at=now()
+                            WHERE confirmation_id=%s
+                            RETURNING *
+                            """,
+                            (
+                                _confirmation_token_hash(token),
+                                datetime.now(timezone.utc) + timedelta(seconds=ttl),
+                                row["confirmation_id"],
+                            ),
+                        )
+                        row = dict(cur.fetchone())
+                        conn.commit()
+                    public = legacy.json_safe(row)
+                    public.pop("token_hash", None)
+                    if str(row.get("status") or "") == "pending":
+                        public["confirmation_token"] = token
+                    return {"ok": True, "idempotent": True, "confirmation": public}
+            cur.execute(
+                """
+                INSERT INTO candidate_action_confirmations (
+                  company_code, app_key, action, observed_stage, observed_version,
+                  target_payload, request_hash, token_hash, actor_user_id, actor_phone,
+                  actor_type, channel, idempotency_key, expires_at
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING *
+                """,
+                (
+                    company,
+                    key,
+                    requested,
+                    stage,
+                    version,
+                    legacy.Json(payload),
+                    request_hash,
+                    _confirmation_token_hash(token),
+                    actor_id,
+                    actor_digits,
+                    actor_kind,
+                    str(channel or "unknown"),
+                    idem,
+                    datetime.now(timezone.utc) + timedelta(seconds=ttl),
+                ),
+            )
+            row = dict(cur.fetchone())
+        conn.commit()
+    public = legacy.json_safe(row)
+    public.pop("token_hash", None)
+    public["confirmation_token"] = token
+    return {"ok": True, "confirmation": public}
+
+
+def _load_application(cur: Any, *, app_key: str, company_code: str) -> dict[str, Any] | None:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return None
+    cur.execute(
+        "SELECT * FROM applications WHERE app_key=%s AND company_code=%s FOR UPDATE",
+        (app_key, company),
+    )
     row = cur.fetchone()
     return dict(row) if row else None
+
+
+def _verify_confirmation_for_transition(
+    legacy: Any,
+    cur: Any,
+    *,
+    application: dict[str, Any],
+    action: str,
+    confirmation_id: str | None,
+    confirmation_secret: str | None,
+    target_payload: dict[str, Any],
+    actor_user_id: str | None,
+    actor_phone: str | None,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    confirmation_key = str(confirmation_id or "").strip()
+    secret = str(confirmation_secret or "").strip()
+    if not confirmation_key or not secret:
+        return None, {"ok": False, "error": "confirmation_required"}
+    cur.execute(
+        """
+        SELECT * FROM candidate_action_confirmations
+        WHERE confirmation_id=%s AND company_code=%s AND app_key=%s
+        FOR UPDATE
+        """,
+        (confirmation_key, application.get("company_code"), application.get("app_key")),
+    )
+    row = cur.fetchone()
+    if not row:
+        return None, {"ok": False, "error": "confirmation_not_found"}
+    confirmation = dict(row)
+    if not hmac.compare_digest(
+        str(confirmation.get("token_hash") or ""),
+        _confirmation_token_hash(secret),
+    ):
+        return None, {"ok": False, "error": "confirmation_mismatch"}
+    if str(confirmation.get("action") or "") != str(action or ""):
+        return None, {"ok": False, "error": "confirmation_action_mismatch"}
+    if str(confirmation.get("actor_user_id") or "") != str(actor_user_id or ""):
+        return None, {"ok": False, "error": "confirmation_actor_mismatch"}
+    if (legacy.digits(confirmation.get("actor_phone")) or None) != (legacy.digits(actor_phone) or None):
+        return None, {"ok": False, "error": "confirmation_actor_mismatch"}
+    if str(confirmation.get("status") or "") != "pending":
+        return None, {"ok": False, "error": "confirmation_already_used"}
+    if confirmation.get("expires_at") and confirmation["expires_at"] <= datetime.now(timezone.utc):
+        cur.execute(
+            "UPDATE candidate_action_confirmations SET status='expired', updated_at=now() WHERE confirmation_id=%s",
+            (confirmation_key,),
+        )
+        return None, {"ok": False, "error": "confirmation_expired"}
+    current_stage = normalize_stage(application.get("status"))
+    current_version = int(application.get("lifecycle_version") or 0)
+    if (
+        str(confirmation.get("observed_stage") or "") != str(current_stage or "")
+        or int(confirmation.get("observed_version") or 0) != current_version
+    ):
+        return None, {
+            "ok": False,
+            "error": "stale_confirmation",
+            "observed_stage": confirmation.get("observed_stage"),
+            "current_stage": current_stage,
+            "observed_version": int(confirmation.get("observed_version") or 0),
+            "current_version": current_version,
+        }
+    expected_request_hash = _confirmation_request_hash(
+        company_code=str(application.get("company_code") or "").upper(),
+        app_key=str(application.get("app_key") or ""),
+        action=action,
+        observed_stage=current_stage or "",
+        observed_version=current_version,
+        target_payload=legacy.json_safe(target_payload),
+        actor_user_id=actor_user_id,
+        actor_phone=legacy.digits(actor_phone) or None,
+    )
+    if not hmac.compare_digest(str(confirmation.get("request_hash") or ""), expected_request_hash):
+        return None, {"ok": False, "error": "confirmation_payload_changed"}
+    cur.execute(
+        "UPDATE candidate_action_confirmations SET status='processing', updated_at=now() WHERE confirmation_id=%s",
+        (confirmation_key,),
+    )
+    return confirmation, None
+
+
+def consume_candidate_action_confirmation(
+    legacy: Any,
+    *,
+    company_code: str,
+    app_key: str,
+    action: str,
+    confirmation_id: str,
+    confirmation_token: str,
+    target_payload: dict[str, Any],
+    actor_user_id: str | None,
+    actor_phone: str | None,
+    operation: Callable[[Any, dict[str, Any]], dict[str, Any]],
+) -> dict[str, Any]:
+    """Consume a non-lifecycle candidate confirmation in the operation transaction."""
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_lifecycle_schema(cur)
+            application = _load_application(cur, app_key=app_key, company_code=company)
+            if not application:
+                return {"ok": False, "error": "application_not_found"}
+            confirmation, error = _verify_confirmation_for_transition(
+                legacy,
+                cur,
+                application=application,
+                action=action,
+                confirmation_id=confirmation_id,
+                confirmation_secret=confirmation_token,
+                target_payload=legacy.json_safe(target_payload),
+                actor_user_id=actor_user_id,
+                actor_phone=actor_phone,
+            )
+            if error:
+                conn.commit()
+                return error
+            try:
+                result = operation(cur, application)
+            except Exception as exc:  # noqa: BLE001
+                conn.rollback()
+                return {"ok": False, "error": "confirmed_operation_failed", "detail": str(exc)}
+            if not isinstance(result, dict) or not result.get("ok"):
+                conn.rollback()
+                return {"ok": False, "error": "confirmed_operation_failed", "result": legacy.json_safe(result)}
+            cur.execute(
+                """
+                UPDATE candidate_action_confirmations
+                SET status='consumed', consumed_at=now(), result=%s, updated_at=now()
+                WHERE confirmation_id=%s AND status='processing'
+                """,
+                (legacy.Json(legacy.json_safe(result)), confirmation["confirmation_id"]),
+            )
+        conn.commit()
+    return {"ok": True, "result": legacy.json_safe(result)}
 
 
 def transition_application(
@@ -739,18 +1276,23 @@ def transition_application(
     app_key: str,
     to_stage: str,
     trigger: str,
-    company_code: str | None = None,
+    company_code: str,
     expected_from_stage: str | None = None,
+    expected_version: int | None = None,
     actor_type: str = "human",
     actor_user_id: str | None = None,
     actor_phone: str | None = None,
     channel: str | None = None,
     confirmation_token: str | None = None,
+    confirmation_id: str | None = None,
+    confirmation_action: str | None = None,
+    confirmation_payload: dict[str, Any] | None = None,
     human_confirmed: bool = False,
     idempotency_key: str | None = None,
     permissions: set[str] | list[str] | None = None,
     metadata: dict[str, Any] | None = None,
     run_hire_side_effects: bool = True,
+    transactional_side_effect: Callable[[Any, dict[str, Any], dict[str, Any]], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Single write authority for application stage changes.
 
@@ -765,6 +1307,9 @@ def transition_application(
     target = normalize_stage(to_stage) or str(to_stage or "").strip().lower()
     if target not in APPLICATION_STAGES:
         return {"ok": False, "error": "invalid_target_stage", "to_stage": target}
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
 
     if actor_type == "ai" and human_confirmation_required(target, trigger=trigger):
         return {
@@ -774,7 +1319,12 @@ def transition_application(
             "to_stage": target,
         }
 
-    if human_confirmation_required(target, trigger=trigger) and not human_confirmed:
+    confirmation_needed = human_confirmation_required(target, trigger=trigger)
+    if confirmation_needed and (
+        not human_confirmed
+        or not str(confirmation_id or "").strip()
+        or not str(confirmation_token or "").strip()
+    ):
         return {
             "ok": False,
             "error": "confirmation_required",
@@ -782,10 +1332,11 @@ def transition_application(
             "message": "Human confirmation is required for this transition.",
         }
 
-    required_perm = permission_for_target(target) if human_confirmation_required(target, trigger=trigger) else None
+    required_perm = permission_for_target(target) if confirmation_needed else None
     if required_perm:
         perms = {str(p) for p in (permissions or [])}
-        if required_perm not in perms and actor_type != "system":
+        candidate_self_withdrawal = actor_type == "candidate" and target == "withdrawn"
+        if required_perm not in perms and actor_type != "system" and not candidate_self_withdrawal:
             return {
                 "ok": False,
                 "error": "permission_denied",
@@ -793,17 +1344,26 @@ def transition_application(
                 "to_stage": target,
             }
 
-    company = str(company_code or "").strip().upper() or None
     idem = str(idempotency_key or "").strip() or None
+    confirm_action = str(
+        confirmation_action
+        or TARGET_TO_CONFIRMATION_ACTION.get(target)
+        or ""
+    ).strip().lower()
+    confirm_payload = legacy.json_safe(confirmation_payload or metadata or {})
+    if confirmation_needed:
+        reason_error = _validate_structured_reason(confirm_action, confirm_payload)
+        if reason_error:
+            return reason_error
 
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
+            ensure_lifecycle_schema(cur)
             if idem:
                 cur.execute(
                     """
                     SELECT * FROM application_lifecycle_events
-                    WHERE company_code = COALESCE(%s, company_code)
-                      AND idempotency_key=%s
+                    WHERE company_code=%s AND idempotency_key=%s
                     LIMIT 1
                     """,
                     (company, idem),
@@ -812,8 +1372,8 @@ def transition_application(
                 if existing_event:
                     ev = dict(existing_event)
                     cur.execute(
-                        "SELECT * FROM applications WHERE app_key=%s LIMIT 1",
-                        (ev.get("app_key") or app_key,),
+                        "SELECT * FROM applications WHERE app_key=%s AND company_code=%s LIMIT 1",
+                        (ev.get("app_key") or app_key, company),
                     )
                     app_now = cur.fetchone()
                     return {
@@ -830,10 +1390,11 @@ def transition_application(
                 return {"ok": False, "error": "application_not_found", "app_key": app_key}
 
             app_company = str(app.get("company_code") or "").strip().upper()
-            if company and app_company != company:
+            if app_company != company:
                 return {"ok": False, "error": "tenant_mismatch", "app_key": app_key}
 
             raw_status = str(app.get("status") or "").strip().lower()
+            intake_admission = raw_status in INTAKE_STATUSES and trigger == "intake_admit"
             if raw_status in INTAKE_STATUSES and trigger not in {"intake_admit"}:
                 return {
                     "ok": False,
@@ -864,6 +1425,16 @@ def transition_application(
                         "message": "Application stage changed since this action was prepared.",
                     }
 
+            current_version = int(app.get("lifecycle_version") or 0)
+            if expected_version is not None and int(expected_version) != current_version:
+                return {
+                    "ok": False,
+                    "error": "stale_state",
+                    "expected_version": int(expected_version),
+                    "current_version": current_version,
+                    "message": "Application version changed since this action was prepared.",
+                }
+
             if not transition_is_allowed(from_stage, target):
                 return {
                     "ok": False,
@@ -873,7 +1444,52 @@ def transition_application(
                     "allowed": sorted(allowed_targets(from_stage)),
                 }
 
-            if from_stage == target:
+            confirmation = None
+            if confirmation_needed:
+                confirmation, confirmation_error = _verify_confirmation_for_transition(
+                    legacy,
+                    cur,
+                    application=app,
+                    action=confirm_action,
+                    confirmation_id=confirmation_id,
+                    confirmation_secret=confirmation_token,
+                    target_payload=confirm_payload,
+                    actor_user_id=actor_user_id,
+                    actor_phone=actor_phone,
+                )
+                if confirmation_error:
+                    conn.commit()
+                    return confirmation_error
+
+            if from_stage == target and not intake_admission:
+                noop_side_effect = None
+                if transactional_side_effect:
+                    try:
+                        noop_side_effect = transactional_side_effect(cur, app, app)
+                    except Exception as exc:  # noqa: BLE001
+                        conn.rollback()
+                        return {"ok": False, "error": "transactional_side_effect_failed", "detail": str(exc)}
+                    if not isinstance(noop_side_effect, dict) or not noop_side_effect.get("ok"):
+                        conn.rollback()
+                        return {
+                            "ok": False,
+                            "error": "transactional_side_effect_failed",
+                            "side_effect": legacy.json_safe(noop_side_effect),
+                        }
+                if confirmation:
+                    cur.execute(
+                        """
+                        UPDATE candidate_action_confirmations
+                        SET status='consumed', consumed_at=now(), updated_at=now(),
+                            result=%s
+                        WHERE confirmation_id=%s
+                        """,
+                        (
+                            legacy.Json({"ok": True, "idempotent": True, "from_stage": from_stage, "to_stage": target}),
+                            confirmation["confirmation_id"],
+                        ),
+                    )
+                    conn.commit()
                 return {
                     "ok": True,
                     "idempotent": True,
@@ -881,14 +1497,19 @@ def transition_application(
                     "from_stage": from_stage,
                     "to_stage": target,
                     "application": legacy.json_safe(app),
+                    "side_effect": legacy.json_safe(noop_side_effect) if noop_side_effect is not None else None,
                 }
 
+            cur.execute(
+                "SELECT set_config('wathefni.lifecycle_authority', 'canonical', true)"
+            )
             cur.execute(
                 """
                 UPDATE applications
                 SET status=%s,
                     current_step=%s,
-                    updated_at=CURRENT_DATE
+                    lifecycle_version=lifecycle_version + 1,
+                    updated_at=now()
                 WHERE app_key=%s
                   AND company_code=%s
                 RETURNING *
@@ -898,6 +1519,48 @@ def transition_application(
             updated = cur.fetchone()
             if not updated:
                 return {"ok": False, "error": "update_failed", "app_key": app_key}
+            updated = dict(updated)
+            side_effect_result: dict[str, Any] | None = None
+            if transactional_side_effect:
+                try:
+                    side_effect_result = transactional_side_effect(cur, app, updated)
+                except Exception as exc:  # noqa: BLE001 - rollback is the safety boundary
+                    conn.rollback()
+                    return {
+                        "ok": False,
+                        "error": "transactional_side_effect_failed",
+                        "detail": str(exc),
+                        "from_stage": from_stage,
+                        "to_stage": target,
+                    }
+                if not isinstance(side_effect_result, dict) or not side_effect_result.get("ok"):
+                    conn.rollback()
+                    return {
+                        "ok": False,
+                        "error": "transactional_side_effect_failed",
+                        "side_effect": legacy.json_safe(side_effect_result),
+                        "from_stage": from_stage,
+                        "to_stage": target,
+                    }
+            cur.execute(
+                """
+                UPDATE candidates
+                SET current_status=%s,
+                    profile=COALESCE(profile,'{}'::jsonb) || %s::jsonb
+                WHERE phone=%s
+                """,
+                (
+                    target,
+                    legacy.Json(
+                        {
+                            "current_status_derived": True,
+                            "current_status_authority": "applications.status",
+                            "current_status_app_key": app["app_key"],
+                        }
+                    ),
+                    app.get("phone"),
+                ),
+            )
 
             event_id = str(uuid.uuid4())
             cur.execute(
@@ -921,23 +1584,46 @@ def transition_application(
                     actor_user_id,
                     legacy.digits(actor_phone) or None,
                     channel,
-                    confirmation_token,
+                    str(confirmation["confirmation_id"]) if confirmation else None,
                     idem,
                     expected_from_stage,
                     legacy.Json(legacy.json_safe(metadata or {})),
                 ),
             )
             event = dict(cur.fetchone())
+            if confirmation:
+                cur.execute(
+                    """
+                    UPDATE candidate_action_confirmations
+                    SET status='consumed', consumed_at=now(), updated_at=now(),
+                        result=%s
+                    WHERE confirmation_id=%s AND status='processing'
+                    """,
+                    (
+                        legacy.Json(
+                            {
+                                "ok": True,
+                                "event_id": str(event.get("event_id") or ""),
+                                "from_stage": from_stage,
+                                "to_stage": target,
+                                "lifecycle_version": int(updated.get("lifecycle_version") or 0),
+                            }
+                        ),
+                        confirmation["confirmation_id"],
+                    ),
+                )
         conn.commit()
 
     result: dict[str, Any] = {
         "ok": True,
         "from_stage": from_stage,
         "to_stage": target,
-        "application": legacy.json_safe(dict(updated)),
+        "application": legacy.json_safe(updated),
         "event": legacy.json_safe(event),
         "trigger": trigger,
     }
+    if side_effect_result is not None:
+        result["side_effect"] = legacy.json_safe(side_effect_result)
 
     if target == "hired" and run_hire_side_effects and hasattr(legacy, "transition_hire"):
         try:
@@ -1123,6 +1809,7 @@ def mark_cv_received(
         return {"ok": True, "skipped": True, "stage": stage, "application": legacy.json_safe(application)}
     if stage == "cv_processing":
         return {"ok": True, "idempotent": True, "stage": stage, "application": legacy.json_safe(application)}
+    version = _cv_version_from_app(application, {"conversation_id": conversation_id})
     return transition_application(
         legacy,
         app_key=str(application.get("app_key")),
@@ -1132,6 +1819,7 @@ def mark_cv_received(
         actor_type="system",
         channel=channel,
         human_confirmed=False,
+        idempotency_key=f"cv-received:{application.get('company_code')}:{application.get('app_key')}:{version}",
         metadata={"conversation_id": conversation_id} if conversation_id else None,
     )
 
@@ -1171,6 +1859,7 @@ def mark_cv_ready_for_review(
         actor_type="system",
         channel="system",
         human_confirmed=False,
+        idempotency_key=f"cv-success:{application.get('company_code')}:{application.get('app_key')}:{document_id or cv_version or _cv_version_from_app(application, meta)}",
         metadata=meta,
     )
 

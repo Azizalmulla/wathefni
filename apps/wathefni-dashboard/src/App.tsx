@@ -3179,37 +3179,37 @@ function CandidateDrawer({
   const runHire = async () => {
     if (
       !(await confirm({
-        title: 'Hire this candidate?',
-        body: `This will hire ${who}, create their employee record, and start onboarding. This is hard to undo.`,
-        confirmLabel: 'Hire candidate',
+        title: locale === 'ar' ? 'توظيف هذا المرشح؟' : 'Hire this candidate?',
+        body: locale === 'ar' ? `سيتم توظيف ${who} وإنشاء سجل الموظف وبدء التهيئة. يصعب التراجع عن هذا الإجراء.` : `This will hire ${who}, create their employee record, and start onboarding. This is hard to undo.`,
+        confirmLabel: locale === 'ar' ? 'توظيف المرشح' : 'Hire candidate',
         destructive: true,
       }))
     )
       return
-    await mutate('Hiring candidate', () => hireCandidate(access, candidate.app_key), actionKey('hire'))
+    await mutate('Hiring candidate', () => hireCandidate(access, candidate, message), actionKey('hire'))
   }
   const runShortlist = async () => {
     if (
       !(await confirm({
-        title: 'Shortlist this candidate?',
-        body: `Move ${who} to the shortlist for ${candidate.position?.title || candidate.position?.code || 'this role'}.`,
-        confirmLabel: 'Shortlist candidate',
+        title: locale === 'ar' ? 'إضافة المرشح للقائمة المختصرة؟' : 'Shortlist this candidate?',
+        body: locale === 'ar' ? `نقل ${who} إلى القائمة المختصرة لوظيفة ${candidate.position?.title || candidate.position?.code || 'هذه الوظيفة'}.` : `Move ${who} to the shortlist for ${candidate.position?.title || candidate.position?.code || 'this role'}.`,
+        confirmLabel: locale === 'ar' ? 'إضافة للقائمة المختصرة' : 'Shortlist candidate',
       }))
     )
       return
-    await mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate.app_key), actionKey('shortlist'))
+    await mutate('Shortlisting candidate', () => shortlistCandidate(access, candidate, message), actionKey('shortlist'))
   }
   const runReject = async () => {
     if (
       !(await confirm({
-        title: 'Reject this candidate?',
-        body: `This will move ${who} out of the active pipeline. You can still find their record later.`,
-        confirmLabel: 'Reject candidate',
+        title: locale === 'ar' ? 'رفض هذا المرشح؟' : 'Reject this candidate?',
+        body: locale === 'ar' ? `سيتم إخراج ${who} من مسار التوظيف النشط مع الاحتفاظ بالسجل.` : `This will move ${who} out of the active pipeline. You can still find their record later.`,
+        confirmLabel: locale === 'ar' ? 'رفض المرشح' : 'Reject candidate',
         destructive: true,
       }))
     )
       return
-    await mutate('Rejecting candidate', () => rejectCandidate(access, candidate.app_key), actionKey('reject'))
+    await mutate('Rejecting candidate', () => rejectCandidate(access, candidate, message), actionKey('reject'))
   }
   const runPrimaryAction = () => {
     if (primaryAction.id === 'send_assessment') return runSendAssessment()

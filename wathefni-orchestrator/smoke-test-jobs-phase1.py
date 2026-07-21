@@ -33,6 +33,16 @@ def main() -> None:
     suffix = uuid.uuid4().hex[:8].upper()
     code = f"JP1_{suffix}"
     actor = "00000000-0000-4000-8000-000000000001"
+    phone = f"9650000{suffix[:6]}"
+    app_key = f"smoke-{suffix}"
+
+    def _cleanup() -> None:
+        with orch.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM applications WHERE company_code=%s AND app_key=%s", (company, app_key))
+                cur.execute("DELETE FROM candidates WHERE phone=%s", (phone,))
+                cur.execute("DELETE FROM positions WHERE company_code=%s AND position_code=%s", (company, code))
+            conn.commit()
 
     # Schema
     with orch.db_connect() as conn:
@@ -44,6 +54,17 @@ def main() -> None:
     # Existing staging jobs survive (count before/after create must not drop legacy).
     before = orch.dashboard_prehire_positions_summary(company)
     before_total = int(before.get("total_positions") or 0)
+    try:
+        _run_jobs_phase1_body(orch, company, suffix, code, actor, phone, app_key, before_total)
+    finally:
+        _cleanup()
+        _ok("cleanup smoke artifacts (finally)")
+
+    print("PASS jobs-phase1")
+    print(f"ts={time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}")
+
+
+def _run_jobs_phase1_body(orch, company, suffix, code, actor, phone, app_key, before_total) -> None:
 
     # Create draft
     created = jobs.create_job(
@@ -230,11 +251,9 @@ def main() -> None:
             _fail("invalid transition code", exc.code)
         _ok("invalid transition rejected")
 
-    # Vacancy math: remaining = vacancies - hired
+    # Vacancy math fixture: temporary hired row for count only; always cleaned in finally.
     with orch.db_connect() as conn:
         with conn.cursor() as cur:
-            phone = f"9650000{suffix[:6]}"
-            app_key = f"smoke-{suffix}"
             cur.execute(
                 """
                 INSERT INTO candidates (phone, name, updated_at)
@@ -248,8 +267,13 @@ def main() -> None:
                 INSERT INTO applications (
                   app_key, company_code, phone, position_code, position_title, status,
                   cv_received, data_source, ingested_at, updated_at, raw_json
-                ) VALUES (%s,%s,%s,%s,%s,'hired', TRUE, 'production', now(), now(), '{}'::jsonb)
-                ON CONFLICT (app_key) DO UPDATE SET status='hired', position_code=EXCLUDED.position_code
+                ) VALUES (%s,%s,%s,%s,%s,'hired', TRUE, 'jobs_phase1_smoke', now(), now(),
+                          jsonb_build_object('smoke', true, 'jobs_phase1', true))
+                ON CONFLICT (app_key) DO UPDATE
+                  SET status='hired',
+                      position_code=EXCLUDED.position_code,
+                      data_source='jobs_phase1_smoke',
+                      raw_json=EXCLUDED.raw_json
                 """,
                 (app_key, company, phone, code, created.get("title")),
             )
@@ -291,17 +315,6 @@ def main() -> None:
     if after_total < before_total + 1:
         _fail("existing jobs survived", f"before={before_total} after={after_total}")
     _ok(f"inventory grew safely ({before_total} → {after_total})")
-
-    # Cleanup smoke job + app (keep staging tidy)
-    with orch.db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM applications WHERE app_key=%s", (app_key,))
-            cur.execute("DELETE FROM positions WHERE company_code=%s AND position_code=%s", (company, code))
-        conn.commit()
-    _ok("cleanup smoke artifacts")
-
-    print("PASS jobs-phase1")
-    print(f"ts={time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}")
 
 
 if __name__ == "__main__":

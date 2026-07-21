@@ -235,6 +235,11 @@ def _flow_to_sent(
 
 
 def main() -> int:
+    # Quarantined after Candidates C0/C1: uses direct applications.status fixture writes.
+    sys.path.insert(0, str(ROOT / "ops"))
+    from lifecycle_fixture_quarantine import refuse_unless_legacy_fixtures_explicitly_allowed
+
+    refuse_unless_legacy_fixtures_explicitly_allowed(script_name="offer1-owner-review.py")
     os.environ.setdefault("WATHEFNI_ENV", "staging")
     import app as legacy
     import offer_lifecycle as offers

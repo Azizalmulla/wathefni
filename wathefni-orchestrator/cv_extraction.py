@@ -1238,7 +1238,9 @@ def extract_cv_document(
     force_ocr: bool = False,
 ) -> ExtractionResult:
     """Main entry: local Poppler → Mistral OCR for failed pages → GPT rescue."""
-    company = (company_code or "WATHEFNI").upper()
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return ExtractionResult(text="", method="scope-check", error="tenant_scope_required")
     if not path.exists() or not path.is_file():
         return ExtractionResult(text="", method="missing-file", error="file_not_found")
 

@@ -700,7 +700,9 @@ def extract_docx_document(
     app_key: str | None = None,
     db_execute: cv.DbExecute | None = None,
 ) -> cv.ExtractionResult:
-    company = (company_code or "WATHEFNI").upper()
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return cv.ExtractionResult(text="", method="scope-check", error="tenant_scope_required")
     if not path.exists() or not path.is_file():
         return cv.ExtractionResult(text="", method="missing-file", error="file_not_found")
 

@@ -458,6 +458,7 @@ export type ApplicationSummary = {
   }
   status?: string
   canonical_stage?: string
+  lifecycle_version?: number
   status_label?: string
   current_step?: string
   screening_status?: string

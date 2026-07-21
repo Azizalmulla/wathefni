@@ -6362,12 +6362,15 @@ def hr_company_code(phone: str | None) -> str | None:
     return None
 
 
-def request_company_code(request: WhatsAppTurnRequest, default: str | None = "WATHEFNI") -> str | None:
+def request_company_code(request: WhatsAppTurnRequest, default: str | None = None) -> str | None:
     metadata = getattr(request, "metadata", None)
     if isinstance(metadata, dict):
         metadata_company = str(metadata.get("company_code") or "").strip().upper()
         if metadata_company and str(metadata.get("channel") or "") == "web_dashboard":
             return metadata_company
+    active_company = active_company_code()
+    if active_company:
+        return active_company
     linked = whatsapp_actor_context_for_phone(getattr(request, "sender_phone", None))
     if linked and linked.get("company_code"):
         return str(linked.get("company_code") or "").upper()
@@ -7359,7 +7362,7 @@ def infer_candidate_mutation_action(text: str, *, request: WhatsAppTurnRequest |
     action_type = candidate_mutation_action_type_from_text(text)
     if not action_type:
         return None
-    company = request_company_code(request) if request else "WATHEFNI"
+    company = request_company_code(request) if request else None
     resolution = resolve_candidate_reference_from_text(text, company_code=company)
     base = {
         "action_type": action_type,
@@ -9706,6 +9709,9 @@ def call_analytical_refinement_planner(
     company_code: str | None,
     timeout: int = 8,
 ) -> dict[str, Any] | None:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return None
     provider = planner_provider_config()
     if not provider:
         return None
@@ -9728,7 +9734,7 @@ def call_analytical_refinement_planner(
             "payload": latest_action.get("payload"),
             "completed_at": latest_action.get("completed_at"),
         },
-        "company_code": (company_code or "WATHEFNI").upper(),
+        "company_code": company,
         "required_shape": {
             "intent": "analytical_refinement | clarification_needed | unsupported | none",
             "previous_action": "previous action type",
@@ -10353,7 +10359,7 @@ def operational_focus(
         "entity_type": entity_type,
         "key": key,
         "display_name": display_name,
-        "company_code": (company_code or "WATHEFNI").upper(),
+        "company_code": str(company_code or "").strip().upper(),
         "source_action": source_action,
         "confidence": confidence,
         "updated_at": now,
@@ -10369,7 +10375,7 @@ def candidate_focus_from_app(app: dict[str, Any] | None, *, source_action: str |
         return None
     contact = candidate_contact(app)
     key = str(app.get("app_key") or contact.get("app_key") or "").strip()
-    if not key:
+    if not key or not str(app.get("company_code") or "").strip():
         return None
     return operational_focus(
         entity_type="candidate",
@@ -11692,9 +11698,18 @@ def operational_context_from_action_result(
     result_payload: dict[str, Any],
 ) -> dict[str, Any]:
     out = persistent_context_pruned(context)
+    action_scope = action.get("memory_scope") if isinstance(action.get("memory_scope"), dict) else {}
+    result_scope = result_payload.get("memory_scope") if isinstance(result_payload.get("memory_scope"), dict) else {}
+    company = resolved_company_scope(
+        action.get("company_code")
+        or result_payload.get("company_code")
+        or action_scope.get("company_id")
+        or result_scope.get("company_id")
+    )
     for key in ("application", "selected_application"):
         value = result_payload.get(key)
-        app = find_application_by_key(value.get("app_key")) if isinstance(value, dict) else None
+        item_company = str(value.get("company_code") or company or "").strip() if isinstance(value, dict) else company
+        app = find_application_by_key(value.get("app_key"), company_code=item_company) if isinstance(value, dict) else None
         out = set_operational_focus(out, candidate_focus_from_app(app, source_action=action_type))
     candidate = result_payload.get("candidate") if isinstance(result_payload.get("candidate"), dict) else {}
     focus_context = out.get("focus") if isinstance(out.get("focus"), dict) else {}
@@ -11705,7 +11720,14 @@ def operational_context_from_action_result(
     employee = result_payload.get("employee") if isinstance(result_payload.get("employee"), dict) else None
     out = set_operational_focus(out, employee_focus_from_employee(employee, source_action=action_type))
     if employee and employee.get("app_key"):
-        out = set_operational_focus(out, candidate_focus_from_app(find_application_by_key(employee.get("app_key")), source_action=action_type, confidence="linked_employee_app"))
+        out = set_operational_focus(
+            out,
+            candidate_focus_from_app(
+                find_application_by_key(employee.get("app_key"), company_code=employee.get("company_code") or company),
+                source_action=action_type,
+                confidence="linked_employee_app",
+            ),
+        )
     elif employee and employee.get("phone"):
         out = set_operational_focus(out, candidate_focus_from_app(resolve_application_for_action({"subject_phone": employee.get("phone")}), source_action=action_type, confidence="linked_employee_phone"))
     attempt = result_payload.get("attempt") if isinstance(result_payload.get("attempt"), dict) else None
@@ -12204,25 +12226,20 @@ def backfill_candidate_identity_from_documents() -> dict[str, int]:
 
 def find_application_by_key(app_key: str | None, company_code: str | None = None) -> dict[str, Any] | None:
     key = str(app_key or "").strip()
-    if not key:
+    company = resolved_company_scope(company_code)
+    if not key or not company:
         return None
-    company = str(company_code or "").strip().upper()
     with db_connect() as conn:
         with conn.cursor() as cur:
-            where = "a.app_key=%s"
-            params: list[Any] = [key]
-            if company:
-                where += " AND a.company_code=%s"
-                params.append(company)
             cur.execute(
-                f"""
+                """
                 SELECT a.*, c.name AS candidate_name, c.email AS candidate_email
                 FROM applications a
                 JOIN candidates c ON c.phone = a.phone
-                WHERE {where}
+                WHERE a.app_key=%s AND a.company_code=%s
                 LIMIT 1
                 """,
-                params,
+                (key, company),
             )
             row = cur.fetchone()
             return dict(row) if row else None
@@ -12230,29 +12247,25 @@ def find_application_by_key(app_key: str | None, company_code: str | None = None
 
 def candidate_applications_by_email(email: str, company_code: str | None = None) -> list[dict[str, Any]]:
     target = str(email or "").strip().lower()
-    if not target:
+    company = resolved_company_scope(company_code)
+    if not target or not company:
         return []
-    company = str(company_code or "").strip().upper()
     with db_connect() as conn:
         with conn.cursor() as cur:
-            company_clause = "AND a.company_code=%s" if company else ""
-            params: list[Any] = [target]
-            if company:
-                params.append(company)
             cur.execute(
-                f"""
+                """
                 SELECT a.*, c.name AS candidate_name, c.email AS candidate_email
                 FROM candidates c
                 JOIN applications a ON a.phone=c.phone
                 WHERE lower(c.email)=%s
-                  {company_clause}
+                  AND a.company_code=%s
                 ORDER BY c.name NULLS LAST,
                          CASE WHEN a.status IN ('hired','shortlisted','screening_complete') THEN 0 ELSE 1 END,
                          a.updated_at DESC NULLS LAST,
                          a.ingested_at DESC NULLS LAST
                 LIMIT 50
                 """,
-                params,
+                (target, company),
             )
             return [dict(row) for row in cur.fetchall()]
 
@@ -13230,7 +13243,10 @@ def generate_application_profile_evaluation(app_key: str, company_code: str, *, 
     return candidate
 
 
-def rank_candidates(action: dict[str, Any], *, company_code: str | None = "WATHEFNI") -> dict[str, Any]:
+def rank_candidates(action: dict[str, Any], *, company_code: str | None = None) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required", "action": action}
     requested_top_n = int(action.get("top_n") or 0)
     top_n = requested_top_n if requested_top_n > 0 else RANK_CANDIDATES_DEFAULT_TOP_N
     capped = top_n > RANK_CANDIDATES_MAX_TOP_N
@@ -13244,7 +13260,7 @@ def rank_candidates(action: dict[str, Any], *, company_code: str | None = "WATHE
     terms = normalized_search_terms(ranking_prompt, position)
     query_vector = embed_rank_query(ranking_prompt) if (terms or position) else None
     query_vector_literal = pgvector_literal(query_vector) if query_vector else None
-    params: list[Any] = [(company_code or "WATHEFNI").upper()]
+    params: list[Any] = [company]
     where = ["a.company_code=%s", reviewable_application_predicate("a")]
     if position:
         where.append("(a.position_code ILIKE %s OR a.position_title ILIKE %s)")
@@ -13357,11 +13373,11 @@ def rank_candidates(action: dict[str, Any], *, company_code: str | None = "WATHE
         )
     scored.sort(key=lambda item: item["score"], reverse=True)
     selected = scored[:top_n]
-    attach_gpt_rank_evaluations(selected, role_profile=role_profile, query=ranking_prompt, company_code=(company_code or "WATHEFNI").upper())
+    attach_gpt_rank_evaluations(selected, role_profile=role_profile, query=ranking_prompt, company_code=company)
     return {
         "ok": True,
         "query": query,
-        "filters": {"company_code": (company_code or "WATHEFNI").upper(), "position": position or None, "status": status_filter or None},
+        "filters": {"company_code": company, "position": position or None, "status": status_filter or None},
         "requested_top_n": requested_top_n or None,
         "shown_top_n": top_n,
         "capped": capped,
@@ -13399,13 +13415,16 @@ def format_rank_candidates_reply(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def candidate_cv_evaluation(action: dict[str, Any], *, company_code: str | None = "WATHEFNI") -> dict[str, Any]:
+def candidate_cv_evaluation(action: dict[str, Any], *, company_code: str | None = None) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required", "action": action}
     app_key = str(action.get("app_key") or action.get("subject_key") or "").strip()
     if app_key:
-        app = find_application_by_key(app_key, company_code=company_code)
+        app = find_application_by_key(app_key, company_code=company)
         if not app:
             return {"ok": False, "error": "candidate_not_found", "action": action}
-        item = compare_candidate_item({"app_key": app_key}, company_code=company_code)
+        item = compare_candidate_item({"app_key": app_key}, company_code=company)
         strengths, gaps = candidate_strengths_and_gaps(item)
         evaluated = [{
             "app_key": item.get("app_key"),
@@ -13436,7 +13455,7 @@ def candidate_cv_evaluation(action: dict[str, Any], *, company_code: str | None 
             "top_n": action.get("top_n") or 5,
             "query": action.get("query") or action.get("prompt_text") or "candidate CV evaluation",
         },
-        company_code=company_code,
+        company_code=company,
     )
     if not ranking.get("ok"):
         return {**ranking, "ok": False, "action": action}
@@ -13600,12 +13619,15 @@ def candidate_strengths_and_gaps(candidate: dict[str, Any]) -> tuple[list[str], 
     return strengths or ["No stored strengths beyond basic profile fields"], gaps or ["No stored gaps identified"]
 
 
-def compare_candidates(action: dict[str, Any], *, company_code: str | None = "WATHEFNI") -> dict[str, Any]:
+def compare_candidates(action: dict[str, Any], *, company_code: str | None = None) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required", "action": action}
     source_items = action.get("candidates") if isinstance(action.get("candidates"), list) else []
     if not source_items:
         ids = action.get("candidate_ids") if isinstance(action.get("candidate_ids"), list) else []
         source_items = [{"app_key": item} for item in ids if item]
-    candidates = [compare_candidate_item(item, company_code=company_code) for item in source_items if isinstance(item, dict)]
+    candidates = [compare_candidate_item(item, company_code=company) for item in source_items if isinstance(item, dict)]
     candidates = [item for item in candidates if item.get("app_key") != "missing" or item.get("name") != "missing"]
     if len(candidates) < 2:
         return {"ok": False, "error": "not_enough_candidates", "candidates": candidates, "action": action}
@@ -21047,9 +21069,11 @@ def register_candidate_cv_file(
     source, mime_type, checksum, size_bytes = source_file_details(media.get("path"), media.get("type") or media.get("mime_type"))
     if not source or not source.exists() or not mime_type:
         return {"ok": False, "storage_status": "failed", "storage_error": "missing_candidate_cv_media_file"}
-    company_code = str(application.get("company_code") or "WATHEFNI").upper()
+    company_code = str(application.get("company_code") or "").strip().upper()
     phone = digits(application.get("phone"))
-    app_key = str(application.get("app_key") or f"{phone}-{company_code}-{application.get('position_code') or 'APPLICATION'}")
+    app_key = str(application.get("app_key") or "").strip()
+    if not company_code or not app_key:
+        return {"ok": False, "storage_status": "failed", "storage_error": "tenant_scope_required"}
     raw_json = dict(application.get("raw_json") or {})
     prior_cv = dict(raw_json.get("cv") or {})
     is_replacement = bool(prior_cv.get("filename") or prior_cv.get("storage"))
@@ -21194,23 +21218,18 @@ def register_candidate_cv_file(
         SET raw_json=%s,
             cv_received=CASE WHEN %s THEN true ELSE cv_received END,
             cv_received_at=CASE WHEN %s THEN COALESCE(cv_received_at, CURRENT_DATE) ELSE cv_received_at END,
-            status=CASE WHEN %s AND NOT %s AND status IN ('awaiting_cv','cv_received') THEN 'cv_processing' ELSE status END,
-            current_step=CASE WHEN %s AND NOT %s AND current_step IN ('cv_request','cv_upload') THEN 'cv_processing' ELSE current_step END,
             drive_sync_status=CASE WHEN %s='google_drive' AND %s THEN 'ok' ELSE drive_sync_status END,
-            updated_at=COALESCE(updated_at, CURRENT_DATE)
-        WHERE app_key=%s
+            updated_at=now()
+        WHERE app_key=%s AND company_code=%s
         """,
         (
             Json(raw_json),
             received_ok,
             received_ok,
-            received_ok,
-            canonical_lifecycle_enabled(),
-            received_ok,
-            canonical_lifecycle_enabled(),
             storage_result.get("provider"),
             received_ok,
             app_key,
+            company_code,
         ),
     )
     document_id = None
@@ -21235,7 +21254,7 @@ def register_candidate_cv_file(
                 original_filename,
                 storage_metadata.get("local_path") or str(source),
                 cv_json.get("source") or "whatsapp_document",
-                "pending_extraction" if received_ok else "failed",
+                ("awaiting_confirmation" if is_replacement and received_ok else ("pending_extraction" if received_ok else "failed")),
                 None,
                 None,
                 storage_result.get("external_file_id"),
@@ -21718,6 +21737,7 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             sys.modules[__name__],
             phone=request.sender_phone,
             conversation_id=request.conversation_id,
+            company_code=request_company_code(request, default=None),
             account_id=request.account_id,
             allow_single_eligible=True,
         )
@@ -21752,7 +21772,11 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
                     **candidate_message_result("ambiguous_application", request=request),
                 }
     else:
-        application = find_candidate_application_for_file(request.sender_phone)
+        return {
+            "ok": False,
+            "error": "canonical_lifecycle_disabled",
+            **candidate_message_result("cv_held_needs_role", request=request),
+        }
     if not application:
         held = hold_candidate_pending_media(request)
         return {
@@ -21789,15 +21813,83 @@ def handle_candidate_file_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
             template_key = "cv_updated_accepted" if result.get("is_replacement") else "cv_accepted"
             result.update(candidate_message_result(template_key, request=request, application=application, locale=locale))
             return result
-        if canonical_lifecycle_enabled():
-            import recruiting_lifecycle as _rl
+        import recruiting_lifecycle as _rl
 
-            _rl.mark_cv_received(
+        if result.get("is_replacement"):
+            if not request.conversation_id or not result.get("document_id"):
+                return {
+                    **result,
+                    "ok": False,
+                    "error": "replacement_confirmation_unavailable",
+                    "reply": "I stored the file safely, but I could not prepare CV replacement confirmation. Your current CV remains unchanged.",
+                }
+            target_payload = {
+                "document_id": str(result["document_id"]),
+                "content_sha256": (result.get("storage") or {}).get("content_sha256"),
+            }
+            minted = _rl.mint_candidate_action_confirmation(
                 sys.modules[__name__],
-                application=application,
+                company_code=str(application.get("company_code") or ""),
+                app_key=str(application.get("app_key") or ""),
+                action="replace_cv",
+                observed_stage=str(application.get("status") or ""),
+                observed_version=int(application.get("lifecycle_version") or 0),
+                target_payload=target_payload,
+                actor_user_id=None,
+                actor_phone=request.sender_phone,
+                actor_type="candidate",
                 channel="whatsapp",
-                conversation_id=request.conversation_id,
+                permissions=set(),
+                idempotency_key=f"replace-cv:{application.get('company_code')}:{application.get('app_key')}:{result['document_id']}",
             )
+            if not minted.get("ok"):
+                return {
+                    **result,
+                    "ok": False,
+                    "error": minted.get("error") or "replacement_confirmation_unavailable",
+                    "reply": "I stored the file safely, but your current CV remains unchanged.",
+                }
+            confirmation = minted["confirmation"]
+            pending = {
+                "type": "replace_cv",
+                "status": "pending",
+                "app_key": application.get("app_key"),
+                "company_code": application.get("company_code"),
+                "confirmation_id": confirmation.get("confirmation_id"),
+                "confirmation_token": confirmation.get("confirmation_token"),
+                "observed_stage": confirmation.get("observed_stage"),
+                "observed_version": confirmation.get("observed_version"),
+                "target_payload": target_payload,
+                "requested_at": now_iso(),
+            }
+            state = _rl.update_candidate_conversation_state(
+                sys.modules[__name__],
+                company_code=str(application.get("company_code") or ""),
+                conversation_id=str(request.conversation_id),
+                phone=str(application.get("phone") or request.sender_phone),
+                app_key=str(application.get("app_key") or ""),
+                updates={"pending_candidate_action": pending},
+            )
+            if not state.get("ok"):
+                return {**result, "ok": False, "error": state.get("error") or "replacement_confirmation_unavailable"}
+            result.update(
+                {
+                    "status": "needs_confirmation",
+                    "intent": "candidate_cv_replacement_confirmation_required",
+                    "reply": (
+                        "وصلتني السيرة الجديدة. أرسل «تأكيد» لاستبدال السيرة الحالية، أو «إلغاء» للاحتفاظ بالحالية."
+                        if locale == "ar"
+                        else "I received the new CV. Reply CONFIRM to replace your current CV, or CANCEL to keep the current one."
+                    ),
+                }
+            )
+            return result
+        _rl.mark_cv_received(
+            sys.modules[__name__],
+            application=application,
+            channel="whatsapp",
+            conversation_id=request.conversation_id,
+        )
         result.update(candidate_message_result("file_received_checking", request=request, application=application, locale=locale))
     else:
         result.update(candidate_message_result("cv_invalid", request=request, application=application, locale=locale))
@@ -22195,7 +22287,9 @@ def merge_candidate_profiles_with_authority(
 
 
 def screening_questions_for_application(application: dict[str, Any]) -> list[dict[str, Any]]:
-    company_code = str(application.get("company_code") or "WATHEFNI")
+    company_code = str(application.get("company_code") or "").strip().upper()
+    if not company_code:
+        return []
     position_code = str(application.get("position_code") or "")
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -22272,7 +22366,9 @@ def upsert_application_semantic_document(
     app_key = str(application.get("app_key") or "")
     if not app_key or not content.strip():
         return {"ok": False, "error": "missing_app_key_or_content"}
-    company_code = str(application.get("company_code") or "WATHEFNI").upper()
+    company_code = str(application.get("company_code") or "").strip().upper()
+    if not company_code:
+        return {"ok": False, "error": "tenant_scope_required"}
     position_code = str(application.get("position_code") or "")
     phone = digits(application.get("phone"))
     title = str(application.get("position_title") or position_code or "Application CV")
@@ -22481,7 +22577,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
             if held_import or imported_app:
                 send_screening = False
             local_path = item.get("local_path") or document_cv.get("path") or ((raw_json.get("cv") or {}).get("path") if isinstance(raw_json.get("cv"), dict) else None)
-            company_code = str(app.get("company_code") or "WATHEFNI").upper()
+            company_code = str(app.get("company_code") or "").strip().upper()
+            if not company_code:
+                return {"ok": False, "error": "tenant_scope_required", "document_id": document_id}
             db_exec = _cv_db_execute_factory(cur)
             lease = _cv_extraction.acquire_extraction_lease(
                 db_exec,
@@ -22588,8 +22686,8 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             "company_code": app.get("company_code"),
                             "position_code": app.get("position_code"),
                             "apply_code": app.get("apply_code"),
-                            "status": "screening",
-                            "current_step": "screening",
+                            "status": app.get("status"),
+                            "current_step": app.get("current_step"),
                             "cv_received": True,
                             "screening_status": "pending",
                             "updated_at": now_iso(),
@@ -22598,7 +22696,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         **candidate_profile,
                         **{k: v for k, v in profile.items() if v not in (None, "", [], {})},
                         "applications": updated_apps,
-                        "current_status": "screening",
+                        "current_status": app.get("status"),
+                        "current_status_derived": True,
+                        "current_status_authority": "applications.status",
                         "active_company_code": app.get("company_code"),
                         "active_position_code": app.get("position_code"),
                         "active_application": {
@@ -22672,66 +22772,27 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         "pending_keys": pending_keys,
                         "completed_at": now_iso() if screening_status == "complete" else current_screening.get("completed_at"),
                     }
-                    lifecycle_on = canonical_lifecycle_enabled()
                     cur.execute(
                         """
                         UPDATE applications
                         SET raw_json=%s,
                             cv_received=true,
                             cv_received_at=COALESCE(cv_received_at, CURRENT_DATE),
-                            status=CASE
-                              WHEN status IN ('needs_role','import_review') THEN status
-                              WHEN status IN ('shortlisted','interview','hired','rejected','withdrawn') THEN status
-                              WHEN %s THEN 'ready_for_review'
-                              WHEN %s='complete' THEN 'screening_complete'
-                              WHEN status IN ('awaiting_cv','cv_received','cv_processing') THEN 'screening'
-                              ELSE status
-                            END,
-                            current_step=CASE
-                              WHEN status IN ('needs_role','import_review') THEN current_step
-                              WHEN status IN ('shortlisted','interview','hired','rejected','withdrawn') THEN current_step
-                              WHEN %s THEN 'ready_for_review'
-                              ELSE 'screening'
-                            END,
                             screening_status=%s,
                             screening_completed_at=CASE WHEN %s='complete' THEN COALESCE(screening_completed_at, CURRENT_DATE) ELSE screening_completed_at END,
-                            updated_at=COALESCE(updated_at, CURRENT_DATE)
-                        WHERE app_key=%s
+                            updated_at=now()
+                        WHERE app_key=%s AND company_code=%s
                         RETURNING *
                         """,
                         (
                             Json(json_safe(next_raw)),
-                            lifecycle_on,
-                            screening_status,
-                            lifecycle_on,
                             screening_status,
                             screening_status,
                             app.get("app_key"),
+                            company_code,
                         ),
                     )
                     refreshed_after_cv = cur.fetchone()
-                    if lifecycle_on and not held_import and refreshed_after_cv:
-                        import recruiting_lifecycle as _rl
-
-                        try:
-                            cur.execute(
-                                """
-                                INSERT INTO application_lifecycle_events (
-                                  company_code, app_key, from_stage, to_stage, trigger,
-                                  actor_type, channel, metadata
-                                )
-                                VALUES (%s,%s,%s,%s,'cv_processing_success','system','system',%s)
-                                """,
-                                (
-                                    str(refreshed_after_cv.get("company_code") or company_code).upper(),
-                                    refreshed_after_cv.get("app_key"),
-                                    _rl.normalize_stage(app.get("status")) or str(app.get("status") or ""),
-                                    str(refreshed_after_cv.get("status") or "ready_for_review"),
-                                    Json(json_safe({"document_id": document_id, "screening_status": screening_status})),
-                                ),
-                            )
-                        except Exception:
-                            logger.warning("lifecycle event write after CV processing failed", exc_info=True)
                     cur.execute(
                         """
                         UPDATE candidate_documents
@@ -22804,18 +22865,28 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         ),
                     )
                     conn.commit()
-                    if lifecycle_on and not held_import and refreshed_after_cv:
+                    lifecycle_result = None
+                    if not held_import and refreshed_after_cv:
                         import recruiting_lifecycle as _rl
 
                         try:
-                            _rl.ensure_ready_for_review_task(
+                            lifecycle_result = _rl.mark_cv_ready_for_review(
                                 sys.modules[__name__],
-                                company_code=str(refreshed_after_cv.get("company_code") or company_code),
                                 application=dict(refreshed_after_cv),
                                 cv_version=str(document_id),
+                                document_id=str(document_id),
                             )
+                            transitioned = lifecycle_result.get("application") if isinstance(lifecycle_result, dict) else None
+                            if isinstance(transitioned, dict):
+                                refreshed_after_cv = transitioned
                         except Exception:
-                            logger.warning("ready_for_review HR task create failed", exc_info=True)
+                            logger.exception("canonical CV lifecycle transition failed")
+                            return {
+                                "ok": False,
+                                "error": "cv_lifecycle_transition_failed",
+                                "document_id": document_id,
+                                "app_key": app.get("app_key"),
+                            }
                     screening_result = None
                     if send_screening:
                         ctx = _action_registry.ExecutionContext(
@@ -22947,7 +23018,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                     )
                 conn.commit()
                 failure_transition = None
-                if canonical_lifecycle_enabled() and not held_import and not imported_app and not is_replacement:
+                if not held_import and not is_replacement:
                     import recruiting_lifecycle as _rl
 
                     failure_transition = _rl.transition_application(
@@ -22960,6 +23031,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         channel="system",
                         human_confirmed=False,
                         expected_from_stage="cv_processing",
+                        idempotency_key=f"cv-failed:{company_code}:{app.get('app_key')}:{document_id}",
                         metadata={"document_id": document_id, "reason": error or "no_text_extracted"},
                     )
                 screening_result = None
@@ -23167,6 +23239,7 @@ def resolve_candidate_request_application(request: WhatsAppTurnRequest) -> dict[
         sys.modules[__name__],
         phone=request.sender_phone,
         conversation_id=request.conversation_id,
+        company_code=request_company_code(request, default=None),
         account_id=request.account_id,
         allow_single_eligible=True,
     )
@@ -23276,6 +23349,108 @@ def handle_candidate_withdrawal_turn(request: WhatsAppTurnRequest) -> dict[str, 
     cancel = normalized in {"cancel", "no", "keep it", "do not withdraw"} or bool(
         re.fullmatch(r"\s*(إلغاء|الغاء|لا|خله|خليه)\s*", raw)
     )
+    if pending and pending.get("type") == "replace_cv" and pending.get("status") == "pending":
+        if not application:
+            return {"ok": False, "error": "pending_application_missing"}
+        import recruiting_lifecycle as _rl
+
+        payload = pending.get("target_payload") if isinstance(pending.get("target_payload"), dict) else {}
+        document_id = str(payload.get("document_id") or "")
+        if cancel:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE candidate_documents
+                        SET extraction_status='cancelled',
+                            metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                            updated_at=now()
+                        WHERE document_id=%s AND app_key=%s AND extraction_status='awaiting_confirmation'
+                        """,
+                        (Json({"replacement_cancelled_at": now_iso()}), document_id, application.get("app_key")),
+                    )
+                    cur.execute(
+                        "UPDATE applications SET raw_json=COALESCE(raw_json,'{}'::jsonb) - 'cv_pending' WHERE company_code=%s AND app_key=%s",
+                        (application.get("company_code"), application.get("app_key")),
+                    )
+                    cur.execute(
+                        """
+                        UPDATE candidate_action_confirmations
+                        SET status='cancelled', result=%s, updated_at=now()
+                        WHERE confirmation_id=%s AND company_code=%s AND status='pending'
+                        """,
+                        (
+                            Json({"ok": True, "cancelled": True, "document_id": document_id}),
+                            pending.get("confirmation_id"),
+                            application.get("company_code"),
+                        ),
+                    )
+                conn.commit()
+            outcome = {"ok": True, "cancelled": True}
+        elif confirm:
+            def activate_replacement(cur: Any, current_app: dict[str, Any]) -> dict[str, Any]:
+                cur.execute(
+                    """
+                    UPDATE candidate_documents
+                    SET extraction_status='pending_extraction',
+                        metadata=COALESCE(metadata,'{}'::jsonb) || %s::jsonb,
+                        updated_at=now()
+                    WHERE document_id=%s AND app_key=%s AND extraction_status='awaiting_confirmation'
+                    RETURNING document_id
+                    """,
+                    (
+                        Json({"replacement_confirmed_at": now_iso()}),
+                        document_id,
+                        current_app.get("app_key"),
+                    ),
+                )
+                return {"ok": bool(cur.fetchone()), "document_id": document_id}
+
+            outcome = _rl.consume_candidate_action_confirmation(
+                sys.modules[__name__],
+                company_code=str(application.get("company_code") or ""),
+                app_key=str(application.get("app_key") or ""),
+                action="replace_cv",
+                confirmation_id=str(pending.get("confirmation_id") or ""),
+                confirmation_token=str(pending.get("confirmation_token") or ""),
+                target_payload=payload,
+                actor_user_id=None,
+                actor_phone=request.sender_phone,
+                operation=activate_replacement,
+            )
+            if not outcome.get("ok"):
+                return {"ok": False, "error": outcome.get("error"), "reply": "This CV replacement confirmation is no longer valid. Please send the CV again."}
+        else:
+            return {
+                "ok": False,
+                "status": "needs_confirmation",
+                "intent": "candidate_cv_replacement_confirmation_required",
+                "reply": "Reply CONFIRM to replace your current CV, or CANCEL to keep the current one.",
+            }
+        _rl.update_candidate_conversation_state(
+            sys.modules[__name__],
+            company_code=str(application.get("company_code") or ""),
+            conversation_id=str(request.conversation_id or ""),
+            phone=str(application.get("phone") or request.sender_phone),
+            app_key=str(application.get("app_key") or ""),
+            updates={
+                "pending_candidate_action": {
+                    **pending,
+                    "status": "cancelled" if cancel else "completed",
+                    "resolved_at": now_iso(),
+                }
+            },
+        )
+        return {
+            "ok": True,
+            "intent": "candidate_cv_replacement_cancelled" if cancel else "candidate_cv_replacement_confirmed",
+            "reply": (
+                "Your current CV was kept."
+                if cancel
+                else "Confirmed. I’ll validate the new CV now; your current CV remains authoritative until validation succeeds."
+            ),
+            "outcome": json_safe(outcome),
+        }
     if pending and pending.get("type") == "withdraw" and pending.get("status") == "pending":
         if not application:
             return {**candidate_message_result("no_active_application", request=request), "error": "pending_application_missing"}
@@ -23319,6 +23494,7 @@ def handle_candidate_withdrawal_turn(request: WhatsAppTurnRequest) -> dict[str, 
                 "intent": "candidate_withdrawal_confirmation_required",
             }
         provider_message_id = _whatsapp_provider_message_id(request)
+        confirmation_payload = pending.get("target_payload") if isinstance(pending.get("target_payload"), dict) else {}
         transition = _rl.transition_application(
             sys.modules[__name__],
             app_key=str(application.get("app_key") or ""),
@@ -23328,11 +23504,19 @@ def handle_candidate_withdrawal_turn(request: WhatsAppTurnRequest) -> dict[str, 
             actor_type="candidate",
             actor_phone=request.sender_phone,
             channel="whatsapp",
-            confirmation_token=provider_message_id,
+            confirmation_id=str(pending.get("confirmation_id") or "") or None,
+            confirmation_token=str(pending.get("confirmation_token") or "") or None,
+            confirmation_action="withdraw",
+            confirmation_payload=confirmation_payload,
             idempotency_key=f"candidate-withdraw:{provider_message_id}" if provider_message_id else None,
             human_confirmed=True,
-            expected_from_stage=str(application.get("status") or "") or None,
-            metadata={"conversation_id": request.conversation_id, "account_id": request.account_id},
+            expected_from_stage=str(pending.get("observed_stage") or "") or None,
+            expected_version=pending.get("observed_version"),
+            metadata={
+                **confirmation_payload,
+                "conversation_id": request.conversation_id,
+                "account_id": request.account_id,
+            },
         )
         if not transition.get("ok"):
             return {
@@ -23368,12 +23552,36 @@ def handle_candidate_withdrawal_turn(request: WhatsAppTurnRequest) -> dict[str, 
         return candidate_resolution_failure_message(request, resolution)
     import recruiting_lifecycle as _rl
 
+    confirmation_payload = {"reason_code": "candidate_requested", "source": "candidate"}
+    minted = _rl.mint_candidate_action_confirmation(
+        sys.modules[__name__],
+        company_code=str(application.get("company_code") or ""),
+        app_key=str(application.get("app_key") or ""),
+        action="withdraw",
+        observed_stage=str(application.get("status") or ""),
+        observed_version=int(application.get("lifecycle_version") or 0),
+        target_payload=confirmation_payload,
+        actor_user_id=None,
+        actor_phone=request.sender_phone,
+        actor_type="candidate",
+        channel="whatsapp",
+        permissions=set(),
+        idempotency_key=f"candidate-withdraw-prepare:{request.conversation_id}:{application.get('app_key')}:{application.get('lifecycle_version') or 0}",
+    )
+    if not minted.get("ok"):
+        return candidate_resolution_failure_message(request, {"error": minted.get("error")})
+    confirmation = minted["confirmation"]
     pending = {
         "type": "withdraw",
         "status": "pending",
         "app_key": application.get("app_key"),
         "company_code": application.get("company_code"),
         "requested_at": now_iso(),
+        "confirmation_id": confirmation.get("confirmation_id"),
+        "confirmation_token": confirmation.get("confirmation_token"),
+        "observed_stage": confirmation.get("observed_stage"),
+        "observed_version": confirmation.get("observed_version"),
+        "target_payload": confirmation_payload,
     }
     state = _rl.update_candidate_conversation_state(
         sys.modules[__name__],
@@ -24060,7 +24268,7 @@ def start_public_candidate_application(request: WhatsAppTurnRequest, role: dict[
                 SET data_source=%s,
                     data_source_detail=%s,
                     raw_json=COALESCE(raw_json,'{}'::jsonb) || %s::jsonb
-                WHERE app_key=%s
+                WHERE app_key=%s AND company_code=%s
                 """,
                 (
                     data_source,
@@ -24144,7 +24352,7 @@ def attach_public_pending_cv_to_application(request: WhatsAppTurnRequest, applic
                 },
             )
         conn.commit()
-    if result.get("ok") and not result.get("duplicate") and canonical_lifecycle_enabled():
+    if result.get("ok") and not result.get("duplicate"):
         import recruiting_lifecycle as _rl
 
         result["lifecycle"] = _rl.mark_cv_received(
@@ -24960,9 +25168,9 @@ def resolve_bound_screening_application(request: WhatsAppTurnRequest) -> dict[st
         return None
     company = str(application.get("company_code") or "").strip().upper()
     if company and active_company_code() and company != str(active_company_code() or "").strip().upper():
-        # Allow when request company is unset/default; otherwise require exact match.
+        # Missing request scope cannot authorize a tenant mismatch.
         request_company = request_company_code(request)
-        if request_company and str(request_company).strip().upper() not in {company, "WATHEFNI"}:
+        if not request_company or str(request_company).strip().upper() != company:
             return None
     return application
 
@@ -25292,6 +25500,8 @@ def handle_candidate_semantic_router_turn(request: WhatsAppTurnRequest) -> dict[
     if parse_apply_code_text(text):
         return None
     application, pending = candidate_pending_action(request)
+    if pending and pending.get("status") == "pending" and pending.get("type") == "replace_cv":
+        return handle_candidate_withdrawal_turn(request)
     if pending and pending.get("status") == "pending" and pending.get("type") in {"withdraw", "intent_clarification"}:
         # Pending confirmations / clarifications: only continue with Luna when the
         # deterministic pending withdraw path did not already claim the turn.
@@ -25478,9 +25688,6 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
         "completed_at": now_iso() if status == "complete" else screening.get("completed_at"),
     }
     raw_next = {**raw_json, "screening": screening_next}
-    if status == "complete":
-        raw_next["status"] = "screening_complete"
-        raw_next["current_step"] = "screening_complete"
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -25489,9 +25696,7 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
                 SET raw_json=%s,
                     screening_status=%s,
                     screening_completed_at=CASE WHEN %s='complete' THEN COALESCE(screening_completed_at, CURRENT_DATE) ELSE screening_completed_at END,
-                    status=CASE WHEN %s='complete' THEN 'screening_complete' ELSE status END,
-                    current_step=CASE WHEN %s='complete' THEN 'screening_complete' ELSE current_step END,
-                    updated_at=COALESCE(updated_at, CURRENT_DATE)
+                    updated_at=now()
                 WHERE app_key=%s
                   AND company_code=%s
                 """,
@@ -25499,21 +25704,37 @@ def handle_candidate_screening_turn(request: WhatsAppTurnRequest) -> dict[str, A
                     Json(json_safe(raw_next)),
                     status,
                     status,
-                    status,
-                    status,
                     application.get("app_key"),
                     application.get("company_code"),
                 ),
             )
         conn.commit()
+    lifecycle_application = application
     if status == "complete":
+        import recruiting_lifecycle as _rl
+
+        lifecycle_result = _rl.mark_cv_ready_for_review(
+            sys.modules[__name__],
+            application=application,
+            cv_version=str((screening_next.get("completed_at") or "")),
+        )
+        if not lifecycle_result.get("ok"):
+            return {
+                "reply": "I saved your answers, but the application could not be moved to review. HR has been notified.",
+                "error": lifecycle_result.get("error"),
+                "application": json_safe(application),
+                "screening_status": status,
+                "intent": "handle_candidate_screening_answer",
+            }
+        if isinstance(lifecycle_result.get("application"), dict):
+            lifecycle_application = lifecycle_result["application"]
         reply = "Thanks — I’ve saved your screening answers. Your application is now complete for review."
     else:
         next_question = format_next_screening_question(questions, missing_after)
         reply = f"Thanks, I saved that.\n\nNext question:\n{next_question}"
     return {
         "reply": reply,
-        "application": json_safe({**application, "raw_json": raw_next, "screening_status": status, "status": "screening_complete" if status == "complete" else application.get("status")}),
+        "application": json_safe({**lifecycle_application, "raw_json": raw_next, "screening_status": status}),
         "captured_answers": json_safe(parsed_answers),
         "captured_corrections": json_safe(parsed_corrections),
         "parser": parser_name,
@@ -26540,6 +26761,9 @@ def refresh_conversation_link_from_inbound(request: WhatsAppTurnRequest) -> dict
         return {"refreshed": False, "reason": "smoke_turn"}
     if not phone or not conversation_id or is_hr_phone(phone):
         return {"refreshed": False, "reason": "not_candidate_or_missing_identity"}
+    scoped_company = request_company_code(request, default=None)
+    if not scoped_company:
+        return {"refreshed": False, "reason": "tenant_scope_required"}
 
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -26549,11 +26773,11 @@ def refresh_conversation_link_from_inbound(request: WhatsAppTurnRequest) -> dict
                        a.position_code, a.raw_json AS application_json
                 FROM employees e
                 LEFT JOIN applications a ON a.app_key = e.app_key
-                WHERE e.phone=%s
+                WHERE e.phone=%s AND e.company_code=%s
                 ORDER BY e.updated_at DESC
                 LIMIT 1
                 """,
-                (phone,),
+                (phone, scoped_company),
             )
             subject = cur.fetchone()
             if not subject:
@@ -26564,14 +26788,14 @@ def refresh_conversation_link_from_inbound(request: WhatsAppTurnRequest) -> dict
                            a.phone, a.position_code, a.raw_json AS application_json
                     FROM applications a
                     LEFT JOIN candidates c ON c.phone = a.phone
-                    WHERE a.phone=%s
+                    WHERE a.phone=%s AND a.company_code=%s
                     ORDER BY
                       CASE WHEN a.status IN ('hired','shortlisted') THEN 0 ELSE 1 END,
                       a.updated_at DESC NULLS LAST,
                       a.ingested_at DESC NULLS LAST
                     LIMIT 1
                     """,
-                    (phone,),
+                    (phone, scoped_company),
                 )
                 subject = cur.fetchone()
             if not subject:
@@ -26579,7 +26803,9 @@ def refresh_conversation_link_from_inbound(request: WhatsAppTurnRequest) -> dict
 
             subject = dict(subject)
             app_json = subject.get("application_json") or {}
-            company_code = subject.get("company_code") or app_json.get("company_code") or "WATHEFNI"
+            company_code = subject.get("company_code") or app_json.get("company_code")
+            if not company_code or str(company_code).upper() != str(scoped_company).upper():
+                return {"refreshed": False, "reason": "tenant_scope_mismatch"}
             position_code = subject.get("position_code") or app_json.get("position_code")
             apply_code = app_json.get("apply_code") or (f"APPLY-{company_code}-{position_code}" if position_code else None)
             raw_json = {
@@ -27524,9 +27750,6 @@ def record_outbound_delivery_event(
     sent_at = now_utc() if status == "sent" else None
     failed_at = now_utc() if status == "failed" else None
     company = str(company_code or "").strip().upper()
-    if not company and subject_type == "candidate" and subject_key:
-        app = find_application_by_key(str(subject_key))
-        company = str((app or {}).get("company_code") or "").strip().upper()
     if not company and isinstance(payload, dict):
         memory_scope = payload.get("memory_scope") if isinstance(payload.get("memory_scope"), dict) else {}
         company = str(payload.get("company_code") or memory_scope.get("company_id") or "").strip().upper()
@@ -27578,54 +27801,43 @@ def update_application_status(
     actor_phone: str | None = None,
     channel: str | None = None,
     expected_from_stage: str | None = None,
+    expected_version: int | None = None,
     idempotency_key: str | None = None,
     permissions: set[str] | list[str] | None = None,
     confirmation_token: str | None = None,
+    confirmation_id: str | None = None,
+    confirmation_action: str | None = None,
+    confirmation_payload: dict[str, Any] | None = None,
     metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Update application status.
+    """Mandatory single authority for every application lifecycle mutation."""
+    import recruiting_lifecycle as _rl
 
-    When WATHEFNI_CANONICAL_LIFECYCLE is on, all writes go through the single
-    transition authority (strict matrix, stale checks, confirmation, audit).
-    """
-    if canonical_lifecycle_enabled():
-        import recruiting_lifecycle as _rl
-
-        return _rl.transition_application(
-            sys.modules[__name__],
-            app_key=str(app.get("app_key") or ""),
-            company_code=str(app.get("company_code") or ""),
-            to_stage=status,
-            trigger=trigger,
-            expected_from_stage=expected_from_stage,
-            actor_type=actor_type,
-            actor_user_id=actor_user_id,
-            actor_phone=actor_phone,
-            channel=channel,
-            confirmation_token=confirmation_token,
-            human_confirmed=human_confirmed,
-            idempotency_key=idempotency_key,
-            permissions=permissions,
-            metadata=metadata,
-            run_hire_side_effects=False,  # hire path calls transition_hire separately / via hire executor
-        )
-    args = [
-        str(WORKSPACE / "tools" / "db" / "update_state.py"),
-        "--env",
-        str(ENV_PATH),
-        "update-application",
-        "--app-key",
-        str(app["app_key"]),
-        "--company",
-        str(app.get("company_code") or "WATHEFNI"),
-        "--status",
-        status,
-        "--current-step",
-        status,
-    ]
-    if runtime_binding().application_environment != "production":
-        args.append("--no-sheet-sync")
-    return run_workspace_tool(args, timeout=75)
+    company = str(app.get("company_code") or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
+    return _rl.transition_application(
+        sys.modules[__name__],
+        app_key=str(app.get("app_key") or ""),
+        company_code=company,
+        to_stage=status,
+        trigger=trigger,
+        expected_from_stage=expected_from_stage,
+        expected_version=expected_version,
+        actor_type=actor_type,
+        actor_user_id=actor_user_id,
+        actor_phone=actor_phone,
+        channel=channel,
+        confirmation_token=confirmation_token,
+        confirmation_id=confirmation_id,
+        confirmation_action=confirmation_action,
+        confirmation_payload=confirmation_payload,
+        human_confirmed=human_confirmed,
+        idempotency_key=idempotency_key,
+        permissions=permissions,
+        metadata=metadata,
+        run_hire_side_effects=False,
+    )
 
 
 def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
@@ -29214,10 +29426,12 @@ def create_or_resume_assessment_attempt(
     import assessment_lifecycle as _assessment_lifecycle
     import assessment_service as _assessment_service
 
-    company = str(app.get("company_code") or "WATHEFNI").upper()
+    company = str(app.get("company_code") or "").strip().upper()
     app_key = str(app.get("app_key") or "").strip()
     contact = candidate_contact(app)
     phone = digits(contact.get("phone"))
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
     if not app_key or not phone:
         return {"ok": False, "error": "missing_candidate_contact", "candidate": contact}
     battery = resolve_assessment_battery(company, battery_key=battery_key)
@@ -33269,7 +33483,7 @@ def execute_direct_action(state: GraphState) -> GraphState:
         result_payload = result
     elif action_type == "answer_candidate_email_lookup":
         email = str(action.get("email") or "").strip().lower()
-        matches = candidate_applications_by_email(email)
+        matches = candidate_applications_by_email(email, company_code=company_code)
         status = "completed"
         reply = candidate_email_lookup_reply(email, matches)
         result_payload = {
@@ -36452,11 +36666,26 @@ class AssessmentItemTransitionRequest(BaseModel):
     original_content_attested: bool = False
 
 
-class DashboardHireRequest(BaseModel):
+class DashboardCandidateConfirmationRequest(BaseModel):
+    action: Literal["shortlist", "reject", "withdraw", "schedule_interview", "hire", "replace_cv"]
+    observed_stage: str
+    observed_version: int = Field(ge=0)
+    target_payload: dict[str, Any] = Field(default_factory=dict)
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardCandidateDecisionRequest(BaseModel):
+    confirmation_id: str
+    confirmation_token: str
+    observed_stage: str
+    observed_version: int = Field(ge=0)
+    target_payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class DashboardHireRequest(DashboardCandidateDecisionRequest):
     hire_override: bool = False
     override_reason: str | None = None
-    confirm: bool = False
-    confirmation_token: str | None = None
+    confirm: bool = True
 
 
 class DashboardInterviewStateRequest(BaseModel):
@@ -40970,6 +41199,7 @@ def prehire_application_summary(
             "title": row.get("position_title") or row.get("position_code"),
         },
         "status": row.get("status"),
+        "lifecycle_version": int(row.get("lifecycle_version") or 0),
         "current_step": row.get("current_step"),
         "screening_status": row.get("screening_status") or screening.get("status"),
         "data_source": row.get("data_source") or raw_json.get("data_source") or PRODUCTION_DATA_SOURCE,
@@ -42397,7 +42627,9 @@ def send_interview_invite(
     interview_id: str | None = None,
     preferred_channel: str | None = None,
 ) -> dict[str, Any]:
-    company = str(application.get("company_code") or "WATHEFNI").upper()
+    company = str(application.get("company_code") or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
     app_key = str(application.get("app_key") or "").strip()
     interview = fetch_candidate_interview(interview_id, company) if interview_id else latest_candidate_interview_for_app(app_key, company)
     if interview and app_key and str(interview.get("app_key") or "") != app_key:
@@ -42453,7 +42685,9 @@ def send_interview_invite(
 
 
 def interview_invite_status(application: dict[str, Any]) -> dict[str, Any]:
-    company = str(application.get("company_code") or "WATHEFNI").upper()
+    company = str(application.get("company_code") or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
     interview = latest_candidate_interview_for_candidate(application, company)
     if not interview:
         return {"ok": False, "error": "interview_not_found", "message": "I do not see a scheduled interview for this candidate yet.", "application": json_safe(application)}
@@ -42558,7 +42792,9 @@ def create_candidate_interview_from_schedule(
 ) -> dict[str, Any] | None:
     if not application or not schedule_result:
         return None
-    company = str(application.get("company_code") or "WATHEFNI").upper()
+    company = str(application.get("company_code") or "").strip().upper()
+    if not company:
+        return None
     app_key = str(application.get("app_key") or "").strip()
     if not app_key:
         return None
@@ -42977,7 +43213,9 @@ def store_video_interview_file(
     filename: str | None,
     mime_type: str | None,
 ) -> dict[str, Any]:
-    company = str(interview.get("company_code") or "WATHEFNI").upper()
+    company = str(interview.get("company_code") or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
     interview_id = str(interview.get("interview_id") or "")
     question_id = str(question.get("question_id") or "")
     extension = video_file_extension(filename, mime_type)
@@ -43697,7 +43935,9 @@ def create_or_resume_async_video_interview(
     *,
     actor_context: dict[str, Any],
 ) -> dict[str, Any]:
-    company = str(application.get("company_code") or "WATHEFNI").upper()
+    company = str(application.get("company_code") or "").strip().upper()
+    if not company:
+        raise HTTPException(status_code=422, detail={"error": "tenant_scope_required"})
     app_key = str(application.get("app_key") or "").strip()
     contact = candidate_contact(application)
     if not app_key:
@@ -44619,7 +44859,9 @@ def register_candidate_cv_preview(
     preview_path: Path,
     metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    company_code = str(application.get("company_code") or "WATHEFNI").upper()
+    company_code = str(application.get("company_code") or "").strip().upper()
+    if not company_code:
+        return {"ok": False, "error": "tenant_scope_required"}
     phone = digits(application.get("phone"))
     app_key = str(application.get("app_key") or f"{phone}-{company_code}-APPLICATION")
     checksum = sha256_file(preview_path)
@@ -44666,6 +44908,9 @@ def register_candidate_cv_preview(
 
 
 def generate_candidate_cv_pdf_preview(application: dict[str, Any], cv: dict[str, Any]) -> dict[str, Any]:
+    company_code = str(application.get("company_code") or "").strip().upper()
+    if not company_code:
+        return {"ok": False, "status": "failed", "error": "tenant_scope_required"}
     source_path = dashboard_candidate_cv_path(cv)
     if not source_path:
         return {"ok": False, "status": "failed", "error": "candidate_cv_file_unavailable"}
@@ -44688,7 +44933,7 @@ def generate_candidate_cv_pdf_preview(application: dict[str, Any], cv: dict[str,
         WORKSPACE
         / "data"
         / "companies"
-        / str(application.get("company_code") or "WATHEFNI").upper()
+        / company_code
         / "tmp"
         / "cv-previews"
         / safe_storage_name(app_key)
@@ -49843,11 +50088,11 @@ def dashboard_prehire_import_assign(
             if promote and not effective_position:
                 raise HTTPException(status_code=400, detail={"error": "role_required", "message": "Assign a role before adding this candidate to the pipeline."})
             new_status = "review_pending" if promote else ("import_review" if effective_position else "needs_role")
+            stored_status = str(row.get("status") or "") if promote else new_status
             cur.execute(
                 """
                 UPDATE applications
                 SET position_code=%s, position_title=%s, status=%s,
-                    current_step=CASE WHEN %s='review_pending' THEN 'review' ELSE current_step END,
                     raw_json=COALESCE(raw_json,'{}'::jsonb) || jsonb_build_object(
                         'import', COALESCE(raw_json->'import','{}'::jsonb) || jsonb_build_object(
                             'needs_role', %s, 'promoted', %s, 'promoted_at', %s, 'role_assigned_by', %s
@@ -49857,10 +50102,10 @@ def dashboard_prehire_import_assign(
                 WHERE app_key=%s
                 """,
                 (
-                    effective_position or "", effective_title or None, new_status, new_status,
+                    effective_position or "", effective_title or None, stored_status,
                     new_status == "needs_role", new_status == "review_pending",
                     now_iso() if new_status == "review_pending" else None,
-                    context.get("actor_email"), app_key,
+                    context.get("actor_email"), app_key, company,
                 ),
             )
             if effective_position:
@@ -49873,6 +50118,21 @@ def dashboard_prehire_import_assign(
                 (effective_position or None, effective_title or None, app_key, company),
             )
         conn.commit()
+    if promote:
+        lifecycle_result = update_application_status(
+            {**dict(row), "company_code": company, "position_code": effective_position, "position_title": effective_title},
+            "ready_for_review",
+            trigger="intake_admit",
+            actor_type="system",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            channel="web",
+            human_confirmed=False,
+            idempotency_key=f"intake-admit:{company}:{app_key}:{effective_position}",
+            metadata={"position_code": effective_position, "import_admit": True},
+        )
+        if not lifecycle_result.get("ok"):
+            raise HTTPException(status_code=409, detail=lifecycle_result)
+        new_status = "ready_for_review"
     record_admin_audit(
         context,
         "import_candidate_assigned",
@@ -50047,6 +50307,7 @@ def dashboard_prehire_import_bulk(
         raise HTTPException(status_code=400, detail={"error": "too_many_items", "message": "Select at most 1000 at a time."})
     actor = context.get("actor_email")
     summary = {"updated": 0, "skipped": 0, "archived": 0, "promoted": 0}
+    promotions: list[dict[str, Any]] = []
     with db_connect() as conn:
         with conn.cursor() as cur:
             for app_key in app_keys:
@@ -50074,9 +50335,9 @@ def dashboard_prehire_import_bulk(
                                 )
                             ),
                             updated_at=CURRENT_DATE
-                        WHERE app_key=%s
+                        WHERE app_key=%s AND company_code=%s
                         """,
-                        (actor, now_iso(), app_key),
+                        (actor, now_iso(), app_key, company),
                     )
                     summary["updated"] += 1
                     summary["archived"] += 1
@@ -50093,7 +50354,7 @@ def dashboard_prehire_import_bulk(
                 cur.execute(
                     """
                     UPDATE applications
-                    SET position_code=%s, position_title=%s, status='review_pending', current_step='review',
+                    SET position_code=%s, position_title=%s,
                         raw_json=COALESCE(raw_json,'{}'::jsonb) || jsonb_build_object(
                             'import', COALESCE(raw_json->'import','{}'::jsonb) || jsonb_build_object(
                                 'needs_role', false, 'promoted', true, 'promoted_at', %s,
@@ -50101,9 +50362,9 @@ def dashboard_prehire_import_bulk(
                             )
                         ),
                         updated_at=CURRENT_DATE
-                    WHERE app_key=%s
+                    WHERE app_key=%s AND company_code=%s
                     """,
-                    (eff_code, eff_title or None, now_iso(), actor, "bulk_" + action, app_key),
+                    (eff_code, eff_title or None, now_iso(), actor, "bulk_" + action, app_key, company),
                 )
                 cur.execute(
                     "UPDATE candidates SET active_position_code=%s, updated_at=now() WHERE phone=%s",
@@ -50113,9 +50374,25 @@ def dashboard_prehire_import_bulk(
                     "UPDATE import_items SET position_code=%s, position_title=%s, updated_at=now() WHERE app_key=%s AND company_code=%s",
                     (eff_code, eff_title or None, app_key, company),
                 )
-                summary["updated"] += 1
-                summary["promoted"] += 1
+                promotions.append({**dict(row), "app_key": app_key, "position_code": eff_code, "position_title": eff_title})
         conn.commit()
+    for promotion in promotions:
+        lifecycle_result = update_application_status(
+            {**promotion, "company_code": company},
+            "ready_for_review",
+            trigger="intake_admit",
+            actor_type="system",
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            channel="web",
+            human_confirmed=False,
+            idempotency_key=f"intake-admit:{company}:{promotion['app_key']}:{promotion['position_code']}",
+            metadata={"position_code": promotion["position_code"], "import_admit": True, "bulk": True},
+        )
+        if lifecycle_result.get("ok"):
+            summary["updated"] += 1
+            summary["promoted"] += 1
+        else:
+            summary["skipped"] += 1
     record_admin_audit(
         context,
         "import_bulk_action",
@@ -50164,30 +50441,106 @@ def dashboard_prehire_import_report(batch_id: str, context: dict[str, Any] = Dep
     )
 
 
+@app.post("/dashboard/prehire/applications/{app_key}/confirmations")
+def dashboard_prepare_candidate_confirmation(
+    app_key: str,
+    body: DashboardCandidateConfirmationRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    import recruiting_lifecycle as _rl
+
+    company = str(context.get("company_code") or "").strip().upper()
+    if not company:
+        raise HTTPException(status_code=403, detail={"error": "tenant_scope_required"})
+    required = _rl.HUMAN_DECISION_ACTIONS.get(body.action, {}).get("permission") or "candidate.manage"
+    require_entitlement(context, "pre_hiring", required)
+    application = dashboard_application_or_404(app_key, company)
+    actor_user_id = str(
+        context.get("actor_user_id")
+        or context.get("permission_subject_user_id")
+        or (context.get("hr_user") or {}).get("user_id")
+        or ""
+    ).strip() or None
+    target_payload = json_safe(body.target_payload)
+    hire_operation = None
+    if body.action == "hire":
+        import hire_operations as _hire_operations
+
+        prepared = _hire_operations.prepare_hire_operation(
+            sys.modules[__name__],
+            company_code=company,
+            app_key=app_key,
+            idempotency_key=body.idempotency_key,
+            expected_from_stage=body.observed_stage,
+            expected_version=body.observed_version,
+            actor_user_id=actor_user_id,
+            actor_phone=digits(context.get("hr_phone")),
+            channel="web",
+            structured_reason=target_payload,
+        )
+        if not prepared.get("ok"):
+            raise HTTPException(status_code=409, detail=prepared)
+        hire_operation = prepared["operation"]
+        target_payload = {
+            **target_payload,
+            "operation_id": hire_operation["operation_id"],
+            "hiring_reference": hire_operation["operation_id"],
+        }
+    result = _rl.mint_candidate_action_confirmation(
+        sys.modules[__name__],
+        company_code=company,
+        app_key=app_key,
+        action=body.action,
+        observed_stage=body.observed_stage,
+        observed_version=body.observed_version,
+        target_payload=target_payload,
+        actor_user_id=actor_user_id,
+        actor_phone=digits(context.get("hr_phone")),
+        actor_type="human",
+        channel="web",
+        permissions=set(context.get("permissions") or []),
+        idempotency_key=f"candidate-confirm:{body.idempotency_key}",
+    )
+    if not result.get("ok"):
+        status_code = 409 if result.get("error") in {"stale_state", "transition_not_allowed", "idempotency_conflict"} else 422
+        raise HTTPException(status_code=status_code, detail=result)
+    return {"ok": True, **result, "hire_operation": hire_operation, "application": json_safe(application)}
+
+
 @app.post("/dashboard/prehire/applications/{app_key}/shortlist")
-def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_shortlist(
+    app_key: str,
+    body: DashboardCandidateDecisionRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
     require_entitlement(context, "pre_hiring", "candidate.manage")
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
-    if _prehire_registry_enabled("shortlist_candidate"):
-        return run_prehire_registry_action(context, "shortlist_candidate", {}, app_key=app_key)
-    if canonical_lifecycle_enabled():
-        update_result = update_application_status(
-            application,
-            "shortlisted",
-            trigger="dashboard_shortlist",
-            human_confirmed=True,
-            actor_type="human",
-            actor_user_id=str(context.get("actor_user_id") or "") or None,
-            actor_phone=digits(context.get("hr_phone")),
-            channel="web",
-            permissions=set(context.get("permissions") or []) | {"candidate.manage"},
-            expected_from_stage=str(application.get("status") or "") or None,
-            idempotency_key=f"web-shortlist:{company}:{app_key}:{application.get('status')}",
-        )
-    else:
-        update_result = update_application_status(application, "shortlisted")
-    update_ok = workspace_tool_operation_ok(update_result) if not canonical_lifecycle_enabled() else bool(update_result.get("ok"))
+    update_result = update_application_status(
+        application,
+        "shortlisted",
+        trigger="dashboard_shortlist",
+        human_confirmed=True,
+        actor_type="human",
+        actor_user_id=str(
+            context.get("actor_user_id")
+            or context.get("permission_subject_user_id")
+            or (context.get("hr_user") or {}).get("user_id")
+            or ""
+        ) or None,
+        actor_phone=digits(context.get("hr_phone")),
+        channel="web",
+        permissions=set(context.get("permissions") or []),
+        expected_from_stage=body.observed_stage,
+        expected_version=body.observed_version,
+        confirmation_id=body.confirmation_id,
+        confirmation_token=body.confirmation_token,
+        confirmation_action="shortlist",
+        confirmation_payload=body.target_payload,
+        idempotency_key=f"web-shortlist:{company}:{app_key}:{body.confirmation_id}",
+        metadata=body.target_payload,
+    )
+    update_ok = bool(update_result.get("ok"))
     status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     if update_ok:
@@ -50219,29 +50572,39 @@ def dashboard_prehire_shortlist(app_key: str, context: dict[str, Any] = Depends(
 
 
 @app.post("/dashboard/prehire/applications/{app_key}/reject")
-def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_reject(
+    app_key: str,
+    body: DashboardCandidateDecisionRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
     require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
-    if _prehire_registry_enabled("reject_candidate"):
-        return run_prehire_registry_action(context, "reject_candidate", {}, app_key=app_key)
-    if canonical_lifecycle_enabled():
-        update_result = update_application_status(
-            application,
-            "rejected",
-            trigger="dashboard_reject",
-            human_confirmed=True,
-            actor_type="human",
-            actor_user_id=str(context.get("actor_user_id") or "") or None,
-            actor_phone=digits(context.get("hr_phone")),
-            channel="web",
-            permissions=set(context.get("permissions") or []) | {"candidate.decide"},
-            expected_from_stage=str(application.get("status") or "") or None,
-            idempotency_key=f"web-reject:{company}:{app_key}:{application.get('status')}",
-        )
-    else:
-        update_result = update_application_status(application, "rejected")
-    update_ok = workspace_tool_operation_ok(update_result) if not canonical_lifecycle_enabled() else bool(update_result.get("ok"))
+    update_result = update_application_status(
+        application,
+        "rejected",
+        trigger="dashboard_reject",
+        human_confirmed=True,
+        actor_type="human",
+        actor_user_id=str(
+            context.get("actor_user_id")
+            or context.get("permission_subject_user_id")
+            or (context.get("hr_user") or {}).get("user_id")
+            or ""
+        ) or None,
+        actor_phone=digits(context.get("hr_phone")),
+        channel="web",
+        permissions=set(context.get("permissions") or []),
+        expected_from_stage=body.observed_stage,
+        expected_version=body.observed_version,
+        confirmation_id=body.confirmation_id,
+        confirmation_token=body.confirmation_token,
+        confirmation_action="reject",
+        confirmation_payload=body.target_payload,
+        idempotency_key=f"web-reject:{company}:{app_key}:{body.confirmation_id}",
+        metadata=body.target_payload,
+    )
+    update_ok = bool(update_result.get("ok"))
     status = "completed" if update_ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     if update_ok:
@@ -50273,13 +50636,13 @@ def dashboard_prehire_reject(app_key: str, context: dict[str, Any] = Depends(pre
 @app.post("/dashboard/prehire/applications/{app_key}/hire")
 def dashboard_prehire_hire(
     app_key: str,
-    body: DashboardHireRequest | None = None,
+    body: DashboardHireRequest,
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
     require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
     application = dashboard_application_or_404(app_key, company)
-    payload = body or DashboardHireRequest()
+    payload = body
     hire_override = bool(payload.hire_override)
     override_reason = payload.override_reason
     if hire_override and not payload.confirm:
@@ -50307,36 +50670,28 @@ def dashboard_prehire_hire(
             )
             or None,
             actor_type="human",
-            confirmation_token=str(payload.confirmation_token or "") or None,
+            confirmation_token=str(payload.confirmation_id or "") or None,
             confirmed=bool(payload.confirm) if hire_override else False,
             expected_from_stage=str(application.get("status") or "") or None,
             idempotency_key=f"web-hire-override:{company}:{app_key}:{payload.confirmation_token or payload.confirm}",
         )
     except _offers.OfferAuthorityError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
-    if _prehire_registry_enabled("hire_candidate"):
-        return run_prehire_registry_action(context, "hire_candidate", {}, app_key=app_key)
-    if canonical_lifecycle_enabled():
-        update_result = update_application_status(
-            application,
-            "hired",
-            trigger="dashboard_hire",
-            human_confirmed=True,
-            actor_type="human",
-            actor_user_id=str(context.get("actor_user_id") or "") or None,
-            actor_phone=digits(context.get("hr_phone")),
-            channel="web",
-            permissions=set(context.get("permissions") or []) | {"candidate.decide"},
-            expected_from_stage=str(application.get("status") or "") or None,
-            idempotency_key=f"web-hire:{company}:{app_key}:{application.get('status')}",
-        )
-        # transition_application with run_hire_side_effects=False; run hire separately.
-        posthire_result = transition_hire(application) if update_result.get("ok") else {"ok": False, "skipped": "application_update_failed"}
-        ok = bool(update_result.get("ok") and posthire_result.get("ok"))
-    else:
-        update_result = update_application_status(application, "hired")
-        posthire_result = transition_hire(application)
-        ok = bool(update_result.get("ok") and posthire_result.get("ok"))
+    import hire_operations as _hire_operations
+
+    operation_id = str(payload.target_payload.get("operation_id") or "").strip()
+    if not operation_id:
+        raise HTTPException(status_code=422, detail={"error": "hiring_reference_required"})
+    hire_result = _hire_operations.execute_hire_operation(
+        sys.modules[__name__],
+        operation_id=operation_id,
+        confirmation_id=payload.confirmation_id,
+        confirmation_token=payload.confirmation_token,
+        permissions=set(context.get("permissions") or []),
+    )
+    update_result = hire_result.get("transition") if isinstance(hire_result.get("transition"), dict) else hire_result
+    posthire_result = update_result.get("side_effect") if isinstance(update_result, dict) else None
+    ok = bool(hire_result.get("ok"))
     status = "completed" if ok else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
     reply = f"{name} is hired and employee setup is done." if ok else f"I could not complete hiring for {name}."
@@ -50348,6 +50703,7 @@ def dashboard_prehire_hire(
         "application": json_safe(application),
         "update": update_result,
         "posthire": posthire_result,
+        "hire_operation": hire_result,
         "action": {"type": "hire_candidate", "target_type": "application", "target": app_key},
         "source": "dashboard",
         "company_code": company,

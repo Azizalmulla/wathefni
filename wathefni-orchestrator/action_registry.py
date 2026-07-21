@@ -661,31 +661,45 @@ def _status_mutation_executor(target_status: str, success_label: str, failure_la
         # orchestrator before this executor runs. Still refuse if actor is marked AI
         # without human_confirmed on the action payload.
         actor_type = str(ctx.action.get("actor_type") or "human")
-        human_confirmed = bool(ctx.action.get("human_confirmed", True))
+        human_confirmed = bool(ctx.action.get("human_confirmed", False))
         meta = getattr(ctx.request, "metadata", None) or {}
         if not isinstance(meta, dict):
             meta = {}
         permissions = meta.get("permissions") or []
         if isinstance(permissions, dict):
             permissions = list(permissions.keys())
-        kwargs: dict[str, Any] = {}
-        if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-            kwargs = {
-                "trigger": action_type or f"registry_{target_status}",
-                "human_confirmed": human_confirmed,
-                "actor_type": "ai" if actor_type == "ai" else "human",
-                "actor_phone": getattr(ctx.request, "sender_phone", None),
-                "channel": "whatsapp" if not meta.get("dashboard") else "web",
-                "permissions": set(permissions),
-                "expected_from_stage": str(app.get("status") or "") or None,
-                "idempotency_key": str(ctx.action.get("idempotency_key") or "") or None,
+        company = str(app.get("company_code") or "").strip().upper()
+        if not company:
+            return {
+                "action_type": action_type,
+                "success": False,
+                "status": "failed",
+                "error": "tenant_scope_required",
+                "message": "The candidate company scope is missing.",
             }
-            # Force AI actor when the request is from the assistant without dashboard flag.
-            if not meta.get("dashboard") and str(getattr(ctx.request, "sender_role", "") or "") != "hr_admin":
-                # Still human-confirmed via pending-action flow; actor_type stays human
-                # because a person confirmed. Only block if explicitly actor_type=ai without confirm.
-                pass
-        update = legacy.update_application_status(app, target_status, **kwargs) if kwargs else legacy.update_application_status(app, target_status)
+        action_name = "shortlist" if target_status == "shortlisted" else "reject"
+        confirmation_payload = ctx.action.get("confirmation_payload")
+        if not isinstance(confirmation_payload, dict):
+            confirmation_payload = {}
+        update = legacy.update_application_status(
+            app,
+            target_status,
+            trigger=action_type or f"registry_{target_status}",
+            human_confirmed=human_confirmed,
+            actor_type="ai" if actor_type == "ai" else "human",
+            actor_user_id=str(ctx.action.get("actor_user_id") or meta.get("actor_user_id") or "") or None,
+            actor_phone=getattr(ctx.request, "sender_phone", None),
+            channel="whatsapp" if not meta.get("dashboard") else "web",
+            permissions=set(permissions),
+            expected_from_stage=str(ctx.action.get("expected_from_stage") or "") or None,
+            expected_version=ctx.action.get("expected_version"),
+            confirmation_id=str(ctx.action.get("confirmation_id") or "") or None,
+            confirmation_token=str(ctx.action.get("confirmation_token") or "") or None,
+            confirmation_action=str(ctx.action.get("confirmation_action") or action_name),
+            confirmation_payload=confirmation_payload,
+            idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
+            metadata=confirmation_payload,
+        )
         ok = bool(update.get("ok") if isinstance(update, dict) else False)
         name = _candidate_name(app, ctx.action)
         return {
@@ -744,6 +758,14 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
         ):
             hire_override = False
         company_code = str(app.get("company_code") or (meta.get("company_code") if isinstance(meta, dict) else "") or "")
+        if not company_code:
+            return {
+                "action_type": action_type,
+                "success": False,
+                "status": "failed",
+                "error": "tenant_scope_required",
+                "message": "The candidate company scope is missing.",
+            }
         actor_user_id = str((meta.get("actor_user_id") if isinstance(meta, dict) else "") or "") or None
         actor_subject = str(
             (meta.get("actor_subject") if isinstance(meta, dict) else "")
@@ -763,8 +785,8 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
             actor_subject=actor_subject,
             actor_type=actor_type,
             confirmation_token=str(
-                ctx.action.get("confirmation_token")
-                or (meta.get("confirmation_token") if isinstance(meta, dict) else "")
+                ctx.action.get("confirmation_id")
+                or (meta.get("confirmation_id") if isinstance(meta, dict) else "")
                 or ""
             )
             or None,
@@ -795,22 +817,30 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
             }
         raise
 
-    kwargs: dict[str, Any] = {}
-    if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-        kwargs = {
-            "trigger": "hire_candidate",
-            "human_confirmed": bool(ctx.action.get("human_confirmed", True)),
-            "actor_type": "human",
-            "actor_phone": getattr(ctx.request, "sender_phone", None),
-            "channel": "whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
-            "permissions": set(permissions),
-            "expected_from_stage": str(app.get("status") or "") or None,
-        }
-    update = legacy.update_application_status(app, "hired", **kwargs) if kwargs else legacy.update_application_status(app, "hired")
-    update_ok = bool(update.get("ok") if isinstance(update, dict) else False)
-    posthire = legacy.transition_hire(app) if update_ok else {"ok": False, "skipped": "application_update_failed"}
-    posthire_ok = bool(posthire.get("ok") if isinstance(posthire, dict) else False)
-    ok = update_ok and posthire_ok
+    human_confirmed = bool(ctx.action.get("human_confirmed", False))
+    hire_operation = ctx.action.get("hire_operation") if isinstance(ctx.action.get("hire_operation"), dict) else {}
+    confirmation_payload = ctx.action.get("confirmation_payload")
+    if not isinstance(confirmation_payload, dict):
+        confirmation_payload = {}
+    operation_id = str(hire_operation.get("operation_id") or confirmation_payload.get("operation_id") or "").strip()
+    if not human_confirmed or not operation_id:
+        update = {"ok": False, "error": "confirmation_required"}
+        posthire = {"ok": False, "skipped": "confirmation_required"}
+        ok = False
+    else:
+        import hire_operations as _hire_operations
+
+        hire_result = _hire_operations.execute_hire_operation(
+            legacy,
+            operation_id=operation_id,
+            confirmation_id=str(ctx.action.get("confirmation_id") or ""),
+            confirmation_token=str(ctx.action.get("confirmation_token") or ""),
+            permissions=set(permissions),
+        )
+        update = hire_result.get("transition") if isinstance(hire_result.get("transition"), dict) else hire_result
+        posthire = update.get("side_effect") if isinstance(update, dict) else None
+        ok = bool(hire_result.get("ok"))
+    update_ok = bool(ok)
     name = _candidate_name(app, ctx.action)
     if ok:
         message = f"{name} is hired and employee setup is done."
@@ -824,7 +854,7 @@ def _hire_candidate_executor(ctx: ExecutionContext) -> dict[str, Any]:
         "application": legacy.json_safe(app),
         "update": legacy.json_safe(update),
         "posthire": legacy.json_safe(posthire),
-        "candidate_status": "hired" if update_ok else app.get("status"),
+        "candidate_status": "hired" if ok else app.get("status"),
         "error": update.get("error") if isinstance(update, dict) and not update_ok else None,
     }
 
@@ -867,7 +897,9 @@ def _should_use_interview_invite(ctx: ExecutionContext, app: dict[str, Any], tex
     if not hasattr(ctx.legacy, "latest_candidate_interview_for_app"):
         return False
     try:
-        company = str(app.get("company_code") or "WATHEFNI").upper()
+        company = str(app.get("company_code") or "").strip().upper()
+        if not company:
+            return False
         return bool(ctx.legacy.latest_candidate_interview_for_app(str(app.get("app_key") or ""), company))
     except Exception:
         return False
@@ -1015,7 +1047,9 @@ def _send_assessment_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 
 def _screening_questions_for_app(legacy: Any, app: dict[str, Any]) -> list[dict[str, Any]]:
-    company_code = str(app.get("company_code") or "WATHEFNI")
+    company_code = str(app.get("company_code") or "").strip().upper()
+    if not company_code:
+        return []
     position_code = str(app.get("position_code") or "")
     questions: list[dict[str, Any]] = []
     try:
@@ -1052,6 +1086,15 @@ def _send_screening_questions_executor(ctx: ExecutionContext) -> dict[str, Any]:
     app = _resolve_app(ctx)
     if not app:
         return _candidate_not_found_result("send_screening_questions", "send screening questions to")
+    company = str(app.get("company_code") or "").strip().upper()
+    if not company:
+        return {
+            "action_type": "send_screening_questions",
+            "success": False,
+            "status": "failed",
+            "error": "tenant_scope_required",
+            "message": "The candidate company scope is missing.",
+        }
     all_questions = _screening_questions_for_app(legacy, app)
     raw_json = app.get("raw_json") if isinstance(app.get("raw_json"), dict) else {}
     screening = raw_json.get("screening") if isinstance(raw_json.get("screening"), dict) else {}
@@ -1103,20 +1146,18 @@ def _send_screening_questions_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "questions": all_questions,
             "last_sent_at": getattr(legacy, "now_iso", lambda: None)() if hasattr(legacy, "now_iso") else None,
         }
-        raw_json = {**raw_json, "screening": screening, "status": "screening", "current_step": "screening"}
+        raw_json = {**raw_json, "screening": screening}
         with legacy.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
                     UPDATE applications
                     SET raw_json=%s,
-                        status=CASE WHEN status IN ('awaiting_cv','cv_received') THEN 'screening' ELSE status END,
-                        current_step='screening',
                         screening_status='pending',
-                        updated_at=COALESCE(updated_at, CURRENT_DATE)
-                    WHERE app_key=%s
+                        updated_at=now()
+                    WHERE app_key=%s AND company_code=%s
                     """,
-                    (legacy.Json(legacy.json_safe(raw_json)), app.get("app_key")),
+                    (legacy.Json(legacy.json_safe(raw_json)), app.get("app_key"), company),
                 )
             conn.commit()
     except Exception:
@@ -1137,7 +1178,9 @@ def _scheduled_interview_for_current_app(legacy: Any, app: dict[str, Any]) -> di
     if not hasattr(legacy, "latest_candidate_interview_for_app"):
         return None
     try:
-        company = str(app.get("company_code") or "WATHEFNI").upper()
+        company = str(app.get("company_code") or "").strip().upper()
+        if not company:
+            return None
         interview = legacy.latest_candidate_interview_for_app(str(app.get("app_key") or ""), company)
         if isinstance(interview, dict) and str(interview.get("status") or "").lower() in {"scheduled", "rescheduled"}:
             return interview
@@ -1341,7 +1384,7 @@ def _send_video_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "message": "AI video interview sending is not available in this runtime.",
             "application": legacy.json_safe(app),
         }
-    company = _resolve_company_code(legacy, ctx.request) or str(app.get("company_code") or "WATHEFNI").upper()
+    company = _resolve_company_code(legacy, ctx.request) or str(app.get("company_code") or "").upper()
     metadata = getattr(ctx.request, "metadata", None)
     hr_user = metadata.get("admin_user") if isinstance(metadata, dict) and isinstance(metadata.get("admin_user"), dict) else None
     access = metadata.get("access") if isinstance(metadata, dict) and isinstance(metadata.get("access"), dict) else {}
@@ -1489,7 +1532,7 @@ def _batch_candidates_from_recent_state(state: dict[str, Any], limit: int) -> li
 def _resolve_batch_candidates(ctx: ExecutionContext) -> dict[str, Any]:
     legacy = ctx.legacy
     action = ctx.action
-    company_code = _resolve_company_code(legacy, ctx.request) or str(action.get("company_code") or "WATHEFNI").upper()
+    company_code = _resolve_company_code(legacy, ctx.request) or str(action.get("company_code") or "").upper()
     limit = max(1, min(int(action.get("top_n") or action.get("limit") or 5), BATCH_MAX_ITEMS))
     apps: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
@@ -1655,7 +1698,7 @@ def _execute_candidate_batch_preflight(ctx: ExecutionContext) -> dict[str, Any]:
 
 def _insert_batch_action(ctx: ExecutionContext, preflight: dict[str, Any]) -> str:
     legacy = ctx.legacy
-    company = str(preflight.get("company_code") or ctx.action.get("company_code") or "WATHEFNI").upper()
+    company = str(preflight.get("company_code") or ctx.action.get("company_code") or "").upper()
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -1703,8 +1746,8 @@ def _update_batch_item(legacy: Any, batch_id: str, app: dict[str, Any], action_t
                 """,
                 (
                     batch_id,
-                    str(app.get("company_code") or "WATHEFNI").upper(),
-                    str(app.get("company_code") or "WATHEFNI").upper(),
+                    str(app.get("company_code") or "").upper(),
+                    str(app.get("company_code") or "").upper(),
                     action_type,
                     str(app.get("app_key") or ""),
                     app.get("candidate_name"),
@@ -1790,7 +1833,7 @@ def _mixed_batch_raw_items(action: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _resolve_mixed_batch_items(ctx: ExecutionContext) -> dict[str, Any]:
     legacy = ctx.legacy
-    company_code = _resolve_company_code(legacy, ctx.request) or str(ctx.action.get("company_code") or "WATHEFNI").upper()
+    company_code = _resolve_company_code(legacy, ctx.request) or str(ctx.action.get("company_code") or "").upper()
     items: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
     for index, item in enumerate(_mixed_batch_raw_items(ctx.action)):
@@ -2054,12 +2097,28 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
                 app,
                 "interview",
                 trigger="schedule_interview",
-                human_confirmed=bool(ctx.action.get("human_confirmed", True)),
+                human_confirmed=bool(ctx.action.get("human_confirmed", False)),
                 actor_type="human",
+                actor_user_id=str(ctx.action.get("actor_user_id") or (meta.get("actor_user_id") if isinstance(meta, dict) else "") or "") or None,
                 actor_phone=getattr(ctx.request, "sender_phone", None),
                 channel="whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
                 permissions=set(permissions),
-                expected_from_stage=str(app.get("status") or "") or None,
+                expected_from_stage=str(ctx.action.get("expected_from_stage") or "") or None,
+                expected_version=ctx.action.get("expected_version"),
+                confirmation_id=str(ctx.action.get("confirmation_id") or "") or None,
+                confirmation_token=str(ctx.action.get("confirmation_token") or "") or None,
+                confirmation_action="schedule_interview",
+                confirmation_payload=(
+                    ctx.action.get("confirmation_payload")
+                    if isinstance(ctx.action.get("confirmation_payload"), dict)
+                    else {}
+                ),
+                idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
+                metadata=(
+                    ctx.action.get("confirmation_payload")
+                    if isinstance(ctx.action.get("confirmation_payload"), dict)
+                    else {}
+                ),
             )
             if isinstance(interview, dict):
                 interview = {**interview, "application_stage_update": legacy.json_safe(stage_update)}
@@ -2255,7 +2314,7 @@ def _rank_candidates_parameters_catalog(legacy: Any, request: Any) -> dict[str, 
     """Return the live position vocabulary for this company so GPT picks from
     real values instead of inventing strings like 'instagram marketing'."""
 
-    company_code = _resolve_company_code(legacy, request) or "WATHEFNI"
+    company_code = _resolve_company_code(legacy, request) or ""
     positions: list[dict[str, Any]] = []
     try:
         with legacy.db_connect() as conn:
@@ -2293,7 +2352,7 @@ def _rank_candidates_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
     legacy = ctx.legacy
     action = ctx.action
-    company_code = _resolve_company_code(legacy, ctx.request) or "WATHEFNI"
+    company_code = _resolve_company_code(legacy, ctx.request) or ""
     default_top_n = getattr(legacy, "RANK_CANDIDATES_DEFAULT_TOP_N", 5)
     max_top_n = getattr(legacy, "RANK_CANDIDATES_MAX_TOP_N", 10)
     pool_limit = getattr(legacy, "RANK_CANDIDATES_POOL_LIMIT", 200)
@@ -2891,7 +2950,7 @@ def _job_opening_status_preflight(ctx: ExecutionContext, *, target_status: str) 
         "paused": "pause",
         "open": "reopen or resume",
     }.get(target_status, "update")
-    company_code = _resolve_company_code(legacy, ctx.request) or "WATHEFNI"
+    company_code = _resolve_company_code(legacy, ctx.request) or ""
     position_code = str(ctx.action.get("position_code") or "").strip()
     title = str(ctx.action.get("title") or ctx.action.get("position_title") or "").strip()
     if not position_code and not title:

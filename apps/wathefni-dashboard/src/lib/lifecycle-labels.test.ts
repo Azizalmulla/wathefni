@@ -80,9 +80,12 @@ describe('canonical recruiting lifecycle labels', () => {
 
   test('shortlist, reject and hire keep explicit confirmation', () => {
     const source = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
-    expect(source).toContain("title: 'Shortlist this candidate?'")
-    expect(source).toContain("title: 'Reject this candidate?'")
-    expect(source).toContain("title: 'Hire this candidate?'")
+    expect(source).toContain("'Shortlist this candidate?'")
+    expect(source).toContain("'Reject this candidate?'")
+    expect(source).toContain("'Hire this candidate?'")
+    expect(source).toContain("'إضافة المرشح للقائمة المختصرة؟'")
+    expect(source).toContain("'رفض هذا المرشح؟'")
+    expect(source).toContain("'توظيف هذا المرشح؟'")
     expect(source).toContain('askDashboardAssistant')
   })
 })

@@ -136,6 +136,7 @@ def main() -> int:
     ai_block = rl.transition_application(
         fake,
         app_key="x",
+        company_code="TEST",
         to_stage="shortlisted",
         trigger="ai_proposal",
         actor_type="ai",
@@ -145,6 +146,7 @@ def main() -> int:
     no_confirm = rl.transition_application(
         fake,
         app_key="x",
+        company_code="TEST",
         to_stage="rejected",
         trigger="dashboard_reject",
         actor_type="human",
@@ -293,6 +295,24 @@ def main() -> int:
         )
 
         # Transition shortlist with confirmation + stale check
+        confirmation_payload: dict[str, object] = {}
+        prepared = rl.mint_candidate_action_confirmation(
+            app,
+            company_code=company,
+            app_key=app_key_a,
+            action="shortlist",
+            observed_stage="ready_for_review",
+            observed_version=0,
+            target_payload=confirmation_payload,
+            actor_user_id=None,
+            actor_phone=phone,
+            actor_type="human",
+            channel="web",
+            permissions={"candidate.manage"},
+            idempotency_key=f"prepare-shortlist-{app_key_a}",
+        )
+        check("shortlist confirmation minted", bool(prepared.get("ok")), str(prepared.get("error")))
+        confirmation = prepared.get("confirmation") or {}
         shortlist = rl.transition_application(
             app,
             app_key=app_key_a,
@@ -301,9 +321,15 @@ def main() -> int:
             trigger="dashboard_shortlist",
             human_confirmed=True,
             actor_type="human",
+            actor_phone=phone,
             channel="web",
             permissions={"candidate.manage"},
             expected_from_stage="ready_for_review",
+            expected_version=0,
+            confirmation_id=confirmation.get("confirmation_id"),
+            confirmation_token=confirmation.get("confirmation_token"),
+            confirmation_action="shortlist",
+            confirmation_payload=confirmation_payload,
             idempotency_key=f"test-shortlist-{app_key_a}",
         )
         check("shortlist transition ok", bool(shortlist.get("ok")), str(shortlist.get("error")))
@@ -318,14 +344,35 @@ def main() -> int:
             trigger="dashboard_shortlist",
             human_confirmed=True,
             actor_type="human",
+            actor_phone=phone,
             channel="web",
             permissions={"candidate.manage"},
             expected_from_stage="ready_for_review",
+            confirmation_id=confirmation.get("confirmation_id"),
+            confirmation_token=confirmation.get("confirmation_token"),
+            confirmation_action="shortlist",
+            confirmation_payload=confirmation_payload,
             idempotency_key=f"test-shortlist-{app_key_a}",
         )
         check("shortlist idempotent replay", bool(replay.get("ok")) and bool(replay.get("idempotent")))
 
         # Stale expected stage fails
+        reject_payload = {"reason_code": "not_selected", "note": "smoke"}
+        reject_prepared = rl.mint_candidate_action_confirmation(
+            app,
+            company_code=company,
+            app_key=app_key_a,
+            action="reject",
+            observed_stage="shortlisted",
+            observed_version=1,
+            target_payload=reject_payload,
+            actor_user_id=None,
+            actor_phone=phone,
+            actor_type="human",
+            channel="web",
+            permissions={"candidate.decide"},
+        )
+        reject_confirmation = reject_prepared.get("confirmation") or {}
         stale = rl.transition_application(
             app,
             app_key=app_key_a,
@@ -334,9 +381,14 @@ def main() -> int:
             trigger="dashboard_reject",
             human_confirmed=True,
             actor_type="human",
+            actor_phone=phone,
             channel="web",
             permissions={"candidate.decide"},
             expected_from_stage="ready_for_review",
+            confirmation_id=reject_confirmation.get("confirmation_id"),
+            confirmation_token=reject_confirmation.get("confirmation_token"),
+            confirmation_action="reject",
+            confirmation_payload=reject_payload,
             idempotency_key=f"test-stale-{app_key_a}",
         )
         check("stale expected_from_stage fails closed", stale.get("error") == "stale_state", str(stale.get("error")))
@@ -353,6 +405,10 @@ def main() -> int:
             channel="web",
             permissions={"candidate.decide"},
             expected_from_stage="ready_for_review",
+            confirmation_id=str(uuid.uuid4()),
+            confirmation_token="invalid-but-present",
+            confirmation_action="hire",
+            confirmation_payload={"hiring_reference": "invalid-transition"},
         )
         check("hire from ready_for_review blocked", bad_hire.get("error") == "transition_not_allowed", str(bad_hire.get("error")))
 
@@ -401,6 +457,10 @@ def main() -> int:
             human_confirmed=True,
             actor_type="human",
             permissions={"candidate.decide"},
+            confirmation_id=str(uuid.uuid4()),
+            confirmation_token="invalid-but-present",
+            confirmation_action="reject",
+            confirmation_payload={"reason_code": "not_selected"},
         )
         check("tenant mismatch fails closed", tenant.get("error") in {"application_not_found", "tenant_mismatch"}, str(tenant.get("error")))
 
@@ -408,6 +468,7 @@ def main() -> int:
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM application_lifecycle_events WHERE app_key IN (%s,%s)", (app_key_a, app_key_b))
+                cur.execute("DELETE FROM candidate_action_confirmations WHERE app_key IN (%s,%s)", (app_key_a, app_key_b))
                 cur.execute("DELETE FROM conversation_application_bindings WHERE conversation_id=%s", (conv,))
                 cur.execute(
                     "DELETE FROM hr_tasks WHERE company_code=%s AND metadata->>'app_key' IN (%s,%s)",

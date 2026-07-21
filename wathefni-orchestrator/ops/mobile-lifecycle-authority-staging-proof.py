@@ -74,6 +74,11 @@ def auth(token: str) -> dict[str, str]:
 
 
 def main() -> int:
+    # Quarantined after Candidates C0/C1: uses direct applications.status fixture writes.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from lifecycle_fixture_quarantine import refuse_unless_legacy_fixtures_explicitly_allowed
+
+    refuse_unless_legacy_fixtures_explicitly_allowed(script_name="mobile-lifecycle-authority-staging-proof.py")
     os.environ.setdefault("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.staging.env")
     os.environ.setdefault("WATHEFNI_WORKSPACE", "/opt/wathefni/staging/workspace")
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")

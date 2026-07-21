@@ -1,6 +1,7 @@
 import type {
   ActivityFilters,
   ActivityResponse,
+  ApplicationSummary,
   ApplicationsResponse,
   AssessmentAuthoringDraftsResponse,
   AssessmentConfigResponse,
@@ -722,21 +723,68 @@ function openPreviewUrl(url: string, previewWindow: Window | null) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-export function shortlistCandidate(access: DashboardAccess, appKey: string) {
-  return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/shortlist`, access, {
-    method: 'POST',
-  })
+type CandidateDecisionAction = 'shortlist' | 'reject' | 'hire'
+
+type CandidateConfirmation = {
+  confirmation_id: string
+  confirmation_token: string
+  observed_stage: string
+  observed_version: number
+  target_payload: Record<string, unknown>
 }
 
-export function hireCandidate(access: DashboardAccess, appKey: string) {
-  return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/hire`, access, {
-    method: 'POST',
-  })
+async function confirmedCandidateDecision(
+  access: DashboardAccess,
+  application: ApplicationSummary,
+  action: CandidateDecisionAction,
+  targetPayload: Record<string, unknown>,
+) {
+  const observedStage = application.canonical_stage || application.status || ''
+  const observedVersion = application.lifecycle_version ?? 0
+  const idempotencyKey = `candidate:${action}:${application.app_key}:${observedVersion}:${crypto.randomUUID()}`
+  const prepared = await request<{ ok: boolean; confirmation: CandidateConfirmation }>(
+    `/dashboard/prehire/applications/${encodeURIComponent(application.app_key)}/confirmations`,
+    access,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        observed_stage: observedStage,
+        observed_version: observedVersion,
+        target_payload: targetPayload,
+        idempotency_key: idempotencyKey,
+      }),
+    },
+  )
+  const confirmation = prepared.confirmation
+  return request<MutationResponse>(
+    `/dashboard/prehire/applications/${encodeURIComponent(application.app_key)}/${action === 'shortlist' ? 'shortlist' : action}`,
+    access,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        confirmation_id: confirmation.confirmation_id,
+        confirmation_token: confirmation.confirmation_token,
+        observed_stage: confirmation.observed_stage,
+        observed_version: confirmation.observed_version,
+        target_payload: confirmation.target_payload,
+      }),
+    },
+  )
 }
 
-export function rejectCandidate(access: DashboardAccess, appKey: string) {
-  return request<MutationResponse>(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/reject`, access, {
-    method: 'POST',
+export function shortlistCandidate(access: DashboardAccess, application: ApplicationSummary, note?: string) {
+  return confirmedCandidateDecision(access, application, 'shortlist', { note: note?.trim() || null })
+}
+
+export function hireCandidate(access: DashboardAccess, application: ApplicationSummary, note?: string) {
+  return confirmedCandidateDecision(access, application, 'hire', { note: note?.trim() || null })
+}
+
+export function rejectCandidate(access: DashboardAccess, application: ApplicationSummary, note?: string) {
+  return confirmedCandidateDecision(access, application, 'reject', {
+    reason_code: 'not_selected',
+    note: note?.trim() || null,
   })
 }
 

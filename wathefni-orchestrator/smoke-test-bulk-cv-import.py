@@ -262,14 +262,30 @@ def run_checks() -> None:
             assert_true(cur.fetchone()["status"] == "import_review", "worker must preserve held status on extraction complete")
         conn.commit()
 
-    # Assign role + promote: Ali enters the pipeline and becomes Ranking-eligible.
+    # Assign role + promote via canonical intake_admit (no direct lifecycle write).
     with app.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE applications SET position_code='WELDER', position_title='Bulk Welder', status='review_pending', updated_at=CURRENT_DATE WHERE app_key=%s",
-                (ali_app,),
+                """
+                UPDATE applications
+                SET position_code='WELDER',
+                    position_title='Bulk Welder',
+                    updated_at=CURRENT_DATE
+                WHERE app_key=%s AND company_code=%s
+                """,
+                (ali_app, COMPANY_A),
             )
         conn.commit()
+    admit = app.update_application_status(
+        {"app_key": ali_app, "company_code": COMPANY_A, "status": "needs_role", "position_code": "WELDER"},
+        "ready_for_review",
+        trigger="intake_admit",
+        actor_type="system",
+        channel="smoke",
+        human_confirmed=False,
+        idempotency_key=f"bulk-import-smoke-admit:{ali_app}",
+    )
+    assert_true(admit.get("ok"), f"canonical intake_admit must succeed: {admit}")
     listing2 = app.prehire_applications_query(
         company_code=COMPANY_A, status=None, position=None, search=None, limit=200, offset=0
     )

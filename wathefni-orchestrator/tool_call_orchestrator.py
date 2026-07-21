@@ -1178,6 +1178,7 @@ def _save_pending(
     summary: str,
     scope: dict[str, Any],
     preflight_plan: dict[str, Any] | None = None,
+    candidate_confirmation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     legacy = _legacy()
     pending_metadata = {
@@ -1187,6 +1188,7 @@ def _save_pending(
         "action_hash": _action_hash(tool_name, tool_args, scope),
         "preflight_plan": preflight_plan or {},
         "confirmation_contract": "same_admin_company_conversation_module_session_and_action_hash",
+        "candidate_confirmation": candidate_confirmation or {},
     }
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
@@ -1217,6 +1219,94 @@ def _save_pending(
             row = cur.fetchone()
         conn.commit()
     return dict(row) if row else {}
+
+
+def _prepare_candidate_confirmation(
+    legacy: Any,
+    *,
+    tool_name: str,
+    args: dict[str, Any],
+    resolved_app: dict[str, Any] | None,
+    request: Any,
+    scope: dict[str, Any],
+) -> dict[str, Any] | None:
+    action_map = {
+        "shortlist_candidate": "shortlist",
+        "reject_candidate": "reject",
+        "hire_candidate": "hire",
+        "schedule_interview": "schedule_interview",
+    }
+    candidate_action = action_map.get(tool_name)
+    if not candidate_action:
+        return None
+    if not resolved_app:
+        return {"ok": False, "error": "application_not_found"}
+    company = str(scope.get("company_id") or "").strip().upper()
+    if not company:
+        return {"ok": False, "error": "tenant_scope_required"}
+    import recruiting_lifecycle as _lifecycle
+
+    target_payload: dict[str, Any] = {}
+    if candidate_action == "reject":
+        target_payload = {
+            "reason_code": str(args.get("reason_code") or "not_selected"),
+            "note": str(args.get("reason") or args.get("note") or "").strip() or None,
+        }
+    elif candidate_action == "schedule_interview":
+        target_payload = {
+            key: args.get(key)
+            for key in ("interview_time", "when", "datetime", "timezone")
+            if args.get(key) not in (None, "")
+        }
+    confirmation_key = f"assistant-confirm:{_action_hash(tool_name, args, scope)}"
+    hire_operation = None
+    if candidate_action == "hire":
+        import hire_operations as _hire_operations
+
+        prepared = _hire_operations.prepare_hire_operation(
+            legacy,
+            company_code=company,
+            app_key=str(resolved_app.get("app_key") or ""),
+            idempotency_key=confirmation_key,
+            expected_from_stage=str(resolved_app.get("status") or ""),
+            expected_version=int(resolved_app.get("lifecycle_version") or 0),
+            actor_user_id=str(scope.get("admin_user_id") or "") or None,
+            actor_phone=getattr(request, "sender_phone", None),
+            channel="whatsapp",
+            structured_reason=target_payload,
+        )
+        if not prepared.get("ok"):
+            return prepared
+        hire_operation = prepared["operation"]
+        target_payload = {
+            **target_payload,
+            "operation_id": hire_operation["operation_id"],
+            "hiring_reference": hire_operation["operation_id"],
+        }
+    minted = _lifecycle.mint_candidate_action_confirmation(
+        legacy,
+        company_code=company,
+        app_key=str(resolved_app.get("app_key") or ""),
+        action=candidate_action,
+        observed_stage=str(resolved_app.get("status") or ""),
+        observed_version=int(resolved_app.get("lifecycle_version") or 0),
+        target_payload=target_payload,
+        actor_user_id=str(scope.get("admin_user_id") or "") or None,
+        actor_phone=getattr(request, "sender_phone", None),
+        actor_type="human",
+        channel="whatsapp",
+        permissions=set(scope.get("permissions") or []),
+        idempotency_key=confirmation_key,
+        ttl_seconds=1200,
+    )
+    if not minted.get("ok"):
+        return minted
+    confirmation = dict(minted["confirmation"])
+    confirmation["target_payload"] = target_payload
+    confirmation["candidate_action"] = candidate_action
+    if hire_operation:
+        confirmation["hire_operation"] = hire_operation
+    return {"ok": True, "confirmation": confirmation}
 
 
 def _resolve_pending_match(request: Any, tool_name: str, tool_args: dict[str, Any], scope: dict[str, Any]) -> dict[str, Any] | None:
@@ -1495,6 +1585,20 @@ def _execute_tool(tool_name: str, args: dict[str, Any], request: Any, state: dic
                 }
         match = _resolve_pending_match(request, tool_name, args, scope)
         if not match:
+            candidate_confirmation = _prepare_candidate_confirmation(
+                legacy,
+                tool_name=tool_name,
+                args=args,
+                resolved_app=resolved_app,
+                request=request,
+                scope=scope,
+            )
+            if candidate_confirmation and not candidate_confirmation.get("ok"):
+                return {
+                    "status": "failed",
+                    "tool": tool_name,
+                    "result": _json_safe(candidate_confirmation),
+                }
             saved = _save_pending(
                 request,
                 graph_state,
@@ -1503,6 +1607,11 @@ def _execute_tool(tool_name: str, args: dict[str, Any], request: Any, state: dic
                 _tool_call_summary(tool_name, args),
                 scope,
                 preflight_plan=preflight_result if "preflight_result" in locals() else None,
+                candidate_confirmation=(
+                    candidate_confirmation.get("confirmation")
+                    if candidate_confirmation
+                    else None
+                ),
             )
             return {
                 "status": "needs_confirmation",
@@ -1514,6 +1623,25 @@ def _execute_tool(tool_name: str, args: dict[str, Any], request: Any, state: dic
                 "preflight_plan": _json_safe(preflight_result if "preflight_result" in locals() else {}),
                 "result": _json_safe(preflight_result if "preflight_result" in locals() else {"message": "Confirm to continue?"}),
                 "instruction": "Ask the user for one explicit confirmation for this exact stored plan. The backend will execute the stored plan directly when the user says yes; do not ask for repeated confirmations.",
+            }
+        pending_metadata = match.get("metadata") if isinstance(match.get("metadata"), dict) else {}
+        candidate_confirmation = (
+            pending_metadata.get("candidate_confirmation")
+            if isinstance(pending_metadata.get("candidate_confirmation"), dict)
+            else {}
+        )
+        if candidate_confirmation:
+            action = {
+                **action,
+                "human_confirmed": True,
+                "confirmation_id": candidate_confirmation.get("confirmation_id"),
+                "confirmation_token": candidate_confirmation.get("confirmation_token"),
+                "confirmation_action": candidate_confirmation.get("candidate_action"),
+                "confirmation_payload": candidate_confirmation.get("target_payload") or {},
+                "expected_from_stage": candidate_confirmation.get("observed_stage"),
+                "expected_version": candidate_confirmation.get("observed_version"),
+                "idempotency_key": f"assistant:{candidate_confirmation.get('confirmation_id')}",
+                "hire_operation": candidate_confirmation.get("hire_operation"),
             }
         _mark_pending_resolved(match["action_id"], "approved")
     ctx = _registry.ExecutionContext(
