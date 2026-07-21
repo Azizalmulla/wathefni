@@ -103,7 +103,7 @@ artifact_sha() {
 }
 
 sync_code() {  # $1 = dest orchestrator dir
-  rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC/requirements.txt" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
+  rsync -az "${CODE_FILES[@]/#/$ORCH_SRC/}" "$ORCH_SRC/requirements.txt" "$ORCH_SRC"/smoke-test-*.py "$ORCH_SRC/test_candidates_c01.py" "$ORCH_SRC/integrity-scan.py" "$VPS_HOST:$1/"
   rsync -az "$ORCH_SRC/ops/" "$VPS_HOST:$1/ops/"
   "${SSH[@]}" "mkdir -p '$1/reports/assessment-product2-eval'"
   rsync -az "$ORCH_SRC/reports/assessment-product2-eval/" "$VPS_HOST:$1/reports/assessment-product2-eval/"

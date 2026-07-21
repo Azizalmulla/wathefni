@@ -61,8 +61,14 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
             for table, sql in [
                 ("hire_operations", "DELETE FROM hire_operations WHERE company_code=%s"),
                 ("candidate_action_confirmations", "DELETE FROM candidate_action_confirmations WHERE company_code=%s"),
-                ("application_lifecycle_events", "DELETE FROM application_lifecycle_events WHERE company_code=%s AND (metadata ? 'c01_marker' OR app_key LIKE 'c01-%')"),
+                ("application_lifecycle_events", "DELETE FROM application_lifecycle_events WHERE company_code=%s AND (metadata ? 'c01_marker' OR app_key LIKE 'c01-%%')"),
                 ("candidate_interviews", "DELETE FROM candidate_interviews WHERE company_code=%s"),
+                ("hr_tasks", "DELETE FROM hr_tasks WHERE company_code=%s"),
+                ("conversation_application_bindings", "DELETE FROM conversation_application_bindings WHERE company_code=%s"),
+                ("pending_actions", "DELETE FROM pending_actions WHERE company_code=%s"),
+                ("action_results", "DELETE FROM action_results WHERE company_code=%s"),
+                ("outbound_delivery_events", "DELETE FROM outbound_delivery_events WHERE company_code=%s"),
+                ("compliance_documents", "DELETE FROM compliance_documents WHERE company_code=%s"),
                 ("employees", "DELETE FROM employees WHERE company_code=%s"),
                 ("applications", "DELETE FROM applications WHERE company_code=%s"),
                 ("positions", "DELETE FROM positions WHERE company_code=%s"),
@@ -85,6 +91,10 @@ def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
                 except Exception as exc:  # noqa: BLE001
                     counts[table] = -1
                     counts[f"{table}_error"] = str(exc)
+            cur.execute("DELETE FROM candidate_documents WHERE app_key LIKE 'c01-%'")
+            counts["candidate_documents"] = cur.rowcount
+            cur.execute("DELETE FROM onboarding_items WHERE employee_key LIKE %s", (f"{company}-%",))
+            counts["onboarding_items"] = cur.rowcount
             cur.execute("DELETE FROM candidates WHERE phone = ANY(%s)", ([PHONE, PHONE_B],))
             counts["candidates"] = cur.rowcount
             # also other company probe
