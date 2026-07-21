@@ -165,8 +165,15 @@ def main() -> int:
         with mock.patch.object(cv, "assess_pdf_pages", fake_assess), mock.patch.object(
             cv, "extract_pdf_pages_with_mistral", fake_ocr
         ):
-            blocked = cv.extract_cv_document(pdf_path, mime_type="application/pdf")
+            blocked = cv.extract_cv_document(
+                pdf_path, mime_type="application/pdf", company_code="SMOKE"
+            )
         check("OCR skipped when flag off", ocr_calls == [] and blocked.error == "ocr_required_mistral_disabled")
+        missing_tenant = cv.extract_cv_document(pdf_path, mime_type="application/pdf")
+        check(
+            "missing tenant fails closed",
+            missing_tenant.error == "tenant_scope_required" and missing_tenant.text == "",
+        )
 
     # Cost estimate
     check("cost estimate $4/1000 pages", cv.estimate_mistral_cost(1) == 0.004)
