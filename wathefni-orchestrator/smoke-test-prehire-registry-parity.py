@@ -127,29 +127,21 @@ def main() -> int:
     for forbidden in ("company_code", "actor_role", "stray"):
         check(f"whitelist drops {forbidden}", forbidden not in safe)
 
-    # --- 5) hire executor parity (stubbed legacy: must call transition_hire) --
+    # --- 5) hire executor parity (atomic C0/C1 operation) --------------------
     class FakeLegacy:
-        def __init__(self, update_ok: bool = True, transition_ok: bool = True):
-            self.update_ok = update_ok
-            self.transition_ok = transition_ok
+        def __init__(self):
             self.calls: list[str] = []
 
         def resolve_application_for_action(self, action, allow_latest=False):  # noqa: ANN001
             return {"app_key": action.get("app_key"), "candidate_name": "Test Candidate", "status": "review_pending", "company_code": "WATHEFNI"}
 
-        def update_application_status(self, app_row, status):  # noqa: ANN001
-            self.calls.append(f"update:{status}")
-            return {"ok": self.update_ok}
-
-        def transition_hire(self, app_row):  # noqa: ANN001
-            self.calls.append("transition_hire")
-            return {"ok": self.transition_ok}
-
         def json_safe(self, value):  # noqa: ANN001
             return value
 
-    def run_hire(update_ok: bool, transition_ok: bool):
-        legacy = FakeLegacy(update_ok=update_ok, transition_ok=transition_ok)
+    def run_hire(transaction_ok: bool, *, confirmed: bool = True):
+        import hire_operations
+
+        legacy = FakeLegacy()
         request = type(
             "Req",
             (),
@@ -165,28 +157,57 @@ def main() -> int:
                 "sender_phone": "96599338566",
             },
         )()
+        original_execute = hire_operations.execute_hire_operation
+
+        def fake_execute(_legacy, **kwargs):  # noqa: ANN001
+            legacy.calls.append(f"execute:{kwargs.get('operation_id')}")
+            if not transaction_ok:
+                return {
+                    "ok": False,
+                    "error": "transactional_side_effect_failed",
+                    "transition": {"ok": False, "error": "transactional_side_effect_failed"},
+                }
+            return {
+                "ok": True,
+                "transition": {
+                    "ok": True,
+                    "to_stage": "hired",
+                    "side_effect": {"ok": True, "employee_key": "EMP-SMOKE"},
+                },
+            }
+
         ctx = registry.ExecutionContext(
             request=request,
-            action={"action_type": "hire_candidate", "app_key": "APP-HIRE", "subject_name": "Test Candidate"},
+            action={
+                "action_type": "hire_candidate",
+                "app_key": "APP-HIRE",
+                "subject_name": "Test Candidate",
+                "human_confirmed": confirmed,
+                "confirmation_id": "00000000-0000-4000-8000-000000000002",
+                "confirmation_token": "smoke-confirmation-token",
+                "hire_operation": {"operation_id": "00000000-0000-4000-8000-000000000003"},
+            },
             state={},
             graph_state={},
             intent={},
             legacy=legacy,
         )
-        return legacy, registry.execute("hire_candidate", ctx)
+        hire_operations.execute_hire_operation = fake_execute  # type: ignore[assignment]
+        try:
+            return legacy, registry.execute("hire_candidate", ctx)
+        finally:
+            hire_operations.execute_hire_operation = original_execute  # type: ignore[assignment]
 
-    legacy_ok, hire_ok = run_hire(True, True)
-    check("hire executor marks application hired", "update:hired" in legacy_ok.calls)
-    check("hire executor runs transition_hire (creates employee)", "transition_hire" in legacy_ok.calls)
-    check("hire succeeds only when both steps succeed", hire_ok.get("status") == "completed" and hire_ok.get("success") is True)
+    legacy_ok, hire_ok = run_hire(True)
+    check("hire executor invokes one atomic hire operation", legacy_ok.calls == ["execute:00000000-0000-4000-8000-000000000003"])
+    check("hire succeeds only after atomic operation commit", hire_ok.get("status") == "completed" and hire_ok.get("success") is True)
     check("hire result carries the posthire outcome for audit", isinstance(hire_ok.get("posthire"), dict))
 
-    _, hire_partial = run_hire(True, False)
-    check("hire fails when transition_hire fails (no silent half-hire)", hire_partial.get("success") is False)
-
-    legacy_noupdate, hire_noupdate = run_hire(False, True)
-    check("hire skips transition_hire if the status update fails", "transition_hire" not in legacy_noupdate.calls)
-    check("hire reports failure if the status update fails", hire_noupdate.get("success") is False)
+    _, hire_failed = run_hire(False)
+    check("hire fails when atomic employee linkage fails (no half-hire)", hire_failed.get("success") is False)
+    legacy_unconfirmed, hire_unconfirmed = run_hire(True, confirmed=False)
+    check("hire without backend confirmation never invokes the operation", legacy_unconfirmed.calls == [])
+    check("hire without backend confirmation fails closed", hire_unconfirmed.get("success") is False)
 
     # --- 6) dashboard harness mechanics (stubbed orchestrator + audit) -------
     def ctx(role: str = "owner", company: str = "WATHEFNI"):

@@ -1258,7 +1258,14 @@ def _prepare_candidate_confirmation(
             for key in ("interview_time", "when", "datetime", "timezone")
             if args.get(key) not in (None, "")
         }
-    confirmation_key = f"assistant-confirm:{_action_hash(tool_name, args, scope)}"
+    # Bind confirmation idempotency to the observed lifecycle version. A retry
+    # before commit reuses the same capability/result, while a later deliberate
+    # action after a committed transition can mint a fresh confirmation.
+    observed_version = int(resolved_app.get("lifecycle_version") or 0)
+    confirmation_key = (
+        f"assistant-confirm:{_action_hash(tool_name, args, scope)}"
+        f":v{observed_version}"
+    )
     hire_operation = None
     if candidate_action == "hire":
         import hire_operations as _hire_operations
@@ -1269,7 +1276,7 @@ def _prepare_candidate_confirmation(
             app_key=str(resolved_app.get("app_key") or ""),
             idempotency_key=confirmation_key,
             expected_from_stage=str(resolved_app.get("status") or ""),
-            expected_version=int(resolved_app.get("lifecycle_version") or 0),
+            expected_version=observed_version,
             actor_user_id=str(scope.get("admin_user_id") or "") or None,
             actor_phone=getattr(request, "sender_phone", None),
             channel="whatsapp",
@@ -1289,7 +1296,7 @@ def _prepare_candidate_confirmation(
         app_key=str(resolved_app.get("app_key") or ""),
         action=candidate_action,
         observed_stage=str(resolved_app.get("status") or ""),
-        observed_version=int(resolved_app.get("lifecycle_version") or 0),
+        observed_version=observed_version,
         target_payload=target_payload,
         actor_user_id=str(scope.get("admin_user_id") or "") or None,
         actor_phone=getattr(request, "sender_phone", None),
