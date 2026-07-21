@@ -667,11 +667,12 @@ def main() -> int:
                 half = int(cur.fetchone()["n"])
         matrix.check("no_hired_without_employee", half == 0, half)
 
-        # EN/AR confirmation copy present in dashboard source synced to staging
+        # EN/AR confirmation copy present in the exact dashboard artifact on staging.
         dash = Path("/opt/wathefni/staging/dashboard-dist")
-        # fallback to repo if needed
-        app_tsx = ROOT.parent / "apps" / "wathefni-dashboard" / "src" / "App.tsx"
-        text = app_tsx.read_text(encoding="utf-8")
+        text = "\n".join(
+            asset.read_text(encoding="utf-8")
+            for asset in sorted((dash / "assets").glob("*.js"))
+        )
         matrix.check("bilingual_hire_copy", "Hire this candidate?" in text and "توظيف هذا المرشح؟" in text)
         matrix.check("bilingual_reject_copy", "Reject this candidate?" in text and "رفض هذا المرشح؟" in text)
 
