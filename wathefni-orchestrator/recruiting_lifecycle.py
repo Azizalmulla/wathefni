@@ -931,6 +931,17 @@ def resume_candidate_handoff(
 # ---------------------------------------------------------------------------
 
 
+def _uuid_or_none(value: Any) -> str | None:
+    """Lifecycle event actor_user_id is uuid; coerce invalid/smoke strings to NULL."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        return str(uuid.UUID(raw))
+    except (ValueError, TypeError, AttributeError):
+        return None
+
+
 def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
 
@@ -1563,6 +1574,10 @@ def transition_application(
             )
 
             event_id = str(uuid.uuid4())
+            actor_uuid = _uuid_or_none(actor_user_id)
+            event_metadata = dict(metadata or {})
+            if actor_user_id and not actor_uuid:
+                event_metadata.setdefault("actor_user_id_raw", str(actor_user_id))
             cur.execute(
                 """
                 INSERT INTO application_lifecycle_events (
@@ -1581,13 +1596,13 @@ def transition_application(
                     target,
                     trigger,
                     actor_type,
-                    actor_user_id,
+                    actor_uuid,
                     legacy.digits(actor_phone) or None,
                     channel,
                     str(confirmation["confirmation_id"]) if confirmation else None,
                     idem,
                     expected_from_stage,
-                    legacy.Json(legacy.json_safe(metadata or {})),
+                    legacy.Json(legacy.json_safe(event_metadata)),
                 ),
             )
             event = dict(cur.fetchone())
