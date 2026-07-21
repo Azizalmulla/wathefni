@@ -252,6 +252,7 @@ def _run_jobs_phase1_body(orch, company, suffix, code, actor, phone, app_key, be
         _ok("invalid transition rejected")
 
     # Vacancy math fixture: temporary hired row for count only; always cleaned in finally.
+    # data_source must remain production so vacancy_counts includes it; mark via raw_json.
     with orch.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -263,17 +264,16 @@ def _run_jobs_phase1_body(orch, company, suffix, code, actor, phone, app_key, be
                 (phone, f"Smoke Hire {suffix}"),
             )
             cur.execute(
+                "DELETE FROM applications WHERE company_code=%s AND app_key=%s",
+                (company, app_key),
+            )
+            cur.execute(
                 """
                 INSERT INTO applications (
                   app_key, company_code, phone, position_code, position_title, status,
                   cv_received, data_source, ingested_at, updated_at, raw_json
-                ) VALUES (%s,%s,%s,%s,%s,'hired', TRUE, 'jobs_phase1_smoke', now(), now(),
+                ) VALUES (%s,%s,%s,%s,%s,'hired', TRUE, 'production', now(), now(),
                           jsonb_build_object('smoke', true, 'jobs_phase1', true))
-                ON CONFLICT (app_key) DO UPDATE
-                  SET status='hired',
-                      position_code=EXCLUDED.position_code,
-                      data_source='jobs_phase1_smoke',
-                      raw_json=EXCLUDED.raw_json
                 """,
                 (app_key, company, phone, code, created.get("title")),
             )
