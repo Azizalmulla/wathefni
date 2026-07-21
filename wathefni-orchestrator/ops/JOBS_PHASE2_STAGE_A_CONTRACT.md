@@ -22,6 +22,10 @@ Publish requires approved EN **or** AR pack, vacancies ≥ 1, employment type, a
 
 Eligibility requires explicit `open` status, visibility by access mode, Asia/Kuwait-inclusive deadline, remaining vacancies, and complete approved content.
 
+## External share surface
+
+Backend `shareable` is authoritative. `application_link` / `qr_value` are emitted only when the job is currently eligible for external intake (`public` or `share_only` via exact APPLY). Internal, draft, paused, closed, expired, full, and incomplete-content jobs keep stable `apply_code` identity but return null share surfaces. Dashboard and Assistant share actions must use this authority and must not invent candidate links.
+
 ## Validation
 
 - Unit: `smoke-test-jobs-phase2-stage-a-unit.py`

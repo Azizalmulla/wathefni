@@ -41037,12 +41037,17 @@ def format_list_job_openings_reply(result: dict[str, Any] | None) -> str:
         if not isinstance(item, dict):
             continue
         title = str(item.get("position_title") or item.get("position_code") or "Role").strip()
-        code = str(item.get("apply_code") or "").strip()
+        # Only reveal candidate APPLY identity on shareable openings. Ineligible /
+        # internal roles stay inspectable by title without a candidate share surface.
+        shareable = bool(item.get("shareable")) if "shareable" in item else bool(item.get("application_link"))
+        code = str(item.get("apply_code") or "").strip() if shareable else ""
         active = int(item.get("active_count") or 0)
         apps = int(item.get("application_count") or 0)
         detail = f"{title}"
         if code:
             detail += f" — `{code}`"
+        elif item.get("eligibility_reason"):
+            detail += f" — not shareable ({item.get('eligibility_reason')})"
         if active or apps:
             detail += f" ({active} active / {apps} total applicants)"
         lines.append(f"- {detail}")

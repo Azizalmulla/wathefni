@@ -328,6 +328,19 @@ const COPY = {
     jobsAgeDays: '{days}d',
     jobsIntakeOpen: 'Accepting applications',
     jobsIntakeClosed: 'Not accepting applications',
+    jobsShareUnavailable: 'External sharing is unavailable for this job.',
+    jobsShareReady: 'Ready to share with candidates',
+    jobsEligibilityReason: 'Intake status',
+    jobsEligibility_job_not_accepting: 'Not accepting applications',
+    jobsEligibility_job_paused: 'Paused — not accepting applications',
+    jobsEligibility_job_closed: 'Closed — not accepting applications',
+    jobsEligibility_job_deadline_passed: 'Application deadline has passed',
+    jobsEligibility_job_vacancies_exhausted: 'No remaining vacancies',
+    jobsEligibility_job_visibility_denied: 'Internal only — not available on candidate WhatsApp',
+    jobsEligibility_job_content_incomplete: 'Candidate-facing content is incomplete or unapproved',
+    jobsEligibility_unknown: 'Not available for candidate sharing',
+    jobsApplicationLinkUnavailable: 'Not available for sharing',
+    jobsApplyCodeInternal: 'Internal identity (not for candidate sharing)',
   },
   ar: {
     language: 'English',
@@ -553,6 +566,19 @@ const COPY = {
     jobsAgeDays: '{days} يومًا',
     jobsIntakeOpen: 'يقبل الطلبات',
     jobsIntakeClosed: 'لا يقبل الطلبات',
+    jobsShareUnavailable: 'المشاركة الخارجية غير متاحة لهذه الوظيفة.',
+    jobsShareReady: 'جاهزة للمشاركة مع المرشحين',
+    jobsEligibilityReason: 'حالة قبول الطلبات',
+    jobsEligibility_job_not_accepting: 'لا يقبل الطلبات',
+    jobsEligibility_job_paused: 'متوقفة مؤقتاً — لا تقبل الطلبات',
+    jobsEligibility_job_closed: 'مغلقة — لا تقبل الطلبات',
+    jobsEligibility_job_deadline_passed: 'انتهى موعد التقديم',
+    jobsEligibility_job_vacancies_exhausted: 'لا توجد شواغر متبقية',
+    jobsEligibility_job_visibility_denied: 'داخلية فقط — غير متاحة في واتساب المرشحين',
+    jobsEligibility_job_content_incomplete: 'محتوى المرشح غير مكتمل أو غير معتمد',
+    jobsEligibility_unknown: 'غير متاحة لمشاركة المرشحين',
+    jobsApplicationLinkUnavailable: 'غير متاحة للمشاركة',
+    jobsApplyCodeInternal: 'معرّف داخلي (ليس للمشاركة مع المرشحين)',
   },
 } as const
 
@@ -566,6 +592,32 @@ export function recruitingCopy(locale: RecruitingLocale, key: RecruitingCopyKey,
     }
   }
   return text
+}
+
+/** Backend-authoritative external share gate for Jobs share/QR controls. */
+export function jobIsExternallyShareable(job: {
+  shareable?: boolean | null
+  application_link?: string | null
+  qr_value?: string | null
+  accepts_applications?: boolean | null
+}): boolean {
+  if (typeof job.shareable === 'boolean') return job.shareable
+  return Boolean(job.application_link || job.qr_value) && job.accepts_applications !== false
+}
+
+const ELIGIBILITY_COPY_KEYS = {
+  job_not_accepting: 'jobsEligibility_job_not_accepting',
+  job_paused: 'jobsEligibility_job_paused',
+  job_closed: 'jobsEligibility_job_closed',
+  job_deadline_passed: 'jobsEligibility_job_deadline_passed',
+  job_vacancies_exhausted: 'jobsEligibility_job_vacancies_exhausted',
+  job_visibility_denied: 'jobsEligibility_job_visibility_denied',
+  job_content_incomplete: 'jobsEligibility_job_content_incomplete',
+} as const satisfies Record<string, RecruitingCopyKey>
+
+export function jobEligibilityReasonLabel(locale: RecruitingLocale, reason: string | null | undefined): string {
+  const key = reason ? ELIGIBILITY_COPY_KEYS[reason as keyof typeof ELIGIBILITY_COPY_KEYS] : undefined
+  return recruitingCopy(locale, key || 'jobsEligibility_unknown')
 }
 
 export function canonicalStage(value: string | null | undefined): CanonicalApplicationStage | null {

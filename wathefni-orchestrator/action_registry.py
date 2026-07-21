@@ -2825,16 +2825,20 @@ def _create_job_opening_executor(ctx: ExecutionContext) -> dict[str, Any]:
             "error": exc.code,
             "message": exc.message,
         }
+    share = jobs.assistant_external_share_fields(created)
     return {
         "action_type": "create_job_opening",
         "success": True,
         "status": "completed",
         "message": f"Saved {plan['title']} as a draft. HR must complete and approve the candidate-facing content before publishing.",
         "position": legacy.json_safe(created),
-        "apply_code": plan["apply_code"],
-        "apply_link": None,
-        "qr_image_url": None,
+        "apply_code": share.get("apply_code") or plan["apply_code"],
+        "apply_link": share.get("apply_link"),
+        "qr_image_url": share.get("qr_image_url"),
         "qr_send_result": None,
+        "shareable": share.get("shareable"),
+        "accepts_applications": share.get("accepts_applications"),
+        "eligibility_reason": share.get("eligibility_reason"),
         "authority_source": "positions",
     }
 
@@ -2941,11 +2945,20 @@ def _job_opening_status_executor(ctx: ExecutionContext, *, target_status: str) -
         "paused": "paused (not accepting new applicants)",
         "open": "open to new applicants",
     }.get(target_status, f"set to {target_status}")
+    import prehire_jobs as jobs
+
+    share = jobs.assistant_external_share_fields(row if isinstance(row, dict) else {})
     return {
         **plan,
         "status": "completed",
         "message": f"{row.get('title') or plan['position_code']} is now {verb}.",
         "position": legacy.json_safe(row),
+        "apply_code": share.get("apply_code"),
+        "apply_link": share.get("apply_link"),
+        "qr_image_url": share.get("qr_image_url"),
+        "shareable": share.get("shareable"),
+        "accepts_applications": share.get("accepts_applications"),
+        "eligibility_reason": share.get("eligibility_reason"),
     }
 
 

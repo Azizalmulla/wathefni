@@ -383,11 +383,12 @@ export type PositionSummary = {
   publish_ready?: boolean
   publish_blockers?: string[]
   eligibility_reason?: string | null
+  shareable?: boolean
   job_key?: string
   application_key?: string
   apply_code?: string
-  application_link?: string
-  qr_value?: string
+  application_link?: string | null
+  qr_value?: string | null
   status?: string
   accepts_applications?: boolean
   description?: string

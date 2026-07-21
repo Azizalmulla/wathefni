@@ -508,6 +508,80 @@ def assert_job_accepts_applications(
     return snapshot
 
 
+def job_shareability_snapshot(
+    row: dict[str, Any],
+    *,
+    vacancy: dict[str, Any] | None = None,
+    now: datetime | None = None,
+    tenant_timezone: str | None = None,
+) -> dict[str, Any]:
+    """Canonical external-share authority for dashboard + Assistant surfaces.
+
+    External sharing (wa.me link / QR payload) is allowed only when the job is
+    currently eligible for external intake via exact APPLY token. Internal and
+    otherwise ineligible jobs keep stable APPLY identity but must not expose a
+    usable candidate share surface.
+    """
+    eligibility = job_eligibility_snapshot(
+        row,
+        vacancy=vacancy,
+        access_mode="exact_token",
+        now=now,
+        tenant_timezone=tenant_timezone,
+    )
+    visibility = str(row.get("visibility") or "").strip().lower() or None
+    if not eligibility.get("eligible"):
+        return {
+            "shareable": False,
+            "reason": eligibility.get("reason") or "job_not_accepting",
+            "visibility": visibility,
+            "accepts_applications": False,
+        }
+    return {
+        "shareable": True,
+        "reason": None,
+        "visibility": visibility,
+        "accepts_applications": True,
+    }
+
+
+def assistant_external_share_fields(
+    job: dict[str, Any] | None,
+    *,
+    vacancy: dict[str, Any] | None = None,
+    now: datetime | None = None,
+    tenant_timezone: str | None = None,
+) -> dict[str, Any]:
+    """Assistant-facing share payload. Never invents a candidate link."""
+    row = job if isinstance(job, dict) else {}
+    # Prefer already-serialized shareability when present; otherwise recompute.
+    if "shareable" in row and "accepts_applications" in row:
+        shareable = bool(row.get("shareable"))
+        reason = row.get("eligibility_reason")
+        apply_code = _text(row.get("apply_code")) or None
+    else:
+        share = job_shareability_snapshot(
+            row,
+            vacancy=vacancy,
+            now=now,
+            tenant_timezone=tenant_timezone,
+        )
+        shareable = bool(share.get("shareable"))
+        reason = share.get("reason")
+        apply_code = _text(row.get("apply_code")) or None
+    link = apply_link(apply_code) if shareable and apply_code else None
+    return {
+        "shareable": shareable,
+        "accepts_applications": shareable,
+        "eligibility_reason": None if shareable else reason,
+        "apply_code": apply_code,
+        "application_link": link,
+        "qr_value": link,
+        "apply_link": link,
+        "qr_image_url": None,
+    }
+
+
 def transition_action(from_status: str, to_status: str) -> str | None:
     return TRANSITION_ACTION.get((normalize_status(from_status), normalize_status(to_status)))
 
@@ -596,6 +670,10 @@ def serialize_job(row: dict[str, Any], *, vacancy: dict[str, Any] | None = None,
         description = meta.get("description") or ""
     publish_issues = publish_blockers(row)
     eligibility = job_eligibility_snapshot(row, vacancy=vacancy, access_mode="exact_token")
+    share = job_shareability_snapshot(row, vacancy=vacancy)
+    shareable = bool(share.get("shareable"))
+    # Usable candidate share surfaces are backend-gated. Stable APPLY identity remains.
+    share_link = apply_link(apply_code) if shareable else None
     out = {
         "job_id": str(row.get("job_id") or "") or None,
         "company_code": company,
@@ -638,12 +716,13 @@ def serialize_job(row: dict[str, Any], *, vacancy: dict[str, Any] | None = None,
         "status": status,
         "accepts_applications": bool(eligibility.get("eligible")),
         "eligibility_reason": eligibility.get("reason"),
+        "shareable": shareable,
         "publish_ready": not publish_issues,
         "publish_blockers": publish_issues,
         "apply_code": apply_code,
         "application_key": apply_code,
-        "application_link": apply_link(apply_code),
-        "qr_value": apply_link(apply_code),
+        "application_link": share_link,
+        "qr_value": share_link,
         "application_count": int(row.get("application_count") or 0),
         "active_count": int(row.get("active_count") or 0),
         "created_at": _iso(row.get("created_at")),

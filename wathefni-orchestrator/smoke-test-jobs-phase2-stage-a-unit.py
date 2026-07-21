@@ -110,6 +110,87 @@ class JobsPhase2StageAUnitTests(unittest.TestCase):
             "job_deadline_passed",
         )
 
+    def test_share_surfaces_follow_backend_shareability(self) -> None:
+        vacancy = {"remaining_vacancies": 1}
+        public = jobs.serialize_job(self.row(visibility="public"), vacancy=vacancy, include_salary=False)
+        self.assertTrue(public["shareable"])
+        self.assertTrue(public["accepts_applications"])
+        self.assertTrue(str(public["application_link"] or "").startswith("https://wa.me/"))
+        self.assertEqual(public["qr_value"], public["application_link"])
+
+        share_only = jobs.serialize_job(self.row(visibility="share_only"), vacancy=vacancy, include_salary=False)
+        self.assertTrue(share_only["shareable"])
+        self.assertTrue(str(share_only["application_link"] or "").startswith("https://wa.me/"))
+
+        internal = jobs.serialize_job(self.row(visibility="internal"), vacancy=vacancy, include_salary=False)
+        self.assertFalse(internal["shareable"])
+        self.assertFalse(internal["accepts_applications"])
+        self.assertEqual(internal["eligibility_reason"], "job_visibility_denied")
+        self.assertIsNone(internal["application_link"])
+        self.assertIsNone(internal["qr_value"])
+        self.assertEqual(internal["apply_code"], "APPLY-WATHEFNI-IT-MANAGER")
+
+        for status, reason in (
+            ("draft", "job_not_accepting"),
+            ("paused", "job_paused"),
+            ("closed", "job_closed"),
+        ):
+            blocked = jobs.serialize_job(self.row(status=status), vacancy=vacancy, include_salary=False)
+            self.assertFalse(blocked["shareable"], status)
+            self.assertIsNone(blocked["application_link"], status)
+            self.assertEqual(blocked["eligibility_reason"], reason, status)
+
+        expired_share = jobs.job_shareability_snapshot(
+            self.row(application_deadline="2026-07-20"),
+            vacancy=vacancy,
+            now=datetime(2026, 7, 21, 21, 1, tzinfo=timezone.utc),
+        )
+        self.assertFalse(expired_share["shareable"])
+        self.assertEqual(expired_share["reason"], "job_deadline_passed")
+        expired_fields = jobs.assistant_external_share_fields(
+            self.row(application_deadline="2026-07-20"),
+            vacancy=vacancy,
+            now=datetime(2026, 7, 21, 21, 1, tzinfo=timezone.utc),
+        )
+        self.assertIsNone(expired_fields["application_link"])
+
+        full = jobs.serialize_job(self.row(), vacancy={"remaining_vacancies": 0}, include_salary=False)
+        self.assertFalse(full["shareable"])
+        self.assertEqual(full["eligibility_reason"], "job_vacancies_exhausted")
+        self.assertIsNone(full["application_link"])
+
+        incomplete = jobs.serialize_job(
+            self.row(content_approved_en_at=None, short_summary_en=""),
+            vacancy=vacancy,
+            include_salary=False,
+        )
+        self.assertFalse(incomplete["shareable"])
+        self.assertEqual(incomplete["eligibility_reason"], "job_content_incomplete")
+        self.assertIsNone(incomplete["qr_value"])
+
+    def test_assistant_cannot_share_blocked_cases(self) -> None:
+        vacancy = {"remaining_vacancies": 1}
+        for overrides in (
+            {"visibility": "internal"},
+            {"status": "draft"},
+            {"status": "paused"},
+            {"status": "closed"},
+            {"application_deadline": "2020-01-01"},
+        ):
+            row = self.row(**overrides)
+            share = jobs.assistant_external_share_fields(row, vacancy=vacancy)
+            self.assertFalse(share["shareable"], overrides)
+            self.assertIsNone(share["apply_link"], overrides)
+            self.assertIsNone(share["application_link"], overrides)
+            self.assertIsNone(share["qr_value"], overrides)
+            self.assertIsNone(share["qr_image_url"], overrides)
+            # Stable APPLY identity may remain for internal inspection.
+            self.assertEqual(share["apply_code"], "APPLY-WATHEFNI-IT-MANAGER")
+
+        open_share = jobs.assistant_external_share_fields(self.row(), vacancy=vacancy)
+        self.assertTrue(open_share["shareable"])
+        self.assertTrue(str(open_share["apply_link"] or "").startswith("https://wa.me/"))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

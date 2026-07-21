@@ -108,6 +108,8 @@ import {
   communicationLabel,
   facetStatusLabel,
   intakeSourceLabel,
+  jobEligibilityReasonLabel,
+  jobIsExternallyShareable,
   recruitingCopy,
   workflowItemLabel,
   type RecruitingLocale,
@@ -657,6 +659,10 @@ function App() {
   useEffect(() => {
     let cancelled = false
     async function renderQr() {
+      if (!jobIsExternallyShareable(selectedJob || {})) {
+        setJobQrDataUrl('')
+        return
+      }
       const value = selectedJob?.qr_value || selectedJob?.application_link || ''
       if (!value) {
         setJobQrDataUrl('')
@@ -3673,6 +3679,7 @@ function JobDrawer({
   const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
   const status = normalizedJobStatus(job)
   const title = jobDisplayTitle(job, locale)
+  const shareable = jobIsExternallyShareable(job)
   return (
     <div className="fixed inset-0 z-30 bg-ink/30" onClick={onClose}>
       <aside
@@ -3727,7 +3734,18 @@ function JobDrawer({
           <Info label={t('jobsFieldRecruiter')} value={job.recruiter_user_id || '—'} />
           <Info label={t('jobsFieldDeadline')} value={job.application_deadline ? formatDateTime(job.application_deadline) : '—'} />
           <Info label={t('jobsColAge')} value={jobAgeDays(job) != null ? t('jobsAgeDays', { days: jobAgeDays(job)! }) : '—'} />
-          <Info label={job.accepts_applications ? t('jobsIntakeOpen') : t('jobsIntakeClosed')} value={job.apply_code || '—'} />
+          <Info
+            label={job.accepts_applications ? t('jobsIntakeOpen') : t('jobsIntakeClosed')}
+            value={shareable ? (job.apply_code || '—') : (job.apply_code ? t('jobsApplyCodeInternal') : '—')}
+          />
+          {!shareable ? (
+            <Info
+              label={t('jobsEligibilityReason')}
+              value={jobEligibilityReasonLabel(locale, job.eligibility_reason)}
+            />
+          ) : (
+            <Info label={t('jobsEligibilityReason')} value={t('jobsShareReady')} />
+          )}
           {job.salary_visibility !== 'public' && (job.salary_min != null || job.salary_max != null) ? (
             <Info
               label={t('jobsFieldSalaryMin')}
@@ -3740,26 +3758,40 @@ function JobDrawer({
           <summary className="cursor-pointer text-sm font-semibold text-text">Sharing details</summary>
           <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
             <Info label="Application code" value={job.apply_code || 'Not generated yet'} />
-            <Info label="Application link" value={job.application_link || 'Not generated yet'} />
+            <Info
+              label="Application link"
+              value={shareable && job.application_link ? job.application_link : t('jobsApplicationLinkUnavailable')}
+            />
           </div>
+          {!shareable ? <p className="mt-3 text-sm text-subtle">{t('jobsShareUnavailable')}</p> : null}
         </details>
 
         <section className="mt-6 grid gap-6 xl:grid-cols-[260px_1fr]">
           <div className="rounded-lg border border-line bg-panel-muted/60 p-4">
             <div className="text-sm font-semibold">QR code</div>
-            {qrDataUrl ? (
+            {shareable && qrDataUrl ? (
               <img alt={`QR code for ${title}`} className="mt-4 rounded-lg border border-line bg-white p-3" src={qrDataUrl} />
             ) : (
-              <EmptyState text="QR link is not available for this job yet." />
+              <EmptyState text={shareable ? 'QR link is not available for this job yet.' : t('jobsShareUnavailable')} />
             )}
             <div className="mt-4 grid gap-2">
-              <Button disabled={!job.apply_code} onClick={() => onCopy(job.apply_code, 'Application code')} size="sm" variant="secondary">
+              <Button
+                disabled={!shareable || !job.apply_code}
+                onClick={() => onCopy(job.apply_code, 'Application code')}
+                size="sm"
+                variant="secondary"
+              >
                 <Copy size={14} /> Copy code
               </Button>
-              <Button disabled={!job.application_link} onClick={() => onCopy(job.application_link, 'Application link')} size="sm" variant="secondary">
+              <Button
+                disabled={!shareable || !job.application_link}
+                onClick={() => onCopy(job.application_link || undefined, 'Application link')}
+                size="sm"
+                variant="secondary"
+              >
                 <Copy size={14} /> Copy link
               </Button>
-              <Button disabled={!qrDataUrl} onClick={onDownloadQr} size="sm" variant="secondary">
+              <Button disabled={!shareable || !qrDataUrl} onClick={onDownloadQr} size="sm" variant="secondary">
                 <Download size={14} /> Download QR
               </Button>
             </div>
@@ -3819,7 +3851,11 @@ function JobDrawer({
           <Button onClick={onViewCandidates} variant="secondary">
             View candidates
           </Button>
-          <Button disabled={!job.application_link} onClick={() => onCopy(job.application_link, 'Application link')} variant="secondary">
+          <Button
+            disabled={!shareable || !job.application_link}
+            onClick={() => onCopy(job.application_link || undefined, 'Application link')}
+            variant="secondary"
+          >
             <ExternalLink size={16} /> Copy link
           </Button>
         </section>
