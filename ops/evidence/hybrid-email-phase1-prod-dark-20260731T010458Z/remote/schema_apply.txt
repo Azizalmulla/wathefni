@@ -1,0 +1,4 @@
+tables= ['company_email_domains', 'company_email_settings', 'company_operational_mailboxes']
+delivery_cols= ['provider', 'provider_accept_status', 'purpose', 'sender_mode', 'visible_from', 'visible_reply_to']
+emergency_fallback_col= True
+SCHEMA_ADDITIVE_OK

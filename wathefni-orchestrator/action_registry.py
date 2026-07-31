@@ -2015,10 +2015,10 @@ def _execute_mixed_candidate_batch_executor(ctx: ExecutionContext) -> dict[str, 
 
 
 def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
-    """Dedicated executor that parses natural-language datetimes ('tomorrow at 9pm').
+    """Schedule via canonical interview_service (Google Meet or Microsoft Teams).
 
-    The legacy schedule_interview helper uses parse_interview_time, which is ISO-only.
-    This executor uses parse_meeting_time, which falls back from ISO to natural language.
+    Replaces the legacy direct gog calendar path. Wathefni interview record is
+    source of truth; provider sync is optional and never invents success.
     """
 
     legacy = ctx.legacy
@@ -2032,6 +2032,7 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
             ctx.action.get("interview_time"),
             ctx.action.get("when"),
             ctx.action.get("datetime"),
+            ctx.action.get("datetime_text"),
             ctx.action.get("message"),
             ctx.action.get("message_text"),
         )
@@ -2049,7 +2050,23 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
     contact = legacy.candidate_contact(app) or {}
     email = contact.get("email")
     name = contact.get("name") or _candidate_name(app, ctx.action)
-    if not email:
+    meeting_type = str(ctx.action.get("meeting_type") or "").strip() or "google_meet"
+    try:
+        import interview_microsoft_calendar as mcal
+        import interview_lifecycle as life
+
+        if life.normalize_meeting_type(meeting_type) == "microsoft_teams" and not mcal.microsoft_env_configured():
+            return {
+                "action_type": "schedule_interview",
+                "success": False,
+                "status": "failed",
+                "error": "microsoft_not_configured",
+                "message": "Microsoft Teams is not configured for this company yet.",
+                "application": legacy.json_safe(app),
+            }
+    except Exception:
+        pass
+    if meeting_type in {"google_meet", "google", "meet"} and not email:
         return {
             "action_type": "schedule_interview",
             "success": False,
@@ -2061,153 +2078,77 @@ def _schedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
     meta = getattr(ctx.request, "metadata", {}) or {}
     if not isinstance(meta, dict):
         meta = {}
-    if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-        import recruiting_lifecycle as _lifecycle
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
 
-        confirmation_payload = (
-            ctx.action.get("confirmation_payload")
-            if isinstance(ctx.action.get("confirmation_payload"), dict)
-            else {}
-        )
-        precheck = _lifecycle.validate_candidate_action_confirmation(
-            legacy,
+    try:
+        scheduled = _interview_service.schedule_interview(
             company_code=str(app.get("company_code") or ""),
             app_key=str(app.get("app_key") or ""),
-            action="schedule_interview",
-            confirmation_id=str(ctx.action.get("confirmation_id") or ""),
-            confirmation_token=str(ctx.action.get("confirmation_token") or ""),
-            target_payload=confirmation_payload,
-            actor_user_id=str(
-                ctx.action.get("actor_user_id")
-                or meta.get("actor_user_id")
-                or ""
-            )
-            or None,
-            actor_phone=getattr(ctx.request, "sender_phone", None),
+            start=start,
+            end=end,
+            meeting_type=meeting_type,
+            location=ctx.action.get("location"),
+            meet_link=ctx.action.get("meet_link") or ctx.action.get("meeting_link"),
+            idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
+            actor={
+                "actor_user_id": str(ctx.action.get("actor_user_id") or meta.get("actor_user_id") or "") or None,
+                "actor_phone": getattr(ctx.request, "sender_phone", None),
+                "actor_role": str(meta.get("actor_role") or "") or None,
+                "actor_type": "human",
+            },
+            source="assistant_schedule",
+            sync_external=True,
+            move_application_stage=True,
+            confirmation={
+                "human_confirmed": bool(ctx.action.get("human_confirmed", False)),
+                "channel": "web" if meta.get("dashboard") else "whatsapp",
+                "permissions": meta.get("permissions") or [],
+                "confirmation_id": ctx.action.get("confirmation_id"),
+                "confirmation_token": ctx.action.get("confirmation_token"),
+                "confirmation_payload": ctx.action.get("confirmation_payload")
+                if isinstance(ctx.action.get("confirmation_payload"), dict)
+                else {},
+                "idempotency_key": ctx.action.get("idempotency_key"),
+                "expected_version": ctx.action.get("expected_version"),
+            },
+            permissions=meta.get("permissions") or [],
         )
-        if not bool(ctx.action.get("human_confirmed", False)) or not precheck.get("ok"):
-            return {
-                "action_type": "schedule_interview",
-                "success": False,
-                "status": "failed",
-                "message": f"I could not schedule the interview with {name}.",
-                "error": (
-                    precheck.get("error")
-                    if not precheck.get("ok")
-                    else "confirmation_required"
-                ),
-                "application": legacy.json_safe(app),
-            }
-    summary = f"Wathefni interview with {name}"
-    account = legacy.openclaw_env().get("GOG_ACCOUNT", "") if hasattr(legacy, "openclaw_env") else ""
-    args = [
-        "calendar",
-        "create",
-        "primary",
-        "--summary",
-        summary,
-        "--from",
-        start,
-        "--to",
-        end,
-        "--attendees",
-        email,
-        "--send-updates",
-        "all",
-        "--with-meet",
-        "--no-input",
-    ]
-    if account:
-        args.extend(["--account", account])
-    cal_result = legacy.run_gog(args, timeout=60)
-    ok = bool(cal_result.get("ok") if isinstance(cal_result, dict) else False)
-    interview = None
-    if ok and hasattr(legacy, "create_candidate_interview_from_schedule"):
-        interview = legacy.create_candidate_interview_from_schedule(
-            app,
-            {"result": legacy.json_safe(cal_result), "start": start, "end": end, "summary": summary},
-            created_by_phone=getattr(ctx.request, "sender_phone", None),
-            source="schedule_interview",
-        )
-        # Canonical lifecycle: scheduling moves the application into `interview`.
-        if hasattr(legacy, "canonical_lifecycle_enabled") and legacy.canonical_lifecycle_enabled():
-            permissions = meta.get("permissions") if isinstance(meta, dict) else []
-            stage_update = legacy.update_application_status(
-                app,
-                "interview",
-                trigger="schedule_interview",
-                human_confirmed=bool(ctx.action.get("human_confirmed", False)),
-                actor_type="human",
-                actor_user_id=str(ctx.action.get("actor_user_id") or (meta.get("actor_user_id") if isinstance(meta, dict) else "") or "") or None,
-                actor_phone=getattr(ctx.request, "sender_phone", None),
-                channel="whatsapp" if not (isinstance(meta, dict) and meta.get("dashboard")) else "web",
-                permissions=set(permissions),
-                expected_from_stage=str(ctx.action.get("expected_from_stage") or "") or None,
-                expected_version=ctx.action.get("expected_version"),
-                confirmation_id=str(ctx.action.get("confirmation_id") or "") or None,
-                confirmation_token=str(ctx.action.get("confirmation_token") or "") or None,
-                confirmation_action="schedule_interview",
-                confirmation_payload=(
-                    ctx.action.get("confirmation_payload")
-                    if isinstance(ctx.action.get("confirmation_payload"), dict)
-                    else {}
-                ),
-                idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
-                metadata=(
-                    ctx.action.get("confirmation_payload")
-                    if isinstance(ctx.action.get("confirmation_payload"), dict)
-                    else {}
-                ),
-            )
-            if isinstance(interview, dict):
-                interview = {**interview, "application_stage_update": legacy.json_safe(stage_update)}
-            stage_ok = bool(stage_update.get("ok"))
-            if not stage_ok:
-                return {
-                    "action_type": "schedule_interview",
-                    "success": False,
-                    "status": "failed",
-                    "message": f"Interview invite was created, but I could not move {name} to the interview stage.",
-                    "error": stage_update.get("error"),
-                    "result": legacy.json_safe(cal_result),
-                    "interview": legacy.json_safe(interview),
-                    "update": legacy.json_safe(stage_update),
-                }
-    google_meet_link = None
-    calendar_event_id = None
-    if hasattr(legacy, "interview_meet_link_from_calendar"):
-        google_meet_link = legacy.interview_meet_link_from_calendar({"result": legacy.json_safe(cal_result)}) or legacy.interview_meet_link_from_calendar(legacy.json_safe(cal_result))
-    if hasattr(legacy, "interview_calendar_event_id"):
-        calendar_event_id = legacy.interview_calendar_event_id(legacy.json_safe(cal_result))
+    except _il.InterviewAuthorityError as exc:
+        return {
+            "action_type": "schedule_interview",
+            "success": False,
+            "status": "failed" if getattr(exc, "error", "") != "confirmation_required" else "failed",
+            "error": getattr(exc, "error", None) or "schedule_failed",
+            "message": getattr(exc, "message", None) or str(exc),
+            "application": legacy.json_safe(app),
+        }
+    interview = scheduled.get("interview") if isinstance(scheduled, dict) else None
+    meet_link = None
     if isinstance(interview, dict):
-        google_meet_link = google_meet_link or interview.get("meet_link")
-        calendar_event_id = calendar_event_id or interview.get("calendar_event_id")
-    calendar_invite_sent = bool(ok and email and calendar_event_id)
-    sent_body = (
-        f"Google Calendar invite sent to {email}. Google Meet: {google_meet_link}"
-        if google_meet_link
-        else f"Google Calendar invite sent to {email}. The calendar invite contains the joining details."
-    )
+        meet_link = interview.get("meet_link")
+    provider_sync = scheduled.get("provider_sync") if isinstance(scheduled, dict) else {}
+    sync_ok = bool((provider_sync or {}).get("ok")) if isinstance(provider_sync, dict) else bool(provider_sync)
     return {
         "action_type": "schedule_interview",
-        "success": ok,
-        "status": "completed" if ok else "failed",
-        "message": f"Interview with {name} scheduled for {start}." if ok else f"I could not schedule the interview with {name}.",
-        "result": legacy.json_safe(cal_result),
+        "success": True,
+        "status": "completed",
+        "message": f"Interview with {name} scheduled for {start}.",
         "interview": legacy.json_safe(interview),
         "interview_created": bool(interview),
-        "calendar_event_created": bool(ok and calendar_event_id),
-        "google_meet_link": google_meet_link,
-        "calendar_invite_sent": calendar_invite_sent,
-        "candidate_invited": calendar_invite_sent,
-        "candidate_notified": calendar_invite_sent,
-        "notification_channel": "calendar_email" if calendar_invite_sent else None,
-        "sent_subject": summary if calendar_invite_sent else None,
-        "sent_body": sent_body if calendar_invite_sent else None,
+        "calendar_event_created": sync_ok or bool(isinstance(interview, dict) and interview.get("calendar_event_id")),
+        "google_meet_link": meet_link if meeting_type in {"google_meet", "google", "meet"} else None,
+        "teams_meet_link": meet_link if "team" in meeting_type.lower() or meeting_type == "microsoft_teams" else None,
+        "meet_link": meet_link,
+        "calendar_invite_sent": bool(isinstance(interview, dict) and interview.get("calendar_invite_sent")),
+        "candidate_invited": bool(isinstance(interview, dict) and interview.get("candidate_invited")),
+        "candidate_notified": bool(isinstance(interview, dict) and (interview.get("candidate_invited") or interview.get("candidate_notified"))),
+        "notification_channel": (interview or {}).get("notification_channel") if isinstance(interview, dict) else None,
+        "provider_sync": legacy.json_safe(provider_sync),
+        "idempotent_replay": bool(scheduled.get("idempotent_replay")),
         "application": legacy.json_safe(app),
         "start": start,
         "end": end,
-        "summary": summary,
     }
 
 
@@ -2229,6 +2170,7 @@ def _send_interview_invite_executor(ctx: ExecutionContext) -> dict[str, Any]:
         account_id=getattr(ctx.request, "account_id", None),
         interview_id=ctx.action.get("interview_id"),
         preferred_channel=preferred,
+        explicit=True,
     )
     ok = bool(result.get("ok") if isinstance(result, dict) else False)
     name = _candidate_name(app, ctx.action)
@@ -3438,6 +3380,21 @@ def _candidate_workflow_plan(ctx: ExecutionContext) -> dict[str, Any]:
                 "expected_result": f"{name} will receive the candidate-facing message after the workflow steps are ready.",
             }
             preview["confirmation_text"] = _format_confirmation_text(preview)
+    workflow_card = {
+        "kind": "workflow_preview",
+        "title": f"Workflow for {name}",
+        "status": "ready" if not missing_fields and not blocked_steps else "needs_clarification",
+        "steps": [{"step": step, "status": "planned"} for step in steps],
+        "channels": {
+            "invite_channel": invite_channel,
+            "meeting_type": ctx.action.get("meeting_type") or ("google_meet" if wants_schedule else None),
+            "fallback_channel": ctx.action.get("fallback_channel") or ("whatsapp" if blocked_steps else None),
+        },
+        "people": [{"name": name, "app_key": app.get("app_key")}],
+        "missing_fields": missing_fields,
+        "blocked_steps": blocked_steps,
+        "datetime_text": datetime_text or None,
+    }
     return {
         "action_type": "execute_candidate_workflow",
         "success": not missing_fields and not blocked_steps,
@@ -3457,6 +3414,7 @@ def _candidate_workflow_plan(ctx: ExecutionContext) -> dict[str, Any]:
         "missing_fields": missing_fields,
         "blocked_steps": blocked_steps,
         "fallback_channel": ctx.action.get("fallback_channel") or ("whatsapp" if blocked_steps else None),
+        "workflow_card": workflow_card,
         "instruction": (
             "Ask one targeted question. If datetime_text is missing, ask for the meeting time. "
             "If candidate_email_missing, tell the user the candidate has no email and ask whether to WhatsApp instead. "
@@ -3489,6 +3447,7 @@ def _execute_candidate_workflow_executor(ctx: ExecutionContext) -> dict[str, Any
     success = True
 
     def run_atomic(step: str, overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+        step_key = str(ctx.action.get("idempotency_key") or "").strip() or f"workflow:{app.get('app_key')}:{step}"
         action = {
             **ctx.action,
             **(overrides or {}),
@@ -3497,6 +3456,7 @@ def _execute_candidate_workflow_executor(ctx: ExecutionContext) -> dict[str, Any
             "subject_key": app.get("app_key"),
             "subject_type": "candidate",
             "subject_name": name,
+            "idempotency_key": f"{step_key}:{step}",
         }
         atomic_ctx = ExecutionContext(
             request=ctx.request,
@@ -3555,6 +3515,39 @@ def _execute_candidate_workflow_executor(ctx: ExecutionContext) -> dict[str, Any
 
     completed_steps = [item["step"] for item in results if (item.get("result") or {}).get("status") == "completed"]
     failed_steps = [item for item in results if (item.get("result") or {}).get("status") != "completed"]
+    idempotency_key = str(ctx.action.get("idempotency_key") or "").strip() or f"workflow:{app.get('app_key')}:{'-'.join(steps)}:{plan.get('datetime_text') or ''}"
+    compensation_state = {
+        "strategy": "stop_on_failure_no_auto_rollback",
+        "note": "Completed steps remain; failed step can be safely retried with the same idempotency key after fixing the cause.",
+        "retry_step": (failed_steps[0].get("step") if failed_steps else None),
+        "completed_steps": completed_steps,
+    }
+    workflow_card = {
+        "kind": "workflow_result" if success or failed_steps else "workflow_preview",
+        "title": f"Workflow for {name}",
+        "status": "completed" if success else "partial",
+        "steps": [
+            {
+                "step": item.get("step"),
+                "status": (item.get("result") or {}).get("status"),
+                "success": (item.get("result") or {}).get("success"),
+                "message": (item.get("result") or {}).get("message") or (item.get("result") or {}).get("error"),
+            }
+            for item in results
+        ],
+        "channels": {
+            "invite_channel": plan.get("invite_channel"),
+            "meeting_type": plan.get("meeting_type"),
+        },
+        "people": [{"name": name, "app_key": app.get("app_key")}],
+        "idempotency_key": idempotency_key,
+        "compensation_state": compensation_state,
+        "retry_prompt": (
+            f"Retry the failed step ({compensation_state['retry_step']}) for {name}"
+            if compensation_state.get("retry_step")
+            else None
+        ),
+    }
     return {
         "action_type": "execute_candidate_workflow",
         "success": success,
@@ -3562,7 +3555,7 @@ def _execute_candidate_workflow_executor(ctx: ExecutionContext) -> dict[str, Any
         "message": (
             f"Workflow completed for {name}."
             if success
-            else f"I completed {len(completed_steps)} step(s) for {name}, but one step needs attention."
+            else f"I completed {len(completed_steps)} step(s) for {name}, but one step needs attention. I am not claiming the whole workflow succeeded."
         ),
         "candidate": plan.get("candidate"),
         "application": legacy.json_safe(app),
@@ -3571,6 +3564,9 @@ def _execute_candidate_workflow_executor(ctx: ExecutionContext) -> dict[str, Any
         "step_results": results,
         "completed_steps": completed_steps,
         "failed_steps": failed_steps,
+        "idempotency_key": idempotency_key,
+        "compensation_state": compensation_state,
+        "workflow_card": workflow_card,
         **_workflow_interview_fields(artifacts),
     }
 
@@ -3967,14 +3963,15 @@ register(
             "message_text",
             "purpose",
             "reason",
+            "idempotency_key",
         ),
         module="pre_hiring",
         requires_confirmation=True,
         preflight=_candidate_workflow_preflight,
         executor=_execute_candidate_workflow_executor,
-        result_keys=("action_type", "success", "status", "message", "plan", "step_results", "completed_steps", "failed_steps", "interview_created", "calendar_event_created", "google_meet_link", "public_link", "candidate_invited", "candidate_notified", "notification_channel"),
+        result_keys=("action_type", "success", "status", "message", "plan", "step_results", "completed_steps", "failed_steps", "workflow_card", "idempotency_key", "compensation_state", "interview_created", "calendar_event_created", "google_meet_link", "public_link", "candidate_invited", "candidate_notified", "notification_channel"),
         sensitive=True,
-        notes="Workflow-level sensitive tool. One confirmation covers the validated plan; executor composes atomic registry actions internally.",
+        notes="Workflow-level sensitive tool. One confirmation covers the validated plan; executor composes atomic registry actions internally with per-step results and stop-on-failure compensation.",
     )
 )
 
@@ -4192,16 +4189,269 @@ register(
 register(
     ActionSpec(
         name="schedule_interview",
-        description="Create the canonical interview record and Google Calendar interview event with Google Meet for a candidate. The candidate is added as an attendee and receives the official Calendar invite. Accepts natural-language times like 'tomorrow at 4pm' as well as ISO timestamps. Sensitive: requires confirmation.",
+        description=(
+            "Create the canonical Wathefni interview record and sync an external calendar event "
+            "(Google Meet or Microsoft Teams when configured). "
+            "Accepts natural-language times like 'tomorrow at 4pm'. Sensitive: requires confirmation. "
+            "Uses interview_service — never a parallel gog-only path."
+        ),
         entity_type="candidate",
         required_fields=("app_key",),
-        optional_fields=("interview_time", "when", "datetime", "message_text"),
+        optional_fields=(
+            "interview_time",
+            "when",
+            "datetime",
+            "datetime_text",
+            "message_text",
+            "meeting_type",
+            "location",
+            "meet_link",
+            "meeting_link",
+            "idempotency_key",
+        ),
         module="pre_hiring",
         requires_confirmation=True,
         executor=_schedule_interview_executor,
-        result_keys=("action_type", "success", "status", "message", "result", "application", "start", "end", "interview_created", "calendar_event_created", "google_meet_link", "candidate_invited", "candidate_notified"),
+        result_keys=(
+            "action_type",
+            "success",
+            "status",
+            "message",
+            "application",
+            "start",
+            "end",
+            "interview",
+            "interview_created",
+            "calendar_event_created",
+            "google_meet_link",
+            "teams_meet_link",
+            "meet_link",
+            "candidate_invited",
+            "candidate_notified",
+            "provider_sync",
+            "idempotent_replay",
+        ),
         sensitive=True,
-        notes="Uses parse_meeting_time, which falls back from ISO to natural-language parsing (today/tomorrow/Xpm).",
+        notes="Canonical interview_service authority for schedule/reschedule/cancel.",
+    )
+)
+
+
+def _active_interview_id_for_app(legacy: Any, app: dict[str, Any], interview_id: str | None = None) -> str:
+    if interview_id:
+        return str(interview_id).strip()
+    existing = _scheduled_interview_for_current_app(legacy, app)
+    if existing and existing.get("interview_id"):
+        return str(existing.get("interview_id"))
+    try:
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT interview_id FROM candidate_interviews
+                    WHERE company_code=%s AND app_key=%s
+                      AND lower(COALESCE(status,'')) IN ('scheduled','rescheduled')
+                      AND lower(COALESCE(interview_type,'live')) <> 'async_video'
+                    ORDER BY updated_at DESC LIMIT 1
+                    """,
+                    (str(app.get("company_code") or "").upper(), str(app.get("app_key") or "")),
+                )
+                row = cur.fetchone() or {}
+                return str(row.get("interview_id") or "")
+    except Exception:
+        return ""
+
+
+def _cancel_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    app = _resolve_app(ctx)
+    if not app:
+        return _candidate_not_found_result("cancel_interview", "cancel")
+    interview_id = _active_interview_id_for_app(legacy, app, str(ctx.action.get("interview_id") or "") or None)
+    if not interview_id:
+        return {
+            "action_type": "cancel_interview",
+            "success": False,
+            "status": "failed",
+            "error": "interview_not_found",
+            "message": "No active interview found to cancel.",
+            "application": legacy.json_safe(app),
+        }
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    meta = getattr(ctx.request, "metadata", {}) or {}
+    if not isinstance(meta, dict):
+        meta = {}
+    try:
+        result = _interview_service.cancel_interview(
+            company_code=str(app.get("company_code") or ""),
+            interview_id=interview_id,
+            idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
+            actor={
+                "actor_user_id": str(ctx.action.get("actor_user_id") or meta.get("actor_user_id") or "") or None,
+                "actor_phone": getattr(ctx.request, "sender_phone", None),
+                "actor_role": str(meta.get("actor_role") or "") or None,
+                "actor_type": "human",
+            },
+            sync_external=True,
+            revert_application_stage=True,
+            permissions=meta.get("permissions") or [],
+        )
+    except _il.InterviewAuthorityError as exc:
+        return {
+            "action_type": "cancel_interview",
+            "success": False,
+            "status": "failed",
+            "error": getattr(exc, "error", None) or "cancel_failed",
+            "message": getattr(exc, "message", None) or str(exc),
+            "application": legacy.json_safe(app),
+        }
+    return {
+        "action_type": "cancel_interview",
+        "success": True,
+        "status": "completed",
+        "message": "Interview cancelled.",
+        "interview": legacy.json_safe(result.get("interview")),
+        "provider_sync": legacy.json_safe(result.get("provider_sync")),
+        "idempotent_replay": bool(result.get("idempotent_replay")),
+        "application": legacy.json_safe(app),
+    }
+
+
+def _reschedule_interview_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    app = _resolve_app(ctx)
+    if not app:
+        return _candidate_not_found_result("reschedule_interview", "reschedule")
+    interview_id = _active_interview_id_for_app(legacy, app, str(ctx.action.get("interview_id") or "") or None)
+    if not interview_id:
+        return {
+            "action_type": "reschedule_interview",
+            "success": False,
+            "status": "failed",
+            "error": "interview_not_found",
+            "message": "No active interview found to reschedule.",
+            "application": legacy.json_safe(app),
+        }
+    text = " ".join(
+        str(value or "")
+        for value in (
+            ctx.action.get("prompt_text"),
+            ctx.action.get("interview_time"),
+            ctx.action.get("when"),
+            ctx.action.get("datetime"),
+            ctx.action.get("datetime_text"),
+            ctx.action.get("message_text"),
+        )
+    ).strip()
+    start, end = legacy.parse_meeting_time(text)
+    if not start or not end:
+        return {
+            "action_type": "reschedule_interview",
+            "success": False,
+            "status": "needs_clarification",
+            "needs_clarification": True,
+            "missing_required_fields": ["interview_time"],
+            "message": "I need the new date and time — for example, 'Thursday at 3pm'.",
+            "application": legacy.json_safe(app),
+        }
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    meta = getattr(ctx.request, "metadata", {}) or {}
+    if not isinstance(meta, dict):
+        meta = {}
+    try:
+        result = _interview_service.reschedule_interview(
+            company_code=str(app.get("company_code") or ""),
+            interview_id=interview_id,
+            start=start,
+            end=end,
+            meeting_type=ctx.action.get("meeting_type"),
+            location=ctx.action.get("location"),
+            meet_link=ctx.action.get("meet_link") or ctx.action.get("meeting_link"),
+            idempotency_key=str(ctx.action.get("idempotency_key") or "") or None,
+            actor={
+                "actor_user_id": str(ctx.action.get("actor_user_id") or meta.get("actor_user_id") or "") or None,
+                "actor_phone": getattr(ctx.request, "sender_phone", None),
+                "actor_role": str(meta.get("actor_role") or "") or None,
+                "actor_type": "human",
+            },
+            sync_external=True,
+            permissions=meta.get("permissions") or [],
+        )
+    except _il.InterviewAuthorityError as exc:
+        return {
+            "action_type": "reschedule_interview",
+            "success": False,
+            "status": "failed",
+            "error": getattr(exc, "error", None) or "reschedule_failed",
+            "message": getattr(exc, "message", None) or str(exc),
+            "application": legacy.json_safe(app),
+        }
+    return {
+        "action_type": "reschedule_interview",
+        "success": True,
+        "status": "completed",
+        "message": "Interview rescheduled.",
+        "interview": legacy.json_safe(result.get("interview")),
+        "provider_sync": legacy.json_safe(result.get("provider_sync")),
+        "idempotent_replay": bool(result.get("idempotent_replay")),
+        "application": legacy.json_safe(app),
+        "start": start,
+        "end": end,
+    }
+
+
+register(
+    ActionSpec(
+        name="cancel_interview",
+        description=(
+            "Cancel the active Wathefni interview for a candidate using the same cancel authority as the dashboard. "
+            "Optionally syncs calendar cancellation when Google is connected. Requires interview.manage and confirmation. Idempotent."
+        ),
+        entity_type="candidate",
+        required_fields=("app_key",),
+        optional_fields=("interview_id", "idempotency_key"),
+        module="pre_hiring",
+        requires_confirmation=True,
+        executor=_cancel_interview_executor,
+        result_keys=("action_type", "success", "status", "message", "interview", "provider_sync", "idempotent_replay", "application"),
+        sensitive=True,
+        notes="Reuses interview_service.cancel_interview.",
+    )
+)
+
+
+register(
+    ActionSpec(
+        name="reschedule_interview",
+        description=(
+            "Reschedule the active Wathefni interview for a candidate to a new date/time using the same authority as the dashboard. "
+            "Updates the same external calendar event when connected. Requires interview.manage and confirmation."
+        ),
+        entity_type="candidate",
+        required_fields=("app_key",),
+        optional_fields=(
+            "interview_id",
+            "interview_time",
+            "when",
+            "datetime",
+            "datetime_text",
+            "message_text",
+            "meeting_type",
+            "location",
+            "meet_link",
+            "meeting_link",
+            "idempotency_key",
+        ),
+        module="pre_hiring",
+        requires_confirmation=True,
+        executor=_reschedule_interview_executor,
+        result_keys=("action_type", "success", "status", "message", "interview", "provider_sync", "idempotent_replay", "application", "start", "end"),
+        sensitive=True,
+        notes="Reuses interview_service.reschedule_interview.",
     )
 )
 
@@ -4235,6 +4485,115 @@ register(
         result_keys=("action_type", "success", "status", "message", "candidate_status", "application"),
         sensitive=False,
         notes="Closes the 'is he shortlisted?' clarification loop by giving GPT an explicit read intent.",
+    )
+)
+
+
+def _get_reports_metrics_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    """Read-only Assistant Reports executor bound to reports-contract-v2 / reports_metrics."""
+
+    import reports_metrics as _reports_metrics
+
+    legacy = ctx.legacy
+    action = ctx.action
+    company_code = _resolve_company_code(legacy, ctx.request) or ""
+    if not company_code:
+        return {
+            "action_type": "get_reports_metrics",
+            "success": False,
+            "status": "failed",
+            "error": "tenant_scope_required",
+            "message": "Reports requires an authenticated tenant.",
+        }
+    locale = str(action.get("locale") or "en").strip() or "en"
+    try:
+        assessments_enabled = bool(legacy.company_has_module(company_code, "assessments"))
+        interviews_enabled = bool(
+            legacy.company_has_module(company_code, "interviews")
+            or legacy.company_has_module(company_code, "video_interviews")
+        )
+    except Exception:
+        assessments_enabled = False
+        interviews_enabled = False
+    reviewable = getattr(legacy, "reviewable_application_predicate", None)
+    if not callable(reviewable):
+        return {
+            "action_type": "get_reports_metrics",
+            "success": False,
+            "status": "failed",
+            "error": "reports_authority_unavailable",
+            "message": "Reports authority is unavailable right now. Open the Reports page.",
+            "authority": "reports-contract-v2",
+        }
+    try:
+        payload = _reports_metrics.build_canonical_reports_payload(
+            company=company_code,
+            db_connect=legacy.db_connect,
+            reviewable_predicate=reviewable,
+            assessments_enabled=assessments_enabled,
+            interviews_enabled=interviews_enabled,
+            locale=locale,
+        )
+    except Exception as exc:
+        return {
+            "action_type": "get_reports_metrics",
+            "success": False,
+            "status": "failed",
+            "error": "reports_failed",
+            "message": str(exc)[:300],
+            "authority": "reports-contract-v2",
+        }
+    overview = payload.get("overview") if isinstance(payload.get("overview"), dict) else {}
+    return {
+        "action_type": "get_reports_metrics",
+        "success": bool(payload.get("ok", True)),
+        "status": "completed" if payload.get("ok", True) else "partial",
+        "message": (
+            "Canonical Reports metrics. Cite these values exactly. "
+            "Do not invent additional analytics. Overview work-queue counts are not a substitute for Reports."
+        ),
+        "authority": "reports-contract-v2",
+        "metric_version": payload.get("metric_version"),
+        "overview": legacy.json_safe(overview),
+        "summary": legacy.json_safe(payload.get("summary")),
+        "breakdowns": legacy.json_safe(payload.get("breakdowns")),
+        "exports": legacy.json_safe(payload.get("exports")),
+        "payload": legacy.json_safe(payload),
+        "overview_is_not_reports": True,
+        "partial": bool(payload.get("partial")),
+    }
+
+
+# Keep get_prehire_* registrations that follow in file — reports tool registered here.
+
+register(
+    ActionSpec(
+        name="get_reports_metrics",
+        description=(
+            "Return canonical hiring Reports metrics (reports-contract-v2): overview cards, breakdowns, "
+            "export counts, and definitions for the authenticated tenant. "
+            "Read-only. Never invent metrics. Never use Overview tools as a Reports substitute. "
+            "Overview work-queue questions should use get_prehire_* tools instead."
+        ),
+        entity_type=None,
+        required_fields=(),
+        optional_fields=("locale",),
+        module="pre_hiring",
+        requires_confirmation=False,
+        executor=_get_reports_metrics_executor,
+        result_keys=(
+            "action_type",
+            "success",
+            "status",
+            "message",
+            "metric_version",
+            "overview",
+            "summary",
+            "breakdowns",
+            "exports",
+        ),
+        sensitive=False,
+        notes="Bound only to reports_metrics.build_canonical_reports_payload.",
     )
 )
 

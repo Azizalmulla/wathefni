@@ -187,3 +187,64 @@ export function deleteChannelAccount(credentials: SetupCredentials, companyCode:
     { method: 'DELETE' },
   )
 }
+
+export function getCompanyEmailAdmin(credentials: SetupCredentials, companyCode: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email`,
+    credentials,
+  )
+}
+
+export function seedCompanyEmailMailboxes(credentials: SetupCredentials, companyCode: string, domain: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/mailboxes/seed`,
+    credentials,
+    { method: 'POST', body: JSON.stringify({ domain }) },
+  )
+}
+
+export function patchCompanyEmailMailbox(
+  credentials: SetupCredentials,
+  companyCode: string,
+  mailboxId: string,
+  body: { status?: string; allow_send?: boolean; exchange_scope_ref?: string; entra_user_id?: string },
+) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/mailboxes/${encodeURIComponent(mailboxId)}`,
+    credentials,
+    { method: 'PATCH', body: JSON.stringify(body) },
+  )
+}
+
+export function probeCompanyEmailMailbox(credentials: SetupCredentials, companyCode: string, mailboxId: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/mailboxes/${encodeURIComponent(mailboxId)}/probe`,
+    credentials,
+    { method: 'POST' },
+  )
+}
+
+export function createCompanyEmailDomain(credentials: SetupCredentials, companyCode: string, domain: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/domains`,
+    credentials,
+    { method: 'POST', body: JSON.stringify({ domain }) },
+  )
+}
+
+export function refreshCompanyEmailDomain(credentials: SetupCredentials, companyCode: string, domainId: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/domains/${encodeURIComponent(domainId)}/refresh`,
+    credentials,
+    { method: 'POST' },
+  )
+}
+
+export function forceCompanyEmailWathefni(credentials: SetupCredentials, companyCode: string) {
+  return request<Record<string, unknown>>(
+    `${SETUP_ROOT}/companies/${encodeURIComponent(companyCode)}/email/force-wathefni`,
+    credentials,
+    { method: 'POST' },
+  )
+}
+

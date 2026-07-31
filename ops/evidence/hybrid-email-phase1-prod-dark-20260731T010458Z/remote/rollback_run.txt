@@ -1,0 +1,2 @@
+rollback_health=200
+Rolled back hybrid email phase1 20260731T010458Z

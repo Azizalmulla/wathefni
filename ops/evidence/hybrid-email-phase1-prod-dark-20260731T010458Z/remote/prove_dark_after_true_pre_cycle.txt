@@ -1,0 +1,37 @@
+=== hybrid email phase1 production-dark prove ===
+PASS inbound_postmark_enabled
+PASS outbound_provider_postmark :: postmark
+PASS outbound_from_wathefni :: hr@wathefni.ai
+PASS postmark_token_present
+PASS mail_sp_env_absent
+PASS mail_send_not_configured
+PASS calendar_client_still_present
+PASS legacy_default_mode_wathefni
+PASS legacy_default_from
+PASS no_branded_modes_active :: branded=0 settings_rows=0
+PASS emergency_fallback_default_false :: emergency=0
+PASS sample_tenant_default_wathefni
+PASS sample_emergency_false
+PASS resolve_still_wathefni :: {"mode": "wathefni", "from_address": "hr@wathefni.ai", "provider": "postmark"}
+PASS resolve_from_matches_global
+PASS microsoft_not_available :: {'available': False, 'status': 'setup_required', 'reason': 'microsoft_not_configured'}
+PASS company_domain_not_forced
+PASS microsoft_activation_blocked :: mode_not_ready
+PASS tenant_still_wathefni_after_block :: wathefni
+PASS unverified_from_rejected :: unverified_company_from
+PASS dual_send_skips_after_calendar
+PASS dual_send_allows_explicit
+PASS failed_calendar_does_not_suppress
+PASS calendar_module_present
+PASS calendar_still_uses_calendar_client_env
+PASS calendar_does_not_import_mail_send
+PASS mailbox_queries_scoped
+PASS settings_queries_scoped
+PASS email_get_requires_settings_manage
+PASS admin_email_uses_superadmin
+PASS durable_ingress_present
+PASS authority_does_not_rewrite_ingress
+PASS branded_fail_closed
+PASS dispatch_uses_for_send_true
+PASS accept_status_accepted_by_provider
+ALL_DARK_PROOFS_PASS

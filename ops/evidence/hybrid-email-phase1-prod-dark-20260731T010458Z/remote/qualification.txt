@@ -1,0 +1,22 @@
+test_company_email_routes_require_settings_manage (test_tenant_email_qualification.ApiAuthorizationSourceTests.test_company_email_routes_require_settings_manage) ... ok
+test_public_projection_has_no_internal_jargon (test_tenant_email_qualification.ApiAuthorizationSourceTests.test_public_projection_has_no_internal_jargon) ... ok
+test_superadmin_email_routes_use_superadmin_context (test_tenant_email_qualification.ApiAuthorizationSourceTests.test_superadmin_email_routes_use_superadmin_context) ... ok
+test_dual_send_requires_successful_calendar_attendee_invite (test_tenant_email_qualification.AuthoritySemanticsTests.test_dual_send_requires_successful_calendar_attendee_invite) ... ok
+test_emergency_fallback_explicit_and_auditable (test_tenant_email_qualification.AuthoritySemanticsTests.test_emergency_fallback_explicit_and_auditable) ... ok
+test_legacy_defaults_to_wathefni (test_tenant_email_qualification.AuthoritySemanticsTests.test_legacy_defaults_to_wathefni) ... ok
+test_microsoft_requires_approved_probed_mailbox_and_mail_sp (test_tenant_email_qualification.AuthoritySemanticsTests.test_microsoft_requires_approved_probed_mailbox_and_mail_sp) ... ok
+test_no_silent_wathefni_fallback_when_branded_unavailable (test_tenant_email_qualification.AuthoritySemanticsTests.test_no_silent_wathefni_fallback_when_branded_unavailable) ... ok
+test_unverified_company_from_rejected (test_tenant_email_qualification.AuthoritySemanticsTests.test_unverified_company_from_rejected) ... ok
+test_durable_ingress_untouched_by_email_authority (test_tenant_email_qualification.InboundRegressionSourceTests.test_durable_ingress_untouched_by_email_authority) ... ok
+test_dispatch_source_fails_closed_without_emergency_fallback (test_tenant_email_qualification.IntegrationDispatchSemanticsTests.test_dispatch_source_fails_closed_without_emergency_fallback) ... ok
+test_resolve_fail_closed_matches_dispatch_contract (test_tenant_email_qualification.IntegrationDispatchSemanticsTests.test_resolve_fail_closed_matches_dispatch_contract) ... ok
+test_calendar_client_cannot_be_reused (test_tenant_email_qualification.MailSpSeparationTests.test_calendar_client_cannot_be_reused) ... ok
+test_graph_accept_status_constant (test_tenant_email_qualification.MailSpSeparationTests.test_graph_accept_status_constant) ... ok
+test_settings_scoped_per_company (test_tenant_email_qualification.TenantIsolationTests.test_settings_scoped_per_company) ... ok
+test_tenant_a_cannot_get_tenant_b_mailbox_by_id (test_tenant_email_qualification.TenantIsolationTests.test_tenant_a_cannot_get_tenant_b_mailbox_by_id) ... ok
+test_tenant_a_cannot_see_tenant_b_mailboxes_or_domains (test_tenant_email_qualification.TenantIsolationTests.test_tenant_a_cannot_see_tenant_b_mailboxes_or_domains) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.041s
+
+OK

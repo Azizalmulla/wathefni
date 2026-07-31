@@ -1,0 +1,2 @@
+TRUE_PRE_ROLLBACK_OK
+health_after_true_pre_rollback=200

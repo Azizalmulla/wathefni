@@ -67,6 +67,8 @@ import type {
   RankingResponse,
   SetupReadinessResponse,
   SummaryResponse,
+  EmailSendingActionResponse,
+  EmailSendingSettingsResponse
 } from '@/types'
 
 type DashboardErrorDetail = {
@@ -1395,3 +1397,33 @@ export function generateCandidateEvaluation(access: DashboardAccess, appKey: str
     method: 'POST',
   })
 }
+
+export function getEmailSendingSettings(access: DashboardAccess) {
+  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access)
+}
+
+export function updateEmailSendingSettings(
+  access: DashboardAccess,
+  body: {
+    current_sender?: string
+    outbound_mode?: string
+    display_name?: string | null
+    reply_to?: string | null
+    interview_email_when_calendar_sent?: boolean
+    allow_wathefni_emergency_fallback?: boolean
+    public_forward_address?: string | null
+  },
+) {
+  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+}
+
+export function emailSendingPrimaryAction(access: DashboardAccess, body: { action: 'connect' | 'verify' | 'test'; domain?: string }) {
+  return request<EmailSendingActionResponse>('/dashboard/prehire/integrations/email/action', access, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+

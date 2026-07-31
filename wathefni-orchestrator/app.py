@@ -39,7 +39,7 @@ import psycopg2.pool
 import puremagic
 from psycopg2.extras import RealDictCursor, Json
 from pydantic import BaseModel, Field
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile
+from fastapi import Body, Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 
 from module_catalog import (
@@ -49,12 +49,18 @@ from module_catalog import (
     POSTHIRE_PEOPLE_MODULES,
     SETUP_CONSOLE_MODULES,
     app_surfaces_for_modules,
+    apply_legacy_module_implications,
     expand_module_dependencies,
     missing_module_dependencies,
     module_bundles_payload,
     module_catalog_payload,
     normalize_module_key,
+    protect_setup_module_selection,
 )
+import tenant_control_service as _tenant_control  # noqa: E402
+import tenant_control_decision as _tenant_decision  # noqa: E402
+import tenant_control_surfaces as _tenant_surfaces  # noqa: E402
+import tenant_control_lifecycle as _tenant_lifecycle  # noqa: E402
 
 # Validate the canonical action registry at process boot. If any registered action is
 # missing an executor or required metadata, this raises and prevents the server from
@@ -76,13 +82,22 @@ import channel_account_routing as _channel_account_routing  # noqa: E402
 import company_setup as _company_setup  # noqa: E402
 import cv_docx as _cv_docx  # noqa: E402
 import cv_extraction as _cv_extraction  # noqa: E402
+import cv_extraction_v2 as _cv_extraction_v2  # noqa: E402
+import durable_email_ingress as _durable_email_ingress  # noqa: E402
+import inbound_cv_authority as _inbound_cv_authority  # INBOUND_CV_SCAN_IDENTITY_AUTHORITY_V1
 import candidate_messages as _candidate_messages  # noqa: E402
+import candidate_communication_authority as _candidate_communication_authority  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
 import candidate_semantic_router as _candidate_semantic_router  # noqa: E402
 import operator_mobile as _operator_mobile  # noqa: E402
 import operator_mobile_data as _operator_mobile_data  # noqa: E402
 import prehire_overview as _prehire_overview  # noqa: E402
 import prehire_jobs as _prehire_jobs  # noqa: E402
 import jobs_phase2_stage_b as _jobs_stage_b  # noqa: E402
+import candidate_cv_evidence as _candidate_cv_evidence  # noqa: E402
+import candidate_cv_facts as _candidate_cv_facts  # noqa: E402
+import talent_pool_auto_email_classification as _talent_pool_auto_email  # noqa: E402
+import candidate_ranking as _candidate_ranking  # noqa: E402
+import ranking_result_presentation as _ranking_presentation  # noqa: E402
 import runtime_environment as _runtime_environment  # noqa: E402
 
 logger = logging.getLogger("wathefni")
@@ -392,6 +407,24 @@ def assistant_hr_reads_enabled() -> bool:
     tools are NOT offered to the LLM on either WhatsApp or the dashboard assistant
     until enabled. Read-only; reuses the dashboard's own data sources."""
     return (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def candidate_knowledge_tools_enabled() -> bool:
+    """Dark-launch gate for Candidate Knowledge live tools (search_candidates,
+    get_candidate_knowledge, compare_candidates). Defaults OFF. Even when on,
+    executors additionally require WATHEFNI tenant allowlist + WATHEFNI_CK_LIVE_TOOL_ACTORS."""
+    ck = (os.environ.get("WATHEFNI_CANDIDATE_KNOWLEDGE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+    tools = (os.environ.get("WATHEFNI_CANDIDATE_KNOWLEDGE_TOOLS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+    return ck and tools
+
+
+def candidate_knowledge_ranking_reader_enabled() -> bool:
+    """Dark-launch gate for the live Ranking reader overlay that uses Candidate
+    Knowledge authority for held/restricted denial and evidence version stamps.
+    Defaults OFF. External tenants remain excluded via CK tenant allowlist."""
+    ck = (os.environ.get("WATHEFNI_CANDIDATE_KNOWLEDGE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+    reader = (os.environ.get("WATHEFNI_CANDIDATE_KNOWLEDGE_RANKING_READER") or "").strip().lower() in _OUTBOUND_ON_VALUES
+    return ck and reader
 
 
 def employee_app_enabled() -> bool:
@@ -969,6 +1002,89 @@ def data_source_from_request(request: Any | None) -> tuple[str, str | None]:
 HELD_IMPORT_STATUSES = ("needs_role", "import_review", "import_archived")
 # Statuses that still appear in the Intake review queue (archived is hidden).
 INTAKE_REVIEW_STATUSES = ("needs_role", "import_review")
+
+
+CandidateCommunicationAuthorityError = _candidate_communication_authority.CandidateCommunicationAuthorityError  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+
+
+def load_candidate_communication_governance(company_code: str | None, app_key: str | None) -> dict[str, Any] | None:  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    company = str(company_code or "").strip().upper()
+    key = str(app_key or "").strip()
+    if not company or not key:
+        return None
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM candidate_record_governance
+                    WHERE company_code=%s AND app_key=%s
+                    LIMIT 1
+                    """,
+                    (company, key),
+                )
+                row = cur.fetchone()
+                return dict(row) if row else None
+    except Exception:
+        return None
+
+
+def evaluate_application_communication_authority(  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    application: dict[str, Any] | None,
+    *,
+    kind: str | None = None,
+    expected_company_code: str | None = None,
+    governance: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    gov = governance
+    if gov is None and isinstance(application, dict):
+        gov = load_candidate_communication_governance(application.get("company_code"), application.get("app_key"))
+    return _candidate_communication_authority.evaluate_candidate_communication_authority(
+        application,
+        governance=gov,
+        expected_company_code=expected_company_code,
+        kind=kind,
+    )
+
+
+def assert_application_communication_allowed(  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    application: dict[str, Any] | None,
+    *,
+    kind: str | None = None,
+    expected_company_code: str | None = None,
+    governance: dict[str, Any] | None = None,
+    raise_http: bool = False,
+) -> dict[str, Any]:
+    try:
+        gov = governance
+        if gov is None and isinstance(application, dict):
+            gov = load_candidate_communication_governance(application.get("company_code"), application.get("app_key"))
+        return _candidate_communication_authority.assert_candidate_communication_allowed(
+            application,
+            governance=gov,
+            expected_company_code=expected_company_code,
+            kind=kind,
+        )
+    except CandidateCommunicationAuthorityError as exc:
+        if raise_http:
+            raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+        raise
+
+
+def require_live_candidate_communication(  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    application: dict[str, Any] | None,
+    *,
+    kind: str,
+    expected_company_code: str | None = None,
+) -> dict[str, Any]:
+    return assert_application_communication_allowed(
+        application,
+        kind=kind,
+        expected_company_code=expected_company_code,
+        raise_http=True,
+    )
+
 
 
 def production_application_predicate(alias: str = "a") -> str:
@@ -2340,6 +2456,12 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS actor_email text;
     ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS actor_phone text;
     ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS actor_role text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS sender_mode text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS visible_from text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS visible_reply_to text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS provider text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS purpose text;
+    ALTER TABLE IF EXISTS outbound_delivery_events ADD COLUMN IF NOT EXISTS provider_accept_status text;
     ALTER TABLE IF EXISTS dashboard_chat_sessions ADD COLUMN IF NOT EXISTS actor_role text;
     ALTER TABLE IF EXISTS dashboard_chat_sessions ADD COLUMN IF NOT EXISTS metadata jsonb NOT NULL DEFAULT '{}'::jsonb;
     ALTER TABLE IF EXISTS dashboard_chat_sessions ADD COLUMN IF NOT EXISTS last_message_at timestamptz NOT NULL DEFAULT now();
@@ -2811,12 +2933,47 @@ def _ensure_schema_impl() -> None:
                 return None
 
             _cv_extraction.ensure_cv_extraction_schema(_cv_schema_exec)
+            _durable_email_ingress.ensure_schema(cur)
+            import inbound_cv_intake as _inbound_cv_intake
+
+            _inbound_cv_intake.ensure_schema(cur)
+            import inbound_cv_processing as _inbound_cv_processing
+
+            _inbound_cv_processing.ensure_schema(cur)
+            import inbound_cv_adapters as _inbound_cv_adapters  # noqa: F401
+
+            _inbound_cv_authority.ensure_schema(cur)
+            import unified_candidates as _unified_candidates  # UNIFIED_CANDIDATES_PRODUCTION_DARK_PATCH
+
+            _unified_candidates.ensure_unified_candidates_schema(cur)
             import recruiting_lifecycle as _rl
 
             _rl.ensure_lifecycle_schema(cur)
+            import candidate_collaboration as _candidate_collaboration
+
+            _candidate_collaboration.ensure_schema(cur)
+            import candidate_identity as _candidate_identity
+
+            _candidate_identity.ensure_schema(cur)
+            _candidate_cv_evidence.ensure_schema(cur)
+            _candidate_cv_facts.ensure_schema(cur)
+            _cv_extraction_v2.ensure_schema(cur)
+            _candidate_ranking.ensure_schema(cur)
             import offer_lifecycle as _offers
 
             _offers.ensure_offer_schema(cur)
+            import kuwait_first_client_foundation as _kw_foundation
+
+            _kw_foundation.ensure_foundation_schema(cur)
+            import kuwait_pilot_document_journey as _kw_doc_journey
+
+            _kw_doc_journey.ensure_document_journey_schema(cur)
+            import interview_lifecycle as _interviews
+
+            _interviews.ensure_interview_schema(cur)
+            import calendar_schema as _calendar_schema
+
+            _calendar_schema.ensure_calendar_schema(cur)
             import assessment_service as _assessment_service
 
             _assessment_service.freeze_current_content_version(
@@ -2824,6 +2981,12 @@ def _ensure_schema_impl() -> None:
                 company_code="GLOBAL",
                 battery_key=ASSESSMENT_BATTERY_KEY,
             )
+            # Wave 1 additive tenant control-plane tables (shadow/dual-write only).
+            if _tenant_control.plane_enabled():
+                _tenant_control.ensure_schema(cur)
+            import tenant_email_authority as _tenant_email_authority
+
+            _tenant_email_authority.ensure_schema(cur)
         conn.commit()
 
 
@@ -2877,7 +3040,9 @@ def configured_company_modules(company_code: str | None) -> set[str]:
     except Exception:
         pass
     modules.update(modules_from_payload(workspace_company_config(company)))
-    return modules
+    # Seed-only sources predate later module carve-outs (see LEGACY_IMPLIED_MODULES).
+    # The registry path above returns before this and stays authoritative.
+    return apply_legacy_module_implications(modules)
 
 
 def module_platform_available(module_key: str) -> bool:
@@ -2894,11 +3059,39 @@ def module_platform_available(module_key: str) -> bool:
 
 def effective_company_modules(company_code: str | None) -> set[str]:
     """Configured tenant entitlements that are currently usable platform-wide."""
-    return {
+    company = (company_code or "WATHEFNI").upper()
+    base = {
         module
         for module in configured_company_modules(company_code)
         if module in MODULE_BY_KEY and module_platform_available(module)
     }
+    # Wave 2: drop modules that are authoritatively denied (canary pause etc.).
+    if not _tenant_decision.decision_enabled():
+        return base
+    filtered: set[str] = set()
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                for module in sorted(base):
+                    result = _tenant_decision.evaluate_decision(
+                        cur,
+                        company_code=company,
+                        surface="navigation",
+                        module_key=module,
+                        legacy_allow=True,
+                        persist=False,
+                    )
+                    if result.mode == "authoritative" and not result.detail.get("canonical_allow", True):
+                        continue
+                    if result.mode == "authoritative" and not result.allow:
+                        continue
+                    # Also hide when canonical says paused even in shadow if we want nav preview?
+                    # Requirement: canary pause disappears from navigation — requires authority.
+                    filtered.add(module)
+            conn.rollback()
+    except Exception:
+        return base
+    return filtered
 
 
 def dashboard_module_catalog_payload(company_code: str | None) -> list[dict[str, Any]]:
@@ -2933,7 +3126,30 @@ def setup_console_module_guidance(company_code: str | None, selected_modules: li
 def company_has_module(company_code: str | None, module_key: str) -> bool:
     module = normalize_module_key(module_key)
     modules = configured_company_modules(company_code)
-    return module in modules
+    legacy_allow = module in modules
+    company = (company_code or "WATHEFNI").upper()
+    # Wave 2: shadow-observe; authoritative only for allowlisted canary capabilities.
+    if _tenant_decision.decision_enabled():
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    result = _tenant_surfaces.observe_or_enforce(
+                        cur,
+                        company_code=company,
+                        surface="module_check",
+                        module_key=module,
+                        legacy_allow=legacy_allow,
+                        record_block=False,
+                    )
+                # Do not commit decision-audit noise for high-frequency checks unless
+                # authoritative mode actually changed the outcome.
+                if result.mode == "authoritative":
+                    conn.commit()
+                    return bool(result.allow)
+                conn.rollback()
+        except Exception:
+            pass
+    return legacy_allow
 
 
 def company_module_settings(company_code: str | None, module_key: str) -> dict[str, Any]:
@@ -2957,16 +3173,36 @@ def company_module_settings(company_code: str | None, module_key: str) -> dict[s
 
 def get_company_settings(company_code: str | None) -> dict[str, Any]:
     """Return the free-form per-company settings blob (company_settings.settings)."""
+    return dict(get_company_settings_row(company_code).get("settings") or {})
+
+
+def get_company_settings_row(company_code: str | None) -> dict[str, Any]:
+    """Return settings blob plus Wave 5 concurrency metadata."""
+    import concurrency_safety as _cs
+
     company = (company_code or "WATHEFNI").upper()
     try:
         with db_connect() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT settings FROM company_settings WHERE company_code=%s LIMIT 1", (company,))
+                _cs.ensure_company_settings_concurrency_schema(cur)
+                cur.execute(
+                    """
+                    SELECT settings, version, updated_at, updated_by_user_id, updated_by_name, updated_by_email
+                    FROM company_settings
+                    WHERE company_code=%s
+                    LIMIT 1
+                    """,
+                    (company,),
+                )
                 row = cur.fetchone()
-        settings = (row or {}).get("settings") if row else None
-        return settings if isinstance(settings, dict) else {}
+            conn.commit()
+        if not row:
+            return {"settings": {}, **_cs.settings_concurrency_meta({"version": 1})}
+        data = dict(row)
+        settings = data.get("settings") if isinstance(data.get("settings"), dict) else {}
+        return {"settings": settings, **_cs.settings_concurrency_meta(data)}
     except Exception:
-        return {}
+        return {"settings": {}, "version": 1, "updated_at": None, "last_updated_by": None}
 
 
 # Keys in company_settings.settings that are OWNED BY THE OPERATOR (set via the
@@ -2983,25 +3219,221 @@ OPERATOR_MANAGED_SETTING_KEYS: tuple[str, ...] = (
     "notification_preset",
     "channel_policy_reviewed",
     "intake_auto_admit_explicit",
+    "prehire_visibility_policy",
+    "communication_policy",
+    "calendar_policy",
 )
 
 
-def set_company_setting(company_code: str | None, key: str, value: Any) -> None:
-    """Merge a single key into company_settings.settings (idempotent upsert)."""
+def set_company_setting(
+    company_code: str | None,
+    key: str,
+    value: Any,
+    *,
+    expected_version: int | None = None,
+    expected_updated_at: str | None = None,
+    require_expected: bool = False,
+    actor: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Merge a single key into company_settings.settings (idempotent upsert).
+
+    Wave 2 integrity: refuse creating settings rows for unknown companies so new
+    orphan company_settings cannot be introduced. Existing orphans are retained.
+    Wave 5: when require_expected=True (dashboard shared edits), mutations must
+    send expected_version / expected_updated_at and never silently overwrite.
+    """
+    import concurrency_safety as _cs
+
     company = (company_code or "WATHEFNI").upper()
+    actor_data = actor if isinstance(actor, dict) else {}
     with db_connect() as conn:
         with conn.cursor() as cur:
+            _cs.ensure_company_settings_concurrency_schema(cur)
+            cur.execute("SELECT 1 FROM companies WHERE company_code=%s LIMIT 1", (company,))
+            if not cur.fetchone():
+                raise HTTPException(
+                    status_code=404,
+                    detail={
+                        "error": "company_not_found",
+                        "message": "Cannot write company settings for an unknown company.",
+                        "company_code": company,
+                    },
+                )
             cur.execute(
                 """
-                INSERT INTO company_settings (company_code, settings)
-                VALUES (%s, %s)
-                ON CONFLICT (company_code) DO UPDATE
-                  SET settings = company_settings.settings || EXCLUDED.settings,
-                      updated_at = now()
+                SELECT settings, version, updated_at, updated_by_user_id, updated_by_name, updated_by_email
+                FROM company_settings
+                WHERE company_code=%s
+                FOR UPDATE
                 """,
-                (company, Json({key: value})),
+                (company,),
             )
+            existing = cur.fetchone()
+            if existing:
+                row = dict(existing)
+                try:
+                    _cs.assert_fresh(
+                        current_version=row.get("version") or 1,
+                        expected_version=expected_version,
+                        current_updated_at=row.get("updated_at"),
+                        expected_updated_at=expected_updated_at,
+                        last_changed_by={
+                            "user_id": row.get("updated_by_user_id"),
+                            "name": row.get("updated_by_name"),
+                            "email": row.get("updated_by_email"),
+                        },
+                        entity_type="company_settings",
+                        entity_id=company,
+                        code_version="stale_settings_version",
+                        code_updated_at="stale_settings_update",
+                        require_token=require_expected,
+                    )
+                except _cs.ConcurrencyError as exc:
+                    raise HTTPException(status_code=exc.http_status, detail=exc.as_detail()) from exc
+                cur.execute(
+                    """
+                    UPDATE company_settings
+                    SET settings = settings || %s,
+                        version = COALESCE(version, 1) + 1,
+                        updated_at = now(),
+                        updated_by_user_id = COALESCE(%s, updated_by_user_id),
+                        updated_by_name = COALESCE(%s, updated_by_name),
+                        updated_by_email = COALESCE(%s, updated_by_email)
+                    WHERE company_code=%s
+                    RETURNING settings, version, updated_at, updated_by_user_id, updated_by_name, updated_by_email
+                    """,
+                    (
+                        Json({key: value}),
+                        str(actor_data.get("user_id") or actor_data.get("actor_user_id") or "") or None,
+                        str(actor_data.get("name") or actor_data.get("actor_name") or "") or None,
+                        str(actor_data.get("email") or actor_data.get("actor_email") or "") or None,
+                        company,
+                    ),
+                )
+            else:
+                if require_expected:
+                    # First create: still accept optional tokens but do not require a prior version.
+                    pass
+                cur.execute(
+                    """
+                    INSERT INTO company_settings (
+                      company_code, settings, version, updated_by_user_id, updated_by_name, updated_by_email
+                    )
+                    VALUES (%s, %s, 1, %s, %s, %s)
+                    RETURNING settings, version, updated_at, updated_by_user_id, updated_by_name, updated_by_email
+                    """,
+                    (
+                        company,
+                        Json({key: value}),
+                        str(actor_data.get("user_id") or actor_data.get("actor_user_id") or "") or None,
+                        str(actor_data.get("name") or actor_data.get("actor_name") or "") or None,
+                        str(actor_data.get("email") or actor_data.get("actor_email") or "") or None,
+                    ),
+                )
+            updated = dict(cur.fetchone() or {})
         conn.commit()
+    settings = updated.get("settings") if isinstance(updated.get("settings"), dict) else {}
+    return {"settings": settings, **_cs.settings_concurrency_meta(updated)}
+
+
+def company_prehire_visibility_policy(company_code: str | None) -> str:
+    import prehire_visibility as _pv
+
+    return _pv.prehire_visibility_policy_from_settings(get_company_settings(company_code))
+
+
+def prehire_visibility_plan_for_context(context: dict[str, Any] | None, *, surface: str) -> dict[str, Any]:
+    import prehire_visibility as _pv
+
+    data = context if isinstance(context, dict) else {}
+    company = str(data.get("company_code") or "").strip().upper()
+    role = dashboard_context_role_key(data) if data else "viewer"
+    policy = company_prehire_visibility_policy(company) if company else _pv.PREHIRE_VISIBILITY_DEFAULT
+    return _pv.resolve_visibility_plan(policy=policy, role=role, surface=surface)
+
+
+def prehire_visibility_assignment_sql(
+    context: dict[str, Any] | None,
+    *,
+    surface: str,
+    kind: str,
+) -> tuple[str, list[Any]]:
+    """Return (sql, params) to AND into queries. Empty when no assignment scope."""
+    import prehire_visibility as _pv
+
+    plan = prehire_visibility_plan_for_context(context, surface=surface)
+    if not plan.get("apply_assignment_scope"):
+        return "", []
+    actor = str(
+        (context or {}).get("actor_user_id")
+        or ((context or {}).get("hr_user") or {}).get("user_id")
+        or ""
+    ).strip()
+    if not actor:
+        # Fail closed for scoped roles without identity.
+        return "FALSE", []
+    role = plan.get("role") or dashboard_context_role_key(context)
+    if kind == "jobs":
+        sql, placeholders = _pv.jobs_assignment_sql(role, alias="")
+    elif kind == "applications":
+        sql, placeholders = _pv.applications_assignment_sql(role, applications_alias="a")
+    elif kind == "interviews":
+        # Interviews inherit application/job ownership for recruiter/HM.
+        app_sql, placeholders = _pv.applications_assignment_sql(role, applications_alias="a")
+        sql = (
+            "EXISTS ("
+            "SELECT 1 FROM applications a "
+            "WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key "
+            f"AND {app_sql}"
+            ")"
+        )
+    elif kind == "assessments":
+        app_sql, placeholders = _pv.applications_assignment_sql(role, applications_alias="a")
+        sql = f"({app_sql})"
+    else:
+        return "", []
+    return sql, _pv.bind_actor_params(placeholders, actor)
+
+
+def require_prehire_application_visibility(context: dict[str, Any], application: dict[str, Any]) -> None:
+    """404 when the actor cannot see this application under the tenant policy."""
+    import prehire_visibility as _pv
+
+    plan = prehire_visibility_plan_for_context(context, surface="detail")
+    if not plan.get("apply_assignment_scope"):
+        return
+    actor = str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "").strip()
+    role = plan.get("role") or dashboard_context_role_key(context)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            ok = _pv.application_visible_to_actor(
+                application=application,
+                role=role,
+                actor_user_id=actor,
+                cur=cur,
+            )
+    if ok:
+        return
+    raise HTTPException(
+        status_code=404,
+        detail={"error": "application_not_found", "message": "Application not found."},
+    )
+
+
+def require_prehire_job_visibility(context: dict[str, Any], job: dict[str, Any] | None) -> None:
+    import prehire_visibility as _pv
+
+    plan = prehire_visibility_plan_for_context(context, surface="detail")
+    if not plan.get("apply_assignment_scope"):
+        return
+    actor = str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "").strip()
+    role = plan.get("role") or dashboard_context_role_key(context)
+    if _pv.job_visible_to_actor(job=job, role=role, actor_user_id=actor):
+        return
+    raise HTTPException(
+        status_code=404,
+        detail={"error": "job_not_found", "message": "Job not found."},
+    )
 
 
 def company_profile_payload(company_code: str | None) -> dict[str, Any]:
@@ -3044,13 +3476,14 @@ def company_currency(company_code: str | None) -> str:
 
 
 def company_auto_admit_imports(company_code: str | None) -> bool:
-    """Whether explicit-role imports auto-admit into Candidates (ON by default).
+    """Whether explicit-role imports auto-admit into Candidates.
 
-    Cautious companies can disable this in Settings to review every import.
+    Fail closed when the company policy is unset. Auto-admit requires an
+    explicit True setting plus a position and non-governed identity path.
     """
     val = get_company_settings(company_code).get("intake_auto_admit_explicit")
     if val is None:
-        return True
+        return False
     return bool(val)
 
 
@@ -5992,15 +6425,19 @@ def hr_admin_users(company_code: str | None = None) -> list[dict[str, str]]:
 
 
 ROLE_ALIASES = {
+    # Company Admin (canonical key remains `owner` so existing owners never escalate/change)
     "owner": "owner",
+    "company_admin": "owner",
+    "company admin": "owner",
     "owner_/_super_admin": "owner",
     "owner / super admin": "owner",
     "super_admin": "owner",
     "super admin": "owner",
     "admin": "owner",
-    "company_admin": "owner",
-    "hr_admin": "owner",
-    "hr admin": "owner",
+    "service": "owner",
+    # HR Admin — distinct role (must NEVER alias to owner)
+    "hr_admin": "hr_admin",
+    "hr admin": "hr_admin",
     "hr_manager": "hr_manager",
     "hr manager": "hr_manager",
     "manager": "manager",
@@ -6022,20 +6459,35 @@ ROLE_ALIASES = {
     "hiring manager": "hiring_manager",
     "department_manager": "hiring_manager",
     "department manager": "hiring_manager",
+    "interviewer": "interviewer",
+    "payroll_operator": "payroll_operator",
+    "payroll operator": "payroll_operator",
+    "payroll": "payroll_operator",
     "viewer": "viewer",
     "read_only": "viewer",
     "readonly": "viewer",
-    "service": "owner",
 }
 
 ROLE_LABELS = {
-    "owner": "Owner / Super Admin",
+    "owner": "Company Admin",
+    "hr_admin": "HR Admin",
     "hr_manager": "HR Manager",
     "manager": "Team Manager",
-    "recruiter": "Recruiter / HR Officer",
-    "hiring_manager": "Hiring Manager / Department Manager",
+    "recruiter": "Recruiter",
+    "hiring_manager": "Hiring Manager",
+    "interviewer": "Interviewer",
+    "payroll_operator": "Payroll Operator",
     "viewer": "Viewer",
 }
+
+# Interviewer is assignment-scoped: company-wide interview.manage is intentionally
+# narrowed by require_interview_assignment_scope + presentation action allowlist.
+INTERVIEW_ASSIGNMENT_SCOPED_ROLES = frozenset({"interviewer"})
+INTERVIEWER_ALLOWED_ACTIONS = frozenset({
+    "write_notes",
+    "view_feedback",
+    "review_video",
+})
 
 # Post-hire operational permissions (registry/tool-call pilot rollout). Two tiers
 # per module (read vs manage) plus a dedicated payroll.export for the most
@@ -6079,13 +6531,122 @@ _POSTHIRE_PERMS_TEAM_MANAGER = {
     "compliance.read",
 }
 
+_CANDIDATES_C2_READ = {"candidates.read"}
+_CANDIDATES_C2_COLLABORATE = {
+    "candidates.notes.manage",
+    "candidates.tasks.manage",
+}
+_CANDIDATES_C2_OPERATE = {
+    "candidates.assign",
+    "candidates.tags.manage",
+    *_CANDIDATES_C2_COLLABORATE,
+}
+# C3 identity/privacy — additive; does not alter C0-C2 lifecycle/ownership authority.
+_CANDIDATES_C3_READ = {
+    "candidates.identity.read",
+    "candidates.privacy.read",
+}
+_CANDIDATES_C3_OPERATE = {
+    "candidates.identity.manage",
+    "candidates.duplicates.review",
+    "candidates.merge.execute",
+    "candidates.privacy.manage",
+    "candidates.privacy.export",
+}
+_CANDIDATES_C3_ELEVATED = {
+    "candidates.merge.reverse",
+    "candidates.privacy.hold",
+    "candidates.civil_id.read",
+    "candidates.civil_id.write",
+}
+
+# Wathefni Calendar C1 — locked keys on existing Wave 1 role authority (C0 §3.2).
+_CALENDAR_PERMS_FULL = {
+    "calendar.read",
+    "calendar.manage",
+    "calendar.company",
+    "calendar.sync",
+    "calendar.conflict_override",
+}
+_CALENDAR_PERMS_OPS = {
+    "calendar.read",
+    "calendar.manage",
+    "calendar.company",
+    "calendar.conflict_override",
+}
+_CALENDAR_PERMS_MANAGE = {"calendar.read", "calendar.manage"}
+_CALENDAR_PERMS_READ = {"calendar.read"}
+
 ROLE_PERMISSIONS = {
-    "owner": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "users.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
-    "hr_manager": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close", "candidate.manage", "candidate.decide", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response", "report.export", "settings.manage", "audit.read", *_POSTHIRE_PERMS_FULL},
-    "manager": set(_POSTHIRE_PERMS_TEAM_MANAGER),
-    "recruiter": {"prehire.read", "jobs.read", "jobs.create", "jobs.edit", "candidate.manage", "candidate.import", "interview.manage", "assessment.manage", "offer.manage", "offer.send", "offer.withdraw", "report.export"},
-    "hiring_manager": {"prehire.read", "jobs.read", "interview.manage", "offer.approve", "report.export", *_POSTHIRE_PERMS_MANAGER},
-    "viewer": {"prehire.read", "jobs.read", *_POSTHIRE_PERMS_VIEWER},
+    # Company Admin — only default role with users.manage
+    "owner": {
+        "prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close",
+        "candidate.manage", "candidate.decide", "candidate.import",
+        "interview.manage", "assessment.manage",
+        "offer.compensation.read", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response",
+        "report.export", "settings.manage", "users.manage", "audit.read",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C2_OPERATE, *_CANDIDATES_C3_READ, *_CANDIDATES_C3_OPERATE, *_CANDIDATES_C3_ELEVATED,
+        *_POSTHIRE_PERMS_FULL,
+        *_CALENDAR_PERMS_FULL,
+    },
+    # HR Admin — full HR + settings + audit; never users.manage / company ownership.
+    # calendar.sync is owner-default / explicit-assignment only — never via HR roles.
+    "hr_admin": {
+        "prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close",
+        "candidate.manage", "candidate.decide", "candidate.import",
+        "interview.manage", "assessment.manage",
+        "offer.compensation.read", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response",
+        "report.export", "settings.manage", "audit.read",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C2_OPERATE, *_CANDIDATES_C3_READ, *_CANDIDATES_C3_OPERATE,
+        *_POSTHIRE_PERMS_FULL,
+        *_CALENDAR_PERMS_OPS,
+    },
+    # HR Manager — operational HR; no settings / users / audit
+    "hr_manager": {
+        "prehire.read", "jobs.read", "jobs.create", "jobs.edit", "jobs.publish", "jobs.close",
+        "candidate.manage", "candidate.decide", "candidate.import",
+        "interview.manage", "assessment.manage",
+        "offer.compensation.read", "offer.manage", "offer.approve", "offer.send", "offer.withdraw", "offer.record_response",
+        "report.export",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C2_OPERATE, *_CANDIDATES_C3_READ, *_CANDIDATES_C3_OPERATE,
+        *_POSTHIRE_PERMS_FULL,
+        *_CALENDAR_PERMS_OPS,
+    },
+    "manager": set(_POSTHIRE_PERMS_TEAM_MANAGER) | _CALENDAR_PERMS_MANAGE,
+    "recruiter": {
+        "prehire.read", "jobs.read", "jobs.create", "jobs.edit",
+        "candidate.manage", "candidate.import",
+        "interview.manage", "assessment.manage",
+        "offer.compensation.read", "offer.manage", "offer.send", "offer.withdraw",
+        "report.export",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C2_OPERATE, *_CANDIDATES_C3_READ,
+        "candidates.duplicates.review", "candidates.identity.manage",
+        *_CALENDAR_PERMS_MANAGE,
+    },
+    "hiring_manager": {
+        "prehire.read", "jobs.read", "interview.manage",
+        "offer.compensation.read", "offer.approve", "report.export",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C2_COLLABORATE, *_CANDIDATES_C3_READ,
+        *_POSTHIRE_PERMS_MANAGER,
+        *_CALENDAR_PERMS_MANAGE,
+    },
+    # Interviewer — feedback/notes on assigned interviews only (hard-scoped below)
+    "interviewer": {
+        "prehire.read", "interview.manage",
+        *_CALENDAR_PERMS_READ,
+    },
+    # Payroll Operator — payroll least privilege; no candidates / prehire
+    "payroll_operator": {
+        "payroll.read", "payroll.manage", "payroll.export",
+    },
+    # Compatibility read grant during the C2/C3 rollout: viewers retain candidate list
+    # reads, but gain no C2/C3 mutation, merge, or legal-hold scope.
+    "viewer": {
+        "prehire.read", "jobs.read",
+        *_CANDIDATES_C2_READ, *_CANDIDATES_C3_READ,
+        *_POSTHIRE_PERMS_VIEWER,
+        *_CALENDAR_PERMS_READ,
+    },
 }
 
 EMPLOYEE_PERMISSION_SCOPES = {
@@ -6138,6 +6699,154 @@ def normalize_hr_role(role: str | None) -> str:
 
 def hr_role_permissions(role: str | None) -> list[str]:
     return sorted(ROLE_PERMISSIONS.get(normalize_hr_role(role), ROLE_PERMISSIONS["viewer"]))
+
+
+def dashboard_context_role_key(context: dict[str, Any] | None) -> str:
+    data = context if isinstance(context, dict) else {}
+    access = data.get("access") if isinstance(data.get("access"), dict) else {}
+    hr_user = data.get("hr_user") if isinstance(data.get("hr_user"), dict) else {}
+    raw = (
+        data.get("actor_role")
+        or access.get("role")
+        or hr_user.get("role")
+        or data.get("role_scope")
+        or ""
+    )
+    return normalize_hr_role(raw)
+
+
+def interview_role_is_assignment_scoped(role: str | None) -> bool:
+    return normalize_hr_role(role) in INTERVIEW_ASSIGNMENT_SCOPED_ROLES
+
+
+def interview_actor_is_assignment_scoped(context: dict[str, Any] | None) -> bool:
+    return interview_role_is_assignment_scoped(dashboard_context_role_key(context))
+
+
+def _interview_actor_identity(context: dict[str, Any] | None) -> dict[str, str]:
+    data = context if isinstance(context, dict) else {}
+    hr_user = data.get("hr_user") if isinstance(data.get("hr_user"), dict) else {}
+    access_user = ((data.get("access") or {}).get("user") if isinstance(data.get("access"), dict) else {}) or {}
+    if not isinstance(access_user, dict):
+        access_user = {}
+    user_id = str(
+        data.get("actor_user_id")
+        or hr_user.get("user_id")
+        or access_user.get("user_id")
+        or ""
+    ).strip()
+    email = normalize_email(hr_user.get("email") or access_user.get("email") or "")
+    phone = digits(data.get("hr_phone") or hr_user.get("phone") or access_user.get("phone") or "")
+    return {"user_id": user_id, "email": email, "phone": phone}
+
+
+def actor_assigned_to_interview(
+    context: dict[str, Any] | None,
+    *,
+    company_code: str,
+    interview_id: str,
+) -> bool:
+    """True when the actor appears on candidate_interview_assignments for this interview."""
+    identity = _interview_actor_identity(context)
+    if not identity["user_id"] and not identity["email"] and not identity["phone"]:
+        return False
+    clauses: list[str] = []
+    params: list[Any] = [str(interview_id), str(company_code).strip().upper()]
+    if identity["user_id"]:
+        clauses.append("LOWER(COALESCE(assignee_user_id, '')) = LOWER(%s)")
+        params.append(identity["user_id"])
+    if identity["email"]:
+        clauses.append("LOWER(COALESCE(assignee_email, '')) = LOWER(%s)")
+        params.append(identity["email"])
+    if identity["phone"]:
+        clauses.append("regexp_replace(COALESCE(assignee_phone, ''), '\\D', '', 'g') = %s")
+        params.append(identity["phone"])
+    if not clauses:
+        return False
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT 1
+                FROM candidate_interview_assignments
+                WHERE interview_id=%s AND company_code=%s
+                  AND ({' OR '.join(clauses)})
+                LIMIT 1
+                """,
+                params,
+            )
+            return bool(cur.fetchone())
+
+
+def require_interview_assignment_scope(
+    context: dict[str, Any],
+    *,
+    company_code: str,
+    interview_id: str,
+) -> None:
+    """Fail-closed for assignment-scoped roles (Interviewer)."""
+    if not interview_actor_is_assignment_scoped(context):
+        return
+    if actor_assigned_to_interview(context, company_code=company_code, interview_id=interview_id):
+        return
+    raise HTTPException(
+        status_code=403,
+        detail={
+            "error": "interview_assignment_required",
+            "message": "You can only access interviews assigned to you.",
+            "role": dashboard_context_role_key(context),
+        },
+    )
+
+
+def narrow_interview_allowed_actions_for_role(role: str | None, actions: list[str] | None) -> list[str]:
+    if not interview_role_is_assignment_scoped(role):
+        return list(actions or [])
+    return [action for action in (actions or []) if action in INTERVIEWER_ALLOWED_ACTIONS]
+
+
+def require_interview_company_operator(context: dict[str, Any], *, action: str) -> None:
+    """Block assignment-scoped roles from company-wide interview operations."""
+    if not interview_actor_is_assignment_scoped(context):
+        return
+    raise HTTPException(
+        status_code=403,
+        detail={
+            "error": "action_not_allowed",
+            "action": action,
+            "message": "Interviewers can only work on assigned interviews.",
+            "role": dashboard_context_role_key(context),
+        },
+    )
+
+
+def interview_assignment_scope_sql(context: dict[str, Any] | None) -> tuple[str, list[Any]]:
+    """SQL fragment forcing assignment match for Interviewer role; empty otherwise."""
+    if not interview_actor_is_assignment_scoped(context):
+        return "", []
+    identity = _interview_actor_identity(context)
+    clauses: list[str] = []
+    params: list[Any] = []
+    if identity["user_id"]:
+        clauses.append("LOWER(COALESCE(a.assignee_user_id, '')) = LOWER(%s)")
+        params.append(identity["user_id"])
+    if identity["email"]:
+        clauses.append("LOWER(COALESCE(a.assignee_email, '')) = LOWER(%s)")
+        params.append(identity["email"])
+    if identity["phone"]:
+        clauses.append("regexp_replace(COALESCE(a.assignee_phone, ''), '\\D', '', 'g') = %s")
+        params.append(identity["phone"])
+    if not clauses:
+        # Fail closed: interviewer with no identity sees nothing.
+        return "FALSE", []
+    sql = (
+        "EXISTS ("
+        "SELECT 1 FROM candidate_interview_assignments a "
+        "WHERE a.interview_id=ci.interview_id AND a.company_code=ci.company_code "
+        f"AND ({' OR '.join(clauses)})"
+        ")"
+    )
+    return sql, params
 
 
 def dashboard_effective_permissions_for_user(
@@ -6334,6 +7043,36 @@ def require_entitlement(context: dict[str, Any], module_key: str | None, permiss
             permission=permission,
             role=role_key,
         )
+
+    # Wave 2 surface observation for APIs (shadow; canary may authoritative-deny).
+    if module and _tenant_decision.decision_enabled():
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    result = _tenant_surfaces.observe_or_enforce(
+                        cur,
+                        company_code=company,
+                        surface="apis",
+                        module_key=module,
+                        legacy_allow=True,
+                        actor_permission_ok=True,
+                        work_kind="api_entitlement",
+                    )
+                    conn.commit()
+                    if result.mode == "authoritative" and not result.allow:
+                        raise entitlement_denied(
+                            status_code=403,
+                            error=result.reason_code or "module_disabled",
+                            message=result.remediation or "This capability is not available right now.",
+                            company_code=company,
+                            module_key=module,
+                            permission=permission,
+                            role=role_key,
+                        )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
 
     if permission and permission not in context_permissions(context, role_key):
         raise entitlement_denied(
@@ -12084,6 +12823,7 @@ def resolve_candidate(
     company_code: str | None = None,
     similarity_threshold: float = 0.35,
     max_matches: int = 5,
+    clarify_first: bool = False,
 ) -> dict[str, Any]:
     """Canonical candidate resolver.
 
@@ -12094,6 +12834,10 @@ def resolve_candidate(
       - no_input: caller did not supply anything to search on
 
     NEVER falls back silently to the latest application or the sender's own phone.
+
+    clarify_first=True (Assistant consequential path): disable silent fuzzy
+    auto-resolution. Name-only hits are returned as ambiguous so HR chooses.
+    Default False preserves existing dashboard/API resolver behavior.
     """
 
     searched = {
@@ -12148,6 +12892,18 @@ def resolve_candidate(
         seen_keys.add(key)
         unique_matches.append(match)
     unique_matches.sort(key=lambda m: float(m.get("match_similarity") or 0.0), reverse=True)
+    if clarify_first:
+        # Exact app_key / unique email / unique phone already returned above.
+        # Name-only or multi-application results must be clarified by HR.
+        name_only = bool(name) and not app_key and not email and not phone_digits
+        if len(unique_matches) != 1 or name_only or len({str(m.get("app_key")) for m in unique_matches}) > 1:
+            return {
+                "status": "ambiguous",
+                "matches": unique_matches[:max_matches],
+                "searched": searched,
+                "clarify_reason": "assistant_clarify_first",
+            }
+        return {"status": "resolved", "matches": unique_matches, "searched": searched}
     if len(unique_matches) == 1:
         return {"status": "resolved", "matches": unique_matches, "searched": searched}
     top = unique_matches[0]
@@ -12465,7 +13221,7 @@ def bounded_ratio_score(hit_count: int, total_count: int, maximum: float) -> flo
 def embedding_provider_config() -> dict[str, str] | None:
     values = planner_env()
     provider = (values.get("WATHEFNI_EMBEDDING_PROVIDER") or "voyage").strip().lower()
-    model = (values.get("WATHEFNI_EMBEDDING_MODEL") or "voyage-4").strip()
+    model = (values.get("WATHEFNI_EMBEDDING_MODEL") or "voyage-4-large").strip()
     if provider != "voyage":
         return None
     voyage_env = read_env_file(values.get("WATHEFNI_VOYAGE_ENV"))
@@ -13244,175 +14000,29 @@ def generate_application_profile_evaluation(app_key: str, company_code: str, *, 
 
 
 def rank_candidates(action: dict[str, Any], *, company_code: str | None = None) -> dict[str, Any]:
-    company = str(company_code or "").strip().upper()
-    if not company:
-        return {"ok": False, "error": "tenant_scope_required", "action": action}
-    requested_top_n = int(action.get("top_n") or 0)
-    top_n = requested_top_n if requested_top_n > 0 else RANK_CANDIDATES_DEFAULT_TOP_N
-    capped = top_n > RANK_CANDIDATES_MAX_TOP_N
-    top_n = max(1, min(top_n, RANK_CANDIDATES_MAX_TOP_N))
-    include_assessment = company_has_module(company_code, "assessments")
-    query = str(action.get("query") or action.get("prompt_text") or "").strip()
-    position = str(action.get("position") or "").strip() or infer_position_filter_from_text(query, company_code=company_code)
-    status_filter = str(action.get("status") or "").strip() or infer_application_status_filter(query)
-    ranking_prompt = query or (position.replace("_", " ") if position else "")
-    role_profile = role_profile_for_position(position, None)
-    terms = normalized_search_terms(ranking_prompt, position)
-    query_vector = embed_rank_query(ranking_prompt) if (terms or position) else None
-    query_vector_literal = pgvector_literal(query_vector) if query_vector else None
-    params: list[Any] = [company]
-    where = ["a.company_code=%s", reviewable_application_predicate("a")]
-    if position:
-        where.append("(a.position_code ILIKE %s OR a.position_title ILIKE %s)")
-        params.extend([f"%{position}%", f"%{position.replace('_', ' ')}%"])
-    if status_filter:
-        if status_filter == "screening_complete":
-            where.append(
-                "("
-                "a.status=%s "
-                "OR a.screening_status='complete' "
-                "OR a.raw_json->'screening'->>'status'='complete'"
-                ")"
-            )
-            params.append(status_filter)
-        else:
-            where.append("a.status=%s")
-            params.append(status_filter)
-    else:
-        where.append("a.status NOT IN ('hired','rejected')")
-    where_sql = " AND ".join(where)
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT COUNT(*) AS count FROM applications a WHERE {where_sql}", params)
-            total = int((cur.fetchone() or {}).get("count") or 0)
-            semantic_select = "1 - (sd.embedding <=> %s::vector) AS semantic_similarity" if query_vector_literal else "NULL::double precision AS semantic_similarity"
-            semantic_order = "(sd.embedding <=> %s::vector) ASC NULLS LAST," if query_vector_literal else ""
-            select_params = [query_vector_literal, *params, query_vector_literal, RANK_CANDIDATES_POOL_LIMIT] if query_vector_literal else [*params, RANK_CANDIDATES_POOL_LIMIT]
-            cur.execute(
-                f"""
-                SELECT a.*, c.name AS candidate_name, c.email AS candidate_email,
-                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json,
-                       latest_assessment.assessment_status,
-                       latest_assessment.assessment_percent,
-                       latest_assessment.assessment_report_json,
-                       latest_interview.interview_status,
-                       latest_interview.interview_feedback_status,
-                       latest_interview.interview_notes,
-                       latest_interview.interview_ai_summary,
-                       sd.content AS semantic_content,
-                       {semantic_select}
-                FROM applications a
-                LEFT JOIN candidates c ON c.phone=a.phone
-                LEFT JOIN semantic_documents sd ON sd.entity_type='application' AND sd.entity_key=a.app_key
-                LEFT JOIN LATERAL (
-                  SELECT aa.status AS assessment_status,
-                         s.percent AS assessment_percent,
-                         r.report_json AS assessment_report_json
-                  FROM assessment_attempts aa
-                  LEFT JOIN assessment_scores s ON s.attempt_id=aa.attempt_id
-                  LEFT JOIN assessment_reports r ON r.attempt_id=aa.attempt_id
-                  WHERE aa.company_code=a.company_code AND aa.app_key=a.app_key
-                  ORDER BY aa.updated_at DESC, aa.created_at DESC
-                  LIMIT 1
-                ) latest_assessment ON TRUE
-                LEFT JOIN LATERAL (
-                  SELECT ci.status AS interview_status,
-                         ci.feedback_status AS interview_feedback_status,
-                         ci.notes AS interview_notes,
-                         ci.ai_summary AS interview_ai_summary
-                  FROM candidate_interviews ci
-                  WHERE ci.company_code=a.company_code AND ci.app_key=a.app_key
-                  ORDER BY ci.scheduled_start DESC NULLS LAST, ci.updated_at DESC
-                  LIMIT 1
-                ) latest_interview ON TRUE
-                WHERE {where_sql}
-                ORDER BY
-                  {semantic_order}
-                  CASE a.status
-                    WHEN 'screening_complete' THEN 0
-                    WHEN 'review_pending' THEN 1
-                    WHEN 'shortlisted' THEN 2
-                    WHEN 'screening' THEN 3
-                    ELSE 4
-                  END,
-                  a.ingested_at DESC NULLS LAST,
-                  a.updated_at DESC NULLS LAST
-                LIMIT %s
-                """,
-                select_params,
-            )
-            rows = [dict(row) for row in cur.fetchall()]
-    scored: list[dict[str, Any]] = []
-    for row in rows:
-        row_role_profile = role_profile_for_position(position or row.get("position_code"), row.get("position_title"))
-        score, breakdown, evidence, confidence, matched_terms = rank_candidate_row(row, query=query, position=position, terms=terms, role_profile=row_role_profile)
-        row_raw_json = row.get("raw_json") if isinstance(row.get("raw_json"), dict) else {}
-        row_screening = row_raw_json.get("screening") if isinstance(row_raw_json.get("screening"), dict) else {}
-        scored.append(
-            {
-                "score": round(score, 2),
-                "score_breakdown": breakdown,
-                "confidence": confidence,
-                "role_profile": row_role_profile,
-                "assessment_signal": row_assessment_signal(row),
-                "interview_signal": row_interview_signal(row),
-                "assessment_report": json_safe(row.get("assessment_report_json") if isinstance(row.get("assessment_report_json"), dict) else {}),
-                "evidence": evidence,
-                "app_key": row.get("app_key"),
-                "phone": row.get("phone"),
-                "name": candidate_name_from_row(row),
-                "position_code": row.get("position_code"),
-                "position_title": row.get("position_title"),
-                "status": row.get("status"),
-                "screening_status": row.get("screening_status") or row_screening.get("status"),
-                "semantic_similarity": row.get("semantic_similarity"),
-                "matched_terms": matched_terms,
-                "reasons": evidence[:4],
-                "application": prehire_application_summary(row, include_raw=True, include_assessment=include_assessment),
-            }
+    """Canonical Ranking entrypoint (R0–R3).
+
+    Delegates to ``candidate_ranking`` so dashboard, mobile, and Admin Assistant
+    share one job-scoped authority. Requires an exact position/job.
+    """
+    try:
+        result = _candidate_ranking.rank_candidates_compat(sys.modules[__name__], action, company_code=company_code)
+        return _ranking_presentation.attach_presentations(
+            result,
+            locale=str(action.get("locale") or "en"),
+            orch=sys.modules[__name__],
+            company_code=company_code or result.get("company_code"),
         )
-    scored.sort(key=lambda item: item["score"], reverse=True)
-    selected = scored[:top_n]
-    attach_gpt_rank_evaluations(selected, role_profile=role_profile, query=ranking_prompt, company_code=company)
-    return {
-        "ok": True,
-        "query": query,
-        "filters": {"company_code": company, "position": position or None, "status": status_filter or None},
-        "requested_top_n": requested_top_n or None,
-        "shown_top_n": top_n,
-        "capped": capped,
-        "embedding": {"provider": "voyage", "model": "voyage-4", "used": bool(query_vector_literal)},
-        "role_profile": role_profile,
-        "total_matching": total,
-        "pool_scanned": len(rows),
-        "candidates": selected,
-    }
+    except _candidate_ranking.RankingError as exc:
+        return {"ok": False, "error": exc.code, "message": str(exc), "details": exc.details, "action": action}
+
 
 
 def format_rank_candidates_reply(result: dict[str, Any]) -> str:
-    candidates = result.get("candidates") if isinstance(result.get("candidates"), list) else []
-    filters = result.get("filters") if isinstance(result.get("filters"), dict) else {}
-    total = int(result.get("total_matching") or 0)
-    shown = int(result.get("shown_top_n") or len(candidates) or 0)
-    position = filters.get("position")
-    if not candidates:
-        return "I couldn't find matching candidates for that search."
-    title = f"Top {len(candidates)} candidate{'s' if len(candidates) != 1 else ''}"
-    if position:
-        title += f" for {position}"
-    title += f" ({total} matching total):"
-    lines = [title]
-    for idx, candidate in enumerate(candidates, 1):
-        reasons = candidate.get("reasons") if isinstance(candidate.get("reasons"), list) else []
-        reason_text = "; ".join(str(reason) for reason in reasons[:3]) or f"score {candidate.get('score')}"
-        lines.append(
-            f"{idx}. {candidate.get('name') or candidate.get('phone')} — {candidate.get('position_title') or candidate.get('position_code')} | {candidate.get('status')}: {reason_text}"
-        )
-    if result.get("capped") and total > shown:
-        lines.append("I capped this at 10 for WhatsApp readability. Ask for the next page if you want more.")
-    elif total > shown:
-        lines.append(f"There are {total - shown} more matching candidates. Ask for more if you want the next batch.")
-    return "\n".join(lines)
+    if result.get("ok") is False:
+        return str(result.get("message") or result.get("error") or "Ranking failed.")
+    locale = str((result.get("presentation_contract") or {}).get("locale") or "en")
+    return _ranking_presentation.format_assistant_result(result, locale=locale)
 
 
 def candidate_cv_evaluation(action: dict[str, Any], *, company_code: str | None = None) -> dict[str, Any]:
@@ -16381,6 +16991,32 @@ def run_leave_accrual_sweep(*, company_code: str | None = None, as_of: date | No
     for company in companies:
         if not company_has_module(company, "leave"):
             continue
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    import tenant_control_queue_gate as _tc_qg
+
+                    queued_epoch = _tc_qg.persist_work_epoch(
+                        cur,
+                        company_code=company,
+                        work_kind="leave_accrual",
+                        work_ref=f"{company}:{today.isoformat()}",
+                        module_key="leave",
+                    )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        cur,
+                        company_code=company,
+                        module_key="leave",
+                        work_kind="leave_accrual",
+                        work_ref=f"{company}:{today.isoformat()}",
+                        queued_epoch=queued_epoch,
+                        surface="timers",
+                    )
+                    conn.commit()
+                    if not allowed:
+                        continue
+        except Exception:
+            pass
         policies = [get_leave_policy(company, lt) for lt in _LEAVE_P1_TYPES]
         policies = [p for p in policies if p and str(p.get("accrual_method")) == "monthly_accrual"]
         if not policies:
@@ -19515,6 +20151,40 @@ def run_shift_reminder_scan(*, account_id: str | None, dry_run: bool = True, lim
         if not company_has_module(shift.get("company_code"), "shifts"):
             skipped.append({"shift_id": str(shift.get("shift_id")), "company_code": shift.get("company_code"), "reason": "shifts_module_disabled"})
             continue
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    import tenant_control_queue_gate as _tc_qg
+
+                    company = str(shift.get("company_code") or "").upper()
+                    work_ref = str(shift.get("shift_id"))
+                    queued_epoch = _tc_qg.persist_work_epoch(
+                        cur,
+                        company_code=company,
+                        work_kind="shift_reminder",
+                        work_ref=work_ref,
+                        module_key="shifts",
+                    )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        cur,
+                        company_code=company,
+                        module_key="shifts",
+                        work_kind="shift_reminder",
+                        work_ref=work_ref,
+                        queued_epoch=queued_epoch,
+                        surface="timers",
+                    )
+                    conn.commit()
+                    if not allowed:
+                        skipped.append({
+                            "shift_id": work_ref,
+                            "company_code": company,
+                            "reason": decision.reason_code,
+                            "correlation_id": decision.audit_correlation_id,
+                        })
+                        continue
+        except Exception:
+            pass
         message = f"Reminder: your shift is on {format_shift_date(shift.get('shift_date'))} from {format_shift_time(shift.get('start_time'))} to {format_shift_time(shift.get('end_time'))}."
         entry = {"shift_id": str(shift.get("shift_id")), "employee_key": shift.get("employee_key"), "phone": shift.get("phone") or shift.get("employee_phone"), "message": message, "dry_run": dry_run}
         if not dry_run:
@@ -20897,82 +21567,36 @@ def record_employee_document_receipt(
             """,
             (*fields, fields[24], fields[13]),
         )
-    if document_type in {"civil_id", "passport", "medical", "education_cert"}:
-        cur.execute(
-            """
-            SELECT employee_key, document_type
-            FROM compliance_documents
-            WHERE employee_key=%s AND document_type=%s
-            ORDER BY updated_at DESC
-            LIMIT 1
-            """,
-            (employee_key, document_type),
+    # Kuwait pilot: dual-write via canonical map (residence + work_permit included).
+    # Historical residency_iqama rows stay non-destructively compatible.
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    ocr_proposal = None
+    if isinstance(extraction, dict) and extraction:
+        ocr_proposal = {
+            "document_number": document_number or None,
+            "issue_date": str(issued_date) if issued_date else extraction.get("issued_date"),
+            "expiry_date": str(expiry_date) if expiry_date else extraction.get("expiry_date"),
+            "name": extraction.get("full_name") or extraction.get("name"),
+            "extraction_status": extraction_status,
+            "authoritative": False,
+        }
+    if _kw_doc_journey.should_dual_write_compliance(document_type):
+        _kw_doc_journey.dual_write_compliance_from_upload(
+            cur,
+            employee=employee,
+            document_type=document_type,
+            label=item.get("label") or _kw_doc_journey.document_label(document_type),
+            metadata=metadata,
+            document_number=document_number or None,
+            issued_date=issued_date,
+            expiry_date=expiry_date,
+            extraction_status=extraction_status,
+            extraction_error=extraction_error,
+            extraction_confidence=extraction_confidence,
+            ocr_proposal=ocr_proposal,
+            notes=value,
         )
-        compliance = cur.fetchone()
-        compliance_metadata = {**metadata, "employee_document_type": document_type}
-        if compliance:
-            cur.execute(
-                """
-                UPDATE compliance_documents
-                SET status='received',
-                    notes=%s,
-                    raw_json=%s,
-                    document_number=COALESCE(%s, document_number),
-                    issued_date=COALESCE(%s, issued_date),
-                    expiry_date=COALESCE(%s, expiry_date),
-                    days_until_expiry=CASE WHEN %s::date IS NULL THEN days_until_expiry ELSE (%s::date - CURRENT_DATE) END,
-                    extraction_status=%s,
-                    extraction_error=%s,
-                    extraction_confidence=%s,
-                    extracted_at=CASE WHEN %s IS NOT NULL THEN now() ELSE extracted_at END,
-                    updated_at=now()
-                WHERE employee_key=%s AND document_type=%s
-                """,
-                (
-                    value,
-                    Json(compliance_metadata),
-                    document_number or None,
-                    issued_date,
-                    expiry_date,
-                    expiry_date,
-                    expiry_date,
-                    extraction_status,
-                    extraction_error,
-                    extraction_confidence,
-                    extraction_status,
-                    employee_key,
-                    document_type,
-                ),
-            )
-        else:
-            cur.execute(
-                """
-                INSERT INTO compliance_documents (
-                    employee_key, document_type, label, status, notes, raw_json,
-                    document_number, issued_date, expiry_date, days_until_expiry,
-                    extraction_status, extraction_error, extraction_confidence, extracted_at,
-                    company_code
-                )
-                VALUES (%s,%s,%s,'received',%s,%s,%s,%s,%s,CASE WHEN %s::date IS NULL THEN NULL ELSE (%s::date - CURRENT_DATE) END,%s,%s,%s,CASE WHEN %s IS NOT NULL THEN now() ELSE NULL END,%s)
-                """,
-                (
-                    employee_key,
-                    document_type,
-                    item.get("label"),
-                    value,
-                    Json(compliance_metadata),
-                    document_number or None,
-                    issued_date,
-                    expiry_date,
-                    expiry_date,
-                    expiry_date,
-                    extraction_status,
-                    extraction_error,
-                    extraction_confidence,
-                    extraction_status,
-                    employee.get("company_code") or "WATHEFNI",
-                ),
-            )
     storage_metadata = storage_result.get("metadata") if isinstance(storage_result.get("metadata"), dict) else {}
     upsert_file_registry(
         cur,
@@ -20993,6 +21617,48 @@ def record_employee_document_receipt(
             "value": value,
         },
     )
+    # Governed version for renew/review history (pending until HR reviews).
+    try:
+        _kw_doc_journey.ensure_document_journey_schema(cur)
+        file_id = None
+        checksum = storage_result.get("content_sha256")
+        if checksum:
+            cur.execute(
+                """
+                SELECT file_id FROM file_registry
+                WHERE subject_type='employee' AND subject_key=%s
+                  AND COALESCE(content_sha256,'')=COALESCE(%s,'')
+                ORDER BY updated_at DESC NULLS LAST LIMIT 1
+                """,
+                (employee_key, checksum),
+            )
+            frow = cur.fetchone()
+            file_id = str(frow["file_id"]) if frow else None
+        _kw_doc_journey.register_upload_version(
+            cur,
+            sys.modules[__name__],
+            company_code=employee.get("company_code") or "WATHEFNI",
+            employee_key=employee_key,
+            document_type=document_type,
+            file_id=file_id,
+            file_sha256=checksum,
+            filename=filename,
+            mime_type=storage_result.get("mime_type"),
+            issue_date=issued_date,
+            expiry_date=expiry_date,
+            document_number=document_number or None,
+            ocr_proposal=ocr_proposal,
+            uploaded_by=digits(employee.get("phone")),
+            upload_source="employee_or_hr_upload",
+            actor_user_id=digits(employee.get("phone")),
+        )
+    except Exception:
+        logger.exception(
+            "governed document version registration failed employee=%s type=%s",
+            employee_key,
+            document_type,
+        )
+
 
 def find_candidate_application_for_file(
     phone: str | None,
@@ -21269,13 +21935,162 @@ def register_candidate_cv_file(
         # Older deployments may not have candidate_documents; canonical application
         # truth above is still the authority used by HR chat.
         pass
+    # WAVE3: additive job-WhatsApp adapter dual-write after live attach.
+    if received_ok and str(cv_json.get("source") or "").startswith("whatsapp"):
+        cur.execute("SAVEPOINT unified_inbound_cv_whatsapp_job")
+        try:
+            import inbound_cv_adapters as _inbound_cv_adapters
+
+            meta = metadata if isinstance(metadata, dict) else {}
+            provider_message_id = str(
+                meta.get("provider_message_id")
+                or meta.get("message_id")
+                or media.get("message_id")
+                or f"{app_key}:{checksum}"
+            )
+            _inbound_cv_adapters.adapt_whatsapp_job(
+                cur,
+                company_code=company_code,
+                provider_message_id=provider_message_id,
+                phone=phone,
+                account_id=str(meta.get("account_id") or "") or None,
+                conversation_id=str(meta.get("conversation_id") or "") or None,
+                pending_id=str(meta.get("pending_id") or "") or None,
+                document_id=document_id,
+                content_sha256=str(checksum or "") or None,
+                filename=original_filename,
+                app_key=app_key,
+                apply_code=str(application.get("apply_code") or "") or None,
+                human_confirmed=True,
+                mime_or_suffix=str(mime_type or original_filename or ""),
+                needs_ocr=False,
+            )
+        except Exception:
+            cur.execute("ROLLBACK TO SAVEPOINT unified_inbound_cv_whatsapp_job")
+            logger.exception("unified_inbound_cv_whatsapp_job_failed")
+        finally:
+            cur.execute("RELEASE SAVEPOINT unified_inbound_cv_whatsapp_job")
+    job_id = None
+    if received_ok and document_id and not is_replacement:
+        try:
+            job_id = ensure_application_cv_extraction_job(
+                cur,
+                company_code=company_code,
+                document_id=str(document_id),
+                app_key=app_key,
+                source_channel=str(cv_json.get("source") or "whatsapp_document"),
+                priority=80,
+            )
+        except Exception:
+            logger.exception(
+                "canonical_cv_enqueue_failed app_key=%s document_id=%s",
+                app_key,
+                document_id,
+            )
+            # Fail closed: do not leave pending_async without a durable job.
+            cv_json = dict((raw_json.get("cv") if isinstance(raw_json.get("cv"), dict) else {}) or {})
+            processing = dict(cv_json.get("processing") or {})
+            processing.update(
+                {
+                    "status": "failed",
+                    "error": "canonical_enqueue_failed",
+                    "updated_at": now_iso(),
+                }
+            )
+            cv_json["processing"] = processing
+            raw_json["cv"] = cv_json
+            cur.execute(
+                "UPDATE applications SET raw_json=%s, updated_at=now() WHERE app_key=%s AND company_code=%s",
+                (Json(raw_json), app_key, company_code),
+            )
+            job_id = None
     return {
         "ok": bool(storage_result.get("ok")),
         "app_key": app_key,
         "document_id": document_id,
+        "intake_job_id": job_id,
         "storage": storage_result,
         "is_replacement": is_replacement,
     }
+
+
+def ensure_application_cv_extraction_job(
+    cur: Any,
+    *,
+    company_code: str,
+    document_id: str,
+    app_key: str | None = None,
+    intake_document_id: str | None = None,
+    source_channel: str | None = None,
+    priority: int = 100,
+) -> str | None:
+    """Enqueue (or keep) the canonical durable cv_extraction job for a candidate document.
+
+    Idempotent on candidate-document:{id}:extract. Does not create a second processing path.
+    """
+    doc_id = str(document_id or "").strip()
+    company = str(company_code or "").strip().upper()
+    if not doc_id or not company:
+        return None
+    config = durable_email_ingress_config()
+    idempotency_key = f"candidate-document:{doc_id}:extract"
+    cur.execute(
+        """
+        SELECT job_id::text AS job_id, status
+        FROM intake_processing_jobs
+        WHERE company_code=%s AND idempotency_key=%s
+        LIMIT 1
+        """,
+        (company, idempotency_key),
+    )
+    existing = cur.fetchone()
+    if existing:
+        status = str(existing.get("status") or "")
+        if status in {"pending", "running", "retrying", "waiting_quota", "waiting_budget", "completed"}:
+            return str(existing["job_id"])
+        if status in {"cancelled", "dead_letter"}:
+            cur.execute(
+                """
+                UPDATE intake_processing_jobs
+                SET status='pending', available_at=now(), lease_owner=NULL, lease_expires_at=NULL,
+                    last_error_code=NULL, last_error_detail=NULL, completed_at=NULL, updated_at=now(),
+                    payload=COALESCE(payload,'{}'::jsonb) || %s::jsonb
+                WHERE job_id=%s::uuid
+                RETURNING job_id::text
+                """,
+                (
+                    Json(
+                        {
+                            "candidate_document_id": doc_id,
+                            "app_key": app_key,
+                            "intake_document_id": intake_document_id,
+                            "source_channel": source_channel,
+                            "revived_from": status,
+                        }
+                    ),
+                    existing["job_id"],
+                ),
+            )
+            revived = cur.fetchone()
+            return str((revived or {}).get("job_id") or existing["job_id"])
+    payload = {
+        "candidate_document_id": doc_id,
+        "app_key": app_key,
+        "source_channel": source_channel or ("email_inbound" if intake_document_id else "application_attach"),
+    }
+    if intake_document_id:
+        payload["intake_document_id"] = str(intake_document_id)
+    return _durable_email_ingress.enqueue_job(
+        cur,
+        company_code=company,
+        job_type="cv_extraction",
+        subject_type="candidate_document",
+        subject_id=doc_id,
+        idempotency_key=idempotency_key,
+        payload=payload,
+        priority=priority,
+        max_attempts=config.max_attempts,
+    )
 
 
 # --- Bulk CV import: shared import core -------------------------------------
@@ -21315,6 +22130,7 @@ def register_imported_cv(
     source_ref: str | None = None,
     auto_admit: bool = False,
     admit_reason: str | None = None,
+    identity_resolution: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     company = str(company_code or "").strip().upper()
     resolved_source, resolved_mime, resolved_checksum, resolved_size = source_file_details(str(source_path), mime_type)
@@ -21323,13 +22139,41 @@ def register_imported_cv(
     checksum = checksum or resolved_checksum
     size_bytes = size_bytes or resolved_size
     email = (str(candidate_email).strip().lower() if candidate_email else None) or None
-    surrogate_phone = import_surrogate_phone(company, email=email, checksum=checksum)
+    governed_identity = bool(identity_resolution)
+    if governed_identity:
+        if (
+            str(identity_resolution.get("outcome") or "")
+            not in _inbound_cv_authority.ACCEPTED_IDENTITY_OUTCOMES
+            or not identity_resolution.get("ownership_confirmed")
+        ):
+            return {
+                "ok": False,
+                "status": "failed",
+                "error": "identity_binding_not_authorized",
+            }
+        surrogate_phone = str(
+            identity_resolution.get("selected_candidate_phone") or ""
+        ).strip()
+        if not surrogate_phone:
+            return {
+                "ok": False,
+                "status": "failed",
+                "error": "identity_candidate_key_missing",
+            }
+    else:
+        surrogate_phone = import_surrogate_phone(
+            company, email=email, checksum=checksum
+        )
     position_code = (str(position_code).strip() if position_code else "") or ""
-    app_key = import_app_key(surrogate_phone, company, position_code)
+    app_key = (
+        str((identity_resolution or {}).get("selected_app_key") or "").strip()
+        if governed_identity
+        else ""
+    ) or import_app_key(surrogate_phone, company, position_code)
     # Tiered intake: an explicit role signal (position_code) + company auto-admit
     # setting places the candidate directly into Candidates (review_pending). Anything
     # else is held in the Intake queue (import_review with a role guess, else needs_role).
-    auto_admitted = bool(auto_admit and position_code)
+    auto_admitted = bool(auto_admit and position_code and not governed_identity)
     if auto_admitted:
         held_status = "review_pending"
         current_step = "review"
@@ -21355,13 +22199,42 @@ def register_imported_cv(
             company,
             position_code or None,
             Json(json_safe({
-                "identity_source": "bulk_import",
+                "identity_source": (
+                    "governed_inbound_cv"
+                    if governed_identity
+                    else "bulk_import"
+                ),
                 "import_batch_id": batch_id,
                 "contact": {"phone": candidate_phone or None, "email": email, "name": candidate_name or None},
+                "identity_resolution_id": (
+                    (identity_resolution or {}).get("resolution_id")
+                ),
             })),
-            Json(json_safe({"identity_source": "bulk_import", "import_batch_id": batch_id})),
+            Json(json_safe({
+                "identity_source": (
+                    "governed_inbound_cv"
+                    if governed_identity
+                    else "bulk_import"
+                ),
+                "import_batch_id": batch_id,
+                "identity_resolution_id": (
+                    (identity_resolution or {}).get("resolution_id")
+                ),
+            })),
         ),
     )
+
+    cur.execute(
+        """
+        SELECT EXISTS (
+          SELECT 1 FROM candidate_documents
+          WHERE app_key=%s
+            AND COALESCE((metadata->>'latest')::boolean,false)=true
+        ) AS has_current_cv
+        """,
+        (app_key,),
+    )
+    has_current_cv = bool((cur.fetchone() or {}).get("has_current_cv"))
 
     storage_result = store_subject_file(
         company_code=company,
@@ -21386,8 +22259,17 @@ def register_imported_cv(
         "original_filename": original_filename,
         "candidate_email": email,
         "candidate_name": candidate_name or None,
-        "latest": True,
+        "latest": not governed_identity,
         "versioned_at": now_iso(),
+        "is_replacement": bool(governed_identity),
+        "had_prior_current_cv": has_current_cv,
+        "identity_resolution_id": (
+            (identity_resolution or {}).get("resolution_id")
+        ),
+        "intake_document_id": (
+            (identity_resolution or {}).get("intake_document_id")
+        ),
+        "identity_outcome": (identity_resolution or {}).get("outcome"),
     }
     upsert_file_registry(
         cur,
@@ -21430,8 +22312,15 @@ def register_imported_cv(
         "filename": original_filename,
         "path": storage_metadata.get("local_path") or str(resolved_source),
         "source": "bulk_import",
-        "latest": True,
+        "latest": not governed_identity,
         "versioned_at": registry_metadata["versioned_at"],
+        "is_replacement": bool(governed_identity),
+        "identity_resolution_id": (
+            (identity_resolution or {}).get("resolution_id")
+        ),
+        "intake_document_id": (
+            (identity_resolution or {}).get("intake_document_id")
+        ),
         "storage": cv_storage,
         "processing": {
             "file_received": True,
@@ -21444,7 +22333,7 @@ def register_imported_cv(
         },
     }
     app_raw = {
-        "cv": cv_json,
+        ("cv_pending" if governed_identity else "cv"): cv_json,
         "cv_received": True,
         "data_source": "production",
         "candidate_name": candidate_name or None,
@@ -21459,6 +22348,9 @@ def register_imported_cv(
             "needs_role": held_status == "needs_role",
             "role_suggestion": role_suggestion or None,
             "imported_at": now_iso(),
+                "identity_resolution_id": (
+                    (identity_resolution or {}).get("resolution_id")
+                ),
         },
     }
     cur.execute(
@@ -21491,6 +22383,19 @@ def register_imported_cv(
             source_ref or original_filename,
         ),
     )
+    try:
+        import prehire_ownership as _own
+
+        _own.apply_application_owner_inherit(
+            cur,
+            company_code=company,
+            app_key=app_key,
+            position_code=position_code,
+            actor_user_id=None,
+            reason="inherit_from_job_recruiter_on_import",
+        )
+    except Exception:
+        pass
 
     document_id = None
     try:
@@ -21516,8 +22421,51 @@ def register_imported_cv(
         )
         doc_row = cur.fetchone()
         document_id = (doc_row or {}).get("document_id")
+        if governed_identity:
+            _inbound_cv_authority.record_candidate_identity_keys(
+                cur,
+                company_code=company,
+                candidate_phone=surrogate_phone,
+                resolution=identity_resolution or {},
+            )
     except Exception:
         pass
+
+    job_id = None
+    if document_id:
+        try:
+            job_id = ensure_application_cv_extraction_job(
+                cur,
+                company_code=company,
+                document_id=str(document_id),
+                app_key=app_key,
+                intake_document_id=(
+                    str((identity_resolution or {}).get("intake_document_id") or "") or None
+                ),
+                source_channel=str(source or "bulk_import"),
+                priority=50 if position_code else 100,
+            )
+        except Exception:
+            logger.exception(
+                "canonical_cv_enqueue_failed app_key=%s document_id=%s",
+                app_key,
+                document_id,
+            )
+            processing = dict(cv_json.get("processing") or {})
+            processing.update(
+                {
+                    "status": "failed",
+                    "error": "canonical_enqueue_failed",
+                    "updated_at": now_iso(),
+                }
+            )
+            cv_json["processing"] = processing
+            app_raw["cv" if not governed_identity else "cv_pending"] = cv_json
+            cur.execute(
+                "UPDATE applications SET raw_json=%s, updated_at=now() WHERE app_key=%s AND company_code=%s",
+                (Json(json_safe(app_raw)), app_key, company),
+            )
+            job_id = None
 
     return {
         "ok": True,
@@ -21528,6 +22476,7 @@ def register_imported_cv(
         "surrogate_phone": surrogate_phone,
         "file_id": file_id,
         "document_id": document_id,
+        "intake_job_id": job_id,
         "checksum": checksum,
         "size_bytes": size_bytes,
         "mime_type": resolved_mime,
@@ -22447,6 +23396,7 @@ def upsert_application_semantic_document(
               provider=EXCLUDED.provider,
               model=EXCLUDED.model,
               dimensions=EXCLUDED.dimensions,
+              embedding=NULL,
               metadata=EXCLUDED.metadata,
               updated_at=now()
             """,
@@ -22476,6 +23426,10 @@ def notify_candidate_cv_validation(
     document_id: str,
     accepted: bool,
 ) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(application, kind="cv_validation")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return {**exc.as_result(), "skipped": "held_or_non_live_application"}
     app_key = str(application.get("app_key") or "")
     company = str(application.get("company_code") or "").upper()
     phone = digits(application.get("phone"))
@@ -22548,10 +23502,29 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                 """
                 SELECT cd.*, cd.raw_json AS document_raw_json, cd.metadata AS document_metadata,
                        a.*, c.name AS candidate_name, c.email AS candidate_email,
-                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json
+                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json,
+                       intake_authority.document_id::text AS authority_intake_document_id,
+                       intake_authority.content_sha256 AS authority_content_sha256,
+                       import_authority.source AS authority_import_source
                 FROM candidate_documents cd
                 JOIN applications a ON a.app_key=cd.app_key
                 LEFT JOIN candidates c ON c.phone=a.phone
+                LEFT JOIN LATERAL (
+                  SELECT d.document_id, d.content_sha256
+                  FROM intake_documents d
+                  WHERE d.company_code=a.company_code
+                    AND d.candidate_document_id=cd.document_id
+                  ORDER BY d.created_at DESC
+                  LIMIT 1
+                ) intake_authority ON true
+                LEFT JOIN LATERAL (
+                  SELECT b.source
+                  FROM import_items i
+                  JOIN import_batches b ON b.batch_id=i.batch_id
+                  WHERE i.document_id=cd.document_id
+                  ORDER BY i.created_at DESC
+                  LIMIT 1
+                ) import_authority ON true
                 WHERE cd.document_id=%s
                 """,
                 (document_id,),
@@ -22580,6 +23553,54 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
             company_code = str(app.get("company_code") or "").strip().upper()
             if not company_code:
                 return {"ok": False, "error": "tenant_scope_required", "document_id": document_id}
+            governed_intake_document_id = str(
+                item.get("authority_intake_document_id")
+                or document_metadata.get("intake_document_id")
+                or document_cv.get("intake_document_id")
+                or ""
+            )
+            identity_resolution_id = str(
+                document_metadata.get("identity_resolution_id")
+                or document_cv.get("identity_resolution_id")
+                or ""
+            )
+            is_governed_inbound = bool(
+                item.get("authority_intake_document_id")
+                or governed_intake_document_id
+                or identity_resolution_id
+                or str(item.get("authority_import_source") or "").lower()
+                in {"email", "email_inbound"}
+            )
+            if is_governed_inbound:
+                if not governed_intake_document_id or not identity_resolution_id:
+                    return {
+                        "ok": False,
+                        "error": "inbound_email_authority_provenance_missing",
+                        "document_id": document_id,
+                    }
+                document_storage = (
+                    document_cv.get("storage")
+                    if isinstance(document_cv.get("storage"), dict)
+                    else {}
+                )
+                content_sha = str(
+                    item.get("authority_content_sha256")
+                    or document_storage.get("sha256")
+                    or ""
+                )
+                if not _inbound_cv_authority.binding_is_authorized(
+                    cur,
+                    company_code=company_code,
+                    intake_document_id=governed_intake_document_id,
+                    content_sha256=content_sha,
+                    candidate_phone=str(app.get("phone") or "") or None,
+                    app_key=str(app.get("app_key") or "") or None,
+                ):
+                    return {
+                        "ok": False,
+                        "error": "document_current_authority_not_proven",
+                        "document_id": document_id,
+                    }
             db_exec = _cv_db_execute_factory(cur)
             lease = _cv_extraction.acquire_extraction_lease(
                 db_exec,
@@ -22642,18 +23663,27 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                     text_path.write_text(text, encoding="utf-8")
                     regex_profile = parse_candidate_profile_from_cv_text(text, fallback_name=item.get("candidate_name"), fallback_phone=app.get("phone"))
                     llm_profile = extract_structured_candidate_profile_from_cv_text(text, application=app)
+                    application_profile = merge_candidate_profiles(regex_profile, llm_profile)
                     candidate_profile = item.get("candidate_profile") if isinstance(item.get("candidate_profile"), dict) else {}
                     profile = merge_candidate_profiles_with_authority(candidate_profile, regex_profile, llm_profile)
                     screening_questions = screening_questions_for_application(app)
                     prefill_answers, prefill_sources, prefill_evidence = prefill_screening_answers_from_profile(profile, screening_questions)
-                    semantic = upsert_application_semantic_document(
+                    source_sha = (
+                        (document_cv.get("storage") or {}).get("sha256")
+                        if isinstance(document_cv.get("storage"), dict)
+                        else None
+                    )
+                    evidence_materialization = _candidate_cv_evidence.materialize_extracted_cv(
                         cur,
+                        db_execute=db_exec,
                         application=app,
-                        content=text,
-                        metadata={
+                        document_id=str(document_id),
+                        local_path=str(local_path or ""),
+                        source_content_sha256=source_sha,
+                        extracted_text=text,
+                        extraction_method=method,
+                        extraction_metadata={
                             "source": "cv_worker",
-                            "document_id": document_id,
-                            "extraction_method": method,
                             "extraction_stage": (extraction.metadata or {}).get("stage"),
                             "extraction_tier": (extraction.metadata or {}).get("tier"),
                             "extraction_provider": (extraction.metadata or {}).get("provider"),
@@ -22661,7 +23691,71 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             "provider_response_model": (extraction.metadata or {}).get("provider_response_model"),
                             "cache_hit": extraction.cache_hit,
                         },
+                        semantic_upsert=upsert_application_semantic_document,
+                        actor="cv_worker",
                     )
+                    semantic = evidence_materialization["semantic"]
+                    application_facts = _candidate_cv_facts.extract_application_cv_facts(
+                        text,
+                        structured_profile=application_profile,
+                    )
+                    facts_snapshot = _candidate_cv_facts.materialize_facts(
+                        cur,
+                        evidence_id=str(evidence_materialization["evidence"]["evidence_id"]),
+                        company_code=company_code,
+                        app_key=str(app.get("app_key") or ""),
+                        document_id=str(document_id),
+                        source_content_sha256=str(
+                            evidence_materialization["evidence"].get("source_content_sha256")
+                            or source_sha
+                            or ""
+                        ),
+                        extracted_text_hash=str(
+                            evidence_materialization["evidence"].get("extracted_text_hash")
+                            or _candidate_cv_facts.text_hash(text)
+                        ),
+                        facts=application_facts,
+                        actor="cv_worker",
+                        provenance={
+                            "profile_parser": application_profile.get("parser"),
+                            "extraction_method": method,
+                        },
+                    )
+                    # CV Extraction V2 (Mistral Document AI) — same durable pipeline, no second intake path.
+                    # Publishes to canonical profile-facts only when WATHEFNI_CV_PROFILE_FACTS_V2=true.
+                    if _cv_extraction_v2.v2_enabled():
+                        try:
+                            v2_run = _cv_extraction_v2.run_v2_extraction(
+                                local_path=local_path,
+                                mime_type=mime,
+                                extracted_text=text,
+                                blocks=list(getattr(extraction, "blocks", None) or []),
+                                prefer_reuse_text=False,
+                            )
+                            _cv_extraction_v2.materialize_v2(
+                                cur,
+                                company_code=company_code,
+                                app_key=str(app.get("app_key") or ""),
+                                document_id=str(document_id),
+                                evidence_id=str(evidence_materialization["evidence"]["evidence_id"]),
+                                source_content_sha256=str(
+                                    evidence_materialization["evidence"].get("source_content_sha256")
+                                    or source_sha
+                                    or ""
+                                ),
+                                extracted_text_hash=str(
+                                    evidence_materialization["evidence"].get("extracted_text_hash")
+                                    or _candidate_cv_facts.text_hash(text)
+                                ),
+                                run_result=v2_run,
+                                publish_to_profile=_cv_extraction_v2.profile_facts_v2_published(),
+                            )
+                        except Exception as v2_exc:
+                            logger.warning(
+                                "cv_extraction_v2_failed document_id=%s error=%s",
+                                document_id,
+                                type(v2_exc).__name__,
+                            )
                     existing_apps = candidate_profile.get("applications") if isinstance(candidate_profile.get("applications"), list) else []
                     updated_apps: list[dict[str, Any]] = []
                     found_app = False
@@ -22748,6 +23842,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         text_extracted=True,
                         profile_parsed=True,
                         semantic_indexed=bool(semantic.get("ok")),
+                        facts_materialized=True,
+                        facts_status=facts_snapshot.get("status"),
+                        facts_contract_version=_candidate_cv_facts.CV_FACTS_CONTRACT_VERSION,
                         screening_prefill_ready=True,
                         screening_prefill_count=len(prefill_answers),
                         status="processed",
@@ -22818,7 +23915,7 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         """,
                         (Json({"latest": False}), company_code, app.get("app_key")),
                     )
-                    current_sha = ((document_cv.get("storage") or {}).get("sha256") if isinstance(document_cv.get("storage"), dict) else None)
+                    current_sha = source_sha
                     if current_sha:
                         cur.execute(
                             """
@@ -22850,6 +23947,9 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                                     {
                                         "semantic": semantic,
                                         "profile": profile,
+                                        "application_profile": application_profile,
+                                        "facts": application_facts,
+                                        "facts_id": str(facts_snapshot.get("facts_id") or ""),
                                         "latest": True,
                                         "validation_status": "accepted",
                                         "validated_at": now_iso(),
@@ -22864,7 +23964,84 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                             document_id,
                         ),
                     )
+                    # TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_CANARY
+                    cur.execute("SAVEPOINT talent_pool_auto_email_enqueue")
+                    try:
+                        auto_classification = _talent_pool_auto_email.record_extraction_and_enqueue(
+                            cur,
+                            company_code=company_code,
+                            app_key=str(app.get("app_key") or ""),
+                            document_id=str(document_id),
+                            extracted_text=text,
+                            extraction_method=method,
+                            evidence=dict(evidence_materialization["evidence"]),
+                            facts_snapshot=dict(facts_snapshot),
+                            provenance={
+                                "source": "canonical_cv_extraction_completion",
+                                "held_import": bool(held_import),
+                                "import_batch_id": item.get("batch_id"),
+                            },
+                        )
+                    except Exception:
+                        cur.execute("ROLLBACK TO SAVEPOINT talent_pool_auto_email_enqueue")
+                        logger.exception("talent_pool_auto_email_enqueue_failed")
+                        auto_classification = {"eligible": False, "reason": "enqueue_failed"}
+                    finally:
+                        cur.execute("RELEASE SAVEPOINT talent_pool_auto_email_enqueue")
+                    # WAVE2: additive cv_version_id dual-write (default OFF; no reader cutover).
+                    cur.execute("SAVEPOINT unified_cv_version_dual_write")
+                    try:
+                        import inbound_cv_processing as _inbound_cv_processing
+
+                        evidence_row = dict(evidence_materialization.get("evidence") or {})
+                        _inbound_cv_processing.dual_write_cv_version(
+                            cur,
+                            company_code=company_code,
+                            content_sha256=str(
+                                evidence_row.get("source_content_sha256") or source_sha or ""
+                            ),
+                            legacy_document_id=str(document_id),
+                            legacy_app_key=str(app.get("app_key") or "") or None,
+                            legacy_text_version_id=(
+                                str(auto_classification.get("version_id") or "")
+                                if isinstance(auto_classification, dict)
+                                and auto_classification.get("version_id")
+                                else None
+                            ),
+                            extracted_text_hash=str(evidence_row.get("extracted_text_hash") or "")
+                            or None,
+                            extraction_method=method,
+                            evidence_id=str(evidence_row.get("evidence_id") or "") or None,
+                            facts_id=str(facts_snapshot.get("facts_id") or "") or None,
+                            provenance={
+                                "source": "canonical_cv_extraction_completion",
+                                "classification_eligible": bool(
+                                    isinstance(auto_classification, dict)
+                                    and auto_classification.get("eligible")
+                                ),
+                            },
+                        )
+                    except Exception:
+                        cur.execute("ROLLBACK TO SAVEPOINT unified_cv_version_dual_write")
+                        logger.exception("unified_cv_version_dual_write_failed")
+                    finally:
+                        cur.execute("RELEASE SAVEPOINT unified_cv_version_dual_write")
                     conn.commit()
+                    ranking_stale = None
+                    try:
+                        position_for_rank = str(app.get("position_code") or "").strip()
+                        if company_code and position_for_rank:
+                            ranking_stale = {
+                                "marked": _candidate_ranking.mark_runs_stale(
+                                    sys.modules[__name__],
+                                    company_code=str(company_code),
+                                    position_code=position_for_rank,
+                                    reason="canonical_cv_evidence_updated",
+                                )
+                            }
+                    except Exception:
+                        logger.exception("ranking_stale_after_cv_failed")
+                        ranking_stale = {"marked": 0, "error": "ranking_stale_failed"}
                     lifecycle_result = None
                     if not held_import and refreshed_after_cv:
                         import recruiting_lifecycle as _rl
@@ -22931,8 +24108,10 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         "chars": len(text),
                         "method": method,
                         "semantic": semantic,
+                        "cv_evidence": json_safe(evidence_materialization.get("evidence")),
                         "screening": json_safe(screening_result),
                         "candidate_notification": json_safe(candidate_notification),
+                        "ranking_stale": json_safe(ranking_stale),
                         "extraction_meta": {
                             "stage": (extraction.metadata or {}).get("stage"),
                             "tier": (extraction.metadata or {}).get("tier"),
@@ -23015,6 +24194,26 @@ def process_candidate_cv_document(document_id: str, *, dry_run: bool = False, se
                         WHERE company_code=%s AND subject_key=%s AND content_sha256=%s
                         """,
                         (Json({"latest": False, "validation_status": "rejected"}), company_code, app.get("app_key"), failed_sha),
+                    )
+                if not is_replacement:
+                    failed_file = _candidate_cv_evidence.resolve_managed_file(
+                        cur,
+                        company_code=company_code,
+                        app_key=str(app.get("app_key") or ""),
+                        document_id=str(document_id),
+                        source_content_sha256=failed_sha,
+                        local_path=str(local_path or ""),
+                    )
+                    _candidate_cv_evidence.materialize_failure(
+                        cur,
+                        company_code=company_code,
+                        app_key=str(app.get("app_key") or ""),
+                        document_id=str(document_id),
+                        file_id=str((failed_file or {}).get("file_id") or ""),
+                        source_content_sha256=failed_sha,
+                        reason=str(error or "cv_extraction_failed"),
+                        actor="cv_worker",
+                        provenance={"extraction_method": method},
                     )
                 conn.commit()
                 failure_transition = None
@@ -23880,6 +25079,42 @@ def hold_candidate_pending_media(request: WhatsAppTurnRequest) -> dict[str, Any]
                 ),
             )
             row = dict(cur.fetchone())
+            # WAVE3: additive unsolicited WhatsApp adapter dual-write.
+            cur.execute("SAVEPOINT unified_inbound_cv_whatsapp_unsolicited")
+            try:
+                import inbound_cv_adapters as _inbound_cv_adapters
+
+                media_meta = media if isinstance(media, dict) else {}
+                request_metadata = request.metadata if isinstance(request.metadata, dict) else {}
+                provider_message_id = str(
+                    media_meta.get("message_id")
+                    or media_meta.get("provider_message_id")
+                    or request_metadata.get("message_id")
+                    or row.get("pending_id")
+                    or ""
+                )
+                company_code = str(
+                    request_metadata.get("company_code")
+                    or os.environ.get("WATHEFNI_DEFAULT_COMPANY")
+                    or "WATHEFNI"
+                ).strip().upper() or "WATHEFNI"
+                _inbound_cv_adapters.adapt_whatsapp_unsolicited(
+                    cur,
+                    company_code=company_code,
+                    provider_message_id=provider_message_id,
+                    phone=phone,
+                    account_id=request.account_id,
+                    conversation_id=request.conversation_id,
+                    pending_id=str(row.get("pending_id") or "") or None,
+                    filename=Path(str(media_meta.get("path") or media_meta.get("filename") or "whatsapp-cv")).name,
+                    mime_or_suffix=str(media_meta.get("type") or media_meta.get("mime_type") or ""),
+                    needs_ocr=True,
+                )
+            except Exception:
+                cur.execute("ROLLBACK TO SAVEPOINT unified_inbound_cv_whatsapp_unsolicited")
+                logger.exception("unified_inbound_cv_whatsapp_unsolicited_failed")
+            finally:
+                cur.execute("RELEASE SAVEPOINT unified_inbound_cv_whatsapp_unsolicited")
         conn.commit()
     return json_safe(row)
 
@@ -25802,7 +27037,9 @@ def handle_non_hr_conversational_turn(request: WhatsAppTurnRequest) -> dict[str,
         if not result:
             continue
         if result.get("reply"):
-            if handler_key.startswith("candidate_"):
+            if handler_key.startswith(("candidate_", "public_candidate_")):
+                result = _candidate_c2_module().strip_collaboration_fields_from_candidate_payload(result)
+                result = _candidate_c3_module().strip_identity_fields_from_candidate_payload(result)
                 guarded = apply_candidate_reply_policy(str(result.get("reply") or ""), request=request, result=result)
                 result = {**result, "reply": guarded.get("reply"), "candidate_policy": guarded}
             return non_hr_truth_response(
@@ -27239,17 +28476,41 @@ def send_octopus_whatsapp(
     company_code: str | None = None,
     audience: str | None = None,
     force_live: bool = False,
+    audit_text: str | None = None,
 ) -> dict[str, Any]:
     # Optional company_code enables Phase 7D account selection. When omitted (all
     # legacy callers) or when WATHEFNI_COMPANY_CHANNEL_ACCOUNTS is OFF, routing is
     # unchanged: use the caller-supplied account_id / shared default.
     # force_live: Stage B canary may override staging dry_run for allowlisted
     # preview delivery so preview_sent_at reflects a real Octopus accept.
+    persisted_message_text = text if audit_text is None else str(audit_text)
+    def audit_payload(result: dict[str, Any], **extra: Any) -> dict[str, Any]:
+        if audit_text is None:
+            return {"send_result": result, **extra}
+        safe_keys = {
+            "ok",
+            "dry_run",
+            "status",
+            "error",
+            "channel",
+            "conversation_id",
+            "event_id",
+            "outbound_event_id",
+            "external_message_id",
+            "provider_message_id",
+            "simulated",
+        }
+        safe_result = {key: result.get(key) for key in safe_keys if key in result}
+        return {
+            "send_result": safe_result,
+            "sensitive_request_redacted": True,
+            **extra,
+        }
     if not valid_whatsapp_recipient(phone):
         return invalid_whatsapp_recipient_result(
             account_id=account_id,
             phone=phone,
-            text=text,
+            text=persisted_message_text,
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=message_kind,
@@ -27279,9 +28540,9 @@ def send_octopus_whatsapp(
             target_phone=phone,
             target_conversation_id=None,
             status="dry_run",
-            message_text=text,
+            message_text=persisted_message_text,
             last_error=None,
-            payload={"send_result": result, "dry_run": True, "channel_route": route_meta},
+            payload=audit_payload(result, dry_run=True, channel_route=route_meta),
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=message_kind,
@@ -27303,9 +28564,9 @@ def send_octopus_whatsapp(
             target_phone=phone,
             target_conversation_id=None,
             status="failed",
-            message_text=text,
+            message_text=persisted_message_text,
             last_error=error,
-            payload={"send_result": result},
+            payload=audit_payload(result),
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=message_kind,
@@ -27358,9 +28619,9 @@ def send_octopus_whatsapp(
                     target_phone=phone,
                     target_conversation_id=str(conversation_id),
                     status="sent" if api_ok else "failed",
-                    message_text=text,
+                    message_text=persisted_message_text,
                     last_error=error,
-                    payload={"send_result": result},
+                    payload=audit_payload(result),
                     subject_type=subject_type,
                     subject_key=subject_key,
                     message_kind=message_kind,
@@ -27375,7 +28636,7 @@ def send_octopus_whatsapp(
                     source="outbound_failure",
                     status=octopus_health_status_for_error(error),
                     error=error,
-                    payload={"send_result": result},
+                    payload=audit_payload(result),
                     failure=True,
                 )
                 last_result = result
@@ -27392,7 +28653,7 @@ def send_octopus_whatsapp(
                 source="outbound_http_error",
                 status="rejected",
                 error=result["error"],
-                payload={"send_result": result},
+                payload=audit_payload(result),
                 failure=True,
             )
             record_outbound_delivery_event(
@@ -27400,9 +28661,9 @@ def send_octopus_whatsapp(
                 target_phone=phone,
                 target_conversation_id=str(conversation_id),
                 status="failed",
-                message_text=text,
+                message_text=persisted_message_text,
                 last_error=result["error"],
-                payload={"send_result": result},
+                payload=audit_payload(result),
                 subject_type=subject_type,
                 subject_key=subject_key,
                 message_kind=message_kind,
@@ -27416,9 +28677,9 @@ def send_octopus_whatsapp(
                 target_phone=phone,
                 target_conversation_id=str(conversation_id),
                 status="failed",
-                message_text=text,
+                message_text=persisted_message_text,
                 last_error=result["error"],
-                payload={"send_result": result},
+                payload=audit_payload(result),
                 subject_type=subject_type,
                 subject_key=subject_key,
             )
@@ -27432,9 +28693,9 @@ def send_octopus_whatsapp(
         target_phone=phone,
         target_conversation_id=None,
         status="failed",
-        message_text=text,
+        message_text=persisted_message_text,
         last_error=result["error"],
-        payload={"send_result": result},
+        payload=audit_payload(result),
         subject_type=subject_type,
         subject_key=subject_key,
         message_kind=message_kind,
@@ -27451,7 +28712,16 @@ def send_company_whatsapp_message(
     subject_key: str | None = None,
     message_kind: str = "text",
     metadata: dict[str, Any] | None = None,
+    audit_text: str | None = None,
 ) -> dict[str, Any]:
+    app_key = str(subject_key or "").strip()
+    company = str(company_code or "").strip().upper()
+    if app_key and company:
+        application = find_application_by_key(app_key, company_code=company)
+        try:
+            assert_application_communication_allowed(application, kind="whatsapp" if message_kind != "employment_offer" else "offer", expected_company_code=company)  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+        except CandidateCommunicationAuthorityError as exc:
+            return {**exc.as_result(), "send": {"ok": False, "error": exc.code}}
     result = send_octopus_whatsapp(
         account_id=account_id,
         phone=phone,
@@ -27461,6 +28731,7 @@ def send_company_whatsapp_message(
         message_kind=message_kind,
         company_code=company_code,
         audience="candidate",
+        audit_text=audit_text,
     )
     if metadata:
         result["metadata"] = json_safe(metadata)
@@ -27745,9 +29016,16 @@ def record_outbound_delivery_event(
     actor_email: str | None = None,
     actor_phone: str | None = None,
     actor_role: str | None = None,
+    sender_mode: str | None = None,
+    visible_from: str | None = None,
+    visible_reply_to: str | None = None,
+    provider: str | None = None,
+    purpose: str | None = None,
+    provider_accept_status: str | None = None,
+    external_message_id: str | None = None,
 ) -> None:
     delivery_id = f"orchestrator-{uuid.uuid4()}"
-    sent_at = now_utc() if status == "sent" else None
+    sent_at = now_utc() if status in {"sent", "accepted"} else None
     failed_at = now_utc() if status == "failed" else None
     company = str(company_code or "").strip().upper()
     if not company and isinstance(payload, dict):
@@ -27755,6 +29033,14 @@ def record_outbound_delivery_event(
         company = str(payload.get("company_code") or memory_scope.get("company_id") or "").strip().upper()
     payload_scope = payload.get("memory_scope") if isinstance(payload, dict) and isinstance(payload.get("memory_scope"), dict) else {}
     actor_email = normalize_email(actor_email or (payload.get("actor_email") if isinstance(payload, dict) else None) or payload_scope.get("actor_email"))
+    if isinstance(payload, dict):
+        sender_mode = sender_mode or payload.get("sender_mode")
+        visible_from = visible_from or payload.get("visible_from")
+        visible_reply_to = visible_reply_to or payload.get("visible_reply_to")
+        provider = provider or payload.get("provider")
+        purpose = purpose or payload.get("purpose")
+        provider_accept_status = provider_accept_status or payload.get("provider_accept_status")
+        external_message_id = external_message_id or payload.get("message_id") or payload.get("external_message_id")
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -27762,8 +29048,10 @@ def record_outbound_delivery_event(
                 INSERT INTO outbound_delivery_events
                 (delivery_id, channel, account_id, target_phone, target_conversation_id, message_kind,
                  subject_type, subject_key, status, message_text, last_error, payload, sent_at, failed_at,
-                 company_code, actor_user_id, actor_email, actor_phone, actor_role)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                 company_code, actor_user_id, actor_email, actor_phone, actor_role,
+                 sender_mode, visible_from, visible_reply_to, provider, purpose, provider_accept_status,
+                 external_message_id)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 """,
                 (
                     delivery_id,
@@ -27785,6 +29073,13 @@ def record_outbound_delivery_event(
                     actor_email,
                     digits(actor_phone),
                     actor_role,
+                    sender_mode,
+                    visible_from,
+                    visible_reply_to,
+                    provider,
+                    purpose,
+                    provider_accept_status,
+                    str(external_message_id) if external_message_id else None,
                 ),
             )
         conn.commit()
@@ -27869,6 +29164,10 @@ def transition_hire(app: dict[str, Any]) -> dict[str, Any]:
 
 
 def notify_candidate(app: dict[str, Any], account_id: str | None, message: str | None = None) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind="notify")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return {**exc.as_result(), "candidate": candidate_contact(app) if isinstance(app, dict) else {}}
     contact = candidate_contact(app)
     name = contact.get("name") or "there"
     body = message or f"Hi {name}, you have been shortlisted. Wathefni HR will contact you with the next step."
@@ -28749,7 +30048,7 @@ def assessment_report_summary(percent: float, band: str) -> str:
     if band == "strong":
         return "Strong ability-assessment result. Candidate answered most items correctly."
     if band == "qualified":
-        return "Qualified ability-assessment result. Candidate passed the v1 threshold."
+        return "Qualified ability-assessment result. Candidate is in the qualified score band."
     if band == "needs_review":
         return "Borderline ability-assessment result. Review alongside CV, screening, and role fit."
     return "Low ability-assessment result. Review carefully before moving forward."
@@ -29130,14 +30429,14 @@ def latest_assessment_attempt_for_app(app_key: str, company_code: str | None = N
             return dict(row) if row else None
 
 
-def active_assessment_attempt_for_phone(
+def open_assessment_attempts_for_phone(
     phone: str | None,
     company_code: str | None,
-) -> dict[str, Any] | None:
+) -> list[dict[str, Any]]:
     phone_digits = digits(phone)
     company = normalize_company_code(company_code)
     if not phone_digits or not company:
-        return None
+        return []
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -29147,12 +30446,18 @@ def active_assessment_attempt_for_phone(
                 WHERE phone=%s AND company_code=%s
                   AND status IN ('pending','in_progress')
                 ORDER BY updated_at DESC, created_at DESC
-                LIMIT 1
                 """,
                 (phone_digits, company),
             )
-            row = cur.fetchone()
-            return dict(row) if row else None
+            return [dict(row) for row in cur.fetchall()]
+
+
+def active_assessment_attempt_for_phone(
+    phone: str | None,
+    company_code: str | None,
+) -> dict[str, Any] | None:
+    attempts = open_assessment_attempts_for_phone(phone, company_code)
+    return attempts[0] if attempts else None
 
 
 def assessment_public_base_url() -> str:
@@ -29379,7 +30684,7 @@ def public_assessment_state(attempt_id: str, token: str | None, *, start: bool =
     if expired:
         raise HTTPException(
             status_code=409,
-            detail={"error": "attempt_expired", "message": "Assessment attempt has expired."},
+            detail=assessment_error_envelope("attempt_expired"),
         )
     if started:
         update_application_assessment_snapshot(
@@ -29397,6 +30702,12 @@ def public_assessment_state(attempt_id: str, token: str | None, *, start: bool =
         )
     answered = int(attempt.get("current_item_index") or 0)
     total = int(attempt.get("total_items") or 0)
+    raw = attempt.get("raw_json") if isinstance(attempt.get("raw_json"), dict) else {}
+    locale = str(raw.get("locale") or "en").strip().lower()
+    if locale not in {"en", "ar"}:
+        locale = "en"
+    status = str(attempt.get("status") or "")
+    needs_begin = status == "pending" and not start
     return {
         "ok": True,
         "attempt": {
@@ -29409,8 +30720,12 @@ def public_assessment_state(attempt_id: str, token: str | None, *, start: bool =
             "percent_complete": round((answered / total) * 100, 1) if total else 0,
             "progress_version": int(attempt.get("progress_version") or 0),
             "expires_at": json_safe(attempt.get("expires_at")),
+            "locale": locale,
         },
-        "item": public_assessment_item_payload(item),
+        "locale": locale,
+        "dir": "rtl" if locale == "ar" else "ltr",
+        "needs_begin": needs_begin,
+        "item": None if needs_begin else public_assessment_item_payload(item),
         "completed": False,
     }
 
@@ -29422,6 +30737,7 @@ def create_or_resume_assessment_attempt(
     requested_by: str | None = None,
     battery_key: str | None = None,
     expires_days: int | None = None,
+    locale: str | None = None,
 ) -> dict[str, Any]:
     import assessment_lifecycle as _assessment_lifecycle
     import assessment_service as _assessment_service
@@ -29432,6 +30748,10 @@ def create_or_resume_assessment_attempt(
     phone = digits(contact.get("phone"))
     if not company:
         return {"ok": False, "error": "tenant_scope_required"}
+    # Defence in depth: every caller is already entitled, but the module owns its
+    # own writes so a new caller cannot create attempts for a disabled tenant.
+    if not company_has_module(company, "assessments"):
+        return {"ok": False, "error": "module_disabled", "required_module": "assessments"}
     if not app_key or not phone:
         return {"ok": False, "error": "missing_candidate_contact", "candidate": contact}
     battery = resolve_assessment_battery(company, battery_key=battery_key)
@@ -29507,6 +30827,9 @@ def create_or_resume_assessment_attempt(
                 items = _assessment_service.version_items(version)
                 expires_at = datetime.now(timezone.utc) + timedelta(days=ttl_days)
                 battery_raw = battery.get("raw_json") if isinstance(battery.get("raw_json"), dict) else {}
+                attempt_locale = str(locale or battery_raw.get("locale") or "en").strip().lower()
+                if attempt_locale not in {"en", "ar"}:
+                    attempt_locale = "en"
                 cur.execute(
                     """
                     INSERT INTO assessment_attempts
@@ -29536,7 +30859,7 @@ def create_or_resume_assessment_attempt(
                                 "source": source,
                                 "requested_by": requested_by,
                                 "candidate": contact,
-                                "locale": battery_raw.get("locale"),
+                                "locale": attempt_locale,
                                 "approved_for_use_status": battery_raw.get("approved_for_use_status"),
                                 "scores_are_supporting_evidence_only": True,
                                 "expires_days": ttl_days,
@@ -29949,7 +31272,7 @@ def record_assessment_response(
     except Exception as exc:
         raise assessment_authority_http_error(exc) from exc
     if expired:
-        raise HTTPException(status_code=409, detail={"error": "attempt_expired", "message": "Assessment attempt has expired."})
+        raise HTTPException(status_code=409, detail=assessment_error_envelope("attempt_expired"))
     result = {
         "response": json_safe(response),
         "attempt": json_safe(attempt),
@@ -30098,7 +31421,7 @@ def cancel_assessment_attempt(
                 cancelled = locked
         conn.commit()
     if expired:
-        raise HTTPException(status_code=409, detail={"error": "attempt_expired"})
+        raise HTTPException(status_code=409, detail=assessment_error_envelope("attempt_expired"))
     update_application_assessment_snapshot(
         str(cancelled.get("app_key") or ""),
         company,
@@ -30123,7 +31446,46 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
     if has_current_media_upload(request.media or {}):
         return None
     company = active_company_code()
-    attempt = active_assessment_attempt_for_phone(request.sender_phone, company)
+    open_attempts = open_assessment_attempts_for_phone(request.sender_phone, company)
+    if not open_attempts:
+        return None
+    text = (request.raw_text or "").strip()
+    normalized = normalize_text(text)
+    attempt: dict[str, Any] | None = None
+    if len(open_attempts) > 1:
+        choice = None
+        if normalized.isdigit():
+            choice = int(normalized)
+        else:
+            role_match = next(
+                (
+                    item
+                    for item in open_attempts
+                    if normalize_text(str(item.get("position_title") or item.get("position_code") or "")) == normalized
+                ),
+                None,
+            )
+            if role_match:
+                attempt = role_match
+        if choice is not None and 1 <= choice <= len(open_attempts):
+            attempt = open_attempts[choice - 1]
+        if attempt is None:
+            lines = []
+            for index, item in enumerate(open_attempts, start=1):
+                role = str(item.get("position_title") or item.get("position_code") or f"Role {index}").strip()
+                lines.append(f"{index}. {role}")
+            return {
+                "reply": (
+                    "You have more than one open assessment. Reply with the number for the role you want to continue:\n"
+                    + "\n".join(lines)
+                ),
+                "attempts": json_safe(open_attempts),
+                "intent": "assessment_role_clarification",
+                "turn_focus": "candidate_assessment",
+                "needs_clarification": True,
+            }
+    else:
+        attempt = open_attempts[0]
     if not attempt:
         return None
     if not company_has_module(attempt.get("company_code"), "assessments"):
@@ -30132,8 +31494,6 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
             "attempt": json_safe(attempt),
             "module_disabled": "assessments",
         }
-    text = (request.raw_text or "").strip()
-    normalized = normalize_text(text)
     if normalized in {"cancel", "stop", "exit"}:
         cancelled = cancel_assessment_attempt(
             attempt,
@@ -30230,6 +31590,10 @@ def deliver_assessment_invitation(
     message_kind: str,
     requested_by: str | None,
 ) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind="assessment_resend" if message_kind == "assessment_resend" else "assessment")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return exc.as_result()
     import assessment_lifecycle as _assessment_lifecycle
     import assessment_service as _assessment_service
 
@@ -30300,7 +31664,7 @@ def deliver_assessment_invitation(
                 attempt = locked
         conn.commit()
     if expired:
-        return {"ok": False, "error": "attempt_expired", "attempt": json_safe(locked)}
+        return {"ok": False, **assessment_error_envelope("attempt_expired"), "attempt": json_safe(locked)}
     contact = candidate_contact(app)
     title = contact.get("position_title") or "the role"
     candidate_template = candidate_message_payload(
@@ -30325,6 +31689,13 @@ def deliver_assessment_invitation(
             "note": str(note or "").strip() or None,
         },
     )
+    import outbound_send_result as _osr
+    send_result = _osr.build_send_result(
+        kind="assessment",
+        recipient=contact,
+        delivery=delivery,
+        ok=bool(delivery.get("ok")),
+    )
     channel_attempts = {
         str(row.get("channel")): row
         for row in (delivery.get("attempts") or [])
@@ -30339,6 +31710,7 @@ def deliver_assessment_invitation(
                 if dry_run:
                     status = "intentionally_skipped"
                 else:
+                    # Provider accept is not candidate delivery confirmation.
                     status = "sent" if delivery_attempt.get("ok") else "failed"
                 statuses.append(status)
                 result_payload = delivery_attempt.get("result") if isinstance(delivery_attempt.get("result"), dict) else {}
@@ -30357,10 +31729,12 @@ def deliver_assessment_invitation(
                     last_error=str(delivery_attempt.get("error") or "") or None,
                     metadata={"delivery_result": json_safe(delivery_attempt)},
                 )
-            if "sent" in statuses:
+            if "sent" in statuses or "send_accepted" in statuses:
                 aggregate_status = "sent"
             elif "intentionally_skipped" in statuses:
                 aggregate_status = "intentionally_skipped"
+            elif "queued" in statuses:
+                aggregate_status = "queued"
             else:
                 aggregate_status = "failed"
             cur.execute(
@@ -30396,8 +31770,19 @@ def deliver_assessment_invitation(
             "sent_at": now_iso(),
         },
     )
+    aggregate = str(attempt.get("delivery_status") or "")
+    if send_result["state"] != "partially_sent":
+        send_result["state"] = {
+            "send_accepted": "sent",
+            "sent": "sent",
+            "delivered": "sent",
+            "queued": "queued",
+            "intentionally_skipped": "queued",
+            "failed": "failed",
+        }.get(aggregate, send_result["state"])
+    send_result["ok"] = send_result["state"] in {"sent", "partially_sent", "queued"}
     return {
-        "ok": bool(delivery.get("ok")) or dry_run,
+        "ok": bool(delivery.get("ok")) or dry_run or send_result["ok"],
         "send": delivery,
         "delivery": delivery,
         "delivery_status": attempt.get("delivery_status"),
@@ -30407,6 +31792,7 @@ def deliver_assessment_invitation(
         "candidate": contact,
         "attempt": json_safe(attempt),
         "invitations": json_safe(list(invitation_rows.values())),
+        "send_result": json_safe(send_result),
     }
 
 
@@ -30418,13 +31804,31 @@ def send_assessment(
     requested_by: str | None = None,
     battery_key: str | None = None,
     expires_days: int | None = None,
+    locale: str | None = None,
 ) -> dict[str, Any]:
+    app_status = str(app.get("status") or "").strip().lower()
+    if app_status in {"hired", "rejected", "withdrawn", "closed"}:
+        return {
+            "ok": False,
+            "error": "terminal_application",
+            "status": app_status,
+            "safe_user_message": f"Cannot send an assessment for an application that is already {app_status}.",
+        }
+    selected_battery_key = str(battery_key or "").strip() or None
+    selected_locale = str(locale or "").strip().lower() or None
+    if selected_locale and not selected_battery_key:
+        locale_map = {
+            "en": "wathefni_gawj_v1_en_beta",
+            "ar": "wathefni_gawj_v1_ar_beta",
+        }
+        selected_battery_key = locale_map.get(selected_locale)
     attempt_result = create_or_resume_assessment_attempt(
         app,
         source="dashboard_or_hr_action",
         requested_by=requested_by,
-        battery_key=battery_key,
+        battery_key=selected_battery_key,
         expires_days=expires_days,
+        locale=selected_locale,
     )
     if not attempt_result.get("ok"):
         return attempt_result
@@ -30449,6 +31853,17 @@ def resend_assessment(
     note: str | None = None,
     requested_by: str | None = None,
 ) -> dict[str, Any]:
+    current_status = str(attempt.get("status") or "").strip().lower()
+    if current_status == "completed":
+        return {"ok": False, **assessment_error_envelope("already_sent"), "safe_user_message": "This assessment is already completed and cannot be resent."}
+    if current_status == "expired":
+        # Expired attempts need a replacement flow, not delivery on the dead attempt.
+        return send_assessment(
+            app,
+            account_id,
+            note=note,
+            requested_by=requested_by,
+        )
     return deliver_assessment_invitation(
         app,
         attempt,
@@ -30503,7 +31918,13 @@ def employee_onboarding_items(employee_key: str) -> list[dict[str, Any]]:
                 """,
                 (employee_key,),
             )
-            return [json_safe(dict(row)) for row in cur.fetchall()]
+            recruiters = []
+            for source_user in cur.fetchall():
+                user = dict(source_user)
+                if "candidates.read" not in dashboard_effective_permissions_for_user(user, cur=cur):
+                    continue
+                recruiters.append(json_safe(user))
+            return recruiters
 
 
 def is_item_complete(item: dict[str, Any]) -> bool:
@@ -30754,18 +32175,122 @@ def notify_hr_admins(
     message: str,
     subject_type: str | None = None,
     subject_key: str | None = None,
+    assignee_user_ids: list[str] | None = None,
+    assignee_phones: list[str] | None = None,
+    audience: str | None = None,
+    fallback_company_broadcast: bool = True,
+    source: str | None = None,
+    kind: str | None = None,
 ) -> dict[str, Any]:
+    """Notify assignees when provided; otherwise company-level HR broadcast.
+
+    Wave 4/6: personal alerts route to relevant assignees only (no accidental
+    company broadcast when audience=personal). Shared operational alerts remain
+    company-level. Every result includes audience + source for audit.
+    """
+    import prehire_personal_work as _ppw
+    import prehire_team_directory as _td
+
+    company = (company_code or "").upper() or None
+    requested_audience = str(audience or "").strip().lower()
+    targets: list[dict[str, Any]] = []
+    resolved_audience = "company"
+    if assignee_user_ids or assignee_phones or requested_audience == "personal":
+        targets, resolved_audience = _ppw.resolve_notify_targets(
+            company=company or "",
+            db_connect=db_connect,
+            assignee_user_ids=assignee_user_ids,
+            assignee_phones=assignee_phones,
+            fallback_company_broadcast=fallback_company_broadcast and requested_audience != "personal",
+            company_users_loader=hr_admin_users,
+        )
+        if requested_audience == "personal":
+            resolved_audience = "personal"
+    else:
+        targets = list(hr_admin_users(company))
+        resolved_audience = "company"
+
+    audit = _td.notification_audit_fields(
+        audience=resolved_audience,
+        source=source,
+        kind=kind,
+    )
+    # Deduplicate by phone so the same person never gets two copies in one fan-out.
+    seen_phones: set[str] = set()
     sends: list[dict[str, Any]] = []
-    for user in hr_admin_users(company_code):
+    for user in targets:
+        phone = digits(user.get("phone")) or ""
+        if not phone or phone in seen_phones:
+            continue
+        seen_phones.add(phone)
         result = send_octopus_whatsapp(
             account_id=account_id,
-            phone=user["phone"],
+            phone=phone,
             text=message,
             subject_type=subject_type,
             subject_key=subject_key,
         )
-        sends.append({"hr_phone": user["phone"], "hr_name": user.get("name"), "ok": result.get("ok", False), "send": result})
-    return {"ok": any(item.get("ok") for item in sends) if sends else False, "sends": sends, "message": message}
+        sends.append(
+            {
+                "hr_phone": phone,
+                "hr_name": user.get("name"),
+                "user_id": user.get("user_id"),
+                "ok": result.get("ok", False),
+                "send": result,
+                "audience": audit["audience"],
+                "source": audit["source"],
+                "kind": audit.get("kind"),
+            }
+        )
+    return {
+        "ok": any(item.get("ok") for item in sends) if sends else False,
+        "sends": sends,
+        "message": message,
+        "audience": audit["audience"],
+        "notification_scope": audit["notification_scope"],
+        "source": audit["source"],
+        "kind": audit.get("kind"),
+        "target_count": len(sends),
+    }
+
+
+def notify_prehire_personal_assignees(
+    *,
+    company_code: str | None,
+    assignee_user_ids: list[str] | None,
+    message: str,
+    source: str,
+    kind: str,
+    subject_type: str | None = None,
+    subject_key: str | None = None,
+    account_id: str | None = "default",
+) -> dict[str, Any]:
+    """Wave 6: personal pre-hire work notifies assignees only — never company broadcast."""
+    ids = [str(uid).strip() for uid in (assignee_user_ids or []) if str(uid or "").strip()]
+    if not ids:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "no_assignees",
+            "audience": "personal",
+            "notification_scope": "personal",
+            "source": source,
+            "kind": kind,
+            "target_count": 0,
+            "sends": [],
+        }
+    return notify_hr_admins(
+        company_code=company_code,
+        account_id=account_id,
+        message=message,
+        subject_type=subject_type,
+        subject_key=subject_key,
+        assignee_user_ids=ids,
+        audience="personal",
+        fallback_company_broadcast=False,
+        source=source,
+        kind=kind,
+    )
 
 
 def notify_hr_onboarding_received(
@@ -31297,14 +32822,31 @@ def _outbound_email_result(
     }
 
 
-def send_email_via_postmark(*, to: str, subject: str, body: str, reply_to: str | None = None) -> dict[str, Any]:
+def send_email_via_postmark(
+    *,
+    to: str,
+    subject: str,
+    body: str,
+    reply_to: str | None = None,
+    from_address: str | None = None,
+    display_name: str | None = None,
+) -> dict[str, Any]:
     """Send one transactional email through Postmark. No raw API body is surfaced
     (it can echo recipient/sender); errors are mapped to short, safe codes."""
     cfg = outbound_postmark_config()
-    if not (cfg["server_token"] and cfg["from_address"]):
+    if not cfg["server_token"]:
         return _outbound_email_result(False, provider="postmark", error="postmark_not_configured")
+    addr = str(from_address or cfg["from_address"] or "").strip()
+    if not addr:
+        return _outbound_email_result(False, provider="postmark", error="postmark_not_configured")
+    try:
+        import tenant_email_authority as _tea
+
+        from_header = _tea.format_from_header(display_name, addr)
+    except Exception:
+        from_header = addr
     message: dict[str, Any] = {
-        "From": cfg["from_address"],
+        "From": from_header,
         "To": to,
         "Subject": subject,
         "TextBody": body,
@@ -31366,12 +32908,103 @@ def send_email_via_gog(*, to: str, subject: str, body: str) -> dict[str, Any]:
     )
 
 
-def dispatch_outbound_email(*, to: str, subject: str, body: str) -> dict[str, Any]:
-    """Provider-agnostic send. Transport is chosen by WATHEFNI_OUTBOUND_EMAIL_PROVIDER;
-    dry-run + delivery-event logging are handled by the caller (send_email)."""
+def dispatch_outbound_email(
+    *,
+    to: str,
+    subject: str,
+    body: str,
+    company_code: str | None = None,
+    purpose: str | None = None,
+    reply_to: str | None = None,
+    from_address: str | None = None,
+    display_name: str | None = None,
+    sender_mode: str | None = None,
+) -> dict[str, Any]:
+    """Provider-agnostic send. Uses tenant email authority when company_code is set;
+    otherwise preserves global Postmark/gmail selection. dry-run + delivery-event
+    logging are handled by the caller (send_email)."""
+    resolved_mode = str(sender_mode or "").strip() or None
+    resolved_from = from_address
+    resolved_reply = reply_to
+    resolved_display = display_name
+    emergency_fallback_used = False
+    intended_mode = None
+    hr_notice = None
+    if company_code and (resolved_from is None or resolved_mode is None):
+        try:
+            import tenant_email_authority as _tea
+
+            resolved = _tea.resolve_outbound_sender(sys.modules[__name__], company_code, purpose=purpose, for_send=True)
+            resolved_mode = resolved_mode or str(resolved.get("mode") or "wathefni")
+            emergency_fallback_used = bool(resolved.get("emergency_fallback_used"))
+            intended_mode = resolved.get("intended_mode") or resolved.get("selected_mode")
+            hr_notice = resolved.get("hr_notice")
+            if not resolved.get("activatable"):
+                return {
+                    "ok": False,
+                    "provider": resolved.get("provider") or "postmark",
+                    "error": str(resolved.get("block_reason") or "sender_not_ready"),
+                    "provider_accept_status": "failed",
+                    "sender_mode": resolved.get("selected_mode") or resolved_mode,
+                    "visible_from": resolved.get("from_address") or resolved.get("intended_from"),
+                    "visible_reply_to": resolved.get("reply_to"),
+                    "emergency_fallback_used": False,
+                    "intended_mode": intended_mode,
+                    "hr_notice": hr_notice or _tea._block_message(str(resolved.get("block_reason") or "sender_not_ready")),
+                    "user_status": "Error",
+                }
+            resolved_from = resolved_from or resolved.get("from_address")
+            resolved_reply = resolved_reply if resolved_reply is not None else resolved.get("reply_to")
+            resolved_display = resolved_display if resolved_display is not None else resolved.get("display_name")
+            if resolved.get("provider") == "microsoft_graph" and not emergency_fallback_used:
+                import microsoft_mail_send as _mms
+
+                sent = _mms.send_mail_as_mailbox(
+                    mailbox=str(resolved_from or ""),
+                    to=to,
+                    subject=subject,
+                    body=body,
+                    reply_to=resolved_reply,
+                    save_to_sent_items=True,
+                )
+                sent["sender_mode"] = "microsoft_mailbox"
+                sent["visible_from"] = resolved_from
+                sent["visible_reply_to"] = resolved_reply
+                sent["emergency_fallback_used"] = False
+                sent["intended_mode"] = "microsoft_mailbox"
+                if sent.get("ok"):
+                    sent["provider_accept_status"] = "accepted_by_provider"
+                    sent["user_status"] = sent.get("user_status") or "Accepted by Microsoft"
+                return sent
+        except Exception as exc:
+            return {
+                "ok": False,
+                "provider": "postmark",
+                "error": f"sender_resolve_failed:{type(exc).__name__}",
+                "provider_accept_status": "failed",
+            }
+
     if outbound_email_provider() == "postmark":
-        return send_email_via_postmark(to=to, subject=subject, body=body)
-    return send_email_via_gog(to=to, subject=subject, body=body)
+        sent = send_email_via_postmark(
+            to=to,
+            subject=subject,
+            body=body,
+            reply_to=resolved_reply,
+            from_address=resolved_from,
+            display_name=resolved_display,
+        )
+    else:
+        sent = send_email_via_gog(to=to, subject=subject, body=body)
+    sent["sender_mode"] = resolved_mode or "wathefni"
+    sent["visible_from"] = resolved_from or outbound_postmark_config().get("from_address")
+    sent["visible_reply_to"] = resolved_reply
+    sent["provider_accept_status"] = "accepted_by_provider" if sent.get("ok") else "failed"
+    sent["emergency_fallback_used"] = emergency_fallback_used
+    sent["intended_mode"] = intended_mode or resolved_mode or "wathefni"
+    if emergency_fallback_used:
+        sent["hr_notice"] = hr_notice
+        sent["user_status"] = "Sent through Wathefni (emergency fallback)"
+    return sent
 
 
 def send_outbound_email(
@@ -31384,6 +33017,7 @@ def send_outbound_email(
     subject_key: str | None = None,
     account_id: str | None = None,
     message_kind: str = "email",
+    purpose: str | None = None,
 ) -> dict[str, Any]:
     """Generic employee-facing email send for the outbound delivery layer.
 
@@ -31392,6 +33026,7 @@ def send_outbound_email(
     recipient = (to or "").strip()
     if not recipient:
         return {"ok": False, "error": "no_employee_email"}
+    purpose_key = str(purpose or message_kind or "email")
     provider = outbound_email_provider()
     if delivery_is_dry_run():
         result = {"ok": True, "dry_run": True, "provider": provider, "channel": "email"}
@@ -31402,33 +33037,70 @@ def send_outbound_email(
             status="dry_run",
             message_text=body,
             last_error=None,
-            payload={"dry_run": True, "recipient_email": recipient, "subject": subject, "provider": provider},
+            payload={"dry_run": True, "recipient_email": recipient, "subject": subject, "provider": provider, "purpose": purpose_key},
             subject_type=subject_type,
             subject_key=subject_key,
             channel="email",
             message_kind=message_kind,
             company_code=company_code,
+            purpose=purpose_key,
+            provider=provider,
         )
         return result
-    sent = dispatch_outbound_email(to=recipient, subject=subject, body=body)
+    sent = dispatch_outbound_email(to=recipient, subject=subject, body=body, company_code=company_code, purpose=purpose_key)
+    accept = str(sent.get("provider_accept_status") or ("accepted_by_provider" if sent.get("ok") else "failed"))
+    status = "accepted" if accept == "accepted_by_provider" and sent.get("provider") == "microsoft_graph" else ("sent" if sent.get("ok") else "failed")
     record_outbound_delivery_event(
         account_id=account_id,
         target_phone=None,
         target_conversation_id=None,
-        status="sent" if sent.get("ok") else "failed",
+        status=status,
         message_text=body,
         last_error=None if sent.get("ok") else str(sent.get("error") or "email_send_failed")[:300],
-        payload={"recipient_email": recipient, "subject": subject, "provider": provider, "send_result": {k: v for k, v in sent.items() if k != "raw"}},
+        payload={
+            "recipient_email": recipient,
+            "subject": subject,
+            "provider": sent.get("provider") or provider,
+            "send_result": {k: v for k, v in sent.items() if k != "raw"},
+            "purpose": purpose_key,
+            "sender_mode": sent.get("sender_mode"),
+            "visible_from": sent.get("visible_from"),
+            "visible_reply_to": sent.get("visible_reply_to"),
+            "provider_accept_status": accept,
+            "emergency_fallback_used": bool(sent.get("emergency_fallback_used")),
+            "intended_mode": sent.get("intended_mode"),
+            "hr_notice": sent.get("hr_notice"),
+        },
         subject_type=subject_type,
         subject_key=subject_key,
         channel="email",
         message_kind=message_kind,
         company_code=company_code,
+        sender_mode=sent.get("sender_mode"),
+        visible_from=sent.get("visible_from"),
+        visible_reply_to=sent.get("visible_reply_to"),
+        provider=sent.get("provider") or provider,
+        purpose=purpose_key,
+        provider_accept_status=accept,
+        external_message_id=sent.get("message_id"),
     )
-    return {"ok": bool(sent.get("ok")), "provider": provider, "channel": "email", "error": sent.get("error")}
+    return {
+        "ok": bool(sent.get("ok")),
+        "provider": sent.get("provider") or provider,
+        "channel": "email",
+        "error": sent.get("error"),
+        "provider_accept_status": accept,
+        "user_status": sent.get("user_status"),
+        "emergency_fallback_used": bool(sent.get("emergency_fallback_used")),
+        "hr_notice": sent.get("hr_notice"),
+    }
 
 
 def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind="email")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return {**exc.as_result(), "candidate": candidate_contact(app) if isinstance(app, dict) else {}}
     contact = candidate_contact(app)
     email = contact.get("email")
     if not email or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", str(email).strip()):
@@ -31437,6 +33109,8 @@ def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
     subject = content["subject"]
     body = content["body"]
     provider = outbound_email_provider()
+    company = str(app.get("company_code") or "").strip().upper() or None
+    purpose = normalize_capability_name(action.get("purpose") or capability_purpose_from_text(action.get("prompt_text") or ""))
     if delivery_is_dry_run():
         record_outbound_delivery_event(
             account_id=action.get("account_id") or action.get("account"),
@@ -31445,11 +33119,14 @@ def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
             status="dry_run",
             message_text=body,
             last_error=None,
-            payload={"dry_run": True, "recipient_email": email, "subject": subject, "provider": provider},
+            payload={"dry_run": True, "recipient_email": email, "subject": subject, "provider": provider, "purpose": purpose, "company_code": company},
             subject_type="candidate",
             subject_key=app.get("app_key"),
             channel="email",
             message_kind="email",
+            company_code=company,
+            purpose=purpose,
+            provider=provider,
         )
         return {
             "ok": True,
@@ -31460,17 +33137,19 @@ def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
             "recipient_email": email,
             "subject": subject,
             "body": body,
-            "purpose": normalize_capability_name(action.get("purpose") or capability_purpose_from_text(action.get("prompt_text") or "")),
+            "purpose": purpose,
             "gmail_message_id": None,
             "sent_at": operational_context_timestamp(),
         }
-    sent = dispatch_outbound_email(to=email, subject=subject, body=body)
+    sent = dispatch_outbound_email(to=email, subject=subject, body=body, company_code=company, purpose=purpose)
     ok = bool(sent.get("ok"))
+    accept = str(sent.get("provider_accept_status") or ("accepted_by_provider" if ok else "failed"))
+    status = "accepted" if accept == "accepted_by_provider" and sent.get("provider") == "microsoft_graph" else ("sent" if ok else "failed")
     record_outbound_delivery_event(
         account_id=action.get("account_id") or action.get("account"),
         target_phone=contact.get("phone"),
         target_conversation_id=None,
-        status="sent" if ok else "failed",
+        status=status,
         message_text=body,
         last_error=None if ok else str(sent.get("error") or "email_send_failed")[:500],
         payload={
@@ -31479,11 +33158,28 @@ def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
             "message_id": sent.get("message_id"),
             "recipient_email": email,
             "subject": subject,
+            "purpose": purpose,
+            "sender_mode": sent.get("sender_mode"),
+            "visible_from": sent.get("visible_from"),
+            "visible_reply_to": sent.get("visible_reply_to"),
+            "provider_accept_status": accept,
+            "emergency_fallback_used": bool(sent.get("emergency_fallback_used")),
+            "intended_mode": sent.get("intended_mode"),
+            "hr_notice": sent.get("hr_notice"),
+            "company_code": company,
         },
         subject_type="candidate",
         subject_key=app.get("app_key"),
         channel="email",
         message_kind="email",
+        company_code=company,
+        sender_mode=sent.get("sender_mode"),
+        visible_from=sent.get("visible_from"),
+        visible_reply_to=sent.get("visible_reply_to"),
+        provider=sent.get("provider"),
+        purpose=purpose,
+        provider_accept_status=accept,
+        external_message_id=sent.get("message_id"),
     )
     return {
         "ok": ok,
@@ -31572,6 +33268,11 @@ def candidate_communication_router(
     message: str | None = None,
     action: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind=str(kind or "generic"))  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        contact = candidate_contact(app) if isinstance(app, dict) else {}
+        return {**exc.as_result(), "kind": kind, "candidate": contact, "policy": {}, "attempts": [], "successful_channels": [], "failed_channels": [], "last_successful_channel": None, "fallback_used": False, "message": message}
     action = dict(action or {})
     contact = candidate_contact(app)
     policy = communication_route_policy(kind, action)
@@ -31639,6 +33340,10 @@ def parse_interview_time(text: str) -> tuple[str | None, str | None]:
 
 
 def schedule_interview(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind="calendar_invite")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return {**exc.as_result(), "candidate": candidate_contact(app) if isinstance(app, dict) else {}}
     contact = candidate_contact(app)
     email = contact.get("email")
     if not email:
@@ -31702,6 +33407,10 @@ def parse_meeting_time(text: str) -> tuple[str | None, str | None]:
 
 
 def schedule_candidate_meeting(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(app, kind="calendar_invite")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return {**exc.as_result(), "candidate": candidate_contact(app) if isinstance(app, dict) else {}}
     contact = candidate_contact(app)
     email = contact.get("email")
     if not email:
@@ -32016,8 +33725,9 @@ DEFAULT_KUWAIT_ONBOARDING_TEMPLATE: list[tuple[str, str, str, str, bool, str]] =
     ("civil_id", "Civil ID (front and back)", "identity_legal", "document", True, "employee"),
     ("passport", "Passport copy (if applicable)", "identity_legal", "document", False, "employee"),
     ("personal_photo", "Personal photo", "identity_legal", "document", True, "employee"),
-    # item_id kept for compatibility; label is Kuwait/GCC residency (not Saudi-only Iqama).
-    ("residency_iqama", "Residency permit (expats)", "identity_legal", "document", False, "employee"),
+    # item_id is canonical Kuwait `residence` (not Saudi iqama). Historical
+    # residency_iqama rows remain readable via doc_type_map compatibility.
+    ("residence", "Residence permit (Article 18 expats)", "identity_legal", "document", False, "employee"),
     ("work_permit", "Work permit (expats)", "identity_legal", "document", False, "employee"),
     ("employment_contract", "Signed employment contract", "identity_legal", "document", True, "employee"),
     ("offer_letter", "Job offer / appointment letter", "identity_legal", "document", False, "hr"),
@@ -32137,6 +33847,26 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
             fallback_from,
             template_name,
         )
+    # Category-aware requiredness for residence / work_permit (Art.18 vs national).
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    employee_category = None
+    try:
+        cur.execute(
+            """
+            SELECT employee_category FROM employee_identity
+            WHERE company_code=%s AND employee_key=%s
+            LIMIT 1
+            """,
+            (company_code, employee_key),
+        )
+        idrow = cur.fetchone()
+        if idrow:
+            employee_category = idrow.get("employee_category")
+    except Exception:
+        employee_category = None
+    required_overrides = _kw_doc_journey.onboarding_required_overrides(employee_category)
+
     cur.execute("SELECT item_id FROM onboarding_items WHERE employee_key=%s", (employee_key,))
     existing = {str(row["item_id"]) for row in cur.fetchall() if row.get("item_id")}
     seeded = 0
@@ -32144,6 +33874,7 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
         if item_id in existing:
             continue
         document_type = item_id if item_type == "document" else None
+        is_required = bool(required_overrides[item_id]) if item_id in required_overrides else bool(required)
         cur.execute(
             """
             INSERT INTO onboarding_items
@@ -32152,9 +33883,9 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s, now())
             """,
             (
-                employee_key, item_id, label, category, item_type, bool(required), owner,
+                employee_key, item_id, label, category, item_type, is_required, owner,
                 order, document_type,
-                Json(seed_meta),
+                Json({**seed_meta, "employee_category": employee_category}),
             ),
         )
         seeded += cur.rowcount or 0
@@ -32203,8 +33934,12 @@ ACTION_REQUIRED_MODULES = {
     "check_assessment_config": "assessments",
     "answer_candidate_email_lookup": "pre_hiring",
     "prepare_candidate_email": "pre_hiring",
-    "schedule_candidate_meeting": "pre_hiring",
-    "schedule_interview": "pre_hiring",
+    "schedule_candidate_meeting": "interviews",
+    "schedule_interview": "interviews",
+    "reschedule_interview": "interviews",
+    "cancel_interview": "interviews",
+    "send_interview_invite": "interviews",
+    "get_interview_invite_status": "interviews",
     "start_onboarding": "onboarding",
     "send_onboarding_reminder": "onboarding",
     "answer_onboarding_status": "onboarding",
@@ -33171,18 +34906,13 @@ def approve_pending_action(state: GraphState) -> GraphState:
             status = "completed"
             result_payload = {"employee": json_safe(refreshed_employee), "employee_notification": employee_notification}
     elif action_type == "hire_candidate":
-        app = resolve_application_for_action(action, allow_latest=False)
-        if not app:
-            reply = "I could not find the candidate to hire."
-            status = "failed"
-        else:
-            update_result = update_application_status(app, "hired")
-            posthire_result = transition_hire(app)
-            ok = bool(update_result.get("ok") and posthire_result.get("ok"))
-            status = "completed" if ok else "failed"
-            name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            reply = f"{name} is hired and employee setup is done." if ok else f"I could not complete hiring for {name}."
-            result_payload = {"application": json_safe(app), "update": update_result, "posthire": posthire_result}
+        reply = "Hiring must use the confirmed canonical hire operation."
+        status = "failed"
+        result_payload = {
+            "ok": False,
+            "error": "canonical_hire_required",
+            "required_authority": "hire_operations",
+        }
     elif action_type == "shortlist_candidate":
         app = resolve_application_for_action(action, allow_latest=False)
         if not app:
@@ -33527,19 +35257,14 @@ def execute_direct_action(state: GraphState) -> GraphState:
                 reply = f"I could not schedule the meeting for {contact.get('name') or 'the candidate'}."
             result_payload = {**result, "selected_application": candidate_lookup_match_payload(app), "action": action}
     elif action_type == "hire_candidate":
-        app = resolve_application_for_action(action, allow_latest=False)
-        if not app:
-            reply = "I could not find the candidate to hire."
-            status = "failed"
-            result_payload = {"reason": "candidate_not_found", "action": action}
-        else:
-            update_result = update_application_status(app, "hired")
-            posthire_result = transition_hire(app)
-            ok = bool(update_result.get("ok") and posthire_result.get("ok"))
-            status = "completed" if ok else "failed"
-            name = app.get("candidate_name") or action.get("subject_name") or "the candidate"
-            reply = f"{name} is hired and employee setup is done." if ok else f"I could not complete hiring for {name}."
-            result_payload = {"application": json_safe(app), "update": update_result, "posthire": posthire_result}
+        reply = "Hiring must use the confirmed canonical hire operation."
+        status = "failed"
+        result_payload = {
+            "ok": False,
+            "error": "canonical_hire_required",
+            "required_authority": "hire_operations",
+            "action": action,
+        }
     elif action_type == "shortlist_candidate":
         app = resolve_application_for_action(action, allow_latest=False)
         if not app:
@@ -34918,6 +36643,40 @@ def run_onboarding_reminder_scan(*, account_id: str | None, dry_run: bool = True
                 "reason": "onboarding_automation_disabled",
             })
             continue
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    import tenant_control_queue_gate as _tc_qg
+
+                    company = str(employee.get("company_code") or "").upper()
+                    work_ref = str(employee.get("employee_key") or "")
+                    queued_epoch = _tc_qg.persist_work_epoch(
+                        cur,
+                        company_code=company,
+                        work_kind="onboarding_reminder",
+                        work_ref=work_ref,
+                        module_key="onboarding",
+                    )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        cur,
+                        company_code=company,
+                        module_key="onboarding",
+                        work_kind="onboarding_reminder",
+                        work_ref=work_ref,
+                        queued_epoch=queued_epoch,
+                        surface="timers",
+                    )
+                    conn.commit()
+                    if not allowed:
+                        skipped.append({
+                            "employee_key": work_ref,
+                            "company_code": company,
+                            "reason": decision.reason_code,
+                            "held": True,
+                        })
+                        continue
+        except Exception:
+            pass
         body, missing = onboarding_reminder_message(employee)
         entry: dict[str, Any] = {
             "employee_key": employee.get("employee_key"),
@@ -34962,6 +36721,7 @@ COMPLIANCE_WARNING_DAYS = {
     "civil_id": 30,
     "passport": 60,
     "residency": 30,
+    "residence": 30,
     "work_permit": 30,
     "medical": 30,
 }
@@ -35059,6 +36819,41 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
                 "reason": "compliance_automation_disabled",
             })
             continue
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    import tenant_control_queue_gate as _tc_qg
+
+                    company = str(row.get("company_code") or "").upper()
+                    work_ref = f"{row.get('employee_key')}:{row.get('document_type')}"
+                    queued_epoch = _tc_qg.persist_work_epoch(
+                        cur,
+                        company_code=company,
+                        work_kind="compliance_scan",
+                        work_ref=work_ref,
+                        module_key="compliance",
+                    )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        cur,
+                        company_code=company,
+                        module_key="compliance",
+                        work_kind="compliance_scan",
+                        work_ref=work_ref,
+                        queued_epoch=queued_epoch,
+                        surface="timers",
+                    )
+                    conn.commit()
+                    if not allowed:
+                        skipped.append({
+                            "employee_key": row.get("employee_key"),
+                            "company_code": company,
+                            "document_type": row.get("document_type"),
+                            "reason": decision.reason_code,
+                            "held": True,
+                        })
+                        continue
+        except Exception:
+            pass
         classification = classify_compliance_row(row)
         due = compliance_alert_due(row, classification, cooldown_hours=alert_cooldown_hours)
         entry = {
@@ -35150,10 +36945,24 @@ def run_compliance_scan(*, account_id: str | None, dry_run: bool = True, limit: 
 COMPLIANCE_DOC_LABELS = {
     "civil_id": "Civil ID",
     "passport": "Passport",
-    "residency": "Residency (Iqama)",
-    "work_permit": "Work Permit",
-    "medical": "Medical Document",
-    "education_cert": "Education Certificate",
+    "residency": "Residence",
+    "residence": "Residence",
+    "residency_iqama": "Residence (legacy id)",
+    "work_permit": "Work permit",
+    "employment_contract": "Employment contract",
+    "medical": "Medical certificate",
+    "education_cert": "Education certificate",
+}
+COMPLIANCE_DOC_LABELS_AR = {
+    "civil_id": "البطاقة المدنية",
+    "passport": "جواز السفر",
+    "residency": "الإقامة",
+    "residence": "الإقامة",
+    "residency_iqama": "الإقامة (معرّف قديم)",
+    "work_permit": "إذن العمل",
+    "employment_contract": "عقد العمل",
+    "medical": "الشهادة الطبية",
+    "education_cert": "الشهادة التعليمية",
 }
 # Five HR-facing buckets. Order matters: it is the order HR should work through.
 COMPLIANCE_BUCKETS = ("expired", "expiring_soon", "missing", "needs_review", "valid")
@@ -35161,8 +36970,11 @@ COMPLIANCE_STATUS_LABELS = {
     "expired": "Expired",
     "expiring_soon": "Expiring soon",
     "missing": "Missing",
-    "needs_review": "Needs review",
-    "valid": "Valid",
+    "needs_review": "Pending HR review",
+    "valid": "HR reviewed",
+    "pending_hr_review": "Pending HR review",
+    "hr_reviewed": "HR reviewed",
+    "rejected_reupload": "Rejected — re-upload required",
 }
 COMPLIANCE_STATUS_TONE = {
     "expired": "danger",
@@ -35822,13 +37634,35 @@ def send_compliance_reminder(employee: dict[str, Any], document_type: str | None
 
 
 def mark_compliance_reviewed(employee: dict[str, Any], document_type: str, note: str | None = None) -> dict[str, Any]:
-    """Mark a document as reviewed by HR. Clears the 'needs review' state (a
-    received document with no readable expiry) by recording HR's confirmation.
-    Documents with a real expiry are still re-derived from that date by the
-    classifier, so this can never fake validity on an expired document."""
+    """Mark a document as HR reviewed (not government verified). Clears pending
+    review; expiry-bearing docs are still re-derived by the classifier."""
     employee_key = str(employee.get("employee_key") or "")
+    company = str(employee.get("company_code") or "WATHEFNI").upper()
     if not document_type:
         return {"ok": False, "error": "document_type_required", "safe_user_message": "Tell me which document to mark as reviewed."}
+    # Prefer governed journey approve when a pending version exists.
+    try:
+        import kuwait_pilot_document_journey as _kw_doc_journey
+
+        approved = _kw_doc_journey.approve_version(
+            sys.modules[__name__],
+            company_code=company,
+            employee_key=employee_key,
+            document_type=document_type,
+            actor_user_id="legacy_mark_reviewed",
+            permissions={_kw_doc_journey.DOCUMENT_REVIEW_MANAGE},
+            reason=note,
+            confirm_ocr=False,
+        )
+        return {
+            "ok": True,
+            "reviewed": [json_safe(approved)],
+            "document_label": compliance_document_friendly_label(document_type),
+            "employee": json_safe(employee),
+            "legitimacy": "hr_reviewed_only_not_government_verified",
+        }
+    except Exception:
+        pass
     with db_connect() as conn:
         with conn.cursor() as cur:
             if note:
@@ -35837,10 +37671,10 @@ def mark_compliance_reviewed(employee: dict[str, Any], document_type: str, note:
                     UPDATE compliance_documents
                     SET status='valid', renewal_status='reviewed', notes=%s,
                         last_checked_at=now(), updated_at=now()
-                    WHERE employee_key=%s AND document_type=%s
+                    WHERE employee_key=%s AND document_type = ANY(%s)
                     RETURNING document_type, label, status, renewal_status
                     """,
-                    (note, employee_key, document_type),
+                    (note, employee_key, list({document_type, "residence", "residency", "residency_iqama"}) if document_type in {"residence", "residency", "residency_iqama"} else [document_type]),
                 )
             else:
                 cur.execute(
@@ -35848,10 +37682,10 @@ def mark_compliance_reviewed(employee: dict[str, Any], document_type: str, note:
                     UPDATE compliance_documents
                     SET status='valid', renewal_status='reviewed',
                         last_checked_at=now(), updated_at=now()
-                    WHERE employee_key=%s AND document_type=%s
+                    WHERE employee_key=%s AND document_type = ANY(%s)
                     RETURNING document_type, label, status, renewal_status
                     """,
-                    (employee_key, document_type),
+                    (employee_key, list({document_type, "residence", "residency", "residency_iqama"}) if document_type in {"residence", "residency", "residency_iqama"} else [document_type]),
                 )
             rows = [dict(r) for r in cur.fetchall()]
         conn.commit()
@@ -35862,6 +37696,7 @@ def mark_compliance_reviewed(employee: dict[str, Any], document_type: str, note:
         "reviewed": json_safe(rows),
         "document_label": compliance_document_friendly_label(document_type, rows[0].get("label")),
         "employee": json_safe(employee),
+        "legitimacy": "hr_reviewed_only_not_government_verified",
     }
 
 
@@ -36638,6 +38473,8 @@ class DashboardAssessmentCancelRequest(BaseModel):
 
 class DashboardAssessmentReviewRequest(BaseModel):
     notes: str | None = Field(default=None, max_length=4000)
+    expected_updated_at: str | None = None
+    expected_version: int | None = None
 
 
 class AssessmentItemDraftRequest(BaseModel):
@@ -36682,10 +38519,119 @@ class DashboardCandidateDecisionRequest(BaseModel):
     target_payload: dict[str, Any] = Field(default_factory=dict)
 
 
+class DashboardCandidateOwnerRequest(BaseModel):
+    action: Literal["assign", "claim", "reassign", "unassign"]
+    owner_user_id: str | None = None
+    expected_ownership_version: int = Field(ge=0)
+    expected_lifecycle_version: int = Field(ge=0)
+    reason: str | None = Field(default=None, max_length=500)
+    idempotency_key: str | None = Field(default=None, min_length=12, max_length=180)
+    confirmation_id: str | None = None
+    confirmation_token: str | None = None
+
+
+class DashboardCandidateNoteCreateRequest(BaseModel):
+    body: str = Field(min_length=1, max_length=12000)
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardCandidateNoteUpdateRequest(BaseModel):
+    body: str | None = Field(default=None, min_length=1, max_length=12000)
+    expected_version: int = Field(ge=1)
+    delete: bool = False
+    delete_reason: str | None = Field(default=None, max_length=500)
+
+
+class DashboardCandidateTaskCreateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=300)
+    description: str | None = Field(default=None, max_length=4000)
+    owner_user_id: str
+    due_at: datetime | None = None
+    priority: Literal["low", "normal", "high", "urgent"] = "normal"
+    idempotency_key: str = Field(min_length=12, max_length=180)
+    confirmation_id: str | None = None
+    confirmation_token: str | None = None
+
+
+class DashboardCandidateTaskUpdateRequest(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=300)
+    description: str | None = Field(default=None, max_length=4000)
+    owner_user_id: str | None = None
+    due_at: datetime | None = None
+    priority: Literal["low", "normal", "high", "urgent"] | None = None
+    status: Literal["open", "completed", "cancelled"] | None = None
+    expected_version: int = Field(ge=1)
+    idempotency_key: str | None = Field(default=None, min_length=12, max_length=180)
+    confirmation_id: str | None = None
+    confirmation_token: str | None = None
+
+
+class DashboardCandidateTagCreateRequest(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+    label_ar: str | None = Field(default=None, max_length=80)
+    color: str | None = Field(default=None, max_length=32)
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardCandidateTagMutationRequest(BaseModel):
+    tag_id: str
+    expected_ownership_version: int = Field(ge=0)
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardCandidateC2ConfirmationRequest(BaseModel):
+    action: Literal["assign", "claim", "reassign", "unassign", "task_create", "task_update", "bulk_assign", "bulk_add_tag", "bulk_remove_tag"]
+    target_payload: dict[str, Any] = Field(default_factory=dict)
+    observed_state: dict[str, Any] = Field(default_factory=dict)
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardCandidateBulkPreviewRequest(BaseModel):
+    action: Literal["assign", "reassign", "add_tag", "remove_tag"]
+    app_keys: list[str] = Field(min_length=1, max_length=200)
+    owner_user_id: str | None = None
+    tag_id: str | None = None
+
+
+class DashboardCandidateBulkExecuteRequest(BaseModel):
+    preview_id: str
+    confirmation_id: str
+    confirmation_token: str
+    idempotency_key: str = Field(min_length=12, max_length=180)
+
+
+class DashboardC3MergePreviewRequest(BaseModel):
+    canonical_person_id: str
+    absorbed_person_id: str
+
+
+class DashboardC3MergeExecuteRequest(BaseModel):
+    preview: dict[str, Any]
+    confirmation_token: str | None = None
+
+
+class DashboardC3ReverseMergeRequest(BaseModel):
+    operation_id: str
+    confirmation_token: str | None = None
+
+
+class DashboardC3LegalHoldRequest(BaseModel):
+    person_id: str
+    scope: str = Field(min_length=2, max_length=120)
+    reason: str = Field(min_length=3, max_length=2000)
+    case_reference: str | None = None
+    confirmation_token: str | None = None
+
+
+class DashboardC3PrivacyRequestCreate(BaseModel):
+    person_id: str
+    request_type: Literal["export", "delete", "anonymize"]
+
+
 class DashboardHireRequest(DashboardCandidateDecisionRequest):
     hire_override: bool = False
     override_reason: str | None = None
-    confirm: bool = True
+    confirm: bool = False
 
 
 class DashboardInterviewStateRequest(BaseModel):
@@ -36697,6 +38643,8 @@ class DashboardInterviewNotesRequest(BaseModel):
     transcript: str | None = None
     status: str | None = None
     generate_summary: bool = True
+    expected_updated_at: str | None = None
+    expected_version: int | None = None
 
 
 class DashboardVideoInterviewQuestion(BaseModel):
@@ -36801,6 +38749,8 @@ class DashboardChatResponse(BaseModel):
     candidate_cards: list[dict[str, Any]] = Field(default_factory=list)
     navigation: list[dict[str, Any]] = Field(default_factory=list)
     confirmation: dict[str, Any] | None = None
+    workflow_card: dict[str, Any] | None = None
+    progress_phase: str | None = None
     session: dict[str, Any] | None = None
     audit: dict[str, Any] = Field(default_factory=dict)
 
@@ -36810,6 +38760,10 @@ class PublicAssessmentAnswer(BaseModel):
     response_text: str | None = None
     item_id: str
     progress_version: int | None = Field(default=None, ge=0)
+
+
+class PublicAssessmentStateRequest(BaseModel):
+    start: bool = False
 
 
 class PublicAssessmentCancel(BaseModel):
@@ -36835,14 +38789,42 @@ class PublicVideoInterviewResponse(BaseModel):
     metadata: dict[str, Any] | None = None
 
 
-def public_assessment_html() -> str:
+def public_assessment_unavailable_html() -> str:
     return """
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Application Assessment</title>
+  <title>Link unavailable</title>
+  <style>
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f5f5f4; color:#1c1917; }
+    main { min-height:100vh; display:grid; place-items:center; padding:24px; }
+    .shell { width:min(560px,100%); border:1px solid #e7e5e4; background:#fff; border-radius:24px; padding:28px; box-shadow:0 18px 50px rgba(28,25,23,.08); }
+    h1 { margin:0 0 10px; font-size:28px; letter-spacing:-.03em; }
+    p { margin:0; color:#57534e; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="shell">
+      <h1>Link unavailable</h1>
+      <p>This link is no longer available. Please contact the hiring team if you need help.</p>
+    </section>
+  </main>
+</body>
+</html>
+""".strip()
+
+
+def public_assessment_html() -> str:
+    return """
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secure assessment</title>
   <style>
     :root { color-scheme: light; --ink:#171d29; --bg:#f6f1e8; --panel:#fffdf8; --line:#e7dece; --muted:#746b5f; }
     * { box-sizing: border-box; }
@@ -36859,52 +38841,102 @@ def public_assessment_html() -> str:
     .bar { height:100%; width:0%; background:var(--ink); transition:width .25s ease; }
     .question { font-size:22px; line-height:1.45; font-weight:650; margin:0 0 22px; letter-spacing:-.02em; }
     .choices { display:grid; gap:12px; }
-    button.choice { width:100%; text-align:left; border:1px solid var(--line); background:#fffaf2; color:var(--ink); border-radius:20px; padding:16px 18px; font-size:16px; line-height:1.45; cursor:pointer; transition:border-color .15s ease, background .15s ease; }
-    button.choice:hover:not(:disabled) { border-color:#1b2230; background:white; }
-    button.choice:disabled { opacity:.6; cursor:not-allowed; }
+    button.choice, button.begin { width:100%; text-align:left; border:1px solid var(--line); background:#fffaf2; color:var(--ink); border-radius:20px; padding:16px 18px; font-size:16px; line-height:1.45; cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+    button.begin { text-align:center; font-weight:700; background:var(--ink); color:#fff; border-color:var(--ink); }
+    button.choice:hover:not(:disabled), button.begin:hover:not(:disabled) { border-color:#1b2230; }
+    button.choice:disabled, button.begin:disabled { opacity:.6; cursor:not-allowed; }
     .key { display:inline-grid; place-items:center; width:28px; height:28px; margin-right:10px; border-radius:999px; background:var(--ink); color:white; font-size:13px; font-weight:700; }
+    [dir="rtl"] .key { margin-right:0; margin-left:10px; }
     .done { text-align:center; padding:34px 10px; }
     .done-icon { width:54px; height:54px; border-radius:50%; display:grid; place-items:center; margin:0 auto 18px; background:var(--ink); color:white; }
     .error { border:1px solid #f0b9b9; background:#fff1f1; color:#8f1d1d; border-radius:18px; padding:14px 16px; }
+    .intro { display:grid; gap:14px; }
   </style>
 </head>
 <body>
   <main>
     <section class="shell">
       <header>
-        <div class="brand">Application Assessment</div>
-        <h1 id="title">Opening your assessment...</h1>
+        <div class="brand" id="brand">Secure link</div>
+        <h1 id="title">Opening…</h1>
         <div class="subtle" id="meta"></div>
         <div class="progress"><div class="bar" id="bar"></div></div>
       </header>
-      <div class="content" id="content"><div class="subtle">Opening your assessment...</div></div>
+      <div class="content" id="content"><div class="subtle" id="loading">Opening…</div></div>
     </section>
   </main>
   <script>
+    const COPY = {
+      en: {
+        brand: 'Secure link',
+        opening: 'Opening…',
+        title: 'Hiring assessment',
+        introTitle: 'Before you begin',
+        introBody: 'This short assessment helps the hiring team review your application. Your answers are saved securely. Please complete it in one sitting when possible.',
+        privacy: 'Do not share this link. Contact the hiring team if you need a new one.',
+        begin: 'Begin assessment',
+        starting: 'Starting…',
+        questionOf: (n, t) => `Question ${n} of ${t}`,
+        saving: 'Saving your answer…',
+        submitted: 'Your assessment has been submitted',
+        thanks: 'Thank you. The hiring team will review it with the rest of your application. You can close this page.',
+        loadError: 'Something went wrong loading your questions. Please contact the hiring team.',
+        saveError: 'We could not save your answer. Please try again.',
+        unavailable: 'This link is no longer available. Please contact the hiring team if you need a new link.',
+        chooseAnswer: 'Please choose one of the available answers.',
+        notAvailable: 'This assessment is not available right now. Please contact the hiring team.',
+        genericError: 'Something went wrong. Please check your connection and try again.',
+      },
+      ar: {
+        brand: 'رابط آمن',
+        opening: 'جاري الفتح…',
+        title: 'تقييم التوظيف',
+        introTitle: 'قبل أن تبدأ',
+        introBody: 'يساعد هذا التقييم القصير فريق التوظيف على مراجعة طلبك. تُحفظ إجاباتك بشكل آمن. يُفضَّل إكماله في جلسة واحدة واحدة قدر الإمكان.',
+        privacy: 'لا تشارك هذا الرابط. تواصل مع فريق التوظيف إذا احتجت رابطًا جديدًا.',
+        begin: 'بدء التقييم',
+        starting: 'جاري البدء…',
+        questionOf: (n, t) => `السؤال ${n} من ${t}`,
+        saving: 'جاري حفظ إجابتك…',
+        submitted: 'تم إرسال تقييمك',
+        thanks: 'شكرًا لك. سيراجعه فريق التوظيف مع بقية طلبك. يمكنك إغلاق هذه الصفحة.',
+        loadError: 'تعذر تحميل الأسئلة. يرجى التواصل مع فريق التوظيف.',
+        saveError: 'تعذر حفظ إجابتك. يرجى المحاولة مرة أخرى.',
+        unavailable: 'هذا الرابط لم يعد متاحًا. يرجى التواصل مع فريق التوظيف إذا احتجت رابطًا جديدًا.',
+        chooseAnswer: 'يرجى اختيار إحدى الإجابات المتاحة.',
+        notAvailable: 'هذا التقييم غير متاح الآن. يرجى التواصل مع فريق التوظيف.',
+        genericError: 'حدث خطأ. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
+      },
+    };
+    let locale = 'en';
+    let t = COPY.en;
     const attemptId = location.pathname.split('/').pop();
     const token = new URLSearchParams(location.search).get('token') || '';
     const content = document.getElementById('content');
     const title = document.getElementById('title');
     const meta = document.getElementById('meta');
     const bar = document.getElementById('bar');
+    const brand = document.getElementById('brand');
+    function applyLocale(nextLocale) {
+      locale = nextLocale === 'ar' ? 'ar' : 'en';
+      t = COPY[locale];
+      document.documentElement.lang = locale;
+      document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+      brand.textContent = t.brand;
+      document.title = t.title;
+    }
     function candidateSafeAssessmentError(code) {
       const normalized = String(code || '').toLowerCase();
-      if (normalized.includes('invalid_assessment_answer')) {
-        return 'Please choose one of the available answers.';
-      }
-      if (normalized.includes('invalid') || normalized.includes('expired') || normalized.includes('not_found')) {
-        return 'This link is no longer available. Please contact the hiring team if you need a new link.';
-      }
-      if (normalized.includes('disabled') || normalized.includes('unavailable')) {
-        return 'This assessment is not available right now. Please contact the hiring team.';
-      }
-      return 'Something went wrong. Please check your connection and try again.';
+      if (normalized.includes('invalid_assessment_answer')) return t.chooseAnswer;
+      if (normalized.includes('invalid') || normalized.includes('expired') || normalized.includes('not_found')) return t.unavailable;
+      if (normalized.includes('disabled') || normalized.includes('unavailable')) return t.notAvailable;
+      return t.genericError;
     }
     function renderUnavailable(message) {
-      title.textContent = 'Application Assessment';
+      title.textContent = t.title;
       meta.textContent = '';
       bar.style.width = '0%';
-      content.innerHTML = `<div class="error">${escapeHtml(message || 'This link is no longer available. Please contact the hiring team if you need a new link.')}</div>`;
+      content.innerHTML = `<div class="error">${escapeHtml(message || t.unavailable)}</div>`;
     }
     async function request(path, init) {
       const res = await fetch(path + '?token=' + encodeURIComponent(token), {
@@ -36920,28 +38952,64 @@ def public_assessment_html() -> str:
       return json;
     }
     function setContentHtml(html) {
-      // Single atomic replace so Mobile Safari does not paint an empty frame
-      // between wipe and rebuild when advancing items.
       const next = document.createElement('div');
       next.innerHTML = html;
       content.replaceChildren(...next.childNodes);
     }
-    function render(state) {
+    function renderIntro(state) {
       const attempt = state.attempt || {};
-      title.textContent = attempt.position_title ? `Assessment for ${attempt.position_title}` : 'Application Assessment';
+      title.textContent = attempt.position_title
+        ? (locale === 'ar' ? `تقييم لوظيفة ${attempt.position_title}` : `Assessment for ${attempt.position_title}`)
+        : t.title;
+      meta.textContent = [attempt.candidate_name, attempt.total_items ? (locale === 'ar' ? `${attempt.total_items} أسئلة` : `${attempt.total_items} questions`) : ''].filter(Boolean).join(' · ');
+      bar.style.width = '0%';
+      setContentHtml(`
+        <div class="intro">
+          <h2 style="margin:0;font-size:22px;letter-spacing:-.02em;">${escapeHtml(t.introTitle)}</h2>
+          <p class="subtle">${escapeHtml(t.introBody)}</p>
+          <p class="subtle">${escapeHtml(t.privacy)}</p>
+          <button class="begin" id="beginBtn" type="button">${escapeHtml(t.begin)}</button>
+        </div>
+      `);
+      document.getElementById('beginBtn').addEventListener('click', async () => {
+        const button = document.getElementById('beginBtn');
+        button.disabled = true;
+        button.textContent = t.starting;
+        try {
+          const next = await request(`/assessment/${attemptId}/state`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ start: true }),
+          });
+          render(next);
+        } catch (err) {
+          renderUnavailable(err.message);
+        }
+      });
+    }
+    function render(state) {
+      applyLocale(state.locale || state.attempt?.locale || locale);
+      if (state.needs_begin) {
+        renderIntro(state);
+        return;
+      }
+      const attempt = state.attempt || {};
+      title.textContent = attempt.position_title
+        ? (locale === 'ar' ? `تقييم لوظيفة ${attempt.position_title}` : `Assessment for ${attempt.position_title}`)
+        : t.title;
       const answered = attempt.current_item_index || 0;
       const total = attempt.total_items || 0;
       const nextQuestion = Math.min(answered + 1, total || 1);
-      meta.textContent = [attempt.candidate_name, total ? `Question ${nextQuestion} of ${total}` : ''].filter(Boolean).join(' · ');
+      meta.textContent = [attempt.candidate_name, total ? t.questionOf(nextQuestion, total) : ''].filter(Boolean).join(' · ');
       bar.style.width = `${attempt.percent_complete || 0}%`;
       if (state.completed) {
-        setContentHtml('<div class="done"><div class="done-icon">✓</div><h2>Your assessment has been submitted</h2><p class="subtle">Thank you. The hiring team will review it with the rest of your application. You can close this page.</p></div>');
+        setContentHtml(`<div class="done"><div class="done-icon">✓</div><h2>${escapeHtml(t.submitted)}</h2><p class="subtle">${escapeHtml(t.thanks)}</p></div>`);
         bar.style.width = '100%';
         return;
       }
       const item = state.item;
       if (!item) {
-        setContentHtml('<div class="error">Something went wrong loading your questions. Please contact the hiring team.</div>');
+        setContentHtml(`<div class="error">${escapeHtml(t.loadError)}</div>`);
         return;
       }
       const questionHtml = `<p class="question">${escapeHtml(item.prompt_text)}</p><div class="choices">${(item.choices || []).map(choice => `<button class="choice" data-key="${escapeHtml(choice.key)}"><span class="key">${escapeHtml(choice.key)}</span>${escapeHtml(choice.text)}</button>`).join('')}</div>`;
@@ -36949,8 +39017,7 @@ def public_assessment_html() -> str:
       content.querySelectorAll('button.choice').forEach(button => {
         button.addEventListener('click', async () => {
           content.querySelectorAll('button.choice').forEach(b => b.disabled = true);
-          // Keep non-empty pending chrome so the pane never blanks during save.
-          setContentHtml(`<p class="question">${escapeHtml(item.prompt_text)}</p><div class="pending" aria-live="polite">Saving your answer…</div>`);
+          setContentHtml(`<p class="question">${escapeHtml(item.prompt_text)}</p><div class="pending" aria-live="polite">${escapeHtml(t.saving)}</div>`);
           try {
             const next = await request(`/assessment/${attemptId}/answer`, {
               method: 'POST',
@@ -36964,7 +39031,7 @@ def public_assessment_html() -> str:
             });
             render(next);
           } catch (err) {
-            setContentHtml(`<div class="error">${escapeHtml(err.message || 'We could not save your answer. Please try again.')}</div>`);
+            setContentHtml(`<div class="error">${escapeHtml(err.message || t.saveError)}</div>`);
           }
         });
       });
@@ -36972,7 +39039,12 @@ def public_assessment_html() -> str:
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
-    request(`/assessment/${attemptId}/state`, { method:'POST' }).then(render).catch(err => renderUnavailable(err.message));
+    applyLocale('en');
+    request(`/assessment/${attemptId}/state`, {
+      method:'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ start: false }),
+    }).then(render).catch(err => renderUnavailable(err.message));
   </script>
 </body>
 </html>
@@ -37608,14 +39680,253 @@ def public_video_interview_html() -> str:
 """.strip()
 
 
+def public_calendar_guest_html() -> str:
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Wathefni Calendar</title>
+  <style>
+    :root { --ink:#23211d; --muted:#716a5e; --bg:#f7f2e9; --panel:#fffaf0; --line:#e8dfd0; --ok:#2f6b4f; --warn:#7a5a20; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Georgia, "Iowan Old Style", serif; background: radial-gradient(circle at 50% -10%, #fffdf5, #f4eee4); color: var(--ink); }
+    .wrap { max-width: 440px; margin: 0 auto; padding: 24px 16px 48px; }
+    .card { background: var(--panel); border: 1px solid rgba(0,0,0,.06); border-radius: 24px; padding: 20px; box-shadow: 0 18px 40px rgba(35,33,29,.08); }
+    .eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+    h1 { font-size: 24px; margin: 8px 0 4px; }
+    .meta { color: var(--muted); font-size: 14px; line-height: 1.45; }
+    .actions { display: grid; gap: 8px; margin-top: 18px; }
+    button, .lang { border: 0; border-radius: 14px; padding: 12px 14px; font: inherit; cursor: pointer; }
+    button.primary { background: var(--ink); color: #fff; }
+    button.secondary { background: #eee5d4; color: var(--ink); }
+    button:disabled { opacity: .5; cursor: default; }
+    .langbar { display:flex; gap:8px; margin-bottom: 12px; }
+    .lang { background: #fff; border: 1px solid var(--line); font-size: 13px; padding: 6px 10px; }
+    .lang.on { background: var(--ink); color:#fff; }
+    .note { width:100%; min-height:72px; border-radius:14px; border:1px solid var(--line); padding:10px; font: inherit; margin-top:8px; }
+    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #fff4e0; color: var(--warn); font-size: 13px; display:none; }
+    .msg.ok { background: #e8f5ee; color: var(--ok); }
+    .times { width:100%; border-radius:14px; border:1px solid var(--line); padding:10px; font: inherit; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="langbar">
+      <button class="lang on" type="button" data-lang="en">English</button>
+      <button class="lang" type="button" data-lang="ar">العربية</button>
+    </div>
+    <div class="card" id="card">
+      <div class="eyebrow" id="eyebrow">Invitation</div>
+      <h1 id="title">Loading…</h1>
+      <div class="meta" id="meta"></div>
+      <div class="actions" id="actions"></div>
+      <div id="rescheduleBox" style="display:none;margin-top:12px">
+        <label class="meta" id="prefLabel">Preferred times (optional)</label>
+        <textarea class="times" id="preferred" placeholder="e.g. Thu 10:00–11:00 Asia/Kuwait"></textarea>
+        <label class="meta" id="noteLabel">Note</label>
+        <textarea class="note" id="note"></textarea>
+        <button class="primary" type="button" id="submitReschedule" style="width:100%;margin-top:8px">Send request</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+  <script>
+    const COPY = {
+      en: {
+        eyebrow: "Invitation",
+        when: "When",
+        where: "Where",
+        accept: "Accept",
+        decline: "Decline",
+        tentative: "Tentative",
+        reschedule: "Request reschedule",
+        pref: "Preferred times (optional)",
+        note: "Note",
+        send: "Send request",
+        cancelled: "This event was cancelled.",
+        done: "Response saved. Thank you.",
+        reqDone: "Reschedule request sent. The organizer must confirm any time change.",
+        error: "Something went wrong. Please try again."
+      },
+      ar: {
+        eyebrow: "دعوة",
+        when: "الوقت",
+        where: "المكان",
+        accept: "قبول",
+        decline: "رفض",
+        tentative: "مبدئي",
+        reschedule: "طلب إعادة جدولة",
+        pref: "الأوقات المفضلة (اختياري)",
+        note: "ملاحظة",
+        send: "إرسال الطلب",
+        cancelled: "تم إلغاء هذا الحدث.",
+        done: "تم حفظ الرد. شكرًا لك.",
+        reqDone: "تم إرسال طلب إعادة الجدولة. يجب على المنظم تأكيد أي تغيير في الوقت.",
+        error: "حدث خطأ. حاول مرة أخرى."
+      }
+    };
+    let lang = "en";
+    let state = null;
+    const token = location.pathname.split("/").filter(Boolean).pop();
+    const $ = (id) => document.getElementById(id);
+    function t(k){ return COPY[lang][k]; }
+    function setLang(next){
+      lang = next;
+      document.documentElement.lang = next;
+      document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
+      document.querySelectorAll(".lang").forEach(b => b.classList.toggle("on", b.dataset.lang === next));
+      render();
+    }
+    document.querySelectorAll(".lang").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+    async function load(){
+      const res = await fetch(`/calendar/guest/${encodeURIComponent(token)}/state`);
+      state = await res.json();
+      render();
+    }
+    function showMsg(text, ok){
+      const el = $("msg");
+      el.style.display = "block";
+      el.className = "msg" + (ok ? " ok" : "");
+      el.textContent = text;
+    }
+    async function act(action){
+      if (action === "request_reschedule"){
+        $("rescheduleBox").style.display = "block";
+        return;
+      }
+      const res = await fetch(`/calendar/guest/${encodeURIComponent(token)}/action`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ action, expected_rsvp_version: state?.guest?.rsvp_version })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok){ showMsg(data.message || data.detail?.message || t("error"), false); return; }
+      showMsg(t("done"), true);
+      await load();
+    }
+    $("submitReschedule").onclick = async () => {
+      const preferred = ($("preferred").value || "").split("\\n").map(s => s.trim()).filter(Boolean);
+      const res = await fetch(`/calendar/guest/${encodeURIComponent(token)}/action`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ action: "request_reschedule", note: $("note").value || "", preferred_times: preferred })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok){ showMsg(data.message || data.detail?.message || t("error"), false); return; }
+      showMsg(t("reqDone"), true);
+      $("rescheduleBox").style.display = "none";
+    };
+    function render(){
+      if (!state || !state.ok){ $("title").textContent = t("error"); return; }
+      $("eyebrow").textContent = t("eyebrow");
+      const ev = state.event || {};
+      $("title").textContent = (lang === "ar" && ev.title_ar) ? ev.title_ar : (ev.title || "Event");
+      const lines = [];
+      if (ev.cancelled) lines.push(t("cancelled"));
+      lines.push(`${t("when")}: ${ev.start_at || ""} → ${ev.end_at || ""} (${ev.timezone || ""})`);
+      if (ev.location) lines.push(`${t("where")}: ${ev.location}`);
+      if (state.guest?.rsvp_status) lines.push(`RSVP: ${state.guest.rsvp_status}`);
+      $("meta").innerHTML = lines.map(l => `<div>${l}</div>`).join("");
+      $("prefLabel").textContent = t("pref");
+      $("noteLabel").textContent = t("note");
+      $("submitReschedule").textContent = t("send");
+      const actions = $("actions");
+      actions.innerHTML = "";
+      if (ev.cancelled) return;
+      [["accept","primary"],["decline","secondary"],["tentative","secondary"],["request_reschedule","secondary"]].forEach(([a, cls]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = cls;
+        b.textContent = t(a === "request_reschedule" ? "reschedule" : a);
+        b.onclick = () => act(a);
+        actions.appendChild(b);
+      });
+    }
+    load().catch(() => showMsg(t("error"), false));
+  </script>
+</body>
+</html>""".strip()
+
+
+@app.get("/calendar/guest/{token}", response_class=HTMLResponse)
+def public_calendar_guest_page(token: str):
+    return HTMLResponse(public_calendar_guest_html(), headers={"Cache-Control": "no-store"})
+
+
+@app.get("/calendar/guest/{token}/state")
+def public_calendar_guest_state(token: str, request: Request):
+    import calendar_participation as cal_part
+    import calendar_schema as cal_schema
+
+    # Simple IP rate limit via in-memory not available — DB audit only; reject empty tokens.
+    if not str(token or "").strip() or len(token) > 200:
+        raise HTTPException(status_code=404, detail={"error": "invalid_token"})
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cal_schema.ensure_calendar_schema(cur)
+                row = cal_part.resolve_guest_token(cur, token)
+        return cal_part.public_guest_payload(row)
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+
+
+class PublicCalendarGuestActionRequest(BaseModel):
+    action: str
+    note: str | None = None
+    preferred_times: list[Any] = Field(default_factory=list)
+    expected_rsvp_version: int | None = None
+
+
+@app.post("/calendar/guest/{token}/action")
+def public_calendar_guest_action(token: str, body: PublicCalendarGuestActionRequest, request: Request):
+    import calendar_participation as cal_part
+
+    if not str(token or "").strip() or len(token) > 200:
+        raise HTTPException(status_code=404, detail={"error": "invalid_token"})
+    client_ip = request.client.host if request.client else None
+    try:
+        return cal_part.apply_guest_action(
+            sys.modules[__name__],
+            raw_token=token,
+            action=body.action,
+            note=body.note,
+            preferred_times=body.preferred_times,
+            expected_rsvp_version=body.expected_rsvp_version,
+            client_ip=client_ip,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+
+
 @app.get("/assessment/{attempt_id}", response_class=HTMLResponse)
 def public_assessment_page(attempt_id: str, token: str | None = Query(default=None)):
+    import assessment_service as _assessment_service
+
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                attempt, _token_row = _assessment_service.validate_take_token(
+                    cur,
+                    attempt_id=attempt_id,
+                    raw_token=token,
+                )
+                if not company_has_module(attempt.get("company_code"), "assessments"):
+                    return HTMLResponse(public_assessment_unavailable_html(), status_code=403)
+    except Exception:
+        return HTMLResponse(public_assessment_unavailable_html(), status_code=404)
     return HTMLResponse(public_assessment_html())
 
 
 @app.post("/assessment/{attempt_id}/state")
-def public_assessment_state_endpoint(attempt_id: str, token: str | None = Query(default=None)):
-    return public_assessment_state(attempt_id, token, start=True)
+def public_assessment_state_endpoint(
+    attempt_id: str,
+    request: PublicAssessmentStateRequest | None = None,
+    token: str | None = Query(default=None),
+):
+    payload = request or PublicAssessmentStateRequest()
+    return public_assessment_state(attempt_id, token, start=bool(payload.start))
 
 
 @app.post("/assessment/{attempt_id}/answer")
@@ -37660,6 +39971,10 @@ def public_assessment_answer_endpoint(attempt_id: str, answer: PublicAssessmentA
     if recorded.get("completed"):
         completed_attempt = recorded.get("attempt") or {}
         total = int(completed_attempt.get("total_items") or 0)
+        raw = completed_attempt.get("raw_json") if isinstance(completed_attempt.get("raw_json"), dict) else {}
+        locale = str(raw.get("locale") or state.get("locale") or "en").strip().lower()
+        if locale not in {"en", "ar"}:
+            locale = "en"
         return {
             "ok": True,
             "attempt": {
@@ -37672,7 +39987,11 @@ def public_assessment_answer_endpoint(attempt_id: str, answer: PublicAssessmentA
                 "percent_complete": 100,
                 "progress_version": int(completed_attempt.get("progress_version") or 0),
                 "expires_at": json_safe(completed_attempt.get("expires_at")),
+                "locale": locale,
             },
+            "locale": locale,
+            "dir": "rtl" if locale == "ar" else "ltr",
+            "needs_begin": False,
             "item": None,
             "completed": True,
         }
@@ -37697,6 +40016,14 @@ def public_assessment_cancel_endpoint(
                 )
             except Exception as exc:
                 raise assessment_authority_http_error(exc) from exc
+            if not company_has_module(token_attempt.get("company_code"), "assessments"):
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "module_disabled",
+                        "message": "This link is no longer available. Please contact the hiring team if you need a new link.",
+                    },
+                )
     payload = request or PublicAssessmentCancel()
     cancelled = cancel_assessment_attempt(
         token_attempt,
@@ -38074,6 +40401,7 @@ def dashboard_user_public(user: dict[str, Any] | None) -> dict[str, Any]:
 
 def dashboard_access_payload_for_user(user: dict[str, Any] | None) -> dict[str, Any]:
     public = dashboard_user_public(user)
+    phone = digits(public.get("phone"))
     return {
         "role": public["role"],
         "role_label": public["role_label"],
@@ -38084,6 +40412,7 @@ def dashboard_access_payload_for_user(user: dict[str, Any] | None) -> dict[str, 
         "permission_authority": "backend_current",
         "permission_subject_user_id": public["user_id"],
         "permission_subject_company": public["company_code"],
+        "is_platform_admin": bool(phone and phone in platform_admin_phones()),
     }
 
 
@@ -38730,6 +41059,36 @@ def company_lifecycle_status(company_code: str | None) -> str:
 def require_active_company(company_code: str | None) -> str:
     company = str(company_code or "").strip().upper()
     status = company_lifecycle_status(company)
+    # Wave 2: also observe control-plane lifecycle (shadow unless canary tenant authority).
+    if _tenant_decision.decision_enabled() and _tenant_decision.lifecycle_enforce_enabled():
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    result = _tenant_surfaces.observe_or_enforce(
+                        cur,
+                        company_code=company,
+                        surface="navigation",
+                        module_key=None,
+                        legacy_allow=(status == "active"),
+                        work_kind="company_lifecycle",
+                    )
+                    conn.commit()
+                    if result.mode == "authoritative" and not result.allow:
+                        raise HTTPException(
+                            status_code=403,
+                            detail={
+                                "error": result.reason_code or f"company_{status}",
+                                "message": result.remediation
+                                or "This company workspace is not active. Contact the Wathefni platform operator.",
+                                "company_code": company,
+                                "company_status": status,
+                                "correlation_id": result.audit_correlation_id,
+                            },
+                        )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
     if status != "active":
         raise HTTPException(
             status_code=403,
@@ -39017,6 +41376,15 @@ def dashboard_workspace_bootstrap(context: dict[str, Any] = Depends(dashboard_co
     company = context["company_code"]
     configured = configured_company_modules(company)
     effective = effective_company_modules(company)
+    timezone_name = str(get_company_settings(company).get("timezone") or "Asia/Kuwait").strip() or "Asia/Kuwait"
+    import prehire_visibility as _pv
+
+    policy = company_prehire_visibility_policy(company)
+    plan = _pv.resolve_visibility_plan(
+        policy=policy,
+        role=dashboard_context_role_key(context),
+        surface="detail",
+    )
     return {
         "company_code": company,
         "configured_modules": sorted(configured),
@@ -39026,6 +41394,9 @@ def dashboard_workspace_bootstrap(context: dict[str, Any] = Depends(dashboard_co
         "module_catalog": dashboard_module_catalog_payload(company),
         "access": context.get("access"),
         "user": dashboard_user_public(context.get("hr_user")),
+        "timezone": timezone_name,
+        "prehire_visibility_policy": policy,
+        **_pv.visibility_meta(plan),
     }
 
 
@@ -39047,6 +41418,7 @@ _operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__]
 import offer_routes as _offer_routes
 
 _offer_routes.register_offer_routes(app, sys.modules[__name__])
+# UNIFIED_CANDIDATES_PRODUCTION_DARK_PATCH: routes mounted before SPA catch-all
 import assessment_ai_routes as _assessment_ai_routes
 
 _assessment_ai_routes.register_assessment_ai_routes(app, sys.modules[__name__])
@@ -39148,7 +41520,23 @@ def dashboard_team_accept_invite(request: DashboardAcceptInviteRequest):
 
 @app.get("/dashboard/team")
 def dashboard_team_list(context: dict[str, Any] = Depends(workspace_dashboard_context)):
+    """Team directory with Wave 6 privacy tiers.
+
+    Admin (users.manage or authorized HR admin with settings.manage): full team
+    contacts + (for users.manage only) permission matrices and invites.
+    Collaboration: name + role + status only — no peer emails/phones/permissions.
+    """
+    import prehire_team_directory as _td
+
     company = context["company_code"]
+    actor_user_id = str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "")
+    can_manage_users = dashboard_context_has_permission(context, "users.manage")
+    can_manage_settings = dashboard_context_has_permission(context, "settings.manage")
+    view = _td.resolve_directory_view(
+        can_manage_users=can_manage_users,
+        can_manage_settings=can_manage_settings,
+        actor_role=dashboard_context_role_key(context),
+    )
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -39163,18 +41551,20 @@ def dashboard_team_list(context: dict[str, Any] = Depends(workspace_dashboard_co
                 """,
                 (company,),
             )
-            users = [dashboard_user_public(dict(row)) for row in cur.fetchall()]
-            cur.execute(
-                """
-                SELECT invite_id, company_code, email, role, status, expires_at, created_at
-                FROM dashboard_user_invites
-                WHERE company_code=%s AND status='pending' AND expires_at > now()
-                ORDER BY created_at DESC
-                LIMIT 100
-                """,
-                (company,),
-            )
-            invites = [json_safe(dict(row)) for row in cur.fetchall()]
+            raw_users = [dict(row) for row in cur.fetchall()]
+            invites: list[dict[str, Any]] = []
+            if can_manage_users:
+                cur.execute(
+                    """
+                    SELECT invite_id, company_code, email, role, status, expires_at, created_at
+                    FROM dashboard_user_invites
+                    WHERE company_code=%s AND status='pending' AND expires_at > now()
+                    ORDER BY created_at DESC
+                    LIMIT 100
+                    """,
+                    (company,),
+                )
+                invites = [json_safe(dict(row)) for row in cur.fetchall()]
             # Which of these users currently have an ACTIVE WhatsApp identity in
             # THIS company. Company-scoped + status='active' so a disabled/relinked
             # row never counts. Used only to show a calm "linked / not linked"
@@ -39184,9 +41574,79 @@ def dashboard_team_list(context: dict[str, Any] = Depends(workspace_dashboard_co
                 (company,),
             )
             linked_user_ids = {str(row["user_id"]) for row in cur.fetchall() if row.get("user_id")}
-    for member in users:
-        member["whatsapp_linked"] = str(member.get("user_id") or "") in linked_user_ids
-    return {"company_code": company, "users": users, "invites": invites, "role_capabilities": {role: hr_role_permissions(role) for role in ROLE_PERMISSIONS}}
+
+    users: list[dict[str, Any]] = []
+    for row in raw_users:
+        public = dashboard_user_public(row)
+        public["whatsapp_linked"] = str(public.get("user_id") or "") in linked_user_ids
+        projected = _td.project_team_member(
+            {**public, "_effective_permissions": public.get("permissions")},
+            view=view,
+            actor_user_id=actor_user_id,
+            include_permissions=can_manage_users,
+            role_label_resolver=lambda role: ROLE_LABELS.get(role, role.replace("_", " ").title()),
+        )
+        users.append(json_safe(projected))
+
+    payload: dict[str, Any] = {
+        "company_code": company,
+        "users": users,
+        "invites": invites if can_manage_users else [],
+        "directory_view": view,
+        "can_manage_team": can_manage_users,
+    }
+    if can_manage_users:
+        payload["role_capabilities"] = {role: hr_role_permissions(role) for role in ROLE_PERMISSIONS}
+    return payload
+
+
+@app.get("/dashboard/team/people")
+def dashboard_team_people_picker(
+    purpose: str = "recruiter",
+    q: str | None = None,
+    limit: int = 50,
+    context: dict[str, Any] = Depends(workspace_dashboard_context),
+):
+    """Searchable privacy-safe people picker for ownership / assignment surfaces."""
+    import prehire_team_directory as _td
+
+    try:
+        purpose_key = _td.normalize_picker_purpose(purpose)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "invalid_picker_purpose", "message": "Unknown people picker purpose."},
+        ) from exc
+    # Assignment pickers require pre-hire (or post-hire for approver) workspace access.
+    company = context["company_code"]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT user_id, company_code, email, name, phone, role, status
+                FROM dashboard_users
+                WHERE company_code=%s AND status='active'
+                ORDER BY lower(COALESCE(NULLIF(name, ''), email)), email
+                LIMIT 500
+                """,
+                (company,),
+            )
+            rows = [dict(row) for row in cur.fetchall()]
+    people = _td.filter_users_for_picker(
+        rows,
+        purpose=purpose_key,
+        query=q,
+        role_label_resolver=lambda role: ROLE_LABELS.get(role, role.replace("_", " ").title()),
+        limit=limit,
+    )
+    return {
+        "company_code": company,
+        "purpose": purpose_key,
+        "q": (q or "").strip() or None,
+        "people": people,
+        "unassigned_allowed": purpose_key in {_td.PURPOSE_RECRUITER, _td.PURPOSE_HIRING_MANAGER, _td.PURPOSE_TASK_OWNER},
+        "directory_view": _td.VIEW_COLLABORATION,
+    }
 
 
 @app.post("/dashboard/team/invites")
@@ -39281,6 +41741,34 @@ def dashboard_team_update_user(user_id: str, request: DashboardTeamUserUpdateReq
         raise HTTPException(status_code=422, detail={"error": "no_update", "message": "No team member update was provided."})
     with db_connect() as conn:
         with conn.cursor() as cur:
+            removes_recruiting_eligibility = (
+                normalize_dashboard_user_status(request.status, default="") == "disabled"
+                if request.status is not None
+                else False
+            ) or (
+                request.role is not None
+                and dashboard_role_key(request.role) not in {"owner", "hr_manager", "recruiter", "hiring_manager"}
+            )
+            if removes_recruiting_eligibility:
+                cur.execute(
+                    """
+                    SELECT count(*) AS count
+                    FROM applications
+                    WHERE company_code=%s AND owner_user_id=%s
+                      AND lower(COALESCE(status,'')) NOT IN ('hired','rejected','withdrawn')
+                    """,
+                    (company, user_id),
+                )
+                owned_active = int((cur.fetchone() or {}).get("count") or 0)
+                if owned_active:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={
+                            "error": "candidate_owner_reassignment_required",
+                            "message": "Reassign or explicitly unassign this recruiter's active applications first.",
+                            "owned_active_applications": owned_active,
+                        },
+                    )
             cur.execute(
                 f"""
                 UPDATE dashboard_users
@@ -39865,6 +42353,26 @@ def platform_admin_phones() -> set[str]:
     return {digits(part) for part in re.split(r"[,\s]+", raw) if digits(part)}
 
 
+def context_is_platform_admin(context: dict[str, Any] | None) -> bool:
+    """True when the dashboard actor phone is in WATHEFNI_PLATFORM_ADMINS."""
+    data = context if isinstance(context, dict) else {}
+    access = data.get("access") if isinstance(data.get("access"), dict) else {}
+    if access.get("is_platform_admin") is True:
+        return True
+    hr_user = data.get("hr_user") if isinstance(data.get("hr_user"), dict) else {}
+    access_user = access.get("user") if isinstance(access.get("user"), dict) else {}
+    for raw in (
+        data.get("hr_phone"),
+        data.get("actor_phone"),
+        hr_user.get("phone"),
+        access_user.get("phone"),
+    ):
+        phone = digits(raw)
+        if phone and phone in platform_admin_phones():
+            return True
+    return False
+
+
 def setup_operator_credentials() -> dict[str, str]:
     """Return per-operator tokens keyed by normalized phone.
 
@@ -39912,6 +42420,31 @@ def superadmin_context(
         "actor_role": "platform_admin",
         "hr_user": {"phone": phone, "role": "platform_admin", "name": "Wathefni Platform Admin", "status": "active"},
     }
+
+
+# Wave 3 Super Admin configuration / integration / readiness APIs.
+try:
+    import tenant_control_wave3_routes as _tc_wave3_routes
+
+    _tc_wave3_routes.register_wave3_routes(
+        app,
+        superadmin_dependency=superadmin_context,
+        db_connect=db_connect,
+    )
+except Exception:
+    pass
+
+# Wave 4 Super Admin wizard / control / cutover APIs.
+try:
+    import tenant_control_wave4_routes as _tc_wave4_routes
+
+    _tc_wave4_routes.register_wave4_routes(
+        app,
+        superadmin_dependency=superadmin_context,
+        db_connect=db_connect,
+    )
+except Exception:
+    pass
 
 
 def _setup_audit_context(superadmin: dict[str, Any], company_code: str) -> dict[str, Any]:
@@ -40401,7 +42934,177 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
         "users": users,
         "channel_policy": setup_console_channel_policy(company),
         "channel_account": setup_console_channel_account(company),
+        "email_admin": _setup_email_admin_snapshot(company),
     }
+
+
+def _setup_email_admin_snapshot(company_code: str) -> dict[str, Any]:
+    try:
+        import tenant_email_authority as tea
+
+        return tea.admin_email_snapshot(sys.modules[__name__], company_code)
+    except Exception as exc:
+        return {"error": type(exc).__name__, "company_code": company_code}
+
+
+@app.get("/dashboard/superadmin/setup/companies/{company_code}/email")
+def setup_console_email_admin_get(company_code: str, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found", "message": "That company does not exist yet."})
+    return _setup_email_admin_snapshot(company)
+
+
+@app.post("/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/seed")
+def setup_console_email_seed_mailboxes(company_code: str, request: dict[str, Any] | None = None, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found"})
+    import tenant_email_authority as tea
+
+    body = request or {}
+    try:
+        rows = tea.seed_default_operational_mailboxes(sys.modules[__name__], company, domain=str(body.get("domain") or ""))
+    except tea.TenantEmailError as exc:
+        raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+    record_admin_audit(
+        {
+            "company_code": company,
+            "actor_user_id": superadmin.get("actor_user_id"),
+            "actor_email": superadmin.get("actor_email"),
+            "actor_phone": superadmin.get("actor_phone") or superadmin.get("hr_phone"),
+            "actor_role": "superadmin",
+            "hr_user": superadmin.get("hr_user"),
+        },
+        "email_mailboxes_seeded",
+        summary=f"Seeded default operational mailboxes for {company}.",
+        target_type="company_operational_mailboxes",
+        target=company,
+        details={"count": len(rows), "domain": body.get("domain")},
+    )
+    return {"ok": True, "mailboxes": rows, "email_admin": _setup_email_admin_snapshot(company)}
+
+
+@app.patch("/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}")
+def setup_console_email_mailbox_patch(
+    company_code: str,
+    mailbox_id: str,
+    request: dict[str, Any] | None = None,
+    superadmin: dict[str, Any] = Depends(superadmin_context),
+):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found"})
+    import tenant_email_authority as tea
+
+    body = request or {}
+    status = str(body.get("status") or "approved").strip()
+    try:
+        row = tea.set_mailbox_status(
+            sys.modules[__name__],
+            company,
+            mailbox_id,
+            status=status,
+            allow_send=body.get("allow_send") if "allow_send" in body else (True if status == "approved" else None),
+            last_error=str(body.get("last_error") or "") or None,
+            exchange_scope_ref=str(body.get("exchange_scope_ref") or "") or None,
+            entra_user_id=str(body.get("entra_user_id") or "") or None,
+        )
+    except tea.TenantEmailError as exc:
+        raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+    record_admin_audit(
+        {
+            "company_code": company,
+            "actor_user_id": superadmin.get("actor_user_id"),
+            "actor_email": superadmin.get("actor_email"),
+            "actor_phone": superadmin.get("actor_phone") or superadmin.get("hr_phone"),
+            "actor_role": "superadmin",
+            "hr_user": superadmin.get("hr_user"),
+        },
+        "email_mailbox_updated",
+        summary=f"Updated mailbox {row.get('address')} to {status}.",
+        target_type="company_operational_mailbox",
+        target=mailbox_id,
+        details={"status": status, "allow_send": row.get("allow_send")},
+    )
+    return {"ok": True, "mailbox": row, "email_admin": _setup_email_admin_snapshot(company)}
+
+
+@app.post("/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}/probe")
+def setup_console_email_mailbox_probe(company_code: str, mailbox_id: str, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found"})
+    import tenant_email_authority as tea
+    import microsoft_mail_send as mms
+
+    mailbox = tea.get_mailbox(sys.modules[__name__], company, mailbox_id)
+    if not mailbox:
+        raise HTTPException(status_code=404, detail={"error": "mailbox_not_found"})
+    if not mms.mail_send_configured():
+        row = tea.record_mailbox_probe(sys.modules[__name__], company, mailbox_id, ok=False, error="microsoft_mail_not_configured")
+        return {"ok": False, "mailbox": row, "message": "Microsoft mail sender is not configured on this environment."}
+    # Probe: attempt token mint only (no live candidate email). Full send probe is ops-controlled.
+    try:
+        mms.mint_mail_graph_token()
+        row = tea.record_mailbox_probe(sys.modules[__name__], company, mailbox_id, ok=True)
+        return {"ok": True, "mailbox": row, "message": "Microsoft mail credentials are reachable."}
+    except Exception as exc:
+        row = tea.record_mailbox_probe(sys.modules[__name__], company, mailbox_id, ok=False, error=str(exc)[:300])
+        return {"ok": False, "mailbox": row, "message": "Microsoft mail probe failed."}
+
+
+@app.post("/dashboard/superadmin/setup/companies/{company_code}/email/domains")
+def setup_console_email_domain_create(company_code: str, request: dict[str, Any] | None = None, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found"})
+    import tenant_email_authority as tea
+
+    body = request or {}
+    try:
+        row = tea.create_or_link_domain(sys.modules[__name__], company, str(body.get("domain") or ""))
+    except tea.TenantEmailError as exc:
+        raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+    return {"ok": True, "domain": row, "dns_records": tea.dns_records_public(row), "email_admin": _setup_email_admin_snapshot(company)}
+
+
+@app.post("/dashboard/superadmin/setup/companies/{company_code}/email/domains/{domain_id}/refresh")
+def setup_console_email_domain_refresh(company_code: str, domain_id: str, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    import tenant_email_authority as tea
+
+    try:
+        row = tea.refresh_domain(sys.modules[__name__], company, domain_id)
+    except tea.TenantEmailError as exc:
+        raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+    return {"ok": True, "domain": row, "dns_records": tea.dns_records_public(row), "email_admin": _setup_email_admin_snapshot(company)}
+
+
+@app.post("/dashboard/superadmin/setup/companies/{company_code}/email/force-wathefni")
+def setup_console_email_force_wathefni(company_code: str, superadmin: dict[str, Any] = Depends(superadmin_context)):
+    company = _setup_normalize_company_code(company_code)
+    if not _setup_company_exists(company):
+        raise HTTPException(status_code=404, detail={"error": "company_not_found"})
+    import tenant_email_authority as tea
+
+    settings = tea.force_wathefni_fallback(sys.modules[__name__], company, updated_by_user_id=str(superadmin.get("actor_user_id") or "") or None)
+    record_admin_audit(
+        {
+            "company_code": company,
+            "actor_user_id": superadmin.get("actor_user_id"),
+            "actor_email": superadmin.get("actor_email"),
+            "actor_phone": superadmin.get("actor_phone") or superadmin.get("hr_phone"),
+            "actor_role": "superadmin",
+            "hr_user": superadmin.get("hr_user"),
+        },
+        "email_force_wathefni",
+        summary=f"Forced outbound email fallback to Wathefni for {company}.",
+        target_type="company_email_settings",
+        target=company,
+        details={},
+    )
+    return {"ok": True, "settings": settings, "email_admin": _setup_email_admin_snapshot(company)}
 
 
 @app.patch("/dashboard/superadmin/setup/companies/{company_code}/lifecycle")
@@ -40658,6 +43361,27 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
     if invalid:
         raise HTTPException(status_code=422, detail={"error": "unknown_module", "message": f"Unknown module(s): {', '.join(invalid)}."})
     requested = sorted(set(requested))
+    currently_enabled = sorted(configured_company_modules(company))
+    # Priority 0: never let Setup Console bulk-save strip protected live interviews.
+    requested = protect_setup_module_selection(requested, currently_enabled)
+    dual_write_validation = _tenant_control.validate_module_publish(
+        requested,
+        currently_enabled=currently_enabled,
+    )
+    if dual_write_validation.get("blocks_publish"):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "commercial_dependency_blocks_publish",
+                "message": " ".join(
+                    item.get("message") or ""
+                    for item in (dual_write_validation.get("commercial_gaps") or [])
+                ) or "Commercial dependency missing.",
+                "commercial_gaps": dual_write_validation.get("commercial_gaps") or [],
+                "module_gaps": dual_write_validation.get("module_gaps") or [],
+                "suggested_modules": expand_module_dependencies(requested),
+            },
+        )
     dependency_gaps = missing_module_dependencies(requested)
     if dependency_gaps:
         raise HTTPException(
@@ -40678,6 +43402,7 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
         "revoked_employee_app_sessions": 0,
         "superseded_employee_app_invites": 0,
     }
+    dual_write_result: dict[str, Any] = {"ok": True, "skipped": True}
     with db_connect() as conn:
         with conn.cursor() as cur:
             # Serialize module changes with activation/refresh, which take a shared
@@ -40725,6 +43450,36 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
                     """,
                     (company, Json(payroll_defaults)),
                 )
+            # Additive dual-write into tenant control-plane (shadow; non-authoritative).
+            try:
+                dual_write_result = _tenant_control.dual_write_module_save(
+                    cur,
+                    company_code=company,
+                    requested_modules=requested,
+                    currently_enabled=currently_enabled,
+                    actor=str((superadmin or {}).get("email") or (superadmin or {}).get("user_id") or "setup_console"),
+                )
+                if not dual_write_result.get("ok") and not dual_write_result.get("skipped"):
+                    raise HTTPException(
+                        status_code=422,
+                        detail={
+                            "error": dual_write_result.get("error") or "dual_write_failed",
+                            "validation": dual_write_result.get("validation") or {},
+                        },
+                    )
+            except HTTPException:
+                raise
+            except Exception as exc:
+                # Dual-write must not silently succeed while control-plane write fails;
+                # fail the mutation so operators retry with a consistent state.
+                raise HTTPException(
+                    status_code=500,
+                    detail={
+                        "error": "tenant_control_dual_write_failed",
+                        "message": "Module save could not persist control-plane audit state.",
+                        "detail": str(exc)[:300],
+                    },
+                ) from exc
         conn.commit()
     record_admin_audit(
         _setup_audit_context(superadmin, company),
@@ -40732,11 +43487,23 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
         summary=f"Enabled modules for {company}: {', '.join(requested) or 'none'}.",
         target_type="company",
         target=company,
-        details={"company_code": company, "modules": requested, **employee_app_invalidated},
+        details={
+            "company_code": company,
+            "modules": requested,
+            "protected_retained": dual_write_result.get("protected_retained") or dual_write_validation.get("protected_retained") or [],
+            "control_plane_version": dual_write_result.get("version_number"),
+            **employee_app_invalidated,
+        },
     )
     return {
         "ok": True,
         "modules": requested,
+        "protected_retained": dual_write_result.get("protected_retained") or dual_write_validation.get("protected_retained") or [],
+        "control_plane": {
+            "dual_write": (not dual_write_result.get("skipped")),
+            "version_number": dual_write_result.get("version_number"),
+            "rollback_target": dual_write_result.get("rollback_target"),
+        },
         **employee_app_invalidated,
         "readiness": setup_console_company_readiness(company),
     }
@@ -41114,24 +43881,65 @@ def _application_ui_contract(
     elif canonical_stage in {"shortlisted", "interview", "hired", "rejected"} and communication_status != "sent":
         waiting_for_hr.append("inform_candidate")
 
+    held_status = str(raw_status or "").strip().lower() in HELD_IMPORT_STATUSES
     allowed_actions: list[str] = []
+    assessment_cohort: str | None = None
+    assessment_allowed_actions: list[str] = []
     if permissions is not None:
         perms = {str(value) for value in permissions}
-        allowed_actions = _rl.allowed_actions_for_stage(canonical_stage, perms)
-        if cv_received and "prehire.read" in perms:
-            allowed_actions.extend(["preview_cv", "download_cv"])
-        if "candidate.manage" in perms:
-            allowed_actions.extend(["notify", "generate_evaluation"])
-        if include_assessment and cv_received and "assessment.manage" in perms:
-            allowed_actions.append("send_assessment")
-        if cv_received and "interview.manage" in perms:
-            allowed_actions.append("send_video_interview")
-        allowed_actions = list(dict.fromkeys(allowed_actions))
+        if held_status:
+            # UNIFIED_CANDIDATES_PRODUCTION_DARK_PATCH: held rows never advertise lifecycle/outreach/ranking.
+            import unified_candidates as _unified_candidates
+
+            allowed_actions = _unified_candidates.held_allowed_actions(perms, cv_received=cv_received)
+            waiting_for_hr = ["review_held_intake"]
+            automatic_activity = [item for item in automatic_activity if item in {"cv_received", "cv_processed"}]
+            communication_status = "intentionally_skipped"
+        else:
+            allowed_actions = _rl.allowed_actions_for_stage(canonical_stage, perms)
+            if cv_received and "prehire.read" in perms:
+                allowed_actions.extend(["preview_cv", "download_cv"])
+            if "candidate.manage" in perms:
+                allowed_actions.extend(["notify", "generate_evaluation"])
+            if include_assessment and cv_received and "assessment.manage" in perms:
+                import assessment_cohorts as _assessment_cohorts
+
+                assess_blob = row.get("assessment_json") if isinstance(row.get("assessment_json"), dict) else {}
+                if not assess_blob:
+                    assess_blob = raw_json.get("assessment") if isinstance(raw_json.get("assessment"), dict) else {}
+                assessment_cohort = _assessment_cohorts.classify_attempt_state(
+                    assessment_status=assess_blob.get("status") or assess_blob.get("assessment_status"),
+                    delivery_status=assess_blob.get("delivery_status") or assess_blob.get("assessment_delivery_status"),
+                    application_status=raw_status,
+                )
+                assessment_allowed_actions = _assessment_cohorts.allowed_actions_for_cohort(
+                    assessment_cohort, can_manage=True
+                )
+                for action_name in assessment_allowed_actions:
+                    allowed_actions.append(action_name)
+                if not assessment_cohort and "send_assessment" not in allowed_actions:
+                    if str(raw_status or "").strip().lower() in set(_assessment_cohorts.ASSESSMENT_ELIGIBLE_STATUSES):
+                        allowed_actions.append("send_assessment")
+            if cv_received and "interview.manage" in perms:
+                allowed_actions.append("send_video_interview")
+            allowed_actions = list(dict.fromkeys(allowed_actions))
+    elif include_assessment and cv_received:
+        import assessment_cohorts as _assessment_cohorts
+
+        assess_blob = row.get("assessment_json") if isinstance(row.get("assessment_json"), dict) else {}
+        if not assess_blob:
+            assess_blob = raw_json.get("assessment") if isinstance(raw_json.get("assessment"), dict) else {}
+        assessment_cohort = _assessment_cohorts.classify_attempt_state(
+            assessment_status=assess_blob.get("status") or assess_blob.get("assessment_status"),
+            delivery_status=assess_blob.get("delivery_status") or assess_blob.get("assessment_delivery_status"),
+            application_status=raw_status,
+        )
 
     stage_changed_at = lifecycle_event.get("created_at")
     sent_at = communication.get("sent_at")
     stage_changed_without_contact = (
-        canonical_stage in {"shortlisted", "interview", "hired", "rejected"}
+        (not held_status)
+        and canonical_stage in {"shortlisted", "interview", "hired", "rejected"}
         and (
             communication_status != "sent"
             or (
@@ -41166,7 +43974,10 @@ def _application_ui_contract(
         "automatic_activity": automatic_activity,
         "waiting_for_hr": waiting_for_hr,
         "allowed_actions": allowed_actions,
+        "assessment_cohort": assessment_cohort,
+        "assessment_allowed_actions": assessment_allowed_actions,
     }
+
 
 
 def prehire_application_summary(
@@ -41200,6 +44011,20 @@ def prehire_application_summary(
         },
         "status": row.get("status"),
         "lifecycle_version": int(row.get("lifecycle_version") or 0),
+        "owner_user_id": str(row.get("owner_user_id")) if row.get("owner_user_id") else None,
+        "owner_assigned_at": json_safe(row.get("owner_assigned_at")),
+        "owner_assigned_by_user_id": str(row.get("owner_assigned_by_user_id")) if row.get("owner_assigned_by_user_id") else None,
+        "ownership_version": int(row.get("ownership_version") or 0),
+        "owner": {
+            "user_id": str(row.get("owner_user_id")),
+            "name": row.get("owner_name") or "",
+            "email": row.get("owner_email") or "",
+            "role": row.get("owner_role") or "",
+            "status": row.get("owner_status") or "",
+        } if row.get("owner_user_id") else None,
+        "open_task_count": int(row.get("open_task_count") or 0),
+        "overdue_task_count": int(row.get("overdue_task_count") or 0),
+        "tags": json_safe(row.get("tags_json") or []),
         "current_step": row.get("current_step"),
         "screening_status": row.get("screening_status") or screening.get("status"),
         "data_source": row.get("data_source") or raw_json.get("data_source") or PRODUCTION_DATA_SOURCE,
@@ -41295,6 +44120,8 @@ def _dashboard_prehire_positions_query(
     deadline: str | None = None,
     has_remaining_vacancies: bool | None = None,
     cursor: str | None = None,
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     """Canonical Jobs inventory: `positions` is the sole authority for whether a
     job opening exists. Application aggregates are LEFT JOINed for counts only —
@@ -41306,13 +44133,11 @@ def _dashboard_prehire_positions_query(
     Offset pagination is primary; optional `cursor` is `updated_at|position_code`
     for stable continuation when the first page shifts.
     """
+    import jobs_queue_contract as _jobs_contract
+
     term = (search or "").strip()
     like = f"%{_ilike_escape(term)}%" if term else ""
-    status_filter = str(status or "").strip().lower()
-    if status_filter in {"", "all", "*"}:
-        status_filter = ""
-    elif status_filter not in {"draft", "open", "paused", "closed"}:
-        status_filter = ""
+    status_filter = _jobs_contract.coerce_job_status_filter(status)
     dept_filter = str(department or "").strip()
     loc_filter = str(location or "").strip()
     recruiter_filter = str(recruiter_user_id or "").strip()
@@ -41327,24 +44152,29 @@ def _dashboard_prehire_positions_query(
         parts = str(cursor).split("|", 1)
         cursor_updated_at = parts[0].strip() or None
         cursor_code = parts[1].strip() if len(parts) > 1 else ""
+    vis_sql = str(visibility_sql or "").strip()
+    vis_params = list(visibility_params or [])
+    visibility_clause = f" AND ({vis_sql})" if vis_sql else ""
+    active_pipeline_sql = _jobs_contract.active_pipeline_status_filter_sql("status")
+    effective_status_sql = _jobs_contract.effective_job_status_sql("p.status")
+    prod_cv_sql = _jobs_contract.APPLICATIONS_PRODUCTION_CV_SQL
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
+                f"""
                 WITH app_stats AS (
                   SELECT
                     company_code,
                     position_code,
                     COALESCE(MAX(position_title), position_code) AS position_title,
                     COUNT(*) AS application_count,
-                    COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_count,
+                    COUNT(*) FILTER (WHERE {active_pipeline_sql}) AS active_count,
                     COUNT(*) FILTER (WHERE LOWER(COALESCE(status, '')) = 'hired') AS filled_vacancies,
                     MAX(updated_at) AS latest_application_at
                   FROM applications
                   WHERE company_code=%s
                     AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
-                    AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
-                    AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                    AND {prod_cv_sql}
                   GROUP BY company_code, position_code
                 ),
                 latest AS (
@@ -41367,7 +44197,7 @@ def _dashboard_prehire_positions_query(
                     p.*,
                     NULLIF(TRIM(c.name), '') AS company_display_name,
                     COALESCE(p.title, p.position_code) AS position_title,
-                    lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) AS effective_status,
+                    {effective_status_sql} AS effective_status,
                     COALESCE(s.application_count, 0) AS application_count,
                     COALESCE(s.active_count, 0) AS active_count,
                     COALESCE(s.filled_vacancies, 0) AS filled_vacancies,
@@ -41406,6 +44236,7 @@ def _dashboard_prehire_positions_query(
                     OR updated_at < %s::timestamptz
                     OR (updated_at = %s::timestamptz AND position_code > %s)
                   )
+                  {visibility_clause}
                 ORDER BY COALESCE(updated_at, latest_application_at) DESC NULLS LAST, position_code ASC
                 LIMIT %s OFFSET %s
                 """,
@@ -41436,6 +44267,7 @@ def _dashboard_prehire_positions_query(
                     cursor_updated_at,
                     cursor_updated_at,
                     cursor_code,
+                    *vis_params,
                     limit,
                     offset if not cursor_updated_at else 0,
                 ),
@@ -41514,6 +44346,13 @@ def _dashboard_prehire_positions_query(
                 for row in cur.fetchall():
                     item = json_safe(dict(row))
                     notifications.setdefault(str(row.get("position_code") or ""), []).append(item)
+            import prehire_team_directory as _td
+
+            owner_ids = []
+            for row in rows:
+                owner_ids.append(row.get("recruiter_user_id"))
+                owner_ids.append(row.get("hiring_manager_user_id"))
+            owner_names = _td.ownership_display_names(cur, company=company, user_ids=owner_ids)
     enriched = []
     for row in rows:
         code = str(row.get("position_code") or "")
@@ -41523,6 +44362,10 @@ def _dashboard_prehire_positions_query(
             row["description"] = metadata.get("description") or raw_json.get("description")
         if not row.get("requirements"):
             row["requirements"] = metadata.get("requirements") or raw_json.get("requirements")
+        rid = str(row.get("recruiter_user_id") or "")
+        hid = str(row.get("hiring_manager_user_id") or "")
+        row["recruiter_name"] = owner_names.get(rid) if rid else None
+        row["hiring_manager_name"] = owner_names.get(hid) if hid else None
         row["stage_counts"] = stage_counts.get(code, [])
         row["recent_applicants"] = recent.get(code, [])
         row["notifications"] = notifications.get(code, [])
@@ -41563,81 +44406,63 @@ def dashboard_prehire_positions_payload(
 
 
 def format_list_job_openings_reply(result: dict[str, Any] | None) -> str:
-    data = result if isinstance(result, dict) else {}
-    positions = data.get("positions") if isinstance(data.get("positions"), list) else []
-    status = str(data.get("status_filter") or "open").strip().lower() or "open"
-    try:
-        total = int(data.get("total_matching") if data.get("total_matching") is not None else len(positions))
-    except Exception:
-        total = len(positions)
-    if total <= 0 or not positions:
-        if status == "open":
-            return "No open job openings right now."
-        if status == "closed":
-            return "No closed job openings right now."
-        return "No job openings found."
-    lines: list[str] = []
-    label = "Open roles" if status == "open" else ("Closed roles" if status == "closed" else "Roles")
-    lines.append(f"{label} ({total}):")
-    for item in positions[:20]:
-        if not isinstance(item, dict):
-            continue
-        title = str(item.get("position_title") or item.get("position_code") or "Role").strip()
-        # Only reveal candidate APPLY identity on shareable openings. Ineligible /
-        # internal roles stay inspectable by title without a candidate share surface.
-        shareable = bool(item.get("shareable")) if "shareable" in item else bool(item.get("application_link"))
-        code = str(item.get("apply_code") or "").strip() if shareable else ""
-        active = int(item.get("active_count") or 0)
-        apps = int(item.get("application_count") or 0)
-        detail = f"{title}"
-        if code:
-            detail += f" — `{code}`"
-        elif item.get("eligibility_reason"):
-            detail += f" — not shareable ({item.get('eligibility_reason')})"
-        if active or apps:
-            detail += f" ({active} active / {apps} total applicants)"
-        lines.append(f"- {detail}")
-    remaining = total - min(len(positions), 20)
-    if remaining > 0:
-        lines.append(f"…and {remaining} more.")
-    return "\n".join(lines)
+    """Assistant inventory presentation — delegates to owner-ready UX formatter."""
+    import assistant_jobs_ux as _assistant_jobs_ux
+
+    return _assistant_jobs_ux.format_assistant_job_openings_reply(result)
 
 
-def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
+def dashboard_prehire_positions_summary(
+    company: str,
+    *,
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
+) -> dict[str, Any]:
     """Lightweight aggregate counts over the FULL canonical `positions` set
     (not application-synthesized rows), so Jobs headline cards match inventory."""
+    vis_sql = str(visibility_sql or "").strip()
+    vis_params = list(visibility_params or [])
+    visibility_clause = f" AND ({vis_sql})" if vis_sql else ""
+    import jobs_queue_contract as _jobs_contract
+
+    active_pipeline_sql = _jobs_contract.active_pipeline_status_filter_sql("status")
+    effective_status_sql = _jobs_contract.effective_job_status_sql("p.status")
+    prod_cv_sql = _jobs_contract.APPLICATIONS_PRODUCTION_CV_SQL
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
+                f"""
                 WITH app_stats AS (
                   SELECT company_code, position_code,
                          COUNT(*) AS application_count,
-                         COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_count
+                         COUNT(*) FILTER (WHERE {active_pipeline_sql}) AS active_count
                   FROM applications
                   WHERE company_code=%s
                     AND NULLIF(TRIM(COALESCE(position_code, '')), '') IS NOT NULL
-                    AND COALESCE(data_source, raw_json->>'data_source', 'production')='production'
-                    AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                    AND {prod_cv_sql}
                   GROUP BY company_code, position_code
                 )
                 SELECT
                   COUNT(*) AS total_positions,
-                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open') AS open_positions,
-                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'draft') AS draft_positions,
-                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'paused') AS paused_positions,
-                  COUNT(*) FILTER (WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'closed') AS closed_positions,
+                  COUNT(*) FILTER (WHERE ({effective_status_sql}) = 'open') AS open_positions,
+                  COUNT(*) FILTER (WHERE ({effective_status_sql}) = 'draft') AS draft_positions,
+                  COUNT(*) FILTER (WHERE ({effective_status_sql}) = 'paused') AS paused_positions,
+                  COUNT(*) FILTER (WHERE ({effective_status_sql}) = 'closed') AS closed_positions,
                   COUNT(*) FILTER (
-                    WHERE lower(COALESCE(NULLIF(TRIM(p.status), ''), 'closed')) = 'open'
+                    WHERE ({effective_status_sql}) = 'open'
                       AND NULLIF(TRIM(COALESCE(p.apply_code, '')), '') IS NOT NULL
                   ) AS open_roles_with_apply_code,
-                  COALESCE(SUM(COALESCE(s.application_count, 0)), 0) AS total_applications
+                  COUNT(*) FILTER (WHERE p.recruiter_user_id IS NULL) AS unassigned_recruiter_positions,
+                  COUNT(*) FILTER (WHERE p.hiring_manager_user_id IS NULL) AS unassigned_hm_positions,
+                  COALESCE(SUM(COALESCE(s.application_count, 0)), 0) AS total_applications,
+                  COALESCE(SUM(COALESCE(s.active_count, 0)), 0) AS total_active_pipeline
                 FROM positions p
                 LEFT JOIN app_stats s ON s.company_code=p.company_code AND s.position_code=p.position_code
                 WHERE p.company_code=%s
                   AND NULLIF(TRIM(COALESCE(p.position_code, '')), '') IS NOT NULL
+                  {visibility_clause}
                 """,
-                (company, company),
+                (company, company, *vis_params),
             )
             row = dict(cur.fetchone() or {})
     open_roles = int(row.get("open_positions") or 0)
@@ -41651,6 +44476,8 @@ def dashboard_prehire_positions_summary(company: str) -> dict[str, Any]:
         "open_roles_with_apply_code": int(row.get("open_roles_with_apply_code") or 0),
         "active_qr_codes": open_roles,  # backward-compatible alias = open roles
         "total_applications": int(row.get("total_applications") or 0),
+        "unassigned_recruiter_positions": int(row.get("unassigned_recruiter_positions") or 0),
+        "unassigned_hm_positions": int(row.get("unassigned_hm_positions") or 0),
     }
 
 
@@ -42377,41 +45204,18 @@ def update_application_interview_snapshot(app_key: str, interview: dict[str, Any
 
 def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
     import recruiting_lifecycle as _rl
+    import interview_lifecycle as _il
 
     ai_summary = row.get("ai_summary") if isinstance(row.get("ai_summary"), dict) else {}
     application_stage = _rl.normalize_stage(row.get("application_status")) or str(
         row.get("application_status") or ""
     )
-    if row.get("candidate_notified") or row.get("candidate_invited") or row.get("calendar_invite_sent"):
-        communication_status = "sent"
-    elif str(row.get("status") or "") == "cancelled":
-        communication_status = "intentionally_skipped"
-    else:
-        communication_status = "pending"
-    notes_status = (
-        "complete"
-        if row.get("feedback_status") == "feedback_complete" or str(row.get("notes") or "").strip()
-        else "pending"
-    )
-    if row.get("consent_accepted_at"):
-        candidate_confirmation = "confirmed"
-    elif communication_status == "sent":
-        candidate_confirmation = "not_confirmed"
-    else:
-        candidate_confirmation = "not_requested"
-    interview_status = str(row.get("status") or "")
-    if communication_status == "failed":
-        next_human_action = "resolve_invitation"
-    elif interview_status in {"scheduled", "rescheduled"} and communication_status != "sent":
-        next_human_action = "send_invitation"
-    elif interview_status == "completed" and notes_status == "pending":
-        next_human_action = "record_notes"
-    elif interview_status == "completed":
-        next_human_action = "decide_application"
-    elif interview_status in {"no_show", "cancelled"}:
-        next_human_action = "review_next_step"
-    else:
-        next_human_action = "conduct_interview"
+    truth = _il.communication_truth(row)
+    communication_status = truth["communication_status"]
+    notes_status = _il.derive_notes_status(row)
+    candidate_confirmation = truth["candidate_confirmation"]
+    next_human_action = _il.next_human_action(row, truth)
+    human_feedback = _il.normalize_feedback_status(row.get("human_feedback_status") or row.get("feedback_status"))
     summary = {
         "interview_id": str(row.get("interview_id") or ""),
         "company_code": row.get("company_code"),
@@ -42426,18 +45230,29 @@ def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
         "interview_type": row.get("interview_type") or ("async_video" if row.get("source") == "async_video" else "live"),
         "status": row.get("status"),
         "feedback_status": row.get("feedback_status"),
+        "human_feedback_status": human_feedback,
         "async_status": row.get("async_status"),
         "scheduled_start": json_safe(row.get("scheduled_start")),
         "scheduled_end": json_safe(row.get("scheduled_end")),
         "timezone": row.get("timezone"),
+        "duration_minutes": row.get("duration_minutes"),
         "meeting_type": row.get("meeting_type"),
+        "location": row.get("location"),
         "meet_link": row.get("meet_link"),
         "calendar_event_id": row.get("calendar_event_id"),
         "calendar_invite_sent": bool(row.get("calendar_invite_sent")),
         "candidate_invited": bool(row.get("candidate_invited")),
         "candidate_notified": bool(row.get("candidate_notified")),
+        "provider_key": row.get("provider_key") or "none",
+        "provider_sync_status": truth["provider_sync_status"],
+        "provider_sync_error": row.get("provider_sync_error"),
+        "provider_accepted": truth["provider_accepted"],
+        "channel_send_status": truth["channel_send_status"],
+        "rsvp_status": truth["rsvp_status"],
+        "delivered": truth["delivered"],
+        "failed": truth["failed"],
         "communication_status": communication_status,
-        "invitation_status": communication_status,
+        "invitation_status": truth["invitation_status"],
         "candidate_confirmation": candidate_confirmation,
         "notification_channel": row.get("notification_channel"),
         "sent_subject": row.get("sent_subject"),
@@ -42459,6 +45274,8 @@ def candidate_interview_summary(row: dict[str, Any]) -> dict[str, Any]:
         "created_at": json_safe(row.get("created_at")),
         "updated_at": json_safe(row.get("updated_at")),
         "next_human_action": next_human_action,
+        "retention_expires_at": json_safe(row.get("retention_expires_at")),
+        "retention_purged_at": json_safe(row.get("retention_purged_at")),
     }
     if summary.get("interview_type") == "async_video" or row.get("source") == "async_video":
         interview_id = summary["interview_id"]
@@ -42626,7 +45443,12 @@ def send_interview_invite(
     account_id: str | None,
     interview_id: str | None = None,
     preferred_channel: str | None = None,
+    explicit: bool = False,
 ) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(application, kind="interview_invite")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return exc.as_result()
     company = str(application.get("company_code") or "").strip().upper()
     if not company:
         return {"ok": False, "error": "tenant_scope_required"}
@@ -42643,6 +45465,34 @@ def send_interview_invite(
             "You can schedule one first, or send an AI video interview link instead."
         )
         return {"ok": False, "error": "interview_not_found_for_app_key", "safe_user_message": safe_message, "message": safe_message, "application": json_safe(application)}
+    try:
+        import tenant_email_authority as _tea
+
+        skip, skip_reason = _tea.should_skip_interview_email_for_calendar(
+            sys.modules[__name__],
+            company_code=company,
+            interview=interview,
+            explicit=bool(explicit),
+        )
+    except Exception:
+        skip, skip_reason = False, None
+    if skip:
+        safe_message = (
+            "A calendar invitation was already sent to the candidate, so Wathefni did not send a second interview email. "
+            "Turn on “Also send an email with calendar invitations” in Settings, or use Send email explicitly."
+        )
+        return {
+            "ok": True,
+            "skipped": True,
+            "skip_reason": skip_reason or "calendar_invite_already_sent",
+            "safe_user_message": safe_message,
+            "message": safe_message,
+            "interview": candidate_interview_summary(interview),
+            "delivery": {"ok": True, "skipped": True, "successful_channels": [], "last_successful_channel": None},
+            "notification_channel": interview.get("notification_channel") or "calendar_email",
+            "candidate_notified": bool(interview.get("candidate_notified") or interview.get("calendar_invite_sent")),
+            "calendar_invite_sent": bool(interview.get("calendar_invite_sent")),
+        }
     subject = "Interview Invitation - Wathefni"
     body = compose_interview_invite_message(application, interview)
     if "join the meeting" in normalize_text(body) and not interview.get("meet_link") and "calendar invite" not in normalize_text(body):
@@ -43313,7 +46163,6 @@ def complete_async_video_interview(interview: dict[str, Any]) -> dict[str, Any]:
                 """
                 UPDATE candidate_interviews
                 SET status='completed',
-                    feedback_status='feedback_complete',
                     async_status='completed',
                     transcript=%s,
                     ai_summary=%s,
@@ -43892,7 +46741,6 @@ def maybe_generate_async_video_interview_summary(interview_id: str) -> dict[str,
                 UPDATE candidate_interviews
                 SET ai_summary=%s,
                     transcript=%s,
-                    feedback_status='feedback_complete',
                     updated_at=now()
                 WHERE interview_id=%s
                 RETURNING *
@@ -43924,9 +46772,69 @@ def maybe_generate_async_video_interview_summary(interview_id: str) -> dict[str,
 
 def process_pending_video_interview_transcripts(limit: int = 5, *, include_failed: bool = False) -> dict[str, Any]:
     ensure_schema()
+    try:
+        import interview_service as _interview_service
+
+        reclaimed = _interview_service.reclaim_stale_transcriptions()
+    except Exception:
+        reclaimed = {"ok": False, "count": 0, "reclaimed_response_ids": []}
     responses = pending_video_transcript_responses(limit, include_failed=include_failed)
-    results = [process_video_response_transcript(response) for response in responses if str(response.get("transcript_status") or "pending") != "processing"]
-    return {"ok": all(item.get("ok") for item in results), "count": len(results), "results": json_safe(results)}
+    # Skip in-lease processing rows; stale processing was reclaimed above.
+    results = []
+    held = 0
+    for response in responses:
+        if str(response.get("transcript_status") or "pending") == "processing":
+            continue
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    import tenant_control_queue_gate as _tc_qg
+
+                    company = str(response.get("company_code") or "").upper()
+                    work_ref = str(response.get("response_id") or response.get("interview_id") or "")
+                    queued_epoch = _tc_qg.load_work_epoch(
+                        cur,
+                        company_code=company,
+                        work_kind="video_transcription",
+                        work_ref=work_ref,
+                    )
+                    if queued_epoch is None:
+                        queued_epoch = _tc_qg.persist_work_epoch(
+                            cur,
+                            company_code=company,
+                            work_kind="video_transcription",
+                            work_ref=work_ref,
+                            module_key="video_interviews",
+                        )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        cur,
+                        company_code=company,
+                        module_key="video_interviews",
+                        work_kind="video_transcription",
+                        work_ref=work_ref,
+                        queued_epoch=int(queued_epoch),
+                    )
+                    conn.commit()
+                    if not allowed:
+                        held += 1
+                        results.append({
+                            "ok": False,
+                            "held": True,
+                            "reason": decision.reason_code,
+                            "correlation_id": decision.audit_correlation_id,
+                            "response_id": work_ref,
+                        })
+                        continue
+        except Exception:
+            pass
+        results.append(process_video_response_transcript(response))
+    return {
+        "ok": all(item.get("ok") for item in results) if results else True,
+        "count": len(results),
+        "held": held,
+        "results": json_safe(results),
+        "reclaimed": json_safe(reclaimed),
+    }
 
 
 def create_or_resume_async_video_interview(
@@ -43938,6 +46846,17 @@ def create_or_resume_async_video_interview(
     company = str(application.get("company_code") or "").strip().upper()
     if not company:
         raise HTTPException(status_code=422, detail={"error": "tenant_scope_required"})
+    # Defence in depth: every caller is already entitled, but the module owns its
+    # own writes so a new caller cannot create interviews for a disabled tenant.
+    if not company_has_module(company, "video_interviews"):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "module_disabled",
+                "required_module": "video_interviews",
+                "message": "This module is not enabled for this company.",
+            },
+        )
     app_key = str(application.get("app_key") or "").strip()
     contact = candidate_contact(application)
     if not app_key:
@@ -44100,6 +47019,10 @@ def send_async_video_interview_invite(
     actor_context: dict[str, Any] | None = None,
     note: str | None = None,
 ) -> dict[str, Any]:
+    try:
+        assert_application_communication_allowed(application, kind="video_interview")  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
+    except CandidateCommunicationAuthorityError as exc:
+        return exc.as_result()
     subject = "Video Interview Invitation"
     body = compose_async_video_interview_invite(application, interview, public_link, note=note)
     action = {
@@ -44156,9 +47079,80 @@ def send_async_video_interview_invite(
     }
 
 
+# Live interviewing (scheduling, panels, feedback, agenda, calendar sync) belongs to
+# the `interviews` module; recorded-answer interviews belong to `video_interviews`.
+# Both kinds share candidate_interviews and several dashboard surfaces, so a shared
+# surface entitles against whichever module owns the specific record.
+INTERVIEW_SURFACE_MODULES = ("interviews", "video_interviews")
+ASYNC_VIDEO_INTERVIEW_MARKERS = frozenset({"async_video"})
+
+
+def interview_record_module(interview: dict[str, Any] | None) -> str:
+    row = interview if isinstance(interview, dict) else {}
+    for field in ("interview_type", "source"):
+        if str(row.get(field) or "").strip().lower() in ASYNC_VIDEO_INTERVIEW_MARKERS:
+            return "video_interviews"
+    return "interviews"
+
+
+def enabled_interview_modules(company_code: str | None) -> dict[str, bool]:
+    modules = configured_company_modules(company_code)
+    return {key: key in modules for key in INTERVIEW_SURFACE_MODULES}
+
+
+def require_interview_surface(context: dict[str, Any], permission: str) -> dict[str, bool]:
+    """Entitle a surface that serves both interview kinds.
+
+    Denies with module_disabled only when neither module is enabled. Callers must
+    still narrow their rows to the kinds that remain enabled.
+    """
+    enabled = enabled_interview_modules(context.get("company_code"))
+    gate = next((key for key in INTERVIEW_SURFACE_MODULES if enabled[key]), INTERVIEW_SURFACE_MODULES[0])
+    require_entitlement(context, gate, permission)
+    return enabled
+
+
+def require_interview_record(context: dict[str, Any], interview_id: str, permission: str) -> dict[str, Any]:
+    """Load a company-scoped interview and entitle against the module that owns it."""
+    require_interview_surface(context, permission)
+    interview = fetch_candidate_interview(interview_id, context["company_code"])
+    if not interview:
+        raise HTTPException(status_code=404, detail={"error": "interview_not_found"})
+    require_entitlement(context, interview_record_module(interview), permission)
+    require_interview_assignment_scope(
+        context,
+        company_code=str(context["company_code"]),
+        interview_id=str(interview_id),
+    )
+    # Wave 2 ownership scope for recruiter/HM (Interviewer already gated above).
+    app_key = str(interview.get("app_key") or "").strip()
+    if app_key:
+        application = find_application_by_key(app_key, company_code=context["company_code"])
+        if application:
+            require_prehire_application_visibility(context, application)
+    return interview
+
+
+def require_interview_feedback_submission(context: dict[str, Any], submission_id: str, permission: str) -> dict[str, Any]:
+    """Same record-scoped gate, resolved through a feedback submission."""
+    require_interview_surface(context, permission)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT interview_id FROM interview_feedback_submissions WHERE submission_id=%s AND company_code=%s LIMIT 1",
+                (submission_id, context["company_code"]),
+            )
+            row = cur.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail={"error": "feedback_not_found"})
+    return require_interview_record(context, str(row["interview_id"]), permission)
+
+
 def dashboard_interviews_payload(
     company: str,
     *,
+    include_live: bool = True,
+    include_async_video: bool = True,
     status: str | None = None,
     q: str | None = None,
     role: str | None = None,
@@ -44167,31 +47161,29 @@ def dashboard_interviews_payload(
     limit: int = 100,
     offset: int = 0,
     permissions: set[str] | list[str] | None = None,
+    context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    where = [
-        "ci.company_code=%s",
-        (
-            "EXISTS ("
-            "SELECT 1 FROM applications a "
-            "WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key "
-            "AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')"
-            ")"
-        ),
-    ]
-    params: list[Any] = [company]
-    normalized_status = str(status or "").strip().lower()
-    if normalized_status and normalized_status != "all":
-        if normalized_status == "upcoming":
-            where.append("ci.status IN ('scheduled','rescheduled')")
-        elif normalized_status == "needs_feedback":
-            where.append("ci.status='completed' AND ci.feedback_status<>'feedback_complete'")
-        elif normalized_status in {"video", "video_interviews", "async_video"}:
-            where.append("(ci.interview_type='async_video' OR ci.source='async_video')")
-        else:
-            status_value = normalize_interview_status(normalized_status, default="")
-            if status_value:
-                where.append("ci.status=%s")
-                params.append(status_value)
+    import interview_queue_contract as iqc
+
+    assignment_sql, assignment_params = interview_assignment_scope_sql(context)
+    vis_sql, vis_params = prehire_visibility_assignment_sql(context, surface="detail", kind="interviews")
+    scope_where, scope_params = iqc.build_shared_scope(
+        company,
+        include_live=include_live,
+        include_async_video=include_async_video,
+        assignment_sql=assignment_sql or None,
+        assignment_params=assignment_params,
+        visibility_sql=vis_sql or None,
+        visibility_params=vis_params,
+    )
+    scope_sql = " AND ".join(scope_where)
+
+    where = list(scope_where)
+    params: list[Any] = list(scope_params)
+    tab_sql, tab_params = iqc.list_tab_predicate(status)
+    if tab_sql:
+        where.append(tab_sql)
+        params.extend(tab_params)
     search = str(q or "").strip()
     if search:
         like = f"%{search}%"
@@ -44209,16 +47201,37 @@ def dashboard_interviews_payload(
         params.extend([like, like])
     date_value = str(date_filter or "").strip()
     if date_value:
-        where.append("ci.scheduled_start::date=%s::date")
-        params.append(date_value)
-    interviewer_filter = digits(interviewer) or str(interviewer or "").strip()
+        # Compare on company IANA local date, not DB session/UTC date.
+        import interview_lifecycle as _il
+
+        tz_name = _il.company_timezone_name(sys.modules[__name__], company)
+        where.append("(ci.scheduled_start AT TIME ZONE %s)::date = %s::date")
+        params.extend([tz_name, date_value])
+    interviewer_filter = str(interviewer or "").strip()
     if interviewer_filter:
         like = f"%{interviewer_filter}%"
-        where.append("(ci.created_by_phone ILIKE %s OR ci.updated_by_phone ILIKE %s)")
-        params.extend([like, like])
+        where.append(
+            """
+            EXISTS (
+              SELECT 1 FROM candidate_interview_assignments a
+              WHERE a.interview_id=ci.interview_id
+                AND a.company_code=ci.company_code
+                AND (
+                  a.assignee_email ILIKE %s
+                  OR a.assignee_name ILIKE %s
+                  OR a.assignee_user_id ILIKE %s
+                  OR a.assignee_phone ILIKE %s
+                )
+            )
+            """
+        )
+        params.extend([like, like, like, like])
     where_sql = " AND ".join(where)
     limit_value = bounded_limit(limit)
     offset_value = max(0, int(offset or 0))
+    feedback_complete_sql = iqc.sql_feedback_complete_expr()
+    needs_feedback_sql = iqc.sql_status_predicate("needs_feedback")
+    video_sql = iqc.sql_status_predicate("video_interviews")
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -44259,75 +47272,118 @@ def dashboard_interviews_payload(
             interviews = [candidate_interview_summary(dict(row)) for row in cur.fetchall()]
             if permissions is not None:
                 perms = {str(value) for value in permissions}
+                can_manage = "interview.manage" in perms
+                actor_role = dashboard_context_role_key(context) if context else ""
+                import interview_presentation as _ip
                 for interview in interviews:
                     allowed_actions: list[str] = []
-                    if "interview.manage" in perms:
+                    if can_manage:
                         status_value = str(interview.get("status") or "")
                         if status_value in {"scheduled", "rescheduled"}:
                             allowed_actions.extend(["mark_completed", "mark_no_show", "cancel_interview"])
                         if interview.get("notes_status") != "complete":
                             allowed_actions.append("write_notes")
                         allowed_actions.append("open_candidate")
-                    interview["allowed_actions"] = allowed_actions
+                    interview["allowed_actions"] = narrow_interview_allowed_actions_for_role(actor_role, allowed_actions)
+                    assignment_names: list[str] = []
+                    try:
+                        with db_connect() as assign_conn:
+                            with assign_conn.cursor() as assign_cur:
+                                assign_cur.execute(
+                                    """
+                                    SELECT COALESCE(assignee_name, assignee_email, assignee_user_id) AS label
+                                    FROM candidate_interview_assignments
+                                    WHERE interview_id=%s AND company_code=%s
+                                    ORDER BY created_at ASC NULLS LAST
+                                    LIMIT 6
+                                    """,
+                                    (interview.get("interview_id"), company),
+                                )
+                                assignment_names = [str(r.get("label")) for r in assign_cur.fetchall() if r.get("label")]
+                    except Exception:
+                        assignment_names = []
+                    interview["interviewer_assignments"] = assignment_names
+                    feedback_submission = None
+                    try:
+                        with db_connect() as fb_conn:
+                            with fb_conn.cursor() as fb_cur:
+                                fb_cur.execute(
+                                    """
+                                    SELECT submission_id, status, submitted_at, updated_at
+                                    FROM interview_feedback_submissions
+                                    WHERE interview_id=%s AND company_code=%s
+                                    ORDER BY updated_at DESC NULLS LAST
+                                    LIMIT 1
+                                    """,
+                                    (interview.get("interview_id"), company),
+                                )
+                                row = fb_cur.fetchone()
+                                feedback_submission = dict(row) if row else None
+                    except Exception:
+                        feedback_submission = None
+                    if feedback_submission:
+                        interview["feedback_submission"] = feedback_submission
+                    presentation = _ip.build_interview_presentation(
+                        interview,
+                        can_manage=can_manage,
+                        legacy_next_action=interview.get("next_human_action"),
+                        assignments=assignment_names,
+                    )
+                    presentation["allowed_actions"] = narrow_interview_allowed_actions_for_role(
+                        actor_role,
+                        presentation.get("allowed_actions") or [],
+                    )
+                    interview["feedback"] = presentation.get("feedback")
+                    interview["feedback_state"] = (presentation.get("feedback") or {}).get("state")
+                    interview["needs_feedback"] = bool((presentation.get("feedback") or {}).get("needs_feedback"))
+                    interview["presentation"] = presentation
+                    interview["next_human_action"] = presentation.get("next_human_action") or interview.get("next_human_action")
+                    interview["allowed_actions"] = presentation.get("allowed_actions") or interview.get("allowed_actions")
+            # Tab badge counts share the list's tenant/visibility/assignment/kind scope.
             cur.execute(
-                """
+                f"""
                 SELECT status, COUNT(*) AS count
                 FROM candidate_interviews ci
-                WHERE ci.company_code=%s
-                  AND EXISTS (
-                    SELECT 1 FROM applications a
-                    WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key
-                      AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                  )
+                WHERE {scope_sql}
                 GROUP BY status
                 ORDER BY count DESC, status
                 """,
-                (company,),
+                scope_params,
             )
             status_counts = [json_safe(dict(row)) for row in cur.fetchall()]
-            # Feedback counts must use the SAME definition as the "Needs feedback"
-            # tab table (status='completed' AND feedback_status<>'feedback_complete'),
-            # otherwise not-yet-completed interviews (which default to
-            # feedback_status='notes_pending') inflate the count above the rows shown.
             cur.execute(
-                """
+                f"""
                 SELECT
+                  COUNT(*) FILTER (WHERE {needs_feedback_sql}) AS notes_pending,
                   COUNT(*) FILTER (
-                    WHERE ci.status='completed' AND ci.feedback_status<>'feedback_complete'
-                  ) AS notes_pending,
-                  COUNT(*) FILTER (
-                    WHERE ci.status='completed' AND ci.feedback_status='feedback_complete'
+                    WHERE ci.status='completed' AND ({feedback_complete_sql})
                   ) AS feedback_complete
                 FROM candidate_interviews ci
-                WHERE ci.company_code=%s
-                  AND EXISTS (
-                    SELECT 1 FROM applications a
-                    WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key
-                      AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                  )
+                WHERE {scope_sql}
                 """,
-                (company,),
+                scope_params,
             )
             fb_row = cur.fetchone() or {}
+            notes_pending = int(fb_row.get("notes_pending") or 0)
+            feedback_complete = int(fb_row.get("feedback_complete") or 0)
             feedback_counts = [
-                {"feedback_status": "notes_pending", "count": int(fb_row.get("notes_pending") or 0)},
-                {"feedback_status": "feedback_complete", "count": int(fb_row.get("feedback_complete") or 0)},
+                {"feedback_status": "notes_pending", "count": notes_pending},
+                {"feedback_status": "feedback_complete", "count": feedback_complete},
+            ]
+            canonical_feedback_counts = [
+                {"feedback_state": "needs_feedback", "count": notes_pending},
+                {"feedback_state": "complete", "count": feedback_complete},
             ]
             cur.execute(
-                """
+                f"""
                 SELECT COUNT(*) AS count
                 FROM candidate_interviews ci
-                WHERE ci.company_code=%s
-                  AND (ci.interview_type='async_video' OR ci.source='async_video')
-                  AND EXISTS (
-                    SELECT 1 FROM applications a
-                    WHERE a.company_code=ci.company_code AND a.app_key=ci.app_key
-                      AND (a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')
-                  )
+                WHERE {scope_sql}
+                  AND ({video_sql})
                 """,
-                (company,),
+                scope_params,
             )
-            video_count = int((cur.fetchone() or {}).get("count") or 0)
+            video_count = int((cur.fetchone() or {}).get("count") or 0) if include_async_video else 0
     return {
         "company_code": company,
         "total": total,
@@ -44335,8 +47391,11 @@ def dashboard_interviews_payload(
         "offset": offset_value,
         "status_counts": status_counts,
         "feedback_counts": feedback_counts,
+        "canonical_feedback_counts": canonical_feedback_counts,
         "video_count": video_count,
         "interviews": interviews,
+        "interviews_enabled": include_live,
+        "video_interviews_enabled": include_async_video,
     }
 
 
@@ -44460,8 +47519,16 @@ def dashboard_chat_candidate_card(candidate: dict[str, Any]) -> dict[str, Any] |
     if not position and isinstance(application.get("position"), dict):
         position = application["position"].get("title") or application["position"].get("code")
     status = candidate.get("status") or application.get("status")
-    score = candidate.get("score") or candidate.get("ranking_score")
-    reasons = candidate.get("reasons") or candidate.get("evidence") or []
+    safe_ranking_card = _ranking_presentation.compact_chat_artifact(candidate)
+    if safe_ranking_card:
+        score = safe_ranking_card["score"]
+        reasons = safe_ranking_card["reasons"]
+        position = safe_ranking_card.get("position") or position
+    else:
+        score = candidate.get("score")
+        if score is None:
+            score = candidate.get("ranking_score")
+        reasons = candidate.get("reasons") or candidate.get("evidence") or []
     if not any([app_key, name, phone]):
         return None
     return {
@@ -44472,26 +47539,67 @@ def dashboard_chat_candidate_card(candidate: dict[str, Any]) -> dict[str, Any] |
         "status": status,
         "score": json_safe(score),
         "reasons": json_safe(reasons[:3] if isinstance(reasons, list) else []),
+        "presentation": json_safe(safe_ranking_card.get("presentation")) if safe_ranking_card else None,
     }
 
 
-def dashboard_chat_artifacts(orchestrator_result: dict[str, Any], request: DashboardChatRequest) -> dict[str, Any]:
+def dashboard_chat_artifacts(
+    orchestrator_result: dict[str, Any],
+    request: DashboardChatRequest,
+    *,
+    company_code: str | None = None,
+) -> dict[str, Any]:
     audit = orchestrator_result.get("audit") if isinstance(orchestrator_result.get("audit"), dict) else {}
     outputs = audit.get("tool_outputs") if isinstance(audit.get("tool_outputs"), list) else []
     cards: list[dict[str, Any]] = []
     navigation: list[dict[str, Any]] = []
     confirmation: dict[str, Any] | None = None
+    workflow_card: dict[str, Any] | None = None
+    # A navigation chip must never advertise a page the tenant cannot open.
+    # Interviews serves both interview kinds, so either module keeps it reachable.
+    # Assessments is a single module — when it is off, no Assessments chip or link.
+    interviews_page_reachable = True
+    assessments_page_reachable = True
+    reports_page_reachable = True
+    if company_code:
+        enabled = configured_company_modules(company_code)
+        interviews_page_reachable = bool({"interviews", "video_interviews"} & enabled)
+        assessments_page_reachable = "assessments" in enabled
     for output in outputs:
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
+        if isinstance(result.get("workflow_card"), dict):
+            workflow_card = json_safe(result.get("workflow_card"))
         if output.get("status") == "needs_confirmation":
             preview = result.get("confirmation_preview") if isinstance(result.get("confirmation_preview"), dict) else {}
             summary = result.get("confirmation_text") or preview.get("confirmation_text") or result.get("message")
+            ranking_preview = bool(
+                preview.get("label") == "Calculate Ranking"
+                or result.get("mint_recalculate_pending")
+                or result.get("error") in {"ranking_run_required", "ranking_recalculate_confirmation_required"}
+                or (isinstance(result.get("filters"), dict) and result["filters"].get("auto_recalculate_preview"))
+            )
+            steps = result.get("steps") if isinstance(result.get("steps"), list) else []
             confirmation = {
                 "pending_action_id": output.get("pending_action_id"),
-                "label": "Confirm",
+                "label": "Calculate Ranking" if ranking_preview else (preview.get("label") or "Confirm"),
                 "summary": summary if isinstance(summary, str) else None,
                 "is_active": True,
                 "status": "pending",
+                "preview": json_safe(preview) if preview else None,
+                "steps": json_safe(steps),
+                "channels": json_safe(result.get("invite_channel") or (workflow_card or {}).get("channels")),
+                "people": json_safe((workflow_card or {}).get("people") or []),
+                "missing_fields": json_safe(result.get("missing_fields") or []),
+                "blocked_steps": json_safe(result.get("blocked_steps") or []),
+                "workflow_card": workflow_card,
+            }
+            if workflow_card and workflow_card.get("kind") == "workflow_preview":
+                confirmation["label"] = confirmation.get("label") or "Confirm workflow"
+        if str(result.get("status") or "").lower() == "partial" and isinstance(result.get("workflow_card"), dict):
+            workflow_card = {
+                **json_safe(result.get("workflow_card")),
+                "kind": "workflow_result",
+                "status": "partial",
             }
         candidates = result.get("candidates") if isinstance(result.get("candidates"), list) else []
         for candidate in candidates[:5]:
@@ -44512,21 +47620,39 @@ def dashboard_chat_artifacts(orchestrator_result: dict[str, Any], request: Dashb
         if tool == "rank_candidates":
             position = (result.get("filters") or {}).get("position") if isinstance(result.get("filters"), dict) else None
             navigation.append({"type": "page", "page": "ranking", "label": "Open Ranking", "position_code": position})
-        if tool in {"send_assessment", "execute_candidate_workflow"}:
+        if tool == "list_job_openings":
+            cont = result.get("continuation") if isinstance(result.get("continuation"), dict) else {}
+            if cont.get("label") and cont.get("prompt"):
+                navigation.append(
+                    {
+                        "type": "assistant_prompt",
+                        "label": cont.get("label") or "Show more roles",
+                        "prompt": cont.get("prompt") or "Show more roles",
+                        "offset": cont.get("offset"),
+                    }
+                )
+        if tool == "get_reports_metrics" and reports_page_reachable:
+            navigation.append({"type": "page", "page": "reports", "label": "Open Reports"})
+        if assessments_page_reachable and tool in {"send_assessment", "execute_candidate_workflow"} and (
+            tool == "send_assessment" or "send_assessment" in json.dumps(result.get("steps") or result.get("completed_steps") or [], default=str)
+        ):
             navigation.append({"type": "page", "page": "assessments", "label": "Open Assessments"})
-        if tool in {"schedule_interview", "execute_candidate_workflow"} and (
-            result.get("interview") or result.get("artifacts") or "schedule_interview" in json.dumps(result, default=str)
+        if (
+            interviews_page_reachable
+            and tool in {"schedule_interview", "reschedule_interview", "cancel_interview", "execute_candidate_workflow"}
+            and (
+                result.get("interview")
+                or result.get("artifacts")
+                or tool in {"schedule_interview", "reschedule_interview", "cancel_interview"}
+                or "schedule_interview" in json.dumps(result, default=str)
+            )
         ):
             navigation.append({"type": "page", "page": "interviews", "label": "Open Interviews"})
-    text = normalize_text(request.message)
-    if "notification" in text or "delivery" in text or "failed" in text:
-        navigation.append({"type": "page", "page": "notifications", "label": "Open delivery issues"})
-    if "interview" in text or "meeting" in text or "meet" in text:
-        navigation.append({"type": "page", "page": "interviews", "label": "Open Interviews"})
-    if "ranking" in text or "rank" in text:
-        navigation.append({"type": "page", "page": "ranking", "label": "Open Ranking"})
-    if "candidate" in text or "open " in text or "show " in text:
-        navigation.append({"type": "page", "page": "candidates", "label": "Open Candidates"})
+    # Policy short-circuit may attach a navigation hint without tool outputs.
+    hint = orchestrator_result.get("navigation_hint")
+    if isinstance(hint, dict) and hint.get("page"):
+        navigation.append(hint)
+    # Navigation must come from grounded tool/policy results only — no wording heuristics.
     deduped_cards: list[dict[str, Any]] = []
     seen_cards: set[str] = set()
     for card in cards:
@@ -44541,7 +47667,12 @@ def dashboard_chat_artifacts(orchestrator_result: dict[str, Any], request: Dashb
         if key not in seen_nav:
             seen_nav.add(key)
             deduped_nav.append(item)
-    return {"candidate_cards": deduped_cards[:6], "navigation": deduped_nav[:6], "confirmation": confirmation}
+    return {
+        "candidate_cards": deduped_cards[:6],
+        "navigation": deduped_nav[:6],
+        "confirmation": confirmation,
+        "workflow_card": workflow_card,
+    }
 
 
 def dashboard_chat_actor_id(context: dict[str, Any]) -> str:
@@ -44748,10 +47879,16 @@ def cancel_dashboard_chat_pending_confirmations(context: dict[str, Any], convers
     return int(cancelled or 0)
 
 
-def dashboard_application_or_404(app_key: str, company_code: str) -> dict[str, Any]:
+def dashboard_application_or_404(
+    app_key: str,
+    company_code: str,
+    context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     application = find_application_by_key(app_key, company_code=company_code)
     if not application:
         raise HTTPException(status_code=404, detail={"error": "application_not_found"})
+    if context is not None:
+        require_prehire_application_visibility(context, application)
     return application
 
 
@@ -45027,13 +48164,17 @@ def dashboard_prehire_mutation_response(
     result_payload: dict[str, Any],
     app_key: str,
     company_code: str,
+    permissions: set[str] | list[str] | None = None,
 ) -> dict[str, Any]:
     audit = dashboard_record_action_result(action_type, status, result_payload, reply)
     refreshed = find_application_by_key(app_key, company_code=company_code)
+    # Mutation responses must use the same permission-aware UI contract as list/detail.
+    # Omitting permissions previously returned allowed_actions=[] and wiped the drawer menu.
     application = prehire_application_summary(
         refreshed,
         include_raw=True,
         include_assessment=company_has_module(company_code, "assessments"),
+        permissions=list(permissions or []),
     ) if refreshed else None
     return {
         "ok": status == "completed",
@@ -45047,7 +48188,74 @@ def dashboard_prehire_mutation_response(
     }
 
 
+def _unified_applications_payload(
+    rows,
+    *,
+    include_assessment,
+    permissions,
+    use_unified,
+    include_match_reasons,
+    search,
+    _uc,
+    prehire_application_summary,
+):
+    out = []
+    for row in rows:
+        summary = prehire_application_summary(
+            row,
+            include_assessment=include_assessment,
+            permissions=permissions,
+        )
+        if use_unified:
+            gov = row.get("governance_json") if isinstance(row.get("governance_json"), dict) else None
+            summary = _uc.enrich_application_summary(summary, row, gov=gov, permissions=permissions)
+        projection = row.get("_classification_projection") if isinstance(row.get("_classification_projection"), dict) else None  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH: merge classification projection
+        if projection:
+            summary.update(projection)
+            if include_match_reasons and search:
+                snapshot = _uc.extract_facts_snapshot(row)
+                effective = _uc.effective_facts_from_events(snapshot, [])
+                summary["match_reasons"] = _uc.search_match_reasons(
+                    query=search,
+                    row=row,
+                    effective_facts=effective,
+                    semantic_similarity=None,
+                )
+                summary["record_state_label"] = _uc.record_state_label(
+                    summary.get("record_state") or _uc.RECORD_ACTIVE
+                )
+        out.append(summary)
+    return out
+
+
+def _prehire_application_status_values(status: str | None) -> list[str]:
+    """Parse list Stage filter: single status or comma-separated display-bucket aliases."""
+    raw = str(status or "").strip()
+    if not raw:
+        return []
+    return [part.strip().lower() for part in raw.split(",") if part.strip()]
+
+
+def _append_prehire_application_status_filter(
+    where: list[str],
+    params: list[Any],
+    status: str | None,
+    *,
+    column: str = "a.status",
+) -> None:
+    statuses = _prehire_application_status_values(status)
+    if not statuses:
+        return
+    if len(statuses) == 1:
+        where.append(f"{column}=%s")
+        params.append(statuses[0])
+    else:
+        where.append(f"{column} = ANY(%s)")
+        params.append(statuses)
+
+
 def prehire_applications_query(
+
     *,
     company_code: str,
     status: str | None,
@@ -45060,29 +48268,112 @@ def prehire_applications_query(
     interview_status: str | None = None,
     follow_up: str | None = None,
     review_status: str | None = None,
+    overview_cohort: str | None = None,
     activity_from: str | None = None,
     activity_to: str | None = None,
     sort: str | None = None,
     include_assessment: bool = True,
     permissions: set[str] | list[str] | None = None,
+    owner_scope: str | None = None,
+    owner_user_id: str | None = None,
+    actor_user_id: str | None = None,
+    tag_id: str | None = None,
+    cursor: str | None = None,
+    view: str | None = None,
+    source_channel: str | None = None,
+    recruiter_owner: str | None = None,
+    cv_processing_state: str | None = None,
+    received_from: str | None = None,
+    received_to: str | None = None,
+    has_grounded_email: str | None = None,
+    has_grounded_phone: str | None = None,
+    fact_completeness: str | None = None,
+    department_intake_tag: str | None = None,
+    include_match_reasons: bool = False,
+    classification_filters: dict[str, Any] | None = None,  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
 ) -> dict[str, Any]:
+    import unified_candidates as _uc  # UNIFIED_CANDIDATES_PRODUCTION_DARK_PATCH
+    import talent_pool_classification as _tpc  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+
     cv_filter = str(cv_status or "").strip().lower()
-    base_predicate = production_application_predicate("a") if cv_filter in {"all", "incomplete", "missing", "no_cv"} else reviewable_application_predicate("a")
-    where = ["a.company_code=%s", base_predicate]
-    params: list[Any] = [company_code]
-    if status:
-        where.append("a.status=%s")
-        params.append(status)
-    if position:
+    view_key = str(view or "").strip().lower()
+    unified_on = _uc.feature_enabled_for_company(company_code)
+    classification_ui = False  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+    parsed_classification = None  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+    try:
+        classification_ui = bool(
+            _tpc.feature_enabled_for_company(company_code)
+            and (_tpc.feature_ui_enabled() or _tpc.feature_schema_enabled())
+        )
+        if classification_ui and classification_filters:
+            parsed_classification = _tpc.parse_classification_filter_query(classification_filters)
+    except Exception:
+        classification_ui = False
+        parsed_classification = None
+    use_unified = unified_on and (
+        bool(view_key)
+        or any(
+            [
+                source_channel,
+                recruiter_owner,
+                cv_processing_state,
+                received_from,
+                received_to,
+                has_grounded_email,
+                has_grounded_phone,
+                fact_completeness,
+                department_intake_tag,
+                bool(parsed_classification and parsed_classification.get("active")),
+            ]
+        )
+    )
+    if use_unified:
+        view_key = view_key or _uc.VIEW_ALL
+        view_sql, view_params = _uc.view_predicate_sql(view_key, "a", "gov")
+        where = ["a.company_code=%s", view_sql]
+        params: list[Any] = [company_code, *view_params]
+    else:
+        base_predicate = production_application_predicate("a") if cv_filter in {"all", "incomplete", "missing", "no_cv"} else reviewable_application_predicate("a")
+        where = ["a.company_code=%s", base_predicate]
+        params = [company_code]
+        view_key = ""
+    vis_sql = str(visibility_sql or "").strip()
+    if vis_sql:
+        where.append(f"({vis_sql})")
+        params.extend(list(visibility_params or []))
+    _append_prehire_application_status_filter(where, params, status, column="a.status")
+    cohort = str(overview_cohort or "").strip().lower()
+    # role_active uses exact position_code so ACCOUNTING does not swallow ACCOUNTING_EXCEL.
+    if position and cohort == "role_active":
+        where.append("a.position_code=%s")
+        params.append(position)
+    elif position:
         where.append("(a.position_code ILIKE %s OR a.position_title ILIKE %s)")
         params.extend([f"%{position}%", f"%{position.replace('_', ' ')}%"])
     if search:
-        where.append(
-            "(a.app_key ILIKE %s OR a.phone ILIKE %s OR c.name ILIKE %s OR c.email ILIKE %s "
-            "OR a.position_code ILIKE %s OR a.position_title ILIKE %s)"
-        )
-        like = f"%{search}%"
-        params.extend([like, like, like, like, like, like])
+        if use_unified:
+            where.append(
+                "("
+                "a.app_key ILIKE %s OR c.name ILIKE %s OR c.email ILIKE %s "
+                "OR a.position_code ILIKE %s OR a.position_title ILIKE %s "
+                "OR (a.phone NOT ILIKE 'imp-%%' AND a.phone ILIKE %s) "
+                "OR COALESCE(a.raw_json->>'candidate_email', a.raw_json->>'email', '') ILIKE %s "
+                "OR COALESCE(a.raw_json->>'candidate_phone', '') ILIKE %s "
+                "OR COALESCE(sd.content, '') ILIKE %s "
+                "OR COALESCE(c.profile::text, '') ILIKE %s"
+                ")"
+            )
+            like = f"%{search}%"
+            params.extend([like, like, like, like, like, like, like, like, like, like])
+        else:
+            where.append(
+                "(a.app_key ILIKE %s OR a.phone ILIKE %s OR c.name ILIKE %s OR c.email ILIKE %s "
+                "OR a.position_code ILIKE %s OR a.position_title ILIKE %s)"
+            )
+            like = f"%{search}%"
+            params.extend([like, like, like, like, like, like])
     if cv_filter in {"with_cv", "received"}:
         where.append("(a.cv_received IS TRUE OR jsonb_typeof(a.raw_json->'cv') = 'object')")
     elif cv_filter in {"incomplete", "missing", "no_cv"}:
@@ -45096,6 +48387,7 @@ def prehire_applications_query(
                 _prehire_overview.assessment_pending_predicate(
                     "a",
                     assessment_status_expr="COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '')",
+                    assessment_delivery_status_expr="COALESCE(latest_assessment.assessment_delivery_status, a.raw_json->'assessment'->>'delivery_status', '')",
                 )
             )
         else:
@@ -45113,18 +48405,190 @@ def prehire_applications_query(
     if str(review_status or "").strip().lower() in {"ready", "ready_for_review", "needed"}:
         # Canonical with prehire_overview.ready_for_review / Overview review card.
         where.append(_prehire_overview.ready_for_review_predicate("a"))
+    if cohort in {"interview_scheduling_debt", "interview_debt"}:
+        # Exact Overview interview scheduling debt (not Interviews tab status).
+        where.append(
+            _prehire_overview.interview_scheduling_debt_predicate(
+                "a",
+                interview_status_expr="latest_interview.interview_status",
+            )
+        )
+    elif cohort in {"role_active", "active_role"}:
+        where.append(_prehire_overview.role_active_predicate("a"))
+    elif cohort in {"follow_up_needed", "follow_up"} and str(follow_up or "").strip().lower() not in {
+        "1",
+        "true",
+        "yes",
+        "needed",
+    }:
+        where.append(_prehire_overview.follow_up_needed_exists("a"))
+    elif cohort in {"ready_for_review", "ready"} and str(review_status or "").strip().lower() not in {
+        "ready",
+        "ready_for_review",
+        "needed",
+    }:
+        where.append(_prehire_overview.ready_for_review_predicate("a"))
+    elif cohort.startswith("assessment_") or cohort in {
+        "awaiting",
+        "ready_to_send",
+        "first_send",
+        "resend",
+        "resend_needed",
+        "delivery_failed",
+        "attention",
+        "assessment_pending",
+    }:
+        import assessment_cohorts as _assessment_cohorts
+
+        # Skip if assessment_status=awaiting already applied the attention predicate.
+        if not (
+            str(assessment_status or "").strip().lower() == "awaiting"
+            and _assessment_cohorts.normalize_cohort_key(cohort) == _assessment_cohorts.COHORT_ATTENTION
+        ):
+            where.append(
+                _assessment_cohorts.cohort_predicate(
+                    cohort,
+                    "a",
+                    status_expr="COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status', '')",
+                    delivery_expr="COALESCE(latest_assessment.assessment_delivery_status, a.raw_json->'assessment'->>'delivery_status', '')",
+                )
+            )
     if activity_from:
         where.append("COALESCE(a.updated_at, a.ingested_at) >= %s::date")
         params.append(activity_from)
     if activity_to:
         where.append("COALESCE(a.updated_at, a.ingested_at) < (%s::date + interval '1 day')")
         params.append(activity_to)
+    if received_from:
+        where.append("a.ingested_at >= %s::date")
+        params.append(received_from)
+    if received_to:
+        where.append("a.ingested_at < (%s::date + interval '1 day')")
+        params.append(received_to)
+    if source_channel:
+        where.append(
+            "LOWER(COALESCE(a.raw_json->'intake'->>'source', a.raw_json->'import'->>'source', a.raw_json->>'intake_source', a.data_source, '')) ILIKE %s"
+        )
+        params.append(f"%{source_channel.strip().lower()}%")
+    if recruiter_owner:
+        if str(recruiter_owner).strip().lower() in {"unassigned", "none", "-"}:
+            where.append("COALESCE(gov.recruiter_owner_user_id, a.owner_user_id::text, '') = ''")
+        else:
+            where.append("COALESCE(gov.recruiter_owner_user_id, a.owner_user_id::text, '') = %s")
+            params.append(str(recruiter_owner).strip())
+    if cv_processing_state:
+        bucket = str(cv_processing_state).strip().lower()
+        if bucket == "ready":
+            where.append(
+                "(COALESCE(a.raw_json->'cv'->'processing'->>'profile_parsed','') IN ('true','1') "
+                "OR jsonb_typeof(c.profile) = 'object')"
+            )
+        elif bucket == "partial":
+            where.append(
+                "(COALESCE(a.raw_json->'cv'->'processing'->>'status','') ILIKE ANY(ARRAY['partial','incomplete','processing']) "
+                "OR COALESCE(a.raw_json->'cv'->'processing'->>'text_extracted','') IN ('true','1'))"
+            )
+        elif bucket == "failed":
+            where.append("COALESCE(a.raw_json->'cv'->'processing'->>'status','') ILIKE ANY(ARRAY['failed','error','dead_letter'])")
+    if has_grounded_email and str(has_grounded_email).strip().lower() in {"1", "true", "yes"}:
+        where.append("COALESCE(c.email, a.raw_json->>'candidate_email', a.raw_json->>'email', '') <> ''")
+    if has_grounded_phone and str(has_grounded_phone).strip().lower() in {"1", "true", "yes"}:
+        where.append(
+            "("
+            "(a.phone IS NOT NULL AND a.phone NOT ILIKE 'imp-%%') "
+            "OR COALESCE(a.raw_json->>'candidate_phone','') <> ''"
+            ")"
+        )
+    if department_intake_tag:
+        where.append("COALESCE(gov.department_intake_tag, '') ILIKE %s")
+        params.append(f"%{department_intake_tag.strip()}%")
+    sort_key = str(sort or "newest").strip().lower()
+    order_sql = {
+        "newest": "COALESCE(a.ingested_at,a.updated_at) DESC NULLS LAST, a.app_key DESC",
+        "last_activity": "COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST, a.app_key DESC",
+        "ready_for_review": "CASE WHEN a.status IN ('screening_complete','review_pending','ready_for_review') THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST, a.app_key DESC",
+        "assessment_complete": "CASE WHEN COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status')='completed' THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST, a.app_key DESC",
+        "ranking_score": "latest_eval.ranking_score DESC NULLS LAST, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST, a.app_key DESC",
+    }.get(sort_key, "COALESCE(a.ingested_at,a.updated_at) DESC NULLS LAST, a.app_key DESC")
+    # Preserve one shared authority for rows and counts. Recruiter ownership is
+    # distinct from role/intake assignment (`needs_role`, `import_review`).
+    base_where = list(where)
+    base_params = list(params)
+    ownership_where = list(base_where)
+    ownership_params = list(base_params)
+    scope = str(owner_scope or "all").strip().lower()
+    if scope not in {"all", "mine", "unassigned", "assigned"}:
+        scope = "all"
+    owner_filter = str(owner_user_id or "").strip()
+    actor_filter = str(actor_user_id or "").strip()
+    if scope == "mine":
+        if not actor_filter:
+            raise HTTPException(status_code=401, detail={"error": "dashboard_user_identity_required"})
+        where.append("a.owner_user_id::text=%s")
+        params.append(actor_filter)
+    elif scope == "unassigned":
+        where.append("a.owner_user_id IS NULL")
+    elif scope == "assigned":
+        where.append("a.owner_user_id IS NOT NULL")
+    if owner_filter:
+        where.append("a.owner_user_id::text=%s")
+        params.append(owner_filter)
+    tag_filter = str(tag_id or "").strip()
+    if tag_filter:
+        tag_predicate = (
+            "EXISTS (SELECT 1 FROM application_tags atf "
+            "WHERE atf.company_code=a.company_code AND atf.app_key=a.app_key "
+            "AND atf.tag_id::text=%s)"
+        )
+        where.append(tag_predicate)
+        params.append(tag_filter)
+        ownership_where.append(tag_predicate)
+        ownership_params.append(tag_filter)
+    if classification_ui and parsed_classification and parsed_classification.get("active"):  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH: classification EXISTS filter
+        try:
+            class_sql, class_params = _tpc.classification_filter_sql(
+                company_code=company_code,
+                filters=parsed_classification,
+                applications_alias="a",
+            )
+            if class_sql and class_sql.strip() != "TRUE":
+                where.append(f"({class_sql})")
+                params.extend(class_params)
+        except Exception:
+            pass
+    count_where_sql = " AND ".join(where)
+    count_params = list(params)
+    cursor_at = ""
+    cursor_key = ""
+    if cursor:
+        if "|" not in str(cursor):
+            raise HTTPException(status_code=400, detail={"error": "cursor_invalid"})
+        if sort_key != "newest":
+            raise HTTPException(status_code=400, detail={"error": "cursor_sort_unsupported"})
+        if offset:
+            raise HTTPException(status_code=400, detail={"error": "cursor_offset_conflict"})
+        cursor_at, cursor_key = str(cursor).split("|", 1)
+        cursor_at, cursor_key = cursor_at.strip(), cursor_key.strip()
+        if cursor_at and cursor_key:
+            where.append(
+                "(COALESCE(a.ingested_at,a.updated_at), a.app_key) < (%s::timestamptz,%s)"
+            )
+            params.extend([cursor_at, cursor_key])
     where_sql = " AND ".join(where)
+    ownership_where_sql = " AND ".join(ownership_where)
     joins_sql = """
                 LEFT JOIN candidates c ON c.phone=a.phone
+                LEFT JOIN dashboard_users owner_user
+                  ON owner_user.company_code=a.company_code
+                 AND owner_user.user_id=a.owner_user_id
+                LEFT JOIN candidate_record_governance gov
+                  ON gov.company_code=a.company_code AND gov.app_key=a.app_key
+                LEFT JOIN semantic_documents sd
+                  ON sd.entity_type='application' AND sd.entity_key=a.app_key
                 LEFT JOIN LATERAL (
                   SELECT
                     aa.status AS assessment_status,
+                    aa.delivery_status AS assessment_delivery_status,
                     to_jsonb(aa) || jsonb_build_object('percent', s.percent, 'band', s.band, 'completed_at', aa.completed_at) AS assessment_json
                   FROM assessment_attempts aa
                   LEFT JOIN assessment_scores s ON s.attempt_id=aa.attempt_id
@@ -45179,15 +48643,33 @@ def prehire_applications_query(
                   ORDER BY ale.created_at DESC
                   LIMIT 1
                 ) latest_lifecycle_event ON TRUE
+                LEFT JOIN LATERAL (
+                  SELECT count(*) FILTER (WHERE t.status='open') AS open_task_count,
+                         count(*) FILTER (WHERE t.status='open' AND t.due_at < now()) AS overdue_task_count
+                  FROM application_recruiter_tasks t
+                  WHERE t.company_code=a.company_code AND t.app_key=a.app_key
+                ) c2_tasks ON TRUE
+                LEFT JOIN LATERAL (
+                  SELECT COALESCE(
+                    jsonb_agg(
+                      jsonb_build_object(
+                        'tag_id', td.tag_id,
+                        'company_code', td.company_code,
+                        'label', td.name,
+                        'label_ar', td.label_ar,
+                        'color', td.color,
+                        'active', td.is_active
+                      )
+                      ORDER BY td.canonical_name
+                    ),
+                    '[]'::jsonb
+                  ) AS tags_json
+                  FROM application_tags atg
+                  JOIN candidate_tag_dictionary td
+                    ON td.company_code=atg.company_code AND td.tag_id=atg.tag_id
+                  WHERE atg.company_code=a.company_code AND atg.app_key=a.app_key
+                ) c2_tags ON TRUE
     """
-    sort_key = str(sort or "newest").strip().lower()
-    order_sql = {
-        "newest": "a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST",
-        "last_activity": "COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
-        "ready_for_review": "CASE WHEN a.status IN ('screening_complete','review_pending','ready_for_review') THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
-        "assessment_complete": "CASE WHEN COALESCE(latest_assessment.assessment_status, a.raw_json->'assessment'->>'status')='completed' THEN 0 ELSE 1 END, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
-        "ranking_score": "latest_eval.ranking_score DESC NULLS LAST, COALESCE(a.updated_at, a.ingested_at) DESC NULLS LAST",
-    }.get(sort_key, "a.ingested_at DESC NULLS LAST, a.updated_at DESC NULLS LAST")
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -45195,11 +48677,25 @@ def prehire_applications_query(
                 SELECT COUNT(*) AS count
                 FROM applications a
                 {joins_sql}
-                WHERE {where_sql}
+                WHERE {count_where_sql}
                 """,
-                params,
+                count_params,
             )
             total = int((cur.fetchone() or {}).get("count") or 0)
+            cur.execute(
+                f"""
+                SELECT
+                  count(*) AS all_count,
+                  count(*) FILTER (WHERE a.owner_user_id::text=%s) AS mine_count,
+                  count(*) FILTER (WHERE a.owner_user_id IS NULL) AS unassigned_count,
+                  count(*) FILTER (WHERE a.owner_user_id IS NOT NULL) AS assigned_count
+                FROM applications a
+                {joins_sql}
+                WHERE {ownership_where_sql}
+                """,
+                [actor_filter, *ownership_params],
+            )
+            ownership_row = dict(cur.fetchone() or {})
             cur.execute(
                 f"""
                 SELECT a.*, c.name AS candidate_name, c.email AS candidate_email,
@@ -45209,7 +48705,16 @@ def prehire_applications_query(
                        latest_eval.rank_evaluation_json,
                        latest_delivery.communication_json,
                        latest_review_task.review_task_json,
-                       latest_lifecycle_event.lifecycle_event_json
+                       latest_lifecycle_event.lifecycle_event_json,
+                       owner_user.name AS owner_name,
+                       owner_user.email AS owner_email,
+                       owner_user.role AS owner_role,
+                       owner_user.status AS owner_status,
+                       COALESCE(c2_tasks.open_task_count,0) AS open_task_count,
+                       COALESCE(c2_tasks.overdue_task_count,0) AS overdue_task_count,
+                       c2_tags.tags_json,
+                       to_jsonb(gov.*) AS governance_json,
+                       sd.content AS semantic_content
                 FROM applications a
                 {joins_sql}
                 WHERE {where_sql}
@@ -45219,18 +48724,101 @@ def prehire_applications_query(
                 [*params, limit, offset],
             )
             rows = [dict(row) for row in cur.fetchall()]
+            classification_by_app = {}  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH: bulk classification projection
+            if classification_ui and rows:
+                try:
+                    app_keys = [str(r.get("app_key") or "") for r in rows if r.get("app_key")]
+                    classification_by_app = _tpc.bulk_load_classification_rows(
+                        cur,
+                        company_code=company_code,
+                        app_keys=app_keys,
+                    )
+                    for row in rows:
+                        key = str(row.get("app_key") or "")
+                        projection = (classification_by_app.get(key) or {}).get("projection") or {}
+                        row["_classification_projection"] = projection
+                except Exception:
+                    for row in rows:
+                        row["_classification_projection"] = {}
+            cur.execute(
+                """
+                SELECT user_id, name, email, role, status
+                FROM dashboard_users
+                WHERE company_code=%s
+                  AND status='active'
+                  AND role IN ('owner','hr_admin','hr_manager','recruiter','hiring_manager')
+                ORDER BY lower(name), lower(email), user_id
+                """,
+                (company_code,),
+            )
+            recruiters = []
+            for source_user in cur.fetchall():
+                user = dict(source_user)
+                if "candidates.read" not in dashboard_effective_permissions_for_user(user, cur=cur):
+                    continue
+                recruiters.append(json_safe(user))
+    next_cursor = None
+    if len(rows) == limit and rows:
+        last = rows[-1]
+        stamp = last.get("ingested_at") or last.get("updated_at")
+        if stamp:
+            next_cursor = f"{json_safe(stamp)}|{last.get('app_key')}"
     return {
         "total": total,
         "limit": limit,
         "offset": offset,
-        "applications": [
-            prehire_application_summary(
-                row,
-                include_assessment=include_assessment,
-                permissions=permissions,
-            )
-            for row in rows
-        ],
+        "next_cursor": next_cursor,
+        "ownership_counts": {
+            "all": int(ownership_row.get("all_count") or 0),
+            "mine": int(ownership_row.get("mine_count") or 0),
+            "unassigned": int(ownership_row.get("unassigned_count") or 0),
+            "assigned": int(ownership_row.get("assigned_count") or 0),
+        },
+        "recruiters": recruiters,
+        "view": view_key or None,
+        "unified_candidates": use_unified,
+        "classification_filters": parsed_classification if classification_ui else None,  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+        "applications": _unified_applications_payload(
+            rows,
+            include_assessment=include_assessment,
+            permissions=permissions,
+            use_unified=use_unified,
+            include_match_reasons=include_match_reasons,
+            search=search,
+            _uc=_uc,
+            prehire_application_summary=prehire_application_summary,
+        ),
+    }
+
+
+ASSESSMENT_ERROR_MESSAGES = {
+    "attempt_expired": ("This assessment link has expired.", "Send a new invitation to let the candidate continue."),
+    "assessment_attempt_not_found": ("This assessment could not be found.", "Refresh the list and try again."),
+    "assessment_resend_failed": ("The assessment could not be resent.", "Review the candidate contact details and try again."),
+    "assessment_not_completed": ("This assessment is not completed yet.", "Wait for the candidate to finish before reviewing."),
+    "terminal_application": ("This application is already closed.", "Assessments cannot be sent for a closed application."),
+    "already_sent": ("An assessment invitation is already active.", "Resend only if the candidate needs a new link."),
+    "delivery_failed": ("The invitation could not be delivered.", "Check the candidate email/WhatsApp and retry."),
+    "report_not_ready": ("The report is not ready yet.", "Wait for scoring to finish before opening the report."),
+    "stale_attempt": ("This assessment changed.", "Refresh and use the latest invitation."),
+    "duplicate_request": ("This request was already processed.", "Refresh to see the current state."),
+    "permission_denied": ("You do not have permission to do this action.", "Ask an admin for assessment access."),
+    "module_disabled": ("Assessments are not enabled for this company.", "Enable assessments to send invitations."),
+}
+
+
+def assessment_error_envelope(code: str, *, locale: str = "en") -> dict[str, Any]:
+    """Canonical error envelope so raw keys are never shown directly to HR."""
+    normalized = str(code or "assessment_error").strip() or "assessment_error"
+    message, next_step = ASSESSMENT_ERROR_MESSAGES.get(
+        normalized,
+        ("The assessment action could not be completed.", "Try again or refresh the page."),
+    )
+    return {
+        "error": normalized,
+        "message": message,
+        "next_step": next_step,
+        "safe_user_message": f"{message} {next_step}",
     }
 
 
@@ -45254,6 +48842,7 @@ def assessment_attempt_summary(row: dict[str, Any]) -> dict[str, Any]:
         "assessment_version_id": str(row.get("assessment_version_id")) if row.get("assessment_version_id") else None,
         "status": row.get("status"),
         "delivery_status": row.get("delivery_status"),
+        "delivery_status_label": prehire_report_status_label(row.get("delivery_status")),
         "review_status": row.get("review_status"),
         "current_item_index": int(row.get("current_item_index") or 0),
         "progress_version": int(row.get("progress_version") or 0),
@@ -45281,6 +48870,7 @@ def assessment_attempt_summary(row: dict[str, Any]) -> dict[str, Any]:
         "reviewed_by_user_id": row.get("reviewed_by_user_id"),
         "review_notes": row.get("review_notes"),
         "updated_at": json_safe(row.get("updated_at")),
+        "version": int(row.get("version") or 0) or None,
     }
 
 
@@ -45375,11 +48965,17 @@ def fetch_dashboard_assessment_report_payload(company: str, attempt_id: str) -> 
             norm_lookup=_assessment_service.version_norm_lookup(version),
         )
         attempt["report_json"] = json_safe(report)
+    import assessment_report_presentation as _arp
+    presentation = _arp.build_assessment_report_presentation(
+        attempt=attempt,
+        report=attempt.get("report_json") if isinstance(attempt.get("report_json"), dict) else {},
+    )
     return {
         "company_code": company,
         "ok": True,
         "attempt": attempt,
         "report": attempt.get("report_json") or {},
+        "report_presentation": presentation,
         "responses": responses,
     }
 
@@ -45479,51 +49075,123 @@ def dashboard_assessments_payload(
     position: str | None = None,
     limit: int = 100,
     offset: int = 0,
+    needs_review: bool = False,
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
+    summary_visibility_sql: str | None = None,
+    summary_visibility_params: list[Any] | None = None,
 ) -> dict[str, Any]:
+    """Attempts list + attempt-axis totals under one shared visibility scope.
+
+    Attempt status_counts / average / needs_review / report-ready use the same
+    detail/user-visible scope as the opened Attempts list (never a wider
+    company-wide summary that opens into a smaller list).
+    """
+    import assessments_queue_contract as _aqc
+    import assessment_cohorts as _ac
+
+    # Prefer explicit summary scope; default to the list/detail scope.
+    sum_vis = str(
+        summary_visibility_sql if summary_visibility_sql is not None else (visibility_sql or "")
+    ).strip()
+    sum_vis_params = list(
+        summary_visibility_params
+        if summary_visibility_params is not None
+        else (visibility_params or [])
+    )
+    list_vis = str(visibility_sql or "").strip()
+    list_vis_params = list(visibility_params or [])
+
     where = ["aa.company_code=%s", reviewable_application_predicate("a")]
     params: list[Any] = [company]
     if status:
         where.append("aa.status=%s")
         params.append(status)
+    if needs_review:
+        where.append(_aqc.needs_review_predicate("aa"))
     if position:
         where.append("(aa.position_code ILIKE %s OR aa.position_title ILIKE %s)")
         params.extend([f"%{position}%", f"%{position.replace('_', ' ')}%"])
+    if list_vis:
+        where.append(f"({list_vis})")
+        params.extend(list_vis_params)
     where_sql = " AND ".join(where)
+
+    # Attempt-axis summary shares the same visibility as the list.
+    summary_where = ["aa.company_code=%s", reviewable_application_predicate("a")]
+    summary_params: list[Any] = [company]
+    if sum_vis:
+        summary_where.append(f"({sum_vis})")
+        summary_params.extend(sum_vis_params)
+    summary_where_sql = " AND ".join(summary_where)
+
     limit_value = bounded_limit(limit)
     offset_value = max(0, int(offset or 0))
     with db_connect() as conn:
         with conn.cursor() as cur:
-            # Company-wide, unpaginated: the headline metrics (tab counts, average
-            # score) must reflect ALL matching attempts, not just the page being
-            # rendered — otherwise they silently drift once a company passes the
-            # page size, which is exactly the kind of scale bug we've been hunting
-            # down across every other module.
             cur.execute(
                 f"""
                 SELECT aa.status, COUNT(*) AS count
                 FROM assessment_attempts aa
                 LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
-                WHERE {where_sql}
+                WHERE {summary_where_sql}
                 GROUP BY aa.status
                 ORDER BY count DESC, aa.status
                 """,
-                params,
+                summary_params,
             )
             status_counts = [json_safe(dict(row)) for row in cur.fetchall()]
-            total = sum(int(row["count"]) for row in status_counts)
+            # Attempts tab total = every historical attempt under scope.
+            total_all_attempts = sum(int(row["count"]) for row in status_counts)
+
             cur.execute(
                 f"""
                 SELECT AVG(s.percent) AS average_percent
                 FROM assessment_attempts aa
                 LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
                 LEFT JOIN assessment_scores s ON s.attempt_id=aa.attempt_id
-                WHERE {where_sql} AND aa.status='completed' AND s.percent IS NOT NULL
+                WHERE {summary_where_sql} AND aa.status='completed' AND s.percent IS NOT NULL
                 """,
-                params,
+                summary_params,
             )
             avg_row = cur.fetchone() or {}
             raw_average = avg_row.get("average_percent")
             average_percent = round(float(raw_average), 1) if raw_average is not None else None
+
+            # assessments.review.* — full scoped totals (not page-local).
+            cur.execute(
+                f"""
+                SELECT COUNT(*) AS count
+                FROM assessment_attempts aa
+                LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
+                WHERE {summary_where_sql} AND {_aqc.needs_review_predicate("aa")}
+                """,
+                summary_params,
+            )
+            needs_review_count = int((cur.fetchone() or {}).get("count") or 0)
+            cur.execute(
+                f"""
+                SELECT COUNT(*) AS count
+                FROM assessment_attempts aa
+                LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
+                WHERE {summary_where_sql} AND {_aqc.report_ready_predicate("aa")}
+                """,
+                summary_params,
+            )
+            report_ready_count = int((cur.fetchone() or {}).get("count") or 0)
+
+            # Opened list total under the active list filters (status / needs_review).
+            cur.execute(
+                f"""
+                SELECT COUNT(*) AS count
+                FROM assessment_attempts aa
+                LEFT JOIN applications a ON a.app_key=aa.app_key AND a.company_code=aa.company_code
+                WHERE {where_sql}
+                """,
+                params,
+            )
+            list_total = int((cur.fetchone() or {}).get("count") or 0)
+
             cur.execute(
                 f"""
                 WITH response_counts AS (
@@ -45556,15 +49224,42 @@ def dashboard_assessments_payload(
                 [*params, limit_value, offset_value],
             )
             attempts = [assessment_attempt_summary(dict(row)) for row in cur.fetchall()]
+
+    import assessment_presentation as _ap
+
+    presented = []
+    for attempt in attempts:
+        presentation = _ap.build_assessment_presentation(attempt=attempt, can_manage=True)
+        attempt["presentation"] = presentation
+        attempt["needs_review"] = presentation.get("needs_review")
+        presented.append(attempt)
+
+    cohorts_payload = _ac.compute_assessment_cohorts(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=True,
+        visibility_sql=list_vis or None,
+        visibility_params=list_vis_params or None,
+    )
+
     return {
         "company_code": company,
         "ok": True,
-        "total": total,
+        "total": list_total,
+        "attempts_total": total_all_attempts,
         "limit": limit_value,
         "offset": offset_value,
         "status_counts": status_counts,
         "average_percent": average_percent,
-        "attempts": attempts,
+        "attempts": presented,
+        "needs_review_count": needs_review_count,
+        "report_ready_count": report_ready_count,
+        "cohorts": cohorts_payload,
+        "filter": {
+            "status": status or None,
+            "needs_review": bool(needs_review),
+            "position": position or None,
+        },
     }
 
 
@@ -45653,16 +49348,12 @@ def dashboard_assessment_config_payload(company: str) -> dict[str, Any]:
     }
 
 
-def prehire_action_counts(company: str) -> dict[str, int]:
+def prehire_action_counts(company: str) -> dict[str, Any]:
     """Company-wide Overview / Reports headline counts (canonical).
 
     Authority: prehire_overview.compute_action_counts
-      - ready_for_review  — distinct reviewable apps in screening_complete|
-        review_pending|ready_for_review (equals Candidates review_status=ready)
-      - assessment_pending — reviewable apps awaiting assessment send
-        (equals Candidates assessment_status=awaiting)
-      - follow_up_needed — distinct reviewable apps with failed delivery
-        (equals Candidates follow_up=needed). Counts applications, not events.
+      Display keys are distinct confirmed people (Candidates identity).
+      Dual application counts are published beside each metric.
     """
     return _prehire_overview.compute_action_counts(
         company=company,
@@ -45676,6 +49367,9 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
     company = context["company_code"]
     enabled_modules = sorted(configured_company_modules(company))
     assessments_enabled = "assessments" in enabled_modules
+    import jobs_queue_contract as _jobs_contract
+
+    _jobs_contract_active_pipeline = _jobs_contract.active_pipeline_status_filter_sql("status")
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -45692,10 +49386,10 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
             )
             status_counts = [json_safe(dict(row)) for row in cur.fetchall()]
             cur.execute(
-                """
+                f"""
                 SELECT COUNT(DISTINCT phone) AS candidates,
                        COUNT(*) AS applications,
-                       COUNT(*) FILTER (WHERE status NOT IN ('hired','rejected')) AS active_applications,
+                       COUNT(*) FILTER (WHERE {_jobs_contract_active_pipeline}) AS active_applications,
                        COUNT(*) FILTER (WHERE status='hired') AS hired_applications
                 FROM applications
                 WHERE company_code=%s
@@ -45705,6 +49399,7 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
                 (company,),
             )
             totals = json_safe(dict(cur.fetchone() or {}))
+    detail_vis_sql, detail_vis_params = prehire_visibility_assignment_sql(context, surface="detail", kind="applications")
     recent = prehire_applications_query(
         company_code=company,
         status=None,
@@ -45714,6 +49409,9 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
         offset=0,
         include_assessment=assessments_enabled,
         permissions=context.get("permissions") or [],
+        actor_user_id=str(context.get("actor_user_id") or "") or None,
+        visibility_sql=detail_vis_sql or None,
+        visibility_params=detail_vis_params or None,
     )
     positions = dashboard_prehire_positions_payload(company, limit=25)
     overview = _prehire_overview.build_overview_authority(
@@ -45721,7 +49419,9 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
         db_connect=db_connect,
         get_company_settings=get_company_settings,
         assessments_enabled=assessments_enabled,
-        interviews_enabled=("interviews" in enabled_modules) or True,
+        interviews_enabled="interviews" in enabled_modules,
+        visibility_sql=detail_vis_sql or None,
+        visibility_params=detail_vis_params or None,
     )
     return {
         "company_code": company,
@@ -45730,11 +49430,15 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
         "access": context.get("access"),
         "features": {
             "assessments_enabled": assessments_enabled,
+            "interviews_enabled": "interviews" in enabled_modules,
+            "video_interviews_enabled": "video_interviews" in enabled_modules,
         },
         "totals": totals,
         "action_counts": overview["action_counts"],
         "next_action": overview["next_action"],
+        "assessment_cohorts": overview.get("assessment_cohorts"),
         "role_priority": overview["role_priority"],
+        "role_next_steps": overview.get("role_next_steps") or [],
         "definitions": overview["definitions"],
         "overview_as_of": overview["as_of"],
         "status_counts": status_counts,
@@ -45747,35 +49451,212 @@ def dashboard_prehire_summary(context: dict[str, Any] = Depends(prehire_dashboar
 def dashboard_prehire_work_queue(
     limit: int = Query(default=25, ge=1, le=100),
     cursor: str | None = None,
+    scope: str | None = Query(default=None, description="mine | company (Wave 4 personal work queues)"),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
+    """My work / Company work queue. Filtering is backend-authoritative (Wave 4)."""
+    import prehire_personal_work as _ppw
+    import prehire_visibility as _pv
+
     company = context["company_code"]
     enabled_modules = sorted(configured_company_modules(company))
-    return _prehire_overview.compute_work_queue(
+    role = dashboard_context_role_key(context)
+    try:
+        resolved_scope = _ppw.resolve_work_scope(requested=scope, role=role, default_mine=True)
+    except _ppw.PersonalWorkScopeError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+
+    payload = _ppw.build_scoped_work_queue(
         company=company,
         db_connect=db_connect,
+        actor_user_id=str(context.get("actor_user_id") or ""),
+        actor_role=role,
+        actor_email=str(context.get("actor_email") or ""),
+        actor_phone=str(context.get("actor_phone") or context.get("hr_phone") or ""),
+        scope=resolved_scope,
         assessments_enabled="assessments" in enabled_modules,
-        interviews_enabled=("interviews" in enabled_modules) or True,
+        interviews_enabled="interviews" in enabled_modules,
         settings=get_company_settings(company),
         limit=limit,
         cursor=(cursor or "").strip() or None,
+        approval_action_types=list(PREHIRE_DASHBOARD_ACTION_TYPES),
     )
+    plan = prehire_visibility_plan_for_context(context, surface="detail")
+    # Preserve Wave 2 assignment visibility on top of Wave 4 ownership filtering.
+    if plan.get("apply_assignment_scope") and resolved_scope == "company":
+        filtered = []
+        for item in payload.get("items") or []:
+            app_key = str(item.get("app_key") or item.get("primary_app_key") or "")
+            if not app_key:
+                # Job / approval / interview entity rows without app_key stay when oversight
+                if item.get("entity_type") in {"job", "approval", "interview", "task"}:
+                    filtered.append(item)
+                continue
+            application = find_application_by_key(app_key, company_code=company)
+            if not application:
+                continue
+            try:
+                require_prehire_application_visibility(context, application)
+            except HTTPException:
+                continue
+            filtered.append(item)
+        payload["items"] = filtered
+        payload["total"] = len(filtered)
+        payload["total_count"] = len(filtered)
+        payload["action_total"] = len(filtered)
+    payload.update(_pv.visibility_meta(plan))
+    return payload
 
 
 @app.get("/dashboard/prehire/overview/next-action")
-def dashboard_prehire_next_action(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_next_action(
+    scope: str | None = Query(default=None, description="mine | company"),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Personalized next action (defaults to My work)."""
+    import prehire_personal_work as _ppw
+
     company = context["company_code"]
     enabled_modules = sorted(configured_company_modules(company))
+    role = dashboard_context_role_key(context)
+    try:
+        resolved_scope = _ppw.resolve_work_scope(requested=scope, role=role, default_mine=True)
+    except _ppw.PersonalWorkScopeError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+
+    if resolved_scope == "mine":
+        queue = _ppw.build_scoped_work_queue(
+            company=company,
+            db_connect=db_connect,
+            actor_user_id=str(context.get("actor_user_id") or ""),
+            actor_role=role,
+            actor_email=str(context.get("actor_email") or ""),
+            actor_phone=str(context.get("actor_phone") or context.get("hr_phone") or ""),
+            scope="mine",
+            assessments_enabled="assessments" in enabled_modules,
+            interviews_enabled="interviews" in enabled_modules,
+            settings=get_company_settings(company),
+            limit=1,
+            approval_action_types=list(PREHIRE_DASHBOARD_ACTION_TYPES),
+        )
+        next_action = queue.get("next_action") or {
+            "action": None,
+            "priority": 0,
+            "unit": "people",
+            "reason": "No personal work items right now",
+            "total_matching": 0,
+            "people_count": 0,
+            "application_count": 0,
+            "destination": None,
+            "authority_source": "prehire_personal_work.next_action",
+        }
+        return {
+            "company_code": company,
+            "ok": True,
+            "scope": "mine",
+            "work_scope": "mine",
+            **next_action,
+        }
+
     return {
         "company_code": company,
         "ok": True,
+        "scope": "company",
+        "work_scope": "company",
         **_prehire_overview.compute_next_action(
             company=company,
             db_connect=db_connect,
             assessments_enabled="assessments" in enabled_modules,
-            interviews_enabled=("interviews" in enabled_modules) or True,
+            interviews_enabled="interviews" in enabled_modules,
             settings=get_company_settings(company),
         ),
+    }
+
+
+@app.get("/dashboard/prehire/visibility-policy")
+def dashboard_prehire_visibility_policy_get(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    """Read the tenant pre-hiring visibility policy (defaults to shared_company)."""
+    import prehire_visibility as _pv
+
+    company = context["company_code"]
+    row = get_company_settings_row(company)
+    policy = company_prehire_visibility_policy(company)
+    plan = _pv.resolve_visibility_plan(
+        policy=policy,
+        role=dashboard_context_role_key(context),
+        surface="detail",
+    )
+    return {
+        "company_code": company,
+        "prehire_visibility_policy": policy,
+        "allowed_policies": sorted(_pv.PREHIRE_VISIBILITY_POLICIES),
+        "version": row.get("version"),
+        "updated_at": row.get("updated_at"),
+        "last_updated_by": row.get("last_updated_by"),
+        "updated_by_user_id": row.get("updated_by_user_id"),
+        "updated_by_name": row.get("updated_by_name"),
+        **_pv.visibility_meta(plan),
+    }
+
+
+@app.put("/dashboard/prehire/visibility-policy")
+def dashboard_prehire_visibility_policy_put(
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Set tenant pre-hiring visibility policy. Requires settings.manage."""
+    import prehire_visibility as _pv
+
+    require_entitlement(context, "pre_hiring", "settings.manage")
+    company = context["company_code"]
+    body = body if isinstance(body, dict) else {}
+    requested = _pv.normalize_prehire_visibility_policy(
+        body.get("prehire_visibility_policy") or body.get("policy")
+    )
+    if requested not in _pv.PREHIRE_VISIBILITY_POLICIES:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "invalid_prehire_visibility_policy", "allowed": sorted(_pv.PREHIRE_VISIBILITY_POLICIES)},
+        )
+    previous = company_prehire_visibility_policy(company)
+    expected_version = body.get("expected_version")
+    expected_updated_at = body.get("expected_updated_at")
+    actor = {
+        "user_id": context.get("actor_user_id"),
+        "name": (context.get("hr_user") or {}).get("name") if isinstance(context.get("hr_user"), dict) else None,
+        "email": context.get("actor_email") or (context.get("hr_user") or {}).get("email"),
+    }
+    result = set_company_setting(
+        company,
+        _pv.SETTING_KEY,
+        requested,
+        expected_version=int(expected_version) if expected_version is not None and str(expected_version) != "" else None,
+        expected_updated_at=str(expected_updated_at) if expected_updated_at else None,
+        require_expected=True,
+        actor=actor,
+    )
+    record_admin_audit(
+        context,
+        "prehire_visibility_policy_updated",
+        summary=f"Pre-hiring visibility policy set to {requested}.",
+        target_type="company_settings",
+        target=_pv.SETTING_KEY,
+        details={"previous": previous, "policy": requested, "version": result.get("version")},
+    )
+    plan = _pv.resolve_visibility_plan(
+        policy=requested,
+        role=dashboard_context_role_key(context),
+        surface="detail",
+    )
+    return {
+        "company_code": company,
+        "ok": True,
+        "prehire_visibility_policy": requested,
+        "previous": previous,
+        "version": result.get("version"),
+        "updated_at": result.get("updated_at"),
+        "last_updated_by": result.get("last_updated_by"),
+        **_pv.visibility_meta(plan),
     }
 
 
@@ -45798,6 +49679,7 @@ def dashboard_prehire_positions(
     require_jobs_permission(context, "jobs.read")
     eff_limit = max(1, min(int(limit or 100), 200))
     eff_offset = max(0, int(offset or 0))
+    vis_sql, vis_params = prehire_visibility_assignment_sql(context, surface="detail", kind="jobs")
     positions, total_count = _dashboard_prehire_positions_query(
         company,
         limit=eff_limit,
@@ -45811,11 +49693,28 @@ def dashboard_prehire_positions(
         deadline=deadline or None,
         has_remaining_vacancies=bool(has_remaining_vacancies) or None,
         cursor=cursor or None,
+        visibility_sql=vis_sql or None,
+        visibility_params=vis_params or None,
     )
     next_cursor = None
     if positions and (eff_offset + len(positions)) < total_count:
         last = positions[-1]
         next_cursor = f"{last.get('updated_at') or ''}|{last.get('position_code') or ''}"
+    summary_plan = prehire_visibility_plan_for_context(context, surface="summary")
+    if summary_plan.get("apply_assignment_scope"):
+        import prehire_visibility as _pv
+
+        actor = str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "").strip()
+        sql, placeholders = _pv.jobs_assignment_sql(summary_plan.get("role"), alias="p")
+        summary = dashboard_prehire_positions_summary(
+            company,
+            visibility_sql=sql if actor else "FALSE",
+            visibility_params=_pv.bind_actor_params(placeholders, actor) if actor else [],
+        )
+    else:
+        summary = dashboard_prehire_positions_summary(company)
+    import prehire_visibility as _pv
+
     return {
         "company_code": company,
         "positions": positions,
@@ -45824,13 +49723,243 @@ def dashboard_prehire_positions(
         "offset": eff_offset,
         "has_more": (eff_offset + len(positions)) < total_count,
         "next_cursor": next_cursor,
-        "summary": dashboard_prehire_positions_summary(company),
+        "summary": summary,
         "status_filter": str(status or "all").strip().lower() or "all",
+        **_pv.visibility_meta(prehire_visibility_plan_for_context(context, surface="detail")),
     }
 
 
 class DashboardPositionStatus(BaseModel):
     status: str
+    # OCC tokens — must stay on the request model so the status handler can
+    # forward them into transition_job (require_token=True). Dropping them
+    # caused AttributeError → generic 400 jobs_error for every lifecycle flip.
+    expected_updated_at: str | None = None
+    expected_version: int | None = None
+
+
+class DashboardCalendarEventCreateRequest(BaseModel):
+    event_type: str = "meeting"
+    title: str = Field(min_length=1, max_length=500)
+    title_ar: str | None = Field(default=None, max_length=500)
+    description: str | None = None
+    description_ar: str | None = None
+    visibility: str = "attendees_only"
+    sensitivity: str = "normal"
+    status: str = "confirmed"
+    start_at: str
+    end_at: str
+    timezone: str = "Asia/Kuwait"
+    all_day: bool = False
+    location: str | None = None
+    meeting_url: str | None = None
+    organizer_user_id: str | None = None
+    owner_user_id: str | None = None
+    attendees: list[dict[str, Any]] = Field(default_factory=list)
+    guests: list[dict[str, Any]] = Field(default_factory=list)
+    org_scope_ids: list[str] = Field(default_factory=list)
+    link: dict[str, Any] | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    override_conflicts: bool = False
+    override_reason: str | None = None
+
+
+class DashboardCalendarEventUpdateRequest(BaseModel):
+    expected_version: int = Field(ge=1)
+    expected_updated_at: str | None = None
+    event_type: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=500)
+    title_ar: str | None = None
+    description: str | None = None
+    description_ar: str | None = None
+    visibility: str | None = None
+    sensitivity: str | None = None
+    status: str | None = None
+    start_at: str | None = None
+    end_at: str | None = None
+    timezone: str | None = None
+    all_day: bool | None = None
+    location: str | None = None
+    meeting_url: str | None = None
+    organizer_user_id: str | None = None
+    owner_user_id: str | None = None
+    attendees: list[dict[str, Any]] | None = None
+    guests: list[dict[str, Any]] | None = None
+    org_scope_ids: list[str] | None = None
+    metadata: dict[str, Any] | None = None
+    override_conflicts: bool = False
+    override_reason: str | None = None
+
+
+class DashboardCalendarEventCancelRequest(BaseModel):
+    expected_version: int = Field(ge=1)
+    expected_updated_at: str | None = None
+
+
+class DashboardCalendarConflictPreviewRequest(BaseModel):
+    start_at: str
+    end_at: str
+    timezone: str = "Asia/Kuwait"
+    all_day: bool = False
+    organizer_user_id: str | None = None
+    attendees: list[dict[str, Any]] = Field(default_factory=list)
+    exclude_event_id: str | None = None
+    app_key: str | None = None
+
+
+class DashboardCalendarRsvpRequest(BaseModel):
+    rsvp_status: str = Field(min_length=1, max_length=32)
+    target_user_id: str | None = None
+    expected_rsvp_version: int | None = None
+
+
+class DashboardCalendarGuestInviteRequest(BaseModel):
+    guest_id: str
+    channel: str | None = None
+
+
+class DashboardCalendarRescheduleResolveRequest(BaseModel):
+    decision: str = Field(min_length=1, max_length=32)
+    resolution_note: str | None = None
+
+
+class DashboardCalendarSyncConnectRequest(BaseModel):
+    account_email: str = Field(min_length=3, max_length=320)
+    refresh_token: str = Field(min_length=8, max_length=4000)
+    external_calendar_id: str | None = "primary"
+    display_name: str | None = None
+    sync_event_types: list[str] | None = None
+    sync_include_candidate_name: bool | None = None
+    with_meet_default: bool = False
+
+
+class DashboardCalendarSyncSettingsRequest(BaseModel):
+    sync_event_types: list[str] | None = None
+    sync_include_candidate_name: bool | None = None
+    external_calendar_id: str | None = None
+    with_meet_default: bool | None = None
+    display_name: str | None = None
+
+
+class DashboardCalendarSyncReconnectRequest(BaseModel):
+    refresh_token: str | None = None
+
+
+class DashboardCalendarSyncMicrosoftConnectRequest(BaseModel):
+    account_email: str = Field(min_length=3, max_length=320)
+    refresh_token: str = Field(min_length=8, max_length=8000)
+    external_calendar_id: str | None = "calendar"
+    display_name: str | None = None
+    external_tenant_id: str | None = None
+    with_meet_default: bool = True
+
+
+class DashboardPlatformIntegrationConnectRequest(BaseModel):
+    """Legacy/ops-only. Product UX must use OAuth start or enterprise connect forms."""
+    provider_key: str = Field(min_length=3, max_length=64)
+    account_email: str = Field(min_length=3, max_length=320)
+    refresh_token: str = Field(min_length=8, max_length=8000)
+    display_name: str | None = None
+    external_tenant_id: str | None = None
+    capabilities: list[str] | None = None
+    attach_calendar: bool = True
+    with_meet_default: bool = True
+    external_calendar_id: str | None = None
+
+
+class DashboardPlatformOAuthStartRequest(BaseModel):
+    provider_key: str = Field(min_length=3, max_length=64)
+    attach_calendar: bool = True
+
+
+class DashboardPlatformMicrosoftEnterpriseRequest(BaseModel):
+    tenant_id: str = Field(min_length=8, max_length=128)
+    client_id: str = Field(min_length=8, max_length=128)
+    calendar_identity: str = Field(min_length=3, max_length=320)
+    client_secret: str | None = Field(default=None, max_length=4000)
+    certificate_pem: str | None = Field(default=None, max_length=200000)
+    certificate_thumbprint: str | None = None
+    display_name: str | None = None
+    credential_expires_at: str | None = None
+    validate_live: bool = True
+    dry_run_accept: bool = False
+
+
+class DashboardPlatformGoogleEnterpriseRequest(BaseModel):
+    impersonation_email: str = Field(min_length=3, max_length=320)
+    service_account_json: str = Field(min_length=20, max_length=200000)
+    display_name: str | None = None
+    validate_live: bool = True
+    dry_run_accept: bool = False
+
+
+class DashboardPlatformRotateRequest(BaseModel):
+    client_secret: str | None = Field(default=None, max_length=4000)
+    certificate_pem: str | None = Field(default=None, max_length=200000)
+    certificate_thumbprint: str | None = None
+    credential_expires_at: str | None = None
+    validate_live: bool = True
+
+
+class DashboardCalendarFreeBusyRequest(BaseModel):
+    user_ids: list[str] = Field(default_factory=list)
+    start_at: str
+    end_at: str
+    timezone: str | None = "Asia/Kuwait"
+
+
+def _calendar_error(exc: Exception) -> HTTPException:
+    import calendar_store as cal_store
+
+    if isinstance(exc, cal_store.CalendarError):
+        detail = exc.envelope()
+        return HTTPException(status_code=exc.http_status, detail=detail)
+    try:
+        import calendar_participation as cal_part
+
+        if isinstance(exc, cal_part.CalendarParticipationError):
+            return HTTPException(status_code=exc.http_status, detail=exc.envelope())
+    except Exception:
+        pass
+    try:
+        import calendar_sync as cal_sync
+
+        if isinstance(exc, cal_sync.CalendarSyncError):
+            return HTTPException(status_code=exc.http_status, detail=exc.envelope())
+    except Exception:
+        pass
+    try:
+        import platform_integrations as pi
+
+        if isinstance(exc, pi.PlatformIntegrationError):
+            return HTTPException(status_code=exc.http_status, detail=exc.envelope())
+    except Exception:
+        pass
+    return HTTPException(status_code=500, detail={"error": "calendar_failed", "message": str(exc)[:500]})
+
+
+def _calendar_actor(context: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "company_code": str(context.get("company_code") or "").strip().upper(),
+        "actor_user_id": str(context.get("actor_user_id") or "").strip(),
+        "actor_role": str(context.get("actor_role") or "").strip(),
+        "permissions": list(context.get("permissions") or []),
+    }
+
+
+def _calendar_can_mutate_event(context: dict[str, Any], event_payload: dict[str, Any]) -> bool:
+    if not dashboard_context_has_permission(context, "calendar.manage"):
+        return False
+    actor = str(context.get("actor_user_id") or "").strip()
+    role = normalize_hr_role(str(context.get("actor_role") or ""))
+    if role in {"owner", "hr_admin", "hr_manager", "recruiter"}:
+        return True
+    # Limited manage: organizer / owner / creator only.
+    return actor in {
+        str(event_payload.get("organizer_user_id") or "").strip(),
+        str(event_payload.get("owner_user_id") or "").strip(),
+        str(event_payload.get("creator_user_id") or "").strip(),
+    }
     expected_updated_at: str | None = None
     expected_version: int | None = None
 
@@ -45879,10 +50008,16 @@ def require_prehire_settings_admin(context: dict[str, Any]) -> str:
 
 def _jobs_http_error(exc: Exception) -> HTTPException:
     if isinstance(exc, _prehire_jobs.JobsError):
-        return HTTPException(
-            status_code=exc.http_status,
-            detail={"error": exc.code, "message": exc.message, **(exc.details or {})},
-        )
+        details = dict(exc.details or {})
+        if details.get("conflict") or details.get("error"):
+            detail = {
+                **details,
+                "error": exc.code,
+                "message": exc.message or details.get("message"),
+            }
+        else:
+            detail = {"error": exc.code, "message": exc.message, **details}
+        return HTTPException(status_code=exc.http_status, detail=detail)
     return HTTPException(status_code=400, detail={"error": "jobs_error", "message": str(exc)})
 
 
@@ -45900,6 +50035,7 @@ def dashboard_prehire_create_position(
             company=company,
             db_connect=db_connect,
             actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_role=dashboard_context_role_key(context),
             payload=payload,
             as_draft=bool(request.save_as_draft),
         )
@@ -45911,7 +50047,14 @@ def dashboard_prehire_create_position(
         summary=f"Created job {job.get('title') or job.get('position_code')} as {job.get('status')}.",
         target_type="position",
         target=str(job.get("position_code") or ""),
-        details={"status": job.get("status"), "job_id": job.get("job_id")},
+        details={
+            "status": job.get("status"),
+            "job_id": job.get("job_id"),
+            "recruiter_user_id": job.get("recruiter_user_id"),
+            "hiring_manager_user_id": job.get("hiring_manager_user_id"),
+            "recruiter_ownership_state": job.get("recruiter_ownership_state"),
+            "hiring_manager_ownership_state": job.get("hiring_manager_ownership_state"),
+        },
     )
     return {"ok": True, "position": job}
 
@@ -45923,6 +50066,11 @@ def dashboard_prehire_update_position(
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
     company = require_jobs_permission(context, "jobs.edit")
+    try:
+        current = _prehire_jobs.get_job(company=company, position_code=position_code, db_connect=db_connect)
+    except Exception as exc:
+        raise _jobs_http_error(exc) from exc
+    require_prehire_job_visibility(context, current)
     controls = {"save_as_draft", "expected_updated_at", "expected_version"}
     payload = {
         key: value
@@ -45935,6 +50083,7 @@ def dashboard_prehire_update_position(
             position_code=position_code,
             db_connect=db_connect,
             actor_user_id=str(context.get("actor_user_id") or "") or None,
+            actor_role=dashboard_context_role_key(context),
             payload=payload,
             expected_updated_at=request.expected_updated_at,
             expected_version=request.expected_version,
@@ -45947,7 +50096,13 @@ def dashboard_prehire_update_position(
         summary=f"Updated job {job.get('title') or position_code}.",
         target_type="position",
         target=position_code,
-        details={"version": job.get("version")},
+        details={
+            "version": job.get("version"),
+            "recruiter_user_id": job.get("recruiter_user_id"),
+            "hiring_manager_user_id": job.get("hiring_manager_user_id"),
+            "recruiter_ownership_state": job.get("recruiter_ownership_state"),
+            "hiring_manager_ownership_state": job.get("hiring_manager_ownership_state"),
+        },
     )
     return {"ok": True, "position": job}
 
@@ -45988,6 +50143,188 @@ def dashboard_prehire_set_position_status(
     return {"ok": True, "position": result}
 
 
+def _candidate_c2_module():
+    import candidate_collaboration as collaboration
+
+    return collaboration
+
+
+def _candidate_c3_module():
+    import candidate_identity as identity
+
+    return identity
+
+
+def _candidate_c2_error(exc: Exception) -> HTTPException:
+    collaboration = _candidate_c2_module()
+    if not isinstance(exc, collaboration.CollaborationError):
+        return HTTPException(status_code=500, detail={"error": "candidate_collaboration_failed", "message": str(exc)[:500]})
+    code = exc.code
+    if code in {"company_required", "actor_user_id_required", "actor_not_active"}:
+        status_code = 401
+    elif code in {"permission_denied", "owner_not_eligible", "confirmation_required"}:
+        status_code = 403
+    elif code.endswith("_not_found") or code in {"application_not_found", "note_not_found", "task_not_found", "tag_not_found"}:
+        status_code = 404
+    elif code.startswith("stale_") or code.startswith("confirmation_") or code in {"application_already_owned", "task_not_open"}:
+        status_code = 409
+    else:
+        status_code = 422
+    detail = exc.envelope()
+    # Wave 5: flatten conflict envelope fields for frontend message + reload UX.
+    nested = detail.get("details")
+    if isinstance(nested, dict) and (nested.get("conflict") or code.startswith("stale_")):
+        for key, value in nested.items():
+            if key in {"ok", "error"}:
+                continue
+            if key == "message" and detail.get("message"):
+                continue
+            detail.setdefault(key, value)
+        # If details itself embeds another envelope, promote once more.
+        deeper = nested.get("details") if isinstance(nested.get("details"), dict) else None
+        if deeper and deeper.get("conflict"):
+            for key, value in deeper.items():
+                if key not in {"ok", "error"}:
+                    detail.setdefault(key, value)
+    return HTTPException(status_code=status_code, detail=detail)
+
+
+def _candidate_c2_common(context: dict[str, Any]) -> dict[str, Any]:
+    company = str(context.get("company_code") or "").strip().upper()
+    actor_user_id = str(context.get("actor_user_id") or "").strip()
+    if not company or not actor_user_id:
+        raise HTTPException(status_code=401, detail={"error": "dashboard_identity_required"})
+    return {
+        "company_code": company,
+        "actor_user_id": actor_user_id,
+        "permissions": context.get("permissions") or [],
+    }
+
+
+def _candidate_c2_timezone(company: str) -> str:
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT metadata->>'timezone' AS timezone FROM companies WHERE company_code=%s", (company,))
+            row = cur.fetchone() or {}
+    return str(row.get("timezone") or "Asia/Kuwait")
+
+
+def _candidate_c2_recruiters(company: str) -> list[dict[str, Any]]:
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT user_id, name, email, role, status
+                FROM dashboard_users
+                WHERE company_code=%s AND status='active'
+                  AND role IN ('owner','hr_admin','hr_manager','recruiter','hiring_manager')
+                ORDER BY lower(name), lower(email), user_id
+                """,
+                (company,),
+            )
+            return [json_safe(dict(row)) for row in cur.fetchall()]
+
+
+def _candidate_c2_collaboration_payload(app_key: str, context: dict[str, Any]) -> dict[str, Any]:
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    company = common["company_code"]
+    require_entitlement(context, "pre_hiring", "candidates.read")
+    application = find_application_by_key(app_key, company_code=company)
+    if not application:
+        raise HTTPException(status_code=404, detail={"error": "application_not_found"})
+    try:
+        notes = collaboration.list_application_notes(
+            sys.modules[__name__],
+            company_code=company,
+            app_key=app_key,
+            permissions=common["permissions"],
+        )
+        tasks = collaboration.list_application_tasks(
+            sys.modules[__name__],
+            company_code=company,
+            app_key=app_key,
+            permissions=common["permissions"],
+            timezone_name=_candidate_c2_timezone(company),
+        )
+        available_tags = collaboration.list_candidate_tags(
+            sys.modules[__name__],
+            company_code=company,
+            permissions=common["permissions"],
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    recruiters = _candidate_c2_recruiters(company)
+    people = {str(item.get("user_id")): item for item in recruiters}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT td.*
+                FROM application_tags atg
+                JOIN candidate_tag_dictionary td
+                  ON td.company_code=atg.company_code AND td.tag_id=atg.tag_id
+                WHERE atg.company_code=%s AND atg.app_key=%s
+                ORDER BY td.canonical_name
+                """,
+                (company, app_key),
+            )
+            application_tags = [dict(row) for row in cur.fetchall()]
+    normalized_notes = []
+    for note in notes:
+        author_id = str(note.get("created_by_user_id") or "")
+        normalized_notes.append(
+            {
+                **json_safe(note),
+                "author_user_id": author_id,
+                "author_name": (people.get(author_id) or {}).get("name"),
+                "status": "deleted" if note.get("is_deleted") else "active",
+                "edited_at": json_safe(note.get("updated_at")) if int(note.get("version") or 1) > 1 else None,
+            }
+        )
+    normalized_tasks = []
+    for task in tasks:
+        owner_id = str(task.get("assigned_to_user_id") or "")
+        normalized_tasks.append(
+            {
+                **json_safe(task),
+                "owner_user_id": owner_id,
+                "owner_name": (people.get(owner_id) or {}).get("name"),
+                "creator_user_id": str(task.get("created_by_user_id") or ""),
+                "overdue": bool(task.get("is_overdue")),
+            }
+        )
+    def tag_payload(tag: dict[str, Any]) -> dict[str, Any]:
+        return {
+            **json_safe(tag),
+            "label": tag.get("name") or "",
+            "label_ar": tag.get("label_ar"),
+            "active": bool(tag.get("is_active", True)),
+        }
+    app_payload = prehire_application_summary(
+        application,
+        include_raw=False,
+        include_assessment=company_has_module(company, "assessments"),
+        permissions=common["permissions"],
+    )
+    owner_id = str(application.get("owner_user_id") or "")
+    app_payload["owner"] = people.get(owner_id) if owner_id else None
+    app_payload["tags"] = [tag_payload(tag) for tag in application_tags]
+    app_payload["open_task_count"] = sum(1 for task in normalized_tasks if task.get("status") == "open")
+    app_payload["overdue_task_count"] = sum(1 for task in normalized_tasks if task.get("overdue"))
+    return {
+        "company_code": company,
+        "current_actor_user_id": common["actor_user_id"],
+        "application": app_payload,
+        "recruiters": recruiters,
+        "notes": normalized_notes,
+        "tasks": normalized_tasks,
+        "tags": [tag_payload(tag) for tag in application_tags],
+        "available_tags": [tag_payload(tag) for tag in available_tags],
+        "permissions": list(common["permissions"]),
+    }
+
+
 @app.get("/dashboard/prehire/applications")
 def dashboard_prehire_applications(
     status: str | None = None,
@@ -45998,21 +50335,63 @@ def dashboard_prehire_applications(
     interview_status: str | None = None,
     follow_up: str | None = None,
     review_status: str | None = None,
+    overview_cohort: str | None = None,
     activity_from: str | None = None,
     activity_to: str | None = None,
     sort: str | None = None,
+    owner_scope: str | None = None,
+    owner_user_id: str | None = None,
+    tag_id: str | None = None,
+    cursor: str | None = None,
+    view: str | None = None,
+    source_channel: str | None = None,
+    recruiter_owner: str | None = None,
+    cv_processing_state: str | None = None,
+    received_from: str | None = None,
+    received_to: str | None = None,
+    has_grounded_email: str | None = None,
+    has_grounded_phone: str | None = None,
+    fact_completeness: str | None = None,
+    department_intake_tag: str | None = None,
+    classification_career_area: str | None = None,  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+    classification_likely_role: str | None = None,
+    classification_skill: str | None = None,
+    classification_industry: str | None = None,
+    classification_seniority: str | None = None,
+    classification_experience_band: str | None = None,
+    classification_node_ids: str | None = None,
+    classification_authority: str | None = None,
+    classification_confidence: str | None = None,
+    classification_include_medium_ai: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
+    require_entitlement(context, "pre_hiring", "candidates.read")
     company = context["company_code"]
+    search = (q or "").strip() or None
+    classification_filters = {
+        "career_area": (classification_career_area or "").strip() or None,
+        "likely_role": (classification_likely_role or "").strip() or None,
+        "skill": (classification_skill or "").strip() or None,
+        "industry": (classification_industry or "").strip() or None,
+        "seniority": (classification_seniority or "").strip() or None,
+        "experience_band": (classification_experience_band or "").strip() or None,
+        "node_ids": (classification_node_ids or "").strip() or None,
+        "authority": (classification_authority or "").strip() or None,
+        "confidence": (classification_confidence or "").strip() or None,
+        "include_medium_ai": (classification_include_medium_ai or "").strip() or None,
+    }
+    vis_sql, vis_params = prehire_visibility_assignment_sql(context, surface="detail", kind="applications")
+    import prehire_visibility as _pv
+
     return {
         "company_code": company,
         **prehire_applications_query(
             company_code=company,
             status=(status or "").strip() or None,
             position=(position or "").strip() or None,
-            search=(q or "").strip() or None,
+            search=search,
             limit=bounded_limit(limit),
             offset=max(0, int(offset)),
             cv_status=(cv_status or "").strip() or None,
@@ -46020,13 +50399,725 @@ def dashboard_prehire_applications(
             interview_status=(interview_status or "").strip() or None,
             follow_up=(follow_up or "").strip() or None,
             review_status=(review_status or "").strip() or None,
+            overview_cohort=(overview_cohort or "").strip() or None,
             activity_from=(activity_from or "").strip() or None,
             activity_to=(activity_to or "").strip() or None,
             sort=(sort or "").strip() or None,
+            owner_scope=(owner_scope or "").strip() or "all",
+            owner_user_id=(owner_user_id or "").strip() or None,
+            actor_user_id=str(context.get("actor_user_id") or "") or None,
+            tag_id=(tag_id or "").strip() or None,
+            cursor=(cursor or "").strip() or None,
             include_assessment=company_has_module(company, "assessments"),
             permissions=context.get("permissions") or [],
+            view=(view or "").strip() or None,
+            source_channel=(source_channel or "").strip() or None,
+            recruiter_owner=(recruiter_owner or "").strip() or None,
+            cv_processing_state=(cv_processing_state or "").strip() or None,
+            received_from=(received_from or "").strip() or None,
+            received_to=(received_to or "").strip() or None,
+            has_grounded_email=(has_grounded_email or "").strip() or None,
+            has_grounded_phone=(has_grounded_phone or "").strip() or None,
+            fact_completeness=(fact_completeness or "").strip() or None,
+            department_intake_tag=(department_intake_tag or "").strip() or None,
+            include_match_reasons=bool(search),
+            classification_filters=classification_filters,  # TALENT_POOL_CLASSIFICATION_COMPLETE_UI_PATCH
+            visibility_sql=vis_sql or None,
+            visibility_params=vis_params or None,
         ),
+        **_pv.visibility_meta(prehire_visibility_plan_for_context(context, surface="detail")),
     }
+
+
+@app.get("/dashboard/prehire/applications/{app_key}/collaboration")
+def dashboard_candidate_collaboration(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.get("/dashboard/prehire/applications/{app_key}/timeline")
+def dashboard_candidate_timeline(
+    app_key: str,
+    cursor: str | None = None,
+    limit: int = Query(default=30, ge=1, le=100),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.read")
+    try:
+        result = collaboration.get_application_timeline(
+            sys.modules[__name__],
+            company_code=common["company_code"],
+            app_key=app_key,
+            permissions=common["permissions"],
+            cursor=cursor,
+            limit=limit,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    return {"company_code": common["company_code"], "app_key": app_key, **result}
+
+
+@app.post("/dashboard/prehire/applications/{app_key}/owner")
+def dashboard_candidate_owner(
+    app_key: str,
+    request: DashboardCandidateOwnerRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.assign")
+    application = dashboard_application_or_404(app_key, common["company_code"], context)
+    if int(application.get("lifecycle_version") or 0) != int(request.expected_lifecycle_version):
+        raise HTTPException(status_code=409, detail={"error": "stale_lifecycle_version"})
+    functions = {
+        "assign": collaboration.assign_application_owner,
+        "claim": collaboration.claim_application,
+        "reassign": collaboration.reassign_application_owner,
+        "unassign": collaboration.unassign_application_owner,
+    }
+    kwargs = {
+        **common,
+        "app_key": app_key,
+        "owner_user_id": request.owner_user_id,
+        "expected_ownership_version": request.expected_ownership_version,
+        "expected_lifecycle_version": request.expected_lifecycle_version,
+        "permission_resolver": dashboard_effective_permissions_for_user,
+        "reason": request.reason,
+        "confirmation_id": request.confirmation_id,
+        "confirmation_token": request.confirmation_token,
+    }
+    try:
+        result = functions[request.action](sys.modules[__name__], **kwargs)
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(
+        context,
+        f"candidate_owner_{request.action}",
+        summary=f"{request.action.title()} recruiter ownership for {app_key}.",
+        target_type="application",
+        target=app_key,
+        details={
+            "owner_user_id": request.owner_user_id,
+            "ownership_version": (result.get("application") or {}).get("ownership_version"),
+            "lifecycle_unchanged": True,
+        },
+    )
+    # Wave 6: personal ownership assignment notifies the new owner only.
+    if request.action in {"assign", "reassign"} and request.owner_user_id and not result.get("skipped"):
+        notify_prehire_personal_assignees(
+            company_code=common["company_code"],
+            assignee_user_ids=[str(request.owner_user_id)],
+            message=f"You were assigned as owner for candidate application {app_key}.",
+            source="application_owner_assignment",
+            kind=f"owner_{request.action}",
+            subject_type="application",
+            subject_key=app_key,
+        )
+    return {"ok": True, **_candidate_c2_collaboration_payload(app_key, context)}
+
+
+@app.post("/dashboard/prehire/applications/{app_key}/notes")
+def dashboard_candidate_note_create(
+    app_key: str,
+    request: DashboardCandidateNoteCreateRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.notes.manage")
+    try:
+        collaboration.create_application_note(
+            sys.modules[__name__],
+            **common,
+            app_key=app_key,
+            body=request.body,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(context, "candidate_note_created", summary=f"Added an internal note to {app_key}.", target_type="application", target=app_key)
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.patch("/dashboard/prehire/applications/{app_key}/notes/{note_id}")
+def dashboard_candidate_note_update(
+    app_key: str,
+    note_id: str,
+    request: DashboardCandidateNoteUpdateRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.notes.manage")
+    try:
+        if request.delete:
+            collaboration.soft_delete_application_note(
+                sys.modules[__name__],
+                **common,
+                app_key=app_key,
+                note_id=note_id,
+                expected_version=request.expected_version,
+            )
+            action = "candidate_note_deleted"
+        else:
+            collaboration.edit_application_note(
+                sys.modules[__name__],
+                **common,
+                app_key=app_key,
+                note_id=note_id,
+                expected_version=request.expected_version,
+                body=request.body,
+            )
+            action = "candidate_note_edited"
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(
+        context,
+        action,
+        summary=f"{'Deleted' if request.delete else 'Edited'} an internal note on {app_key}.",
+        target_type="application_note",
+        target=note_id,
+        details={"app_key": app_key, "soft_delete": request.delete, "reason": request.delete_reason},
+    )
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.post("/dashboard/prehire/applications/{app_key}/tasks")
+def dashboard_candidate_task_create(
+    app_key: str,
+    request: DashboardCandidateTaskCreateRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.tasks.manage")
+    try:
+        collaboration.create_application_task(
+            sys.modules[__name__],
+            **common,
+            app_key=app_key,
+            title=request.title,
+            description=request.description,
+            assigned_to_user_id=request.owner_user_id,
+            due_at=request.due_at,
+            priority=request.priority,
+            idempotency_key=request.idempotency_key,
+            timezone_name=_candidate_c2_timezone(common["company_code"]),
+            permission_resolver=dashboard_effective_permissions_for_user,
+            confirmation_id=request.confirmation_id,
+            confirmation_token=request.confirmation_token,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(context, "candidate_task_created", summary=f"Created a recruiter task for {app_key}.", target_type="application", target=app_key)
+    if request.owner_user_id:
+        notify_prehire_personal_assignees(
+            company_code=common["company_code"],
+            assignee_user_ids=[str(request.owner_user_id)],
+            message=f"You were assigned a recruiter task on application {app_key}: {request.title}",
+            source="task_assignment",
+            kind="task_created",
+            subject_type="application",
+            subject_key=app_key,
+        )
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.patch("/dashboard/prehire/applications/{app_key}/tasks/{task_id}")
+def dashboard_candidate_task_update(
+    app_key: str,
+    task_id: str,
+    request: DashboardCandidateTaskUpdateRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.tasks.manage")
+    action = "edit"
+    if request.status == "completed":
+        action = "complete"
+    elif request.status == "cancelled":
+        action = "cancel"
+    elif request.owner_user_id is not None:
+        action = "reassign"
+    try:
+        collaboration.mutate_application_task(
+            sys.modules[__name__],
+            **common,
+            app_key=app_key,
+            task_id=task_id,
+            expected_version=request.expected_version,
+            action=action,
+            title=request.title,
+            description=request.description,
+            assigned_to_user_id=request.owner_user_id,
+            due_at=request.due_at,
+            priority=request.priority,
+            idempotency_key=request.idempotency_key,
+            timezone_name=_candidate_c2_timezone(common["company_code"]),
+            permission_resolver=dashboard_effective_permissions_for_user,
+            confirmation_id=request.confirmation_id,
+            confirmation_token=request.confirmation_token,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(
+        context,
+        f"candidate_task_{action}",
+        summary=f"Updated recruiter task for {app_key}.",
+        target_type="candidate_task",
+        target=task_id,
+        details={"app_key": app_key, "lifecycle_unchanged": True},
+    )
+    if action == "reassign" and request.owner_user_id:
+        notify_prehire_personal_assignees(
+            company_code=common["company_code"],
+            assignee_user_ids=[str(request.owner_user_id)],
+            message=f"A recruiter task on application {app_key} was reassigned to you.",
+            source="task_assignment",
+            kind="task_reassigned",
+            subject_type="application",
+            subject_key=app_key,
+        )
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.get("/dashboard/prehire/tags")
+def dashboard_candidate_tags(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.read")
+    try:
+        rows = collaboration.list_candidate_tags(
+            sys.modules[__name__],
+            company_code=common["company_code"],
+            permissions=common["permissions"],
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    return {
+        "company_code": common["company_code"],
+        "tags": [
+            {**json_safe(row), "label": row.get("name"), "label_ar": row.get("label_ar"), "active": row.get("is_active")}
+            for row in rows
+        ],
+    }
+
+
+@app.post("/dashboard/prehire/tags")
+def dashboard_candidate_tag_create(
+    request: DashboardCandidateTagCreateRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.tags.manage")
+    try:
+        result = collaboration.create_candidate_tag(
+            sys.modules[__name__],
+            **common,
+            name=request.label,
+            label_ar=request.label_ar,
+            color=request.color,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(context, "candidate_tag_created", summary=f"Created candidate tag {request.label}.", target_type="candidate_tag", target=str((result.get("tag") or {}).get("tag_id") or ""))
+    return result
+
+
+@app.post("/dashboard/prehire/applications/{app_key}/tags/{action}")
+def dashboard_candidate_tag_mutation(
+    app_key: str,
+    action: Literal["add", "remove"],
+    request: DashboardCandidateTagMutationRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    require_entitlement(context, "pre_hiring", "candidates.tags.manage")
+    application = dashboard_application_or_404(app_key, common["company_code"], context)
+    if int(application.get("ownership_version") or 0) != request.expected_ownership_version:
+        raise HTTPException(status_code=409, detail={"error": "stale_ownership_version"})
+    try:
+        function = collaboration.add_application_tag if action == "add" else collaboration.remove_application_tag
+        function(sys.modules[__name__], **common, app_key=app_key, tag_id=request.tag_id)
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    record_admin_audit(context, f"candidate_tag_{action}", summary=f"{action.title()} candidate tag on {app_key}.", target_type="application", target=app_key, details={"tag_id": request.tag_id})
+    return _candidate_c2_collaboration_payload(app_key, context)
+
+
+@app.post("/dashboard/prehire/c2/confirmations")
+def dashboard_candidate_c2_confirmation(
+    request: DashboardCandidateC2ConfirmationRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    permission = "candidates.tasks.manage" if request.action.startswith("task_") else "candidates.assign"
+    if request.action.startswith("bulk_") and "tag" in request.action:
+        permission = "candidates.tags.manage"
+    require_entitlement(context, "pre_hiring", permission)
+    try:
+        return collaboration.mint_c2_confirmation(
+            sys.modules[__name__],
+            **common,
+            action=request.action,
+            payload={"target_payload": request.target_payload, "observed_state": request.observed_state},
+            required_permission=permission,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+
+
+@app.post("/dashboard/prehire/applications/bulk/preview")
+def dashboard_candidate_bulk_preview(
+    request: DashboardCandidateBulkPreviewRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    operation_type = {
+        "assign": "assign",
+        "reassign": "assign",
+        "add_tag": "tag_add",
+        "remove_tag": "tag_remove",
+    }[request.action]
+    permission = "candidates.assign" if operation_type == "assign" else "candidates.tags.manage"
+    require_entitlement(context, "pre_hiring", permission)
+    target = {"owner_user_id": request.owner_user_id} if operation_type == "assign" else {"tag_id": request.tag_id}
+    try:
+        preview = collaboration.preview_bulk_operation(
+            sys.modules[__name__],
+            **common,
+            operation_type=operation_type,
+            app_keys=request.app_keys,
+            target_payload=target,
+            permission_resolver=dashboard_effective_permissions_for_user,
+        )
+        minted = collaboration.mint_c2_confirmation(
+            sys.modules[__name__],
+            **common,
+            action=f"bulk.{operation_type}",
+            payload=preview["confirmation_payload"],
+            required_permission=permission,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    confirmation = minted["confirmation"]
+    return {
+        "preview_id": str(preview["operation"]["operation_id"]),
+        "action": request.action,
+        "items": [
+            {
+                **json_safe(item),
+                "candidate_name": dashboard_candidate_name(item),
+                "result": item.get("preview_result") or "eligible",
+                "reason": item.get("preview_reason"),
+            }
+            for item in preview["items"]
+        ],
+        "selected_count": len(request.app_keys),
+        "affected_count": sum(
+            1 for item in preview["items"]
+            if item.get("preview_result") == "eligible"
+        ),
+        "confirmation": {
+            "confirmation_id": str(confirmation["confirmation_id"]),
+            "confirmation_token": confirmation["confirmation_token"],
+            "expires_at": json_safe(confirmation.get("expires_at")),
+        },
+    }
+
+
+@app.post("/dashboard/prehire/applications/bulk/execute")
+def dashboard_candidate_bulk_execute(
+    request: DashboardCandidateBulkExecuteRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    collaboration = _candidate_c2_module()
+    common = _candidate_c2_common(context)
+    try:
+        result = collaboration.execute_bulk_operation(
+            sys.modules[__name__],
+            **common,
+            operation_id=request.preview_id,
+            confirmation_id=request.confirmation_id,
+            confirmation_token=request.confirmation_token,
+            permission_resolver=dashboard_effective_permissions_for_user,
+        )
+    except Exception as exc:
+        raise _candidate_c2_error(exc) from exc
+    envelope = result.get("result") or {}
+    items = envelope.get("items") or []
+    record_admin_audit(
+        context,
+        "candidate_bulk_executed",
+        summary=f"Executed contained candidate bulk operation {request.preview_id}.",
+        target_type="candidate_bulk_operation",
+        target=request.preview_id,
+        details={"counts": envelope.get("counts") or {}},
+    )
+    return {
+        "ok": True,
+        "operation_id": str((result.get("operation") or {}).get("operation_id") or request.preview_id),
+        "results": [
+            {"app_key": item.get("app_key"), "result": item.get("status"), "reason": item.get("error")}
+            for item in items
+        ],
+        "counts": envelope.get("counts") or {"success": 0, "skipped": 0, "stale": 0, "denied": 0},
+    }
+
+
+@app.get("/dashboard/prehire/candidates/workload")
+def dashboard_candidate_workload(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.read")
+    company = context["company_code"]
+    timezone_name = _candidate_c2_timezone(company)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT u.user_id, u.company_code, u.name, u.email, u.role, u.status,
+                       count(a.app_key) FILTER (
+                         WHERE a.status NOT IN ('hired','rejected','withdrawn')
+                       ) AS assigned_active,
+                       count(a.app_key) FILTER (
+                         WHERE a.status IN ('ready_for_review','shortlisted','interview')
+                       ) AS awaiting_action,
+                       (
+                         SELECT count(*)
+                         FROM application_recruiter_tasks t
+                         WHERE t.company_code=u.company_code
+                           AND t.assigned_to_user_id=u.user_id
+                           AND t.status='open'
+                           AND t.due_at < now()
+                       ) AS overdue_tasks
+                FROM dashboard_users u
+                LEFT JOIN applications a
+                  ON a.company_code=u.company_code AND a.owner_user_id=u.user_id
+                WHERE u.company_code=%s AND u.status='active'
+                  AND u.role IN ('owner','hr_admin','hr_manager','recruiter','hiring_manager')
+                GROUP BY u.user_id, u.name, u.email, u.role, u.status, u.company_code
+                ORDER BY lower(u.name), u.user_id
+                """,
+                (company,),
+            )
+            rows = [
+                user
+                for user in (dict(row) for row in cur.fetchall())
+                if "candidates.read" in dashboard_effective_permissions_for_user(user, cur=cur)
+            ]
+            cur.execute(
+                """
+                SELECT count(*) AS count
+                FROM applications
+                WHERE company_code=%s
+                  AND owner_user_id IS NULL
+                  AND status NOT IN ('hired','rejected','withdrawn')
+                """,
+                (company,),
+            )
+            unassigned = int((cur.fetchone() or {}).get("count") or 0)
+    return {
+        "company_code": company,
+        "timezone": timezone_name,
+        "unassigned": unassigned,
+        "recruiters": [
+            {
+                "user": {key: json_safe(row.get(key)) for key in ("user_id", "name", "email", "role", "status")},
+                "assigned_active": int(row.get("assigned_active") or 0),
+                "overdue_tasks": int(row.get("overdue_tasks") or 0),
+                "awaiting_action": int(row.get("awaiting_action") or 0),
+            }
+            for row in rows
+        ],
+        "operational_only": True,
+    }
+
+
+def _candidate_c3_error(exc: Exception) -> HTTPException:
+    identity = _candidate_c3_module()
+    if isinstance(exc, identity.IdentityError):
+        return HTTPException(status_code=400, detail=exc.envelope())
+    return HTTPException(status_code=500, detail={"error": "candidate_identity_failed", "message": str(exc)[:500]})
+
+
+@app.get("/dashboard/prehire/identity/collision-report")
+def dashboard_c3_collision_report(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.identity.read")
+    return {"ok": True, "report": _candidate_c3_module().collision_report(sys.modules[__name__])}
+
+
+@app.post("/dashboard/prehire/identity/migrate")
+def dashboard_c3_migrate(dry_run: bool = True, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.identity.manage")
+    company = context["company_code"]
+    report = _candidate_c3_module().migrate_candidates_additive(sys.modules[__name__], company_code=company, dry_run=dry_run)
+    record_admin_audit(
+        context,
+        "candidate_identity_migrate",
+        summary=f"{'Dry-run migrated' if dry_run else 'Migrated'} candidate identity rows for {company}.",
+        target_type="company",
+        target=company,
+        details={"dry_run": dry_run, "created": report.get("created"), "linked": report.get("linked"), "auto_merged": report.get("auto_merged")},
+    )
+    return {"ok": True, "report": report}
+
+
+@app.get("/dashboard/prehire/identity/persons/{person_id}")
+def dashboard_c3_person(person_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.identity.read")
+    identity = _candidate_c3_module()
+    perms = set(context.get("permissions") or [])
+    try:
+        return {"ok": True, "person": identity.get_person_tenant_view(sys.modules[__name__], context["company_code"], person_id, perms)}
+    except Exception as exc:
+        raise _candidate_c3_error(exc) from exc
+
+
+@app.get("/dashboard/prehire/identity/duplicates")
+def dashboard_c3_duplicates(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.duplicates.review")
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            rows = identity.list_duplicate_suggestions(cur, company_code=context["company_code"], permissions=context.get("permissions") or [])
+    return {"ok": True, "suggestions": rows}
+
+
+@app.post("/dashboard/prehire/identity/merges/preview")
+def dashboard_c3_merge_preview(request: DashboardC3MergePreviewRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.merge.execute")
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            preview = identity.preview_merge(
+                cur,
+                company_code=context["company_code"],
+                canonical_person_id=request.canonical_person_id,
+                absorbed_person_id=request.absorbed_person_id,
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                permissions=context.get("permissions") or [],
+            )
+            minted = identity.mint_c3_confirmation(
+                cur,
+                company_code=context["company_code"],
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                action="merge",
+                payload=preview,
+            )
+        conn.commit()
+    return {"ok": True, "preview": preview, "confirmation": minted}
+
+
+@app.post("/dashboard/prehire/identity/merges/execute")
+def dashboard_c3_merge_execute(request: DashboardC3MergeExecuteRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.merge.execute")
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            result = identity.execute_merge(
+                cur,
+                preview=request.preview,
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                actor_type="human",
+                permissions=context.get("permissions") or [],
+                confirmation_token=request.confirmation_token,
+            )
+        conn.commit()
+    if result.get("error"):
+        raise HTTPException(status_code=409, detail={"ok": False, **result})
+    if not result.get("idempotent"):
+        record_admin_audit(
+            context,
+            "candidate_identity_merge",
+            summary="Executed human-confirmed candidate person merge.",
+            target_type="person_merge",
+            target=str((result.get("operation") or {}).get("operation_id") or ""),
+            details={"idempotent": False},
+        )
+    return {"ok": True, **result}
+
+
+@app.post("/dashboard/prehire/identity/merges/reverse")
+def dashboard_c3_merge_reverse(request: DashboardC3ReverseMergeRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.merge.reverse")
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            result = identity.reverse_merge(
+                cur,
+                company_code=context["company_code"],
+                operation_id=request.operation_id,
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                permissions=context.get("permissions") or [],
+                confirmation_token=request.confirmation_token,
+            )
+        conn.commit()
+    if result.get("error"):
+        raise HTTPException(status_code=409, detail={"ok": False, **result})
+    if not result.get("idempotent"):
+        record_admin_audit(
+            context,
+            "candidate_identity_merge_reverse",
+            summary="Reversed candidate person merge under elevated permission.",
+            target_type="person_merge",
+            target=request.operation_id,
+            details=result,
+        )
+    return {"ok": True, **result}
+
+
+@app.post("/dashboard/prehire/identity/legal-holds")
+def dashboard_c3_place_hold(request: DashboardC3LegalHoldRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    # Dedicated privacy.hold permission; owner emergency compatibility is encoded in place_legal_hold.
+    identity = _candidate_c3_module()
+    role = str((context.get("hr_user") or {}).get("role") or context.get("role") or "")
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            hold = identity.place_legal_hold(
+                cur,
+                company_code=context["company_code"],
+                person_id=request.person_id,
+                scope=request.scope,
+                reason=request.reason,
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                permissions=context.get("permissions") or [],
+                role=role,
+                case_reference=request.case_reference,
+            )
+        conn.commit()
+    record_admin_audit(context, "candidate_legal_hold_placed", summary="Placed candidate legal hold.", target_type="person", target=request.person_id, details={"scope": request.scope})
+    return {"ok": True, "hold": hold}
+
+
+@app.post("/dashboard/prehire/identity/privacy-requests")
+def dashboard_c3_privacy_request(request: DashboardC3PrivacyRequestCreate, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            row = identity.create_privacy_request(
+                cur,
+                company_code=context["company_code"],
+                person_id=request.person_id,
+                request_type=request.request_type,
+                actor_user_id=str(context.get("actor_user_id") or ""),
+                permissions=context.get("permissions") or [],
+            )
+        conn.commit()
+    return {"ok": True, "request": row}
+
+
+@app.get("/dashboard/prehire/identity/persons/{person_id}/export")
+def dashboard_c3_export(person_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "candidates.privacy.export")
+    identity = _candidate_c3_module()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            package = identity.export_person_package(cur, company_code=context["company_code"], person_id=person_id, permissions=context.get("permissions") or [])
+    return {"ok": True, "export": package}
 
 
 def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict[str, Any]) -> DashboardChatResponse:
@@ -46067,6 +51158,9 @@ def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict
             "admin_user": context.get("hr_user"),
             "access": context.get("access"),
             "permissions": context.get("permissions") or [],
+            "assistant_entry": "toolcall_orchestrator",
+            "legacy_regex_inference_enabled": LEGACY_REGEX_INFERENCE_ENABLED,
+            "legacy_path_inactive": not LEGACY_REGEX_INFERENCE_ENABLED,
         },
     )
     try:
@@ -46075,7 +51169,7 @@ def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict
         result = handle_toolcall_whatsapp_turn(turn_request)
     except Exception as exc:
         raise HTTPException(status_code=500, detail={"error": "dashboard_chat_failed", "message": str(exc)[:500]}) from exc
-    artifacts = dashboard_chat_artifacts(result, request)
+    artifacts = dashboard_chat_artifacts(result, request, company_code=context.get("company_code"))
     audit = result.get("audit") if isinstance(result.get("audit"), dict) else {}
     response = DashboardChatResponse(
         reply_text=str(result.get("reply_text") or "I could not produce a dashboard reply."),
@@ -46084,11 +51178,16 @@ def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict
         candidate_cards=artifacts["candidate_cards"],
         navigation=artifacts["navigation"],
         confirmation=artifacts["confirmation"],
+        workflow_card=artifacts.get("workflow_card"),
         session={"conversation_id": conversation_id},
         audit={
             "memory_scope": audit.get("memory_scope"),
             "turn_id": audit.get("turn_id"),
             "tool_output_count": len(audit.get("tool_outputs") or []) if isinstance(audit.get("tool_outputs"), list) else 0,
+            "correlation_id": audit.get("correlation_id"),
+            "capability_offerable": (audit.get("capability_catalog") or {}).get("offerable")
+            if isinstance(audit.get("capability_catalog"), dict)
+            else None,
         },
     )
     title = dashboard_chat_session_title(request.message, response)
@@ -46116,6 +51215,7 @@ def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict
                     "candidate_cards": response.candidate_cards,
                     "navigation": response.navigation,
                     "confirmation": response.confirmation,
+                    "workflow_card": response.workflow_card,
                     "intent": response.intent,
                     "turn_id": response.turn_id,
                 },
@@ -46131,6 +51231,30 @@ def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict
 
 def dashboard_chat_stream_event(payload: dict[str, Any]) -> str:
     return "data: " + json.dumps(json_safe(payload), ensure_ascii=False, default=str) + "\n\n"
+
+
+@app.get("/dashboard/prehire/assistant/capabilities")
+def dashboard_prehire_assistant_capabilities(
+    locale: str = "en",
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Live Assistant capability catalog for empty-state headline/modules/chips."""
+
+    try:
+        from tool_call_orchestrator import build_dashboard_assistant_capabilities
+
+        return build_dashboard_assistant_capabilities(
+            company_code=str(context.get("company_code") or ""),
+            permissions=context.get("permissions") or [],
+            locale=("ar" if str(locale or "").lower().startswith("ar") else "en"),
+            admin_user=context.get("hr_user") if isinstance(context.get("hr_user"), dict) else {},
+            access=context.get("access") if isinstance(context.get("access"), dict) else {},
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "assistant_capabilities_failed", "message": str(exc)[:400]},
+        ) from exc
 
 
 @app.get("/dashboard/prehire/chat/sessions")
@@ -46215,33 +51339,197 @@ def dashboard_prehire_chat(request: DashboardChatRequest, context: dict[str, Any
 
 
 @app.post("/dashboard/prehire/chat/stream")
-def dashboard_prehire_chat_stream(request: DashboardChatRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
-    def generate():
-        yield dashboard_chat_stream_event({"type": "typing"})
+def dashboard_prehire_chat_stream(
+    request: DashboardChatRequest,
+    http_request: Request,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    import queue
+    import threading
+
+    progress_q: queue.Queue = queue.Queue()
+    cancel_event = threading.Event()
+    done_holder: dict[str, Any] = {}
+
+    def on_progress(event: dict[str, Any]) -> None:
+        progress_q.put(event)
+
+    def worker() -> None:
         try:
-            response = dashboard_prehire_chat_response(request, context)
-            text = response.reply_text or ""
-            if text:
-                for chunk in re.findall(r"\S+\s*|\s+", text):
-                    yield dashboard_chat_stream_event({"type": "delta", "text": chunk})
-                    time_module.sleep(0.012)
-            yield dashboard_chat_stream_event(
-                {
-                    "type": "done",
-                    "message": response.model_dump() if hasattr(response, "model_dump") else response.dict(),
-                }
+            # Attach progress/cancel into the turn via a thin wrapper around the response builder.
+            ensure_schema()
+            company = context["company_code"]
+            hr_phone = digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")) or "dashboard"
+            conversation_id = dashboard_chat_conversation_id(context, request.conversation_id)
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    upsert_dashboard_chat_session(
+                        cur,
+                        context,
+                        conversation_id,
+                        metadata={"page": request.page, "selected_app_key": request.selected_app_key},
+                    )
+                    record_dashboard_chat_message(
+                        cur,
+                        context,
+                        conversation_id,
+                        "user",
+                        request.message,
+                        {"page": request.page, "selected_app_key": request.selected_app_key},
+                    )
+                conn.commit()
+            turn_request = WhatsAppTurnRequest(
+                account_id="default",
+                conversation_id=conversation_id,
+                sender_phone=hr_phone,
+                sender_role="hr_admin",
+                raw_text=request.message,
+                metadata={
+                    "channel": "web_dashboard",
+                    "dashboard": True,
+                    "company_code": company,
+                    "page": request.page,
+                    "selected_app_key": request.selected_app_key,
+                    "admin_user": context.get("hr_user"),
+                    "access": context.get("access"),
+                    "permissions": context.get("permissions") or [],
+                    "assistant_entry": "toolcall_orchestrator",
+                    "legacy_regex_inference_enabled": LEGACY_REGEX_INFERENCE_ENABLED,
+                    "legacy_path_inactive": not LEGACY_REGEX_INFERENCE_ENABLED,
+                    "on_progress": on_progress,
+                    "cancel_event": cancel_event,
+                    "locale": getattr(request, "locale", None),
+                },
             )
+            from tool_call_orchestrator import handle_toolcall_whatsapp_turn
+
+            result = handle_toolcall_whatsapp_turn(turn_request)
+            artifacts = dashboard_chat_artifacts(result, request, company_code=context.get("company_code"))
+            audit = result.get("audit") if isinstance(result.get("audit"), dict) else {}
+            response = DashboardChatResponse(
+                reply_text=str(result.get("reply_text") or "I could not produce a dashboard reply."),
+                intent=result.get("intent"),
+                turn_id=str(audit.get("turn_id") or ""),
+                candidate_cards=artifacts["candidate_cards"],
+                navigation=artifacts["navigation"],
+                confirmation=artifacts["confirmation"],
+                workflow_card=artifacts.get("workflow_card"),
+                session={"conversation_id": conversation_id},
+                audit={
+                    "memory_scope": audit.get("memory_scope"),
+                    "turn_id": audit.get("turn_id"),
+                    "tool_output_count": len(audit.get("tool_outputs") or []) if isinstance(audit.get("tool_outputs"), list) else 0,
+                    "correlation_id": audit.get("correlation_id"),
+                    "capability_offerable": (audit.get("capability_catalog") or {}).get("offerable")
+                    if isinstance(audit.get("capability_catalog"), dict)
+                    else None,
+                },
+            )
+            title = dashboard_chat_session_title(request.message, response)
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    session = upsert_dashboard_chat_session(
+                        cur,
+                        context,
+                        conversation_id,
+                        title=title,
+                        metadata={
+                            "page": request.page,
+                            "selected_app_key": request.selected_app_key,
+                            "last_intent": response.intent,
+                            "last_turn_id": response.turn_id,
+                        },
+                    )
+                    record_dashboard_chat_message(
+                        cur,
+                        context,
+                        conversation_id,
+                        "assistant",
+                        response.reply_text,
+                        {
+                            "candidate_cards": response.candidate_cards,
+                            "navigation": response.navigation,
+                            "confirmation": response.confirmation,
+                            "workflow_card": response.workflow_card,
+                            "intent": response.intent,
+                            "turn_id": response.turn_id,
+                        },
+                    )
+                conn.commit()
+            response.session = {
+                "conversation_id": conversation_id,
+                "title": session.get("title") or title,
+                "updated_at": session.get("updated_at"),
+            }
+            done_holder["response"] = response
         except Exception as exc:
+            done_holder["error"] = exc
+        finally:
+            progress_q.put(None)
+
+    def generate():
+        yield dashboard_chat_stream_event({"type": "typing", "phase": "planning"})
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
+        while True:
+            if http_request is not None:
+                try:
+                    # Starlette Request.is_disconnected is async; best-effort sync probe via scope.
+                    if getattr(http_request, "is_disconnected", None) and False:
+                        pass
+                except Exception:
+                    pass
+            try:
+                item = progress_q.get(timeout=0.4)
+            except queue.Empty:
+                if cancel_event.is_set():
+                    break
+                # Client disconnect: Starlette exposes receive; we mark cancel when thread still running
+                # and the generator is being closed (GeneratorExit handled below).
+                continue
+            if item is None:
+                break
+            if isinstance(item, dict):
+                yield dashboard_chat_stream_event(item if item.get("type") else {"type": "progress", **item})
+        thread.join(timeout=5)
+        if done_holder.get("error"):
             yield dashboard_chat_stream_event(
                 {
                     "type": "error",
                     "message": "I hit an issue while answering. Try again in a moment.",
-                    "detail": str(exc)[:300],
+                    "detail": str(done_holder["error"])[:300],
                 }
             )
+            return
+        response = done_holder.get("response")
+        if response is None:
+            yield dashboard_chat_stream_event(
+                {
+                    "type": "error",
+                    "message": "Stopped before a reply was ready.",
+                }
+            )
+            return
+        # Emit final reply once — no fake token drip. Progress events already streamed live states.
+        text = response.reply_text or ""
+        if text:
+            yield dashboard_chat_stream_event({"type": "delta", "text": text})
+        yield dashboard_chat_stream_event(
+            {
+                "type": "done",
+                "message": response.model_dump() if hasattr(response, "model_dump") else response.dict(),
+            }
+        )
+
+    def guarded_generate():
+        try:
+            yield from generate()
+        except GeneratorExit:
+            cancel_event.set()
+            raise
 
     return StreamingResponse(
-        generate(),
+        guarded_generate(),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
@@ -46253,6 +51541,7 @@ def dashboard_prehire_application_detail(app_key: str, context: dict[str, Any] =
     application = find_application_by_key(app_key, company_code=company)
     if not application:
         raise HTTPException(status_code=404, detail={"error": "application_not_found"})
+    require_prehire_application_visibility(context, application)
     app_payload = prehire_application_summary(
         application,
         include_raw=True,
@@ -46312,7 +51601,41 @@ def dashboard_prehire_application_evaluation(
 ):
     require_entitlement(context, "pre_hiring", "candidate.manage")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
+    if str(application.get("status") or "") in HELD_IMPORT_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "held_record_evaluation_forbidden",
+                "message": "Talent Pool held records cannot be ranked or evaluated until linked to a Job.",
+            },
+        )
+    # UNIFIED_VERIFIED_JOB_BINDING_GATE_WAVE4
+    try:
+        import inbound_cv_wave4 as _inbound_cv_wave4
+        import verified_job_binding_gate as _vjbg
+
+        if _vjbg.gate_enabled():
+            _gate = _inbound_cv_wave4.check_downstream_action(
+                None,
+                company_code=company,
+                app_key=app_key,
+                action="ranking",
+                application=application,
+            )
+            if _vjbg.enforce_enabled() and not _gate.get("allowed", True):
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "verified_job_binding_required",
+                        "message": "Ranking requires a verified Job binding.",
+                        "gate": _gate,
+                    },
+                )
+    except HTTPException:
+        raise
+    except Exception:
+        pass
     candidate = generate_application_profile_evaluation(app_key, company, force=force)
     ranking_payload = {
         "score": candidate.get("score"),
@@ -46330,6 +51653,7 @@ def dashboard_prehire_application_evaluation(
         app_row,
         include_raw=True,
         include_assessment=company_has_module(company, "assessments"),
+        permissions=context.get("permissions") or [],
     )
     app_payload["ranking"] = json_safe(ranking_payload)
     reply = "AI evaluation generated for this candidate and role."
@@ -46360,7 +51684,7 @@ def dashboard_prehire_application_evaluation(
 @app.get("/dashboard/prehire/applications/{app_key}/cv")
 def dashboard_prehire_application_cv(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     cv = dashboard_candidate_cv_metadata(application)
     if not cv:
         record_admin_audit(
@@ -46426,7 +51750,7 @@ def dashboard_prehire_application_cv(app_key: str, context: dict[str, Any] = Dep
 @app.get("/dashboard/prehire/applications/{app_key}/cv/preview")
 def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     cv = dashboard_candidate_cv_metadata(application)
     if not cv:
         record_admin_audit(
@@ -46566,6 +51890,943 @@ def dashboard_prehire_application_cv_preview(app_key: str, context: dict[str, An
     )
 
 
+@app.get("/dashboard/calendar/events")
+def dashboard_calendar_events_list(
+    start: str = Query(..., min_length=1),
+    end: str = Query(..., min_length=1),
+    scope: str = Query(default="mine"),
+    org_scope_id: str | None = Query(default=None),
+    event_type: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    mine_only: bool = Query(default=False),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_projections as cal_proj
+
+    actor = _calendar_actor(context)
+    types = [t.strip() for t in str(event_type or "").split(",") if t.strip()] or None
+    statuses = [s.strip() for s in str(status or "").split(",") if s.strip()] or None
+    try:
+        result = cal_proj.project_events(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            actor_user_id=actor["actor_user_id"],
+            actor_role=actor["actor_role"],
+            permissions=actor["permissions"],
+            scope=scope,
+            start=start,
+            end=end,
+            org_scope_id=org_scope_id,
+            event_types=types,
+            statuses=statuses,
+            mine_only=bool(mine_only),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/calendar/team-scopes")
+def dashboard_calendar_team_scopes(context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_projections as cal_proj
+
+    actor = _calendar_actor(context)
+    meta = cal_proj.team_scope_meta(
+        sys.modules[__name__],
+        company_code=actor["company_code"],
+        actor_user_id=actor["actor_user_id"],
+        permissions=actor["permissions"],
+    )
+    return {"ok": True, "company_code": actor["company_code"], **meta}
+
+
+@app.get("/dashboard/calendar/overview")
+def dashboard_calendar_overview(
+    scope: str = Query(default="mine"),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_projections as cal_proj
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_proj.project_overview(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            actor_user_id=actor["actor_user_id"],
+            actor_role=actor["actor_role"],
+            permissions=actor["permissions"],
+            scope=scope,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/conflicts/preview")
+def dashboard_calendar_conflicts_preview(
+    request: DashboardCalendarConflictPreviewRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_conflicts as cal_conflicts
+
+    actor = _calendar_actor(context)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            result = cal_conflicts.evaluate_conflicts(
+                cur,
+                sys.modules[__name__],
+                company_code=actor["company_code"],
+                start=request.start_at,
+                end=request.end_at,
+                timezone_name=request.timezone,
+                all_day=request.all_day,
+                organizer_user_id=request.organizer_user_id or actor["actor_user_id"],
+                attendees=request.attendees,
+                exclude_event_id=request.exclude_event_id,
+                app_key=request.app_key,
+            )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/calendar/events/{event_id}")
+def dashboard_calendar_event_detail(
+    event_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_projections as cal_proj
+
+    actor = _calendar_actor(context)
+    try:
+        event = cal_proj.project_event_detail(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            actor_user_id=actor["actor_user_id"],
+            actor_role=actor["actor_role"],
+            permissions=actor["permissions"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], "event": event}
+
+
+@app.post("/dashboard/calendar/events")
+def dashboard_calendar_event_create(
+    request: DashboardCalendarEventCreateRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.manage")
+    import calendar_store as cal_store
+
+    actor = _calendar_actor(context)
+    visibility = str(request.visibility or "attendees_only").strip().lower()
+    if visibility == "company" and not dashboard_context_has_permission(context, "calendar.company"):
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "permission_denied", "message": "calendar.company required to set company visibility."},
+        )
+    payload = request.model_dump()
+    try:
+        event = cal_store.create_manual_event(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            actor_user_id=actor["actor_user_id"],
+            payload=payload,
+            actor_permissions=actor["permissions"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "calendar_event_created",
+        summary=f"Created calendar event {event.get('title') or event.get('event_id')}.",
+        target_type="calendar_event",
+        target=str(event.get("event_id")),
+        details={"event_type": event.get("event_type"), "visibility": event.get("visibility")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], "event": event}
+
+
+@app.patch("/dashboard/calendar/events/{event_id}")
+def dashboard_calendar_event_update(
+    event_id: str,
+    request: DashboardCalendarEventUpdateRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.manage")
+    import calendar_store as cal_store
+
+    actor = _calendar_actor(context)
+    existing = cal_store.get_event(sys.modules[__name__], company_code=actor["company_code"], event_id=event_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail={"error": "event_not_found"})
+    if not _calendar_can_mutate_event(context, existing["payload"]):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "Not allowed to edit this event."})
+    if request.visibility == "company" and not dashboard_context_has_permission(context, "calendar.company"):
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "permission_denied", "message": "calendar.company required to set company visibility."},
+        )
+    payload = {k: v for k, v in request.model_dump().items() if k not in {"expected_version"} and v is not None}
+    # Booleans must pass even when False.
+    payload["override_conflicts"] = bool(request.override_conflicts)
+    if request.override_reason is not None:
+        payload["override_reason"] = request.override_reason
+    if request.expected_updated_at is not None:
+        payload["expected_updated_at"] = request.expected_updated_at
+    try:
+        event = cal_store.update_event(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            actor_user_id=actor["actor_user_id"],
+            payload=payload,
+            expected_version=request.expected_version,
+            actor_permissions=actor["permissions"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "calendar_event_updated",
+        summary=f"Updated calendar event {event.get('title') or event_id}.",
+        target_type="calendar_event",
+        target=event_id,
+        details={"version": event.get("version")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], "event": event}
+
+
+@app.post("/dashboard/calendar/events/{event_id}/cancel")
+def dashboard_calendar_event_cancel(
+    event_id: str,
+    request: DashboardCalendarEventCancelRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.manage")
+    import calendar_store as cal_store
+
+    actor = _calendar_actor(context)
+    existing = cal_store.get_event(sys.modules[__name__], company_code=actor["company_code"], event_id=event_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail={"error": "event_not_found"})
+    if not _calendar_can_mutate_event(context, existing["payload"]):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "Not allowed to cancel this event."})
+    try:
+        event = cal_store.cancel_event(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            actor_user_id=actor["actor_user_id"],
+            expected_version=request.expected_version,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "calendar_event_cancelled",
+        summary=f"Cancelled calendar event {event.get('title') or event_id}.",
+        target_type="calendar_event",
+        target=event_id,
+        details={"version": event.get("version")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], "event": event}
+
+
+@app.post("/dashboard/calendar/events/{event_id}/rsvp")
+def dashboard_calendar_event_rsvp(
+    event_id: str,
+    request: DashboardCalendarRsvpRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_participation as cal_part
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_part.set_attendee_rsvp(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            actor_user_id=actor["actor_user_id"],
+            target_user_id=request.target_user_id,
+            rsvp_status=request.rsvp_status,
+            expected_rsvp_version=request.expected_rsvp_version,
+            permissions=actor["permissions"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/events/{event_id}/guests/{guest_id}/invite")
+def dashboard_calendar_guest_invite(
+    event_id: str,
+    guest_id: str,
+    request: DashboardCalendarGuestInviteRequest | None = None,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.manage")
+    import calendar_participation as cal_part
+
+    actor = _calendar_actor(context)
+    channel = (request.channel if request else None) or None
+    try:
+        result = cal_part.queue_guest_invite(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            guest_id=guest_id or (request.guest_id if request else ""),
+            channel=channel,
+            actor_user_id=actor["actor_user_id"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/calendar/reschedule-requests")
+def dashboard_calendar_reschedule_requests(
+    event_id: str | None = None,
+    status: str = Query(default="pending"),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_participation as cal_part
+
+    actor = _calendar_actor(context)
+    items = cal_part.list_reschedule_requests(
+        sys.modules[__name__],
+        company_code=actor["company_code"],
+        event_id=event_id,
+        status=status,
+    )
+    return {"ok": True, "company_code": actor["company_code"], "requests": items, "count": len(items)}
+
+
+@app.post("/dashboard/calendar/reschedule-requests/{request_id}/resolve")
+def dashboard_calendar_reschedule_resolve(
+    request_id: str,
+    request: DashboardCalendarRescheduleResolveRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.manage")
+    import calendar_participation as cal_part
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_part.resolve_reschedule_request(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            request_id=request_id,
+            actor_user_id=actor["actor_user_id"],
+            decision=request.decision,
+            resolution_note=request.resolution_note,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/calendar/sync/connections")
+def dashboard_calendar_sync_connections(context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    items = cal_sync.list_connections(sys.modules[__name__], company_code=actor["company_code"])
+    return {"ok": True, "company_code": actor["company_code"], "connections": items, "count": len(items)}
+
+
+@app.post("/dashboard/calendar/sync/connections/google")
+def dashboard_calendar_sync_connect_google(
+    request: DashboardCalendarSyncConnectRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.connect_google_company(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            account_email=request.account_email,
+            refresh_token=request.refresh_token,
+            actor_user_id=actor["actor_user_id"],
+            external_calendar_id=request.external_calendar_id or "primary",
+            display_name=request.display_name,
+            sync_event_types=request.sync_event_types,
+            sync_include_candidate_name=request.sync_include_candidate_name,
+            with_meet_default=bool(request.with_meet_default),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "calendar_sync_connected",
+        summary="Connected company Google Calendar sync via platform integration.",
+        target_type="calendar_sync_connection",
+        target=(result.get("connection") or {}).get("connection_id"),
+        details={"provider": "google", "mode": "company", "integration_id": (result.get("integration") or {}).get("integration_id")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/sync/connections/microsoft")
+def dashboard_calendar_sync_connect_microsoft(
+    request: DashboardCalendarSyncMicrosoftConnectRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.connect_microsoft_company(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            account_email=request.account_email,
+            refresh_token=request.refresh_token,
+            actor_user_id=actor["actor_user_id"],
+            external_calendar_id=request.external_calendar_id or "calendar",
+            display_name=request.display_name,
+            external_tenant_id=request.external_tenant_id,
+            with_meet_default=bool(request.with_meet_default),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "calendar_sync_connected",
+        summary="Connected company Microsoft 365 Calendar/Teams sync via platform integration.",
+        target_type="calendar_sync_connection",
+        target=(result.get("connection") or {}).get("connection_id"),
+        details={"provider": "microsoft", "mode": "company", "integration_id": (result.get("integration") or {}).get("integration_id")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/sync/connections/legacy-operator")
+def dashboard_calendar_sync_ensure_legacy(context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.ensure_legacy_operator_connection(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            actor_user_id=actor["actor_user_id"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/platform/integrations")
+def dashboard_platform_integrations(context: dict[str, Any] = Depends(dashboard_context)):
+    """Company-level provider connections (Google Workspace / Microsoft 365). Calendar is first consumer."""
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+    import platform_integrations as pi
+
+    actor = _calendar_actor(context)
+    integrations = c6.list_integrations_c6(sys.modules[__name__], company_code=actor["company_code"])
+    return {
+        "ok": True,
+        "company_code": actor["company_code"],
+        "integrations": integrations,
+        "count": len(integrations),
+        "registry": pi.capability_registry(),
+        "modes": c6.connection_mode_catalog(),
+    }
+
+
+@app.get("/dashboard/platform/integrations/modes")
+def dashboard_platform_integration_modes(context: dict[str, Any] = Depends(dashboard_context)):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    return {"ok": True, **c6.connection_mode_catalog()}
+
+
+@app.get("/dashboard/platform/integrations/checklist")
+def dashboard_platform_integration_checklist(
+    provider_key: str = Query(...),
+    mode: str = Query(...),
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    try:
+        return {"ok": True, "checklist": c6.setup_checklist(provider_key=provider_key, mode=mode)}
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+
+
+@app.post("/dashboard/platform/integrations/oauth/start")
+def dashboard_platform_oauth_start(
+    request: DashboardPlatformOAuthStartRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    actor = _calendar_actor(context)
+    try:
+        result = c6.start_oauth(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            provider_key=request.provider_key,
+            actor_user_id=actor["actor_user_id"],
+            attach_calendar=bool(request.attach_calendar),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/platform/integrations/oauth/callback")
+def dashboard_platform_oauth_callback(
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+):
+    """OAuth redirect target — no dashboard session required; state is HMAC-signed."""
+    import platform_connection_c6 as c6
+
+    if error:
+        raise HTTPException(status_code=400, detail={"error": "oauth_denied", "message": str(error)[:200]})
+    try:
+        result = c6.complete_oauth(sys.modules[__name__], state=str(state or ""), code=str(code or ""))
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    # Soft landing for browser redirects.
+    company = (result.get("integration") or {}).get("company_code") or ""
+    provider = (result.get("integration") or {}).get("provider_key") or ""
+    html = f"""<!doctype html><html><body style="font-family:system-ui;padding:2rem;background:#f7f3eb;color:#15120d">
+    <h1>Connected</h1>
+    <p>{provider} is connected for {company}. You can close this window and return to Wathefni Calendar.</p>
+    <script>try{{window.opener&&window.opener.postMessage({{type:'wathefni_platform_oauth',ok:true,provider:'{provider}'}},'*');}}catch(e){{}}</script>
+    </body></html>"""
+    from fastapi.responses import HTMLResponse
+
+    return HTMLResponse(html)
+
+
+@app.post("/dashboard/platform/integrations/microsoft/enterprise")
+def dashboard_platform_microsoft_enterprise(
+    request: DashboardPlatformMicrosoftEnterpriseRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    actor = _calendar_actor(context)
+    try:
+        result = c6.connect_microsoft_enterprise_app(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            tenant_id=request.tenant_id,
+            client_id=request.client_id,
+            calendar_identity=request.calendar_identity,
+            actor_user_id=actor["actor_user_id"],
+            client_secret=request.client_secret,
+            certificate_pem=request.certificate_pem,
+            certificate_thumbprint=request.certificate_thumbprint,
+            display_name=request.display_name,
+            credential_expires_at=request.credential_expires_at,
+            validate=bool(request.validate_live),
+            dry_run_accept=bool(request.dry_run_accept),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "platform_microsoft_enterprise_connected",
+        summary="Connected Microsoft 365 enterprise app-only integration.",
+        target_type="platform_company_integration",
+        target=(result.get("integration") or {}).get("integration_id"),
+        details={"mode": "enterprise_app", "identity": request.calendar_identity},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/platform/integrations/google/enterprise")
+def dashboard_platform_google_enterprise(
+    request: DashboardPlatformGoogleEnterpriseRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    actor = _calendar_actor(context)
+    try:
+        result = c6.connect_google_enterprise_dwd(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            service_account_json=request.service_account_json,
+            impersonation_email=request.impersonation_email,
+            actor_user_id=actor["actor_user_id"],
+            display_name=request.display_name,
+            validate=bool(request.validate_live),
+            dry_run_accept=bool(request.dry_run_accept),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "platform_google_enterprise_connected",
+        summary="Connected Google Workspace domain-wide delegation integration.",
+        target_type="platform_company_integration",
+        target=(result.get("integration") or {}).get("integration_id"),
+        details={"mode": "enterprise_dwd", "impersonation_email": request.impersonation_email},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/platform/integrations/{integration_id}/health")
+def dashboard_platform_integration_health(
+    integration_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    actor = _calendar_actor(context)
+    try:
+        result = c6.healthcheck_integration(
+            sys.modules[__name__], company_code=actor["company_code"], integration_id=integration_id
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/platform/integrations/{integration_id}/rotate")
+def dashboard_platform_integration_rotate(
+    integration_id: str,
+    request: DashboardPlatformRotateRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_connection_c6 as c6
+
+    actor = _calendar_actor(context)
+    try:
+        result = c6.rotate_microsoft_secret(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            integration_id=integration_id,
+            client_secret=request.client_secret,
+            certificate_pem=request.certificate_pem,
+            certificate_thumbprint=request.certificate_thumbprint,
+            credential_expires_at=request.credential_expires_at,
+            actor_user_id=actor["actor_user_id"],
+            validate=bool(request.validate_live),
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "platform_credential_rotated",
+        summary="Rotated platform integration credentials.",
+        target_type="platform_company_integration",
+        target=integration_id,
+        details={},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/platform/integrations/connect")
+def dashboard_platform_integrations_connect(
+    request: DashboardPlatformIntegrationConnectRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    """Ops fallback only — product UX uses OAuth start or enterprise forms (no token paste)."""
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_integrations as pi
+
+    actor = _calendar_actor(context)
+    try:
+        result = pi.connect_provider(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            provider_key=request.provider_key,
+            account_email=request.account_email,
+            refresh_token=request.refresh_token,
+            actor_user_id=actor["actor_user_id"],
+            display_name=request.display_name,
+            external_tenant_id=request.external_tenant_id,
+            capabilities=request.capabilities,
+        )
+        connection = None
+        if request.attach_calendar:
+            integration_id = (result.get("integration") or {}).get("integration_id")
+            provider = str(request.provider_key or "").strip().lower()
+            default_cal = "primary" if provider in {"google_workspace", "google"} else "calendar"
+            attached = pi.attach_calendar_sync_connection(
+                sys.modules[__name__],
+                company_code=actor["company_code"],
+                integration_id=str(integration_id),
+                actor_user_id=actor["actor_user_id"],
+                external_calendar_id=request.external_calendar_id or default_cal,
+                with_meet_default=bool(request.with_meet_default),
+            )
+            connection = attached.get("connection")
+            result = {**result, "connection": connection}
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "platform_integration_connected",
+        summary=f"Connected company platform integration ({request.provider_key}) via ops fallback.",
+        target_type="platform_company_integration",
+        target=(result.get("integration") or {}).get("integration_id"),
+        details={
+            "provider_key": request.provider_key,
+            "attach_calendar": bool(request.attach_calendar),
+            "capabilities": (result.get("integration") or {}).get("capabilities"),
+            "ops_fallback": True,
+        },
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/platform/integrations/{integration_id}/disconnect")
+def dashboard_platform_integrations_disconnect(
+    integration_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import platform_integrations as pi
+
+    actor = _calendar_actor(context)
+    try:
+        result = pi.disconnect_integration(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            integration_id=integration_id,
+            actor_user_id=actor["actor_user_id"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    record_admin_audit(
+        context,
+        "platform_integration_disconnected",
+        summary="Disconnected company platform integration.",
+        target_type="platform_company_integration",
+        target=integration_id,
+        details={"status": (result.get("integration") or {}).get("status")},
+    )
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/free-busy")
+def dashboard_calendar_free_busy(
+    request: DashboardCalendarFreeBusyRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_conflicts as cal_conflicts
+    import calendar_schema as cal_schema
+
+    actor = _calendar_actor(context)
+    user_ids = [str(u).strip() for u in (request.user_ids or []) if str(u).strip()]
+    if not user_ids:
+        user_ids = [actor["actor_user_id"]] if actor.get("actor_user_id") else []
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cal_schema.ensure_calendar_schema(cur)
+                # Lightweight busy blocks from existing conflict helpers / events table.
+                cur.execute(
+                    """
+                    SELECT event_id, title, start_at, end_at, status, event_type
+                    FROM calendar_events
+                    WHERE company_code=%s
+                      AND status <> 'cancelled'
+                      AND start_at < %s::timestamptz
+                      AND end_at > %s::timestamptz
+                    ORDER BY start_at ASC
+                    LIMIT 500
+                    """,
+                    (actor["company_code"], request.end_at, request.start_at),
+                )
+                events = [dict(r) for r in cur.fetchall()]
+            conn.commit()
+        busy = []
+        for ev in events:
+            busy.append(
+                {
+                    "event_id": str(ev.get("event_id")),
+                    "start_at": ev.get("start_at").isoformat() if hasattr(ev.get("start_at"), "isoformat") else ev.get("start_at"),
+                    "end_at": ev.get("end_at").isoformat() if hasattr(ev.get("end_at"), "isoformat") else ev.get("end_at"),
+                    "status": ev.get("status"),
+                    "event_type": ev.get("event_type"),
+                    "busy": True,
+                }
+            )
+        policy = {}
+        try:
+            import calendar_sync as cal_sync
+
+            policy = cal_sync.calendar_policy(sys.modules[__name__], actor["company_code"])
+        except Exception:
+            policy = {}
+        _ = cal_conflicts  # reserved for deeper free/busy overlap helpers
+        return {
+            "ok": True,
+            "company_code": actor["company_code"],
+            "user_ids": user_ids,
+            "start_at": request.start_at,
+            "end_at": request.end_at,
+            "timezone": request.timezone or "Asia/Kuwait",
+            "busy": busy,
+            "policy": {
+                "sync_include_candidate_name": policy.get("sync_include_candidate_name"),
+                "working_hours": policy.get("working_hours"),
+            },
+        }
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+
+
+@app.patch("/dashboard/calendar/sync/connections/{connection_id}")
+def dashboard_calendar_sync_update_connection(
+    connection_id: str,
+    request: DashboardCalendarSyncSettingsRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.update_connection_settings(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            connection_id=connection_id,
+            actor_user_id=actor["actor_user_id"],
+            sync_event_types=request.sync_event_types,
+            sync_include_candidate_name=request.sync_include_candidate_name,
+            external_calendar_id=request.external_calendar_id,
+            with_meet_default=request.with_meet_default,
+            display_name=request.display_name,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/sync/connections/{connection_id}/disconnect")
+def dashboard_calendar_sync_disconnect(
+    connection_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.disconnect_connection(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            connection_id=connection_id,
+            actor_user_id=actor["actor_user_id"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.post("/dashboard/calendar/sync/connections/{connection_id}/reconnect")
+def dashboard_calendar_sync_reconnect(
+    connection_id: str,
+    request: DashboardCalendarSyncReconnectRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.reconnect_connection(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            connection_id=connection_id,
+            actor_user_id=actor["actor_user_id"],
+            refresh_token=request.refresh_token,
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
+@app.get("/dashboard/calendar/events/{event_id}/sync")
+def dashboard_calendar_event_sync_status(
+    event_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    """Event sync status.
+
+    Full bindings (provider keys, errors, external links, binding IDs, health)
+    require calendar.sync. Ordinary calendar.read callers receive only a
+    sanitized customer-facing status — never internal integration evidence.
+    """
+    require_entitlement(context, "calendar", "calendar.read")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    bindings = cal_sync.bindings_for_event(sys.modules[__name__], company_code=actor["company_code"], event_id=event_id)
+    public = cal_sync.public_event_sync_status(bindings)
+    if dashboard_context_has_permission(context, "calendar.sync"):
+        return {
+            "ok": True,
+            "company_code": actor["company_code"],
+            "event_id": event_id,
+            "detail": "full",
+            "bindings": bindings,
+            **public,
+        }
+    return {
+        "ok": True,
+        "company_code": actor["company_code"],
+        "event_id": event_id,
+        "detail": "status",
+        "bindings": [],
+        **public,
+    }
+
+
+@app.post("/dashboard/calendar/events/{event_id}/sync/retry")
+def dashboard_calendar_event_sync_retry(
+    event_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_entitlement(context, "calendar", "calendar.sync")
+    import calendar_sync as cal_sync
+
+    actor = _calendar_actor(context)
+    try:
+        result = cal_sync.retry_binding(
+            sys.modules[__name__],
+            company_code=actor["company_code"],
+            event_id=event_id,
+            actor_user_id=actor["actor_user_id"],
+        )
+    except Exception as exc:
+        raise _calendar_error(exc) from exc
+    return {"ok": True, "company_code": actor["company_code"], **result}
+
+
 @app.get("/dashboard/prehire/interviews")
 def dashboard_prehire_interviews(
     status: str | None = None,
@@ -46577,9 +52838,12 @@ def dashboard_prehire_interviews(
     offset: int = Query(default=0, ge=0),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
+    enabled = require_interview_surface(context, "prehire.read")
     company = context["company_code"]
     return dashboard_interviews_payload(
         company,
+        include_live=enabled["interviews"],
+        include_async_video=enabled["video_interviews"],
         status=status,
         q=q,
         role=role,
@@ -46588,6 +52852,7 @@ def dashboard_prehire_interviews(
         limit=limit,
         offset=offset,
         permissions=context.get("permissions") or [],
+        context=context,
     )
 
 
@@ -46597,57 +52862,59 @@ def dashboard_prehire_interview_update(
     request: DashboardInterviewStateRequest,
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
-    require_entitlement(context, "pre_hiring", "interview.manage")
     company = context["company_code"]
-    interview = fetch_candidate_interview(interview_id, company)
-    if not interview:
-        raise HTTPException(status_code=404, detail={"error": "interview_not_found"})
+    interview = require_interview_record(context, interview_id, "interview.manage")
+    require_interview_company_operator(context, action="update_interview_status")
     status = normalize_interview_status(request.status, default="")
     if not status:
         raise HTTPException(status_code=422, detail={"error": "invalid_interview_status", "allowed": sorted(INTERVIEW_STATUSES)})
+    import interview_presentation as _ip
+    interview_type = _ip.canonical_interview_type(candidate_interview_summary(interview))
+    if interview_type != "async_video" and status in {"scheduled", "rescheduled"}:
+        start_value = interview.get("scheduled_start") or getattr(request, "scheduled_start", None)
+        if not start_value:
+            raise HTTPException(status_code=422, detail={"error": "interview_datetime_required", "message": "A live interview cannot be scheduled without a date/time."})
     hr_phone = digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone"))
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": hr_phone,
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
     row: dict[str, Any] = {}
     if status == "cancelled":
-        import recruiting_lifecycle as _rl
+        import interview_service as _interview_service
+        import interview_lifecycle as _il
 
-        application = dashboard_application_or_404(str(interview.get("app_key") or ""), company)
-        side_effect_row: dict[str, Any] = {}
-
-        def _cancel_interview(cur: Any, _before: dict[str, Any], _after: dict[str, Any]) -> dict[str, Any]:
-            cur.execute(
-                """
-                UPDATE candidate_interviews
-                SET status='cancelled', updated_by_phone=%s, updated_at=now()
-                WHERE interview_id=%s AND company_code=%s
-                RETURNING *
-                """,
-                (hr_phone, interview_id, company),
+        try:
+            cancel_result = _interview_service.cancel_interview(
+                company_code=company,
+                interview_id=interview_id,
+                idempotency_key=f"dashboard-cancel:{company}:{interview_id}",
+                actor=actor,
+                sync_external=True,
+                revert_application_stage=True,
+                permissions=context.get("permissions") or [],
             )
-            cancelled = cur.fetchone()
-            if not cancelled:
-                return {"ok": False, "error": "interview_not_found"}
-            side_effect_row.update(dict(cancelled))
-            return {"ok": True, "interview_id": str(cancelled["interview_id"]), "status": "cancelled"}
-
-        lifecycle_result = _rl.transition_application(
-            sys.modules[__name__],
-            app_key=str(application.get("app_key") or ""),
-            company_code=company,
-            to_stage="shortlisted",
-            trigger="interview_cancelled",
-            expected_from_stage="interview",
-            actor_type="human",
-            actor_user_id=str(context.get("actor_user_id") or "") or None,
-            actor_phone=hr_phone,
-            channel="web",
-            idempotency_key=f"interview-cancel:{company}:{interview_id}",
-            metadata={"interview_id": interview_id, "interview_status": "cancelled"},
-            run_hire_side_effects=False,
-            transactional_side_effect=_cancel_interview,
+        except _il.InterviewAuthorityError as exc:
+            raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+        row = fetch_candidate_interview(interview_id, company) or {}
+        summary = cancel_result.get("interview") or candidate_interview_summary(row)
+        reply = "Interview cancelled."
+        dashboard_record_action_result(
+            "interview_status_update",
+            "completed",
+            {
+                "interview": summary,
+                "action": {"type": "interview_status_update", "target": interview_id, "status": status},
+                "company_code": company,
+                "requested_by": context.get("hr_user"),
+                "source": "dashboard",
+                "provider_sync": cancel_result.get("provider_sync"),
+            },
+            reply,
         )
-        if not lifecycle_result.get("ok"):
-            raise HTTPException(status_code=409, detail=lifecycle_result)
-        row = side_effect_row or (fetch_candidate_interview(interview_id, company) or {})
+        return {"company_code": company, "ok": True, "interview": summary, "provider_sync": cancel_result.get("provider_sync")}
     else:
         with db_connect() as conn:
             with conn.cursor() as cur:
@@ -46667,9 +52934,44 @@ def dashboard_prehire_interview_update(
                     (status, status, hr_phone, interview_id, company),
                 )
                 row = dict(cur.fetchone() or {})
+                if row and status in {"completed", "no_show"}:
+                    import calendar_outbox as _cal_outbox
+                    import calendar_interview_link as _cil
+                    import interview_lifecycle as _ilife
+
+                    if _cil.is_live_timed_interview(row):
+                        try:
+                            assignments = _ilife.list_assignments(cur, interview_id)
+                            _cal_outbox.require_enqueue_from_interview(
+                                cur,
+                                sys.modules[__name__],
+                                interview=row,
+                                assignments=assignments,
+                                operation="complete" if status == "completed" else "cancel",
+                                operation_token=f"dashboard-status:{interview_id}:{status}:{int(datetime.now(timezone.utc).timestamp())}",
+                            )
+                        except _cal_outbox.CalendarOutboxError as exc:
+                            conn.rollback()
+                            raise HTTPException(status_code=503 if exc.retryable else 422, detail=exc.as_detail()) from exc
             conn.commit()
     if row:
-        record_interview_event(str(row["interview_id"]), company, str(row.get("app_key") or ""), f"status_{status}", {"status": status}, hr_phone)
+        record_interview_event(
+            str(row["interview_id"]),
+            company,
+            str(row.get("app_key") or ""),
+            f"status_{status}",
+            {"status": status},
+            hr_phone,
+            actor_context={
+                "company_code": company,
+                "actor_user_id": actor.get("actor_user_id"),
+                "actor_phone": actor.get("actor_phone"),
+                "actor_role": actor.get("actor_role"),
+            },
+            action="interview_status_update",
+            target_type="interview",
+            target=interview_id,
+        )
         update_application_interview_snapshot(str(row.get("app_key") or ""), row)
     reply = f"Interview marked {status.replace('_', ' ')}."
     dashboard_record_action_result(
@@ -46693,61 +52995,365 @@ def dashboard_prehire_interview_notes(
     request: DashboardInterviewNotesRequest,
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
-    require_entitlement(context, "pre_hiring", "interview.manage")
     company = context["company_code"]
-    interview = fetch_candidate_interview(interview_id, company)
-    if not interview:
-        raise HTTPException(status_code=404, detail={"error": "interview_not_found"})
-    notes = str(request.notes or "").strip()
-    transcript = str(request.transcript or "").strip()
-    if not notes and not transcript:
-        raise HTTPException(status_code=422, detail={"error": "interview_notes_required"})
-    application = dashboard_application_or_404(str(interview.get("app_key") or ""), company)
-    status = normalize_interview_status(request.status, default=str(interview.get("status") or "completed"))
-    if status == "scheduled":
-        status = "completed"
-    summary = generate_interview_ai_summary(notes, transcript, application, interview) if request.generate_summary else deterministic_interview_summary(notes, transcript)
-    hr_phone = digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone"))
+    require_interview_record(context, interview_id, "interview.manage")
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.save_notes_only(
+            company_code=company,
+            interview_id=interview_id,
+            notes=str(request.notes or ""),
+            transcript=str(request.transcript or ""),
+            status=request.status,
+            generate_summary=bool(request.generate_summary),
+            actor=actor,
+            expected_updated_at=str(request.expected_updated_at or "") or None,
+            expected_version=request.expected_version,
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    reply = "Interview notes saved. AI summary is advisory. Human feedback remains separate from free-text notes."
+    result_payload = {
+        "interview": result.get("interview"),
+        "action": {"type": "interview_notes", "target": interview_id},
+        "company_code": company,
+        "requested_by": context.get("hr_user"),
+        "source": "dashboard",
+        "human_feedback_complete": False,
+        "ranking_updated": False,
+    }
+    dashboard_record_action_result("interview_feedback", "completed", result_payload, reply)
+    return {"company_code": company, "ok": True, "reply": reply, "interview": result.get("interview")}
+
+
+@app.post("/dashboard/prehire/interviews/schedule")
+def dashboard_prehire_interview_schedule(
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    require_entitlement(context, "interviews", "interview.manage")
+    require_interview_company_operator(context, action="schedule_interview")
+    company = context["company_code"]
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    body = body if isinstance(body, dict) else {}
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.schedule_interview(
+            company_code=company,
+            app_key=str(body.get("app_key") or ""),
+            start=body.get("scheduled_start") or body.get("start"),
+            end=body.get("scheduled_end") or body.get("end"),
+            duration_minutes=body.get("duration_minutes"),
+            timezone_name=body.get("timezone"),
+            meeting_type=body.get("meeting_type") or "manual_link",
+            location=body.get("location"),
+            meet_link=body.get("meet_link"),
+            panel=body.get("panel") if isinstance(body.get("panel"), list) else None,
+            idempotency_key=str(body.get("idempotency_key") or "") or None,
+            actor=actor,
+            source="dashboard_schedule",
+            sync_external=bool(body.get("sync_external", True)),
+            move_application_stage=bool(body.get("move_application_stage", True)),
+            confirmation={
+                "human_confirmed": True,
+                "channel": "web",
+                "permissions": context.get("permissions") or [],
+                "confirmation_id": body.get("confirmation_id"),
+                "confirmation_token": body.get("confirmation_token"),
+                "confirmation_payload": body.get("confirmation_payload") if isinstance(body.get("confirmation_payload"), dict) else {},
+                "idempotency_key": body.get("lifecycle_idempotency_key"),
+            },
+            permissions=context.get("permissions") or [],
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    return {"company_code": company, **result}
+
+
+@app.post("/dashboard/prehire/interviews/{interview_id}/reschedule")
+def dashboard_prehire_interview_reschedule(
+    interview_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = context["company_code"]
+    require_interview_record(context, interview_id, "interview.manage")
+    require_interview_company_operator(context, action="reschedule_interview")
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    body = body if isinstance(body, dict) else {}
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.reschedule_interview(
+            company_code=company,
+            interview_id=interview_id,
+            start=body.get("scheduled_start") or body.get("start"),
+            end=body.get("scheduled_end") or body.get("end"),
+            duration_minutes=body.get("duration_minutes"),
+            timezone_name=body.get("timezone"),
+            meeting_type=body.get("meeting_type"),
+            location=body.get("location"),
+            meet_link=body.get("meet_link"),
+            panel=body.get("panel") if isinstance(body.get("panel"), list) else None,
+            idempotency_key=str(body.get("idempotency_key") or "") or None,
+            actor=actor,
+            sync_external=bool(body.get("sync_external", True)),
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    return {"company_code": company, **result}
+
+
+@app.get("/dashboard/prehire/interviews/agenda")
+def dashboard_prehire_interview_agenda(
+    week_start: str | None = None,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    require_entitlement(context, "interviews", "prehire.read")
+    import interview_service as _interview_service
+
+    payload = _interview_service.agenda_payload(context["company_code"], week_start=week_start)
+    if not interview_actor_is_assignment_scoped(context):
+        return payload
+    company = context["company_code"]
+    scoped_items = []
+    for item in payload.get("interviews") or []:
+        interview_id = str(item.get("interview_id") or "")
+        if interview_id and actor_assigned_to_interview(context, company_code=company, interview_id=interview_id):
+            scoped_items.append(item)
+    allowed_ids = {str(item.get("interview_id")) for item in scoped_items}
+    days = []
+    for day in payload.get("days") or []:
+        day_items = [item for item in (day.get("interviews") or []) if str(item.get("interview_id")) in allowed_ids]
+        days.append({**day, "interviews": day_items})
+    return {**payload, "interviews": scoped_items, "days": days}
+
+
+@app.post("/dashboard/prehire/interviews/{interview_id}/feedback")
+def dashboard_prehire_interview_feedback_submit(
+    interview_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = context["company_code"]
+    require_interview_record(context, interview_id, "interview.manage")
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    body = body if isinstance(body, dict) else {}
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.submit_feedback(
+            company_code=company,
+            interview_id=interview_id,
+            answers=body.get("answers") if isinstance(body.get("answers"), dict) else {},
+            free_text_notes=body.get("free_text_notes") or body.get("notes"),
+            overall_rating=body.get("overall_rating"),
+            definition_version_id=body.get("definition_version_id"),
+            actor=actor,
+            rater=body.get("rater") if isinstance(body.get("rater"), dict) else {
+                "user_id": actor.get("actor_user_id"),
+                "email": (context.get("hr_user") or {}).get("email"),
+                "name": (context.get("hr_user") or {}).get("name"),
+            },
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    return {"company_code": company, **result}
+
+
+@app.post("/dashboard/prehire/interviews/feedback/{submission_id}/reopen")
+def dashboard_prehire_interview_feedback_reopen(
+    submission_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = context["company_code"]
+    require_interview_feedback_submission(context, submission_id, "interview.manage")
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    body = body if isinstance(body, dict) else {}
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.reopen_feedback(
+            company_code=company,
+            submission_id=submission_id,
+            reason=str(body.get("reason") or ""),
+            actor=actor,
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    return {"company_code": company, **result}
+
+
+def _interview_action_actor(context: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+
+
+def _interview_action_allowed(presentation: dict[str, Any], action: str) -> bool:
+    return action in set(presentation.get("allowed_actions") or [])
+
+
+def _presented_interview(context: dict[str, Any], interview_id: str, permission: str = "interview.manage") -> tuple[dict[str, Any], dict[str, Any]]:
+    interview = require_interview_record(context, interview_id, permission)
+    summary = candidate_interview_summary(interview)
+    import interview_presentation as _ip
+
+    can_manage = "interview.manage" in set(context.get("permissions") or [])
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                UPDATE candidate_interviews
-                SET status=%s,
-                    feedback_status='feedback_complete',
-                    notes=%s,
-                    transcript=NULLIF(%s, ''),
-                    ai_summary=%s,
-                    updated_by_phone=%s,
-                    updated_at=now()
+                SELECT COALESCE(assignee_name, assignee_email, assignee_user_id) AS label
+                FROM candidate_interview_assignments
                 WHERE interview_id=%s AND company_code=%s
-                RETURNING *
+                ORDER BY created_at ASC NULLS LAST
+                LIMIT 6
                 """,
-                (status, notes or transcript, transcript, Json(json_safe(summary)), hr_phone, interview_id, company),
+                (interview_id, context["company_code"]),
             )
-            row = dict(cur.fetchone() or {})
-        conn.commit()
-    if row:
-        record_interview_event(
-            str(row["interview_id"]),
-            company,
-            str(row.get("app_key") or ""),
-            "feedback_complete",
-            {"status": status, "summary": json_safe(summary)},
-            hr_phone,
+            assignments = [str(r.get("label")) for r in cur.fetchall() if r.get("label")]
+    presentation = _ip.build_interview_presentation(
+        summary,
+        can_manage=can_manage,
+        legacy_next_action=summary.get("next_human_action"),
+        assignments=assignments,
+    )
+    presentation["allowed_actions"] = narrow_interview_allowed_actions_for_role(
+        dashboard_context_role_key(context),
+        presentation.get("allowed_actions") or [],
+    )
+    return interview, presentation
+
+
+@app.post("/dashboard/prehire/interviews/{interview_id}/actions/assign-interviewer")
+def dashboard_prehire_interview_assign_interviewer(
+    interview_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Assign interviewer(s) using the canonical panel/assignment authority."""
+    company = context["company_code"]
+    interview, presentation = _presented_interview(context, interview_id)
+    require_interview_company_operator(context, action="assign_interviewer")
+    if not _interview_action_allowed(presentation, "assign_interviewer"):
+        raise HTTPException(status_code=409, detail={"error": "action_not_allowed", "action": "assign_interviewer"})
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    body = body if isinstance(body, dict) else {}
+    panel = body.get("panel") if isinstance(body.get("panel"), list) else ([body.get("assignee")] if body.get("assignee") else None)
+    if not panel:
+        raise HTTPException(status_code=422, detail={"error": "panel_required"})
+    try:
+        result = _interview_service.reschedule_interview(
+            company_code=company,
+            interview_id=interview_id,
+            start=body.get("scheduled_start") or interview.get("scheduled_start"),
+            end=body.get("scheduled_end") or interview.get("scheduled_end"),
+            duration_minutes=body.get("duration_minutes") or interview.get("duration_minutes"),
+            timezone_name=body.get("timezone") or interview.get("timezone"),
+            meeting_type=body.get("meeting_type") or interview.get("meeting_type"),
+            location=body.get("location") or interview.get("location"),
+            meet_link=body.get("meet_link") or interview.get("meet_link"),
+            panel=panel,
+            idempotency_key=str(body.get("idempotency_key") or f"assign:{company}:{interview_id}"),
+            actor=_interview_action_actor(context),
+            sync_external=bool(body.get("sync_external", False)),
         )
-        update_application_interview_snapshot(str(row.get("app_key") or ""), row)
-    reply = "Interview notes saved and summarized. HR remains the final decision-maker."
-    result_payload = {
-        "interview": candidate_interview_summary(row),
-        "application": json_safe(application),
-        "action": {"type": "interview_feedback", "target": interview_id, "status": status},
-        "company_code": company,
-        "requested_by": context.get("hr_user"),
-        "source": "dashboard",
-    }
-    dashboard_record_action_result("interview_feedback", "completed", result_payload, reply)
-    return {"company_code": company, "ok": True, "reply": reply, "interview": candidate_interview_summary(row)}
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    # Wave 6: personal interview assignment notifies panel members with user_id only.
+    assignee_ids: list[str] = []
+    for member in panel or []:
+        if not isinstance(member, dict):
+            continue
+        uid = str(member.get("user_id") or member.get("assignee_user_id") or "").strip()
+        if uid:
+            assignee_ids.append(uid)
+    if assignee_ids:
+        notify_prehire_personal_assignees(
+            company_code=company,
+            assignee_user_ids=assignee_ids,
+            message=f"You were assigned to interview {interview_id}.",
+            source="interview_assignment",
+            kind="interview_panel_assigned",
+            subject_type="interview",
+            subject_key=interview_id,
+        )
+    return {"company_code": company, **result}
+
+
+@app.post("/dashboard/prehire/interviews/{interview_id}/actions/send-video-invitation")
+def dashboard_prehire_interview_send_video_invitation(
+    interview_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Send/resend/retry the async video invitation via the canonical video path."""
+    company = context["company_code"]
+    interview, presentation = _presented_interview(context, interview_id)
+    require_interview_company_operator(context, action="send_video_invitation")
+    allowed = {"send_video_invitation", "resend_video_link", "retry_video_invitation", "reopen_invitation"}
+    if not allowed.intersection(set(presentation.get("allowed_actions") or [])):
+        raise HTTPException(status_code=409, detail={"error": "action_not_allowed", "action": "send_video_invitation"})
+    if str(interview.get("interview_type") or "").lower() != "async_video":
+        raise HTTPException(status_code=422, detail={"error": "not_async_video_interview"})
+    application = dashboard_application_or_404(str(interview.get("app_key") or ""), company, context)
+    require_live_candidate_communication(application, kind="video_interview", expected_company_code=company)
+    actor = actor_context_for_hr_user(context.get("hr_user"), company_code=company, hr_phone=context.get("hr_phone"))
+    payload = DashboardVideoInterviewRequest()
+    created = create_or_resume_async_video_interview(application, payload, actor_context={**actor, "actor_role": context.get("actor_role") or actor.get("actor_role")})
+    current = created["interview"]
+    public_link = created["public_link"]
+    body = body if isinstance(body, dict) else {}
+    result = send_async_video_interview_invite(
+        application,
+        current,
+        public_link,
+        account_id=str(body.get("account_id") or "default"),
+        preferred_channel=body.get("preferred_channel"),
+        actor_context={**actor, "actor_role": context.get("actor_role") or actor.get("actor_role")},
+        note=body.get("message"),
+    )
+    return {"company_code": company, **result}
 
 
 @app.get("/dashboard/prehire/interviews/{interview_id}/responses/{response_id}/video")
@@ -46761,6 +53367,7 @@ def dashboard_prehire_video_interview_response_video(
     interview = fetch_candidate_interview(interview_id, company)
     if not interview:
         raise HTTPException(status_code=404, detail={"error": "interview_not_found"})
+    require_interview_assignment_scope(context, company_code=company, interview_id=interview_id)
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -46790,6 +53397,12 @@ def dashboard_prehire_video_interview_transcript_retry(
     interview = fetch_candidate_interview(interview_id, company)
     if not interview:
         raise HTTPException(status_code=404, detail={"error": "interview_not_found"})
+    require_interview_assignment_scope(context, company_code=company, interview_id=interview_id)
+    if interview_actor_is_assignment_scoped(context):
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "action_not_allowed", "action": "retry_transcripts", "role": dashboard_context_role_key(context)},
+        )
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -46862,12 +53475,30 @@ def internal_process_video_interview_transcripts(
 def dashboard_prehire_assessments(
     status: str | None = None,
     position: str | None = None,
+    needs_review: bool = Query(default=False),
     limit: int = Query(default=100, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     context: dict[str, Any] = Depends(assessments_dashboard_context),
 ):
     company = context["company_code"]
-    return dashboard_assessments_payload(company, status=status, position=position, limit=limit, offset=offset)
+    # Operational badges, attempt totals, average, and opened lists share detail scope.
+    detail_vis_sql, detail_vis_params = prehire_visibility_assignment_sql(context, surface="detail", kind="assessments")
+    import prehire_visibility as _pv
+
+    payload = dashboard_assessments_payload(
+        company,
+        status=status,
+        position=position,
+        needs_review=bool(needs_review),
+        limit=limit,
+        offset=offset,
+        visibility_sql=detail_vis_sql or None,
+        visibility_params=detail_vis_params or None,
+        summary_visibility_sql=detail_vis_sql or None,
+        summary_visibility_params=detail_vis_params or None,
+    )
+    payload.update(_pv.visibility_meta(prehire_visibility_plan_for_context(context, surface="detail")))
+    return payload
 
 
 @app.get("/dashboard/prehire/assessments/config")
@@ -47378,7 +54009,8 @@ def dashboard_prehire_assessment_resend(
     attempt = assessment_attempt_by_id(attempt_id, company)
     if not attempt:
         raise HTTPException(status_code=404, detail={"error": "assessment_attempt_not_found"})
-    application = dashboard_application_or_404(str(attempt.get("app_key") or ""), company)
+    application = dashboard_application_or_404(str(attempt.get("app_key") or ""), company, context)
+    require_live_candidate_communication(application, kind="assessment_resend", expected_company_code=company)  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
     payload = request or DashboardCandidateMessage()
     result = resend_assessment(
         application,
@@ -47388,7 +54020,7 @@ def dashboard_prehire_assessment_resend(
         requested_by=assessment_dashboard_actor_id(context),
     )
     if not result.get("ok"):
-        raise HTTPException(status_code=409, detail={"error": result.get("error") or "assessment_resend_failed"})
+        raise HTTPException(status_code=409, detail=assessment_error_envelope(str(result.get("error") or "assessment_resend_failed")))
     return result
 
 
@@ -47440,6 +54072,36 @@ def dashboard_prehire_assessment_review(
             attempt = dict(row)
             if attempt.get("status") != "completed":
                 raise HTTPException(status_code=409, detail={"error": "assessment_not_completed"})
+            if str(attempt.get("review_status") or "") == "reviewed":
+                return {"ok": True, "attempt": assessment_attempt_summary(attempt), "idempotent_replay": True}
+            import concurrency_safety as _cs
+
+            try:
+                _cs.assert_fresh(
+                    current_version=attempt.get("version"),
+                    expected_version=payload.expected_version,
+                    current_updated_at=attempt.get("updated_at"),
+                    expected_updated_at=payload.expected_updated_at,
+                    last_changed_by={
+                        "user_id": attempt.get("reviewed_by_user_id") or attempt.get("updated_by_user_id"),
+                    },
+                    entity_type="assessment_review",
+                    entity_id=str(attempt_id),
+                    code_version="stale_assessment_review",
+                    code_updated_at="stale_assessment_review",
+                    require_token=True,
+                )
+            except _cs.ConcurrencyError as exc:
+                raise HTTPException(status_code=exc.http_status, detail=exc.as_detail()) from exc
+            cur.execute(
+                """
+                SELECT 1 FROM assessment_reports WHERE attempt_id=%s LIMIT 1
+                """,
+                (attempt_id,),
+            )
+            has_report = cur.fetchone() is not None
+            if not has_report and attempt.get("percent") is None:
+                raise HTTPException(status_code=409, detail={"error": "report_not_ready", "message": "The report is not ready yet. Wait for scoring to finish before reviewing."})
             cur.execute(
                 """
                 UPDATE assessment_attempts
@@ -47486,9 +54148,19 @@ def dashboard_notification_item(
     action: str,
     page: str,
     metadata: dict[str, Any] | None = None,
+    audience: str = "company",
+    source: str | None = None,
 ) -> dict[str, Any] | None:
     if count <= 0:
         return None
+    import prehire_team_directory as _td
+
+    resolved_audience = audience if audience in {"personal", "company"} else "company"
+    audit = _td.notification_audit_fields(
+        audience=resolved_audience,
+        source=source or (isinstance(metadata, dict) and metadata.get("source")) or None,
+        kind=kind,
+    )
     return {
         "kind": kind,
         "title": title,
@@ -47496,6 +54168,9 @@ def dashboard_notification_item(
         "severity": severity,
         "action": action,
         "page": page,
+        "audience": audit["audience"],
+        "notification_scope": audit["notification_scope"],
+        "source": audit["source"],
         "metadata": json_safe(metadata or {}),
     }
 
@@ -47524,8 +54199,10 @@ REPORT_STATUS_LABELS = {
     "offered": "Offer stage",
     "hired": "Hired",
     "rejected": "Not selected",
-    "pending": "Pending",
-    "sent": "Sent",
+    "pending": "Queued",
+    "sent": "Send accepted",
+    "send_accepted": "Send accepted",
+    "queued": "Queued",
     "started": "Started",
     "in_progress": "In progress",
     "completed": "Completed",
@@ -47536,6 +54213,7 @@ REPORT_STATUS_LABELS = {
     "no_show": "No-show",
     "passed": "Passed",
     "failed": "Needs follow-up",
+    "intentionally_skipped": "Intentionally skipped",
     "recovered": "",
     "not_added": "Not added",
 }
@@ -47791,6 +54469,9 @@ def prehire_report_export_rows(company: str, report_type: str):
             (company,),
         )
     elif report_type == "roles":
+        import jobs_queue_contract as _jobs_contract
+
+        _roles_effective_status = _jobs_contract.effective_job_status_sql("p.status")
         cur.execute(
             f"""
             WITH app_stats AS (
@@ -47799,7 +54480,7 @@ def prehire_report_export_rows(company: str, report_type: str):
                 a.position_code,
                 COALESCE(MAX(a.position_title), a.position_code) AS position_title,
                 COUNT(*) AS application_count,
-                COUNT(*) FILTER (WHERE a.status NOT IN ('hired','rejected')) AS active_count,
+                COUNT(*) FILTER (WHERE {_prehire_overview.role_active_predicate("a")}) AS active_count,
                 COUNT(*) FILTER (WHERE {_prehire_overview.ready_for_review_predicate("a")}) AS ready_for_review,
                 MAX(a.updated_at) AS latest_application_at
               FROM applications a
@@ -47810,7 +54491,11 @@ def prehire_report_export_rows(company: str, report_type: str):
               COALESCE(p.title, s.position_title, p.position_code, s.position_code) AS job,
               COALESCE(p.position_code, s.position_code) AS position_code,
               p.apply_code,
-              COALESCE(p.status, CASE WHEN COALESCE(s.active_count, 0) > 0 THEN 'open' ELSE 'closed' END) AS status,
+              CASE
+                WHEN p.position_code IS NOT NULL THEN {_roles_effective_status}
+                WHEN COALESCE(s.active_count, 0) > 0 THEN 'open'
+                ELSE 'closed'
+              END AS status,
               COALESCE(s.application_count, 0) AS applications,
               COALESCE(s.active_count, 0) AS active_applications,
               COALESCE(s.ready_for_review, 0) AS ready_for_review,
@@ -47927,7 +54612,14 @@ def prehire_report_export_headers(report_type: str) -> list[str]:
     }.get(report_type, [])
 
 
-def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
+def dashboard_notification_action_items(
+    company: str,
+    *,
+    actor_user_id: str | None = None,
+    actor_phone: str | None = None,
+    actor_email: str | None = None,
+    scope: str = "company",
+) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     enabled_modules = notification_enabled_modules(company)
     pre_hiring_enabled = "pre_hiring" in enabled_modules
@@ -47935,9 +54627,12 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
     compliance_alerts_enabled = "compliance" in enabled_modules
     reviewable = reviewable_application_predicate("a")
     company_hr_phones = [user["phone"] for user in hr_admin_users(company)]
+    actor = str(actor_user_id or "").strip()
+    phone = digits(actor_phone)
+    mine = scope == "mine"
     with db_connect() as conn:
         with conn.cursor() as cur:
-            if onboarding_enabled:
+            if onboarding_enabled and not mine:
                 cur.execute(
                     """
                     SELECT COALESCE(NULLIF(document_type, ''), item_id) AS doc_key,
@@ -47964,57 +54659,64 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                         severity="medium",
                         action="Follow up with employee",
                         page="onboarding",
+                        audience="company",
                         metadata={"document_type": row.get("doc_key"), "label": label, "module_group": "onboarding"},
                     )
                     if item:
                         items.append(item)
             if pre_hiring_enabled:
-                cur.execute(
-                    f"""
-                    SELECT
-                      COUNT(*) FILTER (
-                        WHERE lower(COALESCE(ode.message_kind, ode.subject_type, '')) LIKE '%%assessment%%'
-                           OR lower(COALESCE(ode.subject_type, '')) LIKE '%%assessment%%'
-                      ) AS assessment_failed_count,
-                      COUNT(*) FILTER (
-                        WHERE lower(COALESCE(ode.message_kind, ode.subject_type, '')) LIKE '%%interview%%'
-                           OR lower(COALESCE(ode.subject_type, '')) LIKE '%%interview%%'
-                      ) AS interview_failed_count
-                    FROM outbound_delivery_events ode
-                    JOIN applications a ON a.app_key=ode.subject_key
-                    WHERE ode.status='failed'
-                      AND ode.created_at >= now() - interval '7 days'
-                      AND a.company_code=%s
-                      AND {reviewable}
-                    """,
-                    (company,),
-                )
-                delivery_counts = cur.fetchone() or {}
-                assessment_failed = int(delivery_counts.get("assessment_failed_count") or 0) if company_has_module(company, "assessments") else 0
-                interview_failed = int(delivery_counts.get("interview_failed_count") or 0)
-                item = dashboard_notification_item(
-                    kind="assessment_delivery_failed",
-                    title="Assessment delivery failed",
-                    count=assessment_failed,
-                    severity="high",
-                    action="Contact candidate or send the assessment another way",
-                    page="assessments",
-                    metadata={"window": "7_days", "module_group": "delivery_issues"},
-                )
-                if item:
-                    items.append(item)
-                item = dashboard_notification_item(
-                    kind="interview_invite_failed",
-                    title="Interview invite failed",
-                    count=interview_failed,
-                    severity="high",
-                    action="Contact candidate or resend the interview invite",
-                    page="interviews",
-                    metadata={"window": "7_days", "module_group": "delivery_issues"},
-                )
-                if item:
-                    items.append(item)
-                if company_hr_phones:
+                # Shared operational delivery alerts stay company-level.
+                if not mine:
+                    cur.execute(
+                        f"""
+                        SELECT
+                          COUNT(*) FILTER (
+                            WHERE lower(COALESCE(ode.message_kind, ode.subject_type, '')) LIKE '%%assessment%%'
+                               OR lower(COALESCE(ode.subject_type, '')) LIKE '%%assessment%%'
+                          ) AS assessment_failed_count,
+                          COUNT(*) FILTER (
+                            WHERE lower(COALESCE(ode.message_kind, ode.subject_type, '')) LIKE '%%interview%%'
+                               OR lower(COALESCE(ode.subject_type, '')) LIKE '%%interview%%'
+                          ) AS interview_failed_count
+                        FROM outbound_delivery_events ode
+                        JOIN applications a ON a.app_key=ode.subject_key
+                        WHERE ode.status='failed'
+                          AND ode.created_at >= now() - interval '7 days'
+                          AND a.company_code=%s
+                          AND {reviewable}
+                        """,
+                        (company,),
+                    )
+                    delivery_counts = cur.fetchone() or {}
+                    assessment_failed = int(delivery_counts.get("assessment_failed_count") or 0) if company_has_module(company, "assessments") else 0
+                    interview_failed = int(delivery_counts.get("interview_failed_count") or 0)
+                    item = dashboard_notification_item(
+                        kind="assessment_delivery_failed",
+                        title="Assessment delivery failed",
+                        count=assessment_failed,
+                        severity="high",
+                        action="Contact candidate or send the assessment another way",
+                        page="assessments",
+                        audience="company",
+                        metadata={"window": "7_days", "module_group": "delivery_issues", "shared_alert": True},
+                    )
+                    if item:
+                        items.append(item)
+                    item = dashboard_notification_item(
+                        kind="interview_invite_failed",
+                        title="Interview invite failed",
+                        count=interview_failed,
+                        severity="high",
+                        action="Contact candidate or resend the interview invite",
+                        page="interviews",
+                        audience="company",
+                        metadata={"window": "7_days", "module_group": "delivery_issues", "shared_alert": True},
+                    )
+                    if item:
+                        items.append(item)
+
+                approval_phones = [phone] if mine and phone else company_hr_phones
+                if approval_phones:
                     cur.execute(
                         """
                         SELECT COUNT(*) AS pending_count
@@ -48024,7 +54726,7 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                           AND admin_phone = ANY(%s)
                           AND action_type = ANY(%s)
                         """,
-                        (company_hr_phones, PREHIRE_DASHBOARD_ACTION_TYPES),
+                        (approval_phones, PREHIRE_DASHBOARD_ACTION_TYPES),
                     )
                     pending_count = int((cur.fetchone() or {}).get("pending_count") or 0)
                     item = dashboard_notification_item(
@@ -48034,26 +54736,45 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                         severity="high",
                         action="Review and approve or cancel the pending action",
                         page="ai",
-                        metadata={"module_group": "pre_hiring"},
+                        audience="personal" if mine else "company",
+                        metadata={"module_group": "pre_hiring", "assignee_scoped": bool(mine)},
                     )
                     if item:
                         items.append(item)
-            if pre_hiring_enabled:
-                cur.execute(
-                    """
-                    SELECT COUNT(*) AS completed_count
-                    FROM applications
-                    WHERE company_code=%s
-                      AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
-                      AND (
-                        screening_status='complete'
-                        OR raw_json->'screening'->>'status'='complete'
-                        OR raw_json->'assessment'->>'status'='completed'
-                      )
-                      AND updated_at >= CURRENT_DATE
-                    """,
-                    (company,),
-                )
+
+                if mine and actor:
+                    cur.execute(
+                        """
+                        SELECT COUNT(*) AS completed_count
+                        FROM applications
+                        WHERE company_code=%s
+                          AND CAST(owner_user_id AS text)=%s
+                          AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                          AND (
+                            screening_status='complete'
+                            OR raw_json->'screening'->>'status'='complete'
+                            OR raw_json->'assessment'->>'status'='completed'
+                          )
+                          AND updated_at >= CURRENT_DATE
+                        """,
+                        (company, actor),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT COUNT(*) AS completed_count
+                        FROM applications
+                        WHERE company_code=%s
+                          AND (cv_received IS TRUE OR jsonb_typeof(raw_json->'cv') = 'object')
+                          AND (
+                            screening_status='complete'
+                            OR raw_json->'screening'->>'status'='complete'
+                            OR raw_json->'assessment'->>'status'='completed'
+                          )
+                          AND updated_at >= CURRENT_DATE
+                        """,
+                        (company,),
+                    )
                 completed_screening = int((cur.fetchone() or {}).get("completed_count") or 0)
                 item = dashboard_notification_item(
                     kind="screening_completed_today",
@@ -48062,11 +54783,67 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                     severity="low",
                     action="Review completed candidates",
                     page="candidates",
+                    audience="personal" if mine else "company",
                     metadata={"window": "today", "module_group": "completions"},
                 )
                 if item:
                     items.append(item)
-            if compliance_alerts_enabled:
+
+                if mine and actor:
+                    cur.execute(
+                        """
+                        SELECT COUNT(*) AS overdue_count
+                        FROM application_recruiter_tasks
+                        WHERE company_code=%s
+                          AND CAST(assigned_to_user_id AS text)=%s
+                          AND status='open'
+                          AND due_at IS NOT NULL
+                          AND due_at < NOW()
+                        """,
+                        (company, actor),
+                    )
+                    overdue = int((cur.fetchone() or {}).get("overdue_count") or 0)
+                    item = dashboard_notification_item(
+                        kind="overdue_task_assigned",
+                        title="Overdue tasks assigned to you",
+                        count=overdue,
+                        severity="high",
+                        action="Complete or reassign the overdue task",
+                        page="candidates",
+                        audience="personal",
+                        metadata={"module_group": "personal_work", "assignee_scoped": True},
+                    )
+                    if item:
+                        items.append(item)
+
+                    cur.execute(
+                        """
+                        SELECT COUNT(DISTINCT ci.interview_id) AS feedback_count
+                        FROM candidate_interview_assignments cia
+                        JOIN candidate_interviews ci ON ci.interview_id=cia.interview_id
+                        WHERE cia.company_code=%s
+                          AND LOWER(COALESCE(cia.assignee_user_id, '')) = LOWER(%s)
+                          AND COALESCE(NULLIF(ci.human_feedback_status, ''), NULLIF(ci.feedback_status, ''), 'notes_pending')
+                                <> 'feedback_complete'
+                          AND COALESCE(ci.status, '') NOT IN ('cancelled', 'canceled')
+                        """,
+                        (company, actor),
+                    )
+                    feedback_count = int((cur.fetchone() or {}).get("feedback_count") or 0)
+                    item = dashboard_notification_item(
+                        kind="interview_feedback_needed",
+                        title="Interview feedback needed",
+                        count=feedback_count,
+                        severity="medium",
+                        action="Submit interview feedback",
+                        page="interviews",
+                        audience="personal",
+                        metadata={"module_group": "personal_work", "assignee_scoped": True},
+                    )
+                    if item:
+                        items.append(item)
+
+            if compliance_alerts_enabled and not mine:
                 cur.execute(
                     """
                     SELECT
@@ -48095,7 +54872,8 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                     severity="high",
                     action="Start renewal and remind the employee",
                     page="compliance",
-                    metadata={"status": "expired", "module_group": "compliance"},
+                    audience="company",
+                    metadata={"status": "expired", "module_group": "compliance", "shared_alert": True},
                 )
                 if item:
                     items.append(item)
@@ -48106,7 +54884,8 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                     severity="medium",
                     action="Remind the employee to renew",
                     page="compliance",
-                    metadata={"status": "expiring_soon", "module_group": "compliance"},
+                    audience="company",
+                    metadata={"status": "expiring_soon", "module_group": "compliance", "shared_alert": True},
                 )
                 if item:
                     items.append(item)
@@ -48117,12 +54896,75 @@ def dashboard_notification_action_items(company: str) -> list[dict[str, Any]]:
                     severity="medium",
                     action="Review the document and mark it reviewed",
                     page="compliance",
-                    metadata={"status": "needs_review", "module_group": "compliance"},
+                    audience="company",
+                    metadata={"status": "needs_review", "module_group": "compliance", "shared_alert": True},
                 )
                 if item:
                     items.append(item)
     severity_order = {"high": 0, "medium": 1, "low": 2}
     return sorted(items, key=lambda item: (severity_order.get(str(item.get("severity")), 9), -int(item.get("count") or 0)))[:12]
+
+
+def get_cv_evidence_health(company_code: str, position_code: str | None = None) -> dict[str, Any]:
+    company = str(company_code or "").strip().upper()
+    position = str(position_code or "").strip().upper() or None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _candidate_cv_evidence.ensure_schema(cur)
+            health = _candidate_cv_evidence.health_counts(
+                cur,
+                company_code=company,
+                position_code=position,
+                production_only=True,
+            )
+            params: list[Any] = [company]
+            position_sql = ""
+            if position:
+                position_sql = " AND upper(position_code)=%s"
+                params.append(position)
+            cur.execute(
+                f"""
+                SELECT count(DISTINCT position_code) AS count
+                FROM ranking_runs
+                WHERE company_code=%s {position_sql}
+                  AND stale_reason IS NOT NULL
+                  AND created_at=(
+                    SELECT max(r2.created_at) FROM ranking_runs r2
+                    WHERE r2.company_code=ranking_runs.company_code
+                      AND r2.position_code=ranking_runs.position_code
+                  )
+                """,
+                tuple(params),
+            )
+            stale_jobs = int((cur.fetchone() or {}).get("count") or 0)
+            cur.execute(
+                """
+                SELECT count(*) AS count
+                FROM cv_extraction_finalizations
+                WHERE company_code=%s AND status='failed'
+                  AND finalized_at >= now() - interval '24 hours'
+                """,
+                (company,),
+            )
+            extraction_failures = int((cur.fetchone() or {}).get("count") or 0)
+    return {
+        **health,
+        "position_code": position,
+        "stale_ranking_jobs": stale_jobs,
+        "extraction_failures_24h": extraction_failures,
+        "cv_processing_needed": int(health.get("missing") or 0)
+        + int(health.get("pending") or 0)
+        + int(health.get("failed") or 0),
+    }
+
+
+@app.get("/dashboard/prehire/positions/{position_code}/cv-evidence-health")
+def dashboard_cv_evidence_health(
+    position_code: str,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    require_jobs_permission(context, "jobs.read")
+    return json_safe(get_cv_evidence_health(context["company_code"], position_code))
 
 
 @app.get("/dashboard/prehire/rank")
@@ -48131,28 +54973,254 @@ def dashboard_prehire_rank(
     position: str | None = None,
     status: str | None = None,
     top_n: int = Query(default=10, ge=1, le=50),
+    force: bool = Query(default=False),
+    mode: str | None = Query(default=None),
+    run_id: str | None = None,
+    locale: str = Query(default="en"),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
+    """Job-scoped Ranking workspace (R0–R3). Requires exact position.
+
+    mode=current|latest loads the latest valid current run without creating a new
+    ranking when one already exists. force=true recalculates.
+    """
     company = context["company_code"]
+    position_code = (position or "").strip()
+    detail_vis_sql, detail_vis_params = prehire_visibility_assignment_sql(
+        context, surface="detail", kind="applications"
+    )
+    if not position_code:
+        return {
+            "ok": False,
+            "error": "job_required",
+            "message": "Select an exact job to load the complete application pool.",
+            "company_code": company,
+            "advisory": True,
+            "hr_decision_maker": True,
+            "candidates": [],
+            "items": [],
+            "needs_run": True,
+            "total_matching": 0,
+            "matching_count": 0,
+            "rankable_count": 0,
+            "eligible_count": 0,
+        }
+
+    def _poisoned_by_ck_infra(run_payload: dict[str, Any]) -> bool:
+        for item in list(run_payload.get("items") or []):
+            if not isinstance(item, dict):
+                continue
+            bag = list(item.get("required_missing") or []) + list(item.get("missing_data") or [])
+            for code in bag:
+                text = str(code or "").lower()
+                if "ck_ranking_reader_failed" in text or "undefinedfunction" in text:
+                    return True
+        return False
+
+    mode_norm = str(mode or "").strip().lower()
+    if run_id or mode_norm in {"current", "latest"}:
+        try:
+            run = _candidate_ranking.get_ranking_run(
+                sys.modules[__name__],
+                company_code=company,
+                position_code=position_code,
+                run_id=run_id,
+                locale=locale,
+            )
+            if _poisoned_by_ck_infra(run) and not run_id:
+                # Historical CK reader infra failure voided scores; recalculate once.
+                force = True
+            else:
+                shaped = _candidate_ranking.to_legacy_rank_candidates_shape(run, top_n=top_n)
+                _ranking_presentation.attach_presentations(
+                    shaped,
+                    locale=locale,
+                    orch=sys.modules[__name__],
+                    company_code=company,
+                )
+                shaped["needs_run"] = False
+                shaped["loaded_mode"] = "current"
+                # Assignment-scoped actors must not see company-wide stored pools.
+                # Explicit force always recalculates.
+                if not detail_vis_sql and not force:
+                    import prehire_visibility as _pv
+
+                    shaped.update(_pv.visibility_meta(prehire_visibility_plan_for_context(context, surface="detail")))
+                    return {
+                        "company_code": company,
+                        "evidence_health": json_safe(get_cv_evidence_health(company, position_code)),
+                        **json_safe(shaped),
+                    }
+                force = True
+        except _candidate_ranking.RankingError as exc:
+            if str(exc.code) == "ranking_run_not_found" and mode_norm in {"current", "latest"} and not force:
+                return {
+                    "ok": True,
+                    "company_code": company,
+                    "position_code": position_code,
+                    "needs_run": True,
+                    "candidates": [],
+                    "items": [],
+                    "total_matching": 0,
+                    "advisory": True,
+                    "hr_decision_maker": True,
+                    "message": "No current ranking result for this job yet. Run ranking to create one.",
+                    "evidence_health": json_safe(get_cv_evidence_health(company, position_code)),
+                }
+            if run_id:
+                return {
+                    "ok": False,
+                    "error": exc.code,
+                    "message": str(exc) or exc.code,
+                    "company_code": company,
+                    "advisory": True,
+                }
     result = rank_candidates(
         {
             "query": (q or "").strip(),
-            "position": (position or "").strip(),
+            "position": position_code,
             "status": (status or "").strip(),
             "top_n": top_n,
+            "force": force,
+            "locale": locale,
+            "actor_user_id": str(context.get("user_id") or context.get("actor_user_id") or "") or None,
+            "visibility_sql": detail_vis_sql or None,
+            "visibility_params": detail_vis_params or None,
         },
         company_code=company,
     )
-    return {"company_code": company, **json_safe(result)}
+    if isinstance(result, dict):
+        result["needs_run"] = False
+        result["loaded_mode"] = "recalculated" if force else "computed"
+        import prehire_visibility as _pv
+
+        result.update(_pv.visibility_meta(prehire_visibility_plan_for_context(context, surface="detail")))
+    return {
+        "company_code": company,
+        "evidence_health": json_safe(get_cv_evidence_health(company, position_code)),
+        **json_safe(result),
+    }
+
+
+@app.post("/dashboard/prehire/rank/recalculate")
+def dashboard_prehire_rank_recalculate(
+    payload: dict[str, Any] = Body(default={}),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Manual recalculation for a job ranking run (R3). Read-only wrt lifecycle."""
+    company = context["company_code"]
+    position_code = str(payload.get("position") or "").strip()
+    if not position_code:
+        return {"ok": False, "error": "job_required", "company_code": company}
+    result = rank_candidates(
+        {
+            "position": position_code,
+            "query": str(payload.get("query") or "").strip(),
+            "top_n": int(payload.get("top_n") or 50),
+            "force": True,
+            "locale": str(payload.get("locale") or "en"),
+            "actor_user_id": str(context.get("user_id") or "") or None,
+        },
+        company_code=company,
+    )
+    return {
+        "company_code": company,
+        "evidence_health": json_safe(get_cv_evidence_health(company, position_code)),
+        **json_safe(result),
+    }
+
+
+@app.get("/dashboard/prehire/positions/{position_code}/ranking-evidence-policy")
+def dashboard_get_ranking_evidence_policy(
+    position_code: str,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Tenant-scoped Ranking evidence policy for the HR editor."""
+    require_jobs_permission(context, "jobs.read")
+    company = context["company_code"]
+    try:
+        payload = _candidate_ranking.get_job_evidence_policy(
+            sys.modules[__name__],
+            company_code=company,
+            position_code=position_code,
+        )
+        return json_safe(payload)
+    except _candidate_ranking.RankingError as exc:
+        return {"ok": False, "error": exc.code, "message": str(exc) or exc.code, "company_code": company}
+
+
+@app.post("/dashboard/prehire/positions/{position_code}/ranking-evidence-policy")
+def dashboard_approve_ranking_evidence_policy(
+    position_code: str,
+    payload: dict[str, Any] = Body(default={}),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Approve a new criteria-set version that changes Ranking evidence policy.
+
+    Requires ``jobs.publish``. Marks current Ranking runs stale without auto-recalc.
+    """
+    require_jobs_permission(context, "jobs.publish")
+    company = context["company_code"]
+    actor = str(context.get("user_id") or "").strip()
+    if not actor:
+        return {"ok": False, "error": "actor_required", "company_code": company}
+    evidence_policy = payload.get("evidence_policy") if isinstance(payload.get("evidence_policy"), dict) else payload
+    expected_version = payload.get("expected_version")
+    try:
+        expected = int(expected_version) if expected_version is not None else None
+    except Exception:
+        return {"ok": False, "error": "invalid_expected_version", "company_code": company}
+    try:
+        approved = _candidate_ranking.approve_job_evidence_policy(
+            sys.modules[__name__],
+            company_code=company,
+            position_code=position_code,
+            evidence_policy=evidence_policy,
+            actor_user_id=actor,
+            expected_version=expected,
+            job_id=str(payload.get("job_id") or "") or None,
+        )
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    write_admin_audit(
+                        cur,
+                        context,
+                        "ranking_evidence_policy_approved",
+                        summary=f"Approved Ranking evidence policy for {str(position_code).upper()}",
+                        target_type="position",
+                        target=str(position_code).upper(),
+                        details={
+                            "evidence_policy": approved.get("evidence_policy"),
+                            "stale_reason": approved.get("stale_reason"),
+                            "criteria_version": (approved.get("criteria_set") or {}).get("version"),
+                        },
+                    )
+                conn.commit()
+        except Exception:
+            logger.exception("ranking_evidence_policy_audit_failed")
+        return json_safe(approved)
+    except _candidate_ranking.RankingError as exc:
+        return {"ok": False, "error": exc.code, "message": str(exc) or exc.code, "company_code": company}
 
 
 @app.get("/dashboard/prehire/notifications")
 def dashboard_prehire_notifications(
     status: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
+    scope: str | None = Query(default=None, description="mine | company"),
     context: dict[str, Any] = Depends(workspace_dashboard_context),
 ):
+    import prehire_personal_work as _ppw
+    import prehire_visibility as _pv
+
     company = context["company_code"]
+    role = dashboard_context_role_key(context)
+    try:
+        resolved_scope = _ppw.resolve_work_scope(requested=scope, role=role, default_mine=True)
+    except _ppw.PersonalWorkScopeError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+
     enabled_modules = notification_enabled_modules(company)
     where = ["a.company_code=%s", reviewable_application_predicate("a")]
     params: list[Any] = [company]
@@ -48163,6 +55231,29 @@ def dashboard_prehire_notifications(
         params.append(status)
     else:
         where.append("(ode.status <> 'sent' OR ode.last_error IS NOT NULL)")
+
+    actor = str(context.get("actor_user_id") or "").strip()
+    if resolved_scope == "mine" and actor:
+        where.append(
+            """(
+              CAST(a.owner_user_id AS text)=%s
+              OR EXISTS (
+                SELECT 1 FROM positions p
+                WHERE p.company_code=a.company_code AND p.position_code=a.position_code
+                  AND (
+                    CAST(p.recruiter_user_id AS text)=%s
+                    OR CAST(p.hiring_manager_user_id AS text)=%s
+                  )
+              )
+              OR EXISTS (
+                SELECT 1 FROM candidate_interview_assignments cia
+                WHERE cia.company_code=a.company_code AND cia.app_key=a.app_key
+                  AND LOWER(COALESCE(cia.assignee_user_id, '')) = LOWER(%s)
+              )
+            )"""
+        )
+        params.extend([actor, actor, actor, actor])
+
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -48171,7 +55262,7 @@ def dashboard_prehire_notifications(
                        ode.subject_type, ode.subject_key, ode.status, ode.last_error,
                        ode.message_kind, ode.sent_at, ode.failed_at, ode.created_at, ode.updated_at,
                        a.app_key, a.position_code, a.position_title, c.name AS candidate_name,
-                       c.email AS candidate_email
+                       c.email AS candidate_email, CAST(a.owner_user_id AS text) AS owner_user_id
                 FROM outbound_delivery_events ode
                 JOIN applications a ON a.app_key=ode.subject_key
                 LEFT JOIN candidates c ON c.phone=a.phone
@@ -48185,15 +55276,46 @@ def dashboard_prehire_notifications(
             for row in cur.fetchall():
                 payload = json_safe(dict(row))
                 payload["dashboard_status"] = dashboard_delivery_status(dict(row))
+                payload["audience"] = "personal" if resolved_scope == "mine" else "company"
+                payload["notification_scope"] = resolved_scope
                 rows.append(payload)
+
+    plan = _pv.resolve_visibility_plan(
+        policy=company_prehire_visibility_policy(company),
+        role=role,
+        surface="detail",
+    )
+    action_items = dashboard_notification_action_items(
+        company,
+        actor_user_id=actor,
+        actor_phone=str(context.get("actor_phone") or context.get("hr_phone") or ""),
+        actor_email=str(context.get("actor_email") or ""),
+        scope=resolved_scope,
+    )
     return {
         "company_code": company,
         "enabled_modules": sorted(enabled_modules),
+        "scope": resolved_scope,
+        "work_scope": resolved_scope,
+        "can_view_company_work": bool(plan.get("oversight")),
         "notification_policy": {
-            "principle": "Notifications interrupt HR only for urgent or important alerts; normal work stays in module queues.",
+            "principle": "Personal alerts route to assignees; shared operational alerts stay company-level.",
             "module_scope": "pre_hiring_dashboard_only",
             "disabled_module_alerts": "hidden",
             "routine_activity": "activity_audit_only",
+            "personal_notify": [
+                "ai_action_needs_approval",
+                "overdue_task_assigned",
+                "interview_feedback_needed",
+                "screening_completed_today",
+            ],
+            "company_notify": [
+                "assessment_delivery_failed",
+                "interview_invite_failed",
+                "compliance_document_expired",
+                "compliance_document_expiring",
+                "compliance_needs_review",
+            ],
             "hr_notify": [
                 "assessment_delivery_failed",
                 "interview_invite_failed",
@@ -48201,31 +55323,137 @@ def dashboard_prehire_notifications(
                 "review_completed_screening",
             ],
         },
-        "action_items": dashboard_notification_action_items(company),
+        "action_items": action_items,
         "notifications": rows,
+        **_pv.visibility_meta(plan),
     }
 
 
 @app.get("/dashboard/prehire/reports")
-def dashboard_prehire_reports(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_reports(
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    position_code: str | None = Query(default=None),
+    locale: str = Query(default="en"),
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    """Canonical Reports contract (reports-contract-v2). Read-only."""
+    import prehire_visibility as _pv
+    import reports_metrics as _reports_metrics
+
     company = context["company_code"]
-    return prehire_report_summary_payload(company)
+    app_vis_sql, app_vis_params = prehire_visibility_assignment_sql(
+        context, surface="detail", kind="applications"
+    )
+    jobs_vis_sql, jobs_vis_params = prehire_visibility_assignment_sql(
+        context, surface="detail", kind="jobs"
+    )
+    plan = prehire_visibility_plan_for_context(context, surface="detail")
+    # date/position filters retained for API compatibility; v2 overview is current snapshot.
+    _ = (date_from, date_to, position_code)
+    payload = _reports_metrics.build_canonical_reports_payload(
+        company=company,
+        db_connect=db_connect,
+        reviewable_predicate=reviewable_application_predicate,
+        assessments_enabled=company_has_module(company, "assessments"),
+        interviews_enabled=company_has_module(company, "interviews"),
+        locale=locale,
+        visibility_sql=app_vis_sql or None,
+        visibility_params=app_vis_params or None,
+        jobs_visibility_sql=jobs_vis_sql or None,
+        jobs_visibility_params=jobs_vis_params or None,
+        visibility_meta=_pv.visibility_meta(plan),
+    )
+    return payload
 
 
 @app.get("/dashboard/prehire/reports/export")
 def dashboard_prehire_report_export(
     report_type: str = Query(..., alias="type"),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    position_code: str | None = Query(default=None),
+    locale: str = Query(default="en"),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
+    """Reports CSV export — same visibility scope as Reports counts."""
+    import reports_v1 as _reports_v1
+
     company = context["company_code"]
-    headers = prehire_report_export_headers(report_type)
-    if not headers:
-        raise HTTPException(status_code=400, detail={"error": "unknown_report_type"})
-    require_entitlement(context, "assessments" if report_type == "assessments" else "pre_hiring", "report.export")
+    assessments_enabled = company_has_module(company, "assessments")
+    interviews_enabled = company_has_module(company, "interviews")
+    export_owner = _reports_v1.EXPORT_TYPE_MODULES.get(report_type)
+    if export_owner and not company_has_module(company, export_owner):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "required_module": export_owner})
+    require_entitlement(context, export_owner or "pre_hiring", "report.export")
+    app_vis_sql, app_vis_params = prehire_visibility_assignment_sql(
+        context, surface="detail", kind="applications"
+    )
+    jobs_vis_sql, jobs_vis_params = prehire_visibility_assignment_sql(
+        context, surface="detail", kind="jobs"
+    )
+    try:
+        filters = _reports_v1.normalize_filters(
+            date_from=date_from,
+            date_to=date_to,
+            position_code=position_code,
+        )
+        headers = _reports_v1.export_headers(
+            report_type,
+            locale=locale,
+            assessments_enabled=assessments_enabled,
+            interviews_enabled=interviews_enabled,
+        )
+        rows = list(
+            _reports_v1.iter_export_rows(
+                sys.modules[__name__],
+                company_code=company,
+                report_type=report_type,
+                filters=filters,
+                assessments_enabled=assessments_enabled,
+                interviews_enabled=interviews_enabled,
+                visibility_sql=app_vis_sql or None,
+                visibility_params=app_vis_params or None,
+                jobs_visibility_sql=jobs_vis_sql or None,
+                jobs_visibility_params=jobs_vis_params or None,
+            )
+        )
+    except _reports_v1.ReportsError as exc:
+        code = 403 if exc.code == "module_disabled" else 400
+        raise HTTPException(status_code=code, detail={"error": exc.code, "message": str(exc)}) from exc
+
+    stamp = f"rpt_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_{uuid.uuid4().hex[:8]}"
+    try:
+        _reports_v1.record_export_audit(
+            sys.modules[__name__],
+            company_code=company,
+            actor_user_id=str(context.get("actor_user_id") or context.get("hr_user") or "") or None,
+            report_type=report_type,
+            filters=filters,
+            row_count=len(rows),
+            report_stamp=stamp,
+        )
+    except Exception:
+        logger.warning("report export audit insert failed", exc_info=True)
+    record_admin_audit(
+        context,
+        "report.exported",
+        summary=f"Exported prehire {report_type} report ({len(rows)} rows).",
+        target_type="report",
+        target=report_type,
+        details={
+            "company_code": company,
+            "report_type": report_type,
+            "row_count": len(rows),
+            "filters": filters,
+            "metric_version": "reports-contract-v2",
+            "report_stamp": stamp,
+        },
+    )
     return csv_stream_response(
-        f"wathefni-prehire-{report_type}.csv",
+        f"wathefni-prehire-{report_type}-{stamp}.csv",
         headers,
-        prehire_report_export_rows(company, report_type),
+        rows,
     )
 
 
@@ -48494,6 +55722,7 @@ def _import_process_one_file(
     default_position_code: str | None = None,
     default_position_title: str | None = None,
     auto_admit_enabled: bool = True,
+    identity_resolution: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Shared per-file import step used by BOTH bulk upload and mailbox sync.
 
@@ -48510,9 +55739,32 @@ def _import_process_one_file(
         "mime_type": mimetypes.guess_type(filename)[0],
         "size_bytes": len(data),
     }
-    candidate_name = meta.get("name") or _parse_candidate_name_from_filename(filename)
-    candidate_email = meta.get("email") or None
-    candidate_phone = meta.get("phone") or None
+    if (
+        str(source or "").strip().lower() in {"email", "email_inbound"}
+        and not identity_resolution
+    ):
+        item_record.update(
+            {
+                "status": "failed",
+                "error": "durable_scan_and_identity_authority_required",
+            }
+        )
+        return item_record
+    candidate_name = (
+        (identity_resolution or {}).get("normalized_full_name")
+        or meta.get("name")
+        or _parse_candidate_name_from_filename(filename)
+    )
+    candidate_email = (
+        (identity_resolution or {}).get("extracted_email")
+        or meta.get("email")
+        or None
+    )
+    candidate_phone = (
+        (identity_resolution or {}).get("extracted_phone")
+        or meta.get("phone")
+        or None
+    )
 
     role = resolve_import_role(
         company_positions,
@@ -48579,6 +55831,7 @@ def _import_process_one_file(
             source_ref=f"{source}:{Path(filename).name}",
             auto_admit=auto_admit,
             admit_reason=admit_reason,
+            identity_resolution=identity_resolution,
         )
     except Exception as exc:  # one bad file must not abort the batch
         result = {"ok": False, "error": f"import_failed:{exc}"}
@@ -48606,6 +55859,28 @@ def _import_process_one_file(
             "file_id": result.get("file_id"),
             "document_id": result.get("document_id"),
         })
+        # WAVE3: additive manual adapter dual-write (flag-gated; live import authoritative).
+        if str(source or "").strip().lower() not in {"email", "email_inbound"}:
+            cur.execute("SAVEPOINT unified_inbound_cv_manual_adapter")
+            try:
+                import inbound_cv_adapters as _inbound_cv_adapters
+
+                _inbound_cv_adapters.adapt_manual_import(
+                    cur,
+                    company_code=company,
+                    batch_id=batch_id,
+                    content_sha256=checksum,
+                    filename=Path(filename).name,
+                    document_id=str(result.get("document_id") or "") or None,
+                    app_key=str(result.get("app_key") or "") or None,
+                    held_status=str(result.get("status") or "") or None,
+                    mime_or_suffix=suffix or str(item_record.get("mime_type") or ""),
+                )
+            except Exception:
+                cur.execute("ROLLBACK TO SAVEPOINT unified_inbound_cv_manual_adapter")
+                logger.exception("unified_inbound_cv_manual_adapter_failed")
+            finally:
+                cur.execute("RELEASE SAVEPOINT unified_inbound_cv_manual_adapter")
     else:
         item_record.update({"status": "failed", "error": result.get("error") or "import_failed"})
     return item_record
@@ -48986,15 +56261,46 @@ def run_mailbox_sync(
     provider: Any = None,
     limit: int = 200,
 ) -> dict[str, Any]:
-    """Reusable sync entrypoint for BOTH manual ('Check now') and scheduled runs.
+    """Reusable sync entrypoint for manual and scheduled mailbox checks.
 
-    Read-only: fetches new messages since the stored cursor, imports CV attachments
-    through the shared import core (held in Needs role / Import review), advances the
-    cursor only on a committed live run, and never sends anything to candidates.
+    Dry-run inspection remains available. Live legacy mailbox ingestion is blocked
+    until it routes attachments through the durable scan and identity authorities.
     """
     company = str(company_code or "").strip().upper()
     if not mailbox_ingestion_enabled():
         return {"ok": False, "skipped": "mailbox_sync_disabled"}
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                import tenant_control_queue_gate as _tc_qg
+
+                queued_epoch = _tc_qg.persist_work_epoch(
+                    cur,
+                    company_code=company,
+                    work_kind="mailbox_sync",
+                    work_ref=str(mailbox_id),
+                    module_key="pre_hiring",
+                )
+                allowed, decision = _tc_qg.gate_or_skip(
+                    cur,
+                    company_code=company,
+                    module_key="pre_hiring",
+                    work_kind="mailbox_sync",
+                    work_ref=str(mailbox_id),
+                    queued_epoch=queued_epoch,
+                    surface="workers",
+                )
+                conn.commit()
+                if not allowed:
+                    return {
+                        "ok": False,
+                        "held": True,
+                        "reason": decision.reason_code,
+                        "correlation_id": decision.audit_correlation_id,
+                        "mailbox_id": mailbox_id,
+                    }
+    except Exception:
+        pass
     connection = get_mailbox_connection(company, mailbox_id)
     if not connection:
         return {"ok": False, "error": "mailbox_not_found"}
@@ -49004,6 +56310,12 @@ def run_mailbox_sync(
     prov = provider or build_mailbox_provider(connection)
     cursor = connection.get("cursor") if isinstance(connection.get("cursor"), dict) else {}
     live = str(connection.get("sync_mode") or "dry_run").strip().lower() == "live"
+    if live:
+        return {
+            "ok": False,
+            "error": "durable_scan_and_identity_authority_required",
+            "mailbox_id": mailbox_id,
+        }
 
     try:
         messages, next_cursor = prov.fetch_new_messages(connection=connection, cursor=cursor)
@@ -49063,7 +56375,9 @@ def run_mailbox_sync(
                         filename=attachment.get("filename"),
                         data=attachment.get("data"),
                         folder_hint=None,  # email folders/labels are not roles
-                        meta={"email": _parse_email_address(sender)},
+                        # Sender is provenance only. Legacy mailbox sync cannot
+                        # bind a candidate until it enters the durable authority path.
+                        meta={},
                         auto_admit_enabled=auto_admit_enabled,
                         seen_checksums=seen_checksums,
                     )
@@ -49606,14 +56920,20 @@ def process_privacy_mailbox_inbound(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def process_postmark_inbound(payload: dict[str, Any]) -> dict[str, Any]:
-    """Process one Postmark inbound message through the shared import core.
 
-    Idempotent on (provider, provider_message_id). Resolves recipient -> company,
-    quarantines spam, extracts CV attachments, and lands them in Import review /
-    Needs role. Never messages candidates and never enters Ranking.
-    """
-    # Privacy role mailbox is not CV intake.
+
+def durable_email_ingress_config() -> _durable_email_ingress.IngressConfig:
+    return _durable_email_ingress.IngressConfig.from_env(WORKSPACE)
+
+
+def process_postmark_inbound(
+    payload: dict[str, Any],
+    *,
+    payload_size_bytes: int | None = None,
+    failpoint: Any | None = None,
+    quarantine_store: _durable_email_ingress.LocalQuarantineStore | None = None,
+) -> dict[str, Any]:
+    """Durably accept one Postmark message; never import or OCR in-request."""
     recipient_guess = str(payload.get("OriginalRecipient") or payload.get("To") or "")
     to_full = payload.get("ToFull") or []
     if isinstance(to_full, list):
@@ -49622,122 +56942,591 @@ def process_postmark_inbound(payload: dict[str, Any]) -> dict[str, Any]:
                 return process_privacy_mailbox_inbound(payload)
     if _privacy_recipient_match(recipient_guess):
         return process_privacy_mailbox_inbound(payload)
-    provider = "postmark"
-    provider_message_id = str(payload.get("MessageID") or "").strip()
-    recipient = str(payload.get("OriginalRecipient") or "").strip()
-    if not recipient:
-        to_full = payload.get("ToFull") or []
-        if isinstance(to_full, list) and to_full:
-            recipient = str((to_full[0] or {}).get("Email") or "")
-    if not recipient:
-        recipient = str(payload.get("To") or "")
-    mailbox_hash = str(payload.get("MailboxHash") or "").strip()
-    from_full = payload.get("FromFull") or {}
-    from_address = (from_full.get("Email") if isinstance(from_full, dict) else None) or _parse_email_address(payload.get("From"))
-    subject = str(payload.get("Subject") or "").strip() or None
-    received_at = _parse_email_date(payload.get("Date"))
-    spam_score, spam_flagged = _postmark_spam_score(payload)
-    if not provider_message_id:
-        provider_message_id = "synth-" + hashlib.sha256(f"{recipient}|{from_address}|{subject}|{payload.get('Date')}".encode("utf-8")).hexdigest()[:24]
+    return _durable_email_ingress.durably_receive_postmark(
+        payload,
+        db_connect=db_connect,
+        resolve_intake_address=resolve_intake_address,
+        config=durable_email_ingress_config(),
+        store=quarantine_store,
+        payload_size_bytes=payload_size_bytes,
+        failpoint=failpoint,
+    )
 
-    attachments = [a for a in (payload.get("Attachments") or []) if isinstance(a, dict) and a.get("Name") and a.get("Content")]
 
+def _resolve_clean_intake_document_identity(job: dict[str, Any]) -> dict[str, Any]:
+    company = str(job.get("company_code") or "").strip().upper()
+    payload = job.get("payload") if isinstance(job.get("payload"), dict) else {}
+    document_id = str(payload.get("document_id") or job.get("subject_id") or "")
+    config = durable_email_ingress_config()
+    quarantine = _durable_email_ingress.LocalQuarantineStore(config.quarantine_root)
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO inbound_messages
-                    (provider, provider_message_id, from_address, envelope_recipient, subject,
-                     received_at, spam_score, attachment_count, status)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'received')
-                ON CONFLICT (provider, provider_message_id) DO NOTHING
-                RETURNING inbound_id::text
+                SELECT d.*, d.document_id::text AS document_id,
+                       d.inbound_id::text AS inbound_id,
+                       s.sender_address, s.provider_message_id,
+                       s.envelope_recipient
+                FROM intake_documents d
+                JOIN intake_submissions s
+                  ON s.submission_id=d.submission_id
+                 AND s.company_code=d.company_code
+                WHERE d.company_code=%s AND d.document_id=%s
+                FOR UPDATE OF d
                 """,
-                (provider, provider_message_id, from_address, recipient, subject, received_at, spam_score, len(attachments)),
+                (company, document_id),
             )
-            inserted = cur.fetchone()
-            if not inserted:
+            row = cur.fetchone()
+            if not row:
+                raise _durable_email_ingress.RetryableJobError(
+                    "intake_document_missing"
+                )
+            document = dict(row)
+            existing = _inbound_cv_authority.latest_identity_resolution(
+                cur, company_code=company, intake_document_id=document_id
+            )
+            if existing:
                 conn.commit()
-                return {"duplicate": True}
-            inbound_id = inserted["inbound_id"]
-
-            intake = resolve_intake_address(cur, recipient, mailbox_hash)
-            if not intake:
-                cur.execute("UPDATE inbound_messages SET status='rejected', error='unknown_recipient', updated_at=now() WHERE inbound_id=%s", (inbound_id,))
-                conn.commit()
-                return {"ignored": "unknown_recipient"}
-            company = str(intake.get("company_code") or "").strip().upper()
-            cur.execute("UPDATE inbound_messages SET company_code=%s, intake_id=%s, updated_at=now() WHERE inbound_id=%s", (company, intake["intake_id"], inbound_id))
-
-            if spam_flagged or (spam_score is not None and spam_score >= INBOUND_SPAM_QUARANTINE_THRESHOLD):
-                cur.execute("UPDATE inbound_messages SET status='quarantined', updated_at=now() WHERE inbound_id=%s", (inbound_id,))
-                conn.commit()
-                return {"company_code": company, "quarantined": True}
-
-            if not attachments:
-                cur.execute("UPDATE inbound_messages SET status='processed', error='no_attachments', updated_at=now() WHERE inbound_id=%s", (inbound_id,))
-                conn.commit()
-                return {"company_code": company, "imported": 0, "note": "no_attachments"}
-
-            company_positions = _import_load_company_positions(cur, company)
+                return {
+                    "document_id": document_id,
+                    "outcome": existing.get("outcome"),
+                    "resolution_id": existing.get("resolution_id"),
+                    "idempotent": True,
+                }
+            content_sha = str(document.get("content_sha256") or "")
+            if not _inbound_cv_authority.scan_is_authoritatively_clean(
+                cur,
+                company_code=company,
+                intake_document_id=document_id,
+                content_sha256=content_sha,
+            ):
+                raise _durable_email_ingress.RetryableJobError(
+                    "durable_clean_scan_authority_missing"
+                )
+            source_path = quarantine.verify(
+                str(document.get("quarantine_key") or ""),
+                content_sha,
+                int(document.get("size_bytes") or 0),
+            )
+            extraction = extract_candidate_cv_document(
+                str(source_path),
+                document.get("detected_mime") or document.get("claimed_mime"),
+                company_code=company,
+                document_id=f"intake:{document_id}",
+                app_key=f"intake:{document_id}",
+                cur=cur,
+            )
+            extracted_text = str(extraction.text or "").strip()
+            extraction_ok = bool(extracted_text and extraction.quality_ok)
+            identity: dict[str, Any] = {}
+            if extraction_ok:
+                parsed = parse_candidate_profile_from_cv_text(
+                    extracted_text,
+                    fallback_name=_parse_candidate_name_from_filename(
+                        str(document.get("original_filename") or "")
+                    ),
+                )
+                identity = {
+                    "full_name": parsed.get("name"),
+                    "email": parsed.get("email"),
+                    "phone": parsed.get("phone"),
+                }
+            _inbound_cv_authority.record_identity_extraction(
+                cur,
+                company_code=company,
+                inbound_id=str(document.get("inbound_id")),
+                intake_document_id=document_id,
+                content_sha256=content_sha,
+                extraction_status="completed" if extraction_ok else "failed",
+                extraction_method=extraction.method,
+                extracted_text=extracted_text or None,
+                extracted_identity=identity,
+                document_identity_evidence={
+                    "provider_message_id": document.get("provider_message_id"),
+                    "envelope_recipient": document.get("envelope_recipient"),
+                    "original_filename": document.get("original_filename"),
+                    "content_sha256": content_sha,
+                    "quality_ok": bool(extraction.quality_ok),
+                    "cache_hit": bool(extraction.cache_hit),
+                    "method": extraction.method,
+                },
+                error_code=None if extraction_ok else (
+                    extraction.error or "identity_extraction_low_quality"
+                ),
+            )
+            if extraction_ok:
+                resolution = _inbound_cv_authority.resolve_identity(
+                    cur,
+                    company_code=company,
+                    inbound_id=str(document.get("inbound_id")),
+                    intake_document_id=document_id,
+                    content_sha256=content_sha,
+                    sender_email=document.get("sender_address"),
+                    extracted_identity=identity,
+                )
+            else:
+                resolution = _inbound_cv_authority.record_identity_failure(
+                    cur,
+                    company_code=company,
+                    inbound_id=str(document.get("inbound_id")),
+                    intake_document_id=document_id,
+                    content_sha256=content_sha,
+                    sender_email=document.get("sender_address"),
+                    reason_code=extraction.error or "identity_extraction_low_quality",
+                )
+            outcome = str(resolution.get("outcome") or "")
             cur.execute(
                 """
-                INSERT INTO import_batches (company_code, source, status, total_files, intake_id, options)
-                VALUES (%s,'email_inbound','processing',%s,%s,%s)
-                RETURNING batch_id::text
+                UPDATE intake_documents
+                SET metadata=COALESCE(metadata,'{}'::jsonb) || %s,
+                    updated_at=now()
+                WHERE company_code=%s AND document_id=%s
                 """,
-                (company, len(attachments), intake["intake_id"], Json(json_safe({"provider": provider, "from": from_address}))),
+                (
+                    Json(
+                        {
+                            "identity_resolution_id": resolution.get(
+                                "resolution_id"
+                            ),
+                            "identity_outcome": outcome,
+                            "identity_resolved_at": now_iso(),
+                        }
+                    ),
+                    company,
+                    document_id,
+                ),
             )
-            batch_id = cur.fetchone()["batch_id"]
-
-            provenance = {
-                "source_message_id": provider_message_id,
-                "source_sender": payload.get("From") or from_address,
-                "source_received_at": received_at,
-                "source_subject": subject,
-                "source_label": recipient,
-            }
-            counts = {"imported": 0, "duplicate": 0, "failed": 0, "needs_role": 0, "review": 0, "auto_admitted": 0}
-            auto_admit_enabled = company_auto_admit_imports(company)
-            seen_checksums: dict[str, str] = {}
-            items: list[dict[str, Any]] = []
-            for attachment in attachments:
-                try:
-                    data = base64.b64decode(attachment.get("Content") or "")
-                except Exception:
-                    continue
-                item_record = _import_process_one_file(
+            if outcome in _inbound_cv_authority.ACCEPTED_IDENTITY_OUTCOMES:
+                _durable_email_ingress.enqueue_job(
                     cur,
-                    company=company,
-                    batch_id=batch_id,
-                    source="email_inbound",
-                    company_positions=company_positions,
-                    filename=attachment.get("Name"),
-                    data=data,
-                    folder_hint=None,
-                    meta={"email": from_address},
-                    seen_checksums=seen_checksums,
-                    default_position_code=(intake.get("position_code") or None),
-                    default_position_title=(intake.get("position_title") or None),
-                    auto_admit_enabled=auto_admit_enabled,
+                    company_code=company,
+                    job_type="accepted_intake_preparation",
+                    subject_type="intake_document",
+                    subject_id=document_id,
+                    idempotency_key=f"document:{document_id}:accepted-prepare",
+                    payload={
+                        "document_id": document_id,
+                        "resolution_id": resolution.get("resolution_id"),
+                    },
+                    priority=int(job.get("priority") or 100),
+                    max_attempts=config.max_attempts,
                 )
-                _import_bump_counts(counts, item_record)
-                item_record["item_id"] = _import_insert_item(cur, batch_id=batch_id, company=company, item_record=item_record, provenance=provenance)
-                items.append(item_record)
+            else:
+                cur.execute(
+                    """
+                    UPDATE intake_submissions
+                    SET status='identity_review_required', updated_at=now()
+                    WHERE company_code=%s AND submission_id=%s
+                    """,
+                    (company, document.get("submission_id")),
+                )
+        conn.commit()
+    return {
+        "document_id": document_id,
+        "outcome": outcome,
+        "resolution_id": resolution.get("resolution_id"),
+        "candidate_mutation": False,
+        "accepted_preparation_enqueued": (
+            outcome in _inbound_cv_authority.ACCEPTED_IDENTITY_OUTCOMES
+        ),
+    }
 
+
+def _prepare_accepted_intake_document(job: dict[str, Any]) -> dict[str, Any]:
+    company = str(job.get("company_code") or "").strip().upper()
+    payload = job.get("payload") if isinstance(job.get("payload"), dict) else {}
+    document_id = str(payload.get("document_id") or job.get("subject_id") or "")
+    config = durable_email_ingress_config()
+    quarantine = _durable_email_ingress.LocalQuarantineStore(config.quarantine_root)
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT d.*, d.document_id::text AS document_id,
+                       d.submission_id::text AS submission_id,
+                       s.inbound_id::text AS inbound_id, s.intake_id::text AS intake_id,
+                       s.provider_message_id, s.envelope_recipient, s.sender_address,
+                       s.subject, s.received_at, s.route_snapshot,
+                       s.accepted_attachment_count,
+                       s.import_batch_id::text AS import_batch_id
+                FROM intake_documents d
+                JOIN intake_submissions s
+                  ON s.submission_id=d.submission_id AND s.company_code=d.company_code
+                WHERE d.company_code=%s AND d.document_id=%s
+                FOR UPDATE OF d, s
+                """,
+                (company, document_id),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise _durable_email_ingress.RetryableJobError("intake_document_missing")
+            document = dict(row)
+            if document.get("app_key") or (document.get("metadata") or {}).get("preparation_status"):
+                conn.commit()
+                return {
+                    "document_id": document_id,
+                    "status": (document.get("metadata") or {}).get("preparation_status") or "imported",
+                    "app_key": document.get("app_key"),
+                    "idempotent": True,
+                }
+            if document.get("safety_state") != "clean":
+                raise _durable_email_ingress.RetryableJobError("document_not_clean")
+            resolution = _inbound_cv_authority.latest_identity_resolution(
+                cur, company_code=company, intake_document_id=document_id
+            )
+            if not resolution or not _inbound_cv_authority.binding_is_authorized(
+                cur,
+                company_code=company,
+                intake_document_id=document_id,
+                content_sha256=str(document.get("content_sha256") or ""),
+                candidate_phone=str(
+                    (resolution or {}).get("selected_candidate_phone") or ""
+                )
+                or None,
+                app_key=str((resolution or {}).get("selected_app_key") or "")
+                or None,
+            ):
+                raise _durable_email_ingress.RetryableJobError(
+                    "identity_binding_authority_missing"
+                )
+            cur.execute(
+                "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                (f"{company}:{document.get('content_sha256')}",),
+            )
+            source_path = quarantine.verify(
+                str(document.get("quarantine_key") or ""),
+                str(document.get("content_sha256") or ""),
+                int(document.get("size_bytes") or 0),
+            )
+            batch_id = document.get("import_batch_id")
+            if not batch_id:
+                cur.execute(
+                    """
+                    INSERT INTO import_batches
+                      (company_code, source, status, total_files, intake_id, options)
+                    VALUES (%s,'email_inbound','processing',%s,%s,%s)
+                    RETURNING batch_id::text
+                    """,
+                    (
+                        company,
+                        int(document.get("accepted_attachment_count") or 1),
+                        document.get("intake_id"),
+                        Json(
+                            {
+                                "provider": "postmark",
+                                "intake_submission_id": document.get("submission_id"),
+                                "durable_email_ingress": True,
+                            }
+                        ),
+                    ),
+                )
+                batch_id = cur.fetchone()["batch_id"]
+                cur.execute(
+                    """
+                    UPDATE intake_submissions SET import_batch_id=%s, updated_at=now()
+                    WHERE company_code=%s AND submission_id=%s
+                    """,
+                    (batch_id, company, document.get("submission_id")),
+                )
+            data = source_path.read_bytes()
+            route = document.get("route_snapshot") if isinstance(document.get("route_snapshot"), dict) else {}
+            company_positions = _import_load_company_positions(cur, company)
+            item_record = _import_process_one_file(
+                cur,
+                company=company,
+                batch_id=str(batch_id),
+                source="email_inbound",
+                company_positions=company_positions,
+                filename=str(document.get("original_filename") or "attachment"),
+                data=data,
+                folder_hint=None,
+                # Sender email is source provenance, never the candidate key.
+                meta={},
+                seen_checksums={},
+                default_position_code=(route.get("position_code") or None),
+                default_position_title=(route.get("position_title") or None),
+                auto_admit_enabled=company_auto_admit_imports(company),
+                identity_resolution=resolution,
+            )
+            provenance = {
+                "source_message_id": document.get("provider_message_id"),
+                "source_sender": document.get("sender_address"),
+                "source_received_at": document.get("received_at"),
+                "source_subject": document.get("subject"),
+                "source_label": document.get("envelope_recipient"),
+            }
+            item_record["item_id"] = _import_insert_item(
+                cur,
+                batch_id=str(batch_id),
+                company=company,
+                item_record=item_record,
+                provenance=provenance,
+            )
+            preparation_status = str(item_record.get("status") or "failed")
+            cur.execute(
+                """
+                UPDATE intake_documents
+                SET app_key=%s, file_id=%s, candidate_document_id=%s,
+                    metadata=COALESCE(metadata,'{}'::jsonb) || %s,
+                    updated_at=now()
+                WHERE company_code=%s AND document_id=%s
+                """,
+                (
+                    item_record.get("app_key") or item_record.get("duplicate_of_app_key"),
+                    item_record.get("file_id"),
+                    item_record.get("document_id"),
+                    Json(
+                        {
+                            "preparation_status": preparation_status,
+                            "import_item_id": item_record.get("item_id"),
+                            "prepared_at": now_iso(),
+                        }
+                    ),
+                    company,
+                    document_id,
+                ),
+            )
+            if item_record.get("document_id"):
+                _durable_email_ingress.enqueue_job(
+                    cur,
+                    company_code=company,
+                    job_type="cv_extraction",
+                    subject_type="candidate_document",
+                    subject_id=str(item_record["document_id"]),
+                    idempotency_key=f"candidate-document:{item_record['document_id']}:extract",
+                    payload={
+                        "candidate_document_id": str(item_record["document_id"]),
+                        "intake_document_id": document_id,
+                    },
+                    priority=50 if route.get("position_code") else 100,
+                    max_attempts=config.max_attempts,
+                )
+            cur.execute(
+                """
+                SELECT count(*) FILTER (WHERE status='imported') AS imported,
+                       count(*) FILTER (WHERE status='duplicate') AS duplicate,
+                       count(*) FILTER (WHERE status='failed') AS failed
+                FROM import_items WHERE batch_id=%s
+                """,
+                (batch_id,),
+            )
+            counts = dict(cur.fetchone() or {})
+            cur.execute(
+                """
+                SELECT count(*) AS pending
+                FROM intake_documents
+                WHERE company_code=%s AND submission_id=%s AND safety_state='clean'
+                  AND NOT (metadata ? 'preparation_status')
+                  AND document_id<>%s
+                """,
+                (company, document.get("submission_id"), document_id),
+            )
+            pending = int((cur.fetchone() or {}).get("pending") or 0)
+            cur.execute(
+                """
+                SELECT count(*) AS needs_role
+                FROM import_items i
+                JOIN applications a ON a.app_key=i.app_key AND a.company_code=i.company_code
+                WHERE i.batch_id=%s AND a.status='needs_role'
+                """,
+                (batch_id,),
+            )
+            needs_role = int((cur.fetchone() or {}).get("needs_role") or 0)
+            batch_status = "completed" if pending == 0 else "processing"
             cur.execute(
                 """
                 UPDATE import_batches
-                SET status='completed', imported_count=%s, duplicate_count=%s, failed_count=%s,
-                    needs_role_count=%s, updated_at=now()
+                SET status=%s, imported_count=%s, duplicate_count=%s,
+                    failed_count=%s, needs_role_count=%s, updated_at=now()
                 WHERE batch_id=%s
                 """,
-                (counts["imported"], counts["duplicate"], counts["failed"], counts["needs_role"], batch_id),
+                (
+                    batch_status,
+                    int(counts.get("imported") or 0),
+                    int(counts.get("duplicate") or 0),
+                    int(counts.get("failed") or 0),
+                    needs_role,
+                    batch_id,
+                ),
             )
-            cur.execute("UPDATE inbound_messages SET status='processed', batch_id=%s, updated_at=now() WHERE inbound_id=%s", (batch_id, inbound_id))
+            cur.execute(
+                """
+                UPDATE intake_submissions
+                SET status=%s, updated_at=now()
+                WHERE company_code=%s AND submission_id=%s
+                """,
+                ("accepted" if pending == 0 else "accepted_processing", company, document.get("submission_id")),
+            )
+            cur.execute(
+                """
+                UPDATE inbound_messages
+                SET status=%s, batch_id=%s, updated_at=now()
+                WHERE inbound_id=%s
+                """,
+                ("processed" if pending == 0 else "processing", batch_id, document.get("inbound_id")),
+            )
         conn.commit()
+    return {
+        "document_id": document_id,
+        "status": preparation_status,
+        "app_key": item_record.get("app_key"),
+        "duplicate_of_app_key": item_record.get("duplicate_of_app_key"),
+        "candidate_document_id": item_record.get("document_id"),
+        "batch_id": batch_id,
+    }
 
-    return {"company_code": company, "batch_id": batch_id, "counts": counts, "items": json_safe(items)}
+
+def process_durable_email_ingress_job(job: dict[str, Any]) -> dict[str, Any]:
+    job_type = str(job.get("job_type") or "")
+    company = str(job.get("company_code") or "").strip().upper()
+    payload = job.get("payload") if isinstance(job.get("payload"), dict) else {}
+    config = durable_email_ingress_config()
+
+    def _observe(status: str, result: dict[str, Any] | None = None, *, error_code: str | None = None, error_detail: str | None = None) -> None:
+        # Additive Wave 2 stage ledger. Never changes live email outcomes.
+        try:
+            import inbound_cv_processing as _inbound_cv_processing
+
+            if not _inbound_cv_processing.stage_ledger_enabled():
+                return
+            with db_connect() as obs_conn:
+                with obs_conn.cursor() as obs_cur:
+                    _inbound_cv_processing.ensure_schema(obs_cur)
+                    _inbound_cv_processing.observe_email_job_stage(
+                        obs_cur,
+                        job=job,
+                        status=status,
+                        result=result,
+                        error_code=error_code,
+                        error_detail=error_detail,
+                    )
+                obs_conn.commit()
+        except Exception:
+            logger.exception("unified_cv_processing_stage_observe_failed")
+
+    if job_type == "intake_validation":
+        result = _durable_email_ingress.validate_submission(
+            db_connect=db_connect,
+            submission_id=str(payload.get("submission_id") or job.get("subject_id") or ""),
+            company_code=company,
+            config=config,
+        )
+        _observe("completed", result if isinstance(result, dict) else None)
+        return result
+    if job_type == "file_safety_scan":
+        result = _durable_email_ingress.scan_document(
+            db_connect=db_connect,
+            document_id=str(payload.get("document_id") or job.get("subject_id") or ""),
+            company_code=company,
+            config=config,
+        )
+        _observe("completed", result if isinstance(result, dict) else None)
+        return result
+    if job_type == "cv_identity_resolution":
+        result = _resolve_clean_intake_document_identity(job)
+        _observe("completed", result if isinstance(result, dict) else None)
+        return result
+    if job_type == "accepted_intake_preparation":
+        result = _prepare_accepted_intake_document(job)
+        _observe("completed", result if isinstance(result, dict) else None)
+        return result
+    if job_type == "cv_extraction":
+        candidate_document_id = str(
+            payload.get("candidate_document_id") or job.get("subject_id") or ""
+        )
+        intake_document_id = str(payload.get("intake_document_id") or "")
+        if intake_document_id:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT content_sha256, app_key FROM intake_documents
+                        WHERE company_code=%s AND document_id=%s
+                          AND candidate_document_id=%s AND safety_state='clean'
+                        """,
+                        (company, intake_document_id, candidate_document_id),
+                    )
+                    safety_row = cur.fetchone()
+                    safety_proven = bool(
+                        safety_row
+                        and _inbound_cv_authority.binding_is_authorized(
+                            cur,
+                            company_code=company,
+                            intake_document_id=intake_document_id,
+                            content_sha256=str(safety_row.get("content_sha256") or ""),
+                            app_key=str(safety_row.get("app_key") or "") or None,
+                        )
+                    )
+            if not safety_proven:
+                raise _durable_email_ingress.RetryableJobError(
+                    "intake_document_not_clean"
+                )
+        else:
+            # Application-attached CVs (WhatsApp / manual / bulk) share the same
+            # durable queue without a second worker. Require a live candidate document.
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT d.document_id::text AS document_id, a.company_code
+                        FROM candidate_documents d
+                        JOIN applications a ON a.app_key=d.app_key
+                        WHERE d.document_id=%s::uuid AND a.company_code=%s
+                        LIMIT 1
+                        """,
+                        (candidate_document_id, company),
+                    )
+                    if not cur.fetchone():
+                        raise _durable_email_ingress.RetryableJobError(
+                            "candidate_document_missing"
+                        )
+        result = process_candidate_cv_document(
+            candidate_document_id,
+            dry_run=False,
+            send_screening=False,
+        )
+        if not result.get("ok"):
+            _observe(
+                "retrying",
+                result if isinstance(result, dict) else None,
+                error_code="cv_extraction_failed",
+                error_detail=str(result.get("error") or "cv extraction failed"),
+            )
+            raise _durable_email_ingress.RetryableJobError(
+                "cv_extraction_failed",
+                str(result.get("error") or "cv extraction failed"),
+            )
+        _observe("completed", result if isinstance(result, dict) else None)
+        return json_safe(result)
+    if job_type in {"profile_structuring", "embedding"}:
+        # The current frozen CV worker performs these after extraction. The queue
+        # contract reserves independent types for a later, separately qualified split.
+        result = {"status": "handled_by_cv_extraction_worker", "job_type": job_type}
+        _observe("skipped", result)
+        return result
+    if job_type == "sender_acknowledgment":
+        return {"status": "disabled", "reason": "sender_ack_not_approved"}
+    if job_type == "retention_privacy":
+        return {"status": "reserved", "reason": "retention_policy_not_approved"}
+    raise _durable_email_ingress.RetryableJobError("unsupported_intake_job_type")
+
+
+def run_durable_email_ingress_worker(
+    *,
+    limit: int = 10,
+    worker_id: str | None = None,
+    job_types: list[str] | None = None,
+) -> dict[str, Any]:
+    ensure_schema()
+    worker = worker_id or f"email-ingress-{os.getpid()}-{uuid.uuid4().hex[:8]}"
+    return _durable_email_ingress.run_worker_once(
+        db_connect=db_connect,
+        handler=process_durable_email_ingress_job,
+        worker_id=worker,
+        config=durable_email_ingress_config(),
+        limit=limit,
+        allowed_job_types=job_types,
+    )
 
 
 def _verify_postmark_token(authorization: str | None, token: str | None, secret: str) -> bool:
@@ -49770,18 +57559,39 @@ async def webhook_postmark_inbound(
     if not _verify_postmark_secret(authorization, token):
         raise HTTPException(status_code=401, detail={"error": "unauthorized"})
     if not inbound_email_enabled():
-        return {"ok": True, "ignored": "inbound_disabled"}
+        # Never acknowledge a provider delivery that cannot enter the durable ledger.
+        raise HTTPException(status_code=503, detail={"error": "inbound_disabled"})
+    config = durable_email_ingress_config()
+    body = bytearray()
     try:
-        payload = await request.json()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > config.max_webhook_body_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail={"error": "inbound_body_too_large"},
+                )
+        payload = json.loads(bytes(body))
+    except HTTPException:
+        raise
     except Exception:
         raise HTTPException(status_code=400, detail={"error": "invalid_json"})
     if not isinstance(payload, dict):
         raise HTTPException(status_code=400, detail={"error": "invalid_payload"})
     try:
-        result = process_postmark_inbound(payload)
-    except Exception:
-        # Never 500 to Postmark (it would retry); ack and rely on the audit row.
-        return {"ok": False, "error": "inbound_processing_failed"}
+        result = process_postmark_inbound(payload, payload_size_bytes=len(body))
+    except _durable_email_ingress.IngressError as exc:
+        # Pre-durability failures must remain non-2xx so Postmark retries.
+        raise HTTPException(
+            status_code=exc.http_status,
+            detail={"error": exc.code},
+        ) from exc
+    except Exception as exc:
+        logger.exception("durable Postmark ingress failed before acknowledgement")
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "inbound_durability_unavailable"},
+        ) from exc
     return {"ok": True, **result}
 
 
@@ -49960,6 +57770,124 @@ def dashboard_intake_delete(intake_id: str, context: dict[str, Any] = Depends(pr
         target=intake_id,
     )
     return {"ok": True}
+
+
+@app.get("/dashboard/prehire/integrations/email")
+def dashboard_email_settings_get(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    """Simple company Settings: Email sending + intake summary (product language only)."""
+    require_entitlement(context, "pre_hiring", "settings.manage")
+    company = context["company_code"]
+    import tenant_email_authority as tea
+
+    intake_rows: list[dict[str, Any]] = []
+    if inbound_email_enabled():
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT *, intake_id::text AS intake_id FROM intake_addresses WHERE company_code=%s ORDER BY created_at DESC",
+                    (company,),
+                )
+                intake_rows = [intake_address_public(dict(r)) for r in cur.fetchall()]
+    view = tea.public_email_sending_view(sys.modules[__name__], company, intake_addresses=intake_rows)
+    return view
+
+
+@app.put("/dashboard/prehire/integrations/email")
+def dashboard_email_settings_put(request: dict[str, Any] | None = None, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    require_entitlement(context, "pre_hiring", "settings.manage")
+    company = context["company_code"]
+    body = request or {}
+    import tenant_email_authority as tea
+
+    patch: dict[str, Any] = {}
+    if "outbound_mode" in body or "current_sender" in body:
+        patch["outbound_mode"] = body.get("outbound_mode") or body.get("current_sender")
+    for key in ("display_name", "reply_to", "from_address", "public_forward_address"):
+        if key in body:
+            patch[key] = body.get(key)
+    if "interview_email_when_calendar_sent" in body:
+        patch["interview_email_when_calendar_sent"] = bool(body.get("interview_email_when_calendar_sent"))
+    if "allow_wathefni_emergency_fallback" in body:
+        patch["allow_wathefni_emergency_fallback"] = bool(body.get("allow_wathefni_emergency_fallback"))
+    try:
+        tea.upsert_email_settings(
+            sys.modules[__name__],
+            company,
+            patch,
+            updated_by_user_id=str(context.get("actor_user_id") or "") or None,
+            allow_unready_mode=False,
+        )
+    except tea.TenantEmailError as exc:
+        raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+    record_admin_audit(
+        context,
+        "email_settings_updated",
+        summary="Updated email sending settings.",
+        target_type="company_email_settings",
+        target=company,
+        details={"keys": sorted(patch.keys())},
+    )
+    intake_rows: list[dict[str, Any]] = []
+    if inbound_email_enabled():
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT *, intake_id::text AS intake_id FROM intake_addresses WHERE company_code=%s ORDER BY created_at DESC",
+                    (company,),
+                )
+                intake_rows = [intake_address_public(dict(r)) for r in cur.fetchall()]
+    return tea.public_email_sending_view(sys.modules[__name__], company, intake_addresses=intake_rows)
+
+
+@app.post("/dashboard/prehire/integrations/email/action")
+def dashboard_email_settings_action(request: dict[str, Any] | None = None, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    """Primary action: connect | verify | test — company-facing, no internal details."""
+    require_entitlement(context, "pre_hiring", "settings.manage")
+    company = context["company_code"]
+    body = request or {}
+    action = str(body.get("action") or "").strip().lower()
+    import tenant_email_authority as tea
+
+    if action == "verify":
+        domain = str(body.get("domain") or "").strip().lower()
+        if not domain:
+            settings = tea.get_email_settings(sys.modules[__name__], company)
+            domain = tea._email_host(settings.get("from_address")) or tea._email_host(settings.get("public_forward_address"))
+        if not domain:
+            raise HTTPException(status_code=400, detail={"error": "domain_required", "message": "Enter your company domain to verify."})
+        try:
+            row = tea.create_or_link_domain(sys.modules[__name__], company, domain)
+        except tea.TenantEmailError as exc:
+            raise HTTPException(status_code=exc.http_status, detail=exc.as_http_detail()) from exc
+        record_admin_audit(context, "email_domain_verify_started", summary=f"Started domain verification for {domain}.", target_type="company_email_domain", target=str(row.get("domain_id") or domain))
+        return {
+            "ok": True,
+            "action": "verify",
+            "status": row.get("verification_status"),
+            "message": "Add the DNS records your IT team received, then check again.",
+            "dns_records": tea.dns_records_public(row),
+            "view": tea.public_email_sending_view(sys.modules[__name__], company),
+        }
+    if action == "test":
+        # Dry connectivity check — does not email candidates.
+        resolved = tea.resolve_outbound_sender(sys.modules[__name__], company, purpose="settings_test")
+        ready = bool(resolved.get("activatable") and resolved.get("from_address"))
+        return {
+            "ok": ready,
+            "action": "test",
+            "status": "ready" if ready else "setup_required",
+            "message": "Email sending looks ready." if ready else "Email sending still needs setup.",
+            "view": tea.public_email_sending_view(sys.modules[__name__], company),
+        }
+    if action == "connect":
+        return {
+            "ok": False,
+            "action": "connect",
+            "status": "setup_required",
+            "message": "Ask Wathefni support to connect your Microsoft mailbox. This is not self-serve yet.",
+            "view": tea.public_email_sending_view(sys.modules[__name__], company),
+        }
+    raise HTTPException(status_code=400, detail={"error": "invalid_action", "message": "Choose Connect, Verify, or Test."})
 
 
 @app.post("/dashboard/prehire/import/upload")
@@ -50142,7 +58070,7 @@ def dashboard_prehire_import_assign(
                         )
                     ),
                     updated_at=CURRENT_DATE
-                WHERE app_key=%s
+                WHERE app_key=%s AND company_code=%s
                 """,
                 (
                     effective_position or "", effective_title or None, stored_status,
@@ -50156,6 +58084,19 @@ def dashboard_prehire_import_assign(
                     "UPDATE candidates SET active_position_code=%s, updated_at=now() WHERE phone=%s",
                     (effective_position, row.get("phone")),
                 )
+                try:
+                    import prehire_ownership as _own
+
+                    _own.apply_application_owner_inherit(
+                        cur,
+                        company_code=company,
+                        app_key=app_key,
+                        position_code=effective_position,
+                        actor_user_id=str(context.get("actor_user_id") or "") or None,
+                        reason="inherit_from_job_recruiter_on_role_assign",
+                    )
+                except Exception:
+                    pass
             cur.execute(
                 "UPDATE import_items SET position_code=%s, position_title=%s, updated_at=now() WHERE app_key=%s AND company_code=%s",
                 (effective_position or None, effective_title or None, app_key, company),
@@ -50205,7 +58146,14 @@ def _intake_confidence_label(value: Any) -> str:
 def dashboard_prehire_import_settings(context: dict[str, Any] = Depends(prehire_dashboard_context)):
     require_entitlement(context, "pre_hiring", "candidate.import")
     company = context["company_code"]
-    return {"company_code": company, "auto_admit_explicit_imports": company_auto_admit_imports(company)}
+    row = get_company_settings_row(company)
+    return {
+        "company_code": company,
+        "auto_admit_explicit_imports": company_auto_admit_imports(company),
+        "version": row.get("version"),
+        "updated_at": row.get("updated_at"),
+        "last_updated_by": row.get("last_updated_by"),
+    }
 
 
 @app.put("/dashboard/prehire/import/settings")
@@ -50215,19 +58163,42 @@ def dashboard_prehire_import_settings_update(
 ):
     require_entitlement(context, "pre_hiring", "candidate.import")
     company = context["company_code"]
-    if "auto_admit_explicit_imports" not in (request or {}):
+    body = request if isinstance(request, dict) else {}
+    if "auto_admit_explicit_imports" not in body:
         raise HTTPException(status_code=400, detail={"error": "auto_admit_explicit_imports_required"})
-    value = bool((request or {}).get("auto_admit_explicit_imports"))
-    set_company_setting(company, "intake_auto_admit_explicit", value)
+    value = bool(body.get("auto_admit_explicit_imports"))
+    expected_version = body.get("expected_version")
+    expected_updated_at = body.get("expected_updated_at")
+    actor = {
+        "user_id": context.get("actor_user_id"),
+        "name": (context.get("hr_user") or {}).get("name") if isinstance(context.get("hr_user"), dict) else None,
+        "email": context.get("actor_email") or (context.get("hr_user") or {}).get("email"),
+    }
+    result = set_company_setting(
+        company,
+        "intake_auto_admit_explicit",
+        value,
+        expected_version=int(expected_version) if expected_version is not None and str(expected_version) != "" else None,
+        expected_updated_at=str(expected_updated_at) if expected_updated_at else None,
+        require_expected=True,
+        actor=actor,
+    )
     record_admin_audit(
         context,
         "import_settings_updated",
         summary=f"Auto-admit explicit imports set to {value}.",
         target_type="import_settings",
         target=company,
-        details={"auto_admit_explicit_imports": value},
+        details={"auto_admit_explicit_imports": value, "version": result.get("version")},
     )
-    return {"ok": True, "company_code": company, "auto_admit_explicit_imports": value}
+    return {
+        "ok": True,
+        "company_code": company,
+        "auto_admit_explicit_imports": value,
+        "version": result.get("version"),
+        "updated_at": result.get("updated_at"),
+        "last_updated_by": result.get("last_updated_by"),
+    }
 
 
 @app.get("/dashboard/prehire/import/intake")
@@ -50497,7 +58468,7 @@ def dashboard_prepare_candidate_confirmation(
         raise HTTPException(status_code=403, detail={"error": "tenant_scope_required"})
     required = _rl.HUMAN_DECISION_ACTIONS.get(body.action, {}).get("permission") or "candidate.manage"
     require_entitlement(context, "pre_hiring", required)
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     actor_user_id = str(
         context.get("actor_user_id")
         or context.get("permission_subject_user_id")
@@ -50558,7 +58529,7 @@ def dashboard_prehire_shortlist(
 ):
     require_entitlement(context, "pre_hiring", "candidate.manage")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     update_result = update_application_status(
         application,
         "shortlisted",
@@ -50611,6 +58582,7 @@ def dashboard_prehire_shortlist(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -50622,7 +58594,7 @@ def dashboard_prehire_reject(
 ):
     require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     update_result = update_application_status(
         application,
         "rejected",
@@ -50673,6 +58645,7 @@ def dashboard_prehire_reject(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -50684,7 +58657,7 @@ def dashboard_prehire_hire(
 ):
     require_entitlement(context, "pre_hiring", "candidate.decide")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     payload = body
     hire_override = bool(payload.hire_override)
     override_reason = payload.override_reason
@@ -50696,8 +58669,11 @@ def dashboard_prehire_hire(
     import offer_service as _offer_service
     import offer_lifecycle as _offers
 
+    operation_id = str(payload.target_payload.get("operation_id") or "").strip()
+    if not operation_id:
+        raise HTTPException(status_code=422, detail={"error": "hiring_reference_required"})
     try:
-        _offer_service.enforce_hire_gate(
+        offer_gate = _offer_service.enforce_hire_gate(
             sys.modules[__name__],
             company_code=company,
             app_key=app_key,
@@ -50722,16 +58698,30 @@ def dashboard_prehire_hire(
         raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
     import hire_operations as _hire_operations
 
-    operation_id = str(payload.target_payload.get("operation_id") or "").strip()
-    if not operation_id:
-        raise HTTPException(status_code=422, detail={"error": "hiring_reference_required"})
-    hire_result = _hire_operations.execute_hire_operation(
-        sys.modules[__name__],
-        operation_id=operation_id,
-        confirmation_id=payload.confirmation_id,
-        confirmation_token=payload.confirmation_token,
-        permissions=set(context.get("permissions") or []),
-    )
+    try:
+        hire_result = _hire_operations.execute_hire_operation(
+            sys.modules[__name__],
+            operation_id=operation_id,
+            confirmation_id=payload.confirmation_id,
+            confirmation_token=payload.confirmation_token,
+            permissions=set(context.get("permissions") or []),
+        )
+    except Exception as exc:
+        if offer_gate.get("override"):
+            _offer_service.record_hire_override_outcome(
+                sys.modules[__name__],
+                audit_id=offer_gate.get("audit_id"),
+                hire_result={"ok": False, "error": type(exc).__name__},
+                hire_operation_id=operation_id,
+            )
+        raise
+    if offer_gate.get("override"):
+        _offer_service.record_hire_override_outcome(
+            sys.modules[__name__],
+            audit_id=offer_gate.get("audit_id"),
+            hire_result=hire_result,
+            hire_operation_id=operation_id,
+        )
     update_result = hire_result.get("transition") if isinstance(hire_result.get("transition"), dict) else hire_result
     posthire_result = update_result.get("side_effect") if isinstance(update_result, dict) else None
     ok = bool(hire_result.get("ok"))
@@ -50760,6 +58750,7 @@ def dashboard_prehire_hire(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -50771,7 +58762,12 @@ def dashboard_prehire_notify(
 ):
     require_entitlement(context, "pre_hiring", "candidate.manage")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
+    require_live_candidate_communication(
+        application,
+        kind="notify",
+        expected_company_code=company,
+    )  # HELD_COMMUNICATION_AUTHORITY_PRODUCTION_COMPAT
     payload = request or DashboardCandidateMessage()
     if _prehire_registry_enabled("notify_candidate"):
         extra = {"message_text": payload.message} if payload.message else {}
@@ -50801,6 +58797,7 @@ def dashboard_prehire_notify(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -50812,7 +58809,12 @@ def dashboard_prehire_assessment(
 ):
     require_entitlement(context, "assessments", "assessment.manage")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
+    require_live_candidate_communication(
+        application,
+        kind="assessment",
+        expected_company_code=company,
+    )  # HELD_COMMUNICATION_AUTHORITY_PRODUCTION_COMPAT
     payload = request or DashboardCandidateMessage()
     selected_battery_key = str(payload.battery_key or "").strip() or None
     locale = str(payload.locale or "").strip().lower() or None
@@ -50827,8 +58829,14 @@ def dashboard_prehire_assessment(
         extra = {"message_text": payload.message} if payload.message else {}
         if selected_battery_key:
             extra["battery_key"] = selected_battery_key
+        if locale:
+            extra["locale"] = locale
         if payload.expires_days is not None:
             extra["expires_days"] = payload.expires_days
+        actor_id = assessment_dashboard_actor_id(context)
+        if actor_id:
+            extra["requested_by"] = actor_id
+            extra["actor_user_id"] = actor_id
         return run_prehire_registry_action(context, "send_assessment", extra, app_key=app_key)
     result = send_assessment(
         application,
@@ -50837,6 +58845,7 @@ def dashboard_prehire_assessment(
         requested_by=assessment_dashboard_actor_id(context),
         battery_key=selected_battery_key,
         expires_days=payload.expires_days,
+        locale=locale,
     )
     status = "completed" if result.get("ok") else "failed"
     name = application.get("candidate_name") or application.get("phone") or "the candidate"
@@ -50869,6 +58878,7 @@ def dashboard_prehire_assessment(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -50880,8 +58890,10 @@ def dashboard_prehire_video_interview(
 ):
     require_entitlement(context, "video_interviews", "interview.manage")
     company = context["company_code"]
-    application = dashboard_application_or_404(app_key, company)
+    application = dashboard_application_or_404(app_key, company, context)
     payload = request or DashboardVideoInterviewRequest()
+    if payload.send_invite:
+        require_live_candidate_communication(application, kind="video_interview", expected_company_code=company)  # HELD_COMMUNICATION_AUTHORITY_STAGING_PATCH
     # The registry executor always sends the invite; only route the
     # send-the-invite case through it. The prepare-link-only case
     # (send_invite=False) stays on the legacy path to preserve behavior.
@@ -50935,6 +58947,7 @@ def dashboard_prehire_video_interview(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -51212,7 +59225,7 @@ def run_posthire_dashboard_action(context: dict[str, Any], action_type: str, arg
 
 # Pre-Hiring candidate actions span three modules; an action is only allowed via
 # this surface if its registry spec belongs to one of these.
-PREHIRE_DASHBOARD_REGISTRY_MODULES = ("pre_hiring", "assessments", "video_interviews")
+PREHIRE_DASHBOARD_REGISTRY_MODULES = ("pre_hiring", "assessments", "interviews", "video_interviews")
 
 
 def run_prehire_registry_action(
@@ -51314,6 +59327,7 @@ def run_prehire_registry_action(
         result_payload=result_payload,
         app_key=app_key,
         company_code=company,
+        permissions=context.get("permissions") or [],
     )
 
 
@@ -52341,7 +60355,7 @@ _EMPLOYEE_APP_FEATURE_DEFINITIONS: dict[str, dict[str, Any]] = {
     "documents": {
         "dependency_mode": "any",
         "module_keys": ("onboarding", "compliance"),
-        "actions": ("view", "download"),
+        "actions": ("view", "download", "upload_document"),
     },
     "attendance": {
         "dependency_mode": "all",
@@ -53272,7 +61286,279 @@ def app_documents(context: dict[str, Any] = Depends(employee_app_context)):
     key = context["employee_key"]
     require_employee_app_feature(context, "documents")
     documents = employee_documents_for(company, key)
-    return json_safe({"ok": True, "count": len(documents), "documents": documents})
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    locale = str(context.get("locale") or context.get("preferred_locale") or "en")
+    try:
+        compliance = _kw_doc_journey.list_employee_compliance_journey(
+            sys.modules[__name__],
+            company_code=company,
+            employee_key=key,
+            locale=locale,
+        )
+    except Exception:
+        logger.exception("employee compliance journey list failed")
+        compliance = []
+    return json_safe({
+        "ok": True,
+        "count": len(documents),
+        "documents": documents,
+        "compliance": compliance,
+        "legitimacy_note": "Statuses reflect HR review of uploaded evidence only. PACI, MOI, and PAM verification are not available.",
+    })
+
+
+@app.post("/app/documents/renew")
+async def app_documents_renew(
+    file: UploadFile = File(...),
+    document_type: str = Form(...),
+    context: dict[str, Any] = Depends(employee_app_context),
+):
+    """Employee renewal / replacement upload from Documents (not only unfinished onboarding)."""
+    company = context["company_code"]
+    key = context["employee_key"]
+    employee = context["employee"]
+    require_employee_app_feature(context, "documents", action="upload_document")
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    dtype = _kw_doc_journey.canonical_compliance_type(document_type)
+    if not dtype or dtype not in _kw_doc_journey.upload_synced_compliance_types() | {"employment_contract", "personal_photo"}:
+        # Allow common employee document renewals; still tenant self-scoped.
+        if not str(document_type or "").strip():
+            raise HTTPException(status_code=400, detail={"error": "document_type_required", "message": "Choose which document to renew."})
+        dtype = str(document_type).strip().lower()
+    filename = str(file.filename or "").strip() or "document"
+    ext = Path(filename).suffix.lower()
+    data = await file.read()
+    checks = _kw_doc_journey.automatic_legitimacy_checks(
+        filename=filename,
+        mime_type=file.content_type,
+        size_bytes=len(data),
+    )
+    if not checks["ok"]:
+        code = (checks["errors"] or ["upload_rejected"])[0]
+        raise HTTPException(status_code=400, detail={"error": code, "message": "We couldn't accept that file. Check the type and size."})
+    if ext not in _APP_DOC_EXTENSIONS:
+        raise HTTPException(status_code=400, detail={"error": "unsupported_file_type", "message": "Upload a PDF or an image."})
+    if not data:
+        raise HTTPException(status_code=400, detail={"error": "empty_file", "message": "That file is empty."})
+    if len(data) > _APP_DOC_MAX_BYTES:
+        raise HTTPException(status_code=400, detail={"error": "file_too_large", "message": "Files must be 15 MB or smaller."})
+
+    # Prefer matching onboarding item id when present; otherwise use document type.
+    item = dtype
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT item_id FROM onboarding_items
+                WHERE employee_key=%s AND (item_id=%s OR document_type=%s)
+                ORDER BY CASE WHEN item_id=%s THEN 0 ELSE 1 END
+                LIMIT 1
+                """,
+                (key, dtype, dtype, dtype),
+            )
+            row = cur.fetchone()
+            if row:
+                item = str(row["item_id"])
+
+    tmp_dir = tempfile.mkdtemp(prefix="emp-doc-renew-")
+    tmp_path = str(Path(tmp_dir) / filename)
+    operation = None
+    new_file_id = None
+    storage_result: dict[str, Any] = {}
+    try:
+        Path(tmp_path).write_bytes(data)
+        media = {"path": tmp_path, "mime_type": file.content_type or mimetypes.guess_type(filename)[0]}
+        operation = prepare_document_storage_operation(employee=employee, item_id=item)
+        config = document_storage_config(company)
+        storage_result = store_onboarding_document(
+            employee=employee,
+            item_id=item,
+            media=media,
+            operation_trace=str(operation["trace_key"]),
+        )
+        update_document_storage_operation_after_store(
+            str(operation["operation_id"]),
+            storage_result=storage_result,
+            config=config,
+        )
+        if not storage_result.get("ok") or str(storage_result.get("storage_status")) == "failed":
+            raise HTTPException(status_code=502, detail={"error": "storage_failed", "message": "We couldn't store that document. Please try again."})
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                # extraction={} — OCR optional; HR metadata entry covers OCR-unavailable path.
+                record_employee_document_receipt(
+                    cur,
+                    employee=employee,
+                    item_id=item,
+                    value=filename,
+                    media=media,
+                    storage_result=storage_result,
+                    extraction={},
+                )
+                cur.execute(
+                    """
+                    SELECT file_id FROM file_registry
+                    WHERE company_code=%s AND subject_type='employee' AND subject_key=%s
+                      AND content_sha256=%s
+                    ORDER BY updated_at DESC NULLS LAST LIMIT 1
+                    """,
+                    (company, key, storage_result.get("content_sha256")),
+                )
+                frow = cur.fetchone()
+                new_file_id = str(frow["file_id"]) if frow else None
+                cur.execute(
+                    """
+                    UPDATE document_storage_operations
+                    SET status='canonical_committed', canonical_committed_at=now(),
+                        failure_reason=NULL, next_attempt_at=NULL,
+                        lease_owner=NULL, lease_expires_at=NULL, updated_at=now()
+                    WHERE operation_id=%s AND status='stored'
+                    """,
+                    (operation["operation_id"],),
+                )
+            conn.commit()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    record_admin_audit(
+        context,
+        "employee_document_renewed",
+        summary=f"Employee uploaded a renewal for {dtype}.",
+        target_type="employee",
+        target=key,
+        details={"document_type": dtype, "file_id": new_file_id, "legitimacy": "pending_hr_review"},
+    )
+    return json_safe({
+        "ok": True,
+        "document_type": dtype,
+        "file_id": new_file_id,
+        "review_status": "pending_hr_review",
+        "review_status_label": "Pending HR review",
+        "legitimacy_note": "Uploaded for HR review. This is not PACI, MOI, or PAM verification.",
+        "storage_status": storage_result.get("storage_status"),
+    })
+
+
+class DocumentReviewBody(BaseModel):
+    action: Literal["approve", "reject", "request_reupload", "correct_metadata"]
+    version_id: str | None = None
+    reason: str | None = None
+    issue_date: str | None = None
+    expiry_date: str | None = None
+    document_number: str | None = None
+    confirm_ocr: bool = False
+
+
+@app.post("/dashboard/posthire/employees/{employee_key}/documents/{document_type}/review")
+def dashboard_document_review(
+    employee_key: str,
+    document_type: str,
+    body: DocumentReviewBody,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_entitlement(context, "compliance", "compliance.manage")["company_code"]
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    if not context_manager_allows_employee(context, employee, company_code=company):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    actor = str(context.get("dashboard_user_id") or context.get("user_id") or context.get("hr_phone") or "")
+    perms = set(context.get("permissions") or []) | {_kw_doc_journey.DOCUMENT_REVIEW_MANAGE}
+    try:
+        if body.action == "approve":
+            result = _kw_doc_journey.approve_version(
+                sys.modules[__name__],
+                company_code=company,
+                employee_key=str(employee.get("employee_key")),
+                document_type=document_type,
+                version_id=body.version_id,
+                actor_user_id=actor,
+                permissions=perms,
+                issue_date=body.issue_date,
+                expiry_date=body.expiry_date,
+                document_number=body.document_number,
+                reason=body.reason,
+                confirm_ocr=bool(body.confirm_ocr),
+            )
+        elif body.action in {"reject", "request_reupload"}:
+            result = _kw_doc_journey.reject_version(
+                sys.modules[__name__],
+                company_code=company,
+                employee_key=str(employee.get("employee_key")),
+                document_type=document_type,
+                version_id=body.version_id,
+                actor_user_id=actor,
+                permissions=perms,
+                reason=str(body.reason or "").strip(),
+                request_reupload=True,
+            )
+        elif body.action == "correct_metadata":
+            result = _kw_doc_journey.correct_metadata(
+                sys.modules[__name__],
+                company_code=company,
+                employee_key=str(employee.get("employee_key")),
+                document_type=document_type,
+                actor_user_id=actor,
+                permissions=perms,
+                issue_date=body.issue_date,
+                expiry_date=body.expiry_date,
+                document_number=body.document_number,
+                reason=body.reason,
+            )
+        else:
+            raise HTTPException(status_code=400, detail={"error": "invalid_action"})
+    except _kw_doc_journey.DocumentJourneyError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"error": exc.code, "message": exc.message}) from exc
+
+    record_admin_audit(
+        context,
+        f"document_{body.action}",
+        summary=f"HR {body.action} for {document_type} ({employee_key}).",
+        target_type="employee",
+        target=str(employee.get("employee_key")),
+        details={
+            "document_type": document_type,
+            "action": body.action,
+            "reason": body.reason,
+            "legitimacy": "hr_review_only_not_government_verified",
+        },
+    )
+    return json_safe({
+        "ok": True,
+        "action": body.action,
+        "document_type": _kw_doc_journey.canonical_compliance_type(document_type),
+        "result": result,
+        "legitimacy_note": "HR reviewed uploaded evidence only. Not PACI, MOI, or PAM verification.",
+    })
+
+
+@app.get("/dashboard/posthire/employees/{employee_key}/documents/compliance")
+def dashboard_employee_compliance_journey(employee_key: str, context: dict[str, Any] = Depends(dashboard_context)):
+    company = _document_hub_read_context(context)
+    employee = find_employee_by_key(employee_key, company_code=company)
+    if not employee:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    if not context_manager_allows_employee(context, employee, company_code=company):
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    import kuwait_pilot_document_journey as _kw_doc_journey
+
+    items = _kw_doc_journey.list_employee_compliance_journey(
+        sys.modules[__name__],
+        company_code=company,
+        employee_key=str(employee.get("employee_key")),
+        locale="en",
+    )
+    return json_safe({
+        "ok": True,
+        "company_code": company,
+        "employee_key": employee.get("employee_key"),
+        "documents": items,
+        "legitimacy_note": "HR review confirms evidence was reviewed by authorized HR. This is not PACI, MOI, or PAM verification.",
+    })
 
 
 @app.get("/app/documents/{file_id}")
@@ -54089,7 +62375,7 @@ def dashboard_posthire_employees(
 # Seeded as 'missing' so a newly added employee shows up on the Compliance page
 # with a clear checklist. Only seeded when the company has the compliance module.
 # Sends nothing (compliance reminders are always a manual HR action).
-DEFAULT_COMPLIANCE_SEED_TYPES = ("civil_id", "passport", "work_permit")
+DEFAULT_COMPLIANCE_SEED_TYPES = ("civil_id", "passport")
 
 # Import header normalization: map common CSV/XLSX column names to our fields.
 EMPLOYEE_IMPORT_HEADER_ALIASES = {
@@ -54132,16 +62418,36 @@ def _coerce_employee_start_date(value: Any) -> date | None:
         return None
 
 
-def _seed_employee_compliance_documents(cur: Any, company_code: str, employee_key: str) -> int:
+def _seed_employee_compliance_documents(
+    cur: Any,
+    company_code: str,
+    employee_key: str,
+    *,
+    employee_category: str | None = None,
+) -> int:
     seeded = 0
-    for doc_type in DEFAULT_COMPLIANCE_SEED_TYPES:
+    try:
+        import kuwait_first_client_foundation as _kw_foundation
+
+        types = _kw_foundation.compliance_seed_types_for_category(employee_category)
+    except Exception:
+        types = DEFAULT_COMPLIANCE_SEED_TYPES
+    labels = dict(COMPLIANCE_DOC_LABELS)
+    labels.setdefault("residence", "Residence permit")
+    for doc_type in types:
         cur.execute(
             """
             INSERT INTO compliance_documents (employee_key, document_type, label, status, warning_days, company_code, updated_at)
             VALUES (%s,%s,%s,'missing',%s,%s, now())
             ON CONFLICT (employee_key, document_type) DO NOTHING
             """,
-            (employee_key, doc_type, COMPLIANCE_DOC_LABELS.get(doc_type), COMPLIANCE_WARNING_DAYS.get(doc_type), company_code),
+            (
+                employee_key,
+                doc_type,
+                labels.get(doc_type),
+                COMPLIANCE_WARNING_DAYS.get(doc_type) or COMPLIANCE_WARNING_DAYS.get("residency", 30),
+                company_code,
+            ),
         )
         seeded += cur.rowcount or 0
     return seeded
@@ -56638,6 +64944,25 @@ def audit_action_results(limit: int = 20, _internal: dict[str, Any] = Depends(re
     return {"action_results": rows}
 
 
+# UNIFIED_CANDIDATES_PRODUCTION_DARK_PATCH: late route mount after helpers exist, before SPA catch-all
+import unified_candidates_routes as _unified_candidates_routes
+
+_unified_candidates_routes.mount_unified_candidate_routes_late(sys.modules[__name__])
+
+# TALENT_POOL_CLASSIFICATION_STAGING_PATCH: classification routes after helpers exist; independent of Unified Candidates flags
+try:
+    import talent_pool_classification_routes as _tpc_routes  # TALENT_POOL_CLASSIFICATION_STAGING_PATCH
+except Exception as _tpc_import_err:
+    print("talent_pool_classification import skipped:", _tpc_import_err)
+    _tpc_routes = None
+if _tpc_routes is not None:
+    try:
+        _tpc_routes.mount_talent_pool_classification_routes(sys.modules[__name__])
+    except Exception as _tpc_mount_err:
+        print("talent_pool_classification mount skipped:", _tpc_mount_err)
+
+
+
 @app.get("/dashboard/{asset_path:path}")
 def dashboard_spa_or_asset(asset_path: str):
     # The dashboard SPA routes via query params + React state, so there are no
@@ -56660,3 +64985,477 @@ def dashboard_spa_or_asset(asset_path: str):
                 response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
             return response
     raise HTTPException(status_code=404, detail="Not found")
+
+
+# ---------------------------------------------------------------------------
+# LOCAL-ONLY ADDITIVE SURFACE (reconciled onto production base)
+# Preserved from checkout: unified candidate profile/facts/views + intake debug ops.
+# Production remains authority for shared symbols and CV facts/evidence/ranking wiring.
+# ---------------------------------------------------------------------------
+
+
+# local-only: _unified_candidate_profile_payload (from checkout L46974-47091)
+def _unified_candidate_profile_payload(company: str, app_key: str, context: dict[str, Any]) -> dict[str, Any]:
+    import unified_candidates as _uc
+
+    ensure_schema()
+    application = find_application_by_key(app_key, company_code=company)
+    if not application:
+        raise HTTPException(status_code=404, detail={"error": "application_not_found"})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            cur.execute(
+                """
+                SELECT a.*, c.name AS candidate_name, c.email AS candidate_email,
+                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json,
+                       sd.content AS semantic_content
+                FROM applications a
+                LEFT JOIN candidates c ON c.phone=a.phone
+                LEFT JOIN semantic_documents sd ON sd.entity_type='application' AND sd.entity_key=a.app_key
+                WHERE a.company_code=%s AND a.app_key=%s
+                LIMIT 1
+                """,
+                (company, app_key),
+            )
+            row = dict(cur.fetchone() or application)
+            gov = _uc.load_governance(cur, company_code=company, app_key=app_key)
+            events = _uc.list_fact_review_events(cur, company_code=company, app_key=app_key)
+            cur.execute(
+                """
+                SELECT file_id, file_kind, document_type, original_filename, storage_provider,
+                       storage_url, storage_status, storage_error, stored_at, updated_at, created_at
+                FROM file_registry
+                WHERE company_code=%s AND subject_type='application' AND subject_key=%s
+                ORDER BY updated_at DESC, created_at DESC
+                LIMIT 25
+                """,
+                (company, app_key),
+            )
+            files = [json_safe(dict(item)) for item in cur.fetchall()]
+            try:
+                cur.execute(
+                    """
+                    SELECT document_id, document_type, checksum, mime_type, metadata, created_at, updated_at
+                    FROM candidate_documents
+                    WHERE company_code=%s AND app_key=%s
+                    ORDER BY updated_at DESC NULLS LAST, created_at DESC
+                    LIMIT 25
+                    """,
+                    (company, app_key),
+                )
+                documents = [json_safe(dict(item)) for item in cur.fetchall()]
+            except Exception:
+                documents = []
+            # Sibling applications for same compatibility phone within tenant.
+            cur.execute(
+                """
+                SELECT app_key, status, position_code, position_title, ingested_at, updated_at
+                FROM applications
+                WHERE company_code=%s AND phone=%s
+                ORDER BY ingested_at DESC NULLS LAST
+                """,
+                (company, row.get("phone")),
+            )
+            siblings = [json_safe(dict(item)) for item in cur.fetchall()]
+            conn.commit()
+
+    summary = prehire_application_summary(
+        row,
+        include_raw=True,
+        include_assessment=company_has_module(company, "assessments"),
+        permissions=context.get("permissions") or [],
+    )
+    summary = _uc.enrich_application_summary(
+        summary,
+        row,
+        gov=gov,
+        permissions=context.get("permissions") or [],
+    )
+    snapshot = _uc.extract_facts_snapshot(row)
+    effective = _uc.effective_facts_from_events(snapshot, events)
+    held_rows = [s for s in siblings if str(s.get("status") or "") in HELD_IMPORT_STATUSES]
+    live_rows = [s for s in siblings if str(s.get("status") or "") not in HELD_IMPORT_STATUSES]
+    timeline = [
+        {"label": "Received", "at": summary.get("ingested_at")},
+        {"label": "Updated", "at": summary.get("updated_at")},
+    ]
+    for event in events[-10:]:
+        timeline.append(
+            {
+                "label": f"Fact review: {event.get('action')} {event.get('fact_path')}",
+                "at": json_safe(event.get("created_at")),
+                "actor": event.get("actor_email") or event.get("actor_user_id"),
+            }
+        )
+    return {
+        "company_code": company,
+        "application": summary,
+        "record_state": summary.get("record_state"),
+        "held_reason": _uc.held_reason(row),
+        "source_channel": summary.get("intake_source"),
+        "sender_provenance": _uc.sender_provenance(row),
+        "grounded_contacts": summary.get("grounded_contacts"),
+        "documents": documents,
+        "files": files,
+        "facts": {
+            "extraction_snapshot": snapshot,
+            "effective": effective.get("effective"),
+            "reviews_by_path": effective.get("reviews_by_path"),
+            "events": json_safe(events),
+            "completeness": summary.get("completeness"),
+            "missing_policy": "Not extracted or Unknown — never a negative fact",
+        },
+        "privacy": summary.get("privacy"),
+        "held_applications": held_rows,
+        "live_applications": live_rows,
+        "processing_timeline": timeline,
+        "link_to_job": summary.get("link_to_job"),
+        "cv_truth": candidate_cv_truth(row),
+    }
+
+# local-only: dashboard_prehire_application_fact_review (from checkout L47105-47172)
+@app.post("/dashboard/prehire/applications/{app_key}/facts/review")
+def dashboard_prehire_application_fact_review(
+    app_key: str,
+    request: dict[str, Any],
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    require_entitlement(context, "pre_hiring", "candidate.manage")
+    import unified_candidates as _uc
+
+    company = context["company_code"]
+    application = find_application_by_key(app_key, company_code=company)
+    if not application:
+        raise HTTPException(status_code=404, detail={"error": "application_not_found"})
+    body = request or {}
+    preview = bool(body.get("preview"))
+    action = str(body.get("action") or "").strip().lower()
+    fact_path = str(body.get("fact_path") or "").strip()
+    if action not in _uc.FACT_EVENT_ACTIONS:
+        raise HTTPException(status_code=422, detail={"error": "invalid_fact_review_action"})
+    if not fact_path:
+        raise HTTPException(status_code=422, detail={"error": "fact_path_required"})
+    preview_payload = {
+        "ok": True,
+        "preview": True,
+        "company_code": company,
+        "app_key": app_key,
+        "action": action,
+        "fact_path": fact_path,
+        "new_value": body.get("new_value"),
+        "previous_value": body.get("previous_value"),
+        "note": body.get("note"),
+        "confirmation_required": True,
+        "message": "Confirm to append an immutable HR fact-review event. Extraction snapshots are never overwritten.",
+    }
+    if preview or not bool(body.get("confirm")):
+        return preview_payload
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            try:
+                event = _uc.append_fact_review_event(
+                    cur,
+                    company_code=company,
+                    app_key=app_key,
+                    fact_path=fact_path,
+                    action=action,
+                    actor_user_id=str(context.get("actor_user_id") or "") or None,
+                    actor_email=str(context.get("actor_email") or context.get("hr_email") or "") or None,
+                    new_value=body.get("new_value"),
+                    previous_value=body.get("previous_value"),
+                    evidence_refs=body.get("evidence_refs") if isinstance(body.get("evidence_refs"), list) else [],
+                    note=str(body.get("note") or "") or None,
+                    document_version_id=str(body.get("document_version_id") or "") or None,
+                    extraction_version_id=str(body.get("extraction_version_id") or "") or None,
+                    supersedes_event_id=str(body.get("supersedes_event_id") or "") or None,
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail={"error": str(exc)}) from exc
+            conn.commit()
+    record_admin_audit(
+        context,
+        "candidate_fact_review",
+        summary=f"Appended fact review {action} on {fact_path} for {app_key}.",
+        target_type="application",
+        target=app_key,
+        details={"action": action, "fact_path": fact_path, "event_id": event.get("event_id")},
+    )
+    return {"ok": True, "company_code": company, "app_key": app_key, "event": json_safe(event), "preview": False}
+
+# local-only: dashboard_prehire_application_facts (from checkout L47099-47102)
+@app.get("/dashboard/prehire/applications/{app_key}/facts")
+def dashboard_prehire_application_facts(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    payload = _unified_candidate_profile_payload(context["company_code"], app_key, context)
+    return {"company_code": payload["company_code"], "app_key": app_key, "facts": payload["facts"]}
+
+# local-only: dashboard_prehire_application_profile (from checkout L47094-47096)
+@app.get("/dashboard/prehire/applications/{app_key}/profile")
+def dashboard_prehire_application_profile(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    return _unified_candidate_profile_payload(context["company_code"], app_key, context)
+
+# local-only: dashboard_prehire_delete_saved_view (from checkout L47221-47236)
+@app.delete("/dashboard/prehire/candidates/saved-views/{view_id}")
+def dashboard_prehire_delete_saved_view(view_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    import unified_candidates as _uc
+
+    company = context["company_code"]
+    actor = str(context.get("actor_user_id") or "").strip()
+    if not actor:
+        raise HTTPException(status_code=400, detail={"error": "actor_required"})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            deleted = _uc.delete_saved_view(cur, company_code=company, actor_user_id=actor, view_id=view_id)
+            conn.commit()
+    if not deleted:
+        raise HTTPException(status_code=404, detail={"error": "saved_view_not_found"})
+    return {"ok": True, "company_code": company, "view_id": view_id}
+
+# local-only: dashboard_prehire_intake_attention (from checkout L47253-47269)
+@app.get("/dashboard/prehire/intake-operations/attention")
+def dashboard_prehire_intake_attention(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    """Lightweight banner count for Candidates page. Does not list candidates."""
+    import unified_candidates as _uc
+
+    company = context["company_code"]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            summary = _uc.intake_operations_summary(cur, company_code=company)
+            conn.commit()
+    return {
+        "company_code": company,
+        "attention_count": summary.get("attention_count") or 0,
+        "banner": summary.get("banner"),
+        "link": "/intake-operations",
+    }
+
+# local-only: dashboard_prehire_intake_operations (from checkout L47239-47250)
+@app.get("/dashboard/prehire/intake-operations")
+def dashboard_prehire_intake_operations(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    import unified_candidates as _uc
+
+    require_entitlement(context, "pre_hiring", "candidate.import")
+    company = context["company_code"]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            summary = _uc.intake_operations_summary(cur, company_code=company)
+            conn.commit()
+    return summary
+
+# local-only: dashboard_prehire_save_view (from checkout L47191-47218)
+@app.post("/dashboard/prehire/candidates/saved-views")
+def dashboard_prehire_save_view(
+    request: dict[str, Any],
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    import unified_candidates as _uc
+
+    company = context["company_code"]
+    actor = str(context.get("actor_user_id") or "").strip()
+    if not actor:
+        raise HTTPException(status_code=400, detail={"error": "actor_required"})
+    body = request or {}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            try:
+                view = _uc.upsert_saved_view(
+                    cur,
+                    company_code=company,
+                    actor_user_id=actor,
+                    name=str(body.get("name") or ""),
+                    filters=body.get("filters") if isinstance(body.get("filters"), dict) else {},
+                    view_id=str(body.get("view_id") or "") or None,
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail={"error": str(exc)}) from exc
+            conn.commit()
+    return {"ok": True, "company_code": company, "view": json_safe(view)}
+
+# local-only: dashboard_prehire_saved_views (from checkout L47175-47188)
+@app.get("/dashboard/prehire/candidates/saved-views")
+def dashboard_prehire_saved_views(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+    import unified_candidates as _uc
+
+    company = context["company_code"]
+    actor = str(context.get("actor_user_id") or "").strip()
+    if not actor:
+        raise HTTPException(status_code=400, detail={"error": "actor_required"})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            _uc.ensure_unified_candidates_schema(cur)
+            views = _uc.list_saved_views(cur, company_code=company, actor_user_id=actor)
+            conn.commit()
+    return {"company_code": company, "views": json_safe(views)}
+
+# local-only: internal_intake_job_replay (from checkout L51266-51283)
+@app.post("/orchestrator/debug/intake-jobs/{job_id}/replay")
+def internal_intake_job_replay(
+    job_id: str,
+    company_code: str = Query(...),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    try:
+        return _durable_email_ingress.replay_dead_letter(
+            db_connect=db_connect,
+            company_code=company_code,
+            job_id=job_id,
+            actor="internal_operator",
+        )
+    except _durable_email_ingress.IngressValidationError as exc:
+        raise HTTPException(
+            status_code=404 if exc.code == "intake_job_not_found" else 409,
+            detail={"error": exc.code},
+        ) from exc
+
+# local-only: internal_intake_operations (from checkout L51232-51246)
+@app.get("/orchestrator/debug/intake-operations")
+def internal_intake_operations(
+    company_code: str | None = Query(default=None),
+    include_orphans: bool = Query(default=True),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    ensure_schema()
+    return json_safe(
+        _durable_email_ingress.operations_summary(
+            db_connect=db_connect,
+            config=durable_email_ingress_config(),
+            company_code=company_code,
+            include_orphans=include_orphans,
+        )
+    )
+
+# local-only: internal_intake_quarantine_download (from checkout L51345-51397)
+@app.get("/orchestrator/debug/intake-documents/{document_id}/download")
+def internal_intake_quarantine_download(
+    document_id: str,
+    company_code: str = Query(...),
+    expires: int = Query(...),
+    signature: str = Query(...),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    company = str(company_code or "").strip().upper()
+    secret = str(os.environ.get("WATHEFNI_INTAKE_QUARANTINE_SIGNING_SECRET") or "")
+    if not _durable_email_ingress.verify_quarantine_download(
+        company_code=company,
+        document_id=document_id,
+        expires_at_epoch=expires,
+        signature=signature,
+        secret=secret,
+        now_epoch=int(time_module.time()),
+    ):
+        raise HTTPException(status_code=401, detail={"error": "invalid_download_signature"})
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT quarantine_key, content_sha256, size_bytes, original_filename,
+                       detected_mime
+                FROM intake_documents
+                WHERE company_code=%s AND document_id=%s AND storage_status='stored'
+                """,
+                (company, document_id),
+            )
+            document = cur.fetchone()
+    if not document:
+        raise HTTPException(
+            status_code=404, detail={"error": "intake_document_not_found"}
+        )
+    store = _durable_email_ingress.LocalQuarantineStore(
+        durable_email_ingress_config().quarantine_root
+    )
+    try:
+        path = store.verify(
+            document["quarantine_key"],
+            document["content_sha256"],
+            document["size_bytes"],
+        )
+    except _durable_email_ingress.RetryableJobError as exc:
+        raise HTTPException(status_code=409, detail={"error": exc.code}) from exc
+    return FileResponse(
+        path,
+        media_type=document.get("detected_mime") or "application/octet-stream",
+        filename=document.get("original_filename") or "attachment",
+        content_disposition_type="attachment",
+        headers={"Cache-Control": "no-store"},
+    )
+
+# local-only: internal_intake_quarantine_sweep (from checkout L51286-51297)
+@app.post("/orchestrator/debug/intake-quarantine/sweep")
+def internal_intake_quarantine_sweep(
+    apply: bool = Query(default=False),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    return json_safe(
+        _durable_email_ingress.orphan_storage_report(
+            db_connect=db_connect,
+            config=durable_email_ingress_config(),
+            delete=bool(apply),
+        )
+    )
+
+# local-only: internal_intake_signed_download (from checkout L51300-51342)
+@app.post("/orchestrator/debug/intake-documents/{document_id}/signed-download")
+def internal_intake_signed_download(
+    document_id: str,
+    company_code: str = Query(...),
+    ttl_seconds: int = Query(default=300, ge=30, le=900),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    company = str(company_code or "").strip().upper()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT 1 FROM intake_documents
+                WHERE company_code=%s AND document_id=%s AND storage_status='stored'
+                """,
+                (company, document_id),
+            )
+            if not cur.fetchone():
+                raise HTTPException(
+                    status_code=404, detail={"error": "intake_document_not_found"}
+                )
+    secret = str(os.environ.get("WATHEFNI_INTAKE_QUARANTINE_SIGNING_SECRET") or "")
+    expires = int(time_module.time()) + ttl_seconds
+    try:
+        signature = _durable_email_ingress.sign_quarantine_download(
+            company_code=company,
+            document_id=document_id,
+            expires_at_epoch=expires,
+            secret=secret,
+        )
+    except _durable_email_ingress.IngressValidationError as exc:
+        raise HTTPException(status_code=503, detail={"error": exc.code}) from exc
+    return {
+        "company_code": company,
+        "document_id": document_id,
+        "expires": expires,
+        "signature": signature,
+        "download_path": (
+            f"/orchestrator/debug/intake-documents/{document_id}/download"
+            f"?company_code={urllib.parse.quote(company)}&expires={expires}"
+            f"&signature={signature}"
+        ),
+    }
+
+# local-only: internal_intake_worker_run (from checkout L51249-51263)
+@app.post("/orchestrator/debug/intake-worker/run")
+def internal_intake_worker_run(
+    limit: int = Query(default=10, ge=1, le=500),
+    job_type: list[str] | None = Query(default=None),
+    _internal: dict[str, Any] = Depends(require_internal_access),
+):
+    invalid = sorted(set(job_type or []) - set(_durable_email_ingress.JOB_TYPES))
+    if invalid:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "unsupported_intake_job_type", "job_types": invalid},
+        )
+    return json_safe(
+        run_durable_email_ingress_worker(limit=limit, job_types=job_type or None)
+    )

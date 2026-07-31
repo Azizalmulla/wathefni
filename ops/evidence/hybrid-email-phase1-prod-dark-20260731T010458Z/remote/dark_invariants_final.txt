@@ -1,0 +1,2 @@
+branded_active=0 emergency=0 mail_sp_unset=1
+DARK_INVARIANTS_OK

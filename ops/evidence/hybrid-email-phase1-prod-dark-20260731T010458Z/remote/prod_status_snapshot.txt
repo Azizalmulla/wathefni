@@ -1,0 +1,9 @@
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+WATHEFNI_M365_MAIL_*=unset
+WATHEFNI_INBOUND_EMAIL=on
+audit_cols= ['provider', 'provider_accept_status', 'purpose', 'sender_mode', 'visible_from', 'visible_reply_to']
+deliveries_30d= 261
+email_settings_rows= 0
+mailboxes= 0
+domains= 0
+modules= True

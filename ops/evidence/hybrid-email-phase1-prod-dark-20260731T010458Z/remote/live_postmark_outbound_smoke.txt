@@ -1,0 +1,5 @@
+postmark_server_http= 200
+postmark_reachable=OK
+outbound_from= hr@wathefni.ai
+resolved= {"mode": "wathefni", "from_address": "hr@wathefni.ai", "provider": "postmark", "activatable": true}
+LIVE_OUTBOUND_SMOKE_OK

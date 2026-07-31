@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/pages/SettingsEmailSending.test.tsx
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  03:55:03
+   Duration  877ms (transform 148ms, setup 104ms, import 200ms, tests 71ms, environment 434ms)
+

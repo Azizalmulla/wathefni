@@ -1,0 +1,4 @@
+inbound_enabled=True
+inbound_env= on
+durable_ingress_import=OK
+LIVE_INBOUND_SMOKE_OK

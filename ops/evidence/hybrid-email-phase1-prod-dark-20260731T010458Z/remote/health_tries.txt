@@ -1,0 +1,2 @@
+health_try_1=000
+health_try_2=200

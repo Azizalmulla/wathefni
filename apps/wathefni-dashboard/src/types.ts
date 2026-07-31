@@ -1959,3 +1959,43 @@ export type ActivityFilters = {
   limit?: number
   offset?: number
 }
+
+export type EmailSendingChoice = {
+  id: 'wathefni' | 'microsoft_mailbox' | 'postmark_company_domain' | string
+  title: string
+  description: string
+  recommended?: boolean
+  status: 'ready' | 'setup_required' | 'verifying' | 'error' | string
+  selectable: boolean
+}
+
+export type EmailSendingSettingsResponse = {
+  company_code: string
+  current_sender: string
+  status: 'ready' | 'setup_required' | 'verifying' | 'error' | string
+  status_label: string
+  choices: EmailSendingChoice[]
+  display_name?: string | null
+  reply_to?: string | null
+  visible_from?: string | null
+  interview_email_when_calendar_sent: boolean
+  allow_wathefni_emergency_fallback?: boolean
+  hr_notice?: string | null
+  primary_action?: { id: 'connect' | 'verify' | 'test' | string; label: string } | null
+  intake: {
+    addresses: Array<{ address: string; label?: string | null }>
+    public_forward_address?: string | null
+    forward_instructions_en: string
+    forward_instructions_ar: string
+  }
+}
+
+export type EmailSendingActionResponse = {
+  ok: boolean
+  action: string
+  status?: string
+  message?: string
+  dns_records?: Array<{ type: string; host: string; value: string; purpose: string }>
+  view?: EmailSendingSettingsResponse
+}
+
