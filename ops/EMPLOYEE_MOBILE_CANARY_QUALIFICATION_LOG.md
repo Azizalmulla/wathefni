@@ -1279,4 +1279,5 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 - **C:** none — nothing aesthetic touched.
 - **Regressions:** none · typecheck clean · 14 gates / 609 checks green
 - **Evidence:** `ops/evidence/employee-app-physical-qa-phaseF-20260808T192633Z/TECHNICAL_QA_RESULT.md`
-- **Verdict:** `TECHNICAL_PHYSICAL_QA` **not closed** pending T10–T14 · `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` = **NO** (visual direction owner-rejected; dedicated redesign phase follows)
+- **Closure:** owner elected to close with T10–T14 and T17 unrun. Recorded, not resolved — `ACCESSIBILITY_PHYSICAL` stays **not established** and is deliberately not folded into the pass. Run T13/T14 before any VoiceOver-dependent customer, ideally after the visual redesign moves focus order.
+- **Verdict:** `TECHNICAL_PHYSICAL_QA` = **PASS over the scope tested** (RTL, responsiveness, smoothness, transitions, Dynamic Type) · `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` = **NO** (visual direction owner-rejected; dedicated redesign phase follows)

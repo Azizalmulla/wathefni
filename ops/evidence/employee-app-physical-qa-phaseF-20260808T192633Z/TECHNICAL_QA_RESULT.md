@@ -13,11 +13,26 @@ runtime `0.1.0`, channel `canary`. Owner-executed on the physical iPhone.
 | `TRANSITIONS` | **PASS** |
 | `DYNAMIC_TYPE` | **PASS** |
 | `ACCESSIBILITY_PHYSICAL` | **NOT ESTABLISHED** — T13/T14 not run |
-| `TECHNICAL_PHYSICAL_QA` | **NOT CLOSED** — five tests unreported |
+| `TECHNICAL_PHYSICAL_QA` | **PASS over the scope tested**, closed by owner decision with the gaps below accepted |
 | `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` | **NO** |
 
 Freeze is No on visual grounds regardless of technical result: the owner has
 rejected the current visual direction and a dedicated redesign phase follows.
+
+## Closure decision
+
+The owner elected to close technical QA with T10–T14 and T17 unrun, rather than
+execute the remaining tests. That is recorded rather than resolved:
+`ACCESSIBILITY_PHYSICAL` stays **not established** and is not rolled into the
+overall pass. The technical pass covers RTL, responsiveness, smoothness,
+transitions and Dynamic Type — the areas actually exercised on the device.
+
+Practically this means VoiceOver focus order, unread announcement and Reduce
+Motion behaviour are unverified on hardware. The a11y static gate passes, but that
+proves the accessibility props exist, not that the experience is coherent. If the
+app is ever taken to a customer who relies on VoiceOver, T13/T14 should be run
+first. The upcoming visual redesign will move focus order and hierarchy anyway, so
+running them after that phase is the more economical point.
 
 ## Owner-reported results
 
