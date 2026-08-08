@@ -20,7 +20,13 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    if (__DEV__) console.error('Uncaught app render error', error, info.componentStack)
+    // Always emit — production OTA crashes must be visible in device logs.
+    console.error(
+      '[AppErrorBoundary] Uncaught app render error',
+      error?.message || String(error),
+      error?.stack || '',
+      info?.componentStack || '',
+    )
   }
 
   render() {
