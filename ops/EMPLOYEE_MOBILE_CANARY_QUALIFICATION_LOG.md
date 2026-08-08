@@ -1267,3 +1267,16 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 - **OTA:** group `9b4d8a79-a9d9-4fa5-9f5b-6471685a4219` · iOS `019fe322-4cc3-7507-adfd-04f5ba4cc758` · Android `019fe322-4cc3-75e3-95b0-7df9af333633` · runtime `0.1.0` · commit `3415887` · **rollback group `c997eac8-8b33-4b55-9a8e-a1860d0420fe`**
 - **Evidence:** `ops/evidence/employee-app-physical-qa-phaseF-20260808T192633Z/RTL_ROOT_CAUSE_AND_FIX.md`
 - **Verdict:** root cause **proven** · fix **shipped** · physical Arabic confirmation **pending owner**. All other physical QA verdicts (smoothness, transitions, scrolling, Dynamic Type, VoiceOver, offline, auth transitions) remain **BLOCKED** — no Xcode/simulator/device on the build machine.
+
+## 20260808T211400Z — Technical physical QA (owner-executed)
+
+- **Device:** physical iPhone on OTA `019fe322-4cc3-7507-adfd-04f5ba4cc758` · commit `3415887` · runtime `0.1.0` · channel canary
+- **PASS:** `RTL_PHYSICAL` (A1 confirmed closed — Arabic starts right, chevrons left) · `RESPONSIVENESS` · `SMOOTHNESS` (tab switching, transitions and long-history scrolling all reported SMOOTH) · `TRANSITIONS` · `DYNAMIC_TYPE` (both AX5 suspects hold)
+- **Not established:** `ACCESSIBILITY_PHYSICAL` — VoiceOver (T13) and Reduce Motion (T14) not run; cannot be inferred statically
+- **Unreported:** T10 refresh-no-blank · T11 offline/reconnect · T12 submit states. **Untested:** T17 second device size (no Xcode/simulator on build machine)
+- **Resolved open questions:** T1 proved the `KeyboardAvoidingView` + `automaticallyAdjustKeyboardInsets` pair composes rather than fights — left as-is. T3 proved the privacy cover wins the app-switcher snapshot race. T8 validated paging-inside-ScrollView over nested virtualization.
+- **B1/B2 recorded, not changed:** fixed-height `countryCode` and 38×38 avatar are inconsistent with the flexible pattern around them but legible at AX5, so no churn.
+- **C:** none — nothing aesthetic touched.
+- **Regressions:** none · typecheck clean · 14 gates / 609 checks green
+- **Evidence:** `ops/evidence/employee-app-physical-qa-phaseF-20260808T192633Z/TECHNICAL_QA_RESULT.md`
+- **Verdict:** `TECHNICAL_PHYSICAL_QA` **not closed** pending T10–T14 · `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` = **NO** (visual direction owner-rejected; dedicated redesign phase follows)
