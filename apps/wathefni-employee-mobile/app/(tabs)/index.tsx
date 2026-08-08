@@ -1,80 +1,86 @@
+import { useCallback, useMemo, useState } from 'react'
 import { useRouter, type Href } from 'expo-router'
 
 import { useAuth } from '@/auth/AuthProvider'
+import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
-import { ErrorState, LoadingState } from '@/components/States'
-import { HomeView } from '@/features/home/HomeView'
-import type {
-  AttendanceResponse,
-  LeaveResponse,
-  NotificationsResponse,
-  OnboardingResponse,
-  ShiftRow,
-} from '@/api/types'
+import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
+import { HomeErrorView, HomeLoadingView, HomeView } from '@/features/home/HomeView'
+import {
+  HOME_ROUTE,
+  compositionFromMe,
+  homeTasksFromServer,
+  openableHref,
+} from '@/composition/employeeAppComposition'
+import type { HomeResponse } from '@/api/types'
 
 export default function HomeScreen() {
-  const { profile, hasFeature, can } = useAuth()
+  const { me, profile, refreshMe } = useAuth()
+  const { locale } = useI18n()
   const router = useRouter()
+  const [refreshing, setRefreshing] = useState(false)
 
-  const features = {
-    shifts: hasFeature('shifts'),
-    attendance: hasFeature('attendance'),
-    leave: hasFeature('leave'),
-    onboarding: hasFeature('onboarding'),
-    documents: hasFeature('documents'),
-  }
-  const today = useAppQuery<{ shifts: ShiftRow[] }>(
-    ['shifts', 'today'],
-    '/app/shifts/today',
-    { enabled: features.shifts },
+  // One server-owned projection. Home presents what the owning modules report; it does
+  // not re-query each module and re-derive workflow rules from status strings.
+  const home = useAppQuery<HomeResponse>(
+    ['home', locale],
+    `/app/home?locale=${encodeURIComponent(locale)}`,
+    { staleTime: HIGH_CHURN_STALE_MS },
   )
-  const attendance = useAppQuery<AttendanceResponse>(
-    ['attendance'],
-    '/app/attendance',
-    { enabled: features.attendance },
-  )
-  const leave = useAppQuery<LeaveResponse>(
-    ['leave'],
-    '/app/leave',
-    { enabled: features.leave },
-  )
-  const onboarding = useAppQuery<OnboardingResponse>(
-    ['onboarding'],
-    '/app/onboarding',
-    { enabled: features.onboarding },
-  )
-  const notifications = useAppQuery<NotificationsResponse>(
-    ['notifications'],
-    '/app/notifications',
+  const data = home.data
+
+  const composition = useMemo(
+    () =>
+      compositionFromMe(
+        me,
+        data?.onboarding
+          ? {
+              featureEnabled: data.modules.onboarding !== 'disabled',
+              requiredPending: data.onboarding.pending_count,
+              pendingCount: data.onboarding.pending_count,
+              requiredTotal: data.onboarding.required_total,
+            }
+          : null,
+      ),
+    [me, data?.onboarding, data?.modules.onboarding],
   )
 
-  const optionalQueries = [
-    features.shifts ? today : null,
-    features.attendance ? attendance : null,
-    features.leave ? leave : null,
-    features.onboarding ? onboarding : null,
-  ].filter(Boolean)
-  if (notifications.isLoading || optionalQueries.some((query) => query?.isLoading)) {
-    return <LoadingState />
-  }
-  const failed = notifications.isError
-    ? notifications
-    : optionalQueries.find((query) => query?.isError)
-  if (failed?.isError) {
-    return <ErrorState error={failed.error} onRetry={() => void failed.refetch()} />
-  }
+  const tasks = useMemo(() => homeTasksFromServer(me, data?.tasks), [me, data?.tasks])
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      await Promise.all([refreshMe(), home.refetch()])
+    } finally {
+      setRefreshing(false)
+    }
+  }, [refreshMe, home])
+
+  const onNavigate = useCallback(
+    (path: string) => {
+      const href = openableHref(me, path)
+      if (!href) {
+        router.replace(HOME_ROUTE as Href)
+        return
+      }
+      router.push(href as Href)
+    },
+    [me, router],
+  )
+
+  if (!data && home.isLoading) return <HomeLoadingView />
+  if (!data && home.isError) return <HomeErrorView onRetry={() => void home.refetch()} />
+  if (!data) return <HomeLoadingView />
 
   return (
     <HomeView
       profile={profile}
-      features={features}
-      shift={today.data?.shifts?.[0]}
-      attendance={attendance.data}
-      leave={leave.data}
-      notifications={notifications.data}
-      onboarding={onboarding.data}
-      canRequestLeave={can('leave', 'request')}
-      onNavigate={(path) => router.push(path as Href)}
+      composition={composition}
+      home={data}
+      tasks={tasks}
+      refreshing={refreshing}
+      onRefresh={() => void onRefresh()}
+      onNavigate={onNavigate}
     />
   )
 }

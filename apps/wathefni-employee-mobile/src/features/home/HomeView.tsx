@@ -1,62 +1,80 @@
 import type { ReactNode } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useI18n } from '@/i18n'
 import {
-  DirectionalIcon,
   EditorialHeading,
   FadeIn,
-  IconBadge,
   MotionProgressBar,
   PastelCard,
   PremiumButton,
   ContentSkeleton,
-  WathefniBloom,
   Wordmark,
 } from '@/components/premium'
+import { PageScreen, PageScrollView } from '@/components/layout'
+import { ListRow } from '@/components/lists'
 import { SectionTitle } from '@/components/ui'
-import { formatNumber, formatTimeRange, statusLabel } from '@/lib/format'
-import { colors, font, radius, spacing } from '@/theme'
 import type {
-  AttendanceResponse,
-  EmployeeProfile,
-  LeaveResponse,
-  NotificationsResponse,
-  OnboardingResponse,
-  ShiftRow,
-} from '@/api/types'
+  EmployeeAppComposition,
+  HomeDestination,
+  HomeTask,
+} from '@/composition/employeeAppComposition'
+import { daysUntil, formatNumber, formatTimeRange, statusLabel } from '@/lib/format'
+import { asModuleDataState, isModuleFactual, type ModuleDataState } from '@/lib/moduleState'
+import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
+import type { EmployeeProfile, HomeResponse } from '@/api/types'
 
-export type HomeFeatureSet = {
-  shifts: boolean
-  attendance: boolean
-  leave: boolean
-  onboarding: boolean
-  documents: boolean
+type DestinationVisual = {
+  icon: keyof typeof Ionicons.glyphMap
+  tint: string
+  labelKey: string
+}
+
+/**
+ * Ambient module identity, used as a small tinted icon tile rather than a filled
+ * card. Colour still says "this is Documents"; it no longer paints a third of the
+ * screen to do it.
+ */
+const DESTINATION_VISUALS: Record<HomeDestination['id'], DestinationVisual> = {
+  schedule: { icon: 'calendar-outline', tint: colors.sky, labelKey: 'schedule.title' },
+  leave: { icon: 'umbrella-outline', tint: colors.olive, labelKey: 'leave.title' },
+  documents: { icon: 'documents-outline', tint: colors.lilac, labelKey: 'documents.title' },
+  payslips: { icon: 'wallet-outline', tint: colors.butter, labelKey: 'payslips.title' },
+}
+
+const TASK_LABEL_KEYS: Record<HomeTask['kind'], string> = {
+  onboarding_documents: 'home.taskOnboarding',
+  document_renewal: 'home.taskDocuments',
+  leave_pending: 'home.taskLeave',
+  payslip_released: 'home.taskPayslips',
 }
 
 type HomeViewProps = {
   profile: EmployeeProfile | null
-  features: HomeFeatureSet
-  shift?: ShiftRow
-  attendance?: AttendanceResponse
-  leave?: LeaveResponse
-  notifications?: NotificationsResponse
-  onboarding?: OnboardingResponse
-  canRequestLeave: boolean
+  composition: EmployeeAppComposition
+  /** Server-owned projection: the only source of Home's business facts. */
+  home: HomeResponse
+  tasks: HomeTask[]
+  refreshing?: boolean
+  onRefresh?: () => void
   onNavigate: (path: string) => void
 }
 
+/**
+ * Home hierarchy: today, then what needs doing, then anywhere the tab bar cannot
+ * already reach.
+ *
+ * Every business value is rendered only when its owning module reported `ready`,
+ * so a failed or pending read is never shown as "nothing scheduled".
+ */
 export function HomeView({
   profile,
-  features,
-  shift,
-  attendance,
-  leave,
-  notifications,
-  onboarding,
-  canRequestLeave,
+  composition,
+  home,
+  tasks,
+  refreshing,
+  onRefresh,
   onNavigate,
 }: HomeViewProps) {
   const { t, isRTL, locale } = useI18n()
@@ -67,193 +85,257 @@ export function HomeView({
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('')
-  const latestAttendance = attendance?.records?.[0]
-  const primaryBalance = leave?.balances?.[0]
-  const unread = notifications?.unread ?? 0
-  const onboardingPending = onboarding?.pending_count ?? 0
+
+  const shiftState = asModuleDataState(home.modules.shifts)
+  const attendanceState = asModuleDataState(home.modules.attendance)
+  const inboxState = asModuleDataState(home.modules.notifications)
+  const shift = home.today.shifts?.[0]
+  const attendanceToday = home.today.attendance
+  const unread = home.inbox.unread
+  const showToday = shiftState !== 'disabled' || attendanceState !== 'disabled'
+  const onboarding = home.onboarding
   const onboardingTotal = onboarding?.required_total ?? 0
-  const onboardingDone = onboarding?.received_count ?? 0
-  const requiredPending = onboarding?.pending?.filter((item) => item.required !== false).length ?? 0
-  const rejectedPending = onboarding?.pending?.filter((item) => (item.status || '').toLowerCase() === 'rejected').length ?? 0
-  const caughtUp = !shift && unread === 0 && onboardingPending === 0
-  const moduleCount = Number(features.shifts) + Number(features.attendance) + Number(features.leave) + 1
-  const wideTiles = moduleCount === 1
+  const onboardingDone = onboarding?.satisfied_count ?? 0
+
+  // The onboarding checklist has one presence on Home. It used to have two: a
+  // task card telling the employee to finish their documents, and a progress card
+  // immediately below saying the same thing with a bar. The progress card wins,
+  // because it carries the count as well as the call to action.
+  const showOnboardingCard = composition.showOnboardingJourney
+  const taskList = showOnboardingCard
+    ? tasks.filter((task) => task.kind !== 'onboarding_documents')
+    : tasks
+  const hasWork = taskList.length > 0 || showOnboardingCard
+
   const rowDirection = isRTL ? styles.rowReverse : undefined
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={[styles.header, rowDirection]}>
-        <Wordmark compact />
-        <View style={styles.avatar} accessibilityLabel={profile?.name || t('profile.title')}>
-          <Text style={styles.avatarText}>{initials || 'W'}</Text>
+    <PageScreen>
+      <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
+        <View style={[styles.header, rowDirection]}>
+          <Wordmark compact />
+          <View style={[styles.headerActions, rowDirection]}>
+            <InboxBell
+              state={inboxState}
+              unread={unread}
+              onPress={() => onNavigate(composition.inboxEntry.href)}
+            />
+            <View style={styles.avatar} accessibilityLabel={profile?.name || t('profile.title')}>
+              <Text maxFontSizeMultiplier={1.2} numberOfLines={1} style={styles.avatarText}>
+                {initials || 'W'}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
 
-      <FadeIn style={styles.hero}>
-        <Text style={[styles.greeting, align]}>{t('home.greeting', { name: firstName })}</Text>
-        <EditorialHeading>{t('home.todayAtWork')}</EditorialHeading>
-      </FadeIn>
+        <FadeIn>
+          <EditorialHeading>{t('home.greeting', { name: firstName })}</EditorialHeading>
+        </FadeIn>
 
-      {features.onboarding && (rejectedPending || requiredPending) ? (
-        <FadeIn delay={70}>
-          <PastelCard
-            tone={rejectedPending ? 'blush' : 'butter'}
-            style={styles.attentionCard}
-            onPress={() => onNavigate('/onboarding')}
-            accessibilityLabel={rejectedPending ? t('home.rejectedAction') : t('home.requiredAction')}
-          >
-            <View style={[styles.attentionRow, rowDirection]}>
-              <IconBadge name={rejectedPending ? 'alert-outline' : 'checkmark-circle-outline'} size={36} inverted />
-              <View style={styles.flex}>
-                <Text style={[styles.attentionEyebrow, align]}>{t('home.needsAttention')}</Text>
-                <Text style={[styles.attentionTitle, align]}>
-                  {rejectedPending ? t('home.rejectedAction') : t('home.requiredAction')}
+        {showToday ? (
+          <FadeIn delay={60} style={styles.section}>
+            <SectionTitle>{t('home.todayAtWork')}</SectionTitle>
+            {/* Sky is Schedule's identity and the one ambient surface up here.
+                The workday itself is the headline; the label is a section title. */}
+            <PastelCard tone="sky" style={styles.todayCard}>
+              {shiftState !== 'disabled' ? (
+                <ModuleValue state={shiftState} align={align}>
+                  <Text
+                    maxFontSizeMultiplier={typeScaling.display}
+                    style={[styles.todayHeadline, align]}
+                  >
+                    {shift ? formatTimeRange(shift.start_time, shift.end_time, locale) : t('home.noShiftToday')}
+                  </Text>
+                  {shift?.location ? (
+                    <Text style={[styles.cardSupporting, align]}>{shift.location}</Text>
+                  ) : null}
+                </ModuleValue>
+              ) : null}
+
+              {attendanceState !== 'disabled' ? (
+                <View style={styles.todayRecord}>
+                  <Text style={[styles.todayLabel, align]}>{t('home.attendance')}</Text>
+                  <ModuleValue state={attendanceState} align={align}>
+                    <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.todayRecordValue, align]}>
+                      {attendanceToday
+                        ? statusLabel(attendanceToday.status, t)
+                        : t('home.noAttendanceRecordedToday')}
+                    </Text>
+                  </ModuleValue>
+                </View>
+              ) : null}
+            </PastelCard>
+          </FadeIn>
+        ) : null}
+
+        {/* "All caught up" is the server's claim, not ours: an empty task list can
+            also mean a module read failed, and that must not read as good news. */}
+        {hasWork || home.caught_up ? (
+        <FadeIn delay={80} style={styles.section}>
+          <SectionTitle>{t('home.tasks')}</SectionTitle>
+
+          {showOnboardingCard ? (
+            <PastelCard
+              tone="lilac"
+              onPress={() => onNavigate('/onboarding')}
+              accessibilityLabel={`${t('onboarding.title')}. ${t('onboarding.progress', {
+                done: formatNumber(onboardingDone, locale, 0),
+                total: formatNumber(onboardingTotal, locale, 0),
+              })}`}
+              style={styles.progressCard}
+            >
+              <View style={[styles.progressTop, rowDirection]}>
+                <View style={styles.grow}>
+                  <Text style={[styles.progressOverline, align]}>{t('onboarding.title')}</Text>
+                  <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.progressTitle, align]}>
+                    {onboarding?.pending_count ? t('home.continueChecklist') : t('home.onboardingComplete')}
+                  </Text>
+                </View>
+                <Text maxFontSizeMultiplier={1.3} numberOfLines={1} style={styles.progressCountText}>
+                  {t('onboarding.progress', {
+                    done: formatNumber(onboardingDone, locale, 0),
+                    total: formatNumber(onboardingTotal, locale, 0),
+                  })}
                 </Text>
               </View>
-              <View style={styles.attentionArrow}>
-                <DirectionalIcon size={16} />
-              </View>
-            </View>
-          </PastelCard>
-        </FadeIn>
-      ) : null}
-
-      {caughtUp ? (
-        <PastelCard tone="lilac" style={styles.caughtUpCard}>
-          <View style={[styles.caughtUpRow, rowDirection]}>
-            <IconBadge name="sparkles-outline" />
-            <View style={styles.flex}>
-              <Text style={[styles.caughtUpTitle, align]}>{t('home.caughtUp')}</Text>
-              <Text style={[styles.cardSupporting, align]}>{t('home.caughtUpHint')}</Text>
-            </View>
-          </View>
-          <WathefniBloom variant="watermark" />
-        </PastelCard>
-      ) : null}
-
-      <FadeIn delay={100} style={styles.moduleGrid}>
-        {features.shifts ? (
-          <ModuleCard
-            tone="sky"
-            icon="calendar-outline"
-            title={t('home.todayShift')}
-            wide={wideTiles}
-            onPress={() => onNavigate('/(tabs)/shifts')}
-            isRTL={isRTL}
-          >
-            <Text style={[styles.metric, align]}>{shift ? formatTimeRange(shift.start_time, shift.end_time, locale) : t('home.noShiftToday')}</Text>
-            {shift?.location ? <Text style={[styles.cardSupporting, align]}>{shift.location}</Text> : null}
-          </ModuleCard>
-        ) : null}
-
-        {features.attendance ? (
-          <ModuleCard
-            tone="butter"
-            icon="time-outline"
-            title={t('home.attendance')}
-            wide={wideTiles}
-            onPress={() => onNavigate('/attendance')}
-            isRTL={isRTL}
-          >
-            <Text style={[styles.metric, align]}>
-              {latestAttendance ? statusLabel(latestAttendance.status, t) : t('home.noAttendanceToday')}
-            </Text>
-            {latestAttendance ? (
-              <Text style={[styles.cardSupporting, align]}>{t('home.latestAttendance')}</Text>
-            ) : null}
-          </ModuleCard>
-        ) : null}
-
-        {features.leave ? (
-          <ModuleCard
-            tone="sage"
-            icon="umbrella-outline"
-            title={t('leave.title')}
-            wide={wideTiles}
-            onPress={() => onNavigate('/(tabs)/leave')}
-            isRTL={isRTL}
-          >
-            <Text style={[styles.metric, align]}>
-              {primaryBalance?.balance_days != null
-                ? t('home.leaveDays', { count: formatNumber(primaryBalance.balance_days, locale) })
-                : t('home.leaveAvailable')}
-            </Text>
-            {canRequestLeave ? (
-              <MiniAction label={t('leave.request')} onPress={() => onNavigate('/leave/request')} />
-            ) : null}
-          </ModuleCard>
-        ) : null}
-
-        <ModuleCard
-          tone="blush"
-          icon="mail-outline"
-          title={t('notifications.title')}
-          badge={unread ? formatNumber(unread, locale, 0) : undefined}
-          wide={wideTiles}
-          onPress={() => onNavigate('/(tabs)/notifications')}
-          isRTL={isRTL}
-        >
-          <Text style={[styles.metric, align]}>
-            {unread ? t('home.unreadMessages', { count: formatNumber(unread, locale, 0) }) : t('notifications.empty')}
-          </Text>
-          {notifications?.notifications?.[0]?.title ? (
-            <Text style={[styles.cardSupporting, align]} numberOfLines={1}>{notifications.notifications[0].title}</Text>
+              <MotionProgressBar value={onboardingTotal ? onboardingDone / onboardingTotal : 1} />
+            </PastelCard>
           ) : null}
-        </ModuleCard>
-      </FadeIn>
 
-      {features.onboarding ? (
-        <PastelCard
-          tone="lilac"
-          onPress={() => onNavigate('/onboarding')}
-          accessibilityLabel={t('onboarding.title')}
-          style={styles.progressCard}
-        >
-          <View style={[styles.progressTop, rowDirection]}>
-            <View style={styles.progressCount}>
-              <Text style={styles.progressCountText}>
-                {formatNumber(onboardingDone, locale, 0)}/{formatNumber(onboardingTotal || 0, locale, 0)}
-              </Text>
-            </View>
-            <View style={styles.flex}>
-              <Text style={[styles.progressOverline, align]}>{t('onboarding.title')}</Text>
-              <Text style={[styles.progressTitle, align]}>
-                {onboardingPending ? t('home.continueChecklist') : t('home.onboardingComplete')}
-              </Text>
-            </View>
-            <View style={styles.arrowButton}>
-              <DirectionalIcon size={17} />
-            </View>
-          </View>
-          <MotionProgressBar value={onboardingTotal ? onboardingDone / onboardingTotal : 1} />
-        </PastelCard>
-      ) : null}
+          {taskList.map((task) => {
+            const headline = taskHeadline(task, t, locale)
+            return (
+              <ListRow
+                key={task.id}
+                title={headline}
+                subtitle={headline === t(TASK_LABEL_KEYS[task.kind]) ? null : t(TASK_LABEL_KEYS[task.kind])}
+                meta={
+                  task.count > 1
+                    ? t('home.taskCount', { count: formatNumber(task.count, locale, 0) })
+                    : null
+                }
+                emphasis={task.severity === 'action_required' ? 'warning' : undefined}
+                icon={task.severity === 'action_required' ? 'flash-outline' : 'information-circle-outline'}
+                showChevron
+                onPress={() => onNavigate(task.href)}
+                accessibilityLabel={headline}
+              />
+            )
+          })}
 
-      {((features.onboarding && onboardingPending > 0) || features.documents || features.attendance || canRequestLeave) ? (
-        <View style={styles.quickSection}>
-          <SectionTitle>{t('home.quickActions')}</SectionTitle>
-          <View style={[styles.quickRow, rowDirection]}>
-            {canRequestLeave ? (
-              <QuickAction icon="calendar-clear-outline" label={t('home.requestLeave')} onPress={() => onNavigate('/leave/request')} />
-            ) : null}
-            {features.documents ? (
-              <QuickAction icon="documents-outline" label={t('home.documents')} onPress={() => onNavigate('/documents')} />
-            ) : null}
-            {features.onboarding && onboardingPending > 0 ? (
-              <QuickAction icon="checkmark-done-outline" label={t('home.onboarding')} onPress={() => onNavigate('/onboarding')} />
-            ) : null}
-            {features.attendance ? (
-              <QuickAction icon="time-outline" label={t('home.attendance')} onPress={() => onNavigate('/attendance')} />
-            ) : null}
-          </View>
+          {/* Nothing to do is a quiet line, not a decorated card. */}
+          {!hasWork ? (
+            <ListRow
+              title={t('home.caughtUp')}
+              subtitle={t('home.caughtUpHint')}
+              icon="checkmark-circle-outline"
+            />
+          ) : null}
+        </FadeIn>
+        ) : null}
+
+        {composition.homeDestinations.length ? (
+          <FadeIn delay={100} style={styles.section}>
+            <SectionTitle>{t('home.destinations')}</SectionTitle>
+            {composition.homeDestinations.map((destination) => {
+              const visual = DESTINATION_VISUALS[destination.id]
+              return (
+                <ListRow
+                  key={destination.id}
+                  title={t(visual.labelKey)}
+                  icon={visual.icon}
+                  iconTint={visual.tint}
+                  showChevron
+                  onPress={() => onNavigate(destination.href)}
+                  accessibilityLabel={t(visual.labelKey)}
+                />
+              )
+            })}
+          </FadeIn>
+        ) : null}
+
+        {composition.homePrimaryAction ? (
+          <PremiumButton
+            label={t('home.requestLeave')}
+            onPress={() => onNavigate(composition.homePrimaryAction!.href)}
+          />
+        ) : null}
+      </PageScrollView>
+    </PageScreen>
+  )
+}
+
+/**
+ * What a task says on its strongest line.
+ *
+ * "Your documents need renewing" is true for a passport expiring in nine months
+ * and for a Civil ID that expired last week, and an employee cannot tell which
+ * without opening the screen. When the documents module names the document and
+ * dates it, the task says so.
+ *
+ * The date is the module's; only the phrasing is chosen here. A task without
+ * detail, or with a date that will not parse, falls back to the generic label —
+ * an urgency this function cannot substantiate is never implied.
+ */
+function taskHeadline(
+  task: HomeTask,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  locale: string,
+): string {
+  const generic = t(TASK_LABEL_KEYS[task.kind])
+  if (task.kind !== 'document_renewal') return generic
+  const label = task.detail?.label
+  if (!label) return generic
+  const days = daysUntil(task.detail?.expiry_date)
+  if (days === null) return generic
+  if (days < 0) return t('home.documentExpired', { document: label })
+  if (days === 0) return t('home.documentExpiresToday', { document: label })
+  return t('home.documentExpiresIn', {
+    document: label,
+    count: formatNumber(days, locale, 0),
+  })
+}
+
+/**
+ * Inbox lives here rather than in the tab bar.
+ *
+ * The count is spoken in the accessibility label and drawn as a numeral, so the
+ * badge is never the only thing carrying "you have unread messages".
+ */
+function InboxBell({
+  state,
+  unread,
+  onPress,
+}: {
+  state: ModuleDataState
+  unread: number
+  onPress: () => void
+}) {
+  const { t, locale } = useI18n()
+  const factual = isModuleFactual(state)
+  const count = factual ? unread : 0
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        count
+          ? `${t('notifications.title')}. ${t('home.unreadMessages', { count: formatNumber(count, locale, 0) })}`
+          : t('notifications.title')
+      }
+      onPress={onPress}
+      hitSlop={6}
+      style={({ pressed }) => [styles.bell, pressed && styles.pressed]}
+    >
+      <Ionicons name={count ? 'notifications' : 'notifications-outline'} size={21} color={colors.ink} />
+      {count ? (
+        <View style={styles.badge}>
+          <Text maxFontSizeMultiplier={1.3} numberOfLines={1} style={styles.badgeText}>
+            {formatNumber(count, locale, 0)}
+          </Text>
         </View>
       ) : null}
-
-      <Text style={styles.previewLocale} accessibilityElementsHidden>{locale === 'ar' ? 'AR' : 'EN'}</Text>
-      </ScrollView>
-    </SafeAreaView>
+    </Pressable>
   )
 }
 
@@ -264,7 +346,7 @@ export function HomeLoadingView() {
     <View style={styles.stateScreen}>
       <Wordmark compact />
       <EditorialHeading>{t('home.todayAtWork')}</EditorialHeading>
-      <PastelCard tone="lilac" style={styles.stateCard}>
+      <PastelCard tone="cream" style={styles.stateCard}>
         <ContentSkeleton rows={4} />
       </PastelCard>
       <Text style={[styles.stateMessage, align]}>{t('common.loading')}</Text>
@@ -278,188 +360,107 @@ export function HomeErrorView({ onRetry }: { onRetry: () => void }) {
   return (
     <View style={styles.stateScreen}>
       <Wordmark compact />
-      <PastelCard tone="blush" style={styles.stateCard}>
+      <View style={styles.stateErrorCard}>
         <Ionicons name="cloud-offline-outline" size={34} color={colors.danger} />
         <EditorialHeading size="medium">{t('common.error')}</EditorialHeading>
         <Text style={[styles.stateMessage, align]}>{t('error.generic')}</Text>
         <PremiumButton label={t('common.retry')} onPress={onRetry} />
-      </PastelCard>
+      </View>
     </View>
   )
 }
 
-function ModuleCard({
-  tone,
-  icon,
-  title,
-  badge,
+/**
+ * Renders a module fact only when that module's read succeeded. Unavailable data
+ * is stated as unavailable — never as an empty business value.
+ */
+function ModuleValue({
+  state,
+  align,
   children,
-  onPress,
-  wide,
-  isRTL,
 }: {
-  tone: 'sky' | 'butter' | 'sage' | 'blush'
-  icon: keyof typeof Ionicons.glyphMap
-  title: string
-  badge?: string
+  state: ModuleDataState
+  align: { textAlign: 'left' | 'right' }
   children: ReactNode
-  onPress: () => void
-  wide: boolean
-  isRTL: boolean
 }) {
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const { t } = useI18n()
+  if (isModuleFactual(state)) return <>{children}</>
   return (
-    <PastelCard
-      tone={tone}
-      containerStyle={[styles.moduleCard, wide && styles.moduleCardWide]}
-      style={styles.moduleCardContent}
-      onPress={onPress}
-      accessibilityLabel={title}
-    >
-      <View style={[styles.moduleHead, isRTL && styles.rowReverse]}>
-        <IconBadge name={icon} size={36} inverted />
-        {badge ? (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{badge}</Text>
-          </View>
-        ) : null}
-      </View>
-      <Text style={[styles.moduleTitle, align]}>{title}</Text>
-      <View style={styles.moduleBody}>{children}</View>
-    </PastelCard>
-  )
-}
-
-function MiniAction({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" style={({ pressed }) => [styles.miniAction, { opacity: pressed ? 0.75 : 1 }]} onPress={onPress}>
-      <Text style={styles.miniActionText}>{label}</Text>
-    </Pressable>
-  )
-}
-
-function QuickAction({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  label: string
-  onPress: () => void
-}) {
-  return (
-    <Pressable accessibilityRole="button" style={({ pressed }) => [styles.quickAction, { opacity: pressed ? 0.72 : 1 }]} onPress={onPress}>
-      <IconBadge name={icon} size={38} />
-      <Text style={styles.quickLabel} numberOfLines={2}>{label}</Text>
-    </Pressable>
+    <View style={styles.moduleUnavailable}>
+      <Text style={[styles.moduleUnavailableText, align]}>
+        {state === 'error' ? t('home.dataUnavailable') : t('home.dataLoading')}
+      </Text>
+      {state === 'error' ? (
+        <Text style={[styles.cardSupporting, align]}>{t('home.dataUnavailableHint')}</Text>
+      ) : null}
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xxxl, gap: spacing.lg },
   rowReverse: { flexDirection: 'row-reverse' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  bell: {
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatar: {
-    width: 42,
-    height: 42,
+    width: 38,
+    height: 38,
     borderRadius: radius.pill,
-    backgroundColor: colors.pastelButter,
+    backgroundColor: colors.pink,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: { color: colors.ink, fontSize: font.small, fontWeight: '800' },
-  hero: { gap: spacing.xs },
-  greeting: { color: colors.text, fontSize: font.small, fontWeight: '600' },
-  attentionCard: { paddingVertical: spacing.md, paddingHorizontal: spacing.md },
-  attentionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  attentionEyebrow: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
-  attentionTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800', marginTop: 2 },
-  attentionArrow: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.ink,
-  },
-  caughtUpCard: { minHeight: 82, justifyContent: 'center' },
-  caughtUpRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, zIndex: 2 },
-  caughtUpTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800' },
+  section: { gap: spacing.sm },
+  todayCard: { gap: spacing.md },
+  todayHeadline: { color: colors.ink, fontSize: font.h1, lineHeight: 32, fontWeight: '800', letterSpacing: -0.5 },
+  todayRecord: { gap: 2 },
+  todayLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
+  todayRecordValue: { color: colors.ink, fontSize: font.body, fontWeight: '700' },
   cardSupporting: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
-  flex: { flex: 1 },
-  moduleGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  moduleCard: { width: '47%', minHeight: 178, flexGrow: 1 },
-  moduleCardWide: { width: '100%' },
-  moduleCardContent: { minHeight: 178, gap: spacing.sm },
-  moduleHead: { minHeight: 36, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  moduleTitle: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
-  moduleBody: { flex: 1, justifyContent: 'space-between', gap: spacing.sm },
-  metric: { color: colors.ink, fontSize: font.h3, lineHeight: 24, fontWeight: '700' },
+  grow: { flex: 1, minWidth: 0 },
+  pressed: { opacity: 0.85 },
   badge: {
-    minWidth: 24,
-    height: 24,
-    paddingHorizontal: 7,
+    position: 'absolute',
+    top: 4,
+    right: 2,
+    minWidth: 18,
+    minHeight: 18,
+    paddingHorizontal: 5,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.danger,
   },
-  badgeText: { color: colors.surface, fontSize: font.tiny, fontWeight: '800' },
-  miniAction: {
-    alignSelf: 'stretch',
-    minHeight: 44,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.68)',
-  },
-  miniActionText: { color: colors.ink, fontSize: font.tiny, fontWeight: '800' },
+  badgeText: { color: colors.surface, fontSize: 10, fontWeight: '800' },
   progressCard: { gap: spacing.md },
-  progressTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  progressCount: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.62)',
-  },
+  progressTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   progressCountText: { color: colors.ink, fontSize: font.small, fontWeight: '800' },
   progressOverline: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
   progressTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800', marginTop: 2 },
-  arrowButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.ink,
-  },
-  quickSection: { gap: spacing.md },
-  quickRow: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  quickAction: {
-    width: '23%',
-    minWidth: 72,
-    flexGrow: 1,
-    minHeight: 90,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: 4,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.surface,
-  },
-  quickLabel: { color: colors.text, fontSize: 10.5, lineHeight: 13, fontWeight: '700', letterSpacing: -0.15, textAlign: 'center' },
-  previewLocale: { height: 0, opacity: 0 },
+  moduleUnavailable: { gap: 2 },
+  moduleUnavailableText: { color: colors.subtle, fontSize: font.body, lineHeight: 22, fontWeight: '600' },
   stateScreen: {
     flex: 1,
     backgroundColor: colors.bg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    gap: spacing.lg,
+    paddingHorizontal: layout.pageMargin,
+    paddingTop: layout.pageTop,
+    gap: layout.sectionGap,
   },
   stateCard: { gap: spacing.lg, paddingVertical: spacing.xl },
+  stateErrorCard: {
+    gap: spacing.lg,
+    padding: spacing.lg,
+    paddingVertical: spacing.xl,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderColor: colors.danger,
+  },
   stateMessage: { color: colors.subtle, fontSize: font.body, lineHeight: 22 },
 })

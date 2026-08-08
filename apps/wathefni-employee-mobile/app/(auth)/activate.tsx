@@ -5,6 +5,13 @@ import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
 import { ActivationView } from '@/features/activation/ActivationView'
 
+export const options = {
+  headerShown: false,
+  title: '',
+  headerTitle: '',
+  headerBackVisible: false,
+}
+
 export default function ActivateScreen() {
   const { t } = useI18n()
   const { activate, requestCode } = useAuth()

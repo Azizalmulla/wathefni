@@ -16,7 +16,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useI18n } from '@/i18n'
 import { EditorialHeading, FadeIn, PremiumButton, WathefniBloom, Wordmark } from '@/components/premium'
 import { motion, useReducedMotion } from '@/motion'
-import { colors, font, radius, shadows, spacing } from '@/theme'
+import { colors, font, layout, radius, shadows, spacing } from '@/theme'
 
 type ActivationViewProps = {
   phone: string
@@ -41,15 +41,19 @@ export function ActivationView({
   onSignIn,
   onRequestCode,
 }: ActivationViewProps) {
-  const { t, isRTL } = useI18n()
+  const { t, isRTL, locale, syncAuthLocale } = useI18n()
   const codeRef = useRef<TextInput>(null)
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [codeFocused, setCodeFocused] = useState(false)
   const align = { textAlign: isRTL ? 'right' : 'left' } as const
   const valid = Boolean(phone.trim() && code.trim().length >= 4)
 
+  useEffect(() => {
+    void syncAuthLocale()
+  }, [syncAuthLocale])
+
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} key={`auth-${locale}`}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView
           contentContainerStyle={styles.content}
@@ -231,7 +235,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: {
     flexGrow: 1,
-    paddingHorizontal: spacing.xl,
+    paddingHorizontal: layout.focusMargin,
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     gap: spacing.lg,
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
     width: 86,
     height: 28,
     borderRadius: radius.pill,
-    backgroundColor: colors.pastelSky,
+    backgroundColor: colors.sky,
     opacity: 0.34,
     transform: [{ rotate: '-4deg' }],
   },
@@ -325,8 +329,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: radius.md,
   },
-  errorFeedback: { backgroundColor: colors.dangerSoft },
-  noticeFeedback: { backgroundColor: colors.successSoft },
+  // Feedback is a status: neutral surface plus a semantic edge, never a pastel fill.
+  errorFeedback: { backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: colors.danger },
+  noticeFeedback: { backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth * 2, borderColor: colors.success },
   feedbackText: { flex: 1, fontSize: font.small, lineHeight: 18 },
   codeLink: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   codeLinkText: { color: colors.text, fontSize: font.small, fontWeight: '700', textDecorationLine: 'underline' },
