@@ -9,7 +9,9 @@ export type AppAccessState =
   | 'company_archived'
   | 'company_app_disabled'
   | 'employee_inactive'
+  | 'not_allowlisted'
   | 'session_expired'
+  | 'access_reset'
   | 'unknown_error'
 
 export function accessStateForError(error: unknown): AppAccessState {
@@ -25,9 +27,14 @@ export function accessStateForError(error: unknown): AppAccessState {
       return 'company_archived'
     case 'employee_app_not_enabled_for_company':
       return 'company_app_disabled'
+    case 'employee_app_not_allowlisted':
+      return 'not_allowlisted'
     case 'account_inactive':
       return 'employee_inactive'
+    case 'app_access_revoked':
+      return 'access_reset'
     case 'app_auth_failed':
+    case 'stale_session_epoch':
       return 'session_expired'
     default:
       return 'unknown_error'
