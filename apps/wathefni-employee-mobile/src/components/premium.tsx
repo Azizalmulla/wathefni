@@ -16,16 +16,17 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useI18n } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
 import { actionHaptic } from '@/native/haptics'
-import { colors, font, radius, shadows, spacing } from '@/theme'
+import { colors, font, radius, shadows, spacing, typeScaling } from '@/theme'
 
-export type PastelTone = 'lilac' | 'butter' | 'blush' | 'sage' | 'sky' | 'cream'
+/** Ambient brand tones. These carry module identity and warmth, never status. */
+export type PastelTone = 'lilac' | 'butter' | 'pink' | 'olive' | 'sky' | 'cream'
 
 const pastelColors: Record<PastelTone, string> = {
-  lilac: colors.pastelLilac,
-  butter: colors.pastelButter,
-  blush: colors.pastelBlush,
-  sage: colors.pastelSage,
-  sky: colors.pastelSky,
+  lilac: colors.lilac,
+  butter: colors.butter,
+  pink: colors.pink,
+  olive: colors.olive,
+  sky: colors.sky,
   cream: colors.surface,
 }
 
@@ -164,8 +165,8 @@ export function WathefniBloom({
     >
       <View style={[styles.bloomShape, styles.bloomLilac]} />
       <View style={[styles.bloomShape, styles.bloomButter]} />
-      <View style={[styles.bloomShape, styles.bloomBlush]} />
-      <View style={[styles.bloomShape, styles.bloomSage]} />
+      <View style={[styles.bloomShape, styles.bloomPink]} />
+      <View style={[styles.bloomShape, styles.bloomOlive]} />
     </View>
   )
 }
@@ -174,15 +175,18 @@ export function EditorialHeading({
   children,
   size = 'large',
   style,
+  accessibilityRole = 'header',
 }: {
   children: ReactNode
   size?: 'large' | 'medium'
   style?: StyleProp<TextStyle>
+  accessibilityRole?: 'header' | 'text' | 'none'
 }) {
   const { locale, isRTL } = useI18n()
   return (
     <Text
-      maxFontSizeMultiplier={2}
+      accessibilityRole={accessibilityRole === 'none' ? undefined : accessibilityRole}
+      maxFontSizeMultiplier={size === 'large' ? typeScaling.display : typeScaling.heading}
       style={[
         size === 'large' ? styles.editorialLarge : styles.editorialMedium,
         { fontFamily: editorialFont(locale), textAlign: isRTL ? 'right' : 'left' },
@@ -279,7 +283,13 @@ export function PremiumButton({
         ) : (
           <View style={[styles.buttonContent, isRTL && styles.rowReverse]}>
             {success ? <Ionicons name="checkmark" size={18} color={colors.surface} /> : null}
-            <Text style={styles.premiumButtonText}>{label}</Text>
+            <Text
+              maxFontSizeMultiplier={typeScaling.body}
+              numberOfLines={2}
+              style={styles.premiumButtonText}
+            >
+              {label}
+            </Text>
             {showDirection && !success ? (
               <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={17} color={colors.surface} />
             ) : null}
@@ -386,7 +396,7 @@ const styles = StyleSheet.create({
     height: 28,
     right: 34,
     top: 5,
-    backgroundColor: colors.pastelLilac,
+    backgroundColor: colors.lilac,
     transform: [{ rotate: '24deg' }],
   },
   bloomButter: {
@@ -394,37 +404,37 @@ const styles = StyleSheet.create({
     height: 50,
     right: 6,
     top: 18,
-    backgroundColor: colors.pastelButter,
+    backgroundColor: colors.butter,
     transform: [{ rotate: '-18deg' }],
   },
-  bloomBlush: {
+  bloomPink: {
     width: 45,
     height: 30,
     right: 43,
     top: 46,
-    backgroundColor: colors.pastelBlush,
+    backgroundColor: colors.pink,
     transform: [{ rotate: '-28deg' }],
   },
-  bloomSage: {
+  bloomOlive: {
     width: 31,
     height: 33,
     right: 16,
     top: 58,
-    backgroundColor: colors.pastelSage,
+    backgroundColor: colors.olive,
     transform: [{ rotate: '15deg' }],
   },
   editorialLarge: {
     color: colors.ink,
     fontSize: font.display,
-    lineHeight: 43,
-    letterSpacing: -1,
+    lineHeight: 36,
+    letterSpacing: -0.7,
     fontWeight: '500',
   },
   editorialMedium: {
     color: colors.ink,
     fontSize: font.h1,
-    lineHeight: 34,
-    letterSpacing: -0.5,
+    lineHeight: 32,
+    letterSpacing: -0.4,
     fontWeight: '500',
   },
   pastelCard: {
@@ -434,10 +444,13 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   premiumButton: {
-    height: 48,
+    // minHeight, not height: the label must be able to grow with Dynamic Type
+    // rather than clip inside a fixed box.
+    minHeight: 48,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     backgroundColor: colors.ink,
     shadowColor: colors.ink,
@@ -447,7 +460,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   premiumButtonDisabled: {
-    backgroundColor: '#BEB8AF',
+    backgroundColor: colors.subtle,
     shadowOpacity: 0,
   },
   premiumButtonSuccess: { backgroundColor: colors.success },
@@ -457,19 +470,19 @@ const styles = StyleSheet.create({
     height: 6,
     overflow: 'hidden',
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.58)',
+    backgroundColor: colors.surfaceMuted,
   },
   progressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.accent },
   iconBadge: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.72)',
+    backgroundColor: colors.surfaceMuted,
   },
   iconBadgeInverted: { backgroundColor: colors.ink },
   skeletonWrap: { gap: spacing.md },
   skeleton: {
     height: 15,
     borderRadius: radius.pill,
-    backgroundColor: colors.skeleton,
+    backgroundColor: colors.border,
   },
 })
