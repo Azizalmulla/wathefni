@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { StatusChip } from '@/components/ui'
 import {
   ContentSkeleton,
@@ -109,8 +109,7 @@ export function BankView({
   extractionNote = null,
 }: BankViewProps) {
   const { t, isRTL, locale } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
-  const rowDirection = isRTL ? styles.rowReverse : undefined
+  const align = readingEdgeAlign(isRTL)
 
   const submissionState = String(data.submission_state || 'none') as BankSubmissionState
   const submission = data.submission || null
@@ -152,7 +151,7 @@ export function BankView({
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, rowDirection]}>
+        <View style={styles.nav}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
@@ -173,7 +172,7 @@ export function BankView({
         {/* One account surface: the account that will be paid, stated once.
             Butter is the single colour moment on this screen. */}
         <PastelCard tone="butter" style={styles.card}>
-          <View style={[styles.cardHead, rowDirection]}>
+          <View style={styles.cardHead}>
             <Text style={[styles.cardTitle, align]}>
               {hasEffective ? t('bank.payrollEffectiveTitle') : t('bank.verifiedTitle')}
             </Text>
@@ -208,7 +207,7 @@ export function BankView({
         {/* One human status line: what happens next, never a dead end. */}
         {nextStep ? (
           <View style={styles.statusLine}>
-            <View style={[styles.cardHead, rowDirection]}>
+            <View style={styles.cardHead}>
               <Text style={[styles.subTitle, align]}>{t('bank.nextStepTitle')}</Text>
               <StatusChip label={submissionLabel(submissionState, t)} tone={chipTone(submissionState)} />
             </View>
@@ -223,7 +222,7 @@ export function BankView({
             it would be the masked IBAN above under a second heading. */}
         {showVerifiedSeparately ? (
           <View style={styles.statusLine}>
-            <View style={[styles.cardHead, rowDirection]}>
+            <View style={styles.cardHead}>
               <Text style={[styles.subTitle, align]}>{t('bank.verifiedTitle')}</Text>
               <StatusChip label={t('bank.verifiedChip')} tone="success" />
             </View>
@@ -235,7 +234,7 @@ export function BankView({
         {/* The change the employee asked for, and why it came back. */}
         {pendingChange ? (
           <PastelCard tone="cream" style={styles.card}>
-            <View style={[styles.cardHead, rowDirection]}>
+            <View style={styles.cardHead}>
               <Text style={[styles.cardTitle, align]}>{t('bank.submittedTitle')}</Text>
               <StatusChip label={submissionLabel(submissionState, t)} tone={chipTone(submissionState)} />
             </View>
@@ -265,7 +264,7 @@ export function BankView({
                     accessibilityRole="button"
                     accessibilityLabel={row.filename || t('bank.evidenceTitle')}
                     onPress={() => onOpenEvidence(row)}
-                    style={[styles.evidenceRow, rowDirection]}
+                    style={styles.evidenceRow}
                   >
                     <Ionicons name="document-attach-outline" size={18} color={colors.ink} />
                     <Text style={[styles.evidenceName, align]} numberOfLines={1}>
@@ -362,7 +361,7 @@ export function BankView({
                 <TextInput
                   style={[
                     styles.input,
-                    { textAlign: isRTL ? 'right' : 'left' },
+                    readingEdgeAlign(isRTL),
                     fieldErrors[field] ? styles.inputError : null,
                   ]}
                   value={form[field] || ''}
@@ -414,7 +413,7 @@ export function BankView({
         {/* Masking and encryption are reassurance, not a section: footnotes. */}
         <View style={styles.footnotes}>
           <Text style={[styles.note, align]}>{t('bank.maskedNote')}</Text>
-          <View style={[styles.securityRow, rowDirection]}>
+          <View style={styles.securityRow}>
             <Ionicons name="lock-closed-outline" size={16} color={colors.success} />
             <Text style={[styles.note, styles.flex, align]}>{t('bank.secureMessage')}</Text>
           </View>
@@ -542,7 +541,7 @@ export function BankLoadingView() {
 /** Company opt-out or controlled rollout: explain, then offer a way back. */
 export function BankUnavailableView({ onBack }: { onBack: () => void }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
@@ -556,7 +555,7 @@ export function BankUnavailableView({ onBack }: { onBack: () => void }) {
 
 export function BankErrorView({ onRetry }: { onRetry: () => void }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
@@ -578,7 +577,6 @@ const styles = StyleSheet.create({
     gap: layout.sectionGap,
   },
   nav: { minHeight: layout.touchTarget, flexDirection: 'row', alignItems: 'center' },
-  rowReverse: { flexDirection: 'row-reverse' },
   backButton: {
     width: layout.touchTarget,
     height: layout.touchTarget,

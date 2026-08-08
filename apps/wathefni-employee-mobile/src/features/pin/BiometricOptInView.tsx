@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import type { BiometricKind } from '@/auth/biometricAuth'
 import { EditorialHeading, FadeIn, PremiumButton, Wordmark } from '@/components/premium'
 import { colors, font, layout, spacing } from '@/theme'
@@ -27,7 +27,7 @@ function enableKey(kind: BiometricKind): string {
 
 export function BiometricOptInView({ kind, busy = false, onEnable, onSkip }: BiometricOptInViewProps) {
   const { t, isRTL, locale } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
 
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} key={`bio-opt-${locale}`}>

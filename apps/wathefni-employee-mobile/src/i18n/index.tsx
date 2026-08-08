@@ -62,6 +62,34 @@ function nativeDirectionNeedsFlip(locale: AppLocale): boolean {
   return I18nManager.isRTL !== (locale === 'ar')
 }
 
+const ALIGN_LEADING = { textAlign: 'left' } as const
+const ALIGN_LITERAL_RIGHT = { textAlign: 'right' } as const
+
+/**
+ * Text alignment against the reading edge.
+ *
+ * iOS swaps `textAlign` left↔right itself whenever the view's native layout
+ * direction is RTL (`RCTTextAttributes.effectiveParagraphStyle`). Arabic is
+ * therefore expressed as `left` and arrives as right; stating `right` directly
+ * would be swapped to left and pin Arabic against the wrong edge.
+ *
+ * The literal value is only correct in the degraded case where Arabic is showing
+ * but the native direction was never applied, i.e. an RTL reload that did not
+ * happen. That is why this reads `I18nManager.isRTL` — the direction actually in
+ * force — rather than the selected locale.
+ */
+export function readingEdgeAlign(isRTL: boolean) {
+  return isRTL && !I18nManager.isRTL ? ALIGN_LITERAL_RIGHT : ALIGN_LEADING
+}
+
+const ALIGN_TRAILING = { textAlign: 'right' } as const
+const ALIGN_LITERAL_LEFT = { textAlign: 'left' } as const
+
+/** Mirror of {@link readingEdgeAlign}, for values set against the far edge. */
+export function trailingEdgeAlign(isRTL: boolean) {
+  return isRTL && !I18nManager.isRTL ? ALIGN_LITERAL_LEFT : ALIGN_TRAILING
+}
+
 /** Silent process reload for RTL. No user-facing restart copy. */
 async function reloadForLayoutDirection(): Promise<boolean> {
   try {

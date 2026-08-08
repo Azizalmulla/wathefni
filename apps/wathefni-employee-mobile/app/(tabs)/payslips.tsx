@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useAuth } from '@/auth/AuthProvider'
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 import { ErrorState, LoadingState } from '@/components/States'
@@ -117,7 +117,7 @@ export default function PayslipsScreen() {
   if (list.isLoading && !list.data) return <LoadingState />
   if (list.isError && !list.data) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />
 
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const rows: PayslipListItem[] = list.data?.payslips ?? []
   const honesty = locale === 'ar' ? list.data?.honesty?.ar : list.data?.honesty?.en
   const payslip = detail.data?.payslip
@@ -132,7 +132,7 @@ export default function PayslipsScreen() {
     <PageScreen>
       {/* Payslips is a tab root, so the only back step is out of a single
           payslip and into the list. */}
-      <View style={[styles.nav, isRTL && styles.rowReverse]}>
+      <View style={styles.nav}>
         {selectedId ? (
           <Pressable
             accessibilityRole="button"
@@ -358,10 +358,10 @@ function LineRow({
   currency: string
 }) {
   const { locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <View
-      style={[styles.lineRow, isRTL && styles.rowReverse]}
+      style={styles.lineRow}
       accessibilityLabel={`${label}: ${formatMoney(Number(amount || 0), locale)} ${currency}`}
     >
       <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.lineLabel, styles.flex, align]}>
@@ -386,7 +386,6 @@ const styles = StyleSheet.create({
     paddingTop: layout.pageTop,
     gap: spacing.sm,
   },
-  rowReverse: { flexDirection: 'row-reverse' },
   back: { width: layout.touchTarget, height: layout.touchTarget, alignItems: 'center', justifyContent: 'center' },
   navSpacer: { width: layout.touchTarget },
   honesty: { color: colors.subtle, fontSize: font.small, lineHeight: 18, marginBottom: spacing.sm },

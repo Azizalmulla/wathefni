@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { EditorialHeading, FadeIn, PremiumButton, WathefniBloom, Wordmark } from '@/components/premium'
 import { motion, useReducedMotion } from '@/motion'
 import { colors, font, layout, radius, shadows, spacing } from '@/theme'
@@ -45,7 +45,7 @@ export function ActivationView({
   const codeRef = useRef<TextInput>(null)
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [codeFocused, setCodeFocused] = useState(false)
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const valid = Boolean(phone.trim() && code.trim().length >= 4)
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export function ActivationView({
             <View style={styles.field}>
               <Text style={[styles.label, align]}>{t('auth.phone')}</Text>
               <FocusFrame focused={phoneFocused} invalid={Boolean(error)}>
-                <View style={[styles.phoneRow, isRTL && styles.rowReverse]}>
+                <View style={styles.phoneRow}>
                   <View style={styles.countryCode}>
                     <Text style={styles.countryText}>+965</Text>
                   </View>
@@ -129,7 +129,7 @@ export function ActivationView({
             </View>
 
             {error ? (
-              <FadeIn style={[styles.feedback, styles.errorFeedback, isRTL && styles.rowReverse]}>
+              <FadeIn style={[styles.feedback, styles.errorFeedback]}>
                 <Ionicons name="alert-circle-outline" size={18} color={colors.danger} />
                 <Text
                   accessibilityLiveRegion="assertive"
@@ -140,7 +140,7 @@ export function ActivationView({
               </FadeIn>
             ) : null}
             {notice ? (
-              <FadeIn style={[styles.feedback, styles.noticeFeedback, isRTL && styles.rowReverse]}>
+              <FadeIn style={[styles.feedback, styles.noticeFeedback]}>
                 <Ionicons name="checkmark-circle-outline" size={18} color={colors.success} />
                 <Text
                   accessibilityLiveRegion="polite"
@@ -172,7 +172,7 @@ export function ActivationView({
             </Pressable>
           </FadeIn>
 
-          <View style={[styles.secureNote, isRTL && styles.rowReverse]}>
+          <View style={styles.secureNote}>
             <Ionicons name="shield-checkmark-outline" size={18} color={colors.success} />
             <Text style={[styles.secureText, align]}>{t('auth.secureNote')}</Text>
           </View>
@@ -294,7 +294,6 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   phoneRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center' },
-  rowReverse: { flexDirection: 'row-reverse' },
   countryCode: {
     height: 48,
     justifyContent: 'center',

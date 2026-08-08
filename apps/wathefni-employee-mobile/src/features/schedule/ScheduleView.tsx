@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import {
   EditorialHeading,
   FadeIn,
@@ -37,7 +37,7 @@ export function ScheduleView({
   onRefresh?: () => void
 }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const shiftsState = asModuleDataState(data.authority.shifts)
   const attendanceState = asModuleDataState(data.authority.attendance)
   const upcomingState = asModuleDataState(data.authority.shifts_upcoming)
@@ -47,7 +47,7 @@ export function ScheduleView({
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, isRTL && styles.rowReverse]}>
+        <View style={styles.nav}>
           <Wordmark compact />
         </View>
 
@@ -79,7 +79,7 @@ export function ScheduleView({
             {isModuleFactual(attendanceState) ? (
               <>
                 {summary ? (
-                  <View style={[styles.summaryRow, isRTL && styles.rowReverse]}>
+                  <View style={styles.summaryRow}>
                     <SummaryMetric status="success" label={t('attendance.present')} value={summary.present} />
                     <SummaryMetric status="warning" label={t('attendance.late')} value={summary.late} />
                     <SummaryMetric status="danger" label={t('attendance.absent')} value={summary.absent} />
@@ -121,7 +121,7 @@ export function ScheduleView({
 
         {/* The employee cannot clock in or correct a record here; say so once, plainly. */}
         <PastelCard tone="cream" style={styles.authorityCard}>
-          <View style={[styles.authorityRow, isRTL && styles.rowReverse]}>
+          <View style={styles.authorityRow}>
             <IconBadge name="shield-checkmark-outline" size={34} />
             <Text style={[styles.authorityText, styles.flex, align]}>{t('schedule.hrAuthority')}</Text>
           </View>
@@ -140,7 +140,7 @@ function WorkdayEntryCard({
   attendanceState: ModuleDataState
 }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const { scheduled, recorded } = entry
 
   return (
@@ -149,14 +149,14 @@ function WorkdayEntryCard({
         <Text style={[styles.blockLabel, align]}>{t('schedule.expected')}</Text>
         {scheduled ? (
           <>
-            <View style={[styles.cardHead, isRTL && styles.rowReverse]}>
+            <View style={styles.cardHead}>
               <Text style={[styles.entryTime, align]}>
                 {formatTimeRange(scheduled.start_time, scheduled.end_time, locale)}
               </Text>
               <StatusChip label={statusLabel(scheduled.status, t)} tone={statusTone(scheduled.status)} />
             </View>
             {scheduled.location || scheduled.role ? (
-              <View style={[styles.metaRow, isRTL && styles.rowReverse]}>
+              <View style={styles.metaRow}>
                 <Ionicons name="location-outline" size={16} color={colors.subtle} />
                 <Text style={[styles.supporting, align]}>{scheduled.location || scheduled.role}</Text>
               </View>
@@ -192,10 +192,10 @@ function WorkdayEntryCard({
 
 function RecordedDetail({ record }: { record: WorkdayRecorded }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <>
-      <View style={[styles.cardHead, isRTL && styles.rowReverse]}>
+      <View style={styles.cardHead}>
         <Text style={[styles.entryTime, align]}>
           {record.check_in_at || record.check_out_at
             ? `${formatClockTime(record.check_in_at, locale)} – ${formatClockTime(record.check_out_at, locale)}`
@@ -220,16 +220,16 @@ function RecordedDetail({ record }: { record: WorkdayRecorded }) {
 
 function ScheduledCard({ shift }: { shift: WorkdayScheduled }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <PastelCard tone="sky" style={styles.shiftCard}>
-      <View style={[styles.cardHead, isRTL && styles.rowReverse]}>
+      <View style={styles.cardHead}>
         <Text style={[styles.metaStrong, align]}>{formatDate(shift.date, locale)}</Text>
         <StatusChip label={statusLabel(shift.status, t)} tone={statusTone(shift.status)} />
       </View>
       <Text style={[styles.entryTime, align]}>{formatTimeRange(shift.start_time, shift.end_time, locale)}</Text>
       {shift.location || shift.role ? (
-        <View style={[styles.metaRow, isRTL && styles.rowReverse]}>
+        <View style={styles.metaRow}>
           <Ionicons name="location-outline" size={16} color={colors.subtle} />
           <Text style={[styles.supporting, align]}>{shift.location || shift.role}</Text>
         </View>
@@ -240,10 +240,10 @@ function ScheduledCard({ shift }: { shift: WorkdayScheduled }) {
 
 function RecordedRow({ record }: { record: WorkdayRecorded }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const hasTimes = Boolean(record.check_in_at || record.check_out_at)
   return (
-    <View style={[styles.recordRow, isRTL && styles.rowReverse]}>
+    <View style={styles.recordRow}>
       <View style={styles.flex}>
         <Text style={[styles.recordDate, align]}>{formatDate(record.date, locale)}</Text>
         {hasTimes ? (
@@ -289,10 +289,10 @@ function TodayEmptyCard({
 
 function AuthorityUnavailableCard({ state, subject }: { state: ModuleDataState; subject: string }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <View style={[styles.infoCard, styles.noticeCard, state === 'error' && styles.noticeCardError]}>
-      <View style={[styles.authorityRow, isRTL && styles.rowReverse]}>
+      <View style={styles.authorityRow}>
         <IconBadge name={state === 'error' ? 'cloud-offline-outline' : 'time-outline'} size={32} />
         <View style={styles.flex}>
           <Text style={[styles.infoMessage, align]}>
@@ -321,9 +321,9 @@ function InfoCard({
   tone: PastelTone | 'notice'
 }) {
   const { isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const body = (
-    <View style={[styles.authorityRow, isRTL && styles.rowReverse]}>
+    <View style={styles.authorityRow}>
       <IconBadge name={icon} size={32} />
       <Text
         maxFontSizeMultiplier={typeScaling.body}
@@ -372,7 +372,6 @@ function SummaryMetric({
 }
 
 const styles = StyleSheet.create({
-  rowReverse: { flexDirection: 'row-reverse' },
   nav: { flexDirection: 'row', alignItems: 'center' },
   hero: { gap: spacing.xs },
   heroBloom: { marginTop: spacing.xs },

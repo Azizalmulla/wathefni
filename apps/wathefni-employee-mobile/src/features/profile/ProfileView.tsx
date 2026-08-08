@@ -1,7 +1,7 @@
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { PastelCard, WathefniBloom, Wordmark } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
 import { SectionHeader } from '@/components/lists'
@@ -41,7 +41,7 @@ export function ProfileView({
   onRetryProfile,
 }: Props) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const personal: ProfilePersonal | null = profile?.personal ?? null
   const employment: ProfileEmployment | null = profile?.employment ?? null
   const name = personal?.name || fallbackName || '—'
@@ -50,7 +50,7 @@ export function ProfileView({
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, isRTL && styles.rowReverse]}>
+        <View style={styles.nav}>
           <Wordmark compact />
         </View>
 
@@ -64,7 +64,7 @@ export function ProfileView({
           Identity is also the one pink moment in the app: it is about the person.
         */}
         <PastelCard tone="pink" style={styles.profileHero} accessibilityLabel={name}>
-          <View style={[styles.profileTop, isRTL && styles.rowReverse]}>
+          <View style={styles.profileTop}>
             <View style={styles.largeAvatar} accessibilityElementsHidden>
               <Text style={styles.largeAvatarText}>{initials || 'W'}</Text>
             </View>
@@ -210,10 +210,10 @@ function DetailRow({
   action?: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void } | null
 }) {
   const { isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <View
-      style={[styles.detailRow, isRTL && styles.rowReverse]}
+      style={styles.detailRow}
       accessibilityLabel={`${label}: ${value}${supporting ? `. ${supporting}` : ''}`}
     >
       <View style={styles.detailIcon} accessibilityElementsHidden>
@@ -282,7 +282,7 @@ function MenuRow({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => [styles.menuRow, isRTL && styles.rowReverse, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
       hitSlop={4}
     >
       <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
@@ -293,7 +293,7 @@ function MenuRow({
           styles.menuLabel,
           styles.flex,
           danger && { color: colors.danger },
-          { textAlign: isRTL ? 'right' : 'left' },
+          readingEdgeAlign(isRTL),
         ]}
       >
         {label}
@@ -305,7 +305,6 @@ function MenuRow({
 
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center' },
-  rowReverse: { flexDirection: 'row-reverse' },
   profileHero: { minHeight: 96, justifyContent: 'center' },
   profileTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, zIndex: 2 },
   largeAvatar: {

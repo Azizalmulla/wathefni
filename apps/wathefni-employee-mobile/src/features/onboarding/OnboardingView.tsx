@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { StatusChip } from '@/components/ui'
 import {
   EditorialHeading,
@@ -85,19 +85,19 @@ export function OnboardingView({
     return (
       <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
         <View style={styles.content}>
-          <View style={[styles.nav, isRTL ? styles.rowReverse : undefined]}>
+          <View style={styles.nav}>
             <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={onBack} style={styles.backButton}>
               <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
             </Pressable>
             <Wordmark compact align="center" />
             <View style={styles.navSpacer} />
           </View>
-          <Text style={[styles.taskTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.taskTitle, readingEdgeAlign(isRTL)]}>
             {t('onboarding.contractErrorTitle')}
           </Text>
           {/* The contract version and machine reason still reach telemetry via
               projectOnboardingLifecycle; they are not put in front of the employee. */}
-          <Text style={[styles.stateMessage, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.stateMessage, readingEdgeAlign(isRTL)]}>
             {t('onboarding.contractErrorMessage')}
           </Text>
           {onRefresh ? <PremiumButton label={t('common.retry')} onPress={onRefresh} /> : null}
@@ -153,8 +153,7 @@ function LifecycleChecklistView({
   const handledByOthers = projection.handledByOthers
   const completed = projection.completed
   const canUpload = projection.canUpload && canUploadDocuments
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
-  const rowDirection = isRTL ? styles.rowReverse : undefined
+  const align = readingEdgeAlign(isRTL)
   const done = projection.acceptedCount
   const progress = projection.requiredTotal ? done / projection.requiredTotal : 1
   const hasAny = yourActions.length + beingReviewed.length + handledByOthers.length + completed.length > 0
@@ -180,7 +179,7 @@ function LifecycleChecklistView({
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, rowDirection]}>
+        <View style={styles.nav}>
           <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={onBack} style={styles.backButton}>
             <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
           </Pressable>
@@ -203,7 +202,7 @@ function LifecycleChecklistView({
           in one place — state, count, bar, next action, in that order.
         */}
         <PastelCard tone="lilac" style={styles.progressCard}>
-          <View style={[styles.progressHead, rowDirection]}>
+          <View style={styles.progressHead}>
             <View style={styles.progressCopy}>
               <Text style={[styles.progressLabel, align]}>{t('onboarding.progressLabel')}</Text>
               <Text style={[styles.progressValue, align]}>
@@ -312,7 +311,7 @@ function LifecycleChecklistView({
           <CompletedSection items={completed} />
         ) : null}
 
-        <View style={[styles.securityRow, rowDirection]}>
+        <View style={styles.securityRow}>
           <Ionicons name="shield-checkmark-outline" size={16} color={colors.success} />
           <Text style={[styles.securityText, styles.flex, align]}>{t('onboarding.secureMessage')}</Text>
         </View>
@@ -431,8 +430,7 @@ function ChecklistCard({
   const allowPreview = Boolean(item.file_id) && (actions.size ? actions.has('preview') : true)
   const allowVersions =
     Boolean(onViewVersions) && Boolean(item.file_id) && (actions.size ? actions.has('view_versions') : true)
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
-  const rowDirection = isRTL ? styles.rowReverse : undefined
+  const align = readingEdgeAlign(isRTL)
   const photo = (item.item_id || item.document_type) === 'personal_photo'
   const normalizedStatus = (item.status || 'pending').toLowerCase()
   const awaitingReview = ['submitted', 'processing', 'received'].includes(normalizedStatus)
@@ -477,9 +475,9 @@ function ChecklistCard({
 
   const cardBody = (
     <>
-      <View style={[styles.taskTop, rowDirection]}>
+      <View style={styles.taskTop}>
         <View style={styles.flex}>
-          <View style={[styles.requirementRow, rowDirection]}>
+          <View style={styles.requirementRow}>
             <View style={[styles.requirementPill, item.required === false && styles.optionalPill]}>
               <Text style={[styles.requirementText, item.required === false && styles.optionalText]}>
                 {item.required === false ? t('onboarding.optional') : t('onboarding.required')}
@@ -605,7 +603,7 @@ function ChecklistCard({
       </View>
       {!dualParts && uploading ? (
         <View style={styles.transfer}>
-          <View style={[styles.transferHead, rowDirection]}>
+          <View style={styles.transferHead}>
             <Text style={[styles.transferText, align]}>{t('onboarding.uploading')}</Text>
             <Text style={styles.transferText}>
               {formatNumber(Math.round(uploadProgress * 100), locale, 0)}%
@@ -689,7 +687,7 @@ function ChecklistCard({
 
 function CompletedChecklist() {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <PastelCard tone="pink" style={styles.completeCard}>
       <EditorialHeading size="medium">{t('onboarding.completeTitle')}</EditorialHeading>
@@ -711,7 +709,7 @@ export function OnboardingLoadingView() {
 
 export function OnboardingErrorView({ onRetry }: { onRetry: () => void }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
@@ -776,7 +774,6 @@ const styles = StyleSheet.create({
     gap: layout.sectionGap,
   },
   nav: { minHeight: layout.touchTarget, flexDirection: 'row', alignItems: 'center' },
-  rowReverse: { flexDirection: 'row-reverse' },
   backButton: {
     width: layout.touchTarget,
     height: layout.touchTarget,

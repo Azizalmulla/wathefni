@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
 import { type StatusTone } from '@/components/ui'
 
@@ -54,13 +54,13 @@ export function ListRow({
   style?: StyleProp<ViewStyle>
 }) {
   const { isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const edge =
     emphasis === 'danger' ? colors.danger : emphasis === 'warning' ? colors.warning : emphasis === 'success' ? colors.success : null
 
   const body = (
     <View style={[styles.row, edge ? { borderColor: edge, borderWidth: StyleSheet.hairlineWidth * 2 } : null, style]}>
-      <View style={[styles.rowMain, isRTL && styles.rowReverse]}>
+      <View style={styles.rowMain}>
         {icon ? (
           <View style={[styles.iconTile, iconTint ? { backgroundColor: iconTint } : null]}>
             <Ionicons name={icon} size={17} color={colors.ink} />
@@ -128,11 +128,11 @@ export function SectionHeader({
   const { isRTL } = useI18n()
   const label = count != null ? `${title} (${count})` : title
   const content = (
-    <View style={[styles.sectionHead, isRTL && styles.rowReverse]}>
+    <View style={styles.sectionHead}>
       <Text
         accessibilityRole={collapsible ? undefined : 'header'}
         maxFontSizeMultiplier={typeScaling.heading}
-        style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}
+        style={[styles.sectionTitle, readingEdgeAlign(isRTL)]}
       >
         {label}
       </Text>
@@ -168,7 +168,7 @@ export function ShowMoreButton({ label, onPress }: { label: string; onPress: () 
     >
       <Text
         maxFontSizeMultiplier={typeScaling.body}
-        style={[styles.showMoreText, { textAlign: isRTL ? 'right' : 'left' }]}
+        style={[styles.showMoreText, readingEdgeAlign(isRTL)]}
       >
         {label}
       </Text>
@@ -205,7 +205,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  rowReverse: { flexDirection: 'row-reverse' },
   grow: { flex: 1, minWidth: 0, gap: 1 },
   iconTile: {
     width: 32,

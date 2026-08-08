@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
-import { useI18n, type AppLocale } from '@/i18n'
+import { useI18n, type AppLocale, readingEdgeAlign, trailingEdgeAlign } from '@/i18n'
 import { listAutoLockTimeoutOptions, type AutoLockTimeoutMs } from '@/auth/autoLockPolicy'
 import type { AutoLockDiagnostics } from '@/auth/autoLockDiagnostics'
 import {
@@ -78,11 +78,11 @@ function Page({
   onRefresh?: () => void
 }) {
   const { isRTL, t } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, isRTL && styles.rowReverse]}>
+        <View style={styles.nav}>
           {onBack ? (
             <Pressable
               accessibilityRole="button"
@@ -112,7 +112,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <Text
       accessibilityRole="header"
       maxFontSizeMultiplier={typeScaling.heading}
-      style={[styles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}
+      style={[styles.sectionLabel, readingEdgeAlign(isRTL)]}
     >
       {children}
     </Text>
@@ -124,7 +124,7 @@ function EmptyCard({ icon, message, tone = 'cream' }: { icon: keyof typeof Ionic
   return (
     <PastelCard tone={tone} style={styles.emptyCard}>
       <IconBadge name={icon} />
-      <Text style={[styles.emptyText, { textAlign: isRTL ? 'right' : 'left' }]}>{message}</Text>
+      <Text style={[styles.emptyText, readingEdgeAlign(isRTL)]}>{message}</Text>
       <WathefniBloom variant="watermark" />
     </PastelCard>
   )
@@ -292,7 +292,7 @@ export function LeaveView({
   onRefresh?: () => void
 }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const requests = usePagedList(data.requests, LEAVE_PAGE)
   const balanceFacts = (data.balances ?? [])
     .map((balance) => balanceForLeaveType(data, balance.leave_type))
@@ -315,7 +315,7 @@ export function LeaveView({
             {balanceFacts.map((balance, index) => (
               <View
                 key={balance.leaveType}
-                style={[styles.balanceRow, isRTL && styles.rowReverse, index > 0 && styles.balanceDivider]}
+                style={[styles.balanceRow, index > 0 && styles.balanceDivider]}
                 accessibilityLabel={`${leaveTypeLabel(balance.leaveType, t)}: ${formatNumber(
                   balance.days,
                   locale,
@@ -383,7 +383,7 @@ function LeaveRequestRowItem({
   onCancel: (leaveId: string) => void
 }) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const cancellable = canCancel && ['requested', 'approved'].includes(request.status.toLowerCase())
   const dates = formatDateRange(request.start_date, request.end_date, locale)
   const type = request.leave_type ? leaveTypeLabel(request.leave_type, t) : null
@@ -446,7 +446,7 @@ export function LeaveRequestView({
   const endIso = toIsoDate(endDate)
   const rangeValid = endDate.getTime() >= startDate.getTime()
   const valid = Boolean(leaveType) && rangeValid
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const balance = balanceForLeaveType(balances, leaveType)
 
   // The screen above owns the request; this view only reports what is selected.
@@ -474,7 +474,7 @@ export function LeaveRequestView({
       <Page onBack={onBack} title={t('leave.request')} subtitle={t('remaining.leaveRequestSubtitle')}>
         <View style={styles.formSection}>
           <Text style={[styles.fieldLabel, align]}>{t('leave.type')}</Text>
-          <View style={[styles.segment, isRTL && styles.rowReverse]}>
+          <View style={styles.segment}>
             {leaveTypes.map((type) => (
               <Pressable
                 key={type}
@@ -607,15 +607,15 @@ function DatePickerField({
 }) {
   return (
     <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
+      <Text style={[styles.fieldLabel, readingEdgeAlign(isRTL)]}>{label}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={onOpen}
-        style={[styles.inputWithIcon, isRTL && styles.rowReverse]}
+        style={styles.inputWithIcon}
       >
         <Ionicons name="calendar-outline" size={19} color={colors.subtle} />
-        <Text style={[styles.dateInput, { textAlign: isRTL ? 'right' : 'left', color: colors.ink, paddingVertical: 12 }]}>
+        <Text style={[styles.dateInput, { ...readingEdgeAlign(isRTL), color: colors.ink, paddingVertical: 12 }]}>
           {formatDate(toIsoDate(value), locale)}
         </Text>
       </Pressable>
@@ -660,10 +660,10 @@ function toIsoDate(value: Date): string {
 function DetailRow({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
   const { isRTL } = useI18n()
   return (
-    <View style={[styles.detailRow, isRTL && styles.rowReverse]}>
+    <View style={styles.detailRow}>
       <View style={styles.detailIcon}><Ionicons name={icon} size={18} color={colors.ink} /></View>
-      <Text style={[styles.detailLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
-      <Text style={[styles.detailValue, { textAlign: isRTL ? 'left' : 'right' }]}>{value}</Text>
+      <Text style={[styles.detailLabel, readingEdgeAlign(isRTL)]}>{label}</Text>
+      <Text style={[styles.detailValue, trailingEdgeAlign(isRTL)]}>{value}</Text>
     </View>
   )
 }
@@ -688,10 +688,10 @@ function MenuRow({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.menuRow, isRTL && styles.rowReverse, pressed && styles.pressed, disabled && styles.disabled]}
+      style={({ pressed }) => [styles.menuRow, pressed && styles.pressed, disabled && styles.disabled]}
     >
       <View style={[styles.menuIcon, danger && styles.menuIconDanger]}><Ionicons name={icon} size={19} color={danger ? colors.danger : colors.ink} /></View>
-      <Text style={[styles.menuLabel, styles.flex, danger && { color: colors.danger }, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
+      <Text style={[styles.menuLabel, styles.flex, danger && { color: colors.danger }, readingEdgeAlign(isRTL)]}>{label}</Text>
       <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.subtle} />
     </Pressable>
   )
@@ -761,7 +761,7 @@ export function SettingsView({
 }) {
   const { t, isRTL, locale: uiLocale } = useI18n()
   const autoLockOptions = listAutoLockTimeoutOptions()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const diag = autoLockDiagnostics
   const formatTs = (ms: number | null | undefined) => {
     if (ms == null) return '—'
@@ -798,7 +798,7 @@ export function SettingsView({
     <Page onBack={onBack} title={t('settings.title')} subtitle={t('remaining.settingsSubtitle')}>
       <View style={styles.section}>
         <SectionLabel>{t('settings.language')}</SectionLabel>
-        <View style={[styles.segment, isRTL && styles.rowReverse]}>
+        <View style={styles.segment}>
           {(['en', 'ar'] as const).map((code) => (
             <Pressable
               key={code}
@@ -849,11 +849,11 @@ export function SettingsView({
       ) : null}
       {canManagePush ? (
         <PastelCard tone="sky" style={styles.settingsCard}>
-          <View style={[styles.settingsRow, isRTL && styles.rowReverse]}>
+          <View style={styles.settingsRow}>
             <IconBadge name="notifications-outline" />
             <View style={styles.flex}>
-              <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('settings.push')}</Text>
-              <Text style={[styles.supporting, { textAlign: isRTL ? 'right' : 'left' }]}>{t('remaining.pushSubtitle')}</Text>
+              <Text style={[styles.itemTitle, readingEdgeAlign(isRTL)]}>{t('settings.push')}</Text>
+              <Text style={[styles.supporting, readingEdgeAlign(isRTL)]}>{t('remaining.pushSubtitle')}</Text>
             </View>
             <Switch
               accessibilityLabel={t('settings.push')}
@@ -867,13 +867,13 @@ export function SettingsView({
       ) : null}
       {canManageBiometric && onToggleBiometric ? (
         <PastelCard tone="cream" style={styles.settingsCard}>
-          <View style={[styles.settingsRow, isRTL && styles.rowReverse]}>
+          <View style={styles.settingsRow}>
             <IconBadge name="scan-outline" />
             <View style={styles.flex}>
-              <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.itemTitle, readingEdgeAlign(isRTL)]}>
                 {biometricLabel || t('biometric.settings')}
               </Text>
-              <Text style={[styles.supporting, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.supporting, readingEdgeAlign(isRTL)]}>
                 {t('biometric.settingsSubtitle')}
               </Text>
             </View>
@@ -890,7 +890,7 @@ export function SettingsView({
       {canManageAutoLock && onAutoLockTimeout ? (
         <View style={styles.section}>
           <SectionLabel>{t('autoLock.settings')}</SectionLabel>
-          <Text style={[styles.supporting, { textAlign: isRTL ? 'right' : 'left', marginBottom: spacing.sm }]}>
+          <Text style={[styles.supporting, { ...readingEdgeAlign(isRTL), marginBottom: spacing.sm }]}>
             {t('autoLock.settingsSubtitle')}
           </Text>
           <View style={styles.autoLockList}>
@@ -903,7 +903,7 @@ export function SettingsView({
                   accessibilityState={{ selected, disabled: Boolean(autoLockBusy) }}
                   disabled={Boolean(autoLockBusy)}
                   onPress={() => onAutoLockTimeout(opt.value)}
-                  style={[styles.autoLockRow, selected && styles.autoLockRowActive, isRTL && styles.rowReverse]}
+                  style={[styles.autoLockRow, selected && styles.autoLockRowActive]}
                 >
                   <Text style={[styles.autoLockText, selected && styles.autoLockTextActive]}>
                     {t(opt.labelKey)}
@@ -982,7 +982,7 @@ export function PrivacySupportView({
   onBack: () => void
 }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <Page onBack={onBack} title={t('remaining.privacySupportTitle')} subtitle={t('remaining.privacySupportSubtitle')}>
       <PastelCard tone="cream" style={styles.helpCard}>
@@ -1003,7 +1003,7 @@ export function PrivacySupportView({
 
 export function NotFoundView({ onHome }: { onHome: () => void }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={styles.stateSafe}>
       <View style={styles.stateWrap}>
@@ -1035,7 +1035,6 @@ const styles = StyleSheet.create({
   backButton: { width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', ...shadows.card },
   hero: { gap: spacing.xs },
   subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20, maxWidth: 360 },
-  rowReverse: { flexDirection: 'row-reverse' },
   flex: { flex: 1 },
   section: { gap: spacing.md },
   /** Compact list rhythm: rows sit closer together than top-level sections. */

@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { EditorialHeading, FadeIn, PremiumButton, Wordmark } from '@/components/premium'
 import { PIN_LENGTH } from '@/auth/pinPolicy'
 import { colors, font, layout, radius, shadows, spacing } from '@/theme'
@@ -31,7 +31,7 @@ export function PinView({ mode, busy = false, error = null, onSubmit, onCancel, 
   const { t, isRTL, locale } = useI18n()
   const [pin, setPin] = useState('')
   const inputRef = useRef<TextInput>(null)
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
 
   useEffect(() => {
     setPin('')

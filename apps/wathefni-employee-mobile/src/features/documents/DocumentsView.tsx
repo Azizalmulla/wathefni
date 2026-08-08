@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { EditorialHeading, FadeIn, IconBadge, PastelCard, WathefniBloom, Wordmark } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
 import { ListRow, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
@@ -59,7 +59,7 @@ export function DocumentsView({
   onBack,
 }: Props) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const hierarchy = documentsHierarchy(compliance, documents)
   const historyYears = groupHistoryByYear(hierarchy.history)
   const empty =
@@ -100,7 +100,7 @@ export function DocumentsView({
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.nav, isRTL && styles.rowReverse]}>
+        <View style={styles.nav}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
@@ -257,7 +257,7 @@ function AttentionCard({
   onRenew,
 }: ComplianceItemProps) {
   const { t, locale, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   const fileId = item.current_file_id || null
   const opening = fileId != null && openingId === fileId
   // HR sometimes stores a machine reason code; only show a reason a human wrote.
@@ -267,7 +267,7 @@ function AttentionCard({
 
   return (
     <View style={[styles.attentionCard, { borderColor: edge }]} accessibilityLabel={`${label}. ${status}`}>
-      <View style={[styles.attentionHead, isRTL && styles.rowReverse]}>
+      <View style={styles.attentionHead}>
         <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.itemTitle, styles.flex, align]}>
           {label}
         </Text>
@@ -368,7 +368,7 @@ function DocumentActions({
   if (!fileId && !canRenew) return null
   const renewing = renewingType === item.document_type
   return (
-    <View style={[styles.actionRow, isRTL && styles.rowReverse]}>
+    <View style={styles.actionRow}>
       {fileId ? (
         <Pressable
           accessibilityRole="button"
@@ -505,7 +505,6 @@ const styles = StyleSheet.create({
   subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
   list: { gap: spacing.sm },
   historyGroup: { gap: spacing.sm },
-  rowReverse: { flexDirection: 'row-reverse' },
   attentionCard: {
     gap: spacing.xs,
     padding: spacing.md,

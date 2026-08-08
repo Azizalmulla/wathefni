@@ -10,7 +10,7 @@ import {
   featureUnavailableMessageKey,
   featureUnavailableTitleKey,
 } from '@/lib/featureUnavailableCopy'
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import { EditorialHeading, PastelCard, PremiumButton, WathefniBloom, Wordmark, type PastelTone } from '@/components/premium'
 import { colors, font, spacing } from '@/theme'
 
@@ -110,11 +110,11 @@ function AccessShell({
           <View style={styles.icon} accessible={false}>
             <Ionicons name={icon} size={35} color={colors.ink} />
           </View>
-          <Text style={[styles.eyebrow, { textAlign: isRTL ? 'right' : 'left' }]}>{eyebrow}</Text>
+          <Text style={[styles.eyebrow, readingEdgeAlign(isRTL)]}>{eyebrow}</Text>
           <EditorialHeading size="medium" accessibilityRole="header">
             {title}
           </EditorialHeading>
-          <Text style={[styles.message, { textAlign: isRTL ? 'right' : 'left' }]}>{message}</Text>
+          <Text style={[styles.message, readingEdgeAlign(isRTL)]}>{message}</Text>
           <View style={styles.actions}>{children}</View>
           <WathefniBloom variant="watermark" />
         </PastelCard>

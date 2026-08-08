@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { useI18n, readingEdgeAlign } from '@/i18n'
 import {
   EditorialHeading,
   FadeIn,
@@ -107,15 +107,14 @@ export function HomeView({
     : tasks
   const hasWork = taskList.length > 0 || showOnboardingCard
 
-  const rowDirection = isRTL ? styles.rowReverse : undefined
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
 
   return (
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
-        <View style={[styles.header, rowDirection]}>
+        <View style={styles.header}>
           <Wordmark compact />
-          <View style={[styles.headerActions, rowDirection]}>
+          <View style={styles.headerActions}>
             <InboxBell
               state={inboxState}
               unread={unread}
@@ -185,7 +184,7 @@ export function HomeView({
               })}`}
               style={styles.progressCard}
             >
-              <View style={[styles.progressTop, rowDirection]}>
+              <View style={styles.progressTop}>
                 <View style={styles.grow}>
                   <Text style={[styles.progressOverline, align]}>{t('onboarding.title')}</Text>
                   <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.progressTitle, align]}>
@@ -341,7 +340,7 @@ function InboxBell({
 
 export function HomeLoadingView() {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <View style={styles.stateScreen}>
       <Wordmark compact />
@@ -356,7 +355,7 @@ export function HomeLoadingView() {
 
 export function HomeErrorView({ onRetry }: { onRetry: () => void }) {
   const { t, isRTL } = useI18n()
-  const align = { textAlign: isRTL ? 'right' : 'left' } as const
+  const align = readingEdgeAlign(isRTL)
   return (
     <View style={styles.stateScreen}>
       <Wordmark compact />
@@ -398,7 +397,6 @@ function ModuleValue({
 }
 
 const styles = StyleSheet.create({
-  rowReverse: { flexDirection: 'row-reverse' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   bell: {

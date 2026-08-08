@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { useI18n } from '@/i18n'
+import { readingEdgeAlign, useI18n } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
 import { actionHaptic } from '@/native/haptics'
 import { colors, font, radius, shadows, spacing, typeScaling } from '@/theme'
@@ -189,7 +189,7 @@ export function EditorialHeading({
       maxFontSizeMultiplier={size === 'large' ? typeScaling.display : typeScaling.heading}
       style={[
         size === 'large' ? styles.editorialLarge : styles.editorialMedium,
-        { fontFamily: editorialFont(locale), textAlign: isRTL ? 'right' : 'left' },
+        { fontFamily: editorialFont(locale), ...readingEdgeAlign(isRTL) },
         style,
       ]}
     >
@@ -281,7 +281,7 @@ export function PremiumButton({
         {busy ? (
           <ActivityIndicator size="small" color={colors.surface} />
         ) : (
-          <View style={[styles.buttonContent, isRTL && styles.rowReverse]}>
+          <View style={styles.buttonContent}>
             {success ? <Ionicons name="checkmark" size={18} color={colors.surface} /> : null}
             <Text
               maxFontSizeMultiplier={typeScaling.body}
@@ -373,7 +373,6 @@ export function ContentSkeleton({ rows = 3 }: { rows?: number }) {
 }
 
 const styles = StyleSheet.create({
-  rowReverse: { flexDirection: 'row-reverse' },
   wordmarkWrap: { alignSelf: 'flex-start', minHeight: 30, justifyContent: 'center' },
   wordmarkCentered: { alignSelf: 'center' },
   wordmarkStart: { alignSelf: 'flex-start' },
