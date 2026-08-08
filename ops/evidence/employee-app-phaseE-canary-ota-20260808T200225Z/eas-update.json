@@ -1,0 +1,82 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:53478) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53479) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53481) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53485) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53482) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:53483) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 4993ms node_modules/expo-router/entry.js (1370 modules)
+[expo-cli] Android Bundled 8090ms node_modules/expo-router/entry.js (1373 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-845d7bd2468203fd2e80feaab1ebb22c.hbc (1.95 MB)
+[expo-cli] _expo/static/js/ios/entry-845d7bd2468203fd2e80feaab1ebb22c.hbc.map (7.2 MB)
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-9d298741d3be20313352458cfba4a2da.hbc (1.95 MB)
+[expo-cli] _expo/static/js/android/entry-9d298741d3be20313352458cfba4a2da.hbc.map (7.21 MB)
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.06 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 6.9 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fe2f8-0363-7c06-a114-b216af08a9cb",
+    "createdAt": "2026-08-08T20:02:12.451Z",
+    "group": "c997eac8-8b33-4b55-9a8e-a1860d0420fe",
+    "branch": "canary",
+    "message": "Employee App Visual Refinement A-E: trust/terminology, layout+color tokens, density/hierarchy/nav, high-value additions (1e77bf6)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fe2f8-0363-7c06-a114-b216af08a9cb",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "1e77bf676e9a1c7c1f090833a4678ca4fd483200"
+  },
+  {
+    "id": "019fe2f8-0363-7f93-8095-2abeb8647013",
+    "createdAt": "2026-08-08T20:02:12.451Z",
+    "group": "c997eac8-8b33-4b55-9a8e-a1860d0420fe",
+    "branch": "canary",
+    "message": "Employee App Visual Refinement A-E: trust/terminology, layout+color tokens, density/hierarchy/nav, high-value additions (1e77bf6)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fe2f8-0363-7f93-8095-2abeb8647013",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "1e77bf676e9a1c7c1f090833a4678ca4fd483200"
+  }
+]

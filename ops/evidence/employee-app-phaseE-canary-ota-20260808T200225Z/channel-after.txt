@@ -1,0 +1,13 @@
+
+Channel:
+Name    canary
+ID      019fd253-0239-7802-95d7-804ab815f963
+Status  Active
+
+Branches pointed at this channel and their most recent update group:
+
+Branch           canary
+Platforms        android, ios
+Runtime Version  0.1.0
+Message          "Employee App Visual Refinement A-E: trust/terminology, layout+color tokens, density/hierarchy/nav, high-value additions (1e77bf6)" (17 seconds ago by abdulazizalmulla)
+Group ID         c997eac8-8b33-4b55-9a8e-a1860d0420fe

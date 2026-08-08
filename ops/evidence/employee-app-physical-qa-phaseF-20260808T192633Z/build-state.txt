@@ -1,0 +1,33 @@
+PHASE F PRE-FLIGHT — build-state verification
+captured: 2026-08-08T19:26:33Z
+
+=== 1. Is the Phase A-E code committed? ===
+HEAD: cf26d59512a22a7634eb4edd28b4425ec1624405  feat: record Hybrid Email Phase 1 production-dark artifacts
+uncommitted files in employee mobile app: 96
+uncommitted backend app.py: 1
+-> Phase A-E exists only in the local working tree. Never committed, built, or published.
+
+=== 2. Does production carry the Phase E backend reads? ===
+  /app/me                                                    -> 401  {"detail":{"error":"app_auth_failed","message":"Please sign in again."}}
+  /app/leave                                                 -> 401  {"detail":{"error":"app_auth_failed","message":"Please sign in again."}}
+  /app/home                                                  -> 401  {"detail":{"error":"app_auth_failed","message":"Please sign in again."}}
+  /app/leave/duration?start_date=2026-08-10&end_date=2026-08-12 -> 404  {"detail":"Not Found"}
+-> 401 = route exists, auth required. 404 = route absent.
+-> /app/leave/duration is 404 in production: the deployed backend predates Phase E.
+
+=== 3. Can this machine publish an OTA or verify the installed update? ===
+eas-cli on PATH: eas not found
+NOT INSTALLED
+npx eas whoami: npm error could not determine executable to run
+-> Cannot publish an update, and cannot query which update the canary device is running.
+
+=== 4. Can this machine render the app for visual inspection? ===
+xcodebuild: xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
+iOS simulators available: 0
+0
+-> No Xcode, no simulators. No visual rendering is possible on this machine.
+
+=== CONCLUSION ===
+Physical Visual QA cannot begin. The canary device cannot be running Visual A-E,
+and the two Phase E backend reads do not exist in production. Any visual verdict
+produced now would describe a stale build.

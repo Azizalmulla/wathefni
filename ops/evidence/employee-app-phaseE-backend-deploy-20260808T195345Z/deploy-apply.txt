@@ -1,0 +1,25 @@
+=== uploaded artifact sha ===
+144a608f6fd3297d89b203206570c245b0bd2db0c137375a54223a8985ecfce8  /tmp/employee-app-phaseE-20260808T195345Z/app.py
+=== confirm the delta is only the five Phase E hunks ===
+67995a67996,68027
+68125c68157
+68130c68162,68171
+69303a69345,69427
+changed_lines=128
+=== apply ===
+app_ast_ok
+=== restart ===
+health_try_1=000
+curl: (7) Failed to connect to 127.0.0.1 port 8010 after 0 ms: Couldn't connect to server
+curl: (7) Fhealth_try_2=000
+ailed to connect to 127.0.0.1 port 8010 after 0 ms: Couldn't connect to server
+curl: (7health_try_3=000
+) Failed to connect to 127.0.0.1 port 8010 after 0 ms: Couldn't connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 8010 after 0 mhealth_try_4=000
+s: Couldn't connect to server
+health_try_5=000
+curl: (7) Failed to connect to 127.0.0.1 port 8010 after 0 ms: Couldn't connect to server
+health_try_6=200
+=== post-deploy sha ===
+144a608f6fd3297d89b203206570c245b0bd2db0c137375a54223a8985ecfce8  /opt/wathefni/orchestrator/app.py
+active

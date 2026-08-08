@@ -1,0 +1,24 @@
+
+=== WATHEFNI-96599338566 ===
+  name='W5C-SYNTH|Aziz Mobile QA'
+  duration Thu->Mon: {"ok": true, "available": true, "start_date": "2026-08-13", "end_date": "2026-08-17", "leave_type": "annual", "chargeable_days": 3.0, "calendar_days": 5, "basis": "working_days", "weekend_days": ["fri", "sat"], "excludes_public_holidays": true}
+    calendar_days=5 chargeable_days=3.0
+    OK: weekend/holidays excluded -> working days < calendar days
+  reversed range -> {"ok": true, "available": false, "reason": "invalid_range"}
+  compliance rows=2 renewal_required=1
+    - employment_contract expiry=None status=rejected_reupload
+  home task detail EN: {"document_type": "employment_contract", "label": "Employment contract", "expiry_date": null, "review_status": "rejected_reupload"}
+  home task detail AR: {"document_type": "employment_contract", "label": "عقد العمل", "expiry_date": null, "review_status": "rejected_reupload"}
+
+=== WATHEFNI-96550252254 ===
+  name='Talal Fadhli'
+  duration Thu->Mon: {"ok": true, "available": true, "start_date": "2026-08-13", "end_date": "2026-08-17", "leave_type": "annual", "chargeable_days": 3.0, "calendar_days": 5, "basis": "working_days", "weekend_days": ["fri", "sat"], "excludes_public_holidays": true}
+    calendar_days=5 chargeable_days=3.0
+    OK: weekend/holidays excluded -> working days < calendar days
+  reversed range -> {"ok": true, "available": false, "reason": "invalid_range"}
+  compliance rows=5 renewal_required=0
+  home task detail EN: null
+  home task detail AR: null
+    no renewals for this employee; detail correctly None: True
+
+PHASE_E_RUNTIME_VERIFY=PASS
