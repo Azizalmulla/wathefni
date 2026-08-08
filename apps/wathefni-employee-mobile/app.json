@@ -1,11 +1,26 @@
 {
   "expo": {
     "name": "Wathefni",
-    "slug": "wathefni-employee",
+    "slug": "aziz",
     "scheme": "wathefni",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e381fb7c-bf1b-4ff6-b9ac-6c2d904f67e8",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F2E8"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -14,23 +29,43 @@
       "bundleIdentifier": "ai.wathefni.employee",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSFaceIDUsageDescription": "Wathefni can unlock with Face ID on this device. Your PIN still works anytime.",
         "NSCameraUsageDescription": "Wathefni uses the camera only when you choose to capture a document to upload to HR.",
         "NSPhotoLibraryUsageDescription": "Wathefni accesses your photos only when you choose to attach a document to upload to HR."
       }
     },
     "android": {
       "package": "ai.wathefni.employee",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F8F2E8"
+      },
       "permissions": [
-        "CAMERA",
-        "READ_MEDIA_IMAGES",
-        "POST_NOTIFICATIONS"
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ]
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
       "expo-localization",
-      "expo-notifications",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Wathefni can unlock with Face ID on this device. Your PIN still works anytime."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1C1B19"
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -38,13 +73,17 @@
           "cameraPermission": "Wathefni uses the camera only when you choose to capture a document to upload to HR."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-updates"
     ],
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "e381fb7c-bf1b-4ff6-b9ac-6c2d904f67e8"
       }
-    }
+    },
+    "owner": "abdulazizalmullas-team"
   }
 }

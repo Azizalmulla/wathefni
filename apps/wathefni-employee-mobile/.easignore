@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+coverage/
+*.log
+.git/
+.DS_Store
+docs/phase9a2-preview/
+npm-debug.*

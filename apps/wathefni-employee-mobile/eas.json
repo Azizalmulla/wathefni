@@ -21,9 +21,18 @@
     },
     "production": {
       "autoIncrement": true,
+      "distribution": "internal",
+      "channel": "canary",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
-        "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "0"
+        "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "0",
+        "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+        "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+        "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1",
+        "EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC": "1"
       }
     }
   },

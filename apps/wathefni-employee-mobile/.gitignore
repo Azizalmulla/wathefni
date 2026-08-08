@@ -20,4 +20,3 @@ node_modules/
 # Misc
 npm-debug.*
 .DS_Store
-expo-env.d.ts
