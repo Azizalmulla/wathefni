@@ -2,6 +2,9 @@ import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import * as ImageManipulator from 'expo-image-manipulator'
 
+// Future native document scanner (VisionKit / ML Kit): see documentScanner.ts +
+// docs/NATIVE_DOCUMENT_SCANNER_PREP.md — not wired in this release.
+
 export type PickedFile = { uri: string; name: string; mimeType: string }
 
 export class UploadPickError extends Error {

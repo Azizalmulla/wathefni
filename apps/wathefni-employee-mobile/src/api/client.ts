@@ -6,11 +6,29 @@ export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL || 'https://ap
 export class ApiError extends Error {
   status: number
   code: string
-  constructor(status: number, code: string, message: string) {
+  messageEn?: string
+  messageAr?: string
+  problems?: string[]
+  fields?: string[]
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    extras?: {
+      messageEn?: string
+      messageAr?: string
+      problems?: string[]
+      fields?: string[]
+    },
+  ) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.messageEn = extras?.messageEn
+    this.messageAr = extras?.messageAr
+    this.problems = extras?.problems
+    this.fields = extras?.fields
   }
 }
 
@@ -22,11 +40,34 @@ type RequestOptions = {
   signal?: AbortSignal
 }
 
-function detailMessage(payload: unknown, fallback: string): { code: string; message: string } {
+function detailMessage(payload: unknown, fallback: string): {
+  code: string
+  message: string
+  messageEn?: string
+  messageAr?: string
+  problems?: string[]
+  fields?: string[]
+} {
   const detail = (payload as { detail?: unknown })?.detail ?? payload
   if (detail && typeof detail === 'object') {
-    const d = detail as { error?: string; message?: string }
-    return { code: d.error || 'error', message: d.message || fallback }
+    const d = detail as {
+      error?: string
+      message?: string
+      message_en?: string
+      message_ar?: string
+      problems?: unknown
+      fields?: unknown
+    }
+    const problems = Array.isArray(d.problems) ? d.problems.map((item) => String(item)) : undefined
+    const fields = Array.isArray(d.fields) ? d.fields.map((item) => String(item)) : undefined
+    return {
+      code: d.error || 'error',
+      message: d.message || d.message_en || d.message_ar || fallback,
+      messageEn: d.message_en,
+      messageAr: d.message_ar,
+      problems,
+      fields,
+    }
   }
   return { code: 'error', message: fallback }
 }
@@ -61,8 +102,11 @@ export async function rawRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   if (!response.ok) {
-    const { code, message } = detailMessage(parsed, 'Something went wrong. Please try again.')
-    throw new ApiError(response.status, code, message)
+    const { code, message, messageEn, messageAr, problems, fields } = detailMessage(
+      parsed,
+      'Something went wrong. Please try again.',
+    )
+    throw new ApiError(response.status, code, message, { messageEn, messageAr, problems, fields })
   }
   return parsed as T
 }

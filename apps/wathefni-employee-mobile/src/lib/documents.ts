@@ -17,10 +17,34 @@ export async function openDocument(
   ) => CancellableTransfer<FileSystem.FileSystemDownloadResult>,
   onProgress?: (progress: TransferProgress) => void,
 ): Promise<{ cancel: () => Promise<void>; completed: Promise<void> }> {
-  const safeName = (filename || `document-${fileId}`).replace(/[^\w.\-]+/g, '_')
-  const safeId = fileId.replace(/[^\w\-]+/g, '_')
+  return openPrivateFile(
+    `/app/documents/${encodeURIComponent(fileId)}?disposition=attachment`,
+    filename || `document-${fileId}`,
+    fileId,
+    download,
+    onProgress,
+  )
+}
+
+/**
+ * Authenticated open of any private `/app/*` file stream (documents, bank
+ * evidence). Bytes are never exposed via a public URL, so every open goes
+ * through the token-aware download and the cache copy is deleted afterwards.
+ */
+export async function openPrivateFile(
+  path: string,
+  filename: string | null,
+  cacheKey: string,
+  download: (
+    path: string,
+    target: string,
+    onProgress?: (progress: TransferProgress) => void,
+  ) => CancellableTransfer<FileSystem.FileSystemDownloadResult>,
+  onProgress?: (progress: TransferProgress) => void,
+): Promise<{ cancel: () => Promise<void>; completed: Promise<void> }> {
+  const safeName = (filename || `file-${cacheKey}`).replace(/[^\w.\-]+/g, '_')
+  const safeId = cacheKey.replace(/[^\w\-]+/g, '_')
   const target = `${FileSystem.cacheDirectory}${safeId}-${safeName}`
-  const path = `/app/documents/${encodeURIComponent(fileId)}?disposition=attachment`
   const transfer = download(path, target, onProgress)
 
   const completed = (async () => {
