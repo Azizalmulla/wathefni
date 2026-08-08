@@ -17,14 +17,16 @@ modules; `enabled_modules` is a compatibility alias with the same meaning.
 - `settings`: core; `view`, `change_locale`, `request_deletion`; `manage_push`
   only when push is platform-available.
 - `onboarding`: requires all of `onboarding`; `view`, `upload_document`.
-- `documents`: requires any of `onboarding`, `compliance`; `view`, `download`.
+- `documents`: requires any of `onboarding`, `compliance`; `view`, `download`,
+  and `upload_document` for renewals when the backend grants it.
 - `attendance`: requires all of `attendance`; `view`.
 - `shifts`: requires all of `shifts`; `view`.
 - `leave`: requires all of `leave`; `view`, `request`, `cancel`.
 - `payslips`: requires all of `payroll`, but stays disabled until an
-  employee-scoped payslip API exists.
+  employee-scoped payslip API exists (**no payroll money authority in app v1**).
 - `compliance_actions`: requires all of `compliance`, but stays disabled until
-  missing/expiry action APIs exist.
+  missing/expiry action APIs exist. The Documents journey may still surface
+  compliance expiry items via `documents` when enabled.
 
 Every key is always returned in `features`. Disabled keys contain a deterministic
 `reason` (`module_disabled` or `feature_not_available`) and no actions.
