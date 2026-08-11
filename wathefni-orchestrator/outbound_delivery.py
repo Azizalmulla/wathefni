@@ -201,6 +201,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Onboarding welcome",
+        "label_ar": "ترحيب بالانضمام",
         "text": {
             "en": "Hi {employee_name}, welcome to {company_name}! We've started your onboarding. Please reply here to continue your first steps.",
             "ar": "مرحباً {employee_name}، أهلاً بك في {company_name}! بدأنا إجراءات انضمامك. يرجى الرد هنا لإكمال خطواتك الأولى.",
@@ -213,6 +214,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Onboarding reminder",
+        "label_ar": "تذكير بالانضمام",
         "text": {
             "en": "Hi {employee_name}, a quick reminder to finish your onboarding steps for {company_name}.",
             "ar": "مرحباً {employee_name}، تذكير بسيط لإكمال خطوات الانضمام في {company_name}.",
@@ -225,6 +227,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_EMAIL_FIRST,
         "sensitivity": SENS_METADATA,
         "label": "Document required",
+        "label_ar": "مستند مطلوب",
         "text": {
             "en": "Hi {employee_name}, HR needs your {document_type} to keep your file complete. Please send it when you can.",
             "ar": "مرحباً {employee_name}، يحتاج قسم الموارد البشرية إلى {document_type} لإكمال ملفك. يرجى إرساله عند الإمكان.",
@@ -237,6 +240,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_EMAIL_FIRST,
         "sensitivity": SENS_METADATA,
         "label": "Document expiring",
+        "label_ar": "مستند ينتهي قريباً",
         "text": {
             "en": "Hi {employee_name}, your {document_type} is expiring on {expiry_date}. Please renew it and send the updated copy.",
             "ar": "مرحباً {employee_name}، {document_type} الخاص بك ينتهي في {expiry_date}. يرجى تجديده وإرسال النسخة المحدثة.",
@@ -249,6 +253,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift assigned",
+        "label_ar": "تم تعيين مناوبة",
         "text": {
             "en": "Hi {employee_name}, you have a shift on {shift_date} from {shift_time}. Location: {location}.",
             "ar": "مرحباً {employee_name}، لديك مناوبة يوم {shift_date} من {shift_time}. الموقع: {location}.",
@@ -261,6 +266,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift updated",
+        "label_ar": "تم تحديث المناوبة",
         "text": {
             "en": "Hi {employee_name}, your shift has been moved to {shift_date} from {shift_time}. Location: {location}. Please check the new time.",
             "ar": "مرحباً {employee_name}، تم تغيير موعد مناوبتك إلى {shift_date} من {shift_time}. الموقع: {location}. يرجى مراجعة الموعد الجديد.",
@@ -273,6 +279,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift reminder",
+        "label_ar": "تذكير بالمناوبة",
         "text": {
             "en": "Reminder: your shift starts on {shift_date} at {shift_time}.",
             "ar": "تذكير: تبدأ مناوبتك يوم {shift_date} الساعة {shift_time}.",
@@ -285,6 +292,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Shift cancelled",
+        "label_ar": "تم إلغاء المناوبة",
         "text": {
             "en": "Hi {employee_name}, your shift on {shift_date} has been cancelled. You don't need to come in for it.",
             "ar": "مرحباً {employee_name}، تم إلغاء مناوبتك يوم {shift_date}. لا حاجة للحضور لها.",
@@ -297,6 +305,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_DASHBOARD_ONLY,
         "sensitivity": SENS_PREVIEW,
         "label": "Missed check-in",
+        "label_ar": "لم يتم تسجيل الحضور",
         "text": {
             "en": "Hi {employee_name}, we didn't see a check-in for your shift on {shift_date}. Please check in or reply if there's an issue.",
             "ar": "مرحباً {employee_name}، لم نسجّل حضورك لمناوبة {shift_date}. يرجى تسجيل الحضور أو الرد إذا كان هناك أمر ما.",
@@ -309,6 +318,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Leave approved",
+        "label_ar": "تمت الموافقة على الإجازة",
         "text": {
             "en": "Hi {employee_name}, your leave from {start_date} to {end_date} has been approved.",
             "ar": "مرحباً {employee_name}، تمت الموافقة على إجازتك من {start_date} إلى {end_date}.",
@@ -321,6 +331,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_PREVIEW,
         "label": "Leave decision",
+        "label_ar": "قرار الإجازة",
         "text": {
             "en": "Hi {employee_name}, your leave request from {start_date} to {end_date} was not approved. Please speak with HR for details.",
             "ar": "مرحباً {employee_name}، لم تتم الموافقة على طلب إجازتك من {start_date} إلى {end_date}. يرجى التواصل مع الموارد البشرية للتفاصيل.",
@@ -333,9 +344,36 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_EMAIL_ONLY,
         "sensitivity": SENS_METADATA,
         "label": "Payroll update",
+        "label_ar": "تحديث الرواتب",
         "text": {
             "en": "Hi {employee_name}, there's a payroll update for the {period} period. Please check with HR.",
             "ar": "مرحباً {employee_name}، يوجد تحديث في الرواتب لفترة {period}. يرجى المراجعة مع الموارد البشرية.",
+        },
+    },
+    "payslip_ready": {
+        "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_INFORMATIONAL,
+        "failure_escalation": ESCALATION_AUDIT_ONLY,
+        "employee_channel_intent": CHANNEL_DASHBOARD_ONLY,
+        "sensitivity": SENS_PREVIEW,
+        "label": "Payslip ready",
+        "label_ar": "كشف الراتب جاهز",
+        "text": {
+            "en": "Your payslip for {period} is ready to view in the app.",
+            "ar": "كشف راتبك لفترة {period} جاهز للعرض في التطبيق.",
+        },
+    },
+    "bank_correction_required": {
+        "criticality": CRITICALITY_STANDARD,
+        "delivery_urgency": URGENCY_ACTION_NOW,
+        "failure_escalation": ESCALATION_DELIVERY_ISSUE,
+        "employee_channel_intent": CHANNEL_WHATSAPP_OK,
+        "sensitivity": SENS_PREVIEW,
+        "label": "Bank details need attention",
+        "label_ar": "تفاصيل البنك تحتاج تصحيحاً",
+        "text": {
+            "en": "Hi {employee_name}, your bank details need a correction. Please open Bank in the Wathefni app.",
+            "ar": "مرحباً {employee_name}، تفاصيل حسابك البنكي تحتاج تصحيحاً. يرجى فتح البنك في تطبيق وظفني.",
         },
     },
     # Employee App activation code. Critical so a code that reaches nobody raises a
@@ -348,6 +386,7 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "employee_channel_intent": CHANNEL_WHATSAPP_OK,
         "sensitivity": SENS_METADATA,
         "label": "App activation code",
+        "label_ar": "رمز تفعيل التطبيق",
         "text": {
             "en": "Hi {employee_name}, your {company_name} app activation code is {code}. It expires in {expiry_hours} hours.",
             "ar": "مرحباً {employee_name}، رمز تفعيل تطبيق {company_name} هو {code}. ينتهي خلال {expiry_hours} ساعة.",
@@ -369,6 +408,20 @@ def _now(legacy: Any) -> _dt.datetime:
 
 def catalog_entry(template_key: str) -> dict[str, Any]:
     return TEMPLATE_CATALOG.get(template_key, {})
+
+
+def catalog_label(template_key: str, locale: str = "en") -> str:
+    """Employee-facing inbox title; prefers label_ar when locale is Arabic."""
+    entry = catalog_entry(template_key)
+    loc = str(locale or "en").lower()
+    if loc.startswith("ar"):
+        label = entry.get("label_ar") or entry.get("label")
+    else:
+        label = entry.get("label")
+    if label:
+        return str(label)
+    return str(template_key or "").replace("_", " ").strip().title() or "Message"
+
 
 
 def render_body(template_key: str, variables: dict[str, Any] | None, locale: str = "en") -> str:
@@ -438,7 +491,7 @@ def _body_storage(
 # adding a provider here, not touching every flow.
 class OctopusProvider:
     @staticmethod
-    def send_session(legacy: Any, *, account_id, phone, text, subject_type, subject_key, message_kind) -> dict[str, Any]:
+    def send_session(legacy: Any, *, account_id, phone, text, subject_type, subject_key, message_kind, company_code=None) -> dict[str, Any]:
         return legacy.send_octopus_whatsapp(
             account_id=account_id,
             phone=phone,
@@ -446,6 +499,7 @@ class OctopusProvider:
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=message_kind,
+            company_code=company_code,
         )
 
     @staticmethod
@@ -466,7 +520,24 @@ class OctopusProvider:
 
 class PushProvider:
     @staticmethod
-    def send(legacy: Any, *, company_code, employee_key, title, body, flow, subject_type, subject_key, account_id) -> dict[str, Any]:
+    def send(
+        legacy: Any,
+        *,
+        company_code,
+        employee_key,
+        title,
+        body,
+        flow,
+        subject_type,
+        subject_key,
+        account_id,
+        variables=None,
+        deep_link=None,
+        template_key=None,
+        locale=None,
+        dedupe_key=None,
+        time_sensitive=None,
+    ) -> dict[str, Any]:
         return legacy.send_outbound_push(
             company_code=company_code,
             employee_key=employee_key,
@@ -477,6 +548,12 @@ class PushProvider:
             subject_key=subject_key,
             account_id=account_id,
             message_kind=flow,
+            deep_link=deep_link,
+            variables=variables,
+            template_key=template_key,
+            locale=locale,
+            dedupe_key=dedupe_key,
+            time_sensitive=time_sensitive,
         )
 
 
@@ -534,6 +611,7 @@ def _attempt_ladder(
     subject_type,
     subject_key,
     company_code,
+    dedupe_key=None,
 ) -> dict[str, Any]:
     """Walk the channel ladder once. Returns the outcome of this attempt without
     deciding terminal vs retry (the caller owns that, using criticality)."""
@@ -576,17 +654,39 @@ def _attempt_ladder(
     #     WhatsApp-template dependency. It is NEVER load-bearing: no token / not
     #     configured / send failure all fall straight through to WhatsApp/email.
     #     A scope='all' opt-out blocks push too; a WhatsApp-only opt-out does not.
-    if not all_suppressed and legacy.push_notifications_enabled():
+    #     Activation/session codes stay Inbox+WA/email — never Expo push.
+    try:
+        import employee_push_tray as _push_tray
+    except Exception:
+        _push_tray = None  # type: ignore
+    push_ok = True
+    if _push_tray is not None and not _push_tray.push_allowed(flow=flow, template_key=template_key):
+        push_ok = False
+        reasons.append("push:inbox_only_policy")
+    if push_ok and not all_suppressed and legacy.push_notifications_enabled():
+        tray_title, tray_body = (email_subject, full_text)
+        if _push_tray is not None:
+            tray_title, tray_body = _push_tray.tray_copy(
+                str(template_key or ""),
+                locale=locale,
+                variables=variables if isinstance(variables, dict) else None,
+                fallback_title=email_subject,
+                fallback_body=full_text,
+            )
         p = PushProvider.send(
             legacy,
             company_code=company_code,
             employee_key=subject_key,
-            title=email_subject,
-            body=full_text,
+            title=tray_title,
+            body=tray_body,
             flow=flow,
             subject_type=subject_type,
             subject_key=subject_key,
             account_id=account_id,
+            variables=variables,
+            template_key=template_key,
+            locale=locale,
+            dedupe_key=dedupe_key,
         )
         if p.get("ok"):
             return {"status": STATUS_DELIVERED_PUSH, "channel": "push", "reasons": reasons, "retryable": False}
@@ -605,6 +705,7 @@ def _attempt_ladder(
             subject_type=subject_type,
             subject_key=subject_key,
             message_kind=flow,
+            company_code=company_code,
         )
         if r.get("ok"):
             return {"status": STATUS_DELIVERED_WHATSAPP, "channel": "whatsapp_session", "reasons": reasons, "retryable": False}
@@ -936,6 +1037,66 @@ def deliver_to_employee(
     if not flow or not template_key:
         return {"ok": False, "status": STATUS_FAILED, "error": "missing_flow_or_template"}
 
+    # Wave 2: observe/enforce outbound notifications (shadow unless canary authority).
+    try:
+        import tenant_control_decision as _tc_decision
+        import tenant_control_surfaces as _tc_surfaces
+
+        if _tc_decision.decision_enabled():
+            queued_epoch = None
+            if isinstance(metadata, dict) and metadata.get("activation_epoch") is not None:
+                try:
+                    queued_epoch = int(metadata.get("activation_epoch"))
+                except Exception:
+                    queued_epoch = None
+            with legacy.db_connect() as conn:
+                with conn.cursor() as cur:
+                    result = _tc_surfaces.observe_or_enforce(
+                        cur,
+                        company_code=company,
+                        surface="outbound_notifications",
+                        module_key=(metadata or {}).get("module_key") if isinstance(metadata, dict) else None,
+                        legacy_allow=True,
+                        queued_epoch=queued_epoch,
+                        work_kind="outbound_delivery",
+                        work_ref=f"{flow}:{template_key}",
+                    )
+                    conn.commit()
+                    if result.mode == "authoritative" and not result.allow:
+                        return {
+                            "ok": False,
+                            "status": STATUS_FAILED,
+                            "error": result.reason_code,
+                            "message": result.remediation or "Outbound delivery blocked by tenant control.",
+                            "correlation_id": result.audit_correlation_id,
+                        }
+    except Exception:
+        pass
+
+    # Wave 3: block when a required outbound integration is degraded/kill-switched.
+    try:
+        import tenant_control_integrations as _tc_integ
+
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                blocked_providers = []
+                for provider_key in ("octopus_whatsapp", "postmark_outbound"):
+                    if _tc_integ.integration_blocks_side_effects(
+                        cur, company_code=company, provider_key=provider_key
+                    ):
+                        blocked_providers.append(provider_key)
+                conn.commit()
+                if blocked_providers:
+                    return {
+                        "ok": False,
+                        "status": STATUS_FAILED,
+                        "error": "integration_degraded_or_kill_switch",
+                        "message": "Outbound delivery blocked while integration is degraded or kill-switched.",
+                        "providers": blocked_providers,
+                    }
+    except Exception:
+        pass
+
     recipient = _resolve_recipient(employee)
     employee_key = employee_key or recipient["employee_key"]
     phone = phone or recipient["phone"]
@@ -1051,6 +1212,7 @@ def deliver_to_employee(
         subject_type=subject_type,
         subject_key=subject_key,
         company_code=company,
+        dedupe_key=dedupe_key,
     )
     return _finalize(legacy, row=row_ctx, outcome=outcome, full_text=full_text)
 
@@ -1074,7 +1236,10 @@ def list_hr_tasks(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """HR follow-up tasks for a company (joined to the employee name when known),
-    newest + highest priority first."""
+    ordered urgent > high > normal > low, then newest first.
+
+    Priority is a free-text column; anything unrecognised sorts as normal so an
+    unexpected value can never jump the queue or sink below `low`."""
     import app as legacy
 
     company = str(company_code or "").strip().upper()
@@ -1088,7 +1253,14 @@ def list_hr_tasks(
           LEFT JOIN employees e
             ON e.company_code = t.company_code AND e.employee_key = t.employee_key
          WHERE t.company_code = %s AND t.status = ANY(%s) {clause}
-         ORDER BY (t.priority = 'high') DESC, t.created_at DESC, t.task_id
+         ORDER BY CASE lower(coalesce(t.priority,'normal'))
+                    WHEN 'urgent' THEN 0
+                    WHEN 'high' THEN 1
+                    WHEN 'normal' THEN 2
+                    WHEN 'low' THEN 3
+                    ELSE 2
+                  END ASC,
+                  t.created_at DESC, t.task_id
          LIMIT %s OFFSET %s
     """
     with legacy.db_connect() as conn:
@@ -1129,15 +1301,70 @@ def count_hr_tasks(*, company_code: str, scope: dict[str, Any] | None = None, st
             return int(cur.fetchone()["n"])
 
 
-def resolve_hr_task(*, company_code: str, task_id: str, status: str = "done", resolver_phone: str | None = None) -> dict[str, Any]:
+def get_hr_task(
+    *,
+    company_code: str,
+    task_id: str,
+    scope: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Load one HR task under the same company + manager scope as list_hr_tasks.
+
+    Restricted managers never see ``employee_key IS NULL`` company-wide tasks.
+    """
+    import app as legacy
+
+    company = str(company_code or "").strip().upper()
+    tid = str(task_id or "").strip()
+    if not company or not tid:
+        return None
+    clause, params = _scope_clause(legacy, "t", scope)
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT t.task_id, t.company_code, t.employee_key, t.task_type, t.source,
+                       t.title, t.detail, t.status, t.priority, t.related_message_id,
+                       t.metadata, t.created_at, t.updated_at, e.name AS employee_name
+                  FROM hr_tasks t
+                  LEFT JOIN employees e
+                    ON e.company_code = t.company_code AND e.employee_key = t.employee_key
+                 WHERE t.company_code = %s AND t.task_id = %s {clause}
+                 LIMIT 1
+                """,
+                [company, tid, *params],
+            )
+            row = cur.fetchone()
+    return dict(row) if row else None
+
+
+def resolve_hr_task(
+    *,
+    company_code: str,
+    task_id: str,
+    status: str = "done",
+    resolver_phone: str | None = None,
+    expected_status: str | None = None,
+) -> dict[str, Any]:
     """Close an HR task (done/dismissed). Company-scoped: a task from another
-    company is never touched."""
+    company is never touched.
+
+    ``expected_status`` is the optimistic-concurrency guard shared by web and
+    mobile: the status the actor was looking at when they decided. It is part
+    of the UPDATE predicate, so two HR actors racing on the same task cannot
+    silently overwrite each other — the loser gets ``stale_decision``.
+
+    Returns ``task_type`` and ``metadata`` so callers (web + mobile) can run
+    ``candidate_handoff`` resume side effects after resolve.
+    """
     import app as legacy
 
     status = (status or "done").strip().lower()
     if status not in {"done", "dismissed", "open"}:
         return {"ok": False, "error": "invalid_status"}
     company = str(company_code or "").strip().upper()
+    expected = str(expected_status or "").strip().lower() or None
+    guard_sql = " AND status = %s" if expected else ""
+    guard_params: tuple[Any, ...] = (expected,) if expected else ()
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -1147,16 +1374,37 @@ def resolve_hr_task(*, company_code: str, task_id: str, status: str = "done", re
                        resolved_by_phone = %s,
                        resolved_at = CASE WHEN %s IN ('done','dismissed') THEN now() ELSE NULL END,
                        updated_at = now()
-                 WHERE task_id = %s AND company_code = %s
-                 RETURNING task_id, status, employee_key, source
+                 WHERE task_id = %s AND company_code = %s"""
+                + guard_sql
+                + """
+                 RETURNING task_id, status, employee_key, source, task_type, metadata
                 """,
-                (status, legacy.digits(resolver_phone) if resolver_phone else None, status, task_id, company),
+                (status, legacy.digits(resolver_phone) if resolver_phone else None, status, task_id, company)
+                + guard_params,
             )
             row = cur.fetchone()
+            current_status: str | None = None
+            if not row and expected:
+                cur.execute(
+                    "SELECT status FROM hr_tasks WHERE task_id = %s AND company_code = %s",
+                    (task_id, company),
+                )
+                existing = cur.fetchone()
+                current_status = str(existing["status"]) if existing else None
         conn.commit()
     if not row:
+        if expected and current_status is not None:
+            return {"ok": False, "error": "stale_decision", "current_status": current_status}
         return {"ok": False, "error": "task_not_found"}
-    return {"ok": True, "task": dict(row)}
+    task = dict(row)
+    if isinstance(task.get("metadata"), str):
+        try:
+            import json as _json
+
+            task["metadata"] = _json.loads(task["metadata"])
+        except Exception:
+            task["metadata"] = {}
+    return {"ok": True, "task": task}
 
 
 _NEEDS_FOLLOW_UP_STATUSES = (STATUS_NEEDS_HR, STATUS_FAILED, STATUS_SUPPRESSED, STATUS_THROTTLED, STATUS_DASHBOARD_ONLY)
@@ -1168,14 +1416,20 @@ def list_needs_follow_up(
     scope: dict[str, Any] | None = None,
     limit: int = 100,
     offset: int = 0,
+    exclude_linked_tasks: bool = False,
 ) -> list[dict[str, Any]]:
     """Employee messages that did not reach the employee and need attention.
     Only HR-safe fields are returned (body_preview honours the sensitivity
-    policy; the raw/encrypted body is never exposed here)."""
+    policy; the raw/encrypted body is never exposed here).
+
+    ``exclude_linked_tasks`` mirrors web Alerts & Delivery ``has_task`` dedupe:
+    when True, rows already linked to an open HR task are omitted.
+    """
     import app as legacy
 
     company = str(company_code or "").strip().upper()
     clause, params = _scope_clause(legacy, "m", scope)
+    task_clause = " AND m.hr_task_id IS NULL" if exclude_linked_tasks else ""
     sql = f"""
         SELECT m.message_id, m.employee_key, m.flow, m.template_key, m.criticality,
                m.status, m.channel_used, m.last_error, m.attempts, m.hr_task_id,
@@ -1184,7 +1438,7 @@ def list_needs_follow_up(
           LEFT JOIN employees e
             ON e.company_code = m.company_code AND e.employee_key = m.employee_key
          WHERE m.company_code = %s
-           AND m.status = ANY(%s) {clause}
+           AND m.status = ANY(%s) {clause}{task_clause}
          ORDER BY (m.criticality = '{CRITICALITY_CRITICAL}') DESC, m.updated_at DESC, m.message_id
          LIMIT %s OFFSET %s
     """
@@ -1194,17 +1448,23 @@ def list_needs_follow_up(
             return [dict(r) for r in cur.fetchall()]
 
 
-def count_needs_follow_up(*, company_code: str, scope: dict[str, Any] | None = None) -> int:
+def count_needs_follow_up(
+    *,
+    company_code: str,
+    scope: dict[str, Any] | None = None,
+    exclude_linked_tasks: bool = False,
+) -> int:
     """True company-wide count backing the needs-follow-up list, independent of
     the page size — used for the badge/footer instead of a page's length."""
     import app as legacy
 
     company = str(company_code or "").strip().upper()
     clause, params = _scope_clause(legacy, "m", scope)
+    task_clause = " AND m.hr_task_id IS NULL" if exclude_linked_tasks else ""
     with legacy.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"SELECT count(*) AS n FROM employee_messages m WHERE m.company_code=%s AND m.status = ANY(%s) {clause}",
+                f"SELECT count(*) AS n FROM employee_messages m WHERE m.company_code=%s AND m.status = ANY(%s) {clause}{task_clause}",
                 [company, list(_NEEDS_FOLLOW_UP_STATUSES), *params],
             )
             return int(cur.fetchone()["n"])
@@ -1234,8 +1494,45 @@ def run_delivery_sweep(*, limit: int = 50) -> dict[str, Any]:
             rows = [dict(r) for r in cur.fetchall()]
 
     processed = 0
+    skipped = 0
     results: dict[str, int] = {}
     for r in rows:
+        # Wave 3: epoch/lifecycle gate before retry side effects.
+        try:
+            import tenant_control_queue_gate as _tc_qg
+
+            with legacy.db_connect() as gate_conn:
+                with gate_conn.cursor() as gate_cur:
+                    queued_epoch = _tc_qg.load_work_epoch(
+                        gate_cur,
+                        company_code=r["company_code"],
+                        work_kind="outbound_delivery_sweep",
+                        work_ref=str(r["message_id"]),
+                    )
+                    if queued_epoch is None:
+                        queued_epoch = _tc_qg.persist_work_epoch(
+                            gate_cur,
+                            company_code=r["company_code"],
+                            work_kind="outbound_delivery_sweep",
+                            work_ref=str(r["message_id"]),
+                            module_key=None,
+                        )
+                    allowed, decision = _tc_qg.gate_or_skip(
+                        gate_cur,
+                        company_code=r["company_code"],
+                        module_key=None,
+                        work_kind="outbound_delivery_sweep",
+                        work_ref=str(r["message_id"]),
+                        queued_epoch=int(queued_epoch),
+                        surface="outbound_notifications",
+                    )
+                    gate_conn.commit()
+                    if not allowed:
+                        skipped += 1
+                        results["held"] = results.get("held", 0) + 1
+                        continue
+        except Exception:
+            pass
         template_key = r["template_key"]
         flow = r["flow"]
         locale = r.get("locale") or "en"
@@ -1255,6 +1552,7 @@ def run_delivery_sweep(*, limit: int = 50) -> dict[str, Any]:
             subject_type="employee",
             subject_key=r.get("employee_key"),
             company_code=r["company_code"],
+            dedupe_key=r.get("dedupe_key"),
         )
         r["subject_type"] = "employee"
         r["subject_key"] = r.get("employee_key")
@@ -1263,4 +1561,4 @@ def run_delivery_sweep(*, limit: int = 50) -> dict[str, Any]:
         processed += 1
         results[res["status"]] = results.get(res["status"], 0) + 1
 
-    return {"ok": True, "processed": processed, "by_status": results}
+    return {"ok": True, "processed": processed, "skipped": skipped, "by_status": results}

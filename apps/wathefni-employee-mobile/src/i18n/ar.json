@@ -596,5 +596,8 @@
   "profile.callManager": "اتصل بمديرك",
   "home.documentExpiresIn": "تنتهي صلاحية {{document}} خلال {{count}} يوماً",
   "home.documentExpiresToday": "تنتهي صلاحية {{document}} اليوم",
-  "home.documentExpired": "انتهت صلاحية {{document}}"
+  "home.documentExpired": "انتهت صلاحية {{document}}",
+  "hrQueues.loadMore": "تحميل المزيد",
+  "hrQueues.showingOf": "عرض {{loaded}} من {{total}}",
+  "hrQueues.moreWaiting": "{{count}} بانتظار المعالجة"
 }

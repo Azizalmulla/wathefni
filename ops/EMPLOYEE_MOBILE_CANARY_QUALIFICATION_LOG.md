@@ -8,6 +8,1436 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 
 ---
 
+
+
+
+## 20260811T103500Z — HR Settings live session/queue probe + pagination blockers logged
+
+| Field | Value |
+| --- | --- |
+| Scope | (1) Logged pagination must-fix #1–#3 in `ops/HR_MOBILE_QUEUE_PAGINATION_PRE_CUSTOMER_BLOCKERS.md` for post-visual pre-customer hardening. (2) HR Settings **Session · queues** live probe: API base, operator session, OTA id, raw→rendered→VISQA counts for Docs/Tasks/Alerts/Onboarding/Attendance Today — no demo data, invalidates query cache after probe. |
+| Ship | OTA **`75042c41-ca1b-4e10-8306-dd16c84c256c`** · runtime 0.3.0 · canary · iOS `019ff064-98f1-7603-a453-9dd58148e559` |
+| Verdict | Visual wave paused until on-device probe shows VISQA>0; client pipeline vs Aziz prod does not drop VisQA |
+
+---
+
+## 20260811T102600Z — HR Onboarding Editorial Entity Detail (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Onboarding detail visual — yellow ambient accent, employee identity + Needs HR lead, work items with Accept/Waive pills, waiting-on-employee as quiet typography, ConfirmationSheet outside scroll. Accept/Waive/bank/preview contracts unchanged. |
+| Ship | OTA **`3985e5ff-5d35-4de1-8bb5-9edc7a9a3601`** · runtime 0.3.0 · canary · iOS `019ff05c-3328-712b-895e-5864bf4f8228` |
+| Verify | `verify-hr-onboarding-review.py` GREEN |
+| Verdict | **Shipped canary** — next Editorial Entity Detail candidates: Attendance exception / Shift swap |
+
+---
+
+## 20260811T100100Z — HR mobile VisQA synthetic fixtures seeded (production)
+
+| Field | Value |
+| --- | --- |
+| Scope | Disposable VisQA fixtures for Document Reviews, Onboarding, HR Tasks, Delivery Alerts, Attendance, Shift swaps — marker `hr_mobile_visqa_v1` |
+| Employees | Sara `WATHEFNI-9655280101` · Fahad `WATHEFNI-9655238102` · Noura `WATHEFNI-9655248103` (never Aziz/Talal) |
+| Tool | `ops/mobile-e2e/provision-hr-visqa-fixtures.py` · docs `ops/mobile-e2e/VISQA_FIXTURES.md` |
+| Verify | mobile API: docs VisQA=4 · onboarding=1 · tasks≥2 · alerts=3 · attendance today=1 unresolved=3 · swap=1 · Civil ID detail 200 |
+| Cleanup | `python3 ops/mobile-e2e/provision-hr-visqa-fixtures.py --cleanup` |
+| Verdict | **Ready for owner visual review** of populated detail states |
+
+---
+
+## 20260811T093900Z — HR Tasks Editorial Entity Detail (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | HR Task detail visual — yellow accent, employee·type lead, body as prose, unboxed About facts, pink attention only for high priority, ink Mark done pill. expected_status / no dismiss-assign preserved. Bundles Document Review visual. |
+| Ship | OTA **`ad637b8d-805f-4efd-94ce-a79b9752b268`** · runtime 0.3.0 · canary · iOS `019ff031-f003-747c-92a9-a89114089ae3` |
+| Verify | `verify-hr-tasks-follow-ups.py` GREEN · `verify-hr-documents-reviews.py` GREEN |
+| Verdict | **Shipped canary** for owner visual judgment on Document + Task details |
+
+---
+
+## 20260811T093700Z — HR Document Review Editorial Entity Detail (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Document Review detail visual — olive accent, expiry lead, unboxed Record facts, File actions, ink Mark reviewed pill, pink attention only when expired/missing/≤14d. Contracts preserved. |
+| Ship | OTA **`13d6a012-dc53-4448-9bbd-be723c07d1b3`** · runtime 0.3.0 · canary · iOS `019ff030-b71d-7597-a60b-30eae43cb14b` |
+| Verify | `verify-hr-documents-reviews.py` GREEN |
+| Verdict | **Shipped canary** — Tasks visual follow-up OTA next |
+
+---
+
+## 20260811T093230Z — HR Employee Profile Editorial Entity Detail visual prototype (canary OTA · owner visual judge)
+
+| Field | Value |
+| --- | --- |
+| Scope | Employee Profile visual-only prototype — cream + ink, one powder-blue accent dot, filled Wathefni status chips, role·dept lead, Contact + Tenure groups, no boxed facts. Frozen facts/RBAC/states unchanged. |
+| Ship | OTA **`be3a329c-47fd-41ad-b426-7fa600220130`** · runtime 0.3.0 · canary · iOS `019ff02a-92b0-7915-9a21-3e41ae7c5c4b` |
+| Verify | `verify-hr-employee-profile.py` GREEN · `physical-hr-employee-profile-en-ar.py` PASS |
+| Contract | Facts-only freeze intact — no E360 / module hub / mutations / manager invent |
+| Verdict | **Shipped canary for owner live visual judgment** — do not roll Editorial Entity Detail to other details until accepted |
+| Next | Owner open People → employee profile on canary build; accept/reject visual; then roll language or iterate |
+
+---
+
+## 20260811T054700Z — BrowserStack Maestro real-device gate online (launch smoke MOBILE_PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | BrowserStack App Automate + Maestro wired into `ops/mobile-e2e`; RC IPA `0.3.0` build 23 uploaded |
+| Device | **Real iPhone 15 (iOS 17.5)** via BrowserStack — not simulator |
+| RC | EAS `fa70005b-…` · `bs://41149d60ef1f119af901722322179a92ed2c0b67` · channel canary |
+| MOBILE_PASS | **1** — launch + principal chooser visible (`00-launch-unsigned`) |
+| FAIL | Continue-as-employee / Continue-as-HR taps do not navigate (XCTest `clickable=null`) — HR login / Leave Confirm not yet MOBILE_PASS |
+| Face ID | **DEBT** — not automatable as PASS on BS without dedicated biometric capability proof |
+| Evidence | `ops/evidence/mobile-e2e-bs-20260811T054531Z/` · dashboard `…/builds/5e7ac74aa09b9363ff7182185d3cb9310ccee1f1` |
+| Verdict | **Launch smoke SHIP (canary-only)** · **Broad HR+Employee NO-SHIP** until auth/tabs/Leave Confirm pass on device |
+| Next | Owner: HR email/password + requested `leave_id`; decide canary OTA to remove stuck chooser / restore pressables; then expand matrix |
+
+---
+
+## 20260810T210000Z — Permanent Maestro mobile E2E harness scaffolded (MOBILE_PASS still 0)
+
+| Field | Value |
+| --- | --- |
+| Scope | Permanent release harness: Maestro smoke flows + `ops/mobile-e2e` gate + `e2e.*` testIDs + API reconcile |
+| Device | **BLOCKED** — iOS Simulator runtime missing; disk free ~1 GB (needs ≥9 GB for runtime); no adb/USB Android |
+| Device cloud | None (BrowserStack/Sauce/Maestro Cloud **not** added — local sim/USB is first path) |
+| Harness | `ops/mobile-e2e/README.md` · `run-release-gate.py` · `.maestro/smoke/*` · `verify-mobile-e2e-testids.py` |
+| Rule | Gate refuses to invent `MOBILE_PASS` when `ui_runtime_ready=false` |
+| Evidence | `ops/evidence/mobile-e2e-gate-20260810T200700Z/` |
+| Verdict | Infrastructure progress only — **HR NO-SHIP** · **Employee NO-SHIP** until a real sim/device runs smoke |
+| Next | Free disk → download iOS runtime → install RC on sim → re-run `python3 ops/mobile-e2e/run-release-gate.py` |
+
+---
+
+## 20260810T194000Z — Full HR + Employee mobile E2E product qualification (NO-SHIP)
+
+| Field | Value |
+| --- | --- |
+| Scope | Full end-to-end product matrix: routes, modules, RBAC/tenant, mutations, cross-surface, auth — **API PASS ≠ MOBILE PASS** |
+| Device | **BLOCKED** — no iOS simulator / USB / adb on qual host → **MOBILE_PASS = 0** |
+| API_SPINE | WATHEFNI priorities↔queues aligned; Leave/Onboarding/Docs/Tasks mutations→DB; CV auth bytes; cross-tenant leave denied; Talal workday/leave/payslips/docs/onboarding/notifications; bank ESS fail-closed 403 |
+| Multi-tenant | BOOTPRE01/BOOTPOST01/BOOTMIX01 / TENANTISO* **absent** on prod (`company_modules` companies = 2) — module-off UI matrix incomplete |
+| Static | 32 PASS · harness/style DEBT (deep-nav string, documents back string, color/density/RTL) — not product FAIL after reclassification |
+| Product FAIL | **0** this run (schedule was wrong path `/app/schedule` vs `/app/workday`) |
+| Evidence | `ops/evidence/full-mobile-e2e-qual-20260810T194000Z/` · canvas `full-mobile-e2e-product-qual.canvas.tsx` |
+| Verdict | **HR NO-SHIP** · **Employee NO-SHIP** — canary OTA continued use OK; broad release blocked until owner-device MOBILE_PASS matrix |
+| Next | Owner device: Leave Confirm smoke · full Confirm/file/auth/EN·AR·RTL matrix; optional BOOT* module tenants for module-off proof |
+
+---
+
+## 20260810T185200Z — Three release blockers (Leave Confirm · Onboarding queue · Docs queue)
+
+| Field | Value |
+| --- | --- |
+| Scope | Leave Confirm silent-fail; onboarding HR-actionable SQL queue; compliance needs_review projection truth |
+| Leave | ConfirmationSheet outside ScrollView; inline error; non-blocking post-success refresh; verify-hr-leave-detail GREEN |
+| Onboarding | `list_onboarding_hr_actionable_page` — mobile/Home/Inbox share actionable set (no ~90 in_progress scan) |
+| Documents | SELECT `renewal_status`; `pending_hr_review`→`needs_review`; valid-without-renewal not flooded into queue |
+| Ship | Backend prod restart · OTA **`7c52c216-8534-4e16-a141-ab177495dea5`** (iOS `019fed03-…`) |
+| Evidence | `ops/evidence/hr-three-blocker-fix-20260810T185200Z/` |
+| Verdict | Onboarding **PASS** · Documents **PASS** · Leave **PASS (fix+HTTP)** with owner Confirm smoke on OTA |
+| Next | Owner Confirm smoke on seeded Fouad leaves; then Face ID/auth physical QA |
+
+---
+
+## 20260810T183500Z — HR Confirmation / File / Auth physical canary (CONDITIONAL · API spine)
+
+| Field | Value |
+| --- | --- |
+| Scope | Live prepare→confirm + authenticated file bytes + auth matrix as Aziz; no frozen UX reopen |
+| Device | **BLOCKED** — no iOS simulator/USB on build host (Face ID / auto-lock / Forgot PIN / UI safe-back / locale) |
+| PASS | Attendance prepare→confirm · Shift swap reject confirm · Onboarding Accept/Waive confirm · Document mark reviewed mutation · HR Task mark done · Onboarding/Doc/CV file allowlist + auth GET 200 |
+| Blockers | (1) Onboarding list scans only first ~90 `in_progress` → queue empty while `being_reviewed` exists; (2) Compliance payload status `missing` vs table `needs_review` → Document Reviews queue empty |
+| Hygiene | Attendance verifier Wordmark → cream `PageScreen + EditorialHeading` |
+| Evidence | `ops/evidence/hr-confirm-file-auth-physical-20260810T181835Z/` (+ static `…-matrix-20260810T181353Z/`) |
+| Verdict | **CONDITIONAL** — confirmation/file spines proven; queue discoverability + device auth still open |
+| Next | Owner-device auth/UI pass; fix onboarding pagination + compliance queue status alignment (separate from freezes) |
+
+---
+
+## 20260810T181353Z — HR Confirmation / File / Auth matrix (CONDITIONAL · physical pending)
+
+| Field | Value |
+| --- | --- |
+| Scope | Cross-cutting matrix after Employee Profile freeze: ConfirmationSheet hosts, `openAuthenticatedFile`, HR local-lock |
+| Profile | Already **PASS/FROZEN** (`20260810T180148Z` · OTA `66eab204-…`) — not reopened |
+| Static | Leave/Candidate confirm stamped; Attendance/Swap/Onboarding SOD hooks wired; Docs/Tasks client sheet + `expected_status`; file path allowlist; local-lock + settings verifies GREEN |
+| Physical pending | Decision prepare→confirm on Attendance/Swap/Onboarding/Docs/Tasks; authenticated file open; Face ID/auto-lock/Forgot PIN |
+| Debt note | `verify-hr-attendance-exceptions` Wordmark FAIL (script/chrome hygiene) — fixed in `20260810T183500Z` |
+| Evidence | `ops/evidence/hr-confirm-file-auth-matrix-20260810T181353Z/` |
+| Verdict | **CONDITIONAL** — superseded by physical stamp `20260810T183500Z` |
+| Next | Physical confirmation + file + auth canary; then stamp PASS (no product freeze for this cross-cut) |
+
+---
+
+## 20260810T180148Z — HR Employee Profile cream honesty (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/employees/[employeeKey]` cream facts-only; drop manager_name; localized status; unavailable/not-found; no E360 |
+| Backend | Unchanged quick profile DTO (no manager); spine reconfirmed |
+| Ship | OTA **`66eab204-7f74-441b-8df2-b54a8ec8cf45`** · runtime 0.3.0 · canary · iOS `019fecd7-a208-74cf-aced-c3157b14d130` |
+| Gates | verify-hr-employee-profile · physical-hr-employee-profile-en-ar · people-directory · tsc · spine-probe |
+| Evidence | `ops/evidence/hr-employee-profile-cream-20260810T180148Z/` |
+| Freeze | `.cursor/rules/hr-mobile-employee-profile-freeze.mdc` · debt `ops/HR_MOBILE_EMPLOYEE_PROFILE_CONTRACT_DEBT.md` |
+| Verdict | **PASS** (canary · FROZEN) |
+| Next | Remaining confirmation / file / auth qualification matrix |
+
+---
+
+## 20260810T175300Z — HR Employee Profile detail qualification (CONDITIONAL · not locked)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/employees/[employeeKey]` audit (Aziz); People→canonical profile; no redesign |
+| Live | Directory 112; quick profile strips E360 sections; **no manager_name**; missing→404; facts email/phone/start real |
+| Honesty | Manager UI claimed but API silent; empty-key ready blank; raw employment_status |
+| Role | Facts-only quick profile v1 intentional; restrained module links deferred; not E360 |
+| Visual | People cream; profile still `@hr/theme` OperationalDetailView |
+| Evidence | `ops/evidence/hr-employee-profile-qual-20260810T175300Z/` |
+| Verdict | **CONDITIONAL** — freeze after one cream+honesty patch (not E360) |
+| Next | Contained patch: cream + drop/flag manager + not-found/empty → physical EN/AR → freeze |
+
+---
+
+## 20260810T174850Z — HR Hiring + Candidates list + Interviews cream honesty (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | Hiring home honesty + cream Candidates/Interviews/Jobs; position-scoped ranking; notes concurrency tokens; Assistant `interview_id`; Assessments hidden; EN/AR priority/upcoming |
+| Backend | Priorities → `/jobs` or `/candidates?position=`; `notes_version` on interview DTO; notes `expected_*` wired; backup `/opt/wathefni/backups/hr-hiring-interviews-20260810T174850Z` |
+| Ship | OTA **`56af1a85-d1b3-494d-957f-2f9668b93ac1`** · runtime 0.3.0 · canary · iOS `019feccc-30a3-7fa6-958a-a733106dea71` |
+| Gates | verify-hr-hiring-home · verify-hr-hiring-interviews-wave · physical-hr-hiring-interviews-en-ar · verify-hr-mobile-assistant · tsc · spine-probe |
+| Evidence | `ops/evidence/hr-hiring-interviews-cream-20260810T174850Z/` |
+| Freeze | `.cursor/rules/hr-mobile-hiring-interviews-freeze.mdc` · debt `ops/HR_MOBILE_HIRING_INTERVIEWS_CONTRACT_DEBT.md` |
+| Verdict | **PASS** (canary · FROZEN) |
+| Next | Continue adjacent HR mobile waves under continuous canary; do not expand Assessments / schedule mutations without owner wave |
+
+---
+
+## 20260810T173000Z — HR Hiring Home + Interviews qualification (CONDITIONAL · not locked)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/hiring` + `/hr/candidates` list + `/hr/interviews` list/detail audit (Aziz); no redesign |
+| Live | Prehire priorities present; `candidate_decisions` empty (unscoped rankings); interviews=4; notes without token → `missing_expected_version`; Assistant app_key-as-interviewId fails |
+| Blockers | Notes concurrency tokens missing · Candidates fake empty (flags dropped) · Assistant interview id kind wrong |
+| Honesty | Jobs/Assessments→Candidates remap weak · priority→unscoped list · upcoming EN hardcodes · schedule_interview→list only |
+| Visual | Hiring cream OK; Candidates/Interviews lists+detail still `@hr/theme` legacy |
+| Evidence | `ops/evidence/hr-hiring-interviews-qual-20260810T173000Z/` |
+| Verdict | **CONDITIONAL** — freeze Hiring + Interviews **together** after honesty + cream-list wave |
+| Next | Patch blockers (position-scoped Candidates, notes tokens, Assistant id) + cream lists → physical EN/AR → dual freeze |
+
+---
+
+## 20260810T172200Z — HR Candidate detail cream + honesty (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/candidates/[appKey]` cream + honesty: stage tone, no `#appKey`, CV empty EN/AR, localized confirm/consequence, `already_decided`, offer.current when present; rankings honesty (`requires_position`) without parallel list |
+| Backend | `mobile_candidate_rankings` surfaces `job_required` honestly; backup `/opt/wathefni/backups/hr-candidate-rankings-honesty-20260810T172200Z` |
+| Ship | OTA **`1eb84033-38da-4772-8397-4d31c5cb2793`** · runtime 0.3.0 · canary · iOS `019fecb6-43fd-72f7-906e-34d115825bd7` |
+| Gates | verify-hr-candidate-detail · physical-hr-candidate-en-ar · nav-ergonomics · deep-nav · tsc · spine-probe |
+| Evidence | `ops/evidence/hr-candidate-detail-cream-20260810T172200Z/` |
+| Freeze | `.cursor/rules/hr-mobile-candidate-freeze.mdc` · debt `ops/HR_MOBILE_CANDIDATE_CONTRACT_DEBT.md` |
+| Verdict | **PASS** (canary · FROZEN) |
+| Next | Hiring home / Interviews physical-surface qualification |
+
+---
+
+## 20260810T171500Z — HR Candidate detail qualification (CONDITIONAL · not locked)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/candidates/[appKey]` audit + production helper exercise (Aziz); import ready_for_review prepare shortlist (no confirm); terminal archived read |
+| Backend | Prepare SOD works; detail + CV real; rankings list 0 items (queue discovery debt); offer key present unused by UI |
+| Client gaps | Legacy plum card stack · always-info badge · `#appKey` chrome · EN-only CV/consequence · `already_decided` unwired · offer not rendered |
+| Evidence | `ops/evidence/hr-candidate-detail-qual-20260810T171500Z/` |
+| Verdict | **CONDITIONAL** — do not lock Candidate until cream + honesty (Leave pattern) |
+| Next | Patch Candidate honesty + cream → physical EN/AR → freeze |
+
+---
+
+## 20260810T170800Z — HR Leave detail cream + honesty (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/leave/[id]` honesty + cream migration: real balances + observe-only caption; EN/AR conflict/confirm/consequence; `already_decided`; status tone from real status; `HrPushedNav` cream surface; no plum stack / `#id` chrome |
+| Backend | Unchanged SOD prepare→confirm; spine reconfirmed (Fouad balance 17.5 observe-only; disposable Talal approve) |
+| Ship | OTA **`21e2ccc7-eb8e-414b-9b0e-ab1161699aef`** · runtime 0.3.0 · canary · iOS `019feca4-d4a8-7a5e-a48c-642b66a38943` |
+| Gates | verify-hr-leave-detail · physical-hr-leave-en-ar · tsc · spine-reenforcement |
+| Evidence | `ops/evidence/hr-leave-detail-cream-20260810T170800Z/` |
+| Freeze | `.cursor/rules/hr-mobile-leave-freeze.mdc` · debt `ops/HR_MOBILE_LEAVE_CONTRACT_DEBT.md` |
+| Verdict | **PASS** (canary · FROZEN) |
+| Next | Candidate detail physical-surface qualification |
+
+---
+
+## 20260810T165300Z — HR Leave detail qualification (CONDITIONAL · not locked)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/hr/leave/[id]` audit + production helper exercise (Aziz); disposable Talal approve; Fouad conflict/balance read |
+| Backend | Prepare/confirm SOD works; conflict count matches DB; balance payload real; priorities drop decided item |
+| Client gaps | Fake balance card · EN-only conflict/consequence · confirm action raw verb · `already_decided` unwired · always-attention badge |
+| Visual | Legacy `@hr/theme` vs cream HR — exact change list in evidence (no redesign shipped) |
+| Evidence | `ops/evidence/hr-leave-detail-qual-20260810T165300Z/` |
+| Verdict | **CONDITIONAL** — do not lock Leave until honesty fixes + one physical EN/AR pass |
+| Next | Fix Leave honesty → physical stamp → Candidate detail |
+
+---
+
+## 20260810T163253Z — HR Assistant Thinking + real stream paint (PASS · canary OTA + API)
+
+| Field | Value |
+| --- | --- |
+| Scope | Quiet **Thinking** / **يفكر** instead of cheap `…` bubble; `expo/fetch` SSE body streaming; client delta reveal fallback; paced 2-word server chunks; assistant reply as plain text |
+| Backend | `operator_mobile_assistant.py` paced deltas + no-buffer headers; backup `/opt/wathefni/backups/hr-assistant-thinking-20260810T163253Z` |
+| Ship | OTA **`ac513bb4-2e70-491d-b0be-f27d1dfc5628`** · runtime 0.3.0 · canary · iOS `019fec86-1ab6-7bed-91e8-e0252e3d07db` |
+| Gates | verify-hr-mobile-assistant · test_hr_mobile_assistant · tsc · health 200 |
+| Evidence | `ops/evidence/hr-assistant-thinking-stream-20260810T163253Z/` |
+| Rollback | OTA prior `4dd457d0-…` |
+| Verdict | **PASS** (canary) |
+
+---
+
+## 20260810T162614Z — HR Assistant stream + composer/logo/scroll (PASS · canary OTA + API)
+
+| Field | Value |
+| --- | --- |
+| Scope | Chunked reply SSE deltas (same final text); logo badge mark; FlatList always-scroll + interactive keyboard dismiss; composer padding/height/keyboard gap fix; pink send unchanged |
+| Backend | `operator_mobile_assistant.py` chunked deltas; backup `/opt/wathefni/backups/hr-assistant-stream-20260810T162614Z` |
+| Ship | OTA **`4dd457d0-dbb7-4d1a-8ff8-af60a05628e9`** · runtime 0.3.0 · canary · iOS `019fec7f-f55e-7e91-a9e7-7a4aa15a27d5` |
+| Gates | verify-hr-mobile-assistant · test_hr_mobile_assistant · tsc · health 200 |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/hr-assistant-stream-composer-20260810T162614Z/` |
+| Verdict | **PASS** (canary) |
+
+---
+
+## 20260810T160220Z — HR Assistant calm empty state (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Remove suggestion chips + Update chips; empty = compact Wordmark + Kuwait-local greeting by display name; no Assistant hero; conversation drops empty land; pink send when sendable / quiet when empty; floating composer + keyboard unchanged; spine/backend unchanged |
+| Backend | None (JS/OTA only) |
+| Ship | OTA **`d91a32b9-f5eb-4d42-836c-b2364388cefb`** · runtime 0.3.0 · canary · iOS `019fec69-e7c9-7382-83dd-9ebb009719af` |
+| Gates | verify-hr-mobile-assistant · tsc |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/hr-assistant-empty-calm-20260810T160220Z/` |
+| Verdict | **PASS** (canary) |
+
+---
+
+## 20260810T155350Z — HR Home refresh + People profile path (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home pull-to-refresh spinner only during user pull (not `isFetching`/focus refetch); People row always `/hr/employees/{key}`; onboarding chip separately opens `/hr/onboarding/{key}` when permitted; Home/Inbox onboarding priorities unchanged |
+| Backend | None (JS/OTA only) |
+| Ship | OTA **`e5d788d9-e3ed-4deb-a842-2470da27336e`** · runtime 0.3.0 · canary · iOS `019fec62-1cd3-795f-adb0-4ba3f6d46acd` |
+| Gates | verify-hr-home-parity · verify-hr-people-directory · tsc |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/hr-home-people-nav-fix-20260810T155350Z/` |
+| Verdict | **PASS** (canary) |
+
+---
+
+## 20260810T155041Z — HR Mobile Assistant chat UX polish (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Compact wrapping suggestion chips; circular black ↑ send; floating rounded composer; auto-grow input; keyboard + safe-area avoidance; quieter refresh; cream/black with restrained brand accents; EN/AR/RTL preserved |
+| Backend | None (JS/OTA only — no AI/spine behavior change) |
+| Ship | OTA **`8f83e776-63c8-445d-a16b-056370b2734a`** · runtime 0.3.0 · canary · iOS `019fec5f-620e-7773-b3e7-de87786819e8` |
+| Gates | verify-hr-mobile-assistant · tsc |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/hr-mobile-assistant-chat-ux-20260810T155041Z/` |
+| Verdict | **PASS** (canary); physical keyboard/empty/long/stream matrix on device |
+
+---
+
+## 20260810T153357Z — HR Mobile Assistant V1 (PASS · canary OTA + API)
+
+| Field | Value |
+| --- | --- |
+| Scope | Thin mobile client of Wathefni Assistant spine under More; cream/black chat; EN/AR/RTL; stream; dynamic chips; safe deep links via `destinationAvailable`; conservative confirm; no ai-recruiter; channel `hr_mobile` |
+| Backend | `operator_mobile_assistant.py` + `operator_mobile.py` assistant feature/routes; backup `/opt/wathefni/backups/hr-mobile-assistant-20260810T153357Z`; health 200 on `:8010` |
+| Ship | OTA **`1baaf28a-7966-4221-a13f-bf5c7ff793d2`** · runtime 0.3.0 · canary · iOS `019fec52-60e1-7d65-97da-aa3ab8323ad6` |
+| Gates | verify-hr-mobile-assistant · verify-hr-more-launcher · verify-hr-navigation-ergonomics · test_hr_mobile_assistant · tsc |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/hr-mobile-assistant-20260810T153357Z/` · demo prompts (no fake data) in `DEMO_PROMPTS.md` |
+| Not in scope | Widening frozen module authority for chat · SMS/Telegram/Teams/push send · separate AI backend · P0–P2 Setup→AI parity full prod promote (still local; mobile uses existing prod spine) |
+| Verdict | **PASS** (canary); physical device pull + live prompt matrix remaining |
+
+---
+
+## 20260810T093000Z — Employee navigation ergonomics E1–E7 (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Shared `useEmployeeSafeBack` + `employeeCanonicalParent`; wire all pushed routes; loading/error/unavailable keep Back; Bank unavailable safe fallback; Change PIN never blank → Settings; Payslip Android `BackHandler`; signed-out auth-only Stack |
+| Backend | None (JS/OTA only) |
+| Not in scope | D1–D4 debt · cream redesign · Home tab navigate |
+| Ship | OTA **`baecb510-3fa4-4af7-a13c-ce288f4103d0`** · runtime 0.3.0 · canary · iOS `019feb06-3558-7546-914e-c4c07666fbf1` |
+| Gates | verify-employee-navigation-ergonomics · verify-hr-navigation-ergonomics · tsc |
+| Debt | `ops/EMPLOYEE_MOBILE_NAV_ERGONOMICS_DEBT.md` |
+| Verdict | **PASS** (E1–E7 green; D1–D4 debt) |
+
+### E1–E7
+
+| Item | Verdict |
+| --- | --- |
+| E1 Shared safe-back | **PASS** |
+| E2 Bare back on pushed routes | **PASS** |
+| E3 Loading/error escape chrome | **PASS** |
+| E4 Bank unavailable | **PASS** |
+| E5 Change PIN blank/safe return | **PASS** |
+| E6 Payslip hardware back | **PASS** |
+| E7 Signed-out auth-only stack | **PASS** |
+
+---
+
+## 20260810T090500Z — HR navigation ergonomics B1–B4 (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Shared safe-back contract (`canGoBack` → back else replace canonical parent); visible Back on all pushed/detail HR screens; module/hiring lists as pushed; tab roots unchanged; signed-out auth-only Stack (no swipe into authenticated shells); RTL back icon preserved |
+| Backend | None (JS/OTA only) |
+| Not in scope | Cream redesign · Home tab `navigate` · retiring `/hr/employees` duplicate |
+| Ship | OTA **`8ef75b0c-6a6c-4faa-bf9d-a0c4eaeb385f`** · runtime 0.3.0 · canary · iOS `019feaec-b3ac-7c77-a863-4787ccdeabe4` |
+| Gates | verify-hr-navigation-ergonomics · verify-hr-deep-nav-blockers · verify-hr-delivery-alerts-monitor · tsc |
+| Debt | `ops/HR_MOBILE_NAV_ERGONOMICS_DEBT.md` |
+| Next | Physical canary swipe/system-back matrix; remaining debt below |
+| Verdict | **PASS** (B1–B4 green) |
+
+### Classification
+
+| Item | Verdict |
+| --- | --- |
+| B1 Legacy detail Back | **PASS** |
+| B2 Pushed module/hiring list Back | **PASS** |
+| B3 Safe-back helper / cold-start fallback | **PASS** |
+| B4 Signed-out auth-only stack | **PASS** |
+| Home push Inbox/More · cream/legacy chrome split · People duplicate | **SAFE POST-LAUNCH DEBT** |
+
+---
+
+## 20260810T084500Z — HR deep-nav / principal isolation blockers (PASS · canary OTA + API)
+
+| Field | Value |
+| --- | --- |
+| Scope | Release-blocker remediation: Employee shell hard-denies `/hr/*` (no Stack mount, sync Redirect); remap `/ranking` + filtered `/candidates?…` → `/candidates`; Hiring + Delivery Alerts `destinationAvailable`; Leave/Candidate mobile APIs fail-closed via `_require_mobile_feature_action` |
+| Backend | Deployed `operator_mobile_data.py`; backup `/opt/wathefni/backups/hr-deep-nav-blockers-20260810T084354Z`; health 200 on `:8010` |
+| Not in scope | Cream/black nested-screen redesign · implementing mobile candidate list filters · dedicated `/ranking` surface |
+| Ship | OTA **`01bb1c82-72e2-421e-80b0-8827abb72992`** · runtime 0.3.0 · canary · iOS `019fead8-adc4-7319-bbc8-5dac2a6d1f66` |
+| Gates | verify-hr-deep-nav-blockers · verify-hr-hiring-home · verify-hr-shell-postauth-crash · verify-hr-delivery-alerts-monitor · tsc |
+| Debt | `ops/HR_MOBILE_DEEP_NAV_BLOCKERS_DEBT.md` |
+| Next | Final pre-release qualification matrix below; cream migration only if leftover nested screens hurt today’s release quality |
+| Verdict | **PASS** (correctness blockers green; visuals deferred) |
+
+### Blocker + pre-release verdicts
+
+| Check | Verdict |
+| --- | --- |
+| Hard-deny `/hr/*` from Employee principal/shell | **PASS** |
+| Dead `/ranking` + misleading candidate query deep links | **PASS** (stop-emitting) |
+| Hiring destination validation (parity with Home/Inbox) | **PASS** |
+| Deep-link module/permission/principal fail-closed (static + route gates + API feature actions) | **PASS** |
+| Leave + Candidate APIs fail closed when feature/module unavailable | **PASS** |
+| Multi-tenant isolation / RBAC / manager scope / Setup Console / AI / web↔mobile / DB truth / demo isolation / EN·AR·RTL / session·local-lock | **PASS** (unchanged contracts; this wave did not regress them; physical canary reconfirm on OTA) |
+| Remaining legacy nested cream/black migration | **SAFE POST-LAUNCH DEBT** (decide only after correctness green — now green) |
+
+---
+
+## 20260810T082000Z — HR Local Lock Wave 2 parity (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | HR Phases 0–5 local lock: 6-digit PIN setup/unlock/change, Face ID/Touch ID opt-in + PIN fallback, idle/background overlay + privacy cover, operator re-auth recovery (not OTP), Device Security on HR Settings; namespaced `wathefni.hr.pin|biometric|autolock.*` bound to `company:user_id`; separate AuthProviders/tokens/endpoints preserved |
+| Backend | None (JS/OTA only — native SecureStore/LocalAuthentication already in binary) |
+| Not in scope | Session merge · Phase 6 · HR push · employee SecureStore reuse · `/app/device-security` card on HR |
+| Ship | OTA **`8b49fe0c-f9cc-43d9-bc70-819d5b7b09c2`** · runtime 0.3.0 · canary · iOS `019feac7-4458-702c-b7ca-60a2af754868` |
+| Gates | verify-hr-local-lock-parity · verify-hr-settings-operator-device · tsc |
+| Freeze | `.cursor/rules/hr-mobile-local-lock-freeze.mdc` |
+| Debt | `ops/HR_MOBILE_LOCAL_LOCK_CONTRACT_DEBT.md` |
+| Next | Physical Face ID/auto-lock QA on canary HR; remaining debt as listed |
+| Verdict | **PASS** (ship · frozen) |
+
+---
+
+## 20260810T081200Z — HR Delivery Alerts quiet More monitor (PASS · canary OTA · FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | Quiet read-only More monitor; non-task outbound states; canonical `has_task` / `hr_task_id` dedupe; no Home/Inbox priorities emit; cream/black; capability = HR Tasks read (`payroll.read` included); no resolve/resend; `delivery_failed` vocab; demo `EXPO_PUBLIC_HR_DELIVERY_ALERTS_DEMO=1` |
+| Backend | `exclude_linked_tasks` on outbound list/count + mobile queue; priorities omit `delivery_alerts`; backup `/opt/wathefni/backups/hr-delivery-alerts-mobile-20260810T081127Z` |
+| Not in scope | Mutations · resend · task resolve from alerts · Home/Inbox surface · full web Alerts & Delivery |
+| Ship | OTA **`8b6d1b88-534a-4ca1-a599-bbec31360a92`** · runtime 0.3.0 · canary · iOS `019feaba-c5dc-7964-89c6-d9ee7c36ade1` |
+| Gates | verify-hr-delivery-alerts-monitor · verify-hr-more-launcher · tsc · orchestrator health 200 |
+| Freeze | `.cursor/rules/hr-mobile-delivery-alerts-freeze.mdc` |
+| Debt | `ops/HR_MOBILE_DELIVERY_ALERTS_CONTRACT_DEBT.md` |
+| Next | More destination audit complete — future Alerts & Delivery converge folds under Tasks only with `has_task` dedupe |
+| Verdict | **PASS** (ship + demo · frozen) |
+
+---
+
+## 20260810T080000Z — HR Settings operator+device (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Cream/black Settings: identity + human role/scope + My Access (workspaces); locale single control; refresh `/me`; confirmed Sign out (More+Settings) + Sign out all; Switch to Employee when session exists; web note; no company writers / push / PIN |
+| Backend | Existing `/me` + logout only — no new settings APIs |
+| Not in scope | Setup Console · web Settings writers · Employee Settings merge · HR push/PIN/biometric |
+| Ship | OTA **`f19202cf-6a31-46d8-8bcd-7c580a928bb7`** · runtime 0.3.0 · canary · iOS `019feab0-1700-79ca-9075-0dba0621ce89` |
+| Gates | verify-hr-settings-operator-device · tsc |
+| Debt | `ops/HR_MOBILE_SETTINGS_CONTRACT_DEBT.md` |
+| Next | Delivery Alerts quiet More monitor (locked + frozen) |
+| Verdict | **PASS** (ship) |
+
+---
+
+## 20260810T075200Z — HR Tasks open follow-up queue (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Open-only queue; Home+Inbox+More same truth; `/hr/tasks/{taskId}` detail; Mark done via scoped canonical `resolve_hr_task` + handoff side effects; no dismiss/assign; remove `due_at`; demo `EXPO_PUBLIC_HR_TASKS_DEMO=1` |
+| Backend | `get_hr_task` scope load; `mobile_hr_task_resolve`; `hr_tasks.actions` includes `resolve` when manage; web resolve also scope-gated; backup `/opt/wathefni/backups/hr-tasks-mobile-20260810T075125Z` |
+| Not in scope | Done/dismissed history · dismiss · assign · Delivery Alerts merge |
+| Ship | OTA **`ff01bbac-cb04-4e7f-8d82-701c95234835`** · runtime 0.3.0 · canary · iOS `019feaa8-b375-79d7-b466-5b7ad739e550` |
+| Gates | verify-hr-tasks-follow-ups · tsc · smoke-test-hr3-mobile-data · orchestrator health 200 |
+| Debt | `ops/HR_MOBILE_TASKS_CONTRACT_DEBT.md` |
+| Next | Settings audit (locked questions before redesign) — canvas `hr-settings-workflow-audit` |
+| Verdict | **PASS** (ship + demo) |
+
+---
+
+## 20260810T073200Z — HR Document Reviews needs_review queue (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Default/list = `needs_review` only; Home/Inbox/Document Reviews share `document_reviews` via `mobile_document_reviews`; compliance detail preview/download + confirm → `compliance_mark_reviewed` + `expected_status`; no Send Reminder; onboarding fan-out only when compliance module off (preview → `/hr/onboarding/{key}`); cream/black; demo `EXPO_PUBLIC_HR_DOCUMENTS_DEMO=1` |
+| Backend | `operator_mobile_data.py` `mobile_document_reviews` + priorities `document_reviews`; backup `/opt/wathefni/backups/hr-documents-mobile-20260810T073143Z` |
+| Not in scope | Full register browse · Send Reminder · bulk review · onboarding Accept/Waive on Documents |
+| Ship | OTA **`060f3ee2-0fb9-45e6-b521-70b623d7b313`** · runtime 0.3.0 · canary · iOS `019fea99-44d8-70ee-b25a-02195cd98dcb` |
+| Gates | verify-hr-documents-reviews · tsc · orchestrator health 200 |
+| Debt | `ops/HR_MOBILE_DOCUMENTS_CONTRACT_DEBT.md` |
+| Next | HR Tasks audit (locked questions before redesign) — canvas `hr-tasks-workflow-audit` |
+| Verdict | **PASS** (ship + demo) |
+
+---
+
+## 20260810T071200Z — HR Onboarding HR-actionable review (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Queue/Home/Inbox = `being_reviewed` only; Accept+Waive; file preview; bank ESS handoff; company mutate allowlist on `review`; People chip → `/hr/onboarding/{key}`; demo `EXPO_PUBLIC_HR_ONBOARDING_DEMO=1` |
+| Backend | `mobile_onboarding_list/detail` + priorities via same list; `operator_mobile` review uses `onboarding_hr_mutate_enabled_for_company`; backup `/opt/wathefni/backups/hr-onboarding-mobile-20260810T071132Z` |
+| Not in scope | Remind, start/restart, ownership rails, completion, bank ESS approve, uploads, bulk admin |
+| Ship | OTA **`1f3000a8-cdbd-4bc5-b882-e640d6dd798f`** · runtime 0.3.0 · canary · iOS `019fea84-3a08-7f06-8ff9-88415d6b149c` |
+| Gates | verify-hr-onboarding-review · tsc · orchestrator health 200 |
+| Debt | `ops/HR_MOBILE_ONBOARDING_CONTRACT_DEBT.md` |
+| Next | Document Reviews audit (locked questions before redesign) |
+| Verdict | **PASS** (ship + demo) |
+
+---
+
+## 20260810T065700Z — HR Shifts decision-first companion (PASS · canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Needs Attention (pending swaps) + Today (Kuwait day, read-only); both-sides swap detail; Home/Inbox `shift_swap_decisions`; demo `EXPO_PUBLIC_HR_SHIFTS_DEMO=1` |
+| Backend | `build_mobile_priorities` emits swaps; `_attach_swap_shifts` on list/detail; destination `/shifts`; backup `/opt/wathefni/backups/hr-shifts-mobile-20260810T065619Z` |
+| Not in scope | Week board, create/cancel/reschedule, templates, publishing, rotations, coverage, PAM, recon |
+| Ship | OTA **`757a1b7b-0094-4a52-86a5-2f6ab7e251ff`** · runtime 0.3.0 · canary · iOS `019fea75-dea3-7964-b226-a9a67f461dd6` |
+| Gates | verify-hr-shifts-companion · tsc · orchestrator health 200 |
+| Debt | `ops/HR_MOBILE_SHIFTS_CONTRACT_DEBT.md` |
+| Next | Onboarding audit (no redesign until locked) |
+| Verdict | **PASS** (ship + demo) |
+
+---
+
+## 20260810T064050Z — HR Attendance exception-first (PASS · canary OTA · UX FROZEN)
+
+| Field | Value |
+| --- | --- |
+| Scope | Mobile Attendance as exception-first surface on shared Ops truth: Today + Unresolved (92d API window); Ops kinds; Request correction → pending review; demo via `EXPO_PUBLIC_HR_ATTENDANCE_DEMO=1` |
+| Backend | Deployed `attendance_row_is_exception` / `attendance_exception_kind` + `status=exceptions`; Home priorities use mobile attendance items; backup `/opt/wathefni/backups/hr-attendance-mobile-20260810T063952Z` |
+| Not in scope | Full web Ops board, bulk/import/capture/payroll boards, Ops dual/apply HTTP on mobile |
+| Ship | OTA **`130f2835-c810-49e9-be21-1ad0bbf5cb01`** · runtime 0.3.0 · canary · iOS `019fea67-0b44-723f-bbf2-e8fe17efcff2` |
+| Gates | verify-hr-attendance-exceptions · tsc · orchestrator health 200 |
+| Freeze | UX frozen this pass — `.cursor/rules/hr-mobile-attendance-ux-freeze.mdc` |
+| Debt | `ops/HR_MOBILE_ATTENDANCE_CONTRACT_DEBT.md` (92d lookback · correct_attendance_record · no Ops exception_id/history · Ops-only kinds · dual count sources) |
+| Verdict | **PASS** (ship + demo); **do not expand Attendance** while Shifts+ audit continues |
+
+---
+
+## 20260809T133500Z — HR Home visual parity (PASS · physical review)
+
+| Field | Value |
+| --- | --- |
+| Scope | Employee Wordmark/AmbientCard/ListRow/StatusChip Home; human statuses; tab labels via employee i18n |
+| Not in scope | People/Inbox/Hiring/More redesign; freezing HR ambient semantics |
+| Ship | OTA **`b471b546-cb9b-45b3-8a04-d2958838adce`** · runtime 0.3.0 · canary |
+| Gates | verify-hr-home-parity · verify-hr-shell-ia · unified-principals · tsc |
+| Verdict | **PASS** (ship); stop for owner physical inspect |
+
+---
+
+## 20260809T131800Z — HR IA foundation shell (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home · People · Inbox · Hiring · More; sparse priority Home; Employee tab chrome |
+| Not in scope | Module redesigns, fake urgency, AI Recruiter root tab |
+| Ship | OTA **`fd021242-b38f-4132-97ea-264f465ca2a9`** · runtime 0.3.0 · canary |
+| Gates | verify-hr-shell-ia · unified-principals · tsc |
+| Evidence | `ops/evidence/hr-mobile-ia-foundation-20260809/` |
+| Verdict | **PASS** (foundation) |
+
+---
+
+## 20260809T130402Z — HR shell post Work-email crash (PASS fix)
+
+| Field | Value |
+| --- | --- |
+| Symptom | Work email login succeeded then immediate crash |
+| Crash | `useAuth must be used within AuthProvider` at `app/(tabs)/_layout.tsx` |
+| Root cause | Post-auth shell swap mounted Employee tabs without Employee AuthProvider (URL still `/`) |
+| Fix | Redirect/Slot guard until `/hr`; work-email `router.replace('/hr')` before `selectMode('hr')` |
+| Ship | OTA **`e6ef7513-4a84-456d-8ab3-ba13cf133b8e`** · runtime 0.3.0 · canary |
+| Gates | hr-shell-postauth + unified-principals + capability + push-storm + /me Home data |
+| Evidence | `ops/evidence/unified-app-hr-shell-postauth-crash-20260809T130402Z/` |
+| Physical | Force-quit/reopen → Work email → HR Home |
+| Verdict | **PASS** (fix + OTA) |
+
+---
+
+## 20260809T124804Z — Unified sign-in OTA delivery fix (PASS delivery)
+
+| Field | Value |
+| --- | --- |
+| Symptom | Canary 0.3.0 force-quit still showed Phone + Activation code only (no Phone \| Work email switcher) |
+| Prior OTA | `99b969d9-4089-49cb-80f3-2e05c203ffba` (canary / runtime 0.3.0) — **did reach** this build/channel, but baked `EXPO_PUBLIC_HR_WORKSPACE_ENABLED` unset → `PrincipalGate` forced `{kind:'employee'}` → `EmployeeShell` ActivationView without method switcher |
+| Root cause | `eas update` does not inherit `eas.json` build.env; OTA overwrote embedded JS that had the flag |
+| Fix | `app.config.js` defaults HR workspace to `1`; `hrWorkspaceEnabled()` also falls back to `extra.unifiedApp.hrWorkspace`; republish OTA with flag forced |
+| Route | `ModeRedirect` mounts `UnsignedEntry` when `shell.kind === 'unsigned'` (Phone \| Work email) |
+| Ship | OTA group **`e046b071-f3ea-45a8-a515-f5499d1c156f`** · iOS update `019fe690-e682-7bfd-a223-701f33b920ae` · runtime **0.3.0** · channel **canary** · matches native build `fa70005b-6eb4-4481-860f-9c4013d92a93` |
+| Bundle proof | published `dist` contains `methodPhone` / `Work email` / `UnsignedEntry`; web minify shows `String("1")` for HR flag |
+| Gates | `verify-unified-principals.py` 25/25 |
+| Physical | Force-quit + reopen 0.3.0 to fetch OTA (owner eyeball) |
+| Verdict | **PASS** (canary delivery/routing) |
+
+---
+
+## 20260809T084213Z — PIN unlock layout polish (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Vertical balance, breathing under status bar, softer PIN surface, intentional dots |
+| Files | PinView · BiometricOptInView · LocalUnlockOverlay (no double SafeArea) |
+| Auth | Unchanged |
+| Ship | OTA b99b5661-2b62-4f20-abec-1783b3c5aa59 runtime 0.2.0 |
+| Evidence | ops/evidence/employee-app-pin-unlock-layout-20260809T084213Z/ |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T083902Z — Push tray copy polish (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Human tray EN/AR; friendly dates/times; no ISO; no Open/HR jargon CTAs |
+| Ship | `employee_push_tray.py` prod restart (JS unchanged) |
+| Gates | smoke-test-employee-push-tray PASS |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/employee-app-push-tray-copy-20260809T083902Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T082509Z — Access regression after push permission (PASS fix · physical pending)
+
+| Field | Value |
+| --- | --- |
+| Symptom | App access unavailable after Allow notifications (Aziz iPhone) |
+| Root cause | PushLifecycle register storm → DB pool exhausted → false `employee_app_not_enabled_for_company` |
+| Entitlements | Unchanged — WATHEFNI `employee_app` enabled; Aziz allowlisted/active |
+| Push causal? | Trigger yes / entitlement change no |
+| Fix | Single-flight PushLifecycle + soft API no shell block + server 503 on pool errors |
+| Ship | OTA `754b9114-1b49-40db-93ce-127e33e65f09` + orchestrator app.py restart |
+| Evidence | `/Users/azizalmulla/Desktop/claw/ops/evidence/employee-app-access-regression-20260809T082509Z/` |
+| Physical | **PENDING** access re-verify before push event walk |
+| Verdict | **PASS** (root cause + automated fix); physical TBD |
+
+---
+
+## 20260809T075811Z — Push notifications UX wave (PASS automated · physical pending)
+
+| Field | Value |
+| --- | --- |
+| Scope | Default-on after OS permission; Settings opt-out; tray copy; badge sync; activation Inbox-only; payslip/bank/docs push |
+| Mobile | Opt-out prefs · PushLifecycle auto-register · syncInboxBadge · Settings manage/disable |
+| Server | `employee_push_tray.py` · ladder skip activation · collapse/timeSensitive · payslip+bank+compliance expiring |
+| Gates | push-sound PASS · capability GREEN · follow-through 14 · push-tray smoke PASS |
+| Ship | OTA JS + orchestrator canary deploy (`WATHEFNI_PUSH_NOTIFICATIONS` on) |
+| Physical | **PENDING** (FG/BG/killed/tap/badge/sound/dupe on Aziz/Talal) |
+| Evidence | `ops/evidence/employee-app-push-ux-wave-20260809T075811Z/` |
+| Rollback | OTA prior · or `WATHEFNI_PUSH_NOTIFICATIONS=off` |
+| Verdict | **PASS** (automated); physical canary TBD |
+
+---
+
+## 20260809T071200Z — iOS 26 Icon Composer (FAIL ship · assets ready)
+
+| Field | Value |
+| --- | --- |
+| Current path | Legacy PNG `expo.icon` / AppIcon.appiconset on Xcode 15.4 builds |
+| Auto-adapt | **Yes** (iOS 26 Liquid Glass on legacy PNG) |
+| Composer package | `assets/WathefniAppIcon.icon` (cream fill + badge layer; specular/translucency/glass off) |
+| Build attempt | `4146bebf…` on `macos-sequoia-15.6-xcode-26.2` → XCODE_BUILD_ERROR (SDK 51 vs Xcode 26) |
+| Physical after | Blocked (no IPA) |
+| Evidence | `ops/evidence/employee-app-icon-composer-*/` |
+| Verdict | **FAIL** (ship); Composer assets + gated plugin ready for SDK 54+ |
+
+---
+
+## 20260809T072129Z — Expo SDK 54 upgrade + Icon Composer iOS (PASS IPA · physical pending)
+
+| Field | Value |
+| --- | --- |
+| Before | Expo ~51 / RN 0.74.5 / React 18.2 / runtime 0.1.0 |
+| After | Expo ~54 / RN 0.81.5 / React 19.1 / runtime **0.2.0** · newArch **false** · Reanimated 3.19 |
+| iOS | `83f5955b-f9c7-45a7-a4c9-d09f696a2dcf` · Xcode 26.2 · buildNumber 22 |
+| Bundled | Icon Composer `WathefniAppIcon` + `wathefni_default.wav` (IPA verified) |
+| Regression | Automated gates PASS; Schedule RTL dirty-tree pre-existing FAIL noted |
+| Physical icon | **PENDING** (no handset) |
+| Evidence | `ops/evidence/employee-app-sdk54-upgrade-20260809T072129Z/` |
+| Rollback | Restore SDK51 before artifacts; runtimeVersion isolates 0.1.0 vs 0.2.0 |
+| Verdict | **PASS** (build); physical Home Screen TBD |
+
+---
+
+## 20260809T065323Z — iOS native retry flat icon + sound 040 (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Retry iOS native after Expo Starter upgrade. Assets unchanged (flat cream icon + `wathefni_default.wav`). |
+| Quota preflight | `abdulazizalmullas-team` plan **Starter** `active` (GraphQL) before submit |
+| Build | iOS `78bb78be-dde2-4d8c-b7db-449e6d97a59f` · buildNumber 19 · finished |
+| Link | https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/78bb78be-dde2-4d8c-b7db-449e6d97a59f |
+| Icon+sound | Included (icon sha `9066753b…`, bundled `wathefni_default.wav`) |
+| Evidence | `ops/evidence/employee-app-ios-flat-sound040-20260809T065323Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T064004Z — Flat cream icon + push sound 040 (PASS assets · Android building)
+
+| Field | Value |
+| --- | --- |
+| Scope | Remove icon frame/chrome (full-bleed flat cream `#FEF0D6` + solid black badge, system mask only). Swap push tone to Universfield `040-493469`. Android channel → `wathefni_default_v2`. |
+| Canonical | `assets/brand/wathefni-app-icon-approved-master.png` sha `9066753b…` (= icon/adaptive) |
+| Sound | `assets/sounds/push/wathefni_default.wav` from `universfield-new-notification-040-493469.mp3` (~1.07s) |
+| Gates | verify-push-sound PASS · verify-semantic-feedback PASS |
+| Evidence | `ops/evidence/employee-app-icon-flat-sound040-20260809T064004Z/` |
+| Android | EAS `82f00604-687b-4d00-a5bc-1ca8b92de66d` (versionCode 11) |
+| iOS | **Blocked** — EAS Free plan iOS quota exhausted until 2026-09-01. Need plan upgrade or local Xcode build. |
+| Ship | Native rebuild required (icon + bundled sound). Orchestrator `channelId` → `wathefni_default_v2` (deploy for Android). |
+| Verdict | **PASS** (assets); Android native in flight; iOS pending quota |
+
+---
+
+
+## 20260809T062852Z — Legacy logo audit (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Full Employee App logo audit. Replaced legacy serif-W splash. Removed unused previews/duplicates. Canonical badge only. |
+| Canonical | `assets/brand/wathefni-app-icon-approved-master.png` (= icon/adaptive) |
+| Evidence | `ops/evidence/employee-app-logo-audit-20260809T062852Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T061905Z — App icon exact approved master (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | Stop redrawing icon. Ship byte-identical approved master as `icon.png` + `adaptive-icon.png`. |
+| Cause of blunder | Connected-component extract + resize/recomposite (~61% pixels differed vs master). |
+| Source | `assets/brand/wathefni-app-icon-approved-master.png` (= `assets/icon.png`) sha `85884e9b…` |
+| Channel | Native iOS `74d71dbb-…` (Android build uploading) |
+| Evidence | `ops/evidence/employee-app-icon-master-exact-20260809T061905Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T060401Z — Icon bottom-anchor + push canary enable (PASS assets)
+
+| Field | Value |
+| --- | --- |
+| Scope | Bottom-anchored Wathefni icon. Enable push registration OTA + server `WATHEFNI_PUSH_NOTIFICATIONS=on` for sound test. |
+| Channel | OTA `c62ee5b8-9d61-4aaa-a197-3612f15c7e96` · iOS native `02779570-…` · Android `7116970a-…` |
+| Push | No Aziz token yet — needs Settings → Push on after OTA/native |
+| Evidence | `ops/evidence/employee-app-icon-bottom-anchor-20260809T060401Z/` |
+| Verdict | **PASS** (icon); push send pending device registration |
+
+---
+
+## 20260809T054307Z — Wathefni app icon (PASS assets · native building)
+
+| Field | Value |
+| --- | --- |
+| Scope | Replace app icon with owner Wathefni mark. Full-bleed cream `#FEF0D6`, crop brackets stripped, Android adaptive safe-zone mark, white notification glyph. |
+| Channel | Native rebuild required (icons not OTA). iOS `eb2653f6-…` · Android `f0ab7d98-…` |
+| Evidence | `ops/evidence/employee-app-icon-20260809T054307Z/` |
+| Verdict | **PASS** (assets); install new native binary for home-screen icon |
+
+---
+
+## 20260809T053857Z — In-app haptics only (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Remove in-app UI tones (`snap`/`success`/`warning`/`error`) + `expo-av`. Keep semantic haptics. Push `wathefni_default` unchanged. |
+| Channel | Canary OTA `517be51a-902e-482a-8a78-869a16f0b8d4` · runtime `0.1.0` |
+| Rollback | `bd9e4015-e503-4f6d-9026-f1cd2a83a6d4` |
+| Gates | semantic-feedback PASS · push-sound PASS · density PASS · capability PASS · auth-wave2 dist PASS · tsc PASS |
+| Evidence | `ops/evidence/employee-app-haptics-only-20260809T053857Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T051843Z — Feedback tune (PASS canary · sound needs native)
+
+| Field | Value |
+| --- | --- |
+| Scope | Strengthen semantic haptics (Soft/Medium/Heavy + CTA press). Restrained original UI tones on week snap / success / warning / error only. No visuals/architecture/business logic. |
+| Channel | Canary OTA `48be9a0a-22d5-4649-8dc7-4cedcdf1af8b` · runtime `0.1.0` |
+| Native | iOS build `78372a77-2dce-4c41-99c5-7525d8847f01` (expo-av for sound; haptics live via OTA alone) |
+| Rollback | `afb8371a-75ab-42af-a3d5-0f776e5488aa` |
+| Gates | semantic-feedback PASS · density PASS · capability PASS · color PASS · auth-wave2 dist PASS · tsc PASS |
+| Evidence | `ops/evidence/employee-app-feedback-tune-20260809T051843Z/` |
+| Verdict | **PASS** (haptics OTA; audible after native install) |
+
+---
+
+## 20260809T051008Z — Native micro-feedback (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Native micro-feedback only. Central semantic layer (`selection` / `lightImpact` / `success` / `warning` / `error`). No visual redesign. Throttle/dedupe; Schedule tap+swipe-settle only; no PremiumButton blanket. |
+| Channel | Canary OTA `afb8371a-75ab-42af-a3d5-0f776e5488aa` · runtime `0.1.0` |
+| Rollback | `96703a6f-3f52-4c1f-8e64-8aa72000ad7e` |
+| Gates | semantic-feedback PASS · density PASS · capability PASS · color PASS · auth-wave2 dist PASS · tsc PASS |
+| Evidence | `ops/evidence/employee-app-native-feedback-20260809T051008Z/` |
+| Verdict | **PASS** (physical iPhone not attached this session — canary device pull) |
+
+---
+
+## 20260809T050444Z — Onboarding cards restore (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Visual only. Restore lifecycle-colored cards (yellow action / pink correction / soft-blue progress+review+handled / cream completed). Keep quiet Preview/History. Authority/fixture unchanged. |
+| Channel | Canary OTA `96703a6f-3f52-4c1f-8e64-8aa72000ad7e` · runtime `0.1.0` |
+| Fixture | unchanged `WATHEFNI-9655237101` |
+| Rollback | `28a28073-d4bf-47c1-ba16-f95f4c69ffbc` |
+| Gates | density PASS · capability PASS · color PASS · auth-wave2 dist PASS |
+| Evidence | `ops/evidence/employee-app-onboarding-cards-20260809T050444Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T050027Z — Onboarding hierarchy refine (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Onboarding visual hierarchy only. Soft-blue progress; pink only on correction; cream Your actions; quieter review/handled/completed accents; Preview/History as inline text. Lifecycle/fixture/authority unchanged. |
+| Channel | Canary OTA `28a28073-d4bf-47c1-ba16-f95f4c69ffbc` · runtime `0.1.0` |
+| Fixture | unchanged `WATHEFNI-9655237101` |
+| Rollback | `da7d44f0-69d2-4379-80a6-77ef7a85ee19` |
+| Gates | density PASS · capability PASS · color PASS · auth-wave2 dist PASS |
+| Evidence | `ops/evidence/employee-app-onboarding-hierarchy-20260809T050027Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T045135Z — Onboarding visual + interaction (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Onboarding visual + open latency only. Cream ledger hierarchy; one lilac progress card; Your actions strongest; review/handled/completed quieter; selective life marks; soft upload refresh; latest-wins preview. Wave 2A / completion / upload / bank CTA authority unchanged. |
+| Channel | Canary OTA `da7d44f0-69d2-4379-80a6-77ef7a85ee19` · runtime `0.1.0` |
+| Fixture | `WATHEFNI-9655237101` · phone `9655237101` · code `622949` · `ops-seed-onboarding-visual-fixture.py` · 3 your / 2 review / 1 handled / 7 completed |
+| Rollback | `f226bdf5-d48e-49ef-b172-7c3672a0723e` · fixture `--cleanup` |
+| Gates | density PASS · capability PASS · auth-wave2 dist PASS |
+| Evidence | `ops/evidence/employee-app-onboarding-visual-20260809T045135Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T043924Z — Auth Wave 2 activation restore (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Restore PIN/Face ID/auto-lock. Masters default ON unless explicit `0`. Remove Aziz/Talal employee allowlists. Persist flags via EAS production env + `app.config.js` + publish script. |
+| Channel | Canary OTA `f226bdf5-d48e-49ef-b172-7c3672a0723e` · runtime `0.1.0` |
+| Dist proof | `pin-unlock-effective:on` · `bio-unlock-effective:on` · `al-lock-effective:on` |
+| Rollback | `cf1cd9a5-39fc-4e8f-a603-fb6679b90b63` |
+| Evidence | `ops/evidence/employee-app-auth-wave2-restore-20260809T043924Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T042744Z — Bank hierarchy cleanup (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Bank hierarchy only. One Pending change section; quiet non-yellow review mark; primary/secondary actions; smaller safety note. Authority/lifecycle/masking/routes unchanged. |
+| Channel | Canary OTA `cf1cd9a5-39fc-4e8f-a603-fb6679b90b63` · runtime `0.1.0` |
+| Rollback | `997f5309-4818-46e6-8e48-348093ccebd8` |
+| Gates | density PASS · capability PASS · color PASS |
+| Evidence | `ops/evidence/employee-app-bank-hierarchy-20260809T042744Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T042111Z — Bank visual + interaction (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Bank visual + open/edit/submit latency only. Cream ledger; one butter account surface; calm life marks (action/review/settled); softer employee status copy. Soft upload refresh; latest-wins evidence open. Bank ESS authority/lifecycle/IBAN/masking/routes unchanged. |
+| Channel | Canary OTA `997f5309-4818-46e6-8e48-348093ccebd8` · runtime `0.1.0` |
+| Fixture | Noura effective+pending_hr · 7001 pending_payroll · 7002 needs_correction · 7003 applied · `ops-seed-bank-visual-fixture.py` |
+| Rollback | `0561f73f-4b2b-4592-896c-874244ab2639` · fixture `--cleanup` |
+| Gates | density PASS · capability PASS · color PASS |
+| Evidence | `ops/evidence/employee-app-bank-visual-20260809T042111Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T041123Z — Documents Current/History density (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Density refine only: Current denser (name→expiry→quiet Reviewed→chevron); no renew on healthy docs; quieter History (chevron, no View); Attention stays strongest; fix `personal_photo` missing i18n. |
+| Channel | Canary OTA `0561f73f-4b2b-4592-896c-874244ab2639` · runtime `0.1.0` |
+| Rollback | `c4ae8e90-dbae-495f-8887-019386dc761b` |
+| Gates | density PASS · capability PASS · color PASS · keysets match · tsc clean |
+| Evidence | `ops/evidence/employee-app-documents-density-20260809T041123Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T040453Z — Documents visual + interaction (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Documents visual + open latency only. Cream ledger rows; pink accent only on Needs attention; green healthy status pills; quieter History. Latest-open-wins (cancel prior download); row press opens; soft invalidate after renew. IA / OCR / renew authority unchanged. Noura fixture for populated judgment. |
+| Channel | Canary OTA `c4ae8e90-dbae-495f-8887-019386dc761b` · runtime `0.1.0` |
+| Fixture | `WATHEFNI-96550010001` · phone `96550010001` · code `561188` · seed `ops-seed-docs-visual-fixture.py` · 3 attention / 5 current / 16 files |
+| Rollback | `4ab57e78-af3d-4f0b-8986-d7f9c0025361` · fixture `--cleanup` |
+| Gates | density PASS · capability PASS · color PASS · hierarchy 7/7 · tsc clean |
+| Evidence | `ops/evidence/employee-app-documents-visual-20260809T040453Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T035953Z — Page scroll bottom limit (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Whole-app scroll end: stop double-counting tab bar height in `PageScrollView` padding; keyboard insets opt-in only; no automatic content inset stacking; Home no longer overrides bottom padding. |
+| Channel | Canary OTA `4ab57e78-af3d-4f0b-8986-d7f9c0025361` · runtime `0.1.0` |
+| Rollback | `8851af5b-1fc1-4d24-b610-08631226f304` |
+| Gates | capability PASS (scroll checks) · tsc clean |
+| Evidence | `ops/evidence/employee-app-scroll-limit-20260809T035953Z/` |
+| Verdict | **PASS** (device confirm: scroll stops after last content + small breathing room) |
+
+---
+
+## 20260809T035506Z — Inbox visual + interaction (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Inbox visual + tap latency only. Cream ledger rows (title/body/time), restrained unread accent, quieter collapsed Account activity. Immediate nav (latest tap wins); mark-read optimistic after push; soft invalidate; leave_decision + flow defaults. IA/dedupe/supersede unchanged. Synthetic Noura fixture for density. |
+| Channel | Canary OTA `8851af5b-1fc1-4d24-b610-08631226f304` · runtime `0.1.0` |
+| Fixture | `WATHEFNI-96550010001` · phone `96550010001` · code `156807` · seed `ops-seed-inbox-visual-fixture.py` · 32 msgs / 8 unread |
+| Rollback | `a3ed510a-df54-48e6-b13c-72966729be61` · fixture `--cleanup` |
+| Gates | density PASS · capability PASS · tsc clean |
+| Evidence | `ops/evidence/employee-app-inbox-visual-20260809T035506Z/` |
+| Verdict | **PASS** (device rapid-tap stress pending canary pull) |
+
+---
+
+## 20260809T034436Z — Payslips ledger + PDF copy (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Restore yellow detail hero. One PDF-unavailable footnote. Root list → flat cream ledger (month/period/amount, hairlines, newest butter accent only). Year groups + pagination unchanged. |
+| Channel | Canary OTA `a3ed510a-df54-48e6-b13c-72966729be61` · runtime `0.1.0` |
+| Rollback | `c8d7076b-8ad1-42fe-9b3a-908dd382bb0d` |
+| Gates | density PASS (ledger check) · tsc clean |
+| Evidence | `ops/evidence/employee-app-payslips-ledger-20260809T034436Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T033846Z — Payslips visual wave (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Payslips visual only: cream foundation, month/amount/issued hierarchy, intentional open-year treatment, CalmNote empty, quiet detail surface. Year grouping + keyset pagination preserved. Synthetic Noura fixture 30 slips (2026/2025/2024) for populated judgment. Aziz/Talal untouched. |
+| Channel | Canary OTA `c8d7076b-8ad1-42fe-9b3a-908dd382bb0d` · runtime `0.1.0` |
+| Fixture | `WATHEFNI-96550010001` · phone `96550010001` · code `539840` · seed `ops-seed-payslip-visual-fixture.py` |
+| Rollback | `ece7fa6a-14ae-4283-8f03-6d0a12d37b4b` · fixture `--cleanup` |
+| Gates | color PASS · density PASS · tsc clean · seed shape OK (24 + has_more) |
+| Evidence | `ops/evidence/employee-app-payslips-visual-20260809T033846Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T025330Z — Leave visual wave (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Leave root + history visual polish: green entitlement card, Approved/Requested/Rejected brand pills (green/yellow/pink), CalmNote empties, black Request CTA, black history filters. No layout copy of Schedule; no authority change. |
+| Channel | Canary OTA `ece7fa6a-14ae-4283-8f03-6d0a12d37b4b` · runtime `0.1.0` |
+| Rollback | `edab3610-a184-42c2-bb6b-9d1ca37d73b1` |
+| Gates | color PASS · density PASS · tsc clean |
+| Evidence | `ops/evidence/employee-app-leave-visual-20260809T025330Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T024939Z — Schedule powder blue + Home profile tap (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home avatar opens Profile. Schedule planned surfaces/chips → soft powder blue `#C5D4F0`; Present/Late/Absent stay green/yellow/pink; selection black; cream ground. No Schedule layout/data/interaction changes. |
+| Channel | Canary OTA `edab3610-a184-42c2-bb6b-9d1ca37d73b1` · runtime `0.1.0` |
+| Rollback | `ad21acee-d77f-4f71-9b77-b6b46da78ca9` |
+| Gates | color PASS · density PASS · tsc clean |
+| Evidence | `ops/evidence/employee-app-schedule-blue-profile-20260809T024939Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T023453Z — Attendance history brand pills (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | View attendance history uses same Present/Late/Absent brand pills as Schedule |
+| Channel | Canary OTA `ad21acee-d77f-4f71-9b77-b6b46da78ca9` · runtime `0.1.0` |
+| Rollback | `1ef4f60e-c427-4007-a52e-b3194456d0b7` |
+| Evidence | `ops/evidence/employee-app-history-pills-20260809T023453Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T023156Z — Schedule attendance brand pills (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Present/Late/Absent → green/yellow/pink ambient pills on Schedule summary + rows |
+| Channel | Canary OTA `1ef4f60e-c427-4007-a52e-b3194456d0b7` · runtime `0.1.0` |
+| Rollback | `1426ee18-43b0-4838-b06d-ec5a0b98823e` |
+| Evidence | `ops/evidence/employee-app-attendance-pills-20260809T023156Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T022740Z — Open smoothness (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Post-load jank: one Home FadeIn, deferred soft-refresh, shared LoadingState |
+| Channel | Canary OTA `1426ee18-43b0-4838-b06d-ec5a0b98823e` · runtime `0.1.0` |
+| Rollback | `7356b390-d966-45d2-a24b-272bdb5cdc17` |
+| Evidence | `ops/evidence/employee-app-open-smooth-20260809T022740Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T022428Z — Schedule in-cell capsule (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Fix clipped Sunday capsule: in-cell stadium; CalmNote empties (no white empty cards) |
+| Channel | Canary OTA `7356b390-d966-45d2-a24b-272bdb5cdc17` · runtime `0.1.0` |
+| Rollback | `dff580af-bca4-44dd-94b8-97c5282b9968` |
+| Evidence | `ops/evidence/employee-app-capsule-incell-20260809T022428Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T023924Z — Schedule visual redesign populated fixture (READY)
+
+| Field | Value |
+| --- | --- |
+| Scope | Synthetic Schedule fixture for physical judgment of the redesign with realistic Today / Upcoming / Recent data. **No design change.** Aziz/Talal untouched. |
+| Identity | `WATHEFNI-96550010001` Noura · phone `96550010001` · activation `703012` (expires ~2026-08-10 02:40Z) |
+| Shape | Today 09:00–17:00 Salmiya + Present check-in · 3 upcoming (distinct sites/times) · recent Present / Late-by-12 / Absent · summary 3/1/1 |
+| Channel | Data-only seed via `ops-seed-schedule-visual-fixture.py` · no OTA |
+| Cleanup | `.venv/bin/python ops-seed-schedule-visual-fixture.py --cleanup` |
+| Evidence | `ops/evidence/employee-app-schedule-visual-fixture-20260809T023924Z/` |
+| Verdict | **READY_FOR_PHYSICAL_JUDGMENT** |
+
+---
+
+
+## 20260809T021502Z — Schedule visual redesign (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Kill Present/Late/Absent KPI tiles → quiet 30d line; QuietEmpty day/upcoming; taller week capsule; HR footnote; Home untouched |
+| Channel | Canary OTA `dff580af-bca4-44dd-94b8-97c5282b9968` · runtime `0.1.0` · no native build |
+| Rollback | `5263ab51-5a7b-4ed5-8f64-755e09e4a370` |
+| Gates | density PASS · capability GREEN · tsc clean |
+| Evidence | `ops/evidence/employee-app-schedule-redesign-20260809T021502Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T020931Z — LoadingState drop left wordmark (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | LoadingState: remove left-aligned Wathefni; centered spinner only |
+| Channel | Canary OTA `5263ab51-5a7b-4ed5-8f64-755e09e4a370` · runtime `0.1.0` |
+| Rollback | `e0dc5e93-7165-4e6d-a195-033c15dddc11` |
+| Evidence | `ops/evidence/employee-app-loading-wordmark-20260809T020931Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T020711Z — Week-strip capsule + LoadingState (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Perfect vertical selected-day capsule; centered premium LoadingState (no giant empty card) |
+| Channel | Canary OTA `e0dc5e93-7165-4e6d-a195-033c15dddc11` · runtime `0.1.0` · no native build |
+| Rollback | `dd05381d-b2a0-4d59-b0f9-117e71b4b0f7` |
+| Gates | density PASS · capability GREEN · tsc clean |
+| Evidence | `ops/evidence/employee-app-capsule-loading-20260809T020711Z/` |
+| Verdict | **PASS** |
+
+---
+
+
+## 20260809T015936Z — Visual polish except Home (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Coordinated visual polish: Schedule, histories, Leave, Payslips, Inbox, Documents, Profile, Bank, Onboarding, Settings/Privacy, shared states; **Home untouched** |
+| Channel | Canary OTA `dd05381d-b2a0-4d59-b0f9-117e71b4b0f7` · runtime `0.1.0` · no native build |
+| Rollback | `c4249469-8c13-4d47-a053-ded2149dc3f3` |
+| Gates | density PASS (99) · capability GREEN · tsc clean |
+| Evidence | `ops/evidence/employee-app-visual-polish-20260809T015936Z/` |
+| Verdict | **PASS** — canary OTA ready; device visual pull optional |
+
+---
+
+
+## 20260809T014715Z — Phase 5.2: Leave History UI (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Leave → View all history → `/leave/history`; cursor load-older + year/status chips over `/app/leave/history`; compact rows; cancel only for requested\|approved + capability; root unchanged aside from entry |
+| Channel | Canary OTA `c4249469-8c13-4d47-a053-ded2149dc3f3` · runtime `0.1.0` · no native build |
+| Rollback | `c12f398e-68a6-4c77-8781-6315d2402a92` |
+| Gates | density PASS · capability GREEN · tsc clean · year/status contract PASS |
+| Evidence | `ops/evidence/employee-app-leave-history-ui-20260809T014715Z/` |
+| Verdict | **PASS** — stop after Phase 5.2 |
+
+---
+
+## 20260809T014321Z — Phase 5.1: Attendance History UI (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Schedule → View attendance history → `/schedule/history`; cursor load-older + month chips over `/app/schedule/history`; compact rows; scheduled only when API returns it; root/week strip unchanged aside from entry |
+| Channel | Canary OTA `c12f398e-68a6-4c77-8781-6315d2402a92` · runtime `0.1.0` · no native build |
+| Rollback | `41afc0af-2aa8-46dd-911e-c94d17941ed1` |
+| Gates | density PASS · capability GREEN · tsc clean · month contract PASS |
+| Evidence | `ops/evidence/employee-app-attendance-history-ui-20260809T014321Z/` |
+| Verdict | **PASS** — stop before Leave History UI |
+
+---
+
+## 20260809T013329Z — Phase 4.3: Leave history backend (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | `GET /app/leave/history` keyset + optional `status`/`date_from`/`date_to`/`year`; same request fields as root; `/app/leave` still ≤50; cancel/balances untouched; no Leave UI; no mobile OTA |
+| Backend | deployed · backup `production-pre-employee-leave-history-20260809T013329Z` |
+| Mobile OTA | none (backend only) |
+| Rollback | BE backup `ROLLBACK.sh` |
+| Gates | leave-history smoke PASS (24) · health 200 · `/app/leave` regression PASS |
+| Evidence | `ops/evidence/employee-app-leave-history-20260809T013329Z/` |
+| Verdict | **PASS** — stop after Phase 4.3 |
+
+---
+
+## 20260809T012444Z — Phase 4.2: Schedule attendance history backend (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | `GET /app/schedule/history` keyset + optional `date_from`/`date_to`; recorded vs canonical scheduled; `/app/workday` unchanged; no Schedule UI; no Leave history; no mobile OTA |
+| Backend | deployed · backup `production-pre-employee-schedule-history-20260809T012444Z` |
+| Mobile OTA | none (backend only) |
+| Rollback | BE backup `ROLLBACK.sh` |
+| Gates | schedule-history smoke PASS (23) · health 200 · workday window regression PASS |
+| Evidence | `ops/evidence/employee-app-schedule-history-20260809T012444Z/` |
+| Verdict | **PASS** — stop before Leave history (4.3) |
+
+---
+
+## 20260809T011927Z — Phase 4.1: Payslips keyset pagination (PASS)
+
+| Field | Value |
+| --- | --- |
+| Scope | `/app/payslips` `limit`+`cursor`+`has_more`+`next_cursor`; mobile Load earlier under existing year groups; no redesign; Home untouched; Schedule/Leave history APIs not started |
+| Backend | deployed · backup `production-pre-employee-payslips-pagination-20260809T011927Z` |
+| Mobile OTA | `41afc0af-2aa8-46dd-911e-c94d17941ed1` · runtime `0.1.0` |
+| Rollback | BE backup ROLLBACK · FE `f151fbb5-f174-47bc-9c78-4f45c1af5c2f` |
+| Gates | pagination smoke PASS · density PASS · capability GREEN · tsc clean |
+| Evidence | `ops/evidence/employee-app-payslips-pagination-20260809T011927Z/` |
+| Verdict | **PASS** — stop before Schedule/Leave history contracts |
+
+---
+
+## 20260809T011317Z — Phase 3: Leave root UX (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Leave structural only. Balances only when `balances_enabled` + canonical number; subtitle swaps when balances hidden; Current vs Recent history; Show more within ~50 API window; cancel rules unchanged; no year/status filters |
+| Channel | Canary OTA `f151fbb5-f174-47bc-9c78-4f45c1af5c2f` · runtime `0.1.0` · no native build |
+| Rollback | `3f83d757-7b30-4878-999a-f55e935d21cc` |
+| Gates | density PASS · capability GREEN · tsc clean · partition smoke PASS · live Aziz/Talal leave shape PASS |
+| Evidence | `ops/evidence/employee-app-leave-root-ux-20260809T011317Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T011008Z — Schedule week strip rapid-tap perf (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Interruptible capsule springs; local latest-wins visual selection; `startTransition` for day panel; memoized Upcoming/Recent so date taps do not rebuild them; haptic throttle; no layout setState |
+| Channel | Canary OTA `3f83d757-7b30-4878-999a-f55e935d21cc` · runtime `0.1.0` · no native build |
+| Rollback | `088982ab-67bd-4c23-ac50-acb6ae8841c4` |
+| Gates | density PASS · capability GREEN · tsc clean |
+| Evidence | `ops/evidence/employee-app-schedule-week-strip-perf-20260809T011008Z/` |
+| Verdict | **PASS** (device rapid-tap stress pending canary pull) |
+
+---
+
+## 20260809T010425Z — Schedule week strip day selector (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Interactive week strip under Schedule intro; selected-day panel from `/app/workday` window only (today paired; future shifts; past attendance); capsule spring; Phase 2 hierarchy preserved |
+| Contract limit | No arbitrary-day API — outside ±30d shows honest unavailable; past has no shift roster in payload |
+| Channel | Canary OTA `088982ab-67bd-4c23-ac50-acb6ae8841c4` · runtime `0.1.0` · no native build |
+| Rollback | `8db2b731-8c39-40dc-beb0-9c92bba0addd` |
+| Gates | density PASS · capability GREEN · tsc clean · day-model smoke PASS |
+| Evidence | `ops/evidence/employee-app-schedule-week-strip-20260809T010425Z/` |
+| Verdict | **PASS** (device gesture feel pending canary pull) |
+
+---
+
+## 20260809T004858Z — Phase 2: Schedule root UX (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Schedule structural only. Today → Upcoming(5) → Recent(5)+quiet P/L/A; Show more within fetched 30d window; remove hero bloom; no Home redesign; no backend change |
+| Channel | Canary OTA `8db2b731-8c39-40dc-beb0-9c92bba0addd` · runtime `0.1.0` · no native build |
+| Rollback | `2c8c6f8f-9638-4099-8676-7f046bf56934` |
+| Gates | density PASS · capability GREEN · tsc clean · workday contract PASS · live Aziz/Talal shape PASS |
+| Evidence | `ops/evidence/employee-app-schedule-root-ux-20260809T004858Z/` |
+| Verdict | **PASS** (device visual pull remaining for canary after OTA) |
+
+---
+
+## 20260809T004500Z — Inbox: Earlier → Updates label (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Naming only. Sections: Unread · Updates · Account activity. EN `Updates` / AR `التحديثات`. No authority or filter changes |
+| Channel | Canary OTA `2c8c6f8f-9638-4099-8676-7f046bf56934` · runtime `0.1.0` · no native build |
+| Rollback | `428d1000-80cb-4f36-83d5-f399af1b85bf` |
+| Gates | capability GREEN · EN/AR keys match |
+| Verdict | Stopped for owner review |
+
+---
+
+## 20260809T003705Z — Phase 1: activation Inbox supersede (PASS canary)
+
+| Field | Value |
+| --- | --- |
+| Scope | Stop `app_activation` Inbox multiply on resend: backend hides prior rows (`inbox_hidden`) after new delivery; projection keeps newest only; FE maps `app_activation` into Account activity. No new tabs. Unread = projected rows only |
+| Backend | Deployed `app.py` + `employee_app_invitation.py` to `wathefni-orchestrator` · backup `production-pre-employee-app-activation-inbox-20260809T003705Z` |
+| Mobile OTA | canary `428d1000-80cb-4f36-83d5-f399af1b85bf` · runtime 0.1.0 · **no native build** |
+| Prove | `smoke-test-employee-app-activation-inbox.py` PASS · Aziz 20→1 visible activation · Talal shift inbox unchanged · health/ready 200 |
+| Evidence | `ops/evidence/employee-app-activation-inbox-20260809T003705Z/` |
+| Verdict | **PASS** |
+
+---
+
+## 20260809T002100Z — Home: restore prior layout + blue Request leave (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Restored pre-polish Home exactly (pink workday, yellow tasks, sparse taller hero, white shift chip, serif Your tasks, tasks→leave→destinations). Only change: Request leave uses composition soft blue `#A9C0E4` with ink label |
+| Channel | Canary OTA `356d5bb4-04f5-4040-b6ec-92e4a6413381` · runtime `0.1.0` · no native build |
+| Rollback | `477496f3-be49-4dfe-af1b-c1c663566cbf` |
+| Gates | colour 63 · density 93 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260809T001400Z — Home polish: yellow hero / pink task / black CTA rhythm (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home visual-only. Butter yellow workday with surface eyebrow (no white chip), compact when no shift, smaller calendar mark; pink compact action; YOUR TASKS as quiet eyebrow; Documents cream+green tile only; black Request leave last above nav. Cream intentional; no filler |
+| Channel | Canary OTA `477496f3-be49-4dfe-af1b-c1c663566cbf` · runtime `0.1.0` · no native build |
+| Rollback | `40218e48-1b3a-47b4-b2d3-5e9fb63b1560` |
+| Gates | colour 61 · density 94 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260809T000500Z — Home: pink workday / yellow tasks / olive Request leave (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home palette roles: workday hero pink, Your tasks yellow, Request leave olive fill with ink label (not black, not white-on-olive). Placement unchanged in the action cluster. Schedule ambient follows pink with the workday role |
+| Channel | Canary OTA `40218e48-1b3a-47b4-b2d3-5e9fb63b1560` · runtime `0.1.0` · no native build |
+| Rollback | `479d905d-c1f4-41ba-bf98-91e09cfedb28` |
+| Gates | colour 61 · density 93 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260808T235500Z — Home: sparse-day taller hero + roomier rhythm (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Quiet days (≤1 waiting surface, no discovery rows) grow the yellow workday card and open section gaps so cream below reads as designed margin. Busy days stay compact. No invented filler, no flexGrow footer |
+| Channel | Canary OTA `479d905d-c1f4-41ba-bf98-91e09cfedb28` · runtime `0.1.0` · no native build |
+| Rollback | `da5913a8-d67e-4d76-93d8-884515c772a7` |
+| Gates | colour 59 · density 93 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260808T235200Z — Home: action cluster (tasks → Request leave → quiet Documents) (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Reordered so Request leave sits in the action cluster right after Your tasks (no flexGrow footer). Documents stays a quiet cream link and is omitted when the pink priority already opens documents/onboarding work |
+| Channel | Canary OTA `da5913a8-d67e-4d76-93d8-884515c772a7` · runtime `0.1.0` · no native build |
+| Rollback | `f8ab3b99-03c4-4ef7-9314-ba98d68ff89f` |
+| Gates | colour 59 · density 92 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260808T234300Z — Home: lightweight workspace link; sole black pill (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Removed the green outer Documents card and the single-item “Your workspace” heading. Documents is now a cream-ground navigation link with a small green tile. Request Leave is the page’s only full-width pill and uses `flexGrow` + auto margin to sit near the tab bar while still scrolling under narrow / large-text conditions |
+| Channel | Canary OTA `f8ab3b99-03c4-4ef7-9314-ba98d68ff89f` · runtime `0.1.0` · no native build |
+| Rollback | `31a3807c-3e5f-4231-bd34-076ea52101c2` |
+| Gates | colour 59 · density 91 · capability GREEN · `tsc` + lint clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260808T233500Z — Home: bottom black Request Leave pill restored (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Request Leave restored as full-width black pill below workspace / above nav (screenshot direction). Removed mid-page paired leave tile. Pink task stays under Your tasks; Documents is green AmbientCard so pink does not repeat. Section gap `xl`; attendance as two-line stack; synthetic name strip hardened |
+| Channel | Canary OTA `31a3807c-3e5f-4231-bd34-076ea52101c2` · runtime `0.1.0` · no native build |
+| Rollback | `22805669-b737-484c-b59f-b38f7a1f0550` |
+| Gates | colour 59 · density 91 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review |
+
+---
+
+## 20260808T232400Z — Home premium palette + compact black CTA (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Preserved compact hierarchy; tuned yellow `#F0D065`, pink `#E5A6CB`, green `#B8CE7F`; Request Leave restored to a compact black CTA per latest owner direction; task gained balanced cream action orb; workspace became one intentional green destination surface; no geometry or extra sections |
+| Hero | 26pt workday headline below the page title; 34pt two-tone calendar tile; softer divider; no nested card and no extra no-shift height |
+| Channel | Canary OTA `22805669-b737-484c-b59f-b38f7a1f0550` · runtime `0.1.0` · no native build |
+| Rollback | `6b2eb372-aec7-4289-be14-b16dc2366d04` |
+| Gates | colour 59 · density 92 · capability GREEN · `tsc` + lint clean |
+| Verdict | Stopped for owner Home review — other screens untouched |
+
+---
+
+## 20260808T231500Z — Home composition: blue Request Leave + compact actions (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Request Leave black → composition blue (`homeComposition.requestLeave`, not module ambient). Action tiles compacted (horizontal, no 116pt min height). Hero tightened. Documents = cream destination card with green accent. No At a glance — `/app/home` lacks leave balance / next shift; unread is the bell; docs/onboarding already own pink |
+| Rhythm | cream → yellow → pink + blue → cream/green accent → black nav |
+| Channel | Canary OTA `6b2eb372-aec7-4289-be14-b16dc2366d04` · runtime `0.1.0` · no native build |
+| Rollback | `cc2350c6-7845-4840-bc19-bb6a6b501d62` |
+| Gates | colour 65 · density 91 · capability GREEN · `tsc` clean |
+| Verdict | Stopped for owner Home review — other screens untouched |
+
+---
+
+## 20260808T230500Z — Home question-first rebuild; bento reverted (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only. Bento abandoned on owner physical review (Request leave below the fold, nested white attendance card, oversized empty hero, arbitrary pink/green pairing, 30-day attendance stat, repeated green). Rebuilt around workday → waiting-on-me → what I can do now |
+| Composition | Compact yellow workday (no nested card, inline attendance line) · black Request leave + pink action-required paired above the fold, stacking under `width < 360` or `fontScale ≥ 1.3` · secondary tasks as rows · destinations as compact rows with a small green accent · unread badge purple → ink |
+| Not shipped | "At a glance" facts — `/app/home` exposes no leave balance and no next shift beyond today; unread already lives in the bell. Nothing invented to fill the row |
+| Channel | Canary OTA `cc2350c6-7845-4840-bc19-bb6a6b501d62` · runtime `0.1.0` · no native build |
+| Rollback | `e08e116d-8a2d-4a34-8a50-0be6992010cd` (bento) · `449d7910-4d8f-46c6-86d7-0772085dcb00` (pre-bento polish) |
+| Gates | colour 59 · density 90 · capability GREEN · `tsc --noEmit` clean |
+| Verdict | Stopped for owner Home review — visual system still not extended to other screens |
+
+---
+
+## 20260808T225500Z — Home adaptive bento / asymmetric priority (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only: asymmetric yellow hero, role-based pink/green priority pair, adaptive workspace bento (1–4), no invented leave balances, no geometry, Request leave CTA kept |
+| Channel | Canary OTA `e08e116d-8a2d-4a34-8a50-0be6992010cd` · runtime `0.1.0` · no native build |
+| Rollback | `449d7910-4d8f-46c6-86d7-0772085dcb00` |
+| Gates | color + density + capability + `tsc` PASS |
+| Verdict | Stopped for owner Home review — do not extend to other pages yet |
+
+---
+
+## 20260808T224613Z — Home polish: butter / rose / pistachio + softer cards (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Home-only visual refine: richer yellow/pink/green, rounder soft cards, shared cream action orbs, spacing rhythm; no geometry; greeting + “Today at work” kept |
+| Channel | Canary OTA `449d7910-4d8f-46c6-86d7-0772085dcb00` · runtime `0.1.0` · no native build |
+| Rollback | `8a929873-c3ca-46a3-a064-c4fc2e8bf860` |
+| Gates | `verify-color-system` + `verify-density-hierarchy` + `tsc --noEmit` PASS |
+| Verdict | Internal ship for device review — owner taste still open on Home before extending app-wide |
+
+---
+
 ## 20260808T192633Z — Employee App Final Phase: Physical Visual QA (BLOCKED — not started)
 
 - **No physical QA was performed.** No visual, RTL, Dynamic Type, VoiceOver or responsiveness
@@ -1281,3 +2711,15 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 - **Evidence:** `ops/evidence/employee-app-physical-qa-phaseF-20260808T192633Z/TECHNICAL_QA_RESULT.md`
 - **Closure:** owner elected to close with T10–T14 and T17 unrun. Recorded, not resolved — `ACCESSIBILITY_PHYSICAL` stays **not established** and is deliberately not folded into the pass. Run T13/T14 before any VoiceOver-dependent customer, ideally after the visual redesign moves focus order.
 - **Verdict:** `TECHNICAL_PHYSICAL_QA` = **PASS over the scope tested** (RTL, responsiveness, smoothness, transitions, Dynamic Type) · `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` = **NO** (visual direction owner-rejected; dedicated redesign phase follows)
+
+## 20260811T122043Z — Pre-Customer Architecture Hardening wave (production)
+
+- **Scope:** one controlled wave closing every §5 must-fix from `ops/CANONICAL_MULTISURFACE_ARCHITECTURE_VERIFICATION.md` — onboarding tenant column + scoped reads/writes, candidate tenant integrity (backfill 8, audited delete of 7 unreferenced fixtures, `NOT NULL`), real leave provenance per surface, HR Web task `expected_status` stale-write guard, honest queue pagination + urgent ordering, HR Mobile foreground/focus/unlock convergence, `no-store` on authenticated surface reads.
+- **Backend:** `app.py`, `operator_mobile_data.py`, `outbound_delivery.py`, `action_registry.py`, `onboarding_wave2.py`, `employee_migration_lifecycle.py` · schema applied under the deploy advisory lock (`onboarding_items` 258/258 stamped, `candidates.active_company_code` NOT NULL, 0 NULLs).
+- **HR Web:** bundle rebuilt and shipped to `/opt/wathefni/dashboard-dist` (the served root per the Caddyfile) — resolve now sends `expected_status` and handles 409 `stale_decision`. Prior bundle: `/opt/wathefni/backups/dashboard-dist-20260811T124800Z`. Note for future waves: `/var/www/wathefni-dashboard` in older deploy scripts is no longer served.
+- **OTA:** branch/channel `canary` · runtime `0.3.0` · group `927e90c7-16db-4cd8-8957-29622942f35a` · iOS `019ff0da-121b-7e15-9868-e5ef11030085` · Android `019ff0da-121b-7f3b-a0a7-005074b4643c` · **rollback group `75042c41-ca1b-4e10-8306-dd16c84c256c`**. JS only — no native change, no new native dependency.
+- **Proofs:** canonical multi-surface harness P1–P6 **PASS** · new hardening harness H1–H7 **PASS** (13/13). Synthetic fixtures only; both harnesses self-clean (0 rows left behind).
+- **Regressions:** dashboard 465/465 tests green · mobile typecheck clean (also fixed a pre-existing `typography.small` token in the HR confirm sheet) · Python compile clean.
+- **Accepted debt:** reconnect detection is indirect (no `NetInfo` without a native build; foreground + screen focus cover it) · Inbox shows an honest count rather than Load more because the priorities endpoint is a 30-item window by design · attendance exceptions are filtered twice (totals stay honest) · hiring/pre-hire queues out of scope.
+- **Evidence:** `ops/evidence/pre-customer-hardening-20260811T122043Z/` (both harness JSONs, harness sources, deploy script, `ROLLBACK.sh`) · report `ops/PRE_CUSTOMER_ARCHITECTURE_HARDENING.md`.
+- **Verdict:** **PRE-CUSTOMER ARCHITECTURE HARDENING PASS** — no remaining blocker before onboarding the first real company.

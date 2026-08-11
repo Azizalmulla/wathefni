@@ -563,11 +563,14 @@ def onboarding_start_gate_error(employee: dict[str, Any] | None) -> dict[str, An
 
 
 def assistant_hr_reads_enabled() -> bool:
-    """Dark-launch gate for the Assistant's onboarding/compliance/document read
-    tools (list_onboarding_status, list_compliance_documents). Defaults OFF so the
-    tools are NOT offered to the LLM on either WhatsApp or the dashboard assistant
-    until enabled. Read-only; reuses the dashboard's own data sources."""
-    return (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "").strip().lower() in _OUTBOUND_ON_VALUES
+    """Gate for Assistant onboarding/compliance read tools.
+
+    Setup Console modules + RBAC drive offerability by default (ON).
+    Set WATHEFNI_ASSISTANT_HR_READS=off to emergency-hide these tools.
+    Global WATHEFNI_ASSISTANT_KILL still stops all Assistant turns.
+    """
+    raw = (os.environ.get("WATHEFNI_ASSISTANT_HR_READS") or "on").strip().lower()
+    return raw not in _OUTBOUND_OFF_VALUES
 
 
 def candidate_knowledge_tools_enabled() -> bool:
@@ -2665,6 +2668,7 @@ def _ensure_schema_impl() -> None:
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS rejection_reason text;
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS completed_at timestamptz;
     ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS lifecycle_meta jsonb NOT NULL DEFAULT '{}'::jsonb;
+    ALTER TABLE IF EXISTS onboarding_items ADD COLUMN IF NOT EXISTS company_code text;
     ALTER TABLE IF EXISTS employees ADD COLUMN IF NOT EXISTS onboarding_template_version text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS document_number text;
     ALTER TABLE IF EXISTS compliance_documents ADD COLUMN IF NOT EXISTS issued_date date;
@@ -3188,6 +3192,40 @@ def _ensure_schema_impl() -> None:
         WHERE c.employee_key = e.employee_key AND c.company_code IS NULL;
         CREATE INDEX IF NOT EXISTS idx_compliance_documents_company ON compliance_documents(company_code);
       END IF;
+      -- Candidate hub rows must name their owning tenant. Deterministic
+      -- backfill only: a phone whose applications all sit in one company is
+      -- unambiguous, anything else is left alone for manual attribution.
+      IF to_regclass('public.candidates') IS NOT NULL AND to_regclass('public.applications') IS NOT NULL THEN
+        UPDATE candidates c
+        SET active_company_code = src.company_code, updated_at = now()
+        FROM (
+          SELECT phone, max(company_code) AS company_code
+          FROM applications
+          WHERE COALESCE(company_code,'') <> ''
+          GROUP BY phone
+          HAVING count(DISTINCT company_code) = 1
+        ) src
+        WHERE c.phone = src.phone AND COALESCE(c.active_company_code,'') = '';
+        -- Only tighten the column once every row is attributed; a deploy must
+        -- never fail because of legacy unowned rows.
+        IF NOT EXISTS (SELECT 1 FROM candidates WHERE active_company_code IS NULL) THEN
+          BEGIN
+            ALTER TABLE candidates ALTER COLUMN active_company_code SET NOT NULL;
+          EXCEPTION WHEN others THEN NULL;
+          END;
+        END IF;
+        CREATE INDEX IF NOT EXISTS idx_candidates_active_company ON candidates(active_company_code);
+      END IF;
+      -- Same defense-in-depth for onboarding_items: tenancy previously relied
+      -- entirely on the employees join plus a company-prefixed employee_key.
+      IF to_regclass('public.onboarding_items') IS NOT NULL AND to_regclass('public.employees') IS NOT NULL THEN
+        UPDATE onboarding_items oi
+        SET company_code = e.company_code
+        FROM employees e
+        WHERE oi.employee_key = e.employee_key AND oi.company_code IS NULL;
+        CREATE INDEX IF NOT EXISTS idx_onboarding_items_company ON onboarding_items(company_code);
+        CREATE INDEX IF NOT EXISTS idx_onboarding_items_company_status ON onboarding_items(company_code, status);
+      END IF;
     END $$;
     """
     with db_connect() as conn:
@@ -3312,6 +3350,20 @@ def workspace_company_config(company_code: str | None) -> dict[str, Any]:
     return read_json(company_root(company_code) / "company.json", {})
 
 
+def _is_transient_db_error(exc: BaseException) -> bool:
+    """Pool/connection failures must not be treated as empty entitlements."""
+    name = type(exc).__name__
+    if name in {"PoolError", "OperationalError", "InterfaceError", "DatabaseError"}:
+        return True
+    msg = str(exc).lower()
+    return (
+        "connection pool exhausted" in msg
+        or "too many connections" in msg
+        or "could not connect" in msg
+        or "server closed the connection" in msg
+    )
+
+
 def configured_company_modules(company_code: str | None) -> set[str]:
     company = (company_code or "WATHEFNI").upper()
     modules: set[str] = set()
@@ -3338,7 +3390,11 @@ def configured_company_modules(company_code: str | None) -> set[str]:
                 if row:
                     modules.update(modules_from_payload(row.get("metadata")))
                     modules.update(modules_from_payload(row.get("raw_json")))
-    except Exception:
+    except Exception as exc:
+        # Swallowing pool exhaustion previously fell through to legacy file config
+        # without employee_app → false employee_app_not_enabled_for_company (403).
+        if _is_transient_db_error(exc):
+            raise
         pass
     modules.update(modules_from_payload(workspace_company_config(company)))
     # Seed-only sources predate later module carve-outs (see LEGACY_IMPLIED_MODULES).
@@ -13283,9 +13339,26 @@ def backfill_candidate_identity_from_documents() -> dict[str, int]:
                     email = _extract_email_from_path(row.get("text_path"))
                 if not phone or not (parsed or email):
                     continue
+                # Tenant ownership is not optional: a candidate hub row with no
+                # company is unreachable and breaks fail-closed scoping. Derive
+                # it from the applications this phone actually belongs to, and
+                # skip the insert when that is ambiguous or unknown.
                 cur.execute(
-                    "INSERT INTO candidates (phone, name, email) VALUES (%s, %s, %s) ON CONFLICT (phone) DO NOTHING",
-                    (phone, parsed, email),
+                    """
+                    SELECT DISTINCT company_code FROM applications
+                     WHERE phone=%s AND COALESCE(company_code,'') <> ''
+                    """,
+                    (phone,),
+                )
+                owning = [str(r["company_code"]).upper() for r in (cur.fetchall() or [])]
+                if len(owning) != 1:
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO candidates (phone, name, email, active_company_code)
+                    VALUES (%s, %s, %s, %s) ON CONFLICT (phone) DO NOTHING
+                    """,
+                    (phone, parsed, email, owning[0]),
                 )
                 inserted_candidates += cur.rowcount
                 if parsed:
@@ -17432,8 +17505,42 @@ def list_payroll_exports(action: dict[str, Any], *, company_code: str | None) ->
     }
 
 
-def request_leave(action: dict[str, Any], *, company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
+LEAVE_ORIGIN_SURFACES = {"whatsapp", "employee_app", "hr_web", "hr_mobile", "assistant", "system"}
+
+
+def normalize_origin_surface(value: Any, *, default: str = "whatsapp") -> str:
+    """Canonical name for the surface a request actually came from.
+
+    Provenance is business truth: a leave request typed into the Employee App
+    must not claim it arrived over WhatsApp.
+    """
+    surface = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    aliases = {
+        "app": "employee_app",
+        "employee": "employee_app",
+        "employee_mobile": "employee_app",
+        "mobile": "employee_app",
+        "dashboard": "hr_web",
+        "web": "hr_web",
+        "operator_mobile": "hr_mobile",
+        "hr_app": "hr_mobile",
+        "wa": "whatsapp",
+    }
+    surface = aliases.get(surface, surface)
+    return surface if surface in LEAVE_ORIGIN_SURFACES else default
+
+
+def request_leave(
+    action: dict[str, Any],
+    *,
+    company_code: str | None,
+    created_by_phone: str | None,
+    origin_surface: str | None = None,
+) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
+    # Default stays whatsapp so untouched legacy callers keep their existing
+    # provenance; every real surface now passes its own value.
+    surface = normalize_origin_surface(origin_surface or action.get("origin_surface") or action.get("surface"))
     employee = resolve_leave_employee(action, company_code=company, required=True)
     if not employee:
         return {"ok": False, "error": "employee_not_found", "action": action}
@@ -17574,7 +17681,8 @@ def request_leave(action: dict[str, Any], *, company_code: str | None, created_b
                         str(action.get("prompt_text") or action.get("query") or ""),
                         digits(created_by_phone) or digits(employee.get("phone")),
                         Json({
-                            "source": "whatsapp",
+                            "source": surface,
+                            "origin_surface": surface,
                             "action": json_safe(action),
                             "shift_conflicts": json_safe(conflicts),
                             "leave_type_canonical": leave_type,
@@ -17616,7 +17724,8 @@ def request_leave(action: dict[str, Any], *, company_code: str | None, created_b
                         str(action.get("prompt_text") or action.get("query") or ""),
                         digits(created_by_phone) or digits(employee.get("phone")),
                         Json({
-                            "source": "whatsapp",
+                            "source": surface,
+                            "origin_surface": surface,
                             "action": json_safe(action),
                             "shift_conflicts": json_safe(conflicts),
                             "leave_type_canonical": leave_type,
@@ -19161,6 +19270,7 @@ def deliver_employee_notification(
         "delivery_status": result.get("status"),
         "channel": result.get("channel_used"),
         "hr_task_id": result.get("hr_task_id"),
+        "message_id": result.get("message_id"),
         "message": text,
         "employee": json_safe(employee),
     }
@@ -19227,7 +19337,19 @@ def _deactivate_push_tokens(company_code: str, tokens: list[str], *, reason: str
         conn.commit()
 
 
-def send_push_via_expo(tokens: list[str], *, title: str, body: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+def send_push_via_expo(
+    tokens: list[str],
+    *,
+    title: str,
+    body: str,
+    data: dict[str, Any] | None = None,
+    sound: str | None = "wathefni_default.wav",
+    channel_id: str | None = "wathefni_default_v2",
+    badge: int | None = None,
+    collapse_id: str | None = None,
+    interruption_level: str | None = None,
+    priority: str | None = None,
+) -> dict[str, Any]:
     """Pure HTTP send to Expo's push API. Never raises; returns a normalized result
     including any tokens Expo reports as unregistered so the caller can deactivate
     them. Mirrors send_email_via_postmark's defensive shape."""
@@ -19235,7 +19357,30 @@ def send_push_via_expo(tokens: list[str], *, title: str, body: str, data: dict[s
     if not valid:
         return {"ok": False, "provider": "expo", "error": "push_token_missing", "invalid_tokens": []}
     cfg = outbound_push_config()
-    messages = [{"to": t, "title": title, "body": body, "sound": "default", "data": data or {}} for t in valid]
+    messages = []
+    for t in valid:
+        msg: dict[str, Any] = {
+            "to": t,
+            "title": title,
+            "body": body,
+            "data": data or {},
+        }
+        if sound:
+            # Custom Wathefni default sound (bundled as wathefni_default.wav).
+            # iOS uses the filename with extension; Android 8+ plays the channel sound
+            # (channelId wathefni_default_v2 — bumped when WAV content changes).
+            msg["sound"] = sound
+        if channel_id:
+            msg["channelId"] = channel_id
+        if badge is not None:
+            msg["badge"] = int(badge)
+        if collapse_id:
+            msg["collapseId"] = str(collapse_id)[:64]
+        if interruption_level:
+            msg["interruptionLevel"] = interruption_level
+        if priority:
+            msg["priority"] = priority
+        messages.append(msg)
     payload = json.dumps(messages).encode("utf-8")
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if cfg.get("access_token"):
@@ -19272,6 +19417,7 @@ def send_push_via_expo(tokens: list[str], *, title: str, body: str, data: dict[s
 _FLOW_PUSH_DEFAULT_PATHS: dict[str, str] = {
     "payroll": "/payslips",
     "leave": "/(tabs)/leave",
+    "leave_decision": "/(tabs)/leave",
     "shift": "/(tabs)/schedule",
     "shifts": "/(tabs)/schedule",
     "attendance": "/(tabs)/schedule",
@@ -19339,6 +19485,11 @@ def send_outbound_push(
     message_kind: str | None = None,
     deep_link: dict[str, Any] | None = None,
     variables: dict[str, Any] | None = None,
+    template_key: str | None = None,
+    locale: str | None = None,
+    dedupe_key: str | None = None,
+    time_sensitive: bool | None = None,
+    badge: int | None = None,
 ) -> dict[str, Any]:
     """Layer-facing push wrapper: dry-run short-circuit, recipient-token lookup,
     invalid-token cleanup, and best-effort delivery-event logging. Never raises and
@@ -19348,13 +19499,47 @@ def send_outbound_push(
         return {"ok": False, "provider": "expo", "channel": "push", "error": "push_not_configured"}
     if not employee_key:
         return {"ok": False, "provider": "expo", "channel": "push", "error": "push_no_employee"}
+    try:
+        import employee_push_tray as _push_tray
+    except Exception:
+        _push_tray = None  # type: ignore
+    tmpl = str(template_key or message_kind or flow or "").strip()
+    if _push_tray is not None and not _push_tray.push_allowed(flow=flow, template_key=tmpl):
+        return {"ok": False, "provider": "expo", "channel": "push", "error": "push_inbox_only_policy"}
     if delivery_is_dry_run():
         return {"ok": True, "provider": "expo", "channel": "push", "dry_run": True}
     tokens = active_push_tokens_for(company, str(employee_key))
     if not tokens:
         return {"ok": False, "provider": "expo", "channel": "push", "error": "push_token_missing"}
     push_data = build_employee_push_data(flow, deep_link=deep_link, variables=variables)
-    result = send_push_via_expo(tokens, title=title, body=body, data=push_data)
+    collapse = None
+    interrupt = None
+    priority = None
+    if _push_tray is not None:
+        collapse = _push_tray.collapse_id(
+            company_code=company,
+            flow=str(flow or ""),
+            template_key=tmpl,
+            subject_key=str(subject_key or employee_key or ""),
+            dedupe_key=dedupe_key,
+        )
+        interrupt = _push_tray.interruption_level(
+            tmpl,
+            time_sensitive=time_sensitive,
+            variables=variables if isinstance(variables, dict) else None,
+        )
+        if interrupt == "timeSensitive":
+            priority = "high"
+    result = send_push_via_expo(
+        tokens,
+        title=title,
+        body=body,
+        data=push_data,
+        badge=badge,
+        collapse_id=collapse,
+        interruption_level=interrupt,
+        priority=priority,
+    )
     if result.get("invalid_tokens"):
         try:
             _deactivate_push_tokens(company, list(result.get("invalid_tokens") or []), reason="DeviceNotRegistered")
@@ -19410,11 +19595,39 @@ def notify_employee_leave_decision(employee: dict[str, Any], leave: dict[str, An
             email_subject="Update on your leave request",
             account_id=account_id,
             company_code=str(leave.get("company_code") or employee.get("company_code") or "WATHEFNI"),
-            variables={"start_date": start_text, "end_date": end_text},
+            variables={"start_date": start_text, "end_date": end_text, "date_text": date_text},
             dedupe_key=f"leave_decision:{leave.get('leave_id')}:{decision}",
         )
 
     return send_custom_employee_message(employee, account_id, message)
+
+
+def notify_employee_bank_correction(
+    employee: dict[str, Any],
+    *,
+    company_code: str | None = None,
+    request_id: str | None = None,
+    account_id: str | None = None,
+) -> dict[str, Any]:
+    """Push + Inbox when HR returns bank details for correction. Never includes IBAN."""
+    company = str(company_code or employee.get("company_code") or "WATHEFNI").upper()
+    emp_key = str(employee.get("employee_key") or "").strip()
+    if not emp_key:
+        return {"ok": False, "error": "employee_key_required"}
+    dedupe = f"bank_correction:{request_id or emp_key}"
+    message = "Your bank details need a correction. Please open Bank in the Wathefni app."
+    return deliver_employee_notification(
+        employee,
+        flow="bank",
+        template_key="bank_correction_required",
+        text=message,
+        email_subject="Bank details need attention",
+        account_id=account_id,
+        company_code=company,
+        variables={"deep_link": {"path": "/bank"}},
+        subject_key=emp_key,
+        dedupe_key=dedupe,
+    )
 
 
 def create_shift_assignment_for_employee(action: dict[str, Any], *, employee: dict[str, Any], company_code: str | None, created_by_phone: str | None) -> dict[str, Any]:
@@ -21078,6 +21291,58 @@ def correct_attendance_record(action: dict[str, Any], *, company_code: str | Non
         conn.commit()
     return {"ok": True, "employee": json_safe(employee), "shift": json_safe(shift), "attendance": json_safe(attendance)}
 
+def attendance_row_is_exception(row: dict[str, Any] | None) -> bool:
+    """Canonical exception gate shared by web/mobile list filters.
+
+    Present / completed / approved_leave / void with no late/early signal are
+    never exceptions. Late minutes, early leave, absence, incomplete punches,
+    and pending review states are.
+    """
+    data = row if isinstance(row, dict) else {}
+    status = str(data.get("status") or "").strip().lower()
+    if status in {"approved_leave", "void"}:
+        return False
+    if int(data.get("late_minutes") or 0) > 0 or status == "late":
+        return True
+    if int(data.get("early_leave_minutes") or 0) > 0:
+        return True
+    if status in {"absent", "incomplete", "pending"}:
+        return True
+    check_in = data.get("check_in_at")
+    check_out = data.get("check_out_at")
+    scheduled = data.get("scheduled_start") or data.get("scheduled_end")
+    if scheduled and not check_in and status not in {"present", "completed"}:
+        return True
+    if check_in and not check_out and status not in {"present", "completed", "late"}:
+        return True
+    return False
+
+
+def attendance_exception_kind(row: dict[str, Any] | None) -> str | None:
+    """Ops-aligned exception kind for mobile/web shared vocabulary."""
+    if not attendance_row_is_exception(row):
+        return None
+    data = row if isinstance(row, dict) else {}
+    status = str(data.get("status") or "").strip().lower()
+    late = int(data.get("late_minutes") or 0)
+    early = int(data.get("early_leave_minutes") or 0)
+    check_in = data.get("check_in_at")
+    check_out = data.get("check_out_at")
+    if status == "absent":
+        return "absence"
+    if late > 0 or status == "late":
+        return "lateness"
+    if early > 0:
+        return "early_leave"
+    if not check_in:
+        return "missing_check_in"
+    if check_in and not check_out:
+        return "missing_check_out"
+    if status in {"incomplete", "pending"}:
+        return "incomplete_session"
+    return "incomplete_session"
+
+
 def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict[str, Any]:
     company = (company_code or "WATHEFNI").upper()
     start_date, end_date = shift_query_window(action)
@@ -21112,11 +21377,13 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
                 end_date=end_date,
                 employee_key=str(employee.get("employee_key")) if employee else None,
             )
-            if status_filter in {"present", "late", "absent", "completed", "pending"}:
+            if status_filter in {"present", "late", "absent", "completed", "pending", "exceptions"}:
                 if status_filter == "present":
                     rows = [r for r in rows if str(r.get("status") or "") in {"present", "late", "completed"}]
                 elif status_filter == "late":
                     rows = [r for r in rows if int(r.get("late_minutes") or 0) > 0]
+                elif status_filter == "exceptions":
+                    rows = [r for r in rows if attendance_row_is_exception(r)]
                 else:
                     rows = [r for r in rows if str(r.get("status") or "") == status_filter]
             total_count = len(rows)
@@ -21142,11 +21409,29 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
     if employee:
         where.append("ar.employee_key=%s")
         params.append(employee.get("employee_key"))
-    if status_filter in {"present", "late", "absent", "completed", "pending"}:
+    if status_filter in {"present", "late", "absent", "completed", "pending", "exceptions"}:
         if status_filter == "present":
             where.append("status IN ('present','late','completed')")
         elif status_filter == "late":
             where.append("late_minutes > 0")
+        elif status_filter == "exceptions":
+            where.append(
+                """(
+                    lower(coalesce(ar.status,'')) IN ('late','absent','incomplete','pending')
+                    OR coalesce(ar.late_minutes,0) > 0
+                    OR coalesce(ar.early_leave_minutes,0) > 0
+                    OR (
+                        ar.scheduled_start IS NOT NULL
+                        AND ar.check_in_at IS NULL
+                        AND lower(coalesce(ar.status,'')) NOT IN ('approved_leave','void','present','completed')
+                    )
+                    OR (
+                        ar.check_in_at IS NOT NULL
+                        AND ar.check_out_at IS NULL
+                        AND lower(coalesce(ar.status,'')) IN ('incomplete','pending','')
+                    )
+                )"""
+            )
         else:
             where.append("status=%s")
             params.append(status_filter)
@@ -22517,7 +22802,7 @@ def handle_employee_leave_turn(request: WhatsAppTurnRequest) -> dict[str, Any] |
     company = employee.get("company_code")
     action_type = action.get("action_type")
     if action_type == "request_leave":
-        result = request_leave(action, company_code=company, created_by_phone=employee.get("phone"))
+        result = request_leave(action, company_code=company, created_by_phone=employee.get("phone"), origin_surface="whatsapp")
         return {"reply": format_leave_mutation_reply(result, "request_leave", employee_view=True), "employee_key": employee.get("employee_key"), "result": result, "intent": "request_leave", "turn_focus": "employee_leave"}
     if action_type == "cancel_leave_request":
         result = cancel_leave_request(action, company_code=company, created_by_phone=employee.get("phone"), account_id=request.account_id)
@@ -24799,6 +25084,10 @@ def register_imported_cv(
     extraction_priority: int | None = None,
 ) -> dict[str, Any]:
     company = str(company_code or "").strip().upper()
+    if not company:
+        # Fail closed: an import with no tenant would create an unowned
+        # candidate hub row and an unscoped application.
+        return {"ok": False, "status": "failed", "error": "company_code_required"}
     resolved_source, resolved_mime, resolved_checksum, resolved_size = source_file_details(str(source_path), mime_type)
     if not resolved_source or not resolved_source.exists() or not resolved_mime:
         return {"ok": False, "status": "failed", "error": "unreadable_or_unsupported_file"}
@@ -31903,12 +32192,30 @@ def notify_candidate(app: dict[str, Any], account_id: str | None, message: str |
     contact = candidate_contact(app)
     name = contact.get("name") or "there"
     body = message or f"Hi {name}, you have been shortlisted. Wathefni HR will contact you with the next step."
+    company = str((app or {}).get("company_code") or "").strip().upper()
+    # Fail-closed: Assistant/send path requires company WhatsApp candidate audience configured.
+    if company:
+        try:
+            import assistant_channel_readiness as acr
+
+            if not acr.whatsapp_candidate_ready(sys.modules[__name__], company):
+                return {
+                    "ok": False,
+                    "error": "whatsapp_not_configured",
+                    "message": body,
+                    "candidate": contact,
+                    "send": {"ok": False, "error": "whatsapp_not_configured"},
+                }
+        except Exception:
+            pass
     result = send_octopus_whatsapp(
         account_id=account_id,
         phone=contact["phone"] or "",
         text=body,
         subject_type="candidate",
         subject_key=app.get("app_key"),
+        company_code=company or None,
+        audience="candidate",
     )
     return {"ok": result.get("ok", False), "send": result, "message": body, "candidate": contact}
 
@@ -34635,6 +34942,30 @@ def missing_employee_documents(employee: dict[str, Any]) -> list[str]:
     return [x for x in out if x]
 
 
+def onboarding_company_for_employee(employee_key: str, *, cur: Any | None = None) -> str | None:
+    """Resolve the owning company for an employee from the employee hub.
+
+    Used so onboarding reads can stay tenant-scoped when a caller forgot to pass
+    a company, instead of silently running unscoped.
+    """
+    key = str(employee_key or "").strip()
+    if not key:
+        return None
+
+    def _fetch(active_cur: Any) -> str | None:
+        active_cur.execute("SELECT company_code FROM employees WHERE employee_key=%s LIMIT 1", (key,))
+        row = active_cur.fetchone()
+        if not row:
+            return None
+        return str(row["company_code"] or "").strip().upper() or None
+
+    if cur is not None:
+        return _fetch(cur)
+    with db_connect() as conn:
+        with conn.cursor() as active_cur:
+            return _fetch(active_cur)
+
+
 def load_onboarding_items(
     *,
     employee_key: str,
@@ -34643,13 +34974,19 @@ def load_onboarding_items(
 ) -> list[dict[str, Any]]:
     """Single authority for checklist reads (list/detail/app/profile/summary).
 
-    Always joins `employees`. When company_code is provided, tenant is enforced.
+    Always joins `employees` AND always filters by company. When the caller does
+    not supply a company we resolve it from the employee hub rather than dropping
+    the filter; an employee we cannot attribute to a tenant yields no items.
     Masks bank/IBAN plaintext in `value` (ESS owns bank data).
     """
     key = str(employee_key or "").strip()
     if not key:
         return []
     company = str(company_code or "").strip().upper() or None
+    if not company:
+        company = onboarding_company_for_employee(key, cur=cur)
+    if not company:
+        return []
 
     def _fetch(active_cur: Any) -> list[dict[str, Any]]:
         sql_full = """
@@ -34677,18 +35014,21 @@ def load_onboarding_items(
                 WHERE oi.employee_key=%s {company_clause}
                 ORDER BY oi.required DESC NULLS LAST, oi.sort_order ASC NULLS LAST, oi.created_at ASC
                 """
-        if company:
-            params: tuple[Any, ...] = (key, company)
-            clause = "AND e.company_code=%s"
-        else:
-            params = (key,)
-            clause = ""
+        # Company is guaranteed non-empty by the caller guard above, so the
+        # tenant clause is unconditional. `oi.company_code` is checked too once
+        # the row carries it, so a mis-stamped row cannot ride the join across.
+        clause = "AND e.company_code=%s AND COALESCE(oi.company_code, e.company_code)=%s"
+        params: tuple[Any, ...] = (key, company, company)
+        # Pre-column databases have no oi.company_code; the join filter alone
+        # still enforces tenant there.
+        legacy_clause = "AND e.company_code=%s"
+        legacy_params: tuple[Any, ...] = (key, company)
         try:
             active_cur.execute(sql_full.format(company_clause=clause), params)
             rows = [dict(r) for r in (active_cur.fetchall() or [])]
         except Exception:
             active_cur.connection.rollback()
-            active_cur.execute(sql_legacy.format(company_clause=clause), params)
+            active_cur.execute(sql_legacy.format(company_clause=legacy_clause), legacy_params)
             rows = [dict(r) for r in (active_cur.fetchall() or [])]
         return [mask_onboarding_item_for_read(row) for row in rows]
 
@@ -35090,6 +35430,10 @@ def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, cr
     employee = find_employee_by_key(action.get("employee_key"), company_code=company) or resolve_employee_for_direct_action(action, allow_latest=False)
     if not employee:
         return {"ok": False, "error": "employee_not_found", "safe_user_message": "I need the employee before I can update a checklist item."}
+    if str(employee.get("company_code") or company).upper() != company:
+        # The fallback resolver is not company-bound; refuse rather than write
+        # a checklist item that belongs to another tenant.
+        return {"ok": False, "error": "employee_company_mismatch", "safe_user_message": "I could not find that employee in this workspace."}
     gate = onboarding_mutation_gate_error(employee)
     if gate is not None:
         return gate
@@ -35129,10 +35473,10 @@ def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, cr
                     SELECT oi.*, e.onboarding_status AS emp_onboarding_status
                     FROM onboarding_items oi
                     JOIN employees e ON e.employee_key = oi.employee_key
-                    WHERE oi.employee_key=%s AND oi.item_id=%s
+                    WHERE oi.employee_key=%s AND oi.item_id=%s AND e.company_code=%s
                     LIMIT 1
                     """,
-                    (employee_key, item_id),
+                    (employee_key, item_id, company),
                 )
                 row = cur.fetchone()
                 if not row:
@@ -35201,8 +35545,9 @@ def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, cr
                         UPDATE onboarding_items
                         SET required=FALSE, row_version=row_version+1
                         WHERE employee_key=%s AND item_id=%s
+                          AND COALESCE(company_code, %s)=%s
                         """,
-                        (employee_key, item_id),
+                        (employee_key, item_id, company, company),
                     )
                 else:
                     cur.execute(
@@ -35210,8 +35555,9 @@ def mark_onboarding_item(action: dict[str, Any], *, company_code: str | None, cr
                         UPDATE onboarding_items
                         SET row_version=row_version+1
                         WHERE employee_key=%s AND item_id=%s
+                          AND COALESCE(company_code, %s)=%s
                         """,
-                        (employee_key, item_id),
+                        (employee_key, item_id, company, company),
                     )
                 _lc.set_item_lifecycle(
                     cur,
@@ -36531,11 +36877,24 @@ def send_email(app: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
     email = contact.get("email")
     if not email or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", str(email).strip()):
         return {"ok": False, "error": "missing_candidate_email", "candidate": contact}
+    company = str(app.get("company_code") or "").strip().upper() or None
+    if company:
+        try:
+            import assistant_channel_readiness as acr
+
+            if not acr.email_ready(sys.modules[__name__], company):
+                return {
+                    "ok": False,
+                    "error": "email_not_configured",
+                    "candidate": contact,
+                    "message": "Outbound email is not configured for this company.",
+                }
+        except Exception:
+            pass
     content = compose_email_content(app, action)
     subject = content["subject"]
     body = content["body"]
     provider = outbound_email_provider()
-    company = str(app.get("company_code") or "").strip().upper() or None
     purpose = normalize_capability_name(action.get("purpose") or capability_purpose_from_text(action.get("prompt_text") or ""))
     if delivery_is_dry_run():
         record_outbound_delivery_event(
@@ -36711,6 +37070,23 @@ def candidate_communication_router(
     fallback_used = False
 
     for index, channel in enumerate(channels):
+        refusal = None
+        try:
+            import assistant_channel_readiness as acr
+
+            refusal = acr.refuse_unsupported_channel(channel)
+        except Exception:
+            refusal = None
+        if refusal:
+            attempts.append(
+                {
+                    "channel": channel,
+                    "ok": False,
+                    "error": refusal.get("error"),
+                    "result": json_safe(refusal),
+                }
+            )
+            continue
         if channel == "email":
             email_action = {**action, "purpose": action.get("purpose") or kind, "message_text": action.get("message_text") or message, "account_id": account_id}
             result = send_email(app, email_action)
@@ -37360,12 +37736,14 @@ def seed_onboarding_items(cur: Any, employee: dict[str, Any], *, template_id: st
         cur.execute(
             """
             INSERT INTO onboarding_items
-                (employee_key, item_id, label, category, item_type, required, owner,
+                (employee_key, company_code, item_id, label, category, item_type, required, owner,
                  sort_order, document_type, status, raw_json, updated_at)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s, now())
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s, now())
             """,
             (
-                employee_key, item_id, label, category, item_type, is_required, owner,
+                employee_key,
+                str(company_code or "").strip().upper() or onboarding_company_for_employee(employee_key, cur=cur),
+                item_id, label, category, item_type, is_required, owner,
                 order, document_type,
                 Json({**seed_meta, "employee_category": employee_category}),
             ),
@@ -38960,7 +39338,7 @@ def execute_direct_action(state: GraphState) -> GraphState:
         reply = format_list_attendance_reply(result)
         result_payload = result
     elif action_type == "request_leave":
-        result = request_leave(action, company_code=company_code, created_by_phone=state["request"].sender_phone)
+        result = request_leave(action, company_code=company_code, created_by_phone=state["request"].sender_phone, origin_surface="whatsapp")
         status = "completed" if result.get("ok") else "failed"
         reply = format_leave_mutation_reply(result, action_type)
         result_payload = result
@@ -40684,11 +41062,14 @@ def compliance_bucket_for(classified_status: str | None) -> str:
         return "expired"
     if status == "expiring_soon":
         return "expiring_soon"
-    if status == "missing_expiry":
+    # pending_hr_review = classifier waiting on HR confirm (renewal_status ≠ reviewed).
+    # missing_expiry / explicit needs_review stay in the review queue — never collapse
+    # them into "missing" or mobile/Home Document Reviews go empty while DB truth is reviewable.
+    if status in {"pending_hr_review", "needs_review", "missing_expiry"}:
         return "needs_review"
     if status == "valid":
         return "valid"
-    # received-without-date is needs_review; everything else (missing/unknown) is missing.
+    # Everything else (missing/unknown) is missing.
     return "missing"
 
 
@@ -40771,7 +41152,8 @@ def dashboard_compliance_payload(
                     SELECT cd.employee_key, cd.document_type, cd.label, cd.status,
                            cd.expiry_date, cd.days_until_expiry, cd.warning_days,
                            cd.last_checked_at, cd.last_alerted_at, cd.last_reminded,
-                           cd.reminder_count, cd.extraction_confidence, cd.updated_at
+                           cd.reminder_count, cd.extraction_confidence, cd.updated_at,
+                           cd.renewal_status
                     FROM compliance_documents cd
                     WHERE cd.employee_key = ANY(%s)
                     ORDER BY cd.updated_at DESC NULLS LAST
@@ -40805,8 +41187,6 @@ def dashboard_compliance_payload(
         for row in rows:
             card = cards.get(str(row.get("employee_key") or ""), {})
             classification = classify_compliance_row(row, company_warning_days=company_warning_days)
-            bucket = compliance_bucket_for(classification.get("status"))
-            counts[bucket] += 1
             expiry = row.get("expiry_date")
             expiry_iso = expiry.isoformat() if hasattr(expiry, "isoformat") else (str(expiry) if expiry else None)
             expiry_label = shift_sheet_cell(expiry) if expiry else None
@@ -40822,6 +41202,22 @@ def dashboard_compliance_payload(
                     file_id = file_ids.get((emp_key, alias))
                     if file_id:
                         break
+            classified_status = classification.get("status")
+            bucket = compliance_bucket_for(classified_status)
+            raw_status = str(row.get("status") or "").strip().lower()
+            # Reviewable truth for needs_review: explicit DB needs_review / received,
+            # missing_expiry, or pending_hr_review with a stored file. Do not reopen
+            # stored-valid rows that lack renewal_status into the mobile review queue.
+            if classified_status == "pending_hr_review":
+                if raw_status in {"needs_review", "received"} or file_id:
+                    bucket = "needs_review"
+                elif raw_status == "valid":
+                    bucket = "valid"
+                else:
+                    bucket = "missing"
+            elif raw_status == "needs_review":
+                bucket = "needs_review"
+            counts[bucket] += 1
             documents.append({
                 "employee_key": row.get("employee_key"),
                 "employee_name": card.get("name") or "Unnamed employee",
@@ -41353,14 +41749,25 @@ def send_compliance_reminder(employee: dict[str, Any], document_type: str | None
     # is bumped only when the employee was actually reached on some channel.
     if outbound_flow_enabled("compliance"):
         primary_label = next((d.get("_label") for d in outstanding if d.get("_label")), None)
+        expiry_date = ""
+        # Prefer the expiring template when every outstanding row is expiry-driven.
+        expiry_buckets = {"expired", "expiring_soon"}
+        all_expiry = bool(outstanding) and all(str(d.get("_bucket") or "") in expiry_buckets for d in outstanding)
+        template_key = "compliance_document_expiring" if all_expiry else "compliance_document_required"
+        if all_expiry:
+            first = outstanding[0]
+            expiry_date = str(first.get("expiry_date") or first.get("_expiry_date") or "")[:10]
+        variables = {"document_type": primary_label or "document"}
+        if expiry_date:
+            variables["expiry_date"] = expiry_date
         notification = deliver_employee_notification(
             employee,
             flow="compliance",
-            template_key="compliance_document_required",
+            template_key=template_key,
             text=body,
-            email_subject="A document HR needs from you",
+            email_subject="A document HR needs from you" if not all_expiry else "A document is expiring soon",
             account_id=account_id,
-            variables={"document_type": primary_label or "document"},
+            variables=variables,
             extra={"documents": json_safe(outstanding)},
         )
         notification["reminder_update"] = mark_compliance_reminded(employee_key, document_type) if notification.get("ok") else {}
@@ -41636,6 +42043,26 @@ def require_internal_access(
 
 
 app = FastAPI(title="Wathefni HR Orchestrator")
+
+# Authenticated surface reads carry per-actor business state. Without an explicit
+# directive an OS-level HTTP cache may reuse a response the app cannot invalidate,
+# which is exactly how a mounted screen goes stale after another surface writes.
+# Streaming endpoints set their own directives and are left alone.
+_NO_STORE_PREFIXES = ("/dashboard/", "/app/")
+_NO_STORE_SKIP = ("/stream", "/events", "/sse")
+
+
+@app.middleware("http")
+async def _no_store_on_authenticated_surface_reads(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if (
+        path.startswith(_NO_STORE_PREFIXES)
+        and not any(part in path for part in _NO_STORE_SKIP)
+        and "Cache-Control" not in response.headers
+    ):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.on_event("startup")
@@ -42488,6 +42915,9 @@ class OrgManagerScopeRequest(BaseModel):
 
 class HrTaskResolveRequest(BaseModel):
     status: str = "done"
+    # Required concurrency guard, matching HR Mobile: the status the actor saw
+    # when they decided. Without it two HR users can silently overwrite.
+    expected_status: str
 
 
 class DashboardChatRequest(BaseModel):
@@ -45051,6 +45481,90 @@ def prehire_dashboard_context(context: dict[str, Any] = Depends(dashboard_contex
     return require_entitlement(context, "pre_hiring", "prehire.read")
 
 
+# Modules / permissions that unlock the Platform Assistant (mirrors nav.ai +
+# adjacent HR surfaces). Fail-closed: at least one module AND one permission.
+ASSISTANT_OFFERABLE_MODULES = frozenset(
+    {
+        "pre_hiring",
+        "assessments",
+        "interviews",
+        "video_interviews",
+        "employment_offers",
+        "calendar",
+        "leave",
+        "attendance",
+        "onboarding",
+        "shifts",
+        "payroll",
+        "compliance",
+        "analytics",
+    }
+)
+ASSISTANT_OFFERABLE_PERMISSIONS = frozenset(
+    {
+        "candidate.manage",
+        "candidates.read",
+        "jobs.create",
+        "jobs.read",
+        "prehire.read",
+        "report.export",
+        "leave.read",
+        "attendance.read",
+        "onboarding.read",
+        "payroll.read",
+        "shifts.read",
+        "compliance.read",
+        "analytics.read",
+        "employees.read",
+        "interview.manage",
+        "assessment.manage",
+        "calendar.read",
+        "offer.manage",
+        "offer.send",
+        "offer.approve",
+        "settings.read",
+        "*:*",
+    }
+)
+
+
+def assistant_dashboard_context(context: dict[str, Any] = Depends(dashboard_context)) -> dict[str, Any]:
+    """Platform Assistant session gate — workspace/module-aware, not pre_hiring-only.
+
+    Any authenticated dashboard actor whose company has at least one
+    Assistant-capable module enabled and who holds a matching permission may
+    open chat/capabilities. Individual tools still re-check module + RBAC +
+    manager scope + channel readiness at execute time.
+    """
+    company = str(context.get("company_code") or "").strip().upper()
+    if not company:
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "assistant_unavailable", "message": "Company context is required for Assistant."},
+        )
+    modules = configured_company_modules(company)
+    if not (modules & ASSISTANT_OFFERABLE_MODULES):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "assistant_unavailable",
+                "message": "No Assistant-capable modules are enabled for this company.",
+                "company_code": company,
+            },
+        )
+    perms = context_permissions(context)
+    if not (perms & ASSISTANT_OFFERABLE_PERMISSIONS):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "permission_denied",
+                "message": "You do not have permission to use Wathefni Assistant.",
+                "role": context.get("actor_role"),
+            },
+        )
+    return context
+
+
 def workspace_dashboard_context(context: dict[str, Any] = Depends(dashboard_context)) -> dict[str, Any]:
     """Core workspace authorization, independent of product modules when the
     Phase 3 boot is enabled. With the flag off it preserves the historical
@@ -45822,10 +46336,54 @@ def dashboard_hr_tasks(
 @app.post("/dashboard/hr-tasks/{task_id}/resolve")
 def dashboard_hr_task_resolve(task_id: str, request: HrTaskResolveRequest, context: dict[str, Any] = Depends(dashboard_context)):
     company = _hr_tasks_context(context, manage=True)
-    result = _outbound_delivery.resolve_hr_task(company_code=company, task_id=task_id, status=request.status, resolver_phone=context.get("hr_phone"))
+    # Same manager / NULL-employee_key visibility as list_hr_tasks (not company-by-id only).
+    scoped = _outbound_delivery.get_hr_task(
+        company_code=company,
+        task_id=task_id,
+        scope=context.get("scope") if isinstance(context.get("scope"), dict) else None,
+    )
+    if not scoped:
+        raise HTTPException(status_code=404, detail={"error": "task_not_found", "message": "This task was not found."})
+    expected = str(request.expected_status or "").strip().lower()
+    current = str(scoped.get("status") or "")
+    if not expected:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "expected_status_required", "message": "Refresh this task and try again."},
+        )
+    if expected != current:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "stale_decision",
+                "message": "This task changed since you reviewed it.",
+                "current_status": current,
+            },
+        )
+    result = _outbound_delivery.resolve_hr_task(
+        company_code=company,
+        task_id=task_id,
+        status=request.status,
+        resolver_phone=context.get("hr_phone"),
+        expected_status=expected,
+    )
+    if result.get("error") == "stale_decision":
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "stale_decision",
+                "message": "This task changed since you reviewed it.",
+                "current_status": result.get("current_status"),
+            },
+        )
     if not result.get("ok"):
         raise HTTPException(status_code=404, detail={"error": result.get("error") or "task_not_found", "message": "This task was not found."})
     task = result.get("task") if isinstance(result.get("task"), dict) else {}
+    # Preserve metadata/type from the scoped pre-load when RETURNING is sparse.
+    if not task.get("task_type"):
+        task["task_type"] = scoped.get("task_type")
+    if task.get("metadata") is None and scoped.get("metadata") is not None:
+        task["metadata"] = scoped.get("metadata")
     if str(task.get("task_type") or "") == "candidate_handoff" and str(request.status or "").lower() != "open":
         import recruiting_lifecycle as _rl
 
@@ -46001,11 +46559,18 @@ def messaging_readiness(company_code: str) -> dict[str, Any]:
 def dashboard_outbound_needs_follow_up(
     limit: int = Query(default=100, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
+    exclude_linked_tasks: bool = Query(default=False),
     context: dict[str, Any] = Depends(dashboard_context),
 ):
     company = _hr_tasks_context(context)
     scope = context.get("scope")
-    rows = _outbound_delivery.list_needs_follow_up(company_code=company, scope=scope, limit=limit, offset=offset)
+    rows = _outbound_delivery.list_needs_follow_up(
+        company_code=company,
+        scope=scope,
+        limit=limit,
+        offset=offset,
+        exclude_linked_tasks=bool(exclude_linked_tasks),
+    )
     items: list[dict[str, Any]] = []
     for row in rows:
         has_email = bool(str(row.get("target_email") or "").strip())
@@ -46035,6 +46600,7 @@ def dashboard_outbound_needs_follow_up(
             "employee_name": row.get("employee_name"),
             "flow": row.get("flow"),
             "flow_label": _delivery_flow_label(row.get("flow")),
+            "channel_used": row.get("channel_used"),
             "criticality": row.get("criticality"),
             "status": row.get("status"),
             "kind": kind,
@@ -46049,11 +46615,16 @@ def dashboard_outbound_needs_follow_up(
         "ok": True,
         "company_code": company,
         "count": len(items),
-        "total": _outbound_delivery.count_needs_follow_up(company_code=company, scope=scope),
+        "total": _outbound_delivery.count_needs_follow_up(
+            company_code=company,
+            scope=scope,
+            exclude_linked_tasks=bool(exclude_linked_tasks),
+        ),
         "limit": limit,
         "offset": offset,
         "messages": items,
         "messaging": messaging_readiness(company),
+        "exclude_linked_tasks": bool(exclude_linked_tasks),
     })
 
 
@@ -46553,12 +47124,18 @@ def setup_console_channel_policy(company_code: str) -> dict[str, Any]:
     account = setup_console_channel_account(company)
     account_audiences = set((account or {}).get("audiences") or [])
     settings = get_company_settings(company)
-    email_configured = bool(
-        os.environ.get("WATHEFNI_EMAIL_PROVIDER")
-        or os.environ.get("SMTP_HOST")
-        or os.environ.get("RESEND_API_KEY")
-        or os.environ.get("SENDGRID_API_KEY")
-    )
+    # Canonical email readiness (same probe as Assistant catalog + send gates).
+    try:
+        import assistant_channel_readiness as acr
+
+        email_configured = bool(acr.email_ready(sys.modules[__name__], company))
+    except Exception:
+        email_configured = bool(
+            os.environ.get("WATHEFNI_EMAIL_PROVIDER")
+            or os.environ.get("SMTP_HOST")
+            or os.environ.get("RESEND_API_KEY")
+            or os.environ.get("SENDGRID_API_KEY")
+        )
     employee_app_state = module_states.get("employee_app") or {}
     # Policy reports eligibility (flag ON + active + audience). Send-time still
     # fail-closes when provider_account_id is absent from local sender config.
@@ -55689,7 +56266,7 @@ def dashboard_c3_export(person_id: str, context: dict[str, Any] = Depends(prehir
 
 
 def dashboard_prehire_chat_response(request: DashboardChatRequest, context: dict[str, Any]) -> DashboardChatResponse:
-    # Callers route through prehire_dashboard_context (Depends), which already enforces prehire.read.
+    # Callers route through assistant_dashboard_context (Depends) — workspace/module-aware, not pre_hiring-only.
     ensure_schema()
     company = context["company_code"]
     hr_phone = digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")) or "dashboard"
@@ -55804,7 +56381,7 @@ def dashboard_chat_stream_event(payload: dict[str, Any]) -> str:
 @app.get("/dashboard/prehire/assistant/capabilities")
 def dashboard_prehire_assistant_capabilities(
     locale: str = "en",
-    context: dict[str, Any] = Depends(prehire_dashboard_context),
+    context: dict[str, Any] = Depends(assistant_dashboard_context),
 ):
     """Live Assistant capability catalog for empty-state headline/modules/chips."""
 
@@ -55826,7 +56403,7 @@ def dashboard_prehire_assistant_capabilities(
 
 
 @app.get("/dashboard/prehire/chat/sessions")
-def dashboard_prehire_chat_sessions(context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_chat_sessions(context: dict[str, Any] = Depends(assistant_dashboard_context)):
     ensure_schema()
     scope = dashboard_chat_session_scope(context)
     with db_connect() as conn:
@@ -55849,7 +56426,7 @@ def dashboard_prehire_chat_sessions(context: dict[str, Any] = Depends(prehire_da
 
 
 @app.get("/dashboard/prehire/chat/sessions/{conversation_id}")
-def dashboard_prehire_chat_session_detail(conversation_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_chat_session_detail(conversation_id: str, context: dict[str, Any] = Depends(assistant_dashboard_context)):
     ensure_schema()
     conversation_id = dashboard_chat_conversation_id(context, conversation_id)
     with db_connect() as conn:
@@ -55881,7 +56458,7 @@ def dashboard_prehire_chat_session_detail(conversation_id: str, context: dict[st
 @app.post("/dashboard/prehire/chat/sessions/new")
 def dashboard_prehire_chat_new_session(
     request: DashboardChatNewSessionRequest,
-    context: dict[str, Any] = Depends(prehire_dashboard_context),
+    context: dict[str, Any] = Depends(assistant_dashboard_context),
 ):
     ensure_schema()
     cancelled = cancel_dashboard_chat_pending_confirmations(context, request.current_conversation_id)
@@ -55902,7 +56479,7 @@ def dashboard_prehire_chat_new_session(
 
 
 @app.post("/dashboard/prehire/chat", response_model=DashboardChatResponse)
-def dashboard_prehire_chat(request: DashboardChatRequest, context: dict[str, Any] = Depends(prehire_dashboard_context)):
+def dashboard_prehire_chat(request: DashboardChatRequest, context: dict[str, Any] = Depends(assistant_dashboard_context)):
     return dashboard_prehire_chat_response(request, context)
 
 
@@ -55910,7 +56487,7 @@ def dashboard_prehire_chat(request: DashboardChatRequest, context: dict[str, Any
 def dashboard_prehire_chat_stream(
     request: DashboardChatRequest,
     http_request: Request,
-    context: dict[str, Any] = Depends(prehire_dashboard_context),
+    context: dict[str, Any] = Depends(assistant_dashboard_context),
 ):
     import queue
     import threading
@@ -66416,7 +66993,7 @@ _APP_DOC_TYPE_RULES: dict[str, dict[str, Any]] = {
     },
 }
 # Employee-facing flows surfaced in the app's notification inbox.
-_APP_INBOX_FLOWS = ("leave_decision", "onboarding", "compliance", "shift", "payroll", "app_activation")
+_APP_INBOX_FLOWS = ("leave_decision", "onboarding", "compliance", "shift", "payroll", "app_activation", "bank")
 
 
 class EmployeeAppInviteDenied(Exception):
@@ -67070,13 +67647,30 @@ def create_employee_app_invite(company_code: str, employee: dict[str, Any], *, c
     return invite, code
 
 
-def deliver_app_activation_code(company_code: str, employee: dict[str, Any], code: str) -> dict[str, Any]:
+def deliver_app_activation_code(
+    company_code: str,
+    employee: dict[str, Any],
+    code: str,
+    *,
+    invite_id: str | None = None,
+) -> dict[str, Any]:
     """Deliver the activation code via the shared outbound ladder. metadata_only
     sensitivity keeps the code OUT of the stored message body; if no channel lands
-    it raises a visible HR task (critical) so HR can hand the code over."""
+    it raises a visible HR task (critical) so HR can hand the code over.
+
+    After a successful insert, prior app_activation Inbox rows for this employee
+    are marked inbox_hidden so only the newest code is employee-visible. Older
+    rows remain stored for audit. Supersede runs after deliver so a failed send
+    cannot hide the previous visible row.
+    """
     company = (company_code or "WATHEFNI").upper()
+    emp_key = str(employee.get("employee_key") or "").strip()
+    # Unique per invite/delivery so a new code always creates a new audit row.
+    # Visibility of older rows is controlled by inbox_hidden, not by blocking insert.
+    invite_token = str(invite_id or "").strip() or secrets.token_hex(8)
+    dedupe = f"app_activation:{emp_key}:{invite_token}" if emp_key else None
     try:
-        return deliver_employee_notification(
+        result = deliver_employee_notification(
             employee,
             flow="app_activation",
             template_key="app_activation",
@@ -67085,10 +67679,96 @@ def deliver_app_activation_code(company_code: str, employee: dict[str, Any], cod
             company_code=company,
             variables={"code": code, "company_name": company, "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
             subject_key=employee.get("employee_key"),
+            dedupe_key=dedupe,
+            extra={"invite_id": str(invite_id)} if invite_id else None,
         )
     except Exception:
         logger.warning("app activation code delivery failed for %s", employee.get("employee_key"), exc_info=True)
         return {"ok": False, "delivery_status": "failed", "error": "delivery_failed"}
+    if emp_key:
+        keep = str(result.get("message_id") or "").strip() or None
+        try:
+            _supersede_prior_app_activation_inbox(
+                company_code=company,
+                employee_key=emp_key,
+                keep_message_id=keep,
+            )
+        except Exception:
+            logger.warning(
+                "app activation inbox supersede failed for %s",
+                emp_key,
+                exc_info=True,
+            )
+    return result
+
+
+def _supersede_prior_app_activation_inbox(
+    *,
+    company_code: str,
+    employee_key: str,
+    keep_message_id: str | None = None,
+) -> int:
+    """Hide older app_activation rows from the employee Inbox projection.
+
+    Does not delete rows. Audit/delivery history stays in employee_messages;
+    `/app/notifications` and Home unread omit `metadata.inbox_hidden` rows and,
+    as a belt-and-suspenders rule, only the newest non-hidden app_activation.
+    """
+    company = (company_code or "WATHEFNI").upper()
+    key = str(employee_key or "").strip()
+    if not key:
+        return 0
+    keep = str(keep_message_id or "").strip() or None
+    patch = {
+        "inbox_hidden": True,
+        "inbox_hidden_reason": "superseded_by_newer_activation",
+    }
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE employee_messages
+                SET metadata = COALESCE(metadata, '{}'::jsonb) || %s::jsonb,
+                    updated_at = now()
+                WHERE company_code=%s
+                  AND employee_key=%s
+                  AND flow='app_activation'
+                  AND COALESCE((metadata->>'inbox_hidden')::boolean, false) IS NOT TRUE
+                  AND (%s::uuid IS NULL OR message_id <> %s::uuid)
+                """,
+                (Json(patch), company, key, keep, keep),
+            )
+            hidden = int(cur.rowcount or 0)
+        conn.commit()
+    return hidden
+
+
+def _remediate_app_activation_inbox_projection(*, company_code: str, employee_key: str) -> dict[str, Any]:
+    """Keep the newest app_activation visible; hide older duplicates for one employee."""
+    company = (company_code or "WATHEFNI").upper()
+    key = str(employee_key or "").strip()
+    if not key:
+        return {"ok": False, "hidden": 0, "kept": None}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT message_id
+                FROM employee_messages
+                WHERE company_code=%s AND employee_key=%s AND flow='app_activation'
+                ORDER BY created_at DESC
+                LIMIT 1
+                """,
+                (company, key),
+            )
+            row = cur.fetchone()
+    kept = str(row["message_id"]) if row else None
+    hidden = _supersede_prior_app_activation_inbox(
+        company_code=company,
+        employee_key=key,
+        keep_message_id=kept,
+    )
+    return {"ok": True, "hidden": hidden, "kept": kept}
 
 
 def _create_employee_session_with_cursor(
@@ -67394,7 +68074,19 @@ def employee_app_context(
                         "message": "Your company workspace is not active.",
                     },
                 )
-            if not company_has_module(historical_company, "employee_app"):
+            try:
+                historical_has_module = company_has_module(historical_company, "employee_app")
+            except Exception as exc:
+                if _is_transient_db_error(exc):
+                    raise HTTPException(
+                        status_code=503,
+                        detail={
+                            "error": "employee_app_temporarily_unavailable",
+                            "message": "The employee app is temporarily unavailable. Please try again.",
+                        },
+                    ) from exc
+                raise
+            if not historical_has_module:
                 raise HTTPException(
                     status_code=403,
                     detail={
@@ -67446,7 +68138,19 @@ def employee_app_context(
                 "message": "Your company workspace is not active.",
             },
         )
-    if not company_has_module(company, "employee_app"):
+    try:
+        has_employee_app = company_has_module(company, "employee_app")
+    except Exception as exc:
+        if _is_transient_db_error(exc):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "employee_app_temporarily_unavailable",
+                    "message": "The employee app is temporarily unavailable. Please try again.",
+                },
+            ) from exc
+        raise
+    if not has_employee_app:
         raise HTTPException(status_code=403, detail={"error": "employee_app_not_enabled_for_company", "message": "The app is not enabled for your company."})
     assert_employee_app_allowlisted(str(sess.get("employee_key") or ""))
     employee = sess["employee"]
@@ -67894,6 +68598,130 @@ def _employee_leave_request_rows(
     return [dict(row) for row in cur.fetchall()]
 
 
+_LEAVE_HISTORY_MAX_LIMIT = 50
+_LEAVE_HISTORY_DEFAULT_LIMIT = 30
+# Filter allowlist only — does not invent statuses. Matches HR leave vocabulary +
+# known terminal aliases already recognized by the employee Leave root partition.
+_EMPLOYEE_LEAVE_FILTER_STATUSES = frozenset(
+    {
+        "requested",
+        "approved",
+        "rejected",
+        "cancelled",
+        "canceled",
+        "completed",
+        "denied",
+        "withdrawn",
+        "expired",
+    }
+)
+
+
+def encode_leave_history_cursor(row: dict[str, Any]) -> str:
+    """Opaque keyset cursor for leave history (start_date DESC, leave_id DESC)."""
+    payload = {
+        "v": 1,
+        "d": str(row.get("start_date") or ""),
+        "id": str(row.get("leave_id") or ""),
+    }
+    raw = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def decode_leave_history_cursor(token: str | None) -> dict[str, str] | None:
+    text = str(token or "").strip()
+    if not text:
+        return None
+    pad = "=" * (-len(text) % 4)
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(text + pad).decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        raise ValueError("invalid_cursor") from exc
+    if not isinstance(payload, dict) or int(payload.get("v") or 0) != 1:
+        raise ValueError("invalid_cursor")
+    day = str(payload.get("d") or "").strip()
+    lid = str(payload.get("id") or "").strip()
+    if not day or not lid:
+        raise ValueError("invalid_cursor")
+    _parse_kuwait_iso_date(day, field="cursor")
+    return {"d": day, "id": lid}
+
+
+def _employee_leave_request_entry(row: dict[str, Any]) -> dict[str, Any]:
+    """Same field set as `/app/leave` request rows — no invented balance/policy facts."""
+    return {
+        "leave_id": str(row.get("leave_id") or "") or None,
+        "start_date": row.get("start_date"),
+        "end_date": row.get("end_date"),
+        "leave_type": row.get("leave_type"),
+        "status": row.get("status"),
+        "reason": row.get("reason"),
+        "requested_at": row.get("requested_at"),
+        "decided_at": row.get("decided_at"),
+    }
+
+
+def _employee_leave_history_page(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    limit: int = _LEAVE_HISTORY_DEFAULT_LIMIT,
+    cursor: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    status: str | None = None,
+) -> dict[str, Any]:
+    """Keyset page of leave requests, newest start_date first.
+
+    Ordering: ``start_date DESC, leave_id DESC``. Fetches ``limit + 1`` so
+    ``has_more`` is honest. Optional status / date bounds filter without raising
+    the silent `/app/leave` hard cap.
+    """
+    page_size = max(1, min(int(limit or _LEAVE_HISTORY_DEFAULT_LIMIT), _LEAVE_HISTORY_MAX_LIMIT))
+    decoded = decode_leave_history_cursor(cursor)
+    params: list[Any] = [company_code, employee_key]
+    clauses = ["company_code=%s", "employee_key=%s"]
+    if status is not None:
+        clauses.append("lower(status)=%s")
+        params.append(status)
+    if date_from is not None:
+        clauses.append("start_date >= %s")
+        params.append(date_from)
+    if date_to is not None:
+        clauses.append("start_date <= %s")
+        params.append(date_to)
+    if decoded:
+        clauses.append(
+            """(
+              start_date < %s::date
+              OR (start_date = %s::date AND leave_id::text < %s)
+            )"""
+        )
+        params.extend([decoded["d"], decoded["d"], decoded["id"]])
+    params.append(page_size + 1)
+    cur.execute(
+        f"""
+        SELECT leave_id, start_date, end_date, leave_type, status, reason, requested_at, decided_at
+        FROM leave_requests
+        WHERE {' AND '.join(clauses)}
+        ORDER BY start_date DESC, leave_id::text DESC
+        LIMIT %s
+        """,
+        tuple(params),
+    )
+    fetched = [dict(row) for row in cur.fetchall()]
+    has_more = len(fetched) > page_size
+    page_rows = fetched[:page_size]
+    next_cursor = encode_leave_history_cursor(page_rows[-1]) if has_more and page_rows else None
+    return {
+        "requests": page_rows,
+        "has_more": has_more,
+        "next_cursor": next_cursor,
+        "limit": page_size,
+    }
+
+
 def _json_object(value: Any) -> dict[str, Any]:
     """Coerce a jsonb column that may arrive as dict or text into a plain dict."""
     if isinstance(value, dict):
@@ -67914,6 +68742,12 @@ def _employee_inbox_rows(
     employee_key: str,
     limit: int = 50,
 ) -> list[dict[str, Any]]:
+    """Employee-visible Inbox projection over employee_messages.
+
+    Rows marked ``metadata.inbox_hidden`` stay in the table for audit but are
+    omitted here (and therefore from Home unread). For ``app_activation``, only
+    the newest non-hidden row is projected so resends cannot flood Unread.
+    """
     cur.execute(
         """
         SELECT m.message_id, m.flow, m.template_key, m.status, m.sensitivity,
@@ -67922,7 +68756,23 @@ def _employee_inbox_rows(
         FROM employee_messages m
         LEFT JOIN employee_notification_reads r
           ON r.employee_key = m.employee_key AND r.message_id = m.message_id
-        WHERE m.company_code=%s AND m.employee_key=%s AND m.flow = ANY(%s)
+        WHERE m.company_code=%s
+          AND m.employee_key=%s
+          AND m.flow = ANY(%s)
+          AND COALESCE((m.metadata->>'inbox_hidden')::boolean, false) IS NOT TRUE
+          AND (
+            m.flow IS DISTINCT FROM 'app_activation'
+            OR m.message_id = (
+              SELECT m2.message_id
+              FROM employee_messages m2
+              WHERE m2.company_code = m.company_code
+                AND m2.employee_key = m.employee_key
+                AND m2.flow = 'app_activation'
+                AND COALESCE((m2.metadata->>'inbox_hidden')::boolean, false) IS NOT TRUE
+              ORDER BY m2.created_at DESC
+              LIMIT 1
+            )
+          )
         ORDER BY m.created_at DESC
         LIMIT %s
         """,
@@ -68451,6 +69301,284 @@ def app_workday(
     })
 
 
+
+_SCHEDULE_HISTORY_MAX_LIMIT = 50
+_SCHEDULE_HISTORY_DEFAULT_LIMIT = 30
+
+
+def _parse_kuwait_iso_date(value: str | None, *, field: str) -> date | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return date.fromisoformat(text[:10])
+    except ValueError as exc:
+        raise ValueError(f"invalid_{field}") from exc
+
+
+def encode_schedule_history_cursor(row: dict[str, Any]) -> str:
+    """Opaque keyset cursor for attendance history (date DESC, id DESC)."""
+    payload = {
+        "v": 1,
+        "d": str(row.get("attendance_date") or ""),
+        "id": str(row.get("attendance_id") or ""),
+    }
+    raw = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def decode_schedule_history_cursor(token: str | None) -> dict[str, str] | None:
+    text = str(token or "").strip()
+    if not text:
+        return None
+    pad = "=" * (-len(text) % 4)
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(text + pad).decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        raise ValueError("invalid_cursor") from exc
+    if not isinstance(payload, dict) or int(payload.get("v") or 0) != 1:
+        raise ValueError("invalid_cursor")
+    day = str(payload.get("d") or "").strip()
+    aid = str(payload.get("id") or "").strip()
+    if not day or not aid:
+        raise ValueError("invalid_cursor")
+    # Validate date shape early.
+    _parse_kuwait_iso_date(day, field="cursor")
+    return {"d": day, "id": aid}
+
+
+def _employee_shifts_by_ids(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    shift_ids: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Canonical shift assignments for the given ids — never invents missing rows."""
+    cleaned = [str(s).strip() for s in shift_ids if str(s or "").strip()]
+    if not cleaned:
+        return {}
+    cur.execute(
+        """
+        SELECT shift_id, shift_date, start_time, end_time, status, role, location, timezone, notes
+        FROM shift_assignments
+        WHERE company_code=%s AND employee_key=%s AND shift_id = ANY(%s::uuid[])
+        """,
+        (company_code, employee_key, cleaned),
+    )
+    out: dict[str, dict[str, Any]] = {}
+    for row in cur.fetchall():
+        item = dict(row)
+        sid = str(item.get("shift_id") or "")
+        if sid:
+            out[sid] = item
+    return out
+
+
+def _employee_attendance_history_page(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    limit: int = _SCHEDULE_HISTORY_DEFAULT_LIMIT,
+    cursor: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+) -> dict[str, Any]:
+    """Keyset page of recorded attendance, newest first.
+
+    Ordering: ``attendance_date DESC, attendance_id DESC``. Fetches ``limit + 1``
+    so ``has_more`` is honest. Optional ``date_from`` / ``date_to`` bound the
+    window without loading an unbounded result set in one shot.
+    """
+    page_size = max(1, min(int(limit or _SCHEDULE_HISTORY_DEFAULT_LIMIT), _SCHEDULE_HISTORY_MAX_LIMIT))
+    decoded = decode_schedule_history_cursor(cursor)
+    params: list[Any] = [company_code, employee_key]
+    clauses = ["company_code=%s", "employee_key=%s"]
+    if date_from is not None:
+        clauses.append("attendance_date >= %s")
+        params.append(date_from)
+    if date_to is not None:
+        clauses.append("attendance_date <= %s")
+        params.append(date_to)
+    if decoded:
+        clauses.append(
+            """(
+              attendance_date < %s::date
+              OR (attendance_date = %s::date AND attendance_id::text < %s)
+            )"""
+        )
+        params.extend([decoded["d"], decoded["d"], decoded["id"]])
+    params.append(page_size + 1)
+    cur.execute(
+        f"""
+        SELECT attendance_id, shift_id, attendance_date, status,
+               scheduled_start, scheduled_end,
+               check_in_at, check_out_at, late_minutes, early_leave_minutes, notes
+        FROM attendance_records
+        WHERE {' AND '.join(clauses)}
+        ORDER BY attendance_date DESC, attendance_id::text DESC
+        LIMIT %s
+        """,
+        tuple(params),
+    )
+    fetched = [dict(row) for row in cur.fetchall()]
+    has_more = len(fetched) > page_size
+    page_rows = fetched[:page_size]
+    next_cursor = encode_schedule_history_cursor(page_rows[-1]) if has_more and page_rows else None
+    return {
+        "records": page_rows,
+        "has_more": has_more,
+        "next_cursor": next_cursor,
+        "limit": page_size,
+    }
+
+
+@app.get("/app/schedule/history")
+def app_schedule_history(
+    locale: str | None = Query(default=None),
+    limit: int = Query(default=_SCHEDULE_HISTORY_DEFAULT_LIMIT, ge=1, le=_SCHEDULE_HISTORY_MAX_LIMIT),
+    cursor: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    context: dict[str, Any] = Depends(employee_app_context),
+):
+    """Paginated attendance history for Schedule — beyond the `/app/workday` ~30-day window.
+
+    Returns recorded attendance facts newest-first. A paired ``scheduled`` object is
+    included only when the record's canonical ``shift_id`` resolves to a real
+    assignment for this employee — never invented from attendance timestamps alone.
+
+    ``/app/workday`` is unchanged and remains the Schedule root projection.
+    """
+    company = context["company_code"]
+    key = context["employee_key"]
+    require_employee_app_feature(context, "attendance")
+    # Direct (non-ASGI) calls leave FastAPI Query() defaults unbound — coerce to plain values.
+    locale_s = locale if isinstance(locale, str) else None
+    cursor_s = cursor if isinstance(cursor, str) else None
+    date_from_s = date_from if isinstance(date_from, str) else None
+    date_to_s = date_to if isinstance(date_to, str) else None
+    page_limit = int(limit) if isinstance(limit, int) else _SCHEDULE_HISTORY_DEFAULT_LIMIT
+    page_limit = max(1, min(page_limit, _SCHEDULE_HISTORY_MAX_LIMIT))
+    loc = "ar" if str(locale_s or "en").lower().startswith("ar") else "en"
+    today = kuwait_today()
+    try:
+        bound_from = _parse_kuwait_iso_date(date_from_s, field="date_from")
+        bound_to = _parse_kuwait_iso_date(date_to_s, field="date_to")
+        if bound_to is None:
+            bound_to = today
+        else:
+            bound_to = min(bound_to, today)
+        if bound_from is not None and bound_from > bound_to:
+            raise ValueError("invalid_range")
+        decoded_probe = decode_schedule_history_cursor(cursor_s)  # validate early
+        _ = decoded_probe
+    except ValueError as exc:
+        code = str(exc) or "invalid_request"
+        messages = {
+            "invalid_cursor": "That page link is no longer valid. Refresh and try again.",
+            "invalid_date_from": "That start date is not valid.",
+            "invalid_date_to": "That end date is not valid.",
+            "invalid_cursor_date": "That page link is no longer valid. Refresh and try again.",
+            "invalid_range": "The start date must be on or before the end date.",
+        }
+        # normalize parse field names
+        if code.startswith("invalid_") and code not in messages:
+            if "date_from" in code:
+                code = "invalid_date_from"
+            elif "date_to" in code:
+                code = "invalid_date_to"
+            elif "cursor" in code:
+                code = "invalid_cursor"
+        raise HTTPException(
+            status_code=400,
+            detail={"error": code if code in messages else "invalid_request", "message": messages.get(code, "That request is not valid.")},
+        ) from None
+
+    entitled_shifts = False
+    try:
+        require_employee_app_feature(context, "shifts")
+        entitled_shifts = True
+    except HTTPException:
+        entitled_shifts = False
+
+    states: dict[str, str] = {"attendance": "ready", "shifts": "ready" if entitled_shifts else "disabled"}
+    page: dict[str, Any] = {"records": [], "has_more": False, "next_cursor": None, "limit": page_limit}
+    shift_map: dict[str, dict[str, Any]] = {}
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                page = _employee_attendance_history_page(
+                    cur,
+                    company_code=company,
+                    employee_key=key,
+                    limit=page_limit,
+                    cursor=cursor_s,
+                    date_from=bound_from,
+                    date_to=bound_to,
+                )
+            except Exception:
+                logger.exception("schedule history attendance read failed employee=%s", key)
+                states["attendance"] = "error"
+                page = {"records": [], "has_more": False, "next_cursor": None, "limit": page_limit}
+            if states["attendance"] == "ready" and entitled_shifts:
+                try:
+                    ids = [str(r.get("shift_id") or "") for r in (page.get("records") or []) if r.get("shift_id")]
+                    shift_map = _employee_shifts_by_ids(
+                        cur, company_code=company, employee_key=key, shift_ids=ids
+                    )
+                except Exception:
+                    logger.exception("schedule history shift enrich failed employee=%s", key)
+                    states["shifts"] = "error"
+                    shift_map = {}
+        conn.commit()
+
+    items: list[dict[str, Any]] = []
+    if states["attendance"] == "ready":
+        for record in page.get("records") or []:
+            sid = str(record.get("shift_id") or "")
+            shift = shift_map.get(sid) if sid else None
+            # Cancelled assignments are still canonical if present; omit only when missing.
+            scheduled = _workday_shift_entry(shift) if shift else None
+            items.append(
+                {
+                    "recorded": _workday_attendance_entry(record),
+                    "scheduled": scheduled,
+                }
+            )
+
+    return json_safe(
+        {
+            "ok": True,
+            "locale": loc,
+            "kind": "attendance_history",
+            "authority": {
+                "attendance": states["attendance"],
+                "shifts": states["shifts"],
+            },
+            "records": items if states["attendance"] == "ready" else None,
+            "count": len(items) if states["attendance"] == "ready" else None,
+            "has_more": bool(page.get("has_more")) if states["attendance"] == "ready" else False,
+            "next_cursor": page.get("next_cursor") if states["attendance"] == "ready" else None,
+            "limit": int(page.get("limit") or page_limit),
+            "ordering": "attendance_date_desc",
+            "bounds": {
+                "date_from": bound_from.isoformat() if bound_from else None,
+                "date_to": bound_to.isoformat(),
+            },
+            "read_only": {
+                "employee_clocking": False,
+                "attendance_correction": False,
+                "payroll_effect": False,
+                "authority": "Schedule and attendance are recorded by your HR team.",
+                "authority_ar": "يُسجّل فريق الموارد البشرية الجدول والحضور.",
+            },
+        }
+    )
+
+
 @app.get("/app/onboarding")
 def app_onboarding(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
@@ -68682,6 +69810,120 @@ def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
     })
 
 
+@app.get("/app/leave/history")
+def app_leave_history(
+    locale: str | None = Query(default=None),
+    limit: int = Query(default=_LEAVE_HISTORY_DEFAULT_LIMIT, ge=1, le=_LEAVE_HISTORY_MAX_LIMIT),
+    cursor: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    year: int | None = Query(default=None, ge=2000, le=2100),
+    status: str | None = Query(default=None),
+    context: dict[str, Any] = Depends(employee_app_context),
+):
+    """Paginated leave-request history beyond the `/app/leave` ~50-row window.
+
+    Returns the same request field set as the Leave root. Does not invent
+    balances, accrual, or policy. Cancel remains on ``POST /app/leave/{id}/cancel``.
+    ``/app/leave`` is unchanged and remains the Leave root projection.
+    """
+    company = context["company_code"]
+    key = context["employee_key"]
+    require_employee_app_feature(context, "leave")
+    locale_s = locale if isinstance(locale, str) else None
+    cursor_s = cursor if isinstance(cursor, str) else None
+    date_from_s = date_from if isinstance(date_from, str) else None
+    date_to_s = date_to if isinstance(date_to, str) else None
+    status_s = status if isinstance(status, str) else None
+    year_n = year if isinstance(year, int) else None
+    page_limit = int(limit) if isinstance(limit, int) else _LEAVE_HISTORY_DEFAULT_LIMIT
+    page_limit = max(1, min(page_limit, _LEAVE_HISTORY_MAX_LIMIT))
+    loc = "ar" if str(locale_s or "en").lower().startswith("ar") else "en"
+
+    try:
+        bound_from = _parse_kuwait_iso_date(date_from_s, field="date_from")
+        bound_to = _parse_kuwait_iso_date(date_to_s, field="date_to")
+        if year_n is not None:
+            year_from = date(year_n, 1, 1)
+            year_to = date(year_n, 12, 31)
+            bound_from = year_from if bound_from is None else max(bound_from, year_from)
+            bound_to = year_to if bound_to is None else min(bound_to, year_to)
+        if bound_from is not None and bound_to is not None and bound_from > bound_to:
+            raise ValueError("invalid_range")
+        status_filter: str | None = None
+        if status_s is not None and str(status_s).strip():
+            status_filter = str(status_s).strip().lower()
+            if status_filter not in _EMPLOYEE_LEAVE_FILTER_STATUSES:
+                raise ValueError("invalid_status")
+        decode_leave_history_cursor(cursor_s)  # validate early
+    except ValueError as exc:
+        code = str(exc) or "invalid_request"
+        messages = {
+            "invalid_cursor": "That page link is no longer valid. Refresh and try again.",
+            "invalid_date_from": "That start date is not valid.",
+            "invalid_date_to": "That end date is not valid.",
+            "invalid_range": "The start date must be on or before the end date.",
+            "invalid_status": "That leave status filter is not valid.",
+        }
+        if code.startswith("invalid_") and code not in messages:
+            if "date_from" in code:
+                code = "invalid_date_from"
+            elif "date_to" in code:
+                code = "invalid_date_to"
+            elif "cursor" in code:
+                code = "invalid_cursor"
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": code if code in messages else "invalid_request",
+                "message": messages.get(code, "That request is not valid."),
+            },
+        ) from None
+
+    page: dict[str, Any] = {"requests": [], "has_more": False, "next_cursor": None, "limit": page_limit}
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                page = _employee_leave_history_page(
+                    cur,
+                    company_code=company,
+                    employee_key=key,
+                    limit=page_limit,
+                    cursor=cursor_s,
+                    date_from=bound_from,
+                    date_to=bound_to,
+                    status=status_filter,
+                )
+            except Exception:
+                logger.exception("leave history read failed employee=%s", key)
+                raise HTTPException(
+                    status_code=500,
+                    detail={"error": "leave_history_unavailable", "message": "Leave history is temporarily unavailable."},
+                ) from None
+        conn.commit()
+
+    items = [_employee_leave_request_entry(row) for row in (page.get("requests") or [])]
+    return json_safe(
+        {
+            "ok": True,
+            "locale": loc,
+            "kind": "leave_history",
+            "requests": items,
+            "count": len(items),
+            "has_more": bool(page.get("has_more")),
+            "next_cursor": page.get("next_cursor"),
+            "limit": int(page.get("limit") or page_limit),
+            "ordering": "start_date_desc",
+            "filters": {
+                "status": status_filter,
+                "date_from": bound_from.isoformat() if bound_from else None,
+                "date_to": bound_to.isoformat() if bound_to else None,
+                "year": year_n,
+            },
+        }
+    )
+
+
 @app.get("/app/shifts/today")
 def app_shifts_today(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
@@ -68731,9 +69973,16 @@ def app_attendance(context: dict[str, Any] = Depends(employee_app_context)):
 @app.get("/app/payslips")
 def app_payslips(
     locale: str | None = Query(default=None),
+    limit: int = Query(default=24, ge=1, le=50),
+    cursor: str | None = Query(default=None),
     context: dict[str, Any] = Depends(employee_app_context),
 ):
-    """Self-scoped released payslips only. Period closed ≠ visible."""
+    """Self-scoped released payslips only. Period closed ≠ visible.
+
+    Paginated with an opaque keyset cursor. The first page (no cursor) stays the
+    default entry point; ``has_more`` / ``next_cursor`` tell the client when more
+    history exists instead of raising a silent hard cap.
+    """
     company = context["company_code"]
     key = context["employee_key"]
     require_employee_app_feature(context, "payslips")
@@ -68742,14 +69991,27 @@ def app_payslips(
             status_code=404,
             detail={"error": "feature_not_available", "message": "Payslips are not available for this company."},
         )
-    with db_connect() as conn:
-        with conn.cursor() as cur:
-            rows = _payroll_w3.list_employee_released_payslips(
-                cur, company_code=company, employee_key=key, limit=24
-            )
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                page = _payroll_w3.list_employee_released_payslips_page(
+                    cur,
+                    company_code=company,
+                    employee_key=key,
+                    limit=limit,
+                    cursor=cursor,
+                )
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "invalid_cursor",
+                "message": "That page link is no longer valid. Refresh and try again.",
+            },
+        ) from None
     loc = "ar" if str(locale or "en").lower().startswith("ar") else "en"
     items = []
-    for row in rows:
+    for row in page.get("payslips") or []:
         items.append(
             {
                 "payslip_id": row.get("payslip_id"),
@@ -68770,6 +70032,9 @@ def app_payslips(
             "locale": loc,
             "count": len(items),
             "payslips": items,
+            "has_more": bool(page.get("has_more")),
+            "next_cursor": page.get("next_cursor"),
+            "limit": int(page.get("limit") or limit),
             "honesty": {
                 "en": "Only payslips released by HR appear here. These summaries do not authorize payment.",
                 "ar": "تظهر هنا فقط كشوف الرواتب التي أصدرتها الموارد البشرية. هذه الملخصات لا تفوّض الصرف.",
@@ -69331,7 +70596,12 @@ def app_leave_request(body: EmployeeLeaveRequestBody, context: dict[str, Any] = 
             "leave_type": leave_type,
             "reason": (body.reason or "").strip() or None,
         }
-        result = request_leave(action, company_code=company, created_by_phone=phone)
+        result = request_leave(
+            action,
+            company_code=company,
+            created_by_phone=phone,
+            origin_surface="employee_app",
+        )
     finally:
         reset_active_company_code(token)
     if not result.get("ok"):
@@ -73932,6 +75202,69 @@ def list_onboarding_page(
     return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
 
 
+# Checklist statuses that land in lifecycle `being_reviewed` (REVIEW_STATES + legacy).
+_ONBOARDING_HR_REVIEW_STATUSES = (
+    "submitted",
+    "processing",
+    "received",
+    "needs_review",
+)
+
+
+def list_onboarding_hr_actionable_page(
+    company_code: str | None,
+    *,
+    viewer_phone: str | None = None,
+    dashboard_user_id: str | None = None,
+    actor_role: str | None = None,
+    search: str | None = None,
+    limit: int,
+    offset: int,
+) -> dict[str, Any]:
+    """Paged employees in scope with ≥1 checklist item awaiting HR review.
+
+    Canonical mobile/Home/Inbox onboarding queue — does not page the broad
+    in_progress directory and hope actionable rows appear in the first window.
+    """
+    where_sql, params = _employee_scope_where(
+        company_code,
+        viewer_phone,
+        dashboard_user_id=dashboard_user_id,
+        actor_role=actor_role,
+    )
+    where_sql = f"{where_sql} AND {_ONBOARDING_IN_PROGRESS_SQL}"
+    search_clause, search_params = _employee_search_clause(search)
+    if search_clause:
+        where_sql = f"{where_sql} AND {search_clause}"
+        params.extend(search_params)
+    exec_params: list[Any] = [list(_ONBOARDING_HR_REVIEW_STATUSES), *params, limit, offset]
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT e.*, actionable.hr_actionable_count, COUNT(*) OVER() AS _total_count
+                FROM employees e
+                INNER JOIN (
+                  SELECT oi.employee_key,
+                         COUNT(*)::int AS hr_actionable_count
+                  FROM onboarding_items oi
+                  WHERE lower(coalesce(oi.status, '')) = ANY(%s)
+                  GROUP BY oi.employee_key
+                ) actionable ON actionable.employee_key = e.employee_key
+                WHERE {where_sql}
+                ORDER BY e.name NULLS LAST, e.phone, e.employee_key
+                LIMIT %s OFFSET %s
+                """,
+                exec_params,
+            )
+            rows = [dict(row) for row in cur.fetchall()]
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    for row in rows:
+        row.pop("_total_count", None)
+    has_more = (offset + len(rows)) < total_count
+    return {"rows": rows, "total_count": total_count, "limit": limit, "offset": offset, "has_more": has_more}
+
+
 def onboarding_directory_counts(
     company_code: str | None,
     *,
@@ -74138,7 +75471,9 @@ def _attendance_range(start_date: str | None, end_date: str | None) -> tuple[dat
     return start, end
 
 
-ALLOWED_ATTENDANCE_STATUS_FILTERS = frozenset({"present", "late", "absent", "completed", "pending"})
+ALLOWED_ATTENDANCE_STATUS_FILTERS = frozenset(
+    {"present", "late", "absent", "completed", "pending", "exceptions"}
+)
 
 
 def normalize_attendance_status_filter(status: str | None) -> str | None:
@@ -78850,6 +80185,7 @@ def dashboard_payroll_payslip_release(
     """Explicit employee visibility release. Never inferred from period status."""
     company = _payroll_w3_require(context, "payroll.manage")
     allowed = _payroll_w3_scope_keys(context, company)
+    push_notify: dict[str, Any] | None = None
     with db_connect() as conn:
         with conn.cursor() as cur:
             result = _payroll_w3.release_payslip_to_employee(
@@ -78896,7 +80232,37 @@ def dashboard_payroll_payslip_release(
                             ),
                         ),
                     )
+                    push_notify = {
+                        "employee_key": emp_key,
+                        "period": period,
+                        "payslip_id": str(payslip_id),
+                        "dedupe": dedupe,
+                    }
         conn.commit()
+    if push_notify and push_notify.get("employee_key"):
+        try:
+            import employee_push_tray as _push_tray
+
+            title, body = _push_tray.tray_copy(
+                "payslip_ready",
+                variables={"period": push_notify["period"]},
+            )
+            send_outbound_push(
+                company_code=company,
+                employee_key=push_notify["employee_key"],
+                title=title,
+                body=body,
+                flow="payroll",
+                subject_type="employee",
+                subject_key=push_notify["employee_key"],
+                message_kind="payslip_ready",
+                template_key="payslip_ready",
+                dedupe_key=push_notify["dedupe"],
+                deep_link={"path": "/payslips", "payslip_id": push_notify["payslip_id"]},
+                variables={"period": push_notify["period"], "payslip_id": push_notify["payslip_id"]},
+            )
+        except Exception:
+            logger.warning("payslip push failed for %s", push_notify.get("employee_key"), exc_info=True)
     if not result.get("ok"):
         raise HTTPException(status_code=422, detail=json_safe(result))
     record_admin_audit(

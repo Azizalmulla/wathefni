@@ -4122,7 +4122,7 @@ register(
         entity_type="candidate",
         required_fields=("app_key",),
         optional_fields=("interview_id", "preferred_channel", "invite_channel"),
-        module="pre_hiring",
+        module="interviews",
         requires_confirmation=True,
         executor=_send_interview_invite_executor,
         result_keys=("action_type", "success", "status", "message", "interview", "google_meet_link", "candidate_notified", "notification_channel", "sent_subject", "sent_body"),
@@ -4209,7 +4209,7 @@ register(
             "meeting_link",
             "idempotency_key",
         ),
-        module="pre_hiring",
+        module="interviews",
         requires_confirmation=True,
         executor=_schedule_interview_executor,
         result_keys=(
@@ -4414,7 +4414,7 @@ register(
         entity_type="candidate",
         required_fields=("app_key",),
         optional_fields=("interview_id", "idempotency_key"),
-        module="pre_hiring",
+        module="interviews",
         requires_confirmation=True,
         executor=_cancel_interview_executor,
         result_keys=("action_type", "success", "status", "message", "interview", "provider_sync", "idempotent_replay", "application"),
@@ -4446,7 +4446,7 @@ register(
             "meeting_link",
             "idempotency_key",
         ),
-        module="pre_hiring",
+        module="interviews",
         requires_confirmation=True,
         executor=_reschedule_interview_executor,
         result_keys=("action_type", "success", "status", "message", "interview", "provider_sync", "idempotent_replay", "application", "start", "end"),
@@ -4463,7 +4463,7 @@ register(
         entity_type="candidate",
         required_fields=("app_key",),
         optional_fields=(),
-        module="pre_hiring",
+        module="interviews",
         requires_confirmation=False,
         executor=_get_interview_invite_status_executor,
         result_keys=("action_type", "success", "status", "message", "interview", "calendar_invite_sent", "candidate_invited", "candidate_notified", "notification_channel", "google_meet_link"),
@@ -4775,6 +4775,25 @@ def _leave_account_id(ctx: ExecutionContext) -> Any:
     return getattr(ctx.request, "account_id", None)
 
 
+def _leave_origin_surface(ctx: ExecutionContext) -> str:
+    """Which surface drove this governed action.
+
+    Callers (assistant turn, dashboards) stamp the action/state; anything that
+    does not is attributed to the assistant rather than mislabelled whatsapp.
+    """
+    for candidate in (
+        ctx.action.get("origin_surface"),
+        ctx.action.get("surface"),
+        (ctx.state or {}).get("origin_surface"),
+        (ctx.state or {}).get("surface"),
+        getattr(ctx.request, "surface", None),
+        getattr(ctx.request, "channel", None),
+    ):
+        if str(candidate or "").strip():
+            return str(candidate).strip()
+    return "assistant"
+
+
 def _list_leave_requests_executor(ctx: ExecutionContext) -> dict[str, Any]:
     legacy = ctx.legacy
     action = _leave_action(ctx)
@@ -4786,7 +4805,12 @@ def _list_leave_requests_executor(ctx: ExecutionContext) -> dict[str, Any]:
 def _request_leave_executor(ctx: ExecutionContext) -> dict[str, Any]:
     legacy = ctx.legacy
     action = _leave_action(ctx)
-    result = legacy.request_leave(action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx))
+    result = legacy.request_leave(
+        action,
+        company_code=action.get("company_code"),
+        created_by_phone=_leave_actor_phone(ctx),
+        origin_surface=_leave_origin_surface(ctx),
+    )
     reply = legacy.format_leave_mutation_reply(result, "request_leave")
     return legacy.normalize_posthire_result(result, action_type="request_leave", reply=reply)
 
@@ -4947,13 +4971,27 @@ register(
             "If a scheduled shift overlaps the period, the backend records it so HR can review before approving."
         ),
         required_fields=(),
-        optional_fields=("employee_name", "employee_phone", "leave_type", "reason", "start_date", "end_date"),
+        optional_fields=(
+            "employee_name",
+            "employee_phone",
+            "leave_type",
+            "reason",
+            "start_date",
+            "end_date",
+            "duration_unit",
+            "half_portion",
+            "start_time",
+            "end_time",
+            "hours",
+            "shift_id",
+            "sensitive_category",
+        ),
         module="leave",
         requires_confirmation=False,
         executor=_request_leave_executor,
         result_keys=_LEAVE_RESULT_KEYS,
         sensitive=False,
-        notes="Wraps app.request_leave; never auto-approves.",
+        notes="Wraps app.request_leave; never auto-approves. Wave 3 duration/unpaid fields optional.",
     )
 )
 
@@ -4968,11 +5006,11 @@ register(
             "then asks for one explicit confirmation before approving."
         ),
         required_fields=(),
-        optional_fields=("leave_id", "employee_name", "employee_phone", "start_date", "end_date", "decision_note"),
+        optional_fields=("leave_id", "employee_name", "employee_phone", "start_date", "end_date", "decision_note", "expected_row_version", "allow_shift_conflicts"),
         module="leave",
         requires_confirmation=True,
         executor=_approve_leave_request_executor,
-        preflight=_leave_decision_preflight("approve_leave_request", ("requested",), "approve", check_conflicts=True),
+        preflight=_leave_decision_preflight("approve_leave_request", ("requested", "needs_review"), "approve", check_conflicts=True),
         result_keys=_LEAVE_RESULT_KEYS,
         sensitive=True,
         notes="Wraps app.approve_leave_request; reuses leave_shift_conflicts in preflight so conflicts are confirmed once.",
@@ -4993,7 +5031,7 @@ register(
         module="leave",
         requires_confirmation=True,
         executor=_reject_leave_request_executor,
-        preflight=_leave_decision_preflight("reject_leave_request", ("requested",), "reject"),
+        preflight=_leave_decision_preflight("reject_leave_request", ("requested", "needs_review", "needs_info"), "reject"),
         result_keys=_LEAVE_RESULT_KEYS,
         sensitive=True,
         notes="Wraps app.reject_leave_request.",
@@ -5010,14 +5048,136 @@ register(
             "Call this tool to preflight: the backend confirms which request, then asks for one explicit confirmation before cancelling."
         ),
         required_fields=(),
-        optional_fields=("leave_id", "employee_name", "employee_phone", "start_date", "end_date"),
+        optional_fields=("leave_id", "employee_name", "employee_phone", "start_date", "end_date", "expected_row_version", "allow_cancel_started"),
         module="leave",
         requires_confirmation=True,
         executor=_cancel_leave_request_executor,
-        preflight=_leave_decision_preflight("cancel_leave_request", ("requested", "approved"), "cancel"),
+        preflight=_leave_decision_preflight("cancel_leave_request", ("requested", "approved", "needs_review", "needs_info"), "cancel"),
         result_keys=_LEAVE_RESULT_KEYS,
         sensitive=True,
         notes="Wraps app.cancel_leave_request.",
+    )
+)
+
+
+def _return_leave_for_info_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _leave_action(ctx)
+    result = legacy.return_leave_for_info(action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx))
+    reply = result.get("error") or "Returned leave for more information."
+    if result.get("ok"):
+        reply = "Leave returned for information — employee can resubmit."
+    return legacy.normalize_posthire_result(result, action_type="return_leave_for_info", reply=reply)
+
+
+def _withdraw_leave_request_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _leave_action(ctx)
+    result = legacy.withdraw_leave_request(action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx))
+    reply = "Leave withdrawn." if result.get("ok") else (result.get("error") or "Could not withdraw leave.")
+    return legacy.normalize_posthire_result(result, action_type="withdraw_leave_request", reply=reply)
+
+
+def _resubmit_leave_request_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _leave_action(ctx)
+    result = legacy.resubmit_leave_request(action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx))
+    reply = "Leave resubmitted." if result.get("ok") else (result.get("error") or "Could not resubmit leave.")
+    return legacy.normalize_posthire_result(result, action_type="resubmit_leave_request", reply=reply)
+
+
+def _initiate_leave_stale_dual_control_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _leave_action(ctx)
+    result = legacy.initiate_leave_stale_dual_control(
+        action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx)
+    )
+    reply = "Dual-control initiated — awaiting second allowlisted confirmer." if result.get("ok") else (result.get("error") or "Dual-control failed.")
+    return legacy.normalize_posthire_result(result, action_type="initiate_leave_stale_dual_control", reply=reply)
+
+
+def _confirm_leave_stale_dual_control_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _leave_action(ctx)
+    result = legacy.confirm_leave_stale_dual_control(
+        action, company_code=action.get("company_code"), created_by_phone=_leave_actor_phone(ctx)
+    )
+    reply = "Stale leave resolved via dual control." if result.get("ok") else (result.get("error") or "Dual-control confirm failed.")
+    return legacy.normalize_posthire_result(result, action_type="confirm_leave_stale_dual_control", reply=reply)
+
+
+register(
+    ActionSpec(
+        name="return_leave_for_info",
+        description="Return a pending leave request for more information (needs_info). Keeps reservation.",
+        required_fields=(),
+        optional_fields=("leave_id", "employee_name", "employee_phone", "decision_note", "info_request", "expected_row_version"),
+        module="leave",
+        requires_confirmation=True,
+        executor=_return_leave_for_info_executor,
+        result_keys=_LEAVE_RESULT_KEYS,
+        sensitive=True,
+        notes="Wave 3/4 RFI path.",
+    )
+)
+
+register(
+    ActionSpec(
+        name="withdraw_leave_request",
+        description="Withdraw a leave request before decision.",
+        required_fields=(),
+        optional_fields=("leave_id", "employee_name", "employee_phone", "expected_row_version"),
+        module="leave",
+        requires_confirmation=True,
+        executor=_withdraw_leave_request_executor,
+        result_keys=_LEAVE_RESULT_KEYS,
+        sensitive=False,
+        notes="Wave 3 withdraw.",
+    )
+)
+
+register(
+    ActionSpec(
+        name="resubmit_leave_request",
+        description="Resubmit a leave request after needs_info.",
+        required_fields=(),
+        optional_fields=("leave_id", "reason", "expected_row_version"),
+        module="leave",
+        requires_confirmation=False,
+        executor=_resubmit_leave_request_executor,
+        result_keys=_LEAVE_RESULT_KEYS,
+        sensitive=False,
+        notes="Wave 3 resubmit.",
+    )
+)
+
+register(
+    ActionSpec(
+        name="initiate_leave_stale_dual_control",
+        description="Initiate audited dual-control to resolve a stale real pending leave (first allowlisted actor).",
+        required_fields=("leave_id",),
+        optional_fields=("action_kind", "decision_note"),
+        module="leave",
+        requires_confirmation=True,
+        executor=_initiate_leave_stale_dual_control_executor,
+        result_keys=_LEAVE_RESULT_KEYS,
+        sensitive=True,
+        notes="Wave 4 dual-control first leg.",
+    )
+)
+
+register(
+    ActionSpec(
+        name="confirm_leave_stale_dual_control",
+        description="Confirm dual-control resolution of a stale real pending leave (second different allowlisted actor).",
+        required_fields=("leave_id",),
+        optional_fields=("dual_action_id", "decision_note"),
+        module="leave",
+        requires_confirmation=True,
+        executor=_confirm_leave_stale_dual_control_executor,
+        result_keys=_LEAVE_RESULT_KEYS,
+        sensitive=True,
+        notes="Wave 4 dual-control second leg.",
     )
 )
 
@@ -5362,17 +5522,11 @@ def _compliance_mark_reviewed_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 def _onboarding_start_executor(ctx: ExecutionContext) -> dict[str, Any]:
     """Start (or restart) the onboarding flow for an employee from the dashboard.
-    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE; the backend is authority."""
+    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE; Wave 2B also allows
+    synthetic canary targets when global HR_MUTATE is off."""
 
     legacy = ctx.legacy
     action = _posthire_action(ctx)
-    if not legacy.onboarding_hr_mutate_enabled():
-        msg = "Onboarding changes from the dashboard are not enabled yet."
-        return legacy.normalize_posthire_result(
-            {"ok": False, "error": "feature_disabled", "safe_user_message": msg},
-            action_type="start_onboarding",
-            reply=msg,
-        )
     employee = legacy.resolve_employee_for_direct_action(action, allow_latest=False)
     if not employee:
         msg = "I need the employee before I can start onboarding."
@@ -5381,18 +5535,53 @@ def _onboarding_start_executor(ctx: ExecutionContext) -> dict[str, Any]:
             action_type="start_onboarding",
             reply=msg,
         )
+    gate = legacy.onboarding_mutation_gate_error(employee)
+    if gate is not None:
+        return legacy.normalize_posthire_result(
+            gate,
+            action_type="start_onboarding",
+            reply=gate.get("safe_user_message") or "Onboarding changes are not enabled.",
+        )
     blocked = _posthire_scope_block(ctx, action, employee, action_type="start_onboarding")
     if blocked is not None:
         return blocked
     name = employee.get("name") or action.get("subject_name") or "the employee"
+    delayed = str(action.get("delayed") or "").lower() in {"1", "true", "yes", "on"}
     try:
-        legacy.start_onboarding(employee)
+        started = legacy.start_onboarding(
+            employee,
+            planned_start_date=action.get("planned_start_date") or action.get("start_date"),
+            delayed=delayed,
+            allow_restart=str(action.get("allow_restart") or "").lower() in {"1", "true", "yes"},
+            actor_phone=action.get("viewer_phone"),
+        )
+        if isinstance(started, dict) and not started.get("ok"):
+            err = started.get("error")
+            if err == "onboarding_terminal":
+                msg = f"Onboarding for {name} is already closed."
+            elif err == "delayed_start_requires_future_date":
+                msg = "A delayed start needs a future planned start date."
+            else:
+                msg = started.get("safe_user_message") or f"I could not start onboarding for {name}."
+            return legacy.normalize_posthire_result(
+                {**started, "safe_user_message": msg},
+                action_type="start_onboarding",
+                reply=msg,
+            )
+        status = (started or {}).get("status") if isinstance(started, dict) else "in_progress"
         result = {
             "ok": True,
             "employee": legacy.json_safe(legacy.posthire_employee_card(employee)),
-            "onboarding_status": "in_progress",
+            "onboarding_status": status or "in_progress",
+            "idempotent": bool((started or {}).get("idempotent")) if isinstance(started, dict) else False,
+            "start": legacy.json_safe(started) if isinstance(started, dict) else None,
         }
-        reply = f"Onboarding started for {name}."
+        if result["idempotent"]:
+            reply = f"Onboarding for {name} is already in progress."
+        elif status == "delayed":
+            reply = f"Onboarding for {name} is scheduled (delayed start)."
+        else:
+            reply = f"Onboarding started for {name}."
     except Exception:
         logger.warning("start_onboarding failed", exc_info=True)
         result = {"ok": False, "error": "start_failed", "safe_user_message": f"I could not start onboarding for {name}."}
@@ -5401,12 +5590,23 @@ def _onboarding_start_executor(ctx: ExecutionContext) -> dict[str, Any]:
 
 
 def _onboarding_mark_item_executor(ctx: ExecutionContext) -> dict[str, Any]:
-    """Mark one onboarding checklist item received/waived from the dashboard.
-    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE."""
+    """Mark one onboarding checklist item accepted/waived from the dashboard.
+    Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE; Wave 2B also allows
+    synthetic canary targets when global HR_MUTATE is off."""
 
     legacy = ctx.legacy
     action = _posthire_action(ctx)
-    if not legacy.onboarding_hr_mutate_enabled():
+    # Resolve early so synthetic canary gate can allow without global HR_MUTATE.
+    employee = legacy.resolve_employee_for_direct_action(action, allow_latest=False)
+    if employee is not None:
+        gate = legacy.onboarding_mutation_gate_error(employee)
+        if gate is not None:
+            return legacy.normalize_posthire_result(
+                gate,
+                action_type="onboarding_mark_item",
+                reply=gate.get("safe_user_message") or "Onboarding changes are not enabled.",
+            )
+    elif not legacy.onboarding_hr_mutate_enabled() and not legacy.onboarding_synthetic_canary_enabled():
         msg = "Onboarding changes from the dashboard are not enabled yet."
         return legacy.normalize_posthire_result(
             {"ok": False, "error": "feature_disabled", "safe_user_message": msg},
@@ -5420,7 +5620,7 @@ def _onboarding_mark_item_executor(ctx: ExecutionContext) -> dict[str, Any]:
     )
     if isinstance(result, dict) and result.get("ok"):
         label = result.get("item_label") or "checklist item"
-        verb = "waived" if result.get("item_status") == "waived" else "marked received"
+        verb = "waived" if result.get("item_status") == "waived" else "accepted"
         reply = f"{label.capitalize()} {verb}."
     else:
         reply = (result.get("safe_user_message") if isinstance(result, dict) else None) or "I could not update that checklist item."
@@ -5624,13 +5824,96 @@ register(ActionSpec(
 
 register(ActionSpec(
     name="onboarding_mark_item",
-    description="Mark one onboarding checklist item as received or waived for an employee. Provide employee_key (or name/phone) and item_id; optional item_status ('received' or 'waived'). SENSITIVE: ask the user to confirm first.",
-    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone", "item_id", "item_status", "notes"),
+    description="Mark one onboarding checklist item as accepted or waived for an employee. Provide employee_key (or name/phone) and item_id; optional item_status ('accepted' or 'waived'; legacy 'received' maps to accepted under Wave 2A). SENSITIVE: ask the user to confirm first.",
+    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone", "item_id", "item_status", "notes", "expected_row_version"),
     module="onboarding", requires_confirmation=True,
     executor=_onboarding_mark_item_executor,
     preflight=_posthire_confirm_preflight("onboarding_mark_item", "Update the onboarding checklist item"),
     result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
-    notes="Updates onboarding_items (received, or waived+required=false) and recomputes counts; dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE.",
+    notes="Wave 2A: writes accepted/waived via shared lifecycle (never ambiguous received when flag on). Dark-launched behind WATHEFNI_ONBOARDING_HR_MUTATE.",
+))
+
+
+def _onboarding_cancel_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _posthire_action(ctx)
+    employee = legacy.resolve_employee_for_direct_action(action, allow_latest=False)
+    if not employee:
+        msg = "I need the employee before I can cancel onboarding."
+        return legacy.normalize_posthire_result(
+            {"ok": False, "error": "employee_not_found", "safe_user_message": msg},
+            action_type="cancel_onboarding",
+            reply=msg,
+        )
+    gate = legacy.onboarding_mutation_gate_error(employee)
+    if gate is not None:
+        return legacy.normalize_posthire_result(gate, action_type="cancel_onboarding", reply=gate.get("safe_user_message"))
+    blocked = _posthire_scope_block(ctx, action, employee, action_type="cancel_onboarding")
+    if blocked is not None:
+        return blocked
+    result = legacy.cancel_employee_onboarding(
+        {**action, "viewer_phone": action.get("viewer_phone")},
+        company_code=action.get("company_code") or employee.get("company_code"),
+        created_by_phone=_posthire_actor_phone(ctx),
+    )
+    name = employee.get("name") or "the employee"
+    if result.get("ok"):
+        reply = f"Onboarding for {name} was cancelled. Checklist history was kept."
+    else:
+        reply = result.get("safe_user_message") or f"I could not cancel onboarding for {name}."
+    return legacy.normalize_posthire_result(result, action_type="cancel_onboarding", reply=reply)
+
+
+def _onboarding_reschedule_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    legacy = ctx.legacy
+    action = _posthire_action(ctx)
+    employee = legacy.resolve_employee_for_direct_action(action, allow_latest=False)
+    if not employee:
+        msg = "I need the employee before I can reschedule onboarding."
+        return legacy.normalize_posthire_result(
+            {"ok": False, "error": "employee_not_found", "safe_user_message": msg},
+            action_type="reschedule_onboarding",
+            reply=msg,
+        )
+    gate = legacy.onboarding_mutation_gate_error(employee)
+    if gate is not None:
+        return legacy.normalize_posthire_result(gate, action_type="reschedule_onboarding", reply=gate.get("safe_user_message"))
+    blocked = _posthire_scope_block(ctx, action, employee, action_type="reschedule_onboarding")
+    if blocked is not None:
+        return blocked
+    result = legacy.reschedule_employee_onboarding(
+        {**action, "viewer_phone": action.get("viewer_phone")},
+        company_code=action.get("company_code") or employee.get("company_code"),
+        created_by_phone=_posthire_actor_phone(ctx),
+    )
+    name = employee.get("name") or "the employee"
+    if result.get("ok"):
+        reply = f"Onboarding start date for {name} was updated."
+    else:
+        reply = result.get("safe_user_message") or f"I could not reschedule onboarding for {name}."
+    return legacy.normalize_posthire_result(result, action_type="reschedule_onboarding", reply=reply)
+
+
+register(ActionSpec(
+    name="cancel_onboarding",
+    description="Cancel or withdraw onboarding for an employee without deleting checklist history. Provide employee_key. SENSITIVE: confirm first.",
+    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone", "reason"),
+    module="onboarding", requires_confirmation=True,
+    executor=_onboarding_cancel_executor,
+    preflight=_posthire_confirm_preflight("cancel_onboarding", "Cancel onboarding"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
+    notes="Wave 4: cancel preserves history; gated by HR_MUTATE + company allowlist.",
+))
+
+register(ActionSpec(
+    name="reschedule_onboarding",
+    description="Reschedule the planned onboarding start date and refresh open-item due dates. Provide employee_key and planned_start_date (YYYY-MM-DD). SENSITIVE: confirm first.",
+    required_fields=(), optional_fields=("employee_key", "employee_name", "employee_phone", "planned_start_date", "start_date"),
+    module="onboarding", requires_confirmation=True,
+    executor=_onboarding_reschedule_executor,
+    preflight=_posthire_confirm_preflight("reschedule_onboarding", "Reschedule onboarding start"),
+    result_keys=_POSTHIRE_RESULT_KEYS, sensitive=True,
+    notes="Wave 4: reschedule with due-date recompute; gated by HR_MUTATE + company allowlist.",
 ))
 
 
@@ -5779,9 +6062,522 @@ register(ActionSpec(
 
 register(ActionSpec(
     name="workforce_analytics",
-    description="Answer a workforce analytics question (headcount, attendance rates, overtime, turnover, etc.) from operational data. Read-only.",
+    description="Answer a workforce analytics attention question (lateness, absences, hours-above-schedule non-payroll signal, branch concentration, pending review) from operational data. Read-only; not money authority.",
     required_fields=(), optional_fields=("metric", "start_date", "end_date"),
     module="analytics", requires_confirmation=False,
     executor=_posthire_executor("workforce_analytics", "workforce_analytics", reply_fn="format_workforce_analytics_reply"),
     result_keys=_POSTHIRE_RESULT_KEYS, sensitive=False, notes="Wraps app.workforce_analytics.",
 ))
+
+
+# === Platform Assistant Wave 1 — Spine read-only tools ========================
+# Summarize / explain / investigate / prepare deep links only. No mutations.
+# Gated by WATHEFNI_PLATFORM_ASSISTANT_WAVE1 + HR dashboard channel in schema build.
+
+
+def _spine_wave1_tools_enabled(legacy: Any) -> bool:
+    try:
+        import platform_assistant_spine_wave1 as spine
+
+        return bool(spine.platform_assistant_wave1_enabled()) and not spine.assistant_kill_engaged()
+    except Exception:
+        return False
+
+
+def _spine_wave2_tools_enabled(legacy: Any) -> bool:
+    try:
+        import platform_assistant_wave2_safe_ops_reads as wave2
+
+        return bool(wave2.platform_assistant_wave2_enabled()) and not __import__(
+            "platform_assistant_spine_wave1", fromlist=["assistant_kill_engaged"]
+        ).assistant_kill_engaged()
+    except Exception:
+        return False
+
+
+_FLAG_GATED_TOOLS["summarize_action_inbox"] = "platform_assistant_wave1_tools_enabled"
+_FLAG_GATED_TOOLS["summarize_employee_360"] = "platform_assistant_wave1_tools_enabled"
+_FLAG_GATED_TOOLS["get_launch_readiness_summary"] = "platform_assistant_wave1_tools_enabled"
+_FLAG_GATED_TOOLS["summarize_leave_queue"] = "platform_assistant_wave2_tools_enabled"
+_FLAG_GATED_TOOLS["summarize_attendance_exceptions"] = "platform_assistant_wave2_tools_enabled"
+
+
+def _bind_spine_flag(legacy: Any) -> None:
+    """Ensure legacy exposes Wave 1/2 tool gate checkers used by build_tool_schemas."""
+    if legacy is None:
+        return
+    if not hasattr(legacy, "platform_assistant_wave1_tools_enabled"):
+        setattr(legacy, "platform_assistant_wave1_tools_enabled", lambda: _spine_wave1_tools_enabled(legacy))
+    if not hasattr(legacy, "platform_assistant_wave2_tools_enabled"):
+        setattr(legacy, "platform_assistant_wave2_tools_enabled", lambda: _spine_wave2_tools_enabled(legacy))
+
+
+_orig_build_tool_schemas = build_tool_schemas
+
+
+def build_tool_schemas(legacy: Any, request: Any) -> list[dict[str, Any]]:  # type: ignore[misc]
+    _bind_spine_flag(legacy)
+    tools = _orig_build_tool_schemas(legacy, request)
+    try:
+        import platform_assistant_spine_wave1 as spine
+    except Exception:
+        return tools
+
+    metadata = getattr(request, "metadata", None) if isinstance(getattr(request, "metadata", None), dict) else {}
+    channel = str(metadata.get("channel") or "").strip()
+    dashboard = channel == "web_dashboard" or bool(metadata.get("dashboard"))
+    company = str(metadata.get("company_code") or getattr(request, "company_code", "") or "").upper()
+
+    filtered: list[dict[str, Any]] = []
+    for tool in tools:
+        fn = tool.get("function") if isinstance(tool.get("function"), dict) else {}
+        name = str(fn.get("name") or tool.get("name") or "")
+        if spine.is_spine_read_tool(name):
+            if not dashboard or not spine.wave1_enabled_for_company(company or spine.ALLOWED_COMPANY):
+                continue
+            # Wave 2 tools need Wave 2 flag as well
+            try:
+                import platform_assistant_wave2_safe_ops_reads as wave2
+
+                if wave2.is_wave2_read_tool(name) and not wave2.wave2_enabled_for_company(company or spine.ALLOWED_COMPANY):
+                    continue
+            except Exception:
+                if name in {"summarize_leave_queue", "summarize_attendance_exceptions"}:
+                    continue
+        # Mutation kill: hide confirming/sensitive tools from the catalog when mutations denied.
+        if not spine.assistant_mutations_allowed():
+            spec = spec_for(name)
+            if spine.tool_is_mutation(spec):
+                continue
+        filtered.append(tool)
+    return filtered
+
+
+register(ActionSpec(
+    name="summarize_action_inbox",
+    description=(
+        "Default post-hire entry: summarize Unified Action Inbox attention items (read-only compose). "
+        "Prepares deep links into systems of action. Never mutates. Never claims Payroll money or Attendance ingest."
+    ),
+    required_fields=(),
+    optional_fields=("query",),
+    module="action_inbox",
+    requires_confirmation=False,
+    executor=lambda ctx: __import__("platform_assistant_spine_wave1", fromlist=["execute_summarize_action_inbox"]).execute_summarize_action_inbox(ctx),
+    result_keys=_POSTHIRE_RESULT_KEYS + ("grounding",),
+    sensitive=False,
+    notes="Platform Assistant Wave 1 spine — Action Inbox read/prepare only.",
+))
+
+register(ActionSpec(
+    name="summarize_employee_360",
+    description=(
+        "Read-only Employees 360 summary for one employee (name or employee_key). "
+        "Prepares next-action deep links only. Never mutates employee records."
+    ),
+    required_fields=(),
+    optional_fields=("employee_key", "employee_name", "subject_key", "subject_name", "query"),
+    module="employees",
+    requires_confirmation=False,
+    executor=lambda ctx: __import__("platform_assistant_spine_wave1", fromlist=["execute_summarize_employee_360"]).execute_summarize_employee_360(ctx),
+    result_keys=_POSTHIRE_RESULT_KEYS + ("grounding",),
+    sensitive=False,
+    notes="Platform Assistant Wave 1 spine — Employees 360 read/prepare only.",
+))
+
+register(ActionSpec(
+    name="get_launch_readiness_summary",
+    description=(
+        "Read-only Setup Console Launch Readiness summary for WATHEFNI. Explains blockers and prepares deep links. "
+        "Never mutates Setup, never enables Attendance ingest or Payroll money, never claims legal/government authority."
+    ),
+    required_fields=(),
+    optional_fields=("query",),
+    module="setup_console",
+    requires_confirmation=False,
+    executor=lambda ctx: __import__("platform_assistant_spine_wave1", fromlist=["execute_get_launch_readiness_summary"]).execute_get_launch_readiness_summary(ctx),
+    result_keys=_POSTHIRE_RESULT_KEYS + ("grounding",),
+    sensitive=False,
+    notes="Platform Assistant Wave 1 spine — Setup readiness read/prepare only.",
+))
+
+
+# === Platform Assistant Wave 2 — Safe Ops Queue Reads ========================
+
+register(ActionSpec(
+    name="summarize_leave_queue",
+    description=(
+        "Summarize the Leave request queue that needs HR attention (pending/needs_review/needs_info). "
+        "Groups by employee, team, status, urgency. Prepares deep links into Leave. "
+        "Read-only — never approve, reject, or mutate leave. Leave remains the system of action."
+    ),
+    required_fields=(),
+    optional_fields=("query", "status", "employee_key", "employee_name", "start_date", "end_date"),
+    module="leave",
+    requires_confirmation=False,
+    executor=lambda ctx: __import__(
+        "platform_assistant_wave2_safe_ops_reads", fromlist=["execute_summarize_leave_queue"]
+    ).execute_summarize_leave_queue(ctx),
+    result_keys=_POSTHIRE_RESULT_KEYS + ("grounding",),
+    sensitive=False,
+    notes="Platform Assistant Wave 2 — Leave queue read/prepare only.",
+))
+
+register(ActionSpec(
+    name="summarize_attendance_exceptions",
+    description=(
+        "Summarize Attendance exception records (late/absent/pending) from existing attendance records. "
+        "Device ingest is OFF — do not claim live punches. Groups by employee, team, status. "
+        "Prepares deep links into Attendance. Read-only — never correct or mark absence."
+    ),
+    required_fields=(),
+    optional_fields=("query", "status", "employee_key", "employee_name", "start_date", "end_date"),
+    module="attendance",
+    requires_confirmation=False,
+    executor=lambda ctx: __import__(
+        "platform_assistant_wave2_safe_ops_reads", fromlist=["execute_summarize_attendance_exceptions"]
+    ).execute_summarize_attendance_exceptions(ctx),
+    result_keys=_POSTHIRE_RESULT_KEYS + ("grounding",),
+    sensitive=False,
+    notes="Platform Assistant Wave 2 — Attendance exceptions read/prepare only; ingest-off honesty.",
+))
+
+
+# === P1 — Assessment / Interview / Video reads + Employment Offers ============
+
+
+def _assistant_actor_permissions(ctx: ExecutionContext) -> list[str]:
+    meta = getattr(ctx.request, "metadata", None) or {}
+    if not isinstance(meta, dict):
+        return []
+    raw = meta.get("permissions") or []
+    if isinstance(raw, (list, set, tuple)):
+        return [str(p).strip() for p in raw if str(p).strip()]
+    return []
+
+
+def _assistant_actor_user_id(ctx: ExecutionContext) -> str:
+    meta = getattr(ctx.request, "metadata", None) or {}
+    if isinstance(meta, dict):
+        admin = meta.get("admin_user") if isinstance(meta.get("admin_user"), dict) else {}
+        for key in ("user_id", "id", "email", "phone"):
+            val = admin.get(key) or meta.get(key)
+            if val:
+                return str(val)
+    return str(getattr(ctx.request, "sender_phone", None) or "assistant")
+
+
+def _list_assessment_attempts_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    result = p1.list_assessment_attempts(
+        legacy,
+        company_code=company,
+        status=ctx.action.get("status"),
+        position=ctx.action.get("position") or ctx.action.get("position_code"),
+        limit=int(ctx.action.get("limit") or 25),
+    )
+    count = int(result.get("count") or 0)
+    return {
+        "action_type": "list_assessment_attempts",
+        "success": bool(result.get("ok")),
+        "status": "completed",
+        "message": f"Found {count} assessment attempt(s)." if count else "No assessment attempts matched.",
+        "safe_user_message": f"Found {count} assessment attempt(s)." if count else "No assessment attempts matched.",
+        "result": legacy.json_safe(result),
+    }
+
+
+def _list_live_interviews_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    result = p1.list_live_interviews(
+        legacy,
+        company_code=company,
+        status=ctx.action.get("status"),
+        limit=int(ctx.action.get("limit") or 25),
+    )
+    count = int(result.get("count") or 0)
+    return {
+        "action_type": "list_live_interviews",
+        "success": bool(result.get("ok")),
+        "status": "completed",
+        "message": f"Found {count} live interview(s)." if count else "No live interviews matched.",
+        "safe_user_message": f"Found {count} live interview(s)." if count else "No live interviews matched.",
+        "result": legacy.json_safe(result),
+    }
+
+
+def _list_video_interviews_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    result = p1.list_video_interviews(
+        legacy,
+        company_code=company,
+        status=ctx.action.get("status"),
+        limit=int(ctx.action.get("limit") or 25),
+    )
+    count = int(result.get("count") or 0)
+    return {
+        "action_type": "list_video_interviews",
+        "success": bool(result.get("ok")),
+        "status": "completed",
+        "message": f"Found {count} video interview(s)." if count else "No video interviews matched.",
+        "safe_user_message": f"Found {count} video interview(s)." if count else "No video interviews matched.",
+        "result": legacy.json_safe(result),
+    }
+
+
+def _list_candidate_offers_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+
+    legacy = ctx.legacy
+    app = _resolve_app(ctx)
+    company = _resolve_company_code(legacy, ctx.request) or str((app or {}).get("company_code") or "")
+    app_key = str((app or {}).get("app_key") or ctx.action.get("app_key") or "").strip()
+    result = p1.list_candidate_offers(
+        legacy,
+        company_code=company,
+        app_key=app_key,
+        permissions=_assistant_actor_permissions(ctx),
+    )
+    ok = bool(result.get("ok"))
+    count = int(result.get("count") or 0)
+    msg = result.get("message") or (f"Found {count} offer(s)." if count else "No offers for this candidate.")
+    return {
+        "action_type": "list_candidate_offers",
+        "success": ok,
+        "status": "completed" if ok else "failed",
+        "message": msg,
+        "safe_user_message": msg,
+        "result": legacy.json_safe(result),
+        "application": legacy.json_safe(app) if app else None,
+    }
+
+
+def _approve_employment_offer_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+    import offer_lifecycle as offers
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    offer_id = str(ctx.action.get("offer_id") or "").strip()
+    if not offer_id:
+        return {
+            "action_type": "approve_employment_offer",
+            "success": False,
+            "status": "failed",
+            "message": "I need an offer_id to approve.",
+            "safe_user_message": "I need an offer_id to approve.",
+        }
+    try:
+        result = p1.approve_employment_offer(
+            legacy,
+            company_code=company,
+            offer_id=offer_id,
+            actor_user_id=_assistant_actor_user_id(ctx),
+            permissions=_assistant_actor_permissions(ctx),
+        )
+        return {
+            "action_type": "approve_employment_offer",
+            "success": True,
+            "status": "completed",
+            "message": f"Offer {offer_id} approved.",
+            "safe_user_message": f"Offer {offer_id} approved.",
+            "result": legacy.json_safe(result),
+        }
+    except offers.OfferAuthorityError as exc:
+        return {
+            "action_type": "approve_employment_offer",
+            "success": False,
+            "status": "failed",
+            "message": str(exc.message or exc),
+            "safe_user_message": str(exc.message or exc),
+            "error": getattr(exc, "code", None),
+        }
+
+
+def _send_employment_offer_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p1_tools as p1
+    import offer_lifecycle as offers
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    offer_id = str(ctx.action.get("offer_id") or "").strip()
+    channel = str(ctx.action.get("preferred_channel") or ctx.action.get("channel") or "whatsapp").strip().lower()
+    if not offer_id:
+        return {
+            "action_type": "send_employment_offer",
+            "success": False,
+            "status": "failed",
+            "message": "I need an offer_id to send.",
+            "safe_user_message": "I need an offer_id to send.",
+        }
+    try:
+        result = p1.send_employment_offer(
+            legacy,
+            company_code=company,
+            offer_id=offer_id,
+            actor_user_id=_assistant_actor_user_id(ctx),
+            permissions=_assistant_actor_permissions(ctx),
+            channel=channel,
+        )
+        ok = bool(result.get("ok"))
+        msg = result.get("safe_user_message") or result.get("message") or (
+            f"Offer {offer_id} sent via {channel}." if ok else f"Could not send offer {offer_id}."
+        )
+        return {
+            "action_type": "send_employment_offer",
+            "success": ok,
+            "status": "completed" if ok else "failed",
+            "message": msg,
+            "safe_user_message": msg,
+            "result": legacy.json_safe(result),
+        }
+    except offers.OfferAuthorityError as exc:
+        return {
+            "action_type": "send_employment_offer",
+            "success": False,
+            "status": "failed",
+            "message": str(exc.message or exc),
+            "safe_user_message": str(exc.message or exc),
+            "error": getattr(exc, "code", None),
+        }
+
+
+register(
+    ActionSpec(
+        name="list_assessment_attempts",
+        description="List recent assessment attempts for this company (status, score, needs review). Read-only. Same source of truth as the Assessments page.",
+        required_fields=(),
+        optional_fields=("status", "position", "position_code", "limit", "query"),
+        module="assessments",
+        requires_confirmation=False,
+        executor=_list_assessment_attempts_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="list_live_interviews",
+        description="List live (calendar) interviews for this company. Read-only. Prefer this before scheduling when HR asks what interviews are upcoming.",
+        required_fields=(),
+        optional_fields=("status", "limit", "query"),
+        module="interviews",
+        requires_confirmation=False,
+        executor=_list_live_interviews_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="list_video_interviews",
+        description="List asynchronous video interviews for this company (pending/completed). Read-only.",
+        required_fields=(),
+        optional_fields=("status", "limit", "query"),
+        module="video_interviews",
+        requires_confirmation=False,
+        executor=_list_video_interviews_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="list_candidate_offers",
+        description="List employment offers for a candidate application. Read-only. Requires employment_offers module.",
+        entity_type="candidate",
+        required_fields=("app_key",),
+        optional_fields=("query",),
+        module="employment_offers",
+        requires_confirmation=False,
+        executor=_list_candidate_offers_executor,
+        result_keys=("action_type", "success", "status", "message", "result", "application"),
+        sensitive=False,
+    )
+)
+
+register(
+    ActionSpec(
+        name="approve_employment_offer",
+        description="Approve a pending employment offer. Sensitive: requires confirmation. Uses the canonical offer lifecycle (SOD / self-approval rules).",
+        required_fields=("offer_id",),
+        optional_fields=("app_key",),
+        module="employment_offers",
+        requires_confirmation=True,
+        executor=_approve_employment_offer_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=True,
+    )
+)
+
+register(
+    ActionSpec(
+        name="send_employment_offer",
+        description="Send an approved employment offer to the candidate via WhatsApp or email when configured. Sensitive: requires confirmation. Uses company channel accounts.",
+        required_fields=("offer_id",),
+        optional_fields=("app_key", "preferred_channel", "channel"),
+        module="employment_offers",
+        requires_confirmation=True,
+        executor=_send_employment_offer_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=True,
+    )
+)
+
+# === P2 — Calendar module read =================================================
+
+
+def _list_calendar_events_executor(ctx: ExecutionContext) -> dict[str, Any]:
+    import assistant_p2_tools as p2
+
+    legacy = ctx.legacy
+    company = _resolve_company_code(legacy, ctx.request) or ""
+    meta = getattr(ctx.request, "metadata", None) or {}
+    admin = meta.get("admin_user") if isinstance(meta, dict) and isinstance(meta.get("admin_user"), dict) else {}
+    actor_user_id = str(admin.get("user_id") or admin.get("id") or getattr(ctx.request, "sender_phone", "") or "")
+    actor_role = str(admin.get("role") or getattr(ctx.request, "sender_role", "") or "hr_admin")
+    result = p2.list_calendar_events(
+        legacy,
+        company_code=company,
+        actor_user_id=actor_user_id,
+        actor_role=actor_role,
+        permissions=_assistant_actor_permissions(ctx),
+        scope=str(ctx.action.get("scope") or "mine"),
+        days=int(ctx.action.get("days") or 14),
+    )
+    count = int(result.get("count") or 0)
+    return {
+        "action_type": "list_calendar_events",
+        "success": bool(result.get("ok")),
+        "status": "completed",
+        "message": f"Found {count} calendar event(s)." if count else "No calendar events in this window.",
+        "safe_user_message": f"Found {count} calendar event(s)." if count else "No calendar events in this window.",
+        "result": legacy.json_safe(result),
+    }
+
+
+register(
+    ActionSpec(
+        name="list_calendar_events",
+        description="List upcoming company calendar events for the actor (mine/team/company scope). Read-only. Requires calendar module. Does not create or cancel events.",
+        required_fields=(),
+        optional_fields=("scope", "days", "query"),
+        module="calendar",
+        requires_confirmation=False,
+        executor=_list_calendar_events_executor,
+        result_keys=("action_type", "success", "status", "message", "result"),
+        sensitive=False,
+    )
+)

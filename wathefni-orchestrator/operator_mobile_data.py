@@ -139,6 +139,13 @@ def _employee_identity(
 
 def hr_task_mobile_item(row: dict[str, Any], *, actions: list[str]) -> dict[str, Any]:
     task_id = str(row.get("task_id") or "")
+    status = str(row.get("status") or "")
+    # Advertise resolve only on open tasks when the feature grants it.
+    allowed = [
+        action
+        for action in actions
+        if action != "resolve" or status == "open"
+    ]
     return {
         "task_id": task_id,
         "task_type": row.get("task_type"),
@@ -149,13 +156,46 @@ def hr_task_mobile_item(row: dict[str, Any], *, actions: list[str]) -> dict[str,
             "employee_key": row.get("employee_key"),
             "name": row.get("employee_name") or None,
         },
-        "status": row.get("status"),
+        "status": status or None,
         "priority": row.get("priority"),
         "created_at": _iso(row.get("created_at")),
         "updated_at": _iso(row.get("updated_at")),
-        "allowed_actions": list(actions),
+        "allowed_actions": allowed,
         "destination": f"/tasks/{task_id}",
     }
+
+
+def _load_hr_task(app_mod: Any, context: dict[str, Any], task_id: str) -> dict[str, Any]:
+    """Load one task under the same tenant + manager scope as the open queue."""
+    company = context["company_code"]
+    scope = context.get("scope") if isinstance(context.get("scope"), dict) else None
+    row = app_mod._outbound_delivery.get_hr_task(
+        company_code=company,
+        task_id=task_id,
+        scope=scope,
+    )
+    if not row:
+        raise app_mod.HTTPException(
+            status_code=404,
+            detail={"error": "task_not_found", "message": "This task was not found."},
+        )
+    employee_key = str(row.get("employee_key") or "").strip()
+    if employee_key:
+        employee = app_mod.find_employee_by_key(employee_key, company_code=company)
+        if not employee or not app_mod.context_manager_allows_employee(
+            context, employee, company_code=company
+        ):
+            raise app_mod.HTTPException(
+                status_code=404,
+                detail={"error": "task_not_found", "message": "This task was not found."},
+            )
+    elif scope and scope.get("restricted"):
+        # Company-wide tasks stay HR-only (matches list_hr_tasks NULL-key rule).
+        raise app_mod.HTTPException(
+            status_code=404,
+            detail={"error": "task_not_found", "message": "This task was not found."},
+        )
+    return row
 
 
 def mobile_hr_tasks(
@@ -166,25 +206,140 @@ def mobile_hr_tasks(
     offset: int = 0,
     limit: int = 30,
 ) -> dict[str, Any]:
+    """Open follow-up queue by default — history stays web-first."""
     feature = _require_mobile_feature_action(app_mod, context, "hr", "hr_tasks", "read")
+    bucket = str(status or "").strip().lower() or "open"
     result = app_mod.dashboard_hr_tasks(
-        status=status,
+        status=bucket,
         limit=max(1, min(int(limit or 30), 100)),
         offset=max(0, int(offset or 0)),
         context=context,
     )
+    items = [
+        hr_task_mobile_item(row, actions=_actions(feature))
+        for row in result.get("tasks") or []
+    ]
+    if bucket == "open":
+        items = [row for row in items if str(row.get("status") or "") == "open"]
+    resolved_offset = int(result.get("offset") or 0)
+    resolved_limit = int(result.get("limit") or limit)
+    total = int(result.get("total") or 0)
     return {
         "ok": True,
-        "items": [
-            hr_task_mobile_item(row, actions=_actions(feature))
-            for row in result.get("tasks") or []
-        ],
+        "items": items,
         "open_count": int(result.get("open_count") or 0),
-        "total": int(result.get("total") or 0),
-        "offset": int(result.get("offset") or 0),
-        "limit": int(result.get("limit") or limit),
-        "status": status,
+        "total": total,
+        "offset": resolved_offset,
+        "limit": resolved_limit,
+        "has_more": (resolved_offset + resolved_limit) < total,
+        "status": bucket,
     }
+
+
+def mobile_hr_task_detail(
+    app_mod: Any,
+    context: dict[str, Any],
+    task_id: str,
+) -> dict[str, Any]:
+    feature = _require_mobile_feature_action(app_mod, context, "hr", "hr_tasks", "read")
+    row = _load_hr_task(app_mod, context, task_id)
+    return {
+        "ok": True,
+        "task": hr_task_mobile_item(row, actions=_actions(feature)),
+    }
+
+
+def mobile_hr_task_resolve(
+    app_mod: Any,
+    context: dict[str, Any],
+    task_id: str,
+    *,
+    status: str = "done",
+    expected_status: str = "open",
+) -> dict[str, Any]:
+    """Mark done via canonical resolve_hr_task + web handoff side effects.
+
+    Enforces manage capability and the same manager scope as the read path.
+    Mobile v1 accepts ``done`` only (dismiss stays web-first).
+    """
+    _require_mobile_feature_action(app_mod, context, "hr", "hr_tasks", "resolve")
+    # Same manage gate as dashboard_hr_task_resolve.
+    company = app_mod._hr_tasks_context(context, manage=True)
+    normalized = str(status or "done").strip().lower()
+    if normalized != "done":
+        raise app_mod.HTTPException(
+            status_code=400,
+            detail={
+                "error": "unsupported_task_status",
+                "message": "Mobile can only mark tasks done.",
+            },
+        )
+    row = _load_hr_task(app_mod, context, task_id)
+    current_status = str(row.get("status") or "")
+    if current_status != "open" or str(expected_status or "") != current_status:
+        raise app_mod.HTTPException(
+            status_code=409,
+            detail={
+                "error": "stale_decision",
+                "message": "This task changed since you reviewed it.",
+                "current_status": current_status,
+            },
+        )
+    result = app_mod._outbound_delivery.resolve_hr_task(
+        company_code=company,
+        task_id=task_id,
+        status="done",
+        resolver_phone=context.get("hr_phone"),
+        expected_status=current_status,
+    )
+    if result.get("error") == "stale_decision":
+        # Lost the race between the read above and the write.
+        raise app_mod.HTTPException(
+            status_code=409,
+            detail={
+                "error": "stale_decision",
+                "message": "This task changed since you reviewed it.",
+                "current_status": result.get("current_status"),
+            },
+        )
+    if not result.get("ok"):
+        raise app_mod.HTTPException(
+            status_code=404,
+            detail={"error": result.get("error") or "task_not_found", "message": "This task was not found."},
+        )
+    task = result.get("task") if isinstance(result.get("task"), dict) else {}
+    if not task.get("task_type"):
+        task["task_type"] = row.get("task_type")
+    if task.get("metadata") is None and row.get("metadata") is not None:
+        task["metadata"] = row.get("metadata")
+    if str(task.get("task_type") or "") == "candidate_handoff":
+        import recruiting_lifecycle as _rl
+
+        result["handoff_resume"] = _rl.resume_candidate_handoff(
+            app_mod,
+            company_code=company,
+            task=task,
+            resumed_by=context.get("hr_phone") or context.get("actor_user_id"),
+        )
+    app_mod.record_admin_audit(
+        context,
+        "hr_task_resolved",
+        summary="Marked HR task done.",
+        target_type="hr_task",
+        target=task_id,
+        details={"status": "done", "source": task.get("source"), "via": "operator_mobile"},
+    )
+    return app_mod.json_safe(
+        {
+            "ok": True,
+            "status": "done",
+            "result": result,
+            "task": hr_task_mobile_item(
+                {**row, **task, "status": "done", "employee_name": row.get("employee_name")},
+                actions=[],
+            ),
+        }
+    )
 
 
 def onboarding_mobile_item(
@@ -192,18 +347,32 @@ def onboarding_mobile_item(
     row: dict[str, Any],
     *,
     actions: list[str],
+    hr_actionable_count: int = 0,
 ) -> dict[str, Any]:
     employee_key = str(row.get("employee_key") or "")
     status = str(row.get("onboarding_status") or row.get("status") or "")
     return {
+        "employee_key": employee_key,
         "employee": _employee_identity(app_mod, row),
         "status": status,
         "pending_count": int(row.get("pending_count") or 0),
         "received_count": int(row.get("received_count") or 0),
+        "hr_actionable_count": int(hr_actionable_count or 0),
         "updated_at": _iso(row.get("updated_at")),
         "allowed_actions": list(actions),
         "destination": f"/onboarding/{employee_key}",
     }
+
+
+def _is_bank_ess_item(item: dict[str, Any]) -> bool:
+    item_id = str(item.get("item_id") or "").lower()
+    mode = str(item.get("collection_mode") or "").lower()
+    authority = str(item.get("authority") or "").lower()
+    return (
+        item_id == "bank_details"
+        or mode == "ess_encrypted"
+        or authority == "ess"
+    )
 
 
 def onboarding_checklist_mobile_item(
@@ -211,11 +380,39 @@ def onboarding_checklist_mobile_item(
     item: dict[str, Any],
     *,
     file_id: str | None,
-    actions: list[str],
+    feature_actions: list[str],
+    can_mutate: bool,
+    lifecycle_on: bool,
 ) -> dict[str, Any]:
+    """Map a projection row to mobile — reuse lifecycle group + HR actions."""
+    import onboarding_lifecycle_wave2a as _lc
+
     item_id = str(item.get("item_id") or "")
     status = str(item.get("status") or "")
-    reviewable = status not in {"received", "complete", "completed", "verified", "waived"}
+    group = str(item.get("group") or _lc.group_key_for_item(item) or "")
+    hr_actions = list(
+        item.get("actions")
+        or _lc.actions_for_hr_item(
+            item,
+            can_mutate=can_mutate,
+            can_upload=False,
+            lifecycle_on=lifecycle_on,
+        )
+    )
+    is_bank = _is_bank_ess_item(item)
+    mobile_actions: list[str] = []
+    # Preview whenever a file exists (also when bank has attachments).
+    if file_id or "preview" in hr_actions:
+        mobile_actions.append("preview")
+    if group == "being_reviewed":
+        if is_bank:
+            # Bank ESS / web handoff only — never accept/waive bank on mobile.
+            mobile_actions.append("review_bank")
+        elif can_mutate and "review" in feature_actions:
+            if "mark_complete" in hr_actions:
+                mobile_actions.append("accept")
+            if "waive" in hr_actions:
+                mobile_actions.append("waive")
     return {
         "item_id": item_id,
         "label": item.get("label") or app_mod.item_display_label(item),
@@ -223,6 +420,8 @@ def onboarding_checklist_mobile_item(
         "document_type": item.get("document_type"),
         "required": bool(item.get("required")),
         "status": status,
+        "group": group,
+        "is_bank_ess": is_bank,
         "storage_status": item.get("storage_status"),
         "reminder_count": int(item.get("reminder_count") or 0),
         "last_reminded_at": _iso(item.get("last_reminded_at")),
@@ -234,8 +433,43 @@ def onboarding_checklist_mobile_item(
             if file_id
             else None
         ),
-        "allowed_actions": [a for a in actions if a == "review"] if reviewable else [],
+        "allowed_actions": mobile_actions,
     }
+
+
+def _map_onboarding_projection_items(
+    app_mod: Any,
+    result: dict[str, Any],
+    *,
+    feature_actions: list[str],
+    can_mutate: bool,
+    lifecycle_on: bool,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    index = result.get("document_index") if isinstance(result.get("document_index"), dict) else {}
+
+    def _map_bucket(rows: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        for item in rows or []:
+            file_id = index.get(str(item.get("item_id") or "")) or index.get(
+                str(item.get("document_type") or "")
+            )
+            if not file_id and item.get("file_id"):
+                file_id = item.get("file_id")
+            out.append(
+                onboarding_checklist_mobile_item(
+                    app_mod,
+                    item,
+                    file_id=str(file_id) if file_id else None,
+                    feature_actions=feature_actions,
+                    can_mutate=can_mutate,
+                    lifecycle_on=lifecycle_on,
+                )
+            )
+        return out
+
+    hr_actionable = _map_bucket(result.get("being_reviewed"))
+    waiting = _map_bucket(result.get("your_actions"))
+    return hr_actionable, waiting
 
 
 def mobile_onboarding_list(
@@ -246,25 +480,54 @@ def mobile_onboarding_list(
     limit: int = 30,
     search: str = "",
 ) -> dict[str, Any]:
+    """HR-actionable queue only — employees with being_reviewed items."""
     feature = _require_mobile_feature_action(app_mod, context, "hr", "onboarding_review", "read")
-    result = app_mod.dashboard_posthire_onboarding(
-        offset=max(0, int(offset or 0)),
-        limit=max(1, min(int(limit or 30), 100)),
-        search=str(search or ""),
-        context=context,
+    feature_actions = _actions(feature)
+    company = str(context.get("company_code") or "")
+    can_mutate = bool(
+        "review" in feature_actions
+        and callable(getattr(app_mod, "onboarding_hr_mutate_enabled_for_company", None))
+        and app_mod.onboarding_hr_mutate_enabled_for_company(company)
     )
+    page_limit = max(1, min(int(limit or 30), 100))
+    page_offset = max(0, int(offset or 0))
+    # Canonical SQL page of employees with ≥1 HR-review checklist item — never
+    # scan a truncated in_progress window and miss actionable rows past ~90.
+    page = app_mod.list_onboarding_hr_actionable_page(
+        company,
+        viewer_phone=context.get("hr_phone"),
+        dashboard_user_id=context.get("actor_user_id"),
+        actor_role=context.get("actor_role"),
+        search=str(search or ""),
+        limit=page_limit,
+        offset=page_offset,
+    )
+    items: list[dict[str, Any]] = []
+    for row in page.get("rows") or []:
+        employee_key = str(row.get("employee_key") or "")
+        if not employee_key:
+            continue
+        emp_actions = ["read"]
+        if can_mutate:
+            emp_actions.append("review")
+        items.append(
+            onboarding_mobile_item(
+                app_mod,
+                row,
+                actions=emp_actions,
+                hr_actionable_count=int(row.get("hr_actionable_count") or 0),
+            )
+        )
     return {
         "ok": True,
-        "items": [
-            onboarding_mobile_item(app_mod, row, actions=_actions(feature))
-            for row in result.get("in_progress") or []
-        ],
-        "completed_count": int(result.get("completed_count") or 0),
-        "total": int(result.get("total") or 0),
-        "total_count": int(result.get("total_count") or 0),
-        "limit": int(result.get("limit") or limit),
-        "offset": int(result.get("offset") or 0),
-        "has_more": bool(result.get("has_more")),
+        "items": items,
+        "completed_count": 0,
+        "total": int(page.get("total_count") or len(items)),
+        "total_count": int(page.get("total_count") or len(items)),
+        "limit": page_limit,
+        "offset": page_offset,
+        "has_more": bool(page.get("has_more")),
+        "hr_mutate_enabled": can_mutate,
     }
 
 
@@ -274,25 +537,38 @@ def mobile_onboarding_detail(
     employee_key: str,
 ) -> dict[str, Any]:
     feature = _require_mobile_feature_action(app_mod, context, "hr", "onboarding_review", "read")
+    feature_actions = _actions(feature)
     result = app_mod.dashboard_posthire_onboarding_detail(employee_key, context=context)
     employee = app_mod.find_employee_by_key(employee_key, company_code=context["company_code"])
-    index = result.get("document_index") if isinstance(result.get("document_index"), dict) else {}
-    items = []
-    for item in [*(result.get("pending") or []), *(result.get("received") or [])]:
-        file_id = index.get(str(item.get("item_id") or "")) or index.get(
-            str(item.get("document_type") or "")
+    company = str(context.get("company_code") or "")
+    can_mutate = bool(
+        "review" in feature_actions
+        and callable(getattr(app_mod, "onboarding_hr_mutate_enabled_for_company", None))
+        and app_mod.onboarding_hr_mutate_enabled_for_company(company)
+    )
+    lifecycle_on = True
+    try:
+        import onboarding_lifecycle_wave2a as _lc
+
+        lifecycle_on = bool(
+            _lc.lifecycle_enabled(company_code=company, employee_key=str(employee_key))
         )
-        items.append(
-            onboarding_checklist_mobile_item(
-                app_mod,
-                item,
-                file_id=str(file_id) if file_id else None,
-                actions=_actions(feature),
-            )
-        )
+    except Exception:
+        lifecycle_on = True
+    hr_items, waiting_items = _map_onboarding_projection_items(
+        app_mod,
+        result,
+        feature_actions=feature_actions,
+        can_mutate=can_mutate,
+        lifecycle_on=lifecycle_on,
+    )
+    emp_actions = ["read"]
+    if can_mutate and hr_items:
+        emp_actions.append("review")
     return {
         "ok": True,
         "onboarding": {
+            "employee_key": str(employee_key),
             "employee": _employee_identity(
                 app_mod,
                 employee,
@@ -303,8 +579,13 @@ def mobile_onboarding_detail(
             "required_total": int(result.get("required_total") or 0),
             "received_count": int(result.get("received_count") or 0),
             "pending_count": int(result.get("pending_count") or 0),
-            "items": items,
-            "allowed_actions": _actions(feature),
+            "hr_actionable_count": len(hr_items),
+            "hr_actionable_items": hr_items,
+            "waiting_on_employee_items": waiting_items,
+            # Back-compat: items = HR-actionable only (never all open work).
+            "items": hr_items,
+            "hr_mutate_enabled": can_mutate,
+            "allowed_actions": emp_actions,
         },
     }
 
@@ -383,9 +664,12 @@ def mobile_document_reviews(
     offset: int = 0,
     limit: int = 30,
 ) -> dict[str, Any]:
+    """Document Reviews queue — default needs_review only on compliance path."""
     feature = _require_mobile_feature_action(app_mod, context, "hr", "document_review", "read")
     permissions = {str(value) for value in context.get("permissions") or []}
     company = context["company_code"]
+    # Mobile default = action queue (needs_review). Explicit status still supported.
+    bucket = str(status or "").strip().lower() or "needs_review"
     if app_mod.company_has_module(company, "compliance") and "compliance.read" in permissions:
         compliance_actions = ["read"]
         if "review" in _actions(feature) and "compliance.manage" in permissions:
@@ -394,26 +678,31 @@ def mobile_document_reviews(
             app_mod,
             context,
             search=search,
-            status=status,
+            status=bucket,
             offset=offset,
             limit=limit,
         )
+        items = [
+            compliance_mobile_item(app_mod, row, actions=compliance_actions)
+            for row in result.get("documents") or []
+        ]
+        # Belt-and-suspenders: never surface non-needs_review when defaulting the queue.
+        if bucket == "needs_review":
+            items = [row for row in items if str(row.get("status") or "") == "needs_review"]
         return {
             "ok": True,
-            "items": [
-                compliance_mobile_item(app_mod, row, actions=compliance_actions)
-                for row in result.get("documents") or []
-            ],
+            "items": items,
             "summary": app_mod.json_safe(result.get("summary") or {}),
-            "total": int(result.get("filtered_total") or 0),
+            "total": int(result.get("filtered_total") or len(items)),
             "offset": int(result.get("offset") or 0),
             "limit": int(result.get("limit") or limit),
             "has_more": bool(result.get("has_more")),
+            "status": bucket,
             "source": "compliance",
         }
 
-    # Onboarding-only companies still receive a safe document-review queue via
-    # the authoritative onboarding adapter. No compliance module is implied.
+    # Onboarding-only tenants: preview/context rows only — never compliance decide.
+    # Do not fan onboarding into Documents when compliance module is enabled (above).
     onboarding = mobile_onboarding_list(
         app_mod,
         context,
@@ -423,27 +712,41 @@ def mobile_document_reviews(
     )
     items: list[dict[str, Any]] = []
     for card in onboarding["items"]:
-        employee_key = str((card.get("employee") or {}).get("employee_key") or "")
+        employee_key = str(
+            card.get("employee_key")
+            or (card.get("employee") or {}).get("employee_key")
+            or ""
+        )
         detail = mobile_onboarding_detail(app_mod, context, employee_key)
-        for item in (detail.get("onboarding") or {}).get("items") or []:
+        for item in (detail.get("onboarding") or {}).get("hr_actionable_items") or []:
             if item.get("document_type") or item.get("item_type") == "document":
                 items.append(
                     {
-                        **item,
                         "document_id": f"{employee_key}:{item.get('item_id')}",
                         "source": "onboarding",
                         "employee": card.get("employee"),
+                        "name": item.get("label") or item.get("item_id"),
+                        "label": item.get("label"),
+                        "document_type": item.get("document_type") or item.get("item_id"),
+                        "status": item.get("status") or "needs_review",
+                        "has_file": bool(item.get("has_file") or item.get("preview_path")),
+                        "preview_path": item.get("preview_path"),
+                        "download_path": item.get("download_path"),
                         "destination": f"/onboarding/{employee_key}",
+                        "allowed_actions": [
+                            a for a in (item.get("allowed_actions") or []) if a == "preview"
+                        ],
                     }
                 )
     return {
         "ok": True,
         "items": items,
-        "summary": {"needs_attention": sum(1 for item in items if item.get("allowed_actions"))},
+        "summary": {"needs_attention": len(items)},
         "total": len(items),
         "offset": onboarding["offset"],
         "limit": onboarding["limit"],
         "has_more": onboarding["has_more"],
+        "status": "needs_review",
         "source": "onboarding",
     }
 
@@ -504,6 +807,8 @@ def employee_directory_mobile_item(app_mod: Any, row: dict[str, Any]) -> dict[st
             "position_title": card.get("position_title"),
             "department": card.get("department"),
             "employment_status": card.get("employment_status"),
+            # Exceptional People-row chip authority (not daily attendance).
+            "onboarding_status": card.get("onboarding_status"),
         },
         "started_on": _iso(card.get("start_date")),
         "allowed_actions": ["read"],
@@ -573,15 +878,29 @@ def mobile_employee_quick_profile(
 def delivery_alert_mobile_item(row: dict[str, Any]) -> dict[str, Any]:
     message_id = str(row.get("message_id") or "")
     employee_key = str(row.get("employee_key") or "")
+    channel = (
+        str(row.get("channel_used") or "").strip()
+        or str(row.get("flow_label") or "").strip()
+        or str(row.get("flow") or "").strip()
+        or None
+    )
     return {
         "alert_id": message_id,
-        "title": row.get("flow_label") or "Delivery alert",
+        "employee": {
+            "employee_key": employee_key or None,
+            "name": row.get("employee_name") or None,
+        },
+        "title": row.get("flow_label") or row.get("flow") or "Delivery alert",
         "summary": row.get("reason"),
         "status": row.get("status"),
-        "channel": row.get("flow"),
+        "kind": row.get("kind"),
+        "channel": channel,
+        "flow": row.get("flow"),
+        "flow_label": row.get("flow_label"),
         "occurred_at": _iso(row.get("last_attempt_at")),
         "suggested_action": row.get("suggested_action"),
         "attempts": int(row.get("attempts") or 0),
+        "has_task": bool(row.get("has_task")),
         "destination": f"/employees/{employee_key}" if employee_key else None,
         "allowed_actions": ["read"],
     }
@@ -594,24 +913,27 @@ def mobile_delivery_alert_queue(
     offset: int = 0,
     limit: int = 30,
 ) -> dict[str, Any]:
+    """Read-only outbound monitor — excludes rows already linked to an HR task."""
     _require_mobile_feature_action(app_mod, context, "hr", "delivery_alerts", "read")
     result = app_mod.dashboard_outbound_needs_follow_up(
         limit=max(1, min(int(limit or 30), 100)),
         offset=max(0, int(offset or 0)),
+        exclude_linked_tasks=True,
         context=context,
     )
+    messages = [
+        row for row in (result.get("messages") or []) if not row.get("has_task")
+    ]
     return {
         "ok": True,
-        "items": [
-            delivery_alert_mobile_item(row)
-            for row in result.get("messages") or []
-        ],
+        "items": [delivery_alert_mobile_item(row) for row in messages],
         "total": int(result.get("total") or 0),
         "limit": int(result.get("limit") or limit),
         "offset": int(result.get("offset") or offset),
         "has_more": int(result.get("offset") or offset)
-        + len(result.get("messages") or [])
+        + len(messages)
         < int(result.get("total") or 0),
+        "exclude_linked_tasks": True,
     }
 
 
@@ -623,7 +945,12 @@ def attendance_mobile_item(
 ) -> dict[str, Any]:
     attendance_id = str(row.get("attendance_id") or "")
     status = str(row.get("status") or "")
-    reviewable = status in {"late", "absent", "pending"}
+    kind = app_mod.attendance_exception_kind(row)
+    is_exception = bool(kind) or app_mod.attendance_row_is_exception(row)
+    # Resolve is only offered on genuine exceptions. Under authority this maps to
+    # request_correction (often pending_review) — never claim the day is fixed.
+    reviewable = is_exception and status not in {"approved_leave", "void"}
+    can_resolve = "resolve" in actions and reviewable
     return {
         "attendance_id": attendance_id,
         "employee": _employee_identity(
@@ -638,11 +965,16 @@ def attendance_mobile_item(
         "check_in_at": _iso(row.get("check_in_at")),
         "check_out_at": _iso(row.get("check_out_at")),
         "status": status,
+        "exception_kind": kind,
+        "is_exception": is_exception,
         "late_minutes": int(row.get("late_minutes") or 0),
         "early_leave_minutes": int(row.get("early_leave_minutes") or 0),
         "notes": row.get("notes"),
         "updated_at": _iso(row.get("updated_at")),
-        "allowed_actions": [a for a in actions if a == "resolve"] if reviewable else [],
+        # Honest governance: mobile resolve prepares correct_attendance_record,
+        # which requests a correction when authority is enabled.
+        "action_mode": "request_correction" if can_resolve else "read",
+        "allowed_actions": ["resolve"] if can_resolve else [],
         "destination": f"/attendance/{attendance_id}",
     }
 
@@ -666,12 +998,17 @@ def mobile_attendance_list(
         limit=max(1, min(int(limit or 100), 200)),
         context=context,
     )
+    status_norm = str(status or result.get("status_filter") or "").strip().lower()
+    mapped = [
+        attendance_mobile_item(app_mod, row, actions=_actions(feature))
+        for row in result.get("attendance") or []
+    ]
+    # Never surface normal present/completed days as exceptions on mobile.
+    if status_norm == "exceptions":
+        mapped = [item for item in mapped if item.get("is_exception")]
     return {
         "ok": True,
-        "items": [
-            attendance_mobile_item(app_mod, row, actions=_actions(feature))
-            for row in result.get("attendance") or []
-        ],
+        "items": mapped,
         "start_date": result.get("start_date"),
         "end_date": result.get("end_date"),
         "is_today": bool(result.get("is_today")),
@@ -734,6 +1071,7 @@ def mobile_attendance_detail(
 
 
 def shift_mobile_item(app_mod: Any, row: dict[str, Any]) -> dict[str, Any]:
+    """L0 assignment slice for mobile — read-only companion to web Schedule."""
     return {
         "shift_id": str(row.get("shift_id") or ""),
         "employee": _employee_identity(
@@ -746,13 +1084,47 @@ def shift_mobile_item(app_mod: Any, row: dict[str, Any]) -> dict[str, Any]:
         "start_time": _iso(row.get("start_time")),
         "end_time": _iso(row.get("end_time")),
         "timezone": row.get("timezone"),
-        "role": row.get("role"),
-        "location": row.get("location"),
-        "status": row.get("status"),
+        # Prefer governed assignment_type; fall back to legacy role label.
+        "role": row.get("assignment_type") or row.get("role"),
+        "location": row.get("location") or row.get("site_name") or row.get("branch_name"),
+        "status": row.get("status") or row.get("ui_state") or "scheduled",
         "updated_at": _iso(row.get("updated_at")),
         "allowed_actions": ["read"],
-        "destination": f"/shifts/{row.get('shift_id')}",
+        # Mobile has no shift-detail workflow yet — destination stays list-level.
+        "destination": "/shifts",
     }
+
+
+def _attach_swap_shifts(
+    app_mod: Any,
+    context: dict[str, Any],
+    row: dict[str, Any],
+    *,
+    actions: list[str],
+) -> dict[str, Any]:
+    """Enrich a swap with both L0 sides (scoped by company)."""
+    item = shift_swap_mobile_item(app_mod, row, actions=actions)
+    requester_shift = (
+        app_mod.shift_by_id(str(row.get("requester_shift_id")))
+        if row.get("requester_shift_id")
+        else None
+    )
+    target_shift = (
+        app_mod.shift_by_id(str(row.get("target_shift_id")))
+        if row.get("target_shift_id")
+        else None
+    )
+    company = str(context.get("company_code") or "").upper()
+    if requester_shift and str(requester_shift.get("company_code") or "").upper() != company:
+        requester_shift = None
+    if target_shift and str(target_shift.get("company_code") or "").upper() != company:
+        target_shift = None
+    item["requester_shift"] = (
+        shift_mobile_item(app_mod, requester_shift) if requester_shift else None
+    )
+    item["target_shift"] = shift_mobile_item(app_mod, target_shift) if target_shift else None
+    return item
+
 
 
 def mobile_day_shifts(
@@ -899,12 +1271,18 @@ def mobile_shift_swaps(
     context: dict[str, Any],
     *,
     status: str = "requested",
+    offset: int = 0,
     limit: int = 100,
 ) -> dict[str, Any]:
     feature = _require_mobile_feature_action(
         app_mod, context, "hr", "shift_swap_decisions", "read"
     )
     app_mod.require_entitlement(context, "shifts", "shifts.manage")
+    page_size = max(1, min(int(limit or 100), 200))
+    start = max(0, int(offset or 0))
+    # The swap reader has no offset and applies viewer scoping row by row, so we
+    # pull the window plus one extra row to answer "is there more?" honestly
+    # rather than letting the page silently look complete.
     result = app_mod.list_shift_swaps(
         {
             "company_code": context["company_code"],
@@ -912,21 +1290,29 @@ def mobile_shift_swaps(
             "viewer_phone": context.get("hr_phone"),
             "viewer_user_id": context.get("actor_user_id"),
             "actor_role": context.get("actor_role"),
-            "limit": max(1, min(int(limit or 100), 200)),
+            "limit": min(start + page_size + 1, 500),
         },
         company_code=context["company_code"],
     )
-    items = []
+    visible = []
     for row in result.get("swaps") or []:
         try:
             scoped, _, _ = _load_shift_swap(app_mod, context, str(row.get("swap_id") or ""))
         except app_mod.HTTPException:
             continue
-        items.append(shift_swap_mobile_item(app_mod, scoped, actions=_actions(feature)))
+        visible.append(scoped)
+    window = visible[start : start + page_size]
+    items = [
+        _attach_swap_shifts(app_mod, context, scoped, actions=_actions(feature))
+        for scoped in window
+    ]
     return {
         "ok": True,
         "items": items,
-        "total": len(items),
+        "total": len(visible),
+        "offset": start,
+        "limit": page_size,
+        "has_more": len(visible) > start + page_size,
         "status": status,
     }
 
@@ -941,29 +1327,9 @@ def mobile_shift_swap_detail(
     )
     app_mod.require_entitlement(context, "shifts", "shifts.manage")
     row, _, _ = _load_shift_swap(app_mod, context, swap_id)
-    requester_shift = (
-        app_mod.shift_by_id(str(row.get("requester_shift_id")))
-        if row.get("requester_shift_id")
-        else None
-    )
-    target_shift = (
-        app_mod.shift_by_id(str(row.get("target_shift_id")))
-        if row.get("target_shift_id")
-        else None
-    )
-    if requester_shift and str(requester_shift.get("company_code") or "").upper() != context["company_code"]:
-        requester_shift = None
-    if target_shift and str(target_shift.get("company_code") or "").upper() != context["company_code"]:
-        target_shift = None
     return {
         "ok": True,
-        "swap": {
-            **shift_swap_mobile_item(app_mod, row, actions=_actions(feature)),
-            "requester_shift": (
-                shift_mobile_item(app_mod, requester_shift) if requester_shift else None
-            ),
-            "target_shift": shift_mobile_item(app_mod, target_shift) if target_shift else None,
-        },
+        "swap": _attach_swap_shifts(app_mod, context, row, actions=_actions(feature)),
     }
 
 
@@ -1037,6 +1403,7 @@ def interview_mobile_item(
         "next_human_action": row.get("next_human_action"),
         "notes_available": bool(str(row.get("notes") or "").strip()),
         "updated_at": _iso(row.get("updated_at")),
+        "notes_version": row.get("notes_version"),
         "allowed_actions": _mobile_interview_allowed_actions(status_actions, note_actions),
         "destination": f"/interviews/{interview_id}",
     }
@@ -1044,6 +1411,11 @@ def interview_mobile_item(
         payload["notes"] = row.get("notes")
         payload["ai_summary"] = app_mod.json_safe(row.get("ai_summary") or {})
         payload["ai_advisory"] = True
+        # Prefer locked-row concurrency fields when summary omitted them.
+        if payload.get("notes_version") is None and row.get("notes_version") is not None:
+            payload["notes_version"] = row.get("notes_version")
+        if not payload.get("updated_at"):
+            payload["updated_at"] = _iso(row.get("updated_at"))
     return payload
 
 
@@ -1126,6 +1498,13 @@ def mobile_interview_detail(
             "application_status": (application or {}).get("status"),
         }
     )
+    # Concurrency tokens live on the interview row; keep them on the mobile DTO.
+    if isinstance(row, dict):
+        row = {
+            **row,
+            "notes_version": raw_row.get("notes_version", row.get("notes_version")),
+            "updated_at": raw_row.get("updated_at") or row.get("updated_at"),
+        }
     return {
         "ok": True,
         "interview": interview_mobile_item(
@@ -1230,8 +1609,8 @@ def mobile_leave_list(
     offset: int = 0,
     limit: int = 30,
 ) -> dict[str, Any]:
+    feature = _require_mobile_feature_action(app_mod, context, "hr", "leave_approvals", "read")
     app_mod.require_entitlement(context, "leave", "leave.read")
-    feature = app_mod._operator_mobile.build_hr_workspace_capabilities(app_mod, context).get("leave_approvals")
     result = app_mod.list_leave_requests(
         {
             "company_code": context["company_code"],
@@ -1273,9 +1652,9 @@ def mobile_leave_list(
 
 
 def mobile_leave_detail(app_mod: Any, context: dict[str, Any], leave_id: str) -> dict[str, Any]:
+    feature = _require_mobile_feature_action(app_mod, context, "hr", "leave_approvals", "read")
     app_mod.require_entitlement(context, "leave", "leave.read")
     leave, employee = _load_leave(app_mod, context, leave_id)
-    feature = app_mod._operator_mobile.build_hr_workspace_capabilities(app_mod, context).get("leave_approvals")
     balance = None
     if app_mod.leave_balances_enabled():
         balance = app_mod.leave_balances_for_employee(context["company_code"], str(leave.get("employee_key")))
@@ -1404,6 +1783,7 @@ def mobile_candidate_rankings(
     status: str = "",
     limit: int = 20,
 ) -> dict[str, Any]:
+    _require_mobile_feature_action(app_mod, context, "recruiting", "candidate_rankings", "read")
     app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
     result = app_mod.rank_candidates(
         {
@@ -1414,6 +1794,24 @@ def mobile_candidate_rankings(
         },
         company_code=context["company_code"],
     )
+    # Ranking is job-scoped. Do not invent a company-wide parallel list, and do not
+    # claim an empty success when the ranking authority rejected the request.
+    if result.get("ok") is False:
+        error = str(result.get("error") or "ranking_unavailable")
+        return {
+            "ok": True,
+            "items": [],
+            "total": 0,
+            "filters": app_mod.json_safe(
+                result.get("filters")
+                or {"query": query, "position": position, "status": status}
+            ),
+            "ai_advisory": True,
+            "ranking_unavailable": True,
+            "ranking_error": error,
+            "requires_position": error == "job_required" and not str(position or "").strip(),
+            "message": result.get("message") or str(result.get("error") or "Ranking unavailable"),
+        }
     items = []
     for candidate in result.get("candidates") or []:
         items.append(candidate_mobile_item(app_mod, candidate, context=context))
@@ -1423,12 +1821,17 @@ def mobile_candidate_rankings(
         "total": int(result.get("total_matching") or 0),
         "filters": app_mod.json_safe(result.get("filters") or {}),
         "ai_advisory": True,
+        "ranking_unavailable": False,
+        "ranking_error": None,
+        "requires_position": False,
+        "message": None,
     }
 
 
 def mobile_candidate_detail(app_mod: Any, context: dict[str, Any], app_key: str) -> dict[str, Any]:
     import recruiting_lifecycle as _rl
 
+    _require_mobile_feature_action(app_mod, context, "recruiting", "candidate_summary", "read")
     app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
     application = app_mod.dashboard_application_or_404(app_key, context["company_code"])
     summary = app_mod.prehire_application_summary(
@@ -1789,7 +2192,9 @@ def _load_onboarding_item(
             status_code=404,
             detail={"error": "onboarding_item_not_found", "message": "This checklist item was not found."},
         )
-    for item in app_mod.employee_onboarding_items(employee_key):
+    for item in app_mod.employee_onboarding_items(
+        employee_key, company_code=context["company_code"]
+    ):
         if str(item.get("item_id") or "") == item_id:
             return item, employee
     raise app_mod.HTTPException(
@@ -2010,27 +2415,69 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
         )
 
     if (hr_features.get("onboarding_review") or {}).get("enabled"):
-        onboarding = app_mod.dashboard_posthire_onboarding(
-            offset=0, limit=max_items, search="", context=context
-        )
+        onboarding = mobile_onboarding_list(app_mod, context, offset=0, limit=max_items, search="")
         sections.append(
             {
                 "type": "onboarding_reviews",
                 "title": "Onboarding reviews",
-                "total": int(onboarding.get("total_count") or 0),
+                "total": int(onboarding.get("total_count") or onboarding.get("total") or 0),
                 "items": [
                     {
                         "type": "onboarding_review",
-                        "target_id": item.get("employee_key"),
-                        "summary": item.get("name") or "Employee onboarding",
-                        "status": item.get("onboarding_status"),
-                        "timestamp": _iso(item.get("updated_at")),
-                        "due_context": None,
-                        "permitted_actions": _actions(hr_features.get("onboarding_review")),
-                        "destination": f"/onboarding/{item.get('employee_key')}",
-                        "severity": None,
+                        "target_id": item.get("employee_key")
+                        or (item.get("employee") or {}).get("employee_key"),
+                        "summary": (item.get("employee") or {}).get("name") or "Onboarding review",
+                        "status": "needs_hr_action",
+                        "timestamp": item.get("updated_at"),
+                        "due_context": {
+                            "hr_actionable_count": item.get("hr_actionable_count"),
+                        },
+                        "permitted_actions": item.get("allowed_actions") or [],
+                        "destination": item.get("destination")
+                        or f"/onboarding/{item.get('employee_key')}",
+                        "urgency": "high" if int(item.get("hr_actionable_count") or 0) > 1 else None,
                     }
-                    for item in onboarding.get("in_progress") or []
+                    for item in onboarding.get("items") or []
+                ],
+            }
+        )
+
+    if (hr_features.get("document_review") or {}).get("enabled"):
+        docs = mobile_document_reviews(
+            app_mod, context, search="", status="needs_review", offset=0, limit=max_items
+        )
+        sections.append(
+            {
+                "type": "document_reviews",
+                "title": "Document reviews",
+                "total": int(docs.get("total") or 0),
+                "items": [
+                    {
+                        "type": "document_review",
+                        "target_id": item.get("document_id"),
+                        "summary": (
+                            f"{(item.get('employee') or {}).get('name') or 'Employee'} · "
+                            f"{item.get('label') or item.get('name') or item.get('document_type') or 'Document'}"
+                        ),
+                        "status": item.get("status") or "needs_review",
+                        "timestamp": item.get("last_checked_at") or item.get("updated_at"),
+                        "due_context": {
+                            "expiry_date": item.get("expiry_date"),
+                            "days_until_expiry": item.get("days_until_expiry"),
+                        },
+                        "permitted_actions": item.get("allowed_actions") or [],
+                        "destination": item.get("destination")
+                        or (
+                            f"/onboarding/{(item.get('employee') or {}).get('employee_key')}"
+                            if item.get("source") == "onboarding"
+                            else f"/documents/{(item.get('employee') or {}).get('employee_key')}/{item.get('document_type')}"
+                        ),
+                        "urgency": "high"
+                        if item.get("days_until_expiry") is not None
+                        and int(item.get("days_until_expiry") or 0) <= 7
+                        else None,
+                    }
+                    for item in docs.get("items") or []
                 ],
             }
         )
@@ -2039,35 +2486,76 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
         attendance = app_mod.dashboard_posthire_attendance(
             start_date=None,
             end_date=None,
-            status="late",
+            status="exceptions",
             offset=0,
             limit=max_items,
             context=context,
         )
+        att_actions = _actions(hr_features.get("attendance_exceptions"))
+        att_items = []
+        for raw in attendance.get("attendance") or []:
+            item = attendance_mobile_item(app_mod, raw, actions=att_actions)
+            if not item.get("is_exception"):
+                continue
+            emp = item.get("employee") or {}
+            kind = item.get("exception_kind") or "needs_review"
+            att_items.append(
+                {
+                    "type": "attendance_exception",
+                    "target_id": item.get("attendance_id") or emp.get("employee_key"),
+                    "summary": emp.get("name") or "Attendance exception",
+                    "status": kind,
+                    "timestamp": item.get("updated_at") or item.get("attendance_date"),
+                    "due_context": {"date": item.get("attendance_date")},
+                    "permitted_actions": att_actions,
+                    "destination": item.get("destination") or "/attendance",
+                    "severity": "high" if kind == "absence" else None,
+                }
+            )
         sections.append(
             {
                 "type": "attendance_exceptions",
                 "title": "Attendance exceptions",
-                "total": int(attendance.get("total_count") or attendance.get("count") or 0),
-                "items": [
-                    {
-                        "type": "attendance_exception",
-                        "target_id": item.get("attendance_id") or item.get("employee_key"),
-                        "summary": item.get("employee_name") or "Attendance exception",
-                        "status": item.get("status"),
-                        "timestamp": _iso(item.get("updated_at") or item.get("attendance_date")),
-                        "due_context": {"date": _iso(item.get("attendance_date"))},
-                        "permitted_actions": _actions(hr_features.get("attendance_exceptions")),
-                        "destination": "/attendance",
-                        "severity": None,
-                    }
-                    for item in attendance.get("attendance") or []
-                ],
+                "total": int(attendance.get("total_count") or attendance.get("count") or len(att_items)),
+                "items": att_items,
+            }
+        )
+
+    if (hr_features.get("shift_swap_decisions") or {}).get("enabled"):
+        swaps = mobile_shift_swaps(app_mod, context, status="requested", limit=max_items)
+        swap_items = []
+        for item in swaps.get("items") or []:
+            requester = item.get("requester") or {}
+            target = item.get("target") or {}
+            req_name = requester.get("name") or "Requester"
+            tgt_name = target.get("name") if target else None
+            summary = f"{req_name} → {tgt_name}" if tgt_name else f"{req_name} · shift swap"
+            swap_items.append(
+                {
+                    "type": "shift_swap",
+                    "target_id": item.get("swap_id"),
+                    "summary": summary,
+                    "status": item.get("status") or "requested",
+                    "timestamp": item.get("requested_at") or item.get("updated_at"),
+                    "due_context": {"date": item.get("shift_date")},
+                    "permitted_actions": item.get("allowed_actions") or [],
+                    "destination": item.get("destination") or f"/shift-swaps/{item.get('swap_id')}",
+                    "urgency": None,
+                }
+            )
+        sections.append(
+            {
+                "type": "shift_swap_decisions",
+                "title": "Shift swaps",
+                "total": int(swaps.get("total") or len(swap_items)),
+                "items": swap_items,
             }
         )
 
     if (hr_features.get("hr_tasks") or {}).get("enabled"):
-        tasks = app_mod.dashboard_hr_tasks(status="open", limit=max_items, offset=0, context=context)
+        tasks = mobile_hr_tasks(
+            app_mod, context, status="open", offset=0, limit=max_items
+        )
         sections.append(
             {
                 "type": "hr_tasks",
@@ -2077,45 +2565,31 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
                     {
                         "type": str(item.get("task_type") or item.get("source") or "hr_task"),
                         "target_id": str(item.get("task_id") or ""),
-                        "summary": item.get("summary") or item.get("title") or "HR task",
-                        "status": item.get("status"),
-                        "timestamp": _iso(item.get("created_at") or item.get("updated_at")),
-                        "due_context": app_mod.json_safe(item.get("due_context")),
-                        "permitted_actions": _actions(hr_features.get("hr_tasks")),
-                        "destination": f"/tasks/{item.get('task_id')}",
-                        "severity": item.get("severity") or item.get("priority"),
+                        "summary": (
+                            f"{(item.get('employee') or {}).get('name')} · {item.get('title') or 'HR task'}"
+                            if (item.get("employee") or {}).get("name")
+                            else (item.get("title") or "HR task")
+                        ),
+                        "status": item.get("status") or "open",
+                        "timestamp": item.get("created_at") or item.get("updated_at"),
+                        "due_context": {
+                            "priority": item.get("priority"),
+                            "task_type": item.get("task_type"),
+                        },
+                        "permitted_actions": item.get("allowed_actions") or [],
+                        "destination": item.get("destination")
+                        or f"/tasks/{item.get('task_id')}",
+                        "urgency": "high"
+                        if str(item.get("priority") or "").lower() == "high"
+                        else None,
                     }
-                    for item in tasks.get("tasks") or []
+                    for item in tasks.get("items") or []
                 ],
             }
         )
 
-    if (hr_features.get("delivery_alerts") or {}).get("enabled"):
-        delivery = app_mod.dashboard_outbound_needs_follow_up(
-            limit=max_items, offset=0, context=context
-        )
-        sections.append(
-            {
-                "type": "delivery_alerts",
-                "title": "Delivery alerts",
-                "total": int(delivery.get("total") or 0),
-                "items": [
-                    {
-                        "type": "delivery_alert",
-                        "target_id": item.get("message_id"),
-                        "summary": item.get("reason"),
-                        "status": item.get("status"),
-                        "timestamp": _iso(item.get("last_attempt_at")),
-                        "due_context": {"suggested_action": item.get("suggested_action")},
-                        "permitted_actions": _actions(hr_features.get("delivery_alerts")),
-                        "destination": "/delivery-alerts",
-                        "severity": item.get("criticality"),
-                    }
-                    for item in delivery.get("messages") or []
-                    if item.get("kind") == "issue"
-                ],
-            }
-        )
+    # delivery_alerts intentionally omitted from mobile priorities — Home/Inbox
+    # never render them; the More monitor is the sole surface (has_task-deduped).
 
     # Shared pre-hire priorities contract (same action_counts / next_action
     # authority as desktop Overview and Admin Assistant tools). Emit whenever
@@ -2154,7 +2628,7 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
                         "timestamp": overview.get("as_of"),
                         "due_context": {"total": counts["follow_up_needed"]},
                         "permitted_actions": [],
-                        "destination": "/candidates?follow_up=needed",
+                        "destination": "/jobs",
                         "severity": "high",
                         "authority_source": "prehire_overview.follow_up_needed",
                     }
@@ -2169,7 +2643,7 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
                         "timestamp": overview.get("as_of"),
                         "due_context": {"total": counts["ready_for_review"]},
                         "permitted_actions": [],
-                        "destination": "/candidates?review_status=ready",
+                        "destination": "/jobs",
                         "severity": "high" if str(next_action.get("action")) == "ready_for_review" else None,
                         "authority_source": "prehire_overview.ready_for_review",
                     }
@@ -2184,23 +2658,30 @@ def build_mobile_priorities(app_mod: Any, context: dict[str, Any], *, limit: int
                         "timestamp": overview.get("as_of"),
                         "due_context": {"total": counts["assessment_pending"]},
                         "permitted_actions": [],
-                        "destination": "/candidates?assessment_status=awaiting",
+                        "destination": "/jobs",
                         "severity": None,
                         "authority_source": "prehire_overview.assessment_pending",
                     }
                 )
             if role:
+                position_code = str(role.get("position_code") or "").strip()
                 prehire_items.append(
                     {
                         "type": "prehire_role_priority",
-                        "target_id": role.get("position_code"),
+                        "target_id": position_code or role.get("position_code"),
                         "summary": f"{role.get('position_title')}: {role.get('reason')}",
                         "status": "role_priority",
                         "timestamp": overview.get("as_of"),
-                        "due_context": {"priority": role.get("priority")},
+                        "due_context": {
+                            "priority": role.get("priority"),
+                            "position_code": position_code or None,
+                            "position_title": role.get("position_title"),
+                        },
                         "permitted_actions": [],
-                        "destination": f"/ranking?position={role.get('position_code')}",
-                        "severity": None,
+                        "destination": (
+                            f"/candidates?position={position_code}" if position_code else "/jobs"
+                        ),
+                        "urgency": None,
                         "authority_source": "prehire_overview.role_priority",
                     }
                 )
@@ -2290,7 +2771,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
 
     class OnboardingReviewRequest(BaseModel):
         item_id: str
-        outcome: str = "received"
+        outcome: str = "accepted"
         note: str | None = None
         idempotency_key: str
         confirmation_id: str | None = None
@@ -2321,6 +2802,8 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         notes: str
         status: str | None = None
         generate_summary: bool = True
+        expected_updated_at: str | None = None
+        expected_version: int | None = None
 
     # ``from __future__ import annotations`` makes FastAPI resolve these names
     # through module globals rather than this registration function's locals.
@@ -2370,14 +2853,15 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         request: LeaveDecisionRequest,
         context: dict[str, Any] = Depends(dependency),
     ):
-        app_mod.require_entitlement(context, "leave", "leave.decide")
-        leave, employee = _load_leave(app_mod, context, leave_id)
         action = str(request.action or "").strip().lower()
         if action not in {"approve", "reject"}:
             raise app_mod.HTTPException(
                 status_code=400,
                 detail={"error": "unsupported_leave_action", "message": "That leave decision is not supported."},
             )
+        _require_mobile_feature_action(app_mod, context, "hr", "leave_approvals", action)
+        app_mod.require_entitlement(context, "leave", "leave.decide")
+        leave, employee = _load_leave(app_mod, context, leave_id)
         if action == "reject" and not str(request.reason or "").strip():
             raise app_mod.HTTPException(
                 status_code=422,
@@ -2474,6 +2958,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         app_key: str,
         context: dict[str, Any] = Depends(dependency),
     ):
+        _require_mobile_feature_action(app_mod, context, "recruiting", "candidate_cv", "view")
         app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
         return app_mod.dashboard_prehire_application_cv(app_key, context=context)
 
@@ -2482,6 +2967,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         app_key: str,
         context: dict[str, Any] = Depends(dependency),
     ):
+        _require_mobile_feature_action(app_mod, context, "recruiting", "candidate_cv", "preview")
         app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
         return app_mod.dashboard_prehire_application_cv_preview(app_key, context=context)
 
@@ -2493,13 +2979,22 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
     ):
         import recruiting_lifecycle as _rl
 
-        app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
         action = str(request.action or "").strip().lower()
         if action not in _rl.MOBILE_EXECUTABLE_CANDIDATE_ACTIONS:
             raise app_mod.HTTPException(
                 status_code=400,
                 detail={"error": "unsupported_candidate_action", "message": "That candidate action is not supported."},
             )
+        feature_for_action = {
+            "shortlist": ("candidate_shortlist", "shortlist"),
+            "reject": ("candidate_reject", "reject"),
+            "hire": ("candidate_hire", "hire"),
+        }.get(action)
+        if feature_for_action:
+            _require_mobile_feature_action(
+                app_mod, context, "recruiting", feature_for_action[0], feature_for_action[1]
+            )
+        app_mod.require_entitlement(context, "pre_hiring", "prehire.read")
         application = app_mod.dashboard_application_or_404(app_key, context["company_code"])
         status = str(application.get("status") or "")
         stage = _rl.normalize_stage(status) or status
@@ -2676,6 +3171,33 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             limit=limit,
         )
 
+    @app_mod.app.get("/dashboard/mobile/tasks/{task_id}")
+    def mobile_task_detail(
+        task_id: str,
+        context: dict[str, Any] = Depends(dependency),
+    ):
+        return mobile_hr_task_detail(app_mod, context, task_id)
+
+    class HrTaskMobileResolveRequest(BaseModel):
+        status: str = "done"
+        expected_status: str = "open"
+
+    globals()["HrTaskMobileResolveRequest"] = HrTaskMobileResolveRequest
+
+    @app_mod.app.post("/dashboard/mobile/tasks/{task_id}/resolve")
+    def mobile_task_resolve(
+        task_id: str,
+        request: HrTaskMobileResolveRequest,
+        context: dict[str, Any] = Depends(dependency),
+    ):
+        return mobile_hr_task_resolve(
+            app_mod,
+            context,
+            task_id,
+            status=request.status,
+            expected_status=request.expected_status,
+        )
+
     @app_mod.app.get("/dashboard/mobile/onboarding")
     def mobile_onboarding(
         offset: int = Query(default=0, ge=0),
@@ -2709,7 +3231,8 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         )
         app_mod.require_entitlement(context, "onboarding", "onboarding.manage")
         outcome = str(request.outcome or "").strip().lower()
-        if outcome not in {"received", "waived"}:
+        # Canonical: accepted | waived. Legacy "received" remaps to accepted in mark_onboarding_item.
+        if outcome not in {"accepted", "waived", "received"}:
             raise app_mod.HTTPException(
                 status_code=400,
                 detail={
@@ -2717,8 +3240,31 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
                     "message": "That onboarding review outcome is not supported.",
                 },
             )
+        if outcome == "received":
+            outcome = "accepted"
+        # Company mutate allowlist — never prepare Review if confirm would be blocked.
+        company = str(context.get("company_code") or "")
+        if not (
+            callable(getattr(app_mod, "onboarding_hr_mutate_enabled_for_company", None))
+            and app_mod.onboarding_hr_mutate_enabled_for_company(company)
+        ):
+            raise app_mod.HTTPException(
+                status_code=403,
+                detail={
+                    "error": "onboarding_mutate_disabled",
+                    "message": "Onboarding review mutations are not enabled for this company.",
+                },
+            )
         target_id = f"{employee_key}:{str(request.item_id or '').strip()}"
         item, employee = _load_onboarding_item(app_mod, context, target_id)
+        if _is_bank_ess_item(item):
+            raise app_mod.HTTPException(
+                status_code=400,
+                detail={
+                    "error": "bank_via_ess_required",
+                    "message": "Bank items must be reviewed in the web/ESS bank workflow.",
+                },
+            )
         if request.confirm:
             return confirm_mobile_action(
                 app_mod,
@@ -2731,7 +3277,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             )
         employee_name = _employee_context(app_mod, employee)["name"]
         item_label = item.get("label") or app_mod.item_display_label(item)
-        verb = "Mark received" if outcome == "received" else "Waive"
+        verb = "Accept" if outcome == "accepted" else "Waive"
         return prepare_mobile_confirmation(
             app_mod,
             context,
@@ -2741,7 +3287,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             target_id=target_id,
             expected_status=str(item.get("status") or ""),
             safe_summary=f"{employee_name} · {item_label}",
-            consequence=f"{verb} for {employee_name}'s onboarding checklist.",
+            consequence=f"{verb} {item_label} for {employee_name}'s onboarding checklist.",
             args={
                 "employee_key": employee_key,
                 "item_id": str(request.item_id or "").strip(),
@@ -2758,8 +3304,8 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
         limit: int = Query(default=30, ge=1, le=100),
         context: dict[str, Any] = Depends(dependency),
     ):
-        normalized = str(status or "").strip().lower()
-        if normalized and normalized not in {
+        normalized = str(status or "").strip().lower() or "needs_review"
+        if normalized not in {
             "expired",
             "expiring_soon",
             "missing",
@@ -2935,7 +3481,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
             target_id=attendance_id,
             expected_status=str(attendance.get("status") or ""),
             safe_summary=f"{employee_name} · {_iso(attendance.get('attendance_date'))}",
-            consequence=f"Correct {employee_name}'s attendance status to {status}.",
+            consequence=f"Request a correction for {employee_name}'s attendance to {status}. Review may be required before the day is updated.",
             args={
                 "employee_phone": employee.get("phone"),
                 "date": _iso(attendance.get("attendance_date")),
@@ -2990,6 +3536,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
     @app_mod.app.get("/dashboard/mobile/shift-swaps")
     def mobile_shift_swap_list(
         status: str = Query(default="requested"),
+        offset: int = Query(default=0, ge=0),
         limit: int = Query(default=100, ge=1, le=200),
         context: dict[str, Any] = Depends(dependency),
     ):
@@ -3003,7 +3550,7 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
                 },
             )
         return mobile_shift_swaps(
-            app_mod, context, status=normalized, limit=limit
+            app_mod, context, status=normalized, offset=offset, limit=limit
         )
 
     @app_mod.app.get("/dashboard/mobile/shift-swaps/{swap_id}")
@@ -3127,6 +3674,8 @@ def register_operator_mobile_data_routes(app_mod: Any) -> None:
                 transcript=None,
                 status=request.status,
                 generate_summary=bool(request.generate_summary),
+                expected_updated_at=str(request.expected_updated_at or "") or None,
+                expected_version=request.expected_version,
             ),
             context=context,
         )

@@ -1374,11 +1374,18 @@ export function getHrTasks(access: DashboardAccess, status = 'open', params: { l
   return request<HrTasksResponse>(`/dashboard/hr-tasks?${search.toString()}`, access)
 }
 
-export function resolveHrTask(access: DashboardAccess, taskId: string, status: 'done' | 'dismissed' = 'done') {
+// `expectedStatus` is the status this actor was looking at. The server rejects
+// stale resolves so two HR users cannot silently overwrite each other.
+export function resolveHrTask(
+  access: DashboardAccess,
+  taskId: string,
+  status: 'done' | 'dismissed' = 'done',
+  expectedStatus = 'open',
+) {
   return request<{ ok: boolean; task: { task_id: string; status: string } }>(
     `/dashboard/hr-tasks/${encodeURIComponent(taskId)}/resolve`,
     access,
-    { method: 'POST', body: JSON.stringify({ status }) },
+    { method: 'POST', body: JSON.stringify({ status, expected_status: expectedStatus }) },
   )
 }
 

@@ -1,0 +1,212 @@
+{
+ "stamp": "20260811T124121Z",
+ "proofs": [
+  {
+   "name": "H1 onboarding_items_tenant_scoped",
+   "column_exists": true,
+   "rows_without_company": 0,
+   "mismatched_against_employee": 0,
+   "reads": {
+    "no_company_argument": 36,
+    "owning_tenant": 36,
+    "other_tenant": 0
+   },
+   "unscoped_read_is_owner_scoped": true,
+   "other_tenant_read_empty": true,
+   "qa_web_onboarding_read": 404,
+   "qa_mobile_onboarding_read": 404,
+   "target_item": {
+    "item_id": "access_card_issued",
+    "status_before": "waived",
+    "company_code": "WATHEFNI"
+   },
+   "qa_mobile_onboarding_write": 403,
+   "status_after_cross_tenant_writes": "waived",
+   "cross_tenant_write_had_no_effect": true,
+   "writer_wrong_tenant_result": "{\"ok\": false, \"error\": \"employee_not_found\", \"safe_user_message\": \"I need the employee before I can update a checklist item.\"}",
+   "writer_wrong_tenant_refused": true,
+   "status_after_direct_wrong_tenant_write": "waived",
+   "verdict": "PASS"
+  },
+  {
+   "name": "H2 candidate_tenant_non_null_enforced",
+   "null_rows": 0,
+   "column_nullable": "NO",
+   "db_accepted_null_tenant": false,
+   "db_rejection": "NotNullViolation('null value in column \"active_company_code\" of relation \"candidates\" violates not-null constraint\\nDETAIL:  Failing row contains (9655524121Z, ",
+   "app_layer_result": "{\"ok\": false, \"status\": \"failed\", \"error\": \"company_code_required\"}",
+   "app_layer_accepted_missing_company": false,
+   "verdict": "PASS"
+  },
+  {
+   "name": "H3 leave_source_attribution_by_surface",
+   "surfaces": {
+    "employee_app": {
+     "http": 200,
+     "leave_id": "83b6808a-a8b9-44da-b448-f5222d8582cc",
+     "metadata_source": "employee_app"
+    },
+    "assistant": {
+     "leave_id": "ad84cc8f-f1c3-4063-81c6-bd6a83700ea7",
+     "metadata_source": "assistant"
+    },
+    "whatsapp": {
+     "leave_id": "19544834-e4b3-4434-ada3-da2d7f9922e9",
+     "metadata_source": "whatsapp"
+    }
+   },
+   "whatsapp_writer_result": "{\"ok\": true, \"leave\": {\"leave_id\": \"19544834-e4b3-4434-ada3-da2d7f9922e9\", \"company_code\": \"WATHEFNI\", \"employee_key\": \"WATHEFNI-9655237101\", \"employee_phone\": ",
+   "distinct_sources": [
+    "assistant",
+    "employee_app",
+    "whatsapp"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "name": "H4 dual_actor_task_stale_write_rejected",
+   "task_id": "18a9fe07-af7f-491f-be2d-fb0a61707269",
+   "web_first": 200,
+   "web_second_stale": {
+    "http": 409,
+    "error": "stale_decision"
+   },
+   "mobile_stale": {
+    "http": 409,
+    "error": "stale_decision"
+   },
+   "web_missing_expected_status": 422,
+   "final_status": "done",
+   "verdict": "PASS"
+  },
+  {
+   "name": "H5 queue_visibility_30_and_over_50",
+   "seeded": 60,
+   "db_open_total": 108,
+   "page1": {
+    "http": 200,
+    "items": 30,
+    "total": 108,
+    "has_more": true
+   },
+   "page2": {
+    "http": 200,
+    "items": 30,
+    "total": 108,
+    "has_more": true
+   },
+   "pages_disjoint": true,
+   "total_exceeds_first_page": true,
+   "total_matches_db": true,
+   "priorities_tasks_section": {
+    "items": 30,
+    "total": 108
+   },
+   "priorities_total_is_honest": true,
+   "verdict": "PASS",
+   "other_queues": {
+    "documents": {
+     "http": 200,
+     "items": 10,
+     "total_present": true,
+     "has_more_present": true
+    },
+    "alerts": {
+     "http": 200,
+     "items": 30,
+     "total_present": true,
+     "has_more_present": true
+    },
+    "swaps": {
+     "http": 200,
+     "items": 1,
+     "total_present": true,
+     "has_more_present": true
+    },
+    "attendance": {
+     "http": 200,
+     "items": 0,
+     "total_present": true,
+     "has_more_present": true
+    },
+    "onboarding": {
+     "http": 200,
+     "items": 2,
+     "total_present": true,
+     "has_more_present": true
+    }
+   },
+   "all_queues_expose_continuation": true
+  },
+  {
+   "name": "H6 urgent_tasks_sort_above_high_and_normal",
+   "first_10_priorities": [
+    "urgent",
+    "high",
+    "high",
+    "high",
+    "high",
+    "high",
+    "high",
+    "high",
+    "high",
+    "high"
+   ],
+   "urgent_positions": [
+    0
+   ],
+   "first_high_position": 1,
+   "first_normal_position": null,
+   "verdict": "PASS"
+  },
+  {
+   "name": "H7 web_mutation_visible_to_mobile_without_manual_refresh",
+   "task_id": "c54c82c5-c09d-4a1a-864e-b2ce33f27aab",
+   "mobile_sees_open_before": true,
+   "mobile_cache_control": "no-store",
+   "web_resolve": 200,
+   "mobile_sees_open_after": false,
+   "mobile_detail_status_after": "done",
+   "mobile_priorities_still_lists_task": false,
+   "verdict": "PASS"
+  }
+ ],
+ "cleanup": {
+  "harden_tasks": [
+   {
+    "rowcount": 1
+   }
+  ],
+  "leave_events": [
+   {
+    "rowcount": 3
+   }
+  ],
+  "leave_requests": [
+   {
+    "rowcount": 3
+   }
+  ],
+  "probe_candidates": [
+   {
+    "rowcount": 0
+   }
+  ],
+  "spawned_messages": [
+   {
+    "rowcount": 0
+   }
+  ],
+  "harden_rows_remaining": 0,
+  "synth_leave_remaining": 0
+ },
+ "summary": {
+  "H1 onboarding_items_tenant_scoped": "PASS",
+  "H2 candidate_tenant_non_null_enforced": "PASS",
+  "H3 leave_source_attribution_by_surface": "PASS",
+  "H4 dual_actor_task_stale_write_rejected": "PASS",
+  "H5 queue_visibility_30_and_over_50": "PASS",
+  "H6 urgent_tasks_sort_above_high_and_normal": "PASS",
+  "H7 web_mutation_visible_to_mobile_without_manual_refresh": "PASS"
+ }
+}

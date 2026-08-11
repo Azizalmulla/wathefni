@@ -1,0 +1,257 @@
+{
+ "stamp": "20260811T124003Z",
+ "proofs": [
+  {
+   "name": "P1 employee_app_submission_visible_on_both_HR_surfaces",
+   "employee_post_status": 200,
+   "leave_id": "a675a91e-d359-49b3-ba22-7357c33a00ef",
+   "db_rows_created": 1,
+   "db": {
+    "company_code": "WATHEFNI",
+    "employee_key": "WATHEFNI-9655237101",
+    "status": "requested",
+    "row_version": 1
+   },
+   "provenance_metadata_source": "employee_app",
+   "hr_web": {
+    "http": 200,
+    "found": true,
+    "status": "requested",
+    "cache_control": "no-store"
+   },
+   "hr_mobile": {
+    "http": 200,
+    "found": true,
+    "status": "requested",
+    "cache_control": "no-store"
+   },
+   "employee_app": {
+    "http": 200,
+    "found": true,
+    "status": "requested"
+   },
+   "verdict": "PASS"
+  },
+  {
+   "name": "P2 hr_mobile_mutation_reflected_on_hr_web_and_employee_app",
+   "step1": {
+    "http": 200,
+    "status": "needs_confirmation",
+    "action": "reject_leave_request",
+    "current_state": "requested"
+   },
+   "step2_confirm": {
+    "http": 200,
+    "status": "completed"
+   },
+   "db_after": {
+    "status": "rejected",
+    "decided_by_phone": "96599338566",
+    "row_version": 2
+   },
+   "hr_web_pending_queue_after": "absent_from_pending_queue",
+   "hr_web_employee_view_status": null,
+   "hr_mobile_detail_http": 200,
+   "hr_mobile_status_after": "rejected",
+   "employee_app_status_after": "rejected",
+   "actor_recorded": "96599338566",
+   "verdict": "PASS"
+  },
+  {
+   "name": "P3 hr_web_mutation_reflected_on_hr_mobile",
+   "task_id": "bd7dc64a-d9f4-44f5-b89d-19eaf355cba8",
+   "task_title": "VISQA| Account deletion request \u2014 company follow-up",
+   "mobile_open_before": true,
+   "web_resolve_http": 200,
+   "db_after": {
+    "status": "done",
+    "resolved_at": "2026-08-11 12:40:06.384892+00:00"
+   },
+   "mobile_open_after": false,
+   "mobile_detail_status_after": "done",
+   "verdict": "PASS"
+  },
+  {
+   "name": "P4 hr_mobile_document_review_reflected_on_hr_web",
+   "target": {
+    "employee_key": "WATHEFNI-9655280101",
+    "document_type": "work_permit",
+    "status_before": "needs_review"
+   },
+   "hr_web_status_before": "pending_hr_review",
+   "mobile_review_http": 200,
+   "mobile_review_status": "completed",
+   "db_after": {
+    "status": "valid",
+    "updated_at": "2026-08-11 12:40:06.977146+00:00"
+   },
+   "hr_web_status_after": "hr_reviewed",
+   "hr_web_carries_mobile_note": true,
+   "mobile_needs_review_still_contains": false,
+   "verdict": "PASS"
+  },
+  {
+   "name": "P5 assistant_canonical_reads_and_governed_actions",
+   "registry_result_keys": [
+    "action_type",
+    "count",
+    "employee",
+    "employee_notification",
+    "end_date",
+    "has_more",
+    "leave",
+    "leave_requests",
+    "limit",
+    "message",
+    "offset",
+    "ok",
+    "safe_user_message",
+    "scope",
+    "shift_conflicts",
+    "start_date",
+    "status",
+    "status_filter",
+    "success",
+    "total_count"
+   ],
+   "registry_result_preview": "{\"ok\": true, \"leave_requests\": [{\"leave_id\": \"a675a91e-d359-49b3-ba22-7357c33a00ef\", \"company_code\": \"WATHEFNI\", \"employee_key\": \"WATHEFNI-9655237101\", \"employee_phone\": \"9655237101\", \"employee_name\": \"W2B-SYNTH| Onboarding Visual\", \"start_date\": \"2026-12-16\", \"end_date\": \"2026-12-16\", \"leave_type\": \"annual\", \"status\": \"rejected\", \"reason\": \"ARCHVERIFY-20260811T124003Z\", \"decision_note\": \"arch proof ARCHVERIFY-20260811T124003Z\", \"source_text\": \"\", \"requested_by_phone\": \"9655237101\", \"decided_by_phone\": \"96599338566\", \"requested_at\": \"2026-08-11T12:40:04.100791+00:00\", \"decided_at\": \"2026-08-11",
+   "registry_read_rows": 8,
+   "registry_sees_canonical_leave": true,
+   "registry_status_for_leave": "rejected",
+   "scope_override_demo": {
+    "model_supplied": "WATHEFNI",
+    "after_gate": "WATHEFNIQA"
+   },
+   "other_tenant_scope_sees_wathefni_leave": false,
+   "registry_governance": {
+    "approve_leave_request": {
+     "module": "leave",
+     "requires_confirmation": true
+    },
+    "reject_leave_request": {
+     "module": "leave",
+     "requires_confirmation": true
+    },
+    "compliance_mark_reviewed": {
+     "module": "compliance",
+     "requires_confirmation": false
+    },
+    "correct_attendance_record": {
+     "module": "attendance",
+     "requires_confirmation": true
+    }
+   },
+   "assistant_mutations_env": "0",
+   "assistant_mutations_allowed": false,
+   "assistant_kill_engaged": false,
+   "mobile_assistant_capabilities_http": 200,
+   "mobile_assistant_capabilities_keys": [
+    "catalog",
+    "company_code",
+    "empty_state",
+    "ok",
+    "surface",
+    "unsupported_messaging"
+   ],
+   "mobile_assistant_read_only_flags": {
+    "ok": true
+   },
+   "verdict": "PASS"
+  },
+  {
+   "name": "P6 tenant_isolation_server_side",
+   "qa_mobile_read": 404,
+   "qa_mobile_write": 404,
+   "own_tenant_read": 200,
+   "qa_web_employee_docs": 404,
+   "qa_web_doc_review_write": 404,
+   "qa_mobile_doc_review_write": 404,
+   "qa_web_onboarding_read": 404,
+   "qa_web_task_write": 404,
+   "employee_cross_tenant_cancel": 404,
+   "qa_web_leave_list_contains_wathefni_row": false,
+   "qa_web_leave_list_companies": [
+    "WATHEFNIQA"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "name": "P7 no_duplicate_status_store",
+   "leave_requests_rows": 1,
+   "sibling_tables_rows_for_this_leave": {
+    "attendance_day_projections": 0,
+    "leave_attachment_audit": 0,
+    "leave_dual_control_actions": 0,
+    "leave_events": 2,
+    "leave_ledger": 0,
+    "leave_payroll_handoff_events": 0,
+    "leave_request_attachments": 0,
+    "payroll_input_snapshot_lines": 0
+   },
+   "mobile_only_business_tables": [
+    "cv_extraction_cache",
+    "dashboard_operator_mobile_confirmations",
+    "dashboard_operator_mobile_login_attempts",
+    "dashboard_operator_mobile_sessions"
+   ]
+  },
+  {
+   "name": "P8 http_cache_headers_on_surface_reads",
+   "hr_web_leave": {
+    "http": 200,
+    "cache_control": "no-store",
+    "etag": false,
+    "age": null
+   },
+   "hr_mobile_leave": {
+    "http": 200,
+    "cache_control": "no-store",
+    "etag": false,
+    "age": null
+   },
+   "hr_mobile_tasks": {
+    "http": 200,
+    "cache_control": "no-store",
+    "etag": false,
+    "age": null
+   },
+   "employee_leave": {
+    "http": 200,
+    "cache_control": "no-store",
+    "etag": false,
+    "age": null
+   }
+  }
+ ],
+ "cleanup": {
+  "leave_events": [
+   {
+    "rowcount": 2
+   }
+  ],
+  "leave_requests": [
+   {
+    "rowcount": 1
+   }
+  ],
+  "spawned_hr_tasks": [
+   {
+    "rowcount": 1
+   }
+  ],
+  "spawned_messages": [
+   {
+    "rowcount": 1
+   }
+  ],
+  "synth_leave_remaining": 0
+ },
+ "summary": {
+  "P1 employee_app_submission_visible_on_both_HR_surfaces": "PASS",
+  "P2 hr_mobile_mutation_reflected_on_hr_web_and_employee_app": "PASS",
+  "P3 hr_web_mutation_reflected_on_hr_mobile": "PASS",
+  "P4 hr_mobile_document_review_reflected_on_hr_web": "PASS",
+  "P5 assistant_canonical_reads_and_governed_actions": "PASS",
+  "P6 tenant_isolation_server_side": "PASS"
+ }
+}

@@ -596,5 +596,8 @@
   "profile.callManager": "Call your manager",
   "home.documentExpiresIn": "{{document}} expires in {{count}} days",
   "home.documentExpiresToday": "{{document}} expires today",
-  "home.documentExpired": "{{document}} has expired"
+  "home.documentExpired": "{{document}} has expired",
+  "hrQueues.loadMore": "Load more",
+  "hrQueues.showingOf": "Showing {{loaded}} of {{total}}",
+  "hrQueues.moreWaiting": "{{count}} more waiting"
 }
