@@ -430,7 +430,7 @@ def resolve_outbound_sender(
             "selected_mode": intended_mode or "wathefni",
             "from_address": global_from,
             "reply_to": reply_to or global_reply,
-            "display_name": display_name,
+            "display_name": display_name or "OctoHR",
             "provider": "postmark",
             "mailbox_id": None,
             "activatable": True,
@@ -441,12 +441,12 @@ def resolve_outbound_sender(
             "intended_mode": intended_mode,
             "intended_from": intended_from,
             "user_status": (
-                "Sent through Wathefni (emergency fallback)"
+                "Sent through OctoHR (emergency fallback)"
                 if emergency_fallback_used
                 else None
             ),
             "hr_notice": (
-                "Your selected company sender was unavailable, so this message was sent through Wathefni as an emergency fallback."
+                "Your selected company sender was unavailable, so this message was sent through OctoHR as an emergency fallback."
                 if emergency_fallback_used
                 else None
             ),
@@ -586,12 +586,12 @@ def assert_sender_allowed(resolved: dict[str, Any]) -> None:
 def _block_message(reason: str) -> str:
     return {
         "company_domain_not_verified": "Company domain sending is not ready until the domain is verified.",
-        "microsoft_mailbox_not_approved": "Microsoft mailbox sending needs an approved mailbox from Wathefni support.",
+        "microsoft_mailbox_not_approved": "Microsoft mailbox sending needs an approved mailbox from OctoHR support.",
         "microsoft_mail_not_configured": "Microsoft mailbox sending is not available yet.",
         "mailbox_probe_required": "Microsoft mailbox sending needs a successful connection check before it can be used.",
         "sender_not_ready": "Email sending is not ready for this choice yet.",
-        "wathefni_sender_unavailable": "Wathefni email sending is temporarily unavailable.",
-        "branded_sender_unavailable": "Your selected company sender is unavailable. Turn on emergency fallback in Settings, or switch back to Wathefni.",
+        "wathefni_sender_unavailable": "OctoHR email sending is temporarily unavailable.",
+        "branded_sender_unavailable": "Your selected company sender is unavailable. Turn on emergency fallback in Settings, or switch back to OctoHR.",
     }.get(reason, "Email sending is not ready for this choice yet.")
 
 
@@ -667,7 +667,7 @@ def public_email_sending_view(
     choices = [
         {
             "id": "wathefni",
-            "title": "Send through Wathefni",
+            "title": "Send through OctoHR",
             "description": "Ready immediately",
             "recommended": False,
             "status": matrix["wathefni"]["status"],
@@ -744,12 +744,12 @@ def public_email_sending_view(
         except Exception:
             setup = {
                 "forward_instructions_en": (
-                    "Forward CVs and documents to your Wathefni intake address. "
-                    "Wathefni does not read your Microsoft inbox for documents in this phase."
+                    "Forward CVs and documents to your OctoHR intake address. "
+                    "OctoHR does not read your Microsoft inbox for documents in this phase."
                 ),
                 "forward_instructions_ar": (
-                    "قم بتحويل السير الذاتية والمستندات إلى عنوان استقبال وظفني. "
-                    "وظفني لا يقرأ صندوق بريد مايكروسوفت للمستندات في هذه المرحلة."
+                    "قم بتحويل السير الذاتية والمستندات إلى عنوان استقبال OctoHR. "
+                    "لا يقرأ OctoHR صندوق بريد مايكروسوفت للمستندات في هذه المرحلة."
                 ),
                 "setup_steps_en": [],
                 "setup_steps_ar": [],
@@ -1381,7 +1381,7 @@ def resolve_outbound_sender_pure(
                     "block_reason": None,
                     "emergency_fallback_used": True,
                     "intended_mode": "microsoft_mailbox",
-                    "hr_notice": "Your selected company sender was unavailable, so this message was sent through Wathefni as an emergency fallback.",
+                    "hr_notice": "Your selected company sender was unavailable, so this message was sent through OctoHR as an emergency fallback.",
                 }
             return {
                 "mode": "microsoft_mailbox",

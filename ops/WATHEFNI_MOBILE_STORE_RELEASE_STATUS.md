@@ -1,5 +1,7 @@
 # WATHEFNI MOBILE STORE RELEASE — STATUS
 
+> **Current OctoHR pre-store addendum (2026-08-16):** the public-brand source pass is locally complete, but approved privacy content/live privacy and support, the authorized Employee owner bootstrap, physical iPhone/Android RP, and the standard HR Web TypeScript build remain blocked. No full-pass stamp is issued. See `ops/OCTOHR_PRE_STORE_RELEASE_STATUS.md` for the latest authority result. The detailed results below preserve the immediately preceding Wathefni-identity requalification record.
+
 **Stamp issued:** none  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
 **Date:** 2026-08-16  

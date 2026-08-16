@@ -1011,7 +1011,7 @@ def _calc_employee(
                     "code": "counsel_rate_required",
                     "rule_family": family,
                     "message": (
-                        f"Policy enables {family} money but no approved Wathefni public baseline "
+                        f"Policy enables {family} money but no approved OctoHR public baseline "
                         f"or counsel-attested rate table exists"
                     ),
                 }

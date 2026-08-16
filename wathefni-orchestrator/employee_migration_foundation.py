@@ -328,7 +328,7 @@ def reject_migration_onboarding_request(legacy: Any, start_onboarding: bool) -> 
             "error": "migration_onboarding_forbidden",
             "message": (
                 "Migration import cannot start onboarding or send invitations. "
-                "Use the onboarding workflow after employees are accepted into Wathefni."
+        "Use the onboarding workflow after employees are accepted into OctoHR."
             ),
             "contract": CONTRACT,
             "version": CONTRACT_VERSION,

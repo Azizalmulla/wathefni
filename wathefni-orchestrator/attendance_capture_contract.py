@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Attendance Wave 2B — vendor-neutral canonical punch capture contract.
 
-Privacy: Wathefni never stores fingerprint/face images or biometric templates.
+Privacy: OctoHR never stores fingerprint/face images or biometric templates.
 BioTime (or other devices) remains the biometric verification authority.
 
 Does not enable real clocking, QR/GPS/kiosk UI, or frozen-module changes.

@@ -301,7 +301,7 @@ export function videoInterviewProcessingLine(interview: CandidateInterview) {
   if (failed) return `${failed} answer${failed === 1 ? '' : 's'} need summary retry. Original video remains available.`
   const pending = answers.filter((answer) => answer.transcript_status !== 'completed').length
   if (pending) return 'Video response is submitted. The written summary is being prepared.'
-  if (interview.ai_summary?.summary || interview.ai_summary?.overall_summary) return 'Video answer and Wathefni analysis are ready for HR review.'
+  if (interview.ai_summary?.summary || interview.ai_summary?.overall_summary) return 'Video answer and OctoHR analysis are ready for HR review.'
   return 'Video answer is ready. AI summary is being prepared.'
 }
 

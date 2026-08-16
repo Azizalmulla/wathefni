@@ -608,7 +608,7 @@ def build_external_event_payload(
 ) -> dict[str, Any]:
     """Privacy-safe external projection. Candidate names hidden by default."""
     include_name = bool(connection.get("sync_include_candidate_name"))
-    title = _text(event.get("title")) or "Wathefni event"
+    title = _text(event.get("title")) or "OctoHR event"
     et = _text(event.get("event_type")).lower()
     if et == "interview" and not include_name:
         # Strip guest display names; use limited title.

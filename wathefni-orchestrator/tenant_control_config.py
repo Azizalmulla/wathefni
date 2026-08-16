@@ -584,12 +584,12 @@ def wathefni_default_configs() -> dict[str, dict[str, Any]]:
     """Represent current WATHEFNI live posture as control-plane config documents."""
     return {
         "company_profile": {
-            "display_name": "Wathefni",
+            "display_name": "OctoHR",
             "country": "KW",
             "timezone": "Asia/Kuwait",
             "currency": "KWD",
             "languages": ["en", "ar"],
-            "branding": {"product_name": "Wathefni"},
+            "branding": {"product_name": "OctoHR"},
             "sector": "Recruitment",
         },
         "org_structure": {

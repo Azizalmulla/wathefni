@@ -109,13 +109,13 @@ type Copy = {
 
 const EN: Copy = {
   title: 'External payroll run',
-  subtitle: 'Package people & contracts for your payroll system, upload results, and reconcile — Wathefni does not pay.',
+  subtitle: 'Package people & contracts for your payroll system, upload results, and reconcile — OctoHR does not pay.',
   honesty:
-    'Your external payroll system remains money authority. Payment processing is disabled here. Uploaded results are a mirror for review only and never become Wathefni payment authority.',
+    'Your external payroll system remains money authority. Payment processing is disabled here. Uploaded results are a mirror for review only and never become OctoHR payment authority.',
   moneyAuthority: 'Who pays: external payroll system',
-  paymentDisabled: 'Wathefni payments: off',
+  paymentDisabled: 'OctoHR payments: off',
   vendorUnclaimed: 'File format: standard CSV (no named vendor connector)',
-  notAuthoritative: 'Mirror amounts are for review only — not payment authority in Wathefni',
+  notAuthoritative: 'Mirror amounts are for review only — not payment authority in OctoHR',
   tabOverview: 'Run checklist',
   tabExports: 'Packages & results',
   tabQuarantine: 'Exceptions',
@@ -132,7 +132,7 @@ const EN: Copy = {
   recordsPayslips: 'Payslips',
   recordsClose: 'Close & export',
   recordsStatutory: 'PIFSS & EOS',
-  payrollHint: 'Package for the vendor, review hours, then records — Wathefni does not pay money here.',
+  payrollHint: 'Package for the vendor, review hours, then records — OctoHR does not pay money here.',
   loading: 'Loading external payroll run…',
   retry: 'Retry',
   emptyExports: 'No input packages yet',
@@ -204,7 +204,7 @@ const EN: Copy = {
   csvHelpExport: 'Input package columns (send to payroll / accountant)',
   csvHelpImport: 'Vendor result columns (upload back here)',
   csvHelpBody:
-    'Use the same employee_key and component_code values your payroll system expects. opaque_amount is the vendor’s amount for mirror review only — Wathefni does not pay from it. external_run_id should stay stable for the same vendor run.',
+    'Use the same employee_key and component_code values your payroll system expects. opaque_amount is the vendor’s amount for mirror review only — OctoHR does not pay from it. external_run_id should stay stable for the same vendor run.',
   pickImportRun: 'Choose vendor upload',
   pickExportRun: 'Choose input package',
   openQuarantine: 'Open exceptions',
@@ -212,13 +212,13 @@ const EN: Copy = {
 
 const AR: Copy = {
   title: 'تشغيل الرواتب الخارجية',
-  subtitle: 'جهّز الأشخاص والعقود لنظام الرواتب، ارفع النتائج، وطابِق — وظفني لا يدفع.',
+  subtitle: 'جهّز الأشخاص والعقود لنظام الرواتب، ارفع النتائج، وطابِق — لا يدفع OctoHR.',
   honesty:
-    'نظام الرواتب الخارجي يبقى سلطة المال. معالجة الدفع هنا معطّلة. النتائج المرفوعة مرآة للمراجعة فقط ولا تصبح سلطة دفع داخل وظفني.',
+    'نظام الرواتب الخارجي يبقى سلطة المال. معالجة الدفع هنا معطّلة. النتائج المرفوعة مرآة للمراجعة فقط ولا تصبح سلطة دفع داخل OctoHR.',
   moneyAuthority: 'من يدفع: نظام الرواتب الخارجي',
-  paymentDisabled: 'مدفوعات وظفني: متوقفة',
+  paymentDisabled: 'مدفوعات OctoHR: متوقفة',
   vendorUnclaimed: 'صيغة الملف: CSV قياسي (بدون موصل مورّد مسمّى)',
-  notAuthoritative: 'المبالغ المرآتية للمراجعة فقط — ليست سلطة دفع داخل وظفني',
+  notAuthoritative: 'المبالغ المرآتية للمراجعة فقط — ليست سلطة دفع داخل OctoHR',
   tabOverview: 'قائمة التشغيل',
   tabExports: 'الحزم والنتائج',
   tabQuarantine: 'الاستثناءات',
@@ -235,7 +235,7 @@ const AR: Copy = {
   recordsPayslips: 'قسائم الراتب',
   recordsClose: 'الإغلاق والتصدير',
   recordsStatutory: 'التأمينات ونهاية الخدمة',
-  payrollHint: 'جهّز حزمة المورّد، راجع الساعات، ثم السجلات — وظفني لا يدفع مالاً هنا.',
+  payrollHint: 'جهّز حزمة المورّد، راجع الساعات، ثم السجلات — لا يدفع OctoHR مالاً هنا.',
   loading: 'جاري تحميل تشغيل الرواتب الخارجية…',
   retry: 'إعادة المحاولة',
   emptyExports: 'لا توجد حزم مدخلات بعد',
@@ -307,7 +307,7 @@ const AR: Copy = {
   csvHelpExport: 'أعمدة حزمة المدخلات (تُرسل للرواتب / المحاسب)',
   csvHelpImport: 'أعمدة نتيجة المورّد (تُرفع هنا)',
   csvHelpBody:
-    'استخدم نفس employee_key و component_code التي يتوقعها نظام الرواتب. opaque_amount هو مبلغ المورّد للمراجعة فقط — وظفني لا يدفع منه. حافظ على external_run_id ثابتًا لنفس تشغيل المورّد.',
+    'استخدم نفس employee_key و component_code التي يتوقعها نظام الرواتب. opaque_amount هو مبلغ المورّد للمراجعة فقط — لا يدفع OctoHR منه. حافظ على external_run_id ثابتًا لنفس تشغيل المورّد.',
   pickImportRun: 'اختر رفع المورّد',
   pickExportRun: 'اختر حزمة المدخلات',
   openQuarantine: 'فتح الاستثناءات',

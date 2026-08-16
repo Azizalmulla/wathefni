@@ -172,7 +172,9 @@ export function AssessmentsPage({
   const competencyCount = Object.keys(config?.framework?.competencies || {}).length
   const sections = Object.keys(itemBank?.section_totals || {}).map(stageLabel).join(', ') || (isAr ? 'القدرة + الحكم العملي' : 'Ability + workplace judgment')
   const questionCount = itemBank?.total_items || 22
-  const batteryName = String(config?.battery?.name || 'Wathefni Ability Assessment')
+  const legacyBatteryName = 'Wathefni Ability Assessment'
+  const configuredBatteryName = String(config?.battery?.name || 'OctoHR Ability Assessment')
+  const batteryName = configuredBatteryName === legacyBatteryName ? 'OctoHR Ability Assessment' : configuredBatteryName
   const batteryVersion = String(config?.battery?.version || 'v1')
   const cohortTabs: Array<{ key: string }> = [
     { key: 'assessment_ready_to_send' },
@@ -664,7 +666,7 @@ export function AssessmentsPage({
                 label={isAr ? 'فحص المحتوى' : 'Content check'}
                 value={itemBank?.validation?.ok ? (isAr ? 'جاهز' : 'Looks ready') : `${itemBank?.validation?.error_count || 0} issues`}
               />
-              <Info label={isAr ? 'مصدر المحتوى' : 'Content source'} value={itemBank?.content_policy ? stageLabel(itemBank.content_policy) : 'Wathefni items'} />
+              <Info label={isAr ? 'مصدر المحتوى' : 'Content source'} value={itemBank?.content_policy ? stageLabel(itemBank.content_policy) : 'OctoHR items'} />
               <Info label={isAr ? 'إصدار الإعداد' : 'Setup version'} value={config.norms?.active_norm_version || (isAr ? 'غير محدد' : 'Not set')} />
               <Info
                 label={isAr ? 'البطارية' : 'Battery'}

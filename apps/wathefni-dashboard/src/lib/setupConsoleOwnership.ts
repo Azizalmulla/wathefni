@@ -234,7 +234,7 @@ export const SETUP_CONSOLE_OWNERSHIP: OwnershipEntry[] = [
     ownerLabelEn: 'Setup Console',
     setupHref: '/setup-console#classic-module-documents',
     opsHref: '/dashboard?page=compliance',
-    notesEn: 'Required types + reminder windows — Setup. Uploads/reviews stay in Documents/Compliance ops. OCR is Wathefni-owned.',
+    notesEn: 'Required types + reminder windows — Setup. Uploads/reviews stay in Documents/Compliance ops. OCR is OctoHR-owned.',
   },
   {
     key: 'onboarding_company_policy',

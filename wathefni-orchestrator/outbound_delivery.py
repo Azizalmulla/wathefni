@@ -372,8 +372,8 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "label": "Bank details need attention",
         "label_ar": "تفاصيل البنك تحتاج تصحيحاً",
         "text": {
-            "en": "Hi {employee_name}, your bank details need a correction. Please open Bank in the Wathefni app.",
-            "ar": "مرحباً {employee_name}، تفاصيل حسابك البنكي تحتاج تصحيحاً. يرجى فتح البنك في تطبيق وظفني.",
+            "en": "Hi {employee_name}, your bank details need a correction. Please open Bank in the OctoHR app.",
+            "ar": "مرحباً {employee_name}، تفاصيل حسابك البنكي تحتاج تصحيحاً. يرجى فتح البنك في تطبيق OctoHR.",
         },
     },
     # Employee App activation code. Critical so a code that reaches nobody raises a
@@ -920,7 +920,7 @@ def _finalize(
                     title=f"Couldn't reach employee: {_generic_label(template_key, flow)}",
                     # HR-visible text stays channel-agnostic and calm; raw reason
                     # codes are kept in metadata (attempt_reasons) for diagnosis.
-                    detail="Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+                    detail="OctoHR could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
                     source=flow,
                     related_message_id=message_id,
                     priority="high",

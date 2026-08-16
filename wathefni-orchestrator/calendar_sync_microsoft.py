@@ -116,7 +116,7 @@ class MicrosoftCalendarSyncAdapter:
         end = _text(external_event.get("end"))
         tz = _text(external_event.get("timezone")) or "Asia/Kuwait"
         body: dict[str, Any] = {
-            "subject": _text(external_event.get("summary")) or "Wathefni event",
+            "subject": _text(external_event.get("summary")) or "OctoHR event",
             "body": {
                 "contentType": "text",
                 "content": _text(external_event.get("description")) or "",

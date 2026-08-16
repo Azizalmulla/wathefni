@@ -39,7 +39,7 @@ export function AccessVerificationPage({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.45fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Complete Your Wathefni Invite</CardTitle>
+            <CardTitle>Complete Your OctoHR Invite</CardTitle>
             <CardDescription>Create your workspace login. Your fixed role is already assigned by the company Owner/Admin.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -62,7 +62,7 @@ export function AccessVerificationPage({
         <Card>
           <CardHeader>
             <CardTitle>What Happens Next</CardTitle>
-            <CardDescription>Wathefni will sign you into the company workspace and apply your assigned role immediately.</CardDescription>
+            <CardDescription>OctoHR will sign you into the company workspace and apply your assigned role immediately.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Info label="Workspace" value="Company HR workspace" />
@@ -154,7 +154,7 @@ export function AccessVerificationPage({
       <Card>
         <CardHeader>
           <CardTitle>Workspace Access</CardTitle>
-          <CardDescription>After sign-in, Wathefni loads your company workspace, modules, and role permissions.</CardDescription>
+          <CardDescription>After sign-in, OctoHR loads your company workspace, modules, and role permissions.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <Info label="Company" value={access.companyCode || 'Verified after access check'} />
@@ -171,7 +171,7 @@ export function NeedsSettings({ onOpenSettings }: { onOpenSettings: () => void }
     <Card>
       <CardHeader>
         <CardTitle>Sign in required</CardTitle>
-        <CardDescription>Sign in to your Wathefni workspace from Settings to load the dashboard.</CardDescription>
+        <CardDescription>Sign in to your OctoHR workspace from Settings to load the dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
         <Button onClick={onOpenSettings}>Open Settings</Button>
@@ -195,7 +195,7 @@ export function LoadingDashboard({
     <Card>
       <CardHeader>
         <CardTitle>Loading live dashboard data</CardTitle>
-        <CardDescription>Wathefni found saved dashboard access and is loading live hiring data before showing metrics.</CardDescription>
+        <CardDescription>OctoHR found saved dashboard access and is loading live hiring data before showing metrics.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-line bg-panel-muted/60 p-4 text-sm text-subtle">{notice}</div>

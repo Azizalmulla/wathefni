@@ -219,7 +219,7 @@ def document_annotation_format() -> dict[str, Any]:
 
 
 DOCUMENT_ANNOTATION_PROMPT = """
-You are Wathefni CV Extraction V2.
+You are OctoHR CV Extraction V2.
 
 Extract the candidate CV into the provided JSON schema.
 

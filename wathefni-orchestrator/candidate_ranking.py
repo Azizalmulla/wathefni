@@ -2142,7 +2142,7 @@ def build_bounded_evidence_envelope(
 def terra_narrative_system_prompt(locale: str) -> str:
     lang = "Arabic" if str(locale or "").lower().startswith("ar") else "English"
     return (
-        "You are Wathefni Ranking's post-commit brief layer (gpt-5.6-terra). "
+        "You are OctoHR Ranking's post-commit brief layer (gpt-5.6-terra). "
         f"Write a fun, useful {lang} HR ranking brief for one already-committed result. "
         "Use only the provided evidence envelope. Never invent facts. Never change scores or eligibility. "
         "Never recommend automated hiring/lifecycle actions. Keep the verdict under 180 characters. "

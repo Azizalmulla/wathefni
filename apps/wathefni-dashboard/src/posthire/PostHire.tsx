@@ -1206,8 +1206,8 @@ export function ActivationHandoffModal({ handoff, onClose }: { handoff: Activati
         </p>
         <p className="mt-2 text-[13px] leading-6 text-subtle/95">
           {isAr
-            ? 'اعرض هذا الرمز مباشرة للموظف. لا يحفظه وظّفني بعد إغلاق النافذة.'
-            : 'Show this code directly to the employee. Closing this window clears it — Wathefni does not keep the displayed value.'}
+            ? 'اعرض هذا الرمز مباشرة للموظف. لا يحفظه OctoHR بعد إغلاق النافذة.'
+            : 'Show this code directly to the employee. Closing this window clears it — OctoHR does not keep the displayed value.'}
         </p>
         <div className="mt-5 rounded-2xl border border-line/70 bg-canvas/70 px-5 py-6 text-center">
           <p className="font-mono text-3xl font-semibold tracking-[0.35em] text-text" data-testid="activation-handoff-code">
@@ -3662,7 +3662,7 @@ function DocumentPrivacyNote({ className }: { className?: string }) {
   return (
     <p className={cn('flex items-start gap-1.5 text-[11px] leading-4 text-subtle/75', className)}>
       <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-subtle/60" />
-      <span>Only permitted HR and admin users can view uploaded employee documents. Wathefni records document activity for accountability.</span>
+      <span>Only permitted HR and admin users can view uploaded employee documents. OctoHR records document activity for accountability.</span>
     </p>
   )
 }
@@ -6869,8 +6869,8 @@ function CompliancePage({
         title={isAr ? 'متطلبات المستندات للشركة' : 'Company document requirements'}
         body={
           isAr
-            ? 'الأنواع المطلوبة ونوافذ التذكير في وحدة الإعداد. هنا الرفع والمراجعة والتجديد. استخراج المستندات مملوك لوطّفني.'
-            : 'Required types and reminder windows are configured in Setup Console. This screen owns uploads, reviews, and renewals. Extraction stays Wathefni-owned.'
+            ? 'الأنواع المطلوبة ونوافذ التذكير في وحدة الإعداد. هنا الرفع والمراجعة والتجديد. استخراج المستندات مملوك لـ OctoHR.'
+            : 'Required types and reminder windows are configured in Setup Console. This screen owns uploads, reviews, and renewals. Extraction stays OctoHR-owned.'
         }
         anchor="classic-module-documents"
         locale={isAr ? 'ar' : 'en'}

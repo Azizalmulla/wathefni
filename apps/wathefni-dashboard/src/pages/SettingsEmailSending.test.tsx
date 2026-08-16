@@ -149,7 +149,7 @@ describe('Settings Email sending Communications', () => {
     expect(src).not.toContain('Intake Operations')
     expect(src).toContain('position_code')
     expect(src).toContain('Also send an email with calendar invitations')
-    expect(src).toContain('Allow Wathefni emergency fallback')
+    expect(src).toContain('Allow OctoHR emergency fallback')
     expect(src).not.toContain('service principal')
     expect(src).not.toContain('RBAC')
     expect(src).not.toContain('Mail.Send')

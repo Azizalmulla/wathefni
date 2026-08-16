@@ -63,7 +63,7 @@ class SetupConsoleErrorBoundary extends Component<
               Something interrupted Setup Console
             </h1>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: '#5c564d', margin: '0 0 18px' }}>
-              {this.state.message || 'Please reload the page. If it keeps happening, contact Wathefni platform ops.'}
+              {this.state.message || 'Please reload the page. If it keeps happening, contact OctoHR platform ops.'}
             </p>
             <button
               type="button"

@@ -644,7 +644,7 @@ export function AuthProvider({ children, disabled = false }: { children: ReactNo
         }
         const { promptBiometricUnlock } = await import('./localLock/hrBiometricAuth')
         const result = await promptBiometricUnlock({
-          promptMessage: labels?.promptMessage || 'Unlock Wathefni',
+          promptMessage: labels?.promptMessage || 'Unlock OctoHR',
           cancelLabel: labels?.cancelLabel || 'Cancel',
         })
         if (!result.ok) {
@@ -682,7 +682,7 @@ export function AuthProvider({ children, disabled = false }: { children: ReactNo
       if (!availability.usable) return { ok: false, reason: 'unavailable' }
       const { promptBiometricUnlock } = await import('./localLock/hrBiometricAuth')
       const result = await promptBiometricUnlock({
-        promptMessage: labels?.promptMessage || 'Unlock Wathefni',
+        promptMessage: labels?.promptMessage || 'Unlock OctoHR',
         cancelLabel: labels?.cancelLabel || 'Cancel',
       })
       if (!result.ok) return { ok: false, reason: result.reason }

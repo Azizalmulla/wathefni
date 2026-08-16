@@ -2,10 +2,8 @@ import { Alert, Linking } from 'react-native'
 import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
 
 import { useI18n } from '@/i18n'
-import { PRIVACY_URL } from '@/config'
+import { PRIVACY_URL, SUPPORT_URL } from '@/config'
 import { PrivacySupportView } from '@/features/remaining/RemainingViews'
-
-const SUPPORT_URL = 'mailto:support@wathefni.ai'
 
 export default function PrivacySupportScreen() {
   const { t } = useI18n()

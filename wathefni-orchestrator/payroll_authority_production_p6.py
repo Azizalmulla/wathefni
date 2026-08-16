@@ -450,8 +450,8 @@ def employee_may_authoritative_seal(
             "synthetic": synthetic,
             "entitlement_state": state,
             "reason": "company_not_authoritative_entitled",
-            "message_en": "Company has not opted into Wathefni Mode A money authority.",
-            "message_ar": "الشركة لم تُفعّل سلطة الرواتب في وظفني.",
+            "message_en": "Company has not opted into OctoHR Mode A money authority.",
+            "message_ar": "الشركة لم تُفعّل سلطة الرواتب في OctoHR.",
         }
     if state == STATE_ALLOWLISTED:
         on = employee_on_allowlist(cur, company_code=company, employee_key=key)
@@ -505,8 +505,8 @@ def validate_payroll_readiness(cur: Any, *, company_code: str) -> dict[str, Any]
                 code="payroll_mode_missing",
                 severity="blocked",
                 field="payroll_mode",
-                message_en="Choose payroll mode: Wathefni (native), external, or parallel shadow.",
-                message_ar="اختر وضع الرواتب: وظفني أو خارجي أو ظل موازي.",
+            message_en="Choose payroll mode: OctoHR (native), external, or parallel shadow.",
+            message_ar="اختر وضع الرواتب: OctoHR أو خارجي أو ظل موازي.",
                 how_to_fix="Set payroll mode in company payroll settings.",
             )
         )
@@ -595,7 +595,7 @@ def validate_payroll_readiness(cur: Any, *, company_code: str) -> dict[str, Any]
                     field="kuwait_statutory_baseline",
                     message_en="Kuwait public statutory baseline is not available for this environment.",
                     message_ar="خط الأساس القانوني الكويتي غير متوفر.",
-                    how_to_fix="Ensure P4B KW_PUBLIC_BASELINE is activated (Wathefni-owned).",
+            how_to_fix="Ensure P4B KW_PUBLIC_BASELINE is activated (OctoHR-owned).",
                 )
             )
     except Exception as exc:
@@ -618,7 +618,7 @@ def validate_payroll_readiness(cur: Any, *, company_code: str) -> dict[str, Any]
                 severity="blocked",
                 field="payroll_mode",
                 message_en="External payroll mode uses Mode B money authority; do not entitle Mode A seal.",
-                message_ar="الوضع الخارجي يستخدم سلطة خارجية ولا يُختم كسلطة وظفني.",
+            message_ar="الوضع الخارجي يستخدم سلطة خارجية ولا يُختم كسلطة OctoHR.",
                 how_to_fix="Keep Mode B for external, or switch payroll mode to native for Mode A.",
             )
         )

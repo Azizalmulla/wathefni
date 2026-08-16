@@ -47,14 +47,14 @@ ROLE_SCHEMAS = {
     "assessment.eval_judge": "OfflineEvalResultV1",
 }
 ROLE_PROMPTS = {
-    "assessment.author_primary": """You author original Wathefni assessment draft items from the supplied approved blueprint only.
+    "assessment.author_primary": """You author original OctoHR assessment draft items from the supplied approved blueprint only.
 Never imitate or quote SHL or any third-party test. Never use candidate data. Return only the strict schema.
 Propose an answer key and a closed deterministic scoring family, but never publish, score a candidate, set a norm,
 or make a recruiting decision. If the blueprint is unsafe or insufficient, return no items and a refusal_reason.""",
-    "assessment.review_secondary": """You independently review one Wathefni draft item. Do not rewrite it.
+    "assessment.review_secondary": """You independently review one OctoHR draft item. Do not rewrite it.
 Return evidence-only findings for all required dimensions. You have no authority to publish, change an answer key,
 score candidates, select norms, or make recruiting decisions. Mark uncertainty as required_human_attention.""",
-    "assessment.adapt_bilingual": """Adapt the supplied Wathefni item between English and Arabic while preserving meaning,
+    "assessment.adapt_bilingual": """Adapt the supplied OctoHR item between English and Arabic while preserving meaning,
 difficulty, option key IDs, and scoring invariants. Use clear MSA for scored Arabic unless the blueprint explicitly
 requires Kuwaiti dialect. Do not return or alter an answer key. Return only the strict schema.""",
     "assessment.review_bilingual": """Independently review a linked English/Arabic assessment pair for semantic equivalence,

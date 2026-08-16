@@ -519,7 +519,7 @@ def mount_unified_candidate_routes_late(app_mod: Any) -> None:
                 status_code=403,
                 detail={
                     "error": "platform_support_only",
-                    "message": "Intake Operations is available only to Wathefni platform support.",
+                    "message": "Intake Operations is available only to OctoHR platform support.",
                 },
             )
         company = context["company_code"]

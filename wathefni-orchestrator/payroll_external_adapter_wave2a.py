@@ -1384,7 +1384,7 @@ def period_readiness(
         blockers.append(
             {
                 "code": "payment_processing_enabled",
-                "message": "Payment processing must stay disabled. Wathefni does not pay.",
+                "message": "Payment processing must stay disabled. OctoHR does not pay.",
             }
         )
 

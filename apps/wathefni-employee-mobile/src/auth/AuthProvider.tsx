@@ -716,7 +716,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
       const prompted = await promptBiometricUnlock({
-        promptMessage: labels?.promptMessage || 'Wathefni',
+        promptMessage: labels?.promptMessage || 'OctoHR',
         cancelLabel: labels?.cancelLabel || 'Cancel',
       })
       if (!prompted.ok) {
@@ -752,7 +752,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false, reason: 'unavailable' }
       }
       const prompted = await promptBiometricUnlock({
-        promptMessage: labels?.promptMessage || 'Wathefni',
+        promptMessage: labels?.promptMessage || 'OctoHR',
         cancelLabel: labels?.cancelLabel || 'Cancel',
       })
       if (!prompted.ok) {

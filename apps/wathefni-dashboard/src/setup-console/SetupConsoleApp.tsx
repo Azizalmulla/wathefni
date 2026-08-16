@@ -351,7 +351,7 @@ export default function SetupConsoleApp() {
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">Wathefni</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">OctoHR</p>
               <h1 className="text-lg font-semibold tracking-[-0.025em]">Setup Console</h1>
             </div>
           </div>

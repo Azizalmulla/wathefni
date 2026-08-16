@@ -136,8 +136,8 @@ DEFAULT_POLICY = {
     "scheduler_cadence": "hourly",
     "lag_alert_seconds": 7200,
     "disclaimer": (
-        "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. "
-        "Wathefni does not determine whether a specific termination is legally justified. "
+        "Configurable policy only. Not legal advice. OctoHR records, validates and orchestrates HR decisions. "
+        "OctoHR does not determine whether a specific termination is legally justified. "
         "Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment — "
         "Payroll owns monetary calculations from an inputs-only settlement packet."
     ),
@@ -151,7 +151,7 @@ DEFAULT_POLICY = {
             "and pay frequency are complete, and the case is not exceptional."
         ),
         "exceptional_case_banner": (
-            "Exceptional / high-risk case. Wathefni will not decide lawfulness. "
+            "Exceptional / high-risk case. OctoHR will not decide lawfulness. "
             "Complete evidence, escalate for human legal judgment, and keep dates/approvals manual."
         ),
         "settlement_handoff": (
@@ -160,7 +160,7 @@ DEFAULT_POLICY = {
         ),
         "service_certificate": (
             "On end of service the worker is entitled to a service certificate (Art. 54) stating "
-            "duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni."
+            "duration, position and last remuneration, without harmful expressions. Track issuance in OctoHR."
         ),
         "rehire_vs_reinstate": (
             "Post-effective reinstatement is disabled by default. Use true rehire (new employment) "
@@ -498,7 +498,7 @@ def _assert_termination_classification(legacy: Any, *, policy: dict[str, Any], p
                 "error": "manual_review_missing_classification",
                 "message": (
                     "Missing or invalid authoritative classification fields. "
-                    "Wathefni will not infer contract type, pay frequency, probation or case class."
+                    "OctoHR will not infer contract type, pay frequency, probation or case class."
                 ),
                 "missing_fields": missing,
                 "ui_copy": (policy.get("ui_copy") or DEFAULT_POLICY["ui_copy"]).get("termination_banner"),
@@ -514,7 +514,7 @@ def _assert_termination_classification(legacy: Any, *, policy: dict[str, Any], p
                     "error": "exceptional_case_manual_escalation_required",
                     "message": (
                         "Exceptional / high-risk termination requires an escalation note. "
-                        "Wathefni does not decide lawfulness."
+                        "OctoHR does not decide lawfulness."
                     ),
                     "ui_copy": (policy.get("ui_copy") or DEFAULT_POLICY["ui_copy"]).get("exceptional_case_banner"),
                 },
@@ -712,7 +712,7 @@ def upsert_company_policy(legacy: Any, context: dict[str, Any], *, patch: dict[s
     )
     if "disclaimer" in patch and patch["disclaimer"] is not None:
         pj["disclaimer"] = patch["disclaimer"]
-    elif old_wave in {"", "wave3c", "wave3d"} or "Not legal advice. Wathefni records" not in str(pj.get("disclaimer") or ""):
+    elif old_wave in {"", "wave3c", "wave3d"} or "Not legal advice. OctoHR records" not in str(pj.get("disclaimer") or ""):
         pj["disclaimer"] = DEFAULT_POLICY["disclaimer"]
     else:
         pj["disclaimer"] = merged.get("disclaimer") or DEFAULT_POLICY["disclaimer"]

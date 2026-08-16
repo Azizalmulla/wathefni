@@ -44,7 +44,7 @@ def freeze_current_content_version(
     if not battery:
         raise lifecycle.AssessmentAuthorityError(
             "missing_active_assessment_battery",
-            "No active Wathefni assessment battery is available.",
+            "No active OctoHR assessment battery is available.",
             status_code=409,
         )
     cur.execute(

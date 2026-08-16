@@ -251,7 +251,7 @@ export function HRAssistantView() {
           <Image
             source={BRAND_BADGE}
             style={styles.brandBadge}
-            accessibilityLabel="Wathefni"
+            accessibilityLabel="OctoHR"
             resizeMode="contain"
           />
           <Text

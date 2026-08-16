@@ -10,7 +10,7 @@ export type AccessIssue = {
 export function sessionExpiredIssue(): AccessIssue {
   return {
     code: 'dashboard_auth_failed',
-    title: 'Sign in to Wathefni',
+    title: 'Sign in to OctoHR',
     description: 'Your session expired. Please sign in again.',
   }
 }
@@ -24,14 +24,14 @@ export function accessIssueFromError(error: unknown): AccessIssue | null {
   if (error.code === 'dashboard_user_identity_required') {
     return {
       code: error.code,
-      title: 'Sign in to Wathefni',
+      title: 'Sign in to OctoHR',
       description: 'Your session expired. Please sign in again.',
     }
   }
   if (error.code === 'dashboard_company_required') {
     return {
       code: error.code,
-      title: 'Sign in to Wathefni',
+      title: 'Sign in to OctoHR',
       description: 'Your session expired. Please sign in again.',
     }
   }

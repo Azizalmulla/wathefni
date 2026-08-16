@@ -254,7 +254,7 @@ function candidateFiltersFromDashboardNav(nav: DashboardNavState): CandidateFilt
 
 const navItems: DashboardNavItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, module: 'pre_hiring', group: 'prehire' },
-  { id: 'ai', label: 'Wathefni Assistant', icon: MessageCircle, module: 'pre_hiring', group: 'prehire' },
+  { id: 'ai', label: 'OctoHR Assistant', icon: MessageCircle, module: 'pre_hiring', group: 'prehire' },
   { id: 'jobs', label: 'Jobs', icon: BriefcaseBusiness, module: 'pre_hiring', group: 'prehire' },
   { id: 'requisitions', label: 'Requisitions', icon: ClipboardList, module: 'requisitions', group: 'prehire' },
   { id: 'candidates', label: 'Candidates', icon: Users, module: 'pre_hiring', group: 'prehire' },
@@ -387,14 +387,14 @@ function missingAccessIssue(access: DashboardAccess): AccessIssue {
   if (!access.token.trim()) {
     return {
       code: 'dashboard_auth_failed',
-      title: 'Sign in to Wathefni',
+      title: 'Sign in to OctoHR',
       description: 'Use your workspace email and password to open the company dashboard.',
     }
   }
   return {
     code: 'dashboard_company_required',
-    title: 'Sign in to Wathefni',
-    description: 'Add your company code once so Wathefni can verify the workspace before loading hiring data.',
+    title: 'Sign in to OctoHR',
+    description: 'Add your company code once so OctoHR can verify the workspace before loading hiring data.',
   }
 }
 
@@ -1445,7 +1445,7 @@ function App() {
       const wasPasswordLogin = Boolean(nextAccess.email && nextAccess.password)
       const unauthorized = error instanceof DashboardApiError && (error.status === 401 || error.code === 'dashboard_auth_failed')
       if (wasPasswordLogin && unauthorized) {
-        setAccessIssue({ code: 'dashboard_auth_failed', title: 'Sign in to Wathefni', description: 'Incorrect email or password. Please try again.' })
+        setAccessIssue({ code: 'dashboard_auth_failed', title: 'Sign in to OctoHR', description: 'Incorrect email or password. Please try again.' })
         setNoticeErr('Incorrect email or password. Please try again.')
       } else {
         const issue = accessIssueFromError(error) || { code: 'dashboard_auth_failed', title: 'Verify your access', description: friendlyDashboardError(error, 'Access needs to be verified.') }
@@ -1947,7 +1947,7 @@ function App() {
       rememberDashboardChatConversationId(access, payload.session.conversation_id)
       setChatMessages((payload.messages || []).map(storedDashboardMessageToChatMessage))
       setChatHistoryOpen(false)
-      setNoticeOk(`Reopened ${payload.session.title || 'Wathefni Assistant chat'}.`)
+      setNoticeOk(`Reopened ${payload.session.title || 'OctoHR Assistant chat'}.`)
     } catch (error) {
       setNoticeErr(friendlyDashboardError(error, 'Could not open that chat.'))
     }
@@ -1965,7 +1965,7 @@ function App() {
       setChatInput('')
       setNewChatConfirmOpen(false)
       await loadChatSessions(access)
-      setNoticeOk('Started a new Wathefni Assistant chat. Saved records were not changed.')
+      setNoticeOk('Started a new OctoHR Assistant chat. Saved records were not changed.')
     } catch (error) {
       setNoticeErr(friendlyDashboardError(error, 'Could not start a new chat.'))
     } finally {
@@ -2072,7 +2072,7 @@ function App() {
                 item.id === assistantId
                   ? {
                       ...item,
-                      text: friendlyDashboardError(event.message, 'Wathefni couldn’t finish answering just now. Please try again in a moment.'),
+                      text: friendlyDashboardError(event.message, 'OctoHR couldn’t finish answering just now. Please try again in a moment.'),
                       isStreaming: false,
                       progressPhase: null,
                     }
@@ -2086,9 +2086,9 @@ function App() {
       // A mid-stream error resolves the stream normally (the bubble already shows
       // the friendly failure). Never claim success after a failed answer.
       if (streamFailed) {
-        setNoticeErr('Wathefni couldn’t finish answering. Please try again.')
+        setNoticeErr('OctoHR couldn’t finish answering. Please try again.')
       } else if (!aborted) {
-        setNoticeOk('Answered by the Wathefni assistant.')
+        setNoticeOk('Answered by the OctoHR assistant.')
       }
       if (finalSessionId) {
         setChatConversationId(finalSessionId)
@@ -2105,14 +2105,14 @@ function App() {
             item.id === assistantId
               ? {
                   ...item,
-                  text: friendlyDashboardError(error, 'Wathefni couldn’t finish answering just now. Please try again in a moment.'),
+                  text: friendlyDashboardError(error, 'OctoHR couldn’t finish answering just now. Please try again in a moment.'),
                   isStreaming: false,
                   progressPhase: null,
                 }
               : item,
           ),
         )
-        setNoticeErr('Wathefni couldn’t finish answering. Please try again.')
+        setNoticeErr('OctoHR couldn’t finish answering. Please try again.')
       }
     } finally {
       if (chatAbortRef.current === controller) chatAbortRef.current = null
@@ -2192,7 +2192,7 @@ function App() {
           dir={recruitingLocale === 'ar' ? 'rtl' : 'ltr'}
         >
           <div className={useFramedShell ? 'mb-7 hidden px-3 py-2 lg:block' : 'mb-9 rounded-[1.35rem] px-3 py-2'}>
-            <div className="text-xl font-semibold tracking-[-0.045em]">Wathefni</div>
+            <div className="text-xl font-semibold tracking-[-0.045em]">OctoHR</div>
             <div className={useFramedShell ? 'mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/40' : 'mt-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-mist'}>
               {recruitingLocale === 'ar' ? 'مساحة الموارد البشرية' : 'HR workspace'}
             </div>
@@ -2436,11 +2436,11 @@ function App() {
                 {showingInviteAcceptance
                   ? recruitingLocale === 'ar'
                     ? 'أكمل دعوة واثقني'
-                    : 'Complete your Wathefni invite'
+                    : 'Complete your OctoHR invite'
                   : accessIssue
                   ? recruitingLocale === 'ar'
                     ? 'تحقق من وصولك إلى واثقني'
-                    : 'Verify your Wathefni access'
+                    : 'Verify your OctoHR access'
                   : pageTitle}
               </h1>
               {(accessIssue || showingInviteAcceptance || pagePersonality !== 'chat') ? (
@@ -2448,7 +2448,7 @@ function App() {
                 {showingInviteAcceptance
                   ? recruitingLocale === 'ar'
                     ? 'أنشئ تسجيل الدخول لمساحة العمل للانضمام إلى شركة واثقني هذه.'
-                    : 'Create your workspace login to join this Wathefni company workspace.'
+                    : 'Create your workspace login to join this OctoHR company workspace.'
                   : accessIssue
                   ? recruitingLocale === 'ar'
                     ? 'سجّل الدخول بحساب مساحة العمل، أو استخدم رمز وصول احتياطي فقط عند الحاجة للإعداد أو الاستعادة.'
@@ -2529,7 +2529,7 @@ function App() {
           {showingInviteAcceptance || accessIssue ? (
             <AccessVerificationPage
               access={access}
-              accessIssue={accessIssue || { code: 'invite_pending', title: 'Complete your Wathefni invite', description: 'Create your workspace login. Your assigned role will apply after you accept the invite.' }}
+              accessIssue={accessIssue || { code: 'invite_pending', title: 'Complete your OctoHR invite', description: 'Create your workspace login. Your assigned role will apply after you accept the invite.' }}
               acceptName={acceptName}
               acceptPassword={acceptPassword}
               acceptPhone={acceptPhone}
@@ -3319,7 +3319,7 @@ function App() {
 
 const pageLabels: Record<Page, string> = {
   overview: 'Overview',
-  ai: 'Wathefni Assistant',
+  ai: 'OctoHR Assistant',
   jobs: 'Jobs',
   requisitions: 'Requisitions',
   candidates: 'Candidates',
@@ -3356,7 +3356,7 @@ const pageLabels: Record<Page, string> = {
 
 const pageLabelsAr: Record<Page, string> = {
   overview: 'نظرة عامة',
-  ai: 'مساعد واثقني',
+  ai: 'مساعد OctoHR',
   jobs: 'الوظائف',
   requisitions: 'طلبات التوظيف',
   candidates: 'المرشحون',
@@ -3405,7 +3405,7 @@ const pageSubtitles: Record<Page, string> = {
   reports: 'Hiring reports for roles, candidates, CVs, assessments, and follow-ups.',
   employees: 'Find people quickly, see employment state, and open a profile.',
   workforce: 'Manage departments, teams, locations, and structure — not a second employee directory.',
-  inbox: 'Ranked follow-ups across Wathefni — open the owning module to resolve.',
+  inbox: 'Ranked follow-ups across OctoHR — open the owning module to resolve.',
   preboarding: 'Future joiners, readiness blockers, and pre-join tasks — distinct from active employees.',
   probation: 'Who is on probation, what is due, how they are doing, and which confirm/extend/fail decision is required.',
   onboarding: 'New hires in progress, open documents, and reminders to keep onboarding moving.',
@@ -3425,7 +3425,7 @@ const pageSubtitles: Record<Page, string> = {
   analytics: 'Workforce patterns and risks — not the daily task queue.',
   compliance: 'Resolve missing, expiring, and review-required employee documents.',
   activity: 'A clear, trustworthy, read-only timeline of important company and HR activity.',
-  settings: 'Manage who belongs here, how they sign in, and how Wathefni connects company tools.',
+  settings: 'Manage who belongs here, how they sign in, and how OctoHR connects company tools.',
 }
 
 const pageSubtitlesAr: Record<Page, string> = {
@@ -3462,7 +3462,7 @@ const pageSubtitlesAr: Record<Page, string> = {
   analytics: 'أنماط ومخاطر القوى العاملة — لا قائمة المهام اليومية.',
   compliance: 'حل المستندات الناقصة والمنتهية والتي تحتاج مراجعة.',
   activity: 'جدول زمني موثوق للقراءة فقط لأهم نشاط الشركة والموارد البشرية.',
-  settings: 'أدِر من ينتمي هنا، وكيف يسجّلون الدخول، وكيف يتصل وثّفني بأدوات الشركة.',
+  settings: 'أدِر من ينتمي هنا، وكيف يسجّلون الدخول، وكيف يتصل OctoHR بأدوات الشركة.',
 }
 
 function localizedPageLabel(page: Page | string, locale: RecruitingLocale) {

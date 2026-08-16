@@ -15,8 +15,8 @@ SUPPORTED_LOCALES = frozenset({"en", "ar"})
 
 TEMPLATES: dict[str, dict[str, str]] = {
     "welcome": {
-        "en": "Welcome to Wathefni. Send your APPLY code, or tell me which role you want to apply for.",
-        "ar": "حياك في وظفني. أرسل رمز التقديم (APPLY)، أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها.",
+        "en": "Welcome to OctoHR. Send your APPLY code, or tell me which role you want to apply for.",
+        "ar": "حياك في OctoHR. أرسل رمز التقديم (APPLY)، أو اكتب اسم الوظيفة التي ترغب بالتقديم عليها.",
     },
     "role_resolved_cv_request": {
         "en": "Your application for {role} is ready. Please send your CV as a PDF, DOCX, or clear image.",

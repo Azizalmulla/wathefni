@@ -540,7 +540,7 @@ function ImportSection({
           Deep fields (Civil ID, nationality, contacts, bank, documents, compliance) and onboarding migration state map via field mapping.
         </p>
         <p className="mt-1.5 text-subtle/75">
-          Matching: external ID when supplied, otherwise phone. Unknown source columns are retained. Existing employees can be marked already onboarded externally, history imported, not applicable, or requiring Wathefni onboarding — never faked from “active” alone.
+          Matching: external ID when supplied, otherwise phone. Unknown source columns are retained. Existing employees can be marked already onboarded externally, history imported, not applicable, or requiring OctoHR onboarding — never faked from “active” alone.
         </p>
       </div>
       <input
@@ -620,7 +620,7 @@ function ImportSection({
             </Button>
           </div>
           <p className="text-[12px] leading-5 text-subtle/85">
-            Every source column maps to a Wathefni field, a company custom field, or source-only retention. Unmapped fields never fail the batch.
+            Every source column maps to an OctoHR field, a company custom field, or source-only retention. Unmapped fields never fail the batch.
           </p>
           <div className="max-h-56 space-y-1.5 overflow-y-auto">
             {mappingRules.map((rule, idx) => {
@@ -660,7 +660,7 @@ function ImportSection({
                         setMappingRules(next)
                       }}
                     >
-                      <option value="canonical">Canonical Wathefni field</option>
+                      <option value="canonical">Canonical OctoHR field</option>
                       <option value="custom">Company custom field</option>
                       <option value="create_custom">Create custom field</option>
                       <option value="source_only">Source-only (retain)</option>
@@ -801,9 +801,9 @@ function ConnectedSection({
   const [connections, setConnections] = useState<MigrationConnection[]>([])
   const [runs, setRuns] = useState<MigrationSyncRun[]>([])
   const [canaryAvailable, setCanaryAvailable] = useState(false)
-  const [name, setName] = useState('Wathefni canary connector')
+  const [name, setName] = useState('OctoHR canary connector')
   const [error, setError] = useState<string | null>(null)
-  const nameBaseline = useRef('Wathefni canary connector')
+  const nameBaseline = useRef('OctoHR canary connector')
 
   const refresh = useCallback(async (opts?: { soft?: boolean }) => {
     // Soft refresh keeps painted rows (no loading blank / filter reset).
@@ -889,8 +889,8 @@ function ConnectedSection({
                     schedule_enabled: false,
                   })
                   onNotice?.('Connection added. Run a sync to preview changes.', 'success')
-                  setName('Wathefni canary connector')
-                  nameBaseline.current = 'Wathefni canary connector'
+                  setName('OctoHR canary connector')
+                  nameBaseline.current = 'OctoHR canary connector'
                   await refresh({ soft: true })
                   emitMigrationSyncLive({ reason: 'connection_changed' })
                 } catch (err) {

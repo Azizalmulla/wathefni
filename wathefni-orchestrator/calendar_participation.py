@@ -903,7 +903,7 @@ def process_delivery_item(legacy: Any, cur: Any, item: Mapping[str, Any]) -> dic
     public_base = _text(os.environ.get("WATHEFNI_PUBLIC_BASE_URL") or os.environ.get("WATHEFNI_DASHBOARD_PUBLIC_ORIGIN") or "")
     invite_path = _text(payload.get("invite_path"))
     link = f"{public_base.rstrip('/')}{invite_path}" if public_base and invite_path else invite_path
-    title = _text(event.get("title")) or "Wathefni event"
+    title = _text(event.get("title")) or "OctoHR event"
     recipient = payload.get("recipient") if isinstance(payload.get("recipient"), dict) else {
         "user_id": payload.get("user_id"),
         "guest_id": item.get("guest_id") or payload.get("guest_id"),

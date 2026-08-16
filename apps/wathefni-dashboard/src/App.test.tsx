@@ -102,7 +102,7 @@ describe('dashboard initial load', () => {
 
     renderApp()
 
-    expect(await screen.findByRole('heading', { name: 'Sign in to Wathefni' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Sign in to OctoHR' })).toBeInTheDocument()
     expect(screen.getByText(/session expired/i)).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Backup access code')).toBeInTheDocument()
     expect(screen.getByText('Sign in')).toBeInTheDocument()

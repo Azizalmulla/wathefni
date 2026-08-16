@@ -290,7 +290,7 @@ export function ImportCvButton({
               <div>
                 <div className="text-lg font-semibold tracking-tight">Import CVs</div>
                 <p className="mt-1 text-sm leading-6 text-subtle">
-                  Upload CVs or a ZIP file. Wathefni will prepare them for review before they’re added to your candidates.
+                  Upload CVs or a ZIP file. OctoHR will prepare them for review before they’re added to your candidates.
                 </p>
                 <p className="mt-1 text-xs text-subtle/80">
                   Up to {MAX_FILES} files · {formatBytes(MAX_TOTAL_BYTES)} total · {PRIMARY_FORMATS.join(', ')} and more

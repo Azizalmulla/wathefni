@@ -218,7 +218,7 @@ export function PayrollSetupCard({
               ) : null}
             </section>
 
-            {/* Wathefni-owned */}
+            {/* OctoHR-owned customer presentation; legacy API field names remain stable. */}
             <section
               id="classic-payroll-setup-statutory"
               className="rounded-2xl border border-line/55 bg-panel-muted/40 px-4 py-3"
@@ -226,7 +226,7 @@ export function PayrollSetupCard({
             >
               <p className="flex items-center gap-2 text-sm font-semibold text-text">
                 <ShieldCheck className="h-4 w-4" aria-hidden />
-                {isAr ? 'تملكه وظفني (للقراءة فقط)' : 'Owned by Wathefni (read-only)'}
+                {isAr ? 'يملكه OctoHR (للقراءة فقط)' : 'Owned by OctoHR (read-only)'}
               </p>
               <dl className="mt-2 grid gap-2 text-xs text-subtle sm:grid-cols-2">
                 <div>
@@ -235,7 +235,7 @@ export function PayrollSetupCard({
                 </div>
                 <div>
                   <dt>{isAr ? 'محرك الاحتساب / الختم' : 'Calculation & sealing'}</dt>
-                  <dd className="font-medium text-text">{isAr ? 'قواعد وظفني' : 'Wathefni rules'}</dd>
+                  <dd className="font-medium text-text">{isAr ? 'قواعد OctoHR' : 'OctoHR rules'}</dd>
                 </div>
                 <div>
                   <dt>{isAr ? 'معالجة الدفع' : 'Payment processing'}</dt>
@@ -244,8 +244,8 @@ export function PayrollSetupCard({
               </dl>
               <p className="mt-2 text-xs leading-5 text-subtle">
                 {isAr
-                  ? 'لا تُطلب من الشركة كتابة نسب العمل الإضافي أو التأمينات أو الإجازة المرضية — تملكها وظفني.'
-                  : 'Companies are never asked to type OT, PIFSS, or sick-leave percentages — Wathefni owns those rates.'}
+                  ? 'لا تُطلب من الشركة كتابة نسب العمل الإضافي أو التأمينات أو الإجازة المرضية — يملكها OctoHR.'
+                  : 'Companies are never asked to type OT, PIFSS, or sick-leave percentages — OctoHR owns those rates.'}
               </p>
             </section>
 
@@ -272,7 +272,7 @@ export function PayrollSetupCard({
                   )}
                   onClick={() => setPayrollMode('native')}
                 >
-                  <span className="block text-sm font-semibold">{isAr ? 'رواتب وظفني' : 'Wathefni Payroll'}</span>
+                  <span className="block text-sm font-semibold">{isAr ? 'رواتب OctoHR' : 'OctoHR Payroll'}</span>
                   <span className="mt-1 block text-xs text-subtle">
                     {isAr ? 'إعداد الجاهزية والسلطة الأصلية.' : 'Configure native readiness and authority.'}
                   </span>
@@ -374,8 +374,8 @@ export function PayrollSetupCard({
                   <h3 className="text-sm font-semibold">{isAr ? 'مطلوب · تقويم العمل' : 'Required · Working calendar'}</h3>
                   <p className="text-xs text-subtle">
                     {isAr
-                      ? 'الشركة تملك أيام العمل والراحة. وظفني تملك تفسير العطل الرسمية القانونية.'
-                      : 'The company owns working/rest days. Wathefni owns statutory public-holiday interpretation.'}
+                      ? 'الشركة تملك أيام العمل والراحة. يملك OctoHR تفسير العطل الرسمية القانونية.'
+                      : 'The company owns working/rest days. OctoHR owns statutory public-holiday interpretation.'}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {(['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const).map((day) => {
@@ -450,8 +450,8 @@ export function PayrollSetupCard({
                   </p>
                   <p className="text-xs text-subtle">
                     {isAr
-                      ? 'لا تُدخل نسب التأمينات — تملكها وظفني. أكمل تصنيف الموظف وأساس الأجر فقط.'
-                      : 'Never type PIFSS percentages — Wathefni owns rates. Complete category and wage-base facts only.'}
+                      ? 'لا تُدخل نسب التأمينات — يملكها OctoHR. أكمل تصنيف الموظف وأساس الأجر فقط.'
+                      : 'Never type PIFSS percentages — OctoHR owns rates. Complete category and wage-base facts only.'}
                   </p>
                   <ConfigureInOpsLink
                     href={dashboardPageHref('employees')}
@@ -506,7 +506,7 @@ export function PayrollSetupCard({
                 </section>
 
                 <section id="classic-payroll-setup-authority" className="space-y-3">
-                  <h3 className="text-sm font-semibold">{isAr ? 'مطلوب · سلطة وظفني' : 'Required · Wathefni authority'}</h3>
+                  <h3 className="text-sm font-semibold">{isAr ? 'مطلوب · سلطة OctoHR' : 'Required · OctoHR authority'}</h3>
                   <label className="flex flex-col gap-1.5 text-xs font-medium text-subtle">
                     {isAr ? 'مستوى التفعيل' : 'Activation level'}
                     <select
@@ -633,8 +633,8 @@ export function PayrollSetupCard({
                       </label>
                       <p className="text-xs text-subtle">
                         {isAr
-                          ? 'أهلية العمل الإضافي ونسبها تملكها وظفني — لا تُدخل النسب هنا.'
-                          : 'OT eligibility rates stay Wathefni-owned — never type percentages here.'}
+                          ? 'أهلية العمل الإضافي ونسبها يملكها OctoHR — لا تُدخل النسب هنا.'
+                          : 'OT eligibility rates stay OctoHR-owned — never type percentages here.'}
                       </p>
                     </div>
                   ) : null}

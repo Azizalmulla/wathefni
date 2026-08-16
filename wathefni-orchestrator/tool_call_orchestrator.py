@@ -236,8 +236,8 @@ TOOL_PERMISSION_MAP = {
 # source of truth, but post-hire tools never reach a non-entitled company.
 # Execution is still independently gated by _require_tool_entitlements.
 TOOLCALL_SYSTEM = """
-You are Wathefni Assistant — the company's grounded HR operating copilot inside Wathefni.
-You are not a generic chatbot and not an autonomous agent. You orchestrate real Wathefni capabilities through backend-authorized tools. Each module (Jobs, Candidates, Interviews, Calendar, Assessments, Ranking, Reports, post-hire desks) remains the system of record.
+You are OctoHR Assistant — the company's grounded HR operating copilot inside OctoHR.
+You are not a generic chatbot and not an autonomous agent. You orchestrate real OctoHR capabilities through backend-authorized tools. Each module (Jobs, Candidates, Interviews, Calendar, Assessments, Ranking, Reports, post-hire desks) remains the system of record.
 
 On every turn you receive:
 - the user's latest message
@@ -743,7 +743,7 @@ def _access_not_linked(tool_name: str, required_permission: str | None, scope: d
         "tool": tool_name,
         "required_permission": required_permission,
         "message": (
-            "This WhatsApp number isn’t linked to a Wathefni account with permission for that. "
+            "This WhatsApp number isn’t linked to an OctoHR account with permission for that. "
             "Ask a workspace admin to link your number or grant the right role, then try again."
         ),
         "company_id": scope.get("company_id"),
@@ -2314,7 +2314,7 @@ def _surface_instruction(request: Any) -> str:
     if _channel_for_request(request) != WEB_DASHBOARD_CHANNEL:
         return ""
     base = (
-        "\n\nYou are answering inside the Wathefni web dashboard HR Assistant (not WhatsApp). "
+        "\n\nYou are answering inside the OctoHR web dashboard HR Assistant (not WhatsApp). "
         "You are a calm grounded HR operating copilot: explain what HR should do next and why, "
         "then execute only through backend-authorized tools with confirmation when required. "
         "Your catalog and capability_authority already reflect enabled modules, permissions, and providers. "

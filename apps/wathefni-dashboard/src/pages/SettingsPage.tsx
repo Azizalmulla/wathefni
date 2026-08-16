@@ -224,7 +224,7 @@ export function SettingsPage({
           <Card data-settings-account>
             <CardHeader>
               <CardTitle>{isAr ? 'حسابي' : 'My account'}</CardTitle>
-              <CardDescription>{isAr ? 'هويتك في مساحة عمل وثّفني.' : 'Your identity in this Wathefni workspace.'}</CardDescription>
+              <CardDescription>{isAr ? 'هويتك في مساحة عمل OctoHR.' : 'Your identity in this OctoHR workspace.'}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {recoveryAccess ? (
@@ -300,7 +300,7 @@ export function SettingsPage({
                   <Button disabled={busy} onClick={onInvite}><Plus size={16} /> {isAr ? 'إنشاء رابط دعوة' : 'Create invite link'}</Button>
                 </div>
                 <p className="text-xs leading-5 text-subtle">
-                  {isAr ? 'ينشئ وثّفني رابط دعوة آمناً — شاركه مباشرة.' : 'Wathefni creates a secure invite link — share it directly.'}
+                  {isAr ? 'ينشئ OctoHR رابط دعوة آمناً — شاركه مباشرة.' : 'OctoHR creates a secure invite link — share it directly.'}
                 </p>
                 {createdInviteLink ? (
                   <div className="rounded-2xl border border-[#e8c47d]/55 bg-[#fff7e6]/80 p-4">
@@ -671,7 +671,7 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
           <div>
             <CardTitle>{isAr ? 'إرسال البريد' : 'Email sending'}</CardTitle>
             <CardDescription>
-              {isAr ? 'كيف ترسل وظفني رسائل المرشحين والموظفين؟' : 'How should Wathefni send candidate and employee emails?'}
+              {isAr ? 'كيف يرسل OctoHR رسائل المرشحين والموظفين؟' : 'How should OctoHR send candidate and employee emails?'}
             </CardDescription>
           </div>
           {view ? <Badge tone={statusTone(view.status)}>{view.status_label}</Badge> : null}
@@ -775,8 +775,8 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
                 </div>
                 <p className="mt-1 text-xs leading-5 text-subtle">
                   {isAr
-                    ? 'عند إرسال دعوة تقويم للمرشح، أرسل أيضاً رسالة وظفني. اتركه مغلقاً لتجنب التكرار.'
-                    : 'When a calendar invite already went to the candidate, also send a Wathefni email. Leave off to avoid duplicates.'}
+                    ? 'عند إرسال دعوة تقويم للمرشح، أرسل أيضاً رسالة OctoHR. اتركه مغلقاً لتجنب التكرار.'
+                    : 'When a calendar invite already went to the candidate, also send an OctoHR email. Leave off to avoid duplicates.'}
                 </p>
               </div>
               <button
@@ -797,12 +797,12 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
               <div className="flex items-start justify-between gap-4 rounded-2xl border border-white/70 bg-white/55 p-4">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-text">
-                    {isAr ? 'السماح بإرسال طارئ عبر وظفني' : 'Allow Wathefni emergency fallback'}
+                    {isAr ? 'السماح بإرسال طارئ عبر OctoHR' : 'Allow OctoHR emergency fallback'}
                   </div>
                   <p className="mt-1 text-xs leading-5 text-subtle">
                     {isAr
-                      ? 'إذا تعذّر الإرسال من بريد شركتك، اسمح لوظفني بالإرسال مؤقتاً وسجّل ذلك بوضوح.'
-                      : 'If your company sender is unavailable, allow Wathefni to send temporarily and record it clearly.'}
+                      ? 'إذا تعذّر الإرسال من بريد شركتك، اسمح لـ OctoHR بالإرسال مؤقتاً وسجّل ذلك بوضوح.'
+                      : 'If your company sender is unavailable, allow OctoHR to send temporarily and record it clearly.'}
                   </p>
                 </div>
                 <button
@@ -998,8 +998,8 @@ function EmailDocumentIntakeCard({
         {!allowlisted ? (
           <p className="text-sm text-subtle">
             {isAr
-              ? 'استقبال التحويل متاح حالياً لمستأجري وظفني والاختبار فقط.'
-              : 'Forwarded intake is limited to Wathefni and test tenants in this phase.'}
+              ? 'استقبال التحويل متاح حالياً لمستأجري OctoHR والاختبار فقط.'
+              : 'Forwarded intake is limited to OctoHR and test tenants in this phase.'}
           </p>
         ) : null}
 
@@ -1338,7 +1338,7 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
             : 'New mail from this folder will enter the same durable intake pipeline used by forwarding.'
           : isAr
             ? 'سيتوقف سحب الرسائل تلقائياً. يمكنك المزامنة يدوياً لاحقاً.'
-            : 'Wathefni will stop pulling mail automatically. You can sync manually later.',
+            : 'OctoHR will stop pulling mail automatically. You can sync manually later.',
         confirmLabel: next ? (isAr ? 'تفعيل' : 'Enable') : isAr ? 'إيقاف' : 'Pause',
       }))
     ) {
@@ -1386,7 +1386,7 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
         title: isAr ? 'قطع اتصال الصندوق؟' : 'Disconnect this mailbox?',
         body: isAr
           ? 'سيتوقف سحب السير ويُحذف الربط. يمكنك إعادة الربط لاحقاً.'
-          : 'Wathefni will stop syncing CVs and remove this connection. You can reconnect later.',
+          : 'OctoHR will stop syncing CVs and remove this connection. You can reconnect later.',
         confirmLabel: isAr ? 'قطع الاتصال' : 'Disconnect',
         destructive: true,
       }))
@@ -1418,8 +1418,8 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
         <CardTitle>{isAr ? 'ربط صندوق التوظيف (اختياري)' : 'Recruitment mailbox connector (optional)'}</CardTitle>
         <CardDescription>
           {isAr
-            ? 'مسار مميز للشركات التي لا تريد التحويل. المسار الافتراضي يبقى تحويل البريد إلى عنوان وظفني.'
-            : 'Premium path for companies that prefer not to forward. Forwarding to a Wathefni address remains the default product.'}
+            ? 'مسار مميز للشركات التي لا تريد التحويل. المسار الافتراضي يبقى تحويل البريد إلى عنوان OctoHR.'
+            : 'Premium path for companies that prefer not to forward. Forwarding to an OctoHR address remains the default product.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -1538,8 +1538,8 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
 
               <p className="text-xs leading-5 text-subtle">
                 {isAr
-                  ? 'وظفني يقرأ فقط — لا يرسل ولا يحذف ولا يعلّم الرسائل كمقروءة. السير المعلّقة تُدار من المرشحين.'
-                  : 'Wathefni only reads — it never sends, deletes, or marks mail as read. Held CVs are managed from Candidates.'}
+                  ? 'يقرأ OctoHR فقط — لا يرسل ولا يحذف ولا يعلّم الرسائل كمقروءة. السير المعلّقة تُدار من المرشحين.'
+                  : 'OctoHR only reads — it never sends, deletes, or marks mail as read. Held CVs are managed from Candidates.'}
               </p>
               <div className="flex flex-wrap gap-2">
                 {needsReconnect ? (

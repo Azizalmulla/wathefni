@@ -195,7 +195,7 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
             "mode": m,
             "required_admin_role": "Global Administrator or Application Administrator (Microsoft Entra)",
             "steps": [
-                {"id": "create_app", "title": "Register Wathefni enterprise app in Entra ID", "required": True},
+                {"id": "create_app", "title": "Register OctoHR enterprise app in Entra ID", "required": True},
                 {
                     "id": "app_permissions",
                     "title": "Grant application permissions",
@@ -216,7 +216,7 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
                     "required": True,
                 },
                 {"id": "tenant_id", "title": "Confirm Microsoft tenant ID (Directory ID)", "required": True},
-                {"id": "validate", "title": "Validate connection health in Wathefni", "required": True},
+                {"id": "validate", "title": "Validate connection health in OctoHR", "required": True},
             ],
             "permissions": list(MICROSOFT_365_APP_PERMISSIONS),
             "scopes": list(MICROSOFT_365_APP_SCOPES),
@@ -229,7 +229,7 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
             "steps": [
                 {"id": "start_oauth", "title": "Click Connect with Microsoft", "required": True},
                 {"id": "consent", "title": "Approve Calendar and Teams meeting permissions", "required": True},
-                {"id": "validate", "title": "Wathefni verifies token and calendar access", "required": True},
+                {"id": "validate", "title": "OctoHR verifies token and calendar access", "required": True},
             ],
             "permissions": list(pi.MICROSOFT_365_CALENDAR_SCOPES),
             "scopes": list(pi.MICROSOFT_365_CALENDAR_SCOPES),
@@ -240,7 +240,7 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
             "mode": m,
             "required_admin_role": "Google Workspace Super Admin",
             "steps": [
-                {"id": "create_sa", "title": "Create a Google Cloud service account for Wathefni", "required": True},
+                {"id": "create_sa", "title": "Create a Google Cloud service account for OctoHR", "required": True},
                 {
                     "id": "enable_dwd",
                     "title": "Enable domain-wide delegation on the service account",
@@ -258,8 +258,8 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
                     "detail": "e.g. hr@company.com — SA never owns customer calendars",
                     "required": True,
                 },
-                {"id": "upload_json", "title": "Upload service account JSON key in Wathefni", "required": True},
-                {"id": "validate", "title": "Validate connection health in Wathefni", "required": True},
+                {"id": "upload_json", "title": "Upload service account JSON key in OctoHR", "required": True},
+                {"id": "validate", "title": "Validate connection health in OctoHR", "required": True},
             ],
             "permissions": list(GOOGLE_DWD_SCOPES),
             "scopes": list(GOOGLE_DWD_SCOPES),
@@ -272,7 +272,7 @@ def setup_checklist(*, provider_key: str, mode: str) -> dict[str, Any]:
             "steps": [
                 {"id": "start_oauth", "title": "Click Connect with Google", "required": True},
                 {"id": "consent", "title": "Approve Google Calendar + Meet scopes", "required": True},
-                {"id": "validate", "title": "Wathefni verifies token and calendar access", "required": True},
+                {"id": "validate", "title": "OctoHR verifies token and calendar access", "required": True},
             ],
             "permissions": list(pi.GOOGLE_WORKSPACE_CALENDAR_SCOPES),
             "scopes": list(pi.GOOGLE_WORKSPACE_CALENDAR_SCOPES),
@@ -864,7 +864,7 @@ def parse_microsoft_certificate_pem(certificate_pem: str) -> dict[str, Any]:
     if cert is None:
         raise pi.PlatformIntegrationError(
             "certificate_public_missing",
-            "certificate_pem must include the public X.509 certificate (BEGIN CERTIFICATE) so Wathefni can set x5t/x5t#S256.",
+            "certificate_pem must include the public X.509 certificate (BEGIN CERTIFICATE) so OctoHR can set x5t/x5t#S256.",
             http_status=422,
         )
 

@@ -88,14 +88,14 @@ def connector_feature_payload(*, gmail_oauth_ready: bool, m365_oauth_ready: bool
         "setup_steps_en": [
             "Keep forwarding as the default intake path unless your company requires a direct mailbox connection.",
             "Connect Gmail or Microsoft 365 with read-only recruitment mailbox permission.",
-            "Choose only the recruitment folder or label Wathefni should read.",
+            "Choose only the recruitment folder or label OctoHR should read.",
             "Every email enters the same durable scan, quarantine, and held-admit pipeline as forwarded mail.",
             "Pause or disconnect anytime; reconnect when the token expires or access is revoked.",
         ],
         "setup_steps_ar": [
             "أبقِ التحويل (Forwarding) المسار الافتراضي ما لم تتطلب شركتك ربط صندوق بريد مباشر.",
             "اربط Gmail أو Microsoft 365 بصلاحية قراءة فقط لصندوق التوظيف.",
-            "اختر مجلد أو تسمية التوظيف فقط التي يجب أن يقرأها وظفني.",
+            "اختر مجلد أو تسمية التوظيف فقط التي يجب أن يقرأها OctoHR.",
             "كل رسالة تدخل نفس مسار الفحص والحجر والإضافة اليدوية المستخدم في البريد المحوَّل.",
             "يمكنك الإيقاف أو قطع الاتصال في أي وقت؛ أعد الربط عند انتهاء التوكن أو سحب الصلاحية.",
         ],

@@ -1,7 +1,7 @@
 """Migration & Sync P2 — three-layer field model.
 
 Layers:
-  1) Canonical Wathefni fields (domain writers + authority)
+  1) Canonical OctoHR fields (domain writers + authority)
   2) Company custom field definitions/values
   3) Raw source payload / provenance (never silently discard)
 
@@ -425,7 +425,7 @@ def validate_mapping_rules(rules: list[dict[str, Any]]) -> tuple[list[dict[str, 
                 errors.append(f"{header}: custom_field_key required")
                 continue
             if custom_key in RESERVED_CUSTOM_KEYS:
-                errors.append(f"{header}: '{custom_key}' is reserved for canonical Wathefni fields")
+                errors.append(f"{header}: '{custom_key}' is reserved for canonical OctoHR fields")
                 continue
             canonical = None
         else:
@@ -806,7 +806,7 @@ def apply_deep_canonical_fields(
                     review.append(
                         {
                             "field": "civil_id",
-                            "reason": "Civil ID already verified in Wathefni — import will not overwrite.",
+                            "reason": "Civil ID already verified in OctoHR — import will not overwrite.",
                         }
                     )
                 else:
@@ -888,7 +888,7 @@ def apply_deep_canonical_fields(
         review.append(
             {
                 "field": "employee_category",
-                "reason": "Employee category supplied — confirm against Wathefni category policy before applying.",
+                "reason": "Employee category supplied — confirm against OctoHR category policy before applying.",
                 "value": canonical["employee_category"],
             }
         )
@@ -922,7 +922,7 @@ def apply_deep_canonical_fields(
             for k, v in profile_patch.items():
                 if profile.get(k):
                     if str(profile.get(k)).strip() != str(v).strip():
-                        review.append({"field": k, "reason": "Contact field already set in Wathefni — needs review."})
+                        review.append({"field": k, "reason": "Contact field already set in OctoHR — needs review."})
                     else:
                         skipped.append(k)
                 else:

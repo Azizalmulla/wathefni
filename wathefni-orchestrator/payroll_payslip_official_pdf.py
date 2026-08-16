@@ -244,9 +244,9 @@ def render_official_payslip_pdf_bytes(
         "authority": "Money authority" if not is_ar else "سلطة المبالغ",
         "footer": (
             "This payslip PDF is generated from an immutable external payroll snapshot. "
-            "It does not authorize Wathefni payment processing."
+            "It does not authorize OctoHR payment processing."
             if not is_ar
-            else "تم إنشاء ملف PDF لكشف الراتب من لقطة رواتب خارجية ثابتة. لا يُعد تفويضاً لمعالجة الصرف عبر وظفني."
+            else "تم إنشاء ملف PDF لكشف الراتب من لقطة رواتب خارجية ثابتة. لا يُعد تفويضاً لمعالجة الصرف عبر OctoHR."
         ),
         "description": "Description" if not is_ar else "الوصف",
         "amount": "Amount" if not is_ar else "المبلغ",
@@ -340,7 +340,7 @@ def render_official_payslip_pdf_bytes(
         topMargin=16 * mm,
         bottomMargin=16 * mm,
         title=f"{labels['title']} {period}",
-        author=company_name or "Wathefni",
+        author=company_name or "OctoHR",
     )
     story: list[Any] = []
     story.append(Paragraph(company_name or "—", title_style))

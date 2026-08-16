@@ -30,6 +30,12 @@ bash "$REPO_ROOT/ops/qualify-production-readiness-r10-measured-performance.sh"
 echo "== release: R11 release language =="
 "$PY" "$ORCH/smoke-test-r11-release-language.py"
 
+echo "== release: OctoHR public-brand exhaustion =="
+"$PY" "$REPO_ROOT/ops/qualify-octohr-public-brand.py"
+
+echo "== release: OctoHR live privacy and support destinations =="
+"$PY" "$REPO_ROOT/ops/qualify-octohr-public-destinations.py"
+
 echo "== release: store build gate + live /ready =="
 bash "$REPO_ROOT/ops/qualify-store-build-live.sh"
 

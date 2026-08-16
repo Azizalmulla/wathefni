@@ -282,7 +282,7 @@ def resolve_disposition_from_canonical(canonical: dict[str, str]) -> dict[str, A
         DISPOSITION_ALREADY_EXTERNAL: "Existing employee — already onboarded externally",
         DISPOSITION_HISTORY_IMPORTED: "Existing employee — history will be imported",
         DISPOSITION_NOT_APPLICABLE: "Existing employee — onboarding not applicable",
-        DISPOSITION_NEEDS_WATHEFNI: "Requires Wathefni onboarding",
+    DISPOSITION_NEEDS_WATHEFNI: "Requires OctoHR onboarding",
         DISPOSITION_UNKNOWN: "Needs review — insufficient onboarding evidence",
     }.get(disposition, "Needs review")
 
@@ -722,7 +722,7 @@ def projection_overlay(
     is_ar = str(locale or "").lower().startswith("ar")
     employee_messages = {
         DISPOSITION_ALREADY_EXTERNAL: (
-            "تم إكمال التهيئة خارج وثفني." if is_ar else "Your onboarding was completed outside Wathefni."
+                    "تم إكمال التهيئة خارج OctoHR." if is_ar else "Your onboarding was completed outside OctoHR."
         ),
         DISPOSITION_HISTORY_IMPORTED: (
             "تم استيراد سجل التهيئة السابق." if is_ar else "Your previous onboarding history was imported."
@@ -735,7 +735,7 @@ def projection_overlay(
         DISPOSITION_ALREADY_EXTERNAL: "Already onboarded externally (migrated)",
         DISPOSITION_HISTORY_IMPORTED: "Onboarding history imported (migrated)",
         DISPOSITION_NOT_APPLICABLE: "Onboarding not applicable (migrated)",
-        DISPOSITION_NEEDS_WATHEFNI: "Needs Wathefni onboarding",
+        DISPOSITION_NEEDS_WATHEFNI: "Needs OctoHR onboarding",
         DISPOSITION_UNKNOWN: "Unknown — insufficient source evidence",
     }
     settled = disposition in SETTLED_DISPOSITIONS

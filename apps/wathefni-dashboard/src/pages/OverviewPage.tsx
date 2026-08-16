@@ -36,8 +36,8 @@ export function SetupReadinessCard({
         <CardTitle>Get your workspace ready</CardTitle>
         <CardDescription>
           {remaining > 0
-            ? `${remaining} step${remaining === 1 ? '' : 's'} left before your HR team can run day-to-day on Wathefni - here is what to do next, and why.`
-            : 'A couple of optional recommendations to get the most out of Wathefni.'}
+            ? `${remaining} step${remaining === 1 ? '' : 's'} left before your HR team can run day-to-day on OctoHR - here is what to do next, and why.`
+            : 'A couple of optional recommendations to get the most out of OctoHR.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

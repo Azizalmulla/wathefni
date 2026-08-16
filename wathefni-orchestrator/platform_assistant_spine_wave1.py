@@ -65,8 +65,8 @@ FALLBACKS: dict[str, dict[str, str]] = {
         "ar": "هذا محظور بسبب الصلاحيات أو قوائم السماح أو تجميد السلامة. لن أتجاوزه.",
     },
     "unsupported": {
-        "en": "That action is unsupported. Wathefni does not process pay money or turn on device attendance ingest from the assistant.",
-        "ar": "هذا الإجراء غير مدعوم. وظفني لا يعالج أموال الرواتب ولا يفعّل استقبال أجهزة الحضور من المساعد.",
+        "en": "That action is unsupported. OctoHR does not process pay money or turn on device attendance ingest from the assistant.",
+        "ar": "هذا الإجراء غير مدعوم. لا يعالج OctoHR أموال الرواتب ولا يفعّل استقبال أجهزة الحضور من المساعد.",
     },
     "killed": {
         "en": "The assistant is temporarily unavailable (kill switch).",

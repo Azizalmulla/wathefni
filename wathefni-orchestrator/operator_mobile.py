@@ -951,7 +951,7 @@ def build_owner_workspace_capabilities(app_mod: Any, context: dict[str, Any]) ->
         "enabled": False,
         "features": {},
         "reason": "feature_disabled",
-        "note": "Owner mobile workspace reserved; Setup Console and provisioning stay out of Wathefni HR.",
+        "note": "Owner mobile workspace reserved; Setup Console and provisioning stay out of OctoHR.",
     }
 
 

@@ -40,7 +40,7 @@ INTENTS = frozenset(
     }
 )
 
-SYSTEM_PROMPT = """You are Wathefni's candidate WhatsApp intent router.
+SYSTEM_PROMPT = """You are OctoHR's candidate WhatsApp intent router.
 Classify the candidate message only. Do not invent roles, applications, scores, or decisions.
 Do not mutate state. Do not claim a CV was accepted or a message was delivered.
 Return JSON only that matches the schema.

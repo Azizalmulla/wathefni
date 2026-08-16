@@ -190,7 +190,7 @@ def refuse_unsupported_channel(channel: str | None) -> dict[str, Any] | None:
             "error": "unsupported_channel",
             "channel": key,
             "message": (
-                f"{key} is not a Wathefni Assistant delivery channel. "
+                f"{key} is not an OctoHR Assistant delivery channel. "
                 "Use email or WhatsApp when configured, or complete the action in the product UI."
             ),
             "safe_user_message": (

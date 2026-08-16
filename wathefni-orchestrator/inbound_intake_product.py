@@ -162,29 +162,29 @@ def setup_instructions(*, primary_address: str | None = None) -> dict[str, Any]:
     steps_en = [
         f"Create or choose the recruitment mailbox your company already uses (for example careers@yourcompany.com).",
         f"Add a forward (or inbox rule) so every message with a CV attachment is copied to {addr}.",
-        "In Microsoft 365 / Outlook: Settings → Mail → Forwarding, or create a rule “if has attachment → redirect/forward to Wathefni”.",
+        "In Microsoft 365 / Outlook: Settings → Mail → Forwarding, or create a rule “if has attachment → redirect/forward to OctoHR”.",
         "In Gmail: Settings → Forwarding and POP/IMAP → Add a forwarding address, then confirm; optionally filter “Has attachment” to that address.",
-        "Send one test CV from an external address and confirm Wathefni shows a recent received time on this page.",
-        "Optional: create a job-specific Wathefni alias for a single open role. Without a role alias, CVs are held as needs role until HR assigns one.",
-        "Wathefni does not open or sync your Microsoft/Google inbox in this phase — forwarding is the only intake path.",
+        "Send one test CV from an external address and confirm OctoHR shows a recent received time on this page.",
+        "Optional: create a job-specific OctoHR alias for a single open role. Without a role alias, CVs are held as needs role until HR assigns one.",
+        "OctoHR does not open or sync your Microsoft/Google inbox in this phase — forwarding is the only intake path.",
     ]
     steps_ar = [
         f"أنشئ أو اختر صندوق بريد التوظيف الذي تستخدمه الشركة بالفعل (مثل careers@yourcompany.com).",
         f"أضف تحويلاً (أو قاعدة وارد) بحيث تُنسخ كل رسالة تحتوي مرفق سيرة ذاتية إلى {addr}.",
-        "في Microsoft 365 / Outlook: الإعدادات ← البريد ← التحويل، أو أنشئ قاعدة «إذا وُجد مرفق ← إعادة توجيه إلى وظفني».",
+        "في Microsoft 365 / Outlook: الإعدادات ← البريد ← التحويل، أو أنشئ قاعدة «إذا وُجد مرفق ← إعادة توجيه إلى OctoHR».",
         "في Gmail: الإعدادات ← التحويل وPOP/IMAP ← أضف عنوان تحويل ثم أكّده؛ ويمكنك تصفية «يحتوي مرفقاً» إلى ذلك العنوان.",
-        "أرسل سيرة ذاتية تجريبية من عنوان خارجي وتأكد أن وظفني يعرض وقت استلام حديث في هذه الصفحة.",
+        "أرسل سيرة ذاتية تجريبية من عنوان خارجي وتأكد أن OctoHR يعرض وقت استلام حديث في هذه الصفحة.",
         "اختياري: أنشئ اسماً مستعاراً خاصاً بوظيفة مفتوحة. بدون تعيين وظيفة تُحفظ السير كـ «تحتاج دوراً» حتى يعيّنها الموارد البشرية.",
-        "وظفني لا يفتح ولا يزامن صندوق بريد مايكروسوفت/جوجل في هذه المرحلة — التحويل هو مسار الاستقبال الوحيد.",
+        "لا يفتح OctoHR ولا يزامن صندوق بريد مايكروسوفت/جوجل في هذه المرحلة — التحويل هو مسار الاستقبال الوحيد.",
     ]
     summary_en = (
         f"Forward CVs from your company recruitment email to {addr}. "
-        "Wathefni receives a copy via secure inbound mail, scans attachments, "
+        "OctoHR receives a copy via secure inbound mail, scans attachments, "
         "and holds candidates until HR reviews identity and admits them to a role."
     )
     summary_ar = (
         f"حوّل السير الذاتية من بريد التوظيف في شركتك إلى {addr}. "
-        "يستلم وظفني نسخة عبر بريد وارد آمن، يفحص المرفقات، "
+        "يستلم OctoHR نسخة عبر بريد وارد آمن، يفحص المرفقات، "
         "ويُبقي المرشحين معلّقين حتى تراجع الموارد البشرية الهوية وتضيفهم إلى وظيفة."
     )
     return {

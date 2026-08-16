@@ -183,7 +183,7 @@ class GoogleCalendarSyncAdapter:
         end = _text(external_event.get("end"))
         tz = _text(external_event.get("timezone")) or "Asia/Kuwait"
         body: dict[str, Any] = {
-            "summary": _text(external_event.get("summary")) or "Wathefni event",
+            "summary": _text(external_event.get("summary")) or "OctoHR event",
             "description": _text(external_event.get("description")) or "",
             "location": _text(external_event.get("location")) or "",
         }
@@ -265,7 +265,7 @@ class GoogleCalendarSyncAdapter:
         # Legacy gog path (operator / transitional)
         cal = self._calendar_id(connection)
         provider_event_id = _text((binding or {}).get("provider_event_id"))
-        summary = _text(external_event.get("summary")) or "Wathefni event"
+        summary = _text(external_event.get("summary")) or "OctoHR event"
         start = _text(external_event.get("start"))
         end = _text(external_event.get("end"))
         all_day = bool(external_event.get("all_day"))

@@ -81,6 +81,6 @@ describe('Settings Wave 1 IA Closure contract', () => {
     expect(settingsSrc).toContain('Setup Console')
     expect(settingsSrc).toContain('Alerts & Delivery')
     expect(settingsSrc).toContain('without changing role permissions or delivery ownership')
-    expect(appSrc).toContain('how Wathefni connects company tools')
+    expect(appSrc).toContain('how OctoHR connects company tools')
   })
 })

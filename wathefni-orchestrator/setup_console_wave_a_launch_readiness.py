@@ -386,7 +386,7 @@ def _evaluate_module(
             configured=True,
             blocked=True,
             live=True,
-            summary_en="External payroll run is available in a controlled way. Wathefni does not process pay money.",
+            summary_en="External payroll run is available in a controlled way. OctoHR does not process pay money.",
             summary_ar="تشغيل الرواتب الخارجية متاح بشكل منضبط. وثفني لا يعالج أموال الرواتب.",
             next_action_en="Use External payroll run for setup and exports. Keep payment processing off.",
             next_action_ar="استخدم تشغيل الرواتب الخارجية للإعداد والتصدير. أبقِ معالجة الدفع مغلقة.",

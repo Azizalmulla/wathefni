@@ -1022,8 +1022,8 @@ def _unsealed_payroll(currency: str) -> dict[str, Any]:
             "currency": currency, "fx_conversion": False,
             "requires_authoritative_finalized": True,
             "requires_money_authority": "wathefni",
-            "message_en": "No sealed Wathefni-authoritative payroll period.",
-            "message_ar": "لا توجد فترة رواتب نهائية مختومة ومعتمدة من وظفني.",
+            "message_en": "No sealed OctoHR-authoritative payroll period.",
+            "message_ar": "لا توجد فترة رواتب نهائية مختومة ومعتمدة من OctoHR.",
         },
     }
 
@@ -1430,8 +1430,8 @@ def seed_time_pay_definitions(cur: Any, *, actor_phone: str) -> dict[str, Any]:
         (OT_PAID_KEY, "Paid overtime", "العمل الإضافي المدفوع",
          "OT with sealed payroll payment-component proof.", "عمل إضافي مع إثبات مكون دفع رواتب مختوم.", "count", "event_count", "time_leave"),
         (PAYROLL_WORKFORCE_COST_KEY, "Payroll workforce cost", "تكلفة القوى العاملة بالرواتب",
-         "Configured cost basis from the latest sealed Wathefni payroll period; KWD, no FX.",
-         "أساس التكلفة المحدد من أحدث فترة رواتب مختومة من وظفني؛ د.ك بلا صرف.", "KWD", "period_sum", "payroll_money"),
+         "Configured cost basis from the latest sealed OctoHR payroll period; KWD, no FX.",
+         "أساس التكلفة المحدد من أحدث فترة رواتب مختومة من OctoHR؛ د.ك بلا صرف.", "KWD", "period_sum", "payroll_money"),
         (PAYROLL_MOVEMENT_KEY, "Payroll movement", "حركة الرواتب",
          "Period-over-period workforce cost movement across two sealed periods.",
          "حركة تكلفة القوى العاملة بين فترتي رواتب مختومتين.", "KWD", "period_sum", "payroll_money"),
@@ -1584,7 +1584,7 @@ def reconcile_populations(
         "explain": {
             "headcount_basis": "employment periods active in window when C2 projection exists",
             "scheduled_basis": "authoritative scheduled attendance or shift assignments",
-            "payroll_basis": "employees on sealed Wathefni-authoritative payroll lines",
+            "payroll_basis": "employees on sealed OctoHR-authoritative payroll lines",
             "differences_expected": [
                 "active employees may be unscheduled",
                 "scheduled workers may miss the selected finalized payroll",
@@ -1595,4 +1595,3 @@ def reconcile_populations(
 
 
 _register_handlers()
-

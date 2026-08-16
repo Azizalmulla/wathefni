@@ -1074,8 +1074,8 @@ def assistant_resolve_metric(
             "ok": False,
             "error": "universal_score_forbidden",
             "invented": False,
-            "message_en": "Wathefni does not provide a universal employee/talent score.",
-            "message_ar": "وظفني لا يوفّر درجة موظف/مواهب عامة.",
+            "message_en": "OctoHR does not provide a universal employee/talent score.",
+            "message_ar": "لا يوفّر OctoHR درجة موظف/مواهب عامة.",
         }
     ensure_hr_intelligence_registry_c1_schema(cur)
     cur.execute("SELECT 1 FROM hr_kpi_definitions WHERE semantic_key=%s LIMIT 1", (key,))

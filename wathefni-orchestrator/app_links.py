@@ -135,7 +135,7 @@ def android_assetlinks():
 
 
 def _fallback_html(dest: dict[str, str] | None, *, missing: bool) -> str:
-    title = "Open in Wathefni"
+    title = "Open in OctoHR"
     if missing:
         title = "Link not found"
     app_path = (dest or {}).get("app_path") or "/"
@@ -147,7 +147,7 @@ def _fallback_html(dest: dict[str, str] | None, *, missing: bool) -> str:
 <title>{title}</title>
 </head><body>
 <h1>{title}</h1>
-<p>If Wathefni is installed it should open automatically.</p>
+<p>If OctoHR is installed it should open automatically.</p>
 <p><a href="{scheme}">Open the app</a></p>
 <p><a href="{STORE_IOS}">App Store</a> · <a href="{STORE_ANDROID}">Google Play</a></p>
 </body></html>"""

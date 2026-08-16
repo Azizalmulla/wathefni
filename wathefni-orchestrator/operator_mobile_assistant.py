@@ -78,7 +78,7 @@ def _require_assistant_access(app_mod: Any, context: dict[str, Any]) -> None:
             status_code=403,
             detail={
                 "error": "assistant_unavailable",
-                "message": "Wathefni Assistant is not available for this company or account.",
+                "message": "OctoHR Assistant is not available for this company or account.",
             },
         )
 

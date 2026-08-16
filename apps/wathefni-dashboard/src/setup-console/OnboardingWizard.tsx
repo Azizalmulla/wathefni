@@ -236,7 +236,7 @@ export function OnboardingWizard({
           ) : null}
 
           {step === 4 ? (
-            <p className="text-sm text-subtle">Administrators and roles stay on current Wathefni fixed-role behavior until a custom-role canary proves parity.</p>
+            <p className="text-sm text-subtle">Administrators and roles stay on current OctoHR fixed-role behavior until a custom-role canary proves parity.</p>
           ) : null}
 
           {step === 5 || step === 6 ? (

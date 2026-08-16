@@ -476,7 +476,7 @@ export async function downloadPrehireReport(access: DashboardAccess, type: 'cand
   }
   const blob = await response.blob()
   const disposition = response.headers.get('Content-Disposition') || ''
-  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || `wathefni-prehire-${type}.csv`
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || `octohr-prehire-${type}.csv`
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
@@ -5366,4 +5366,3 @@ export function getEmployeeOnboardingCompletion(
     access,
   )
 }
-

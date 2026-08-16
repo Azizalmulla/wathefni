@@ -32,7 +32,7 @@ HOLIDAY_ENFORCED_OK = frozenset({"seeded_fixed", "approved"})
 PRODUCT_COPY = {
     "disclaimer_en": (
         "Leave figures reflect Kuwait private-sector Labour Law research for software operation. "
-        "Wathefni does not provide legal advice and does not claim automatic legal compliance. "
+        "OctoHR does not provide legal advice and does not claim automatic legal compliance. "
         "Balance enforcement is off until counsel review and an explicit product flip."
     ),
     "disclaimer_ar": (
@@ -239,7 +239,7 @@ OFFICIAL_SOURCE_MATRIX: list[dict[str, Any]] = [
         "field": "timezone",
         "value": "Asia/Kuwait",
         "classification": "configurable_company_policy",
-        "sources": ["Wathefni operational standard for KW tenants"],
+        "sources": ["OctoHR operational standard for Kuwait tenants"],
         "confidence": "high",
         "public_source_verified": True,
         "legal_reviewed": False,

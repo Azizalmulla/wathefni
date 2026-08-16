@@ -113,7 +113,7 @@ export function Wordmark({
   return (
     <View
       accessibilityRole="header"
-      accessibilityLabel={arabic ? 'وظفني' : 'Wathefni'}
+      accessibilityLabel="OctoHR"
       style={[
         styles.wordmarkWrap,
         align === 'center' && styles.wordmarkCentered,
@@ -132,7 +132,7 @@ export function Wordmark({
           },
         ]}
       >
-        {arabic ? 'وظفني' : 'Wathefni'}
+        OctoHR
       </Text>
     </View>
   )

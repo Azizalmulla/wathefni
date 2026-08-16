@@ -466,8 +466,8 @@ def patch_payroll_setup(
                 return {
                     "ok": False,
                     "error": "mode_switch_blocked_authoritative",
-                    "message_en": "Turn off Wathefni authoritative payroll before switching to external payroll. Existing sealed runs stay unchanged.",
-                    "message_ar": "أوقف سلطة وظفني السلطوية قبل التحويل إلى الرواتب الخارجية. التشغيلات المختومة سابقاً تبقى كما هي.",
+                    "message_en": "Turn off OctoHR authoritative payroll before switching to external payroll. Existing sealed runs stay unchanged.",
+                    "message_ar": "أوقف سلطة رواتب OctoHR قبل التحويل إلى الرواتب الخارجية. التشغيلات المختومة سابقاً تبقى كما هي.",
                 }
             if mode_n == "external" and ent_state == p6.STATE_PREVIEW:
                 # Auto-disable Mode A entitlement when moving to external (audited).
@@ -712,8 +712,8 @@ def patch_payroll_setup(
             return {
                 "ok": False,
                 "error": "payroll_module_disabled",
-                "message_en": "Enable the Payroll module before activating Wathefni payroll authority.",
-                "message_ar": "فعّل وحدة الرواتب قبل تفعيل سلطة رواتب وظفني.",
+                "message_en": "Enable the Payroll module before activating OctoHR payroll authority.",
+                "message_ar": "فعّل وحدة الرواتب قبل تفعيل سلطة رواتب OctoHR.",
                 "fix_href": "/setup-console#classic-modules",
             }
         settings_now = pyw1.ensure_company_settings(cur, company_code=company)
@@ -721,8 +721,8 @@ def patch_payroll_setup(
             return {
                 "ok": False,
                 "error": "external_mode_no_wathefni_authority",
-                "message_en": "External payroll companies keep money authority outside Wathefni. Switch to Wathefni Payroll to enable preview or authoritative runs.",
-                "message_ar": "شركات الرواتب الخارجية تبقي سلطة المال خارج وظفني. انتقل إلى رواتب وظفني لتفعيل المعاينة أو السلطة.",
+                "message_en": "External payroll companies keep money authority outside OctoHR. Switch to OctoHR Payroll to enable preview or authoritative runs.",
+                "message_ar": "شركات الرواتب الخارجية تبقي سلطة المال خارج OctoHR. انتقل إلى رواتب OctoHR لتفعيل المعاينة أو السلطة.",
             }
         # Authoritative transitions require Phase 3A calendar (+ statutory when already authoritative path).
         ent_res = p6.set_company_mode_a_entitlement(

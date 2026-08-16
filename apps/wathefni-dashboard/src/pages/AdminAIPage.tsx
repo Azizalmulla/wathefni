@@ -46,7 +46,7 @@ function AssistantProfiler({ id, children }: { id: string; children: React.React
 function assistantCopy(locale: RecruitingLocale, key: string) {
   const ar = locale === 'ar'
   const copy: Record<string, [string, string]> = {
-    title: ['Wathefni Assistant', 'مساعد وظّفني'],
+    title: ['OctoHR Assistant', 'مساعد OctoHR'],
     history: ['History', 'السجل'],
     new_chat: ['New chat', 'محادثة جديدة'],
     close: ['Close', 'إغلاق'],
@@ -71,7 +71,7 @@ function assistantCopy(locale: RecruitingLocale, key: string) {
     empty_retry: ['Retry', 'إعادة المحاولة'],
     history_title: ['History', 'السجل'],
     history_empty: [
-      'No Wathefni Assistant sessions yet. Your recent dashboard chats will appear here.',
+      'No OctoHR Assistant sessions yet. Your recent dashboard chats will appear here.',
       'لا توجد محادثات بعد. ستظهر محادثات لوحة التحكم هنا.',
     ],
     new_chat_title: ['Start a new chat?', 'بدء محادثة جديدة؟'],
@@ -82,7 +82,7 @@ function assistantCopy(locale: RecruitingLocale, key: string) {
     today: ['Today', 'اليوم'],
     yesterday: ['Yesterday', 'أمس'],
     earlier: ['Earlier', 'أقدم'],
-    session_fallback: ['Wathefni Assistant chat', 'محادثة مساعد وظّفني'],
+    session_fallback: ['OctoHR Assistant chat', 'محادثة مساعد OctoHR'],
     workflow_preview: ['Workflow preview', 'معاينة سير العمل'],
     workflow_result: ['Workflow result', 'نتيجة سير العمل'],
     workflow_partial: ['Partial success', 'نجاح جزئي'],

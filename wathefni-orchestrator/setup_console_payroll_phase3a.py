@@ -321,7 +321,7 @@ def upsert_employee_statutory_inputs(
             return {
                 "ok": False,
                 "error": "wathefni_owned_rate_rejected",
-                "message_en": "Do not enter PIFSS percentages — Wathefni owns statutory rates. Provide wage amounts by fund only.",
+                "message_en": "Do not enter PIFSS percentages — OctoHR owns statutory rates. Provide wage amounts by fund only.",
             }
 
     if cat:
@@ -507,7 +507,7 @@ def readiness_issues_phase3a(
                 "field": "employee_statutory_classifications",
                 "message_en": gaps.get("message_en"),
                 "message_ar": gaps.get("message_ar"),
-                "how_to_fix": "Classify employees and provide PIFSS wage bases where required — never type Wathefni rates.",
+                "how_to_fix": "Classify employees and provide PIFSS wage bases where required — never type OctoHR rates.",
                 "fix_href": FIELD_DEEP_LINKS_3A["employee_statutory_classifications"],
                 "count": gaps.get("incomplete"),
                 "missing_category_count": gaps.get("missing_category_count"),

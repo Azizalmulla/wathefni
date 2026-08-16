@@ -284,7 +284,7 @@ def _kw_private_sector_v1() -> dict[str, Any]:
                 "and pay frequency are complete, and the case is not exceptional."
             ),
             "exceptional_case_banner": (
-                "Exceptional / high-risk case. Wathefni will not decide lawfulness. "
+                "Exceptional / high-risk case. OctoHR will not decide lawfulness. "
                 "Complete evidence, escalate for human legal judgment, and keep dates/approvals manual."
             ),
             "settlement_handoff": (
@@ -293,7 +293,7 @@ def _kw_private_sector_v1() -> dict[str, Any]:
             ),
             "service_certificate": (
                 "On end of service the worker is entitled to a service certificate (Art. 54) stating "
-                "duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni."
+                "duration, position and last remuneration, without harmful expressions. Track issuance in OctoHR."
             ),
             "rehire_vs_reinstate": (
                 "Post-effective reinstatement is disabled by default. Use true rehire (new employment) "
@@ -312,8 +312,8 @@ def _kw_private_sector_v1() -> dict[str, Any]:
             ),
         },
         "disclaimer": (
-            "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. "
-            "Wathefni does not determine whether a specific termination is legally justified. "
+            "Configurable policy only. Not legal advice. OctoHR records, validates and orchestrates HR decisions. "
+            "OctoHR does not determine whether a specific termination is legally justified. "
             "Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment — "
             "Payroll owns monetary calculations from an inputs-only settlement packet."
         ),

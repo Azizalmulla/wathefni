@@ -49,7 +49,7 @@ MANDATORY_STATUTORY_FAMILIES = (
 GATED_BLOCKERS = {
     "pifss_wage_base_classification_required": {
         "code": "pifss_wage_base_classification_required",
-        "message": "PIFSS rates are active, but insurable wage base must be company/statutory-classified — Wathefni salary is not auto-assumed as PIFSS base.",
+        "message": "PIFSS rates are active, but insurable wage base must be company/statutory-classified — OctoHR salary is not auto-assumed as PIFSS base.",
     },
     "pifss_category_classification_required": {
         "code": "pifss_category_classification_required",
@@ -353,7 +353,7 @@ def _insert_activated_rule(
             json.dumps(rate_payload),
             float(multiplier) if multiplier is not None else None,
             json.dumps(fraction_payload or {}),
-            "Wathefni public statutory baseline attestation (OFFICIAL_CLEAR) — not Mode A seal",
+            "OctoHR public statutory baseline attestation (OFFICIAL_CLEAR) — not Mode A seal",
             fp,
             json.dumps(
                 {
@@ -466,7 +466,7 @@ def activate_kuwait_public_baseline(
         ) VALUES (
           'KW',NULL,%s,%s,'approved',
           true,false,'2010-02-21',
-          'Kuwait public statutory baseline (Wathefni-owned OFFICIAL_CLEAR)',
+          'Kuwait public statutory baseline (OctoHR-owned OFFICIAL_CLEAR)',
           'خط الأساس النظامي الكويتي العام — قواعد واضحة من مصادر رسمية',
           %s,%s::jsonb,%s,%s,
           %s,now(),%s,%s

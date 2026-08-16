@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Wathefni",
+    "name": "OctoHR",
     "slug": "aziz",
     "scheme": "wathefni",
     "version": "0.3.0",
@@ -32,9 +32,9 @@
       ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSFaceIDUsageDescription": "Wathefni can unlock with Face ID on this device. Your PIN still works anytime.",
-        "NSCameraUsageDescription": "Wathefni uses the camera only when you choose to capture a document to upload to HR.",
-        "NSPhotoLibraryUsageDescription": "Wathefni accesses your photos only when you choose to attach a document to upload to HR."
+        "NSFaceIDUsageDescription": "OctoHR can unlock with Face ID on this device. Your PIN still works anytime.",
+        "NSCameraUsageDescription": "OctoHR uses the camera only when you choose to capture a document to upload to HR.",
+        "NSPhotoLibraryUsageDescription": "OctoHR accesses your photos only when you choose to attach a document to upload to HR."
       },
       "icon": "./assets/WathefniAppIcon.icon"
     },
@@ -85,7 +85,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Wathefni can unlock with Face ID on this device. Your PIN still works anytime."
+          "faceIDPermission": "OctoHR can unlock with Face ID on this device. Your PIN still works anytime."
         }
       ],
       [
@@ -102,8 +102,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Wathefni accesses your photos only when you choose to attach a document to upload to HR.",
-          "cameraPermission": "Wathefni uses the camera only when you choose to capture a document to upload to HR."
+          "photosPermission": "OctoHR accesses your photos only when you choose to attach a document to upload to HR.",
+          "cameraPermission": "OctoHR uses the camera only when you choose to capture a document to upload to HR."
         }
       ],
       "expo-font",

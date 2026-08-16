@@ -32,13 +32,13 @@ READINESS_LEGACY = "legacy"
 CHANNEL_REGISTRY: dict[str, dict[str, Any]] = {
     "wathefni_in_app": {
         "readiness": READINESS_PLANNED,
-        "label": "Wathefni in-app inbox",
+        "label": "OctoHR in-app inbox",
         "lifecycles": ("post_hire", "hr_ops"),
         "notes": "Intended foundation for employees/HR; not production-qualified as a sender yet.",
     },
     "wathefni_push": {
         "readiness": READINESS_DARK,
-        "label": "Wathefni push (Expo)",
+        "label": "OctoHR push (Expo)",
         "lifecycles": ("post_hire", "hr_ops"),
         "gate_env": "WATHEFNI_PUSH_NOTIFICATIONS",
         "notes": "Implemented behind flag; default OFF.",
@@ -386,7 +386,7 @@ def _contact_for_channel(channel: str, recipient: Mapping[str, Any]) -> dict[str
 
 def _subject_body(intent: Mapping[str, Any]) -> tuple[str, str]:
     payload = intent.get("payload") if isinstance(intent.get("payload"), dict) else {}
-    title = _text(payload.get("title") or intent.get("title") or "Wathefni")
+    title = _text(payload.get("title") or intent.get("title") or "OctoHR")
     message = _text(payload.get("message"))
     link = _text(payload.get("link") or payload.get("invite_path"))
     purpose = normalize_purpose(_text(intent.get("purpose")))
@@ -416,7 +416,7 @@ def _subject_body(intent: Mapping[str, Any]) -> tuple[str, str]:
         "calendar_reschedule_requested": f"Reschedule request: {title}",
         "calendar_reschedule_resolved": f"Reschedule update: {title}",
     }
-    subject = _text(payload.get("subject")) or subject_map.get(purpose, f"Wathefni: {title}")
+    subject = _text(payload.get("subject")) or subject_map.get(purpose, f"OctoHR: {title}")
     return subject, message
 
 

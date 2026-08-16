@@ -2071,7 +2071,7 @@ def connector_kinds_catalog(company_code: str | None = None) -> dict[str, Any]:
         "kinds": [
             {
                 "kind": "deterministic_canary",
-                "label": "Wathefni canary (deterministic)",
+            "label": "OctoHR canary (deterministic)",
                 "supports_incremental": True,
                 "supports_schedule": True,
                 "credentials_required": False,

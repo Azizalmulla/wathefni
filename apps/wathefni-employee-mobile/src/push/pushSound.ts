@@ -15,4 +15,4 @@
 export const WATHEFNI_PUSH_SOUND = 'wathefni_default' as const
 export const WATHEFNI_PUSH_SOUND_IOS = 'wathefni_default.wav' as const
 export const WATHEFNI_PUSH_CHANNEL_ID = 'wathefni_default_v2' as const
-export const WATHEFNI_PUSH_CHANNEL_NAME = 'Wathefni' as const
+export const WATHEFNI_PUSH_CHANNEL_NAME = 'OctoHR' as const

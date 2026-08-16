@@ -50,7 +50,7 @@ type LiveIssue = {
 const ACTION_TARGETS: Record<string, Page> = {
   'Open Assessments queue': 'assessments',
   'Open Interviews queue': 'interviews',
-  'Review in Wathefni Assistant': 'ai',
+  'Review in OctoHR Assistant': 'ai',
   'Review completed screening': 'candidates',
   'Open Candidates queue': 'candidates',
   'Open Onboarding queue': 'onboarding',
@@ -197,7 +197,7 @@ function issueFromActionItem(item: NotificationActionItem, enabledModules: strin
     detail = isAr
       ? `${count} إجراء بانتظار موافقة الموارد البشرية.`
       : `${count} AI action${count === 1 ? '' : 's'} are waiting for HR approval.`
-    actionLabel = isAr ? 'المراجعة في مساعد وثّفني' : 'Review in Wathefni Assistant'
+    actionLabel = isAr ? 'المراجعة في مساعد OctoHR' : 'Review in OctoHR Assistant'
     bucket = 'needs_follow_up'
   } else if (kind === 'closed_conversations') {
     title = isAr ? 'رسالة معتمدة مطلوبة' : 'Approved message needed'
@@ -240,7 +240,7 @@ function issueFromActionItem(item: NotificationActionItem, enabledModules: strin
       : kind === 'interview_invite_failed'
         ? 'Open Interviews queue'
         : kind === 'ai_action_needs_approval'
-          ? 'Review in Wathefni Assistant'
+          ? 'Review in OctoHR Assistant'
           : kind === 'screening_completed_today'
             ? 'Review completed screening'
             : kind === 'closed_conversations'

@@ -328,10 +328,10 @@ def _labels_for_source(source_kind: str) -> dict[str, str]:
         return {
             "money_authority": "wathefni",
             "authoritative_label": "wathefni",
-            "label_en": "Wathefni authoritative payslip",
-            "label_ar": "قسيمة راتب معتمدة من وظّفني",
-            "authority_banner_en": "Authoritative Wathefni payroll obligation. Payment processing disabled.",
-            "authority_banner_ar": "التزام رواتب معتمد من وظّفني. معالجة الدفع معطّلة.",
+            "label_en": "OctoHR authoritative payslip",
+            "label_ar": "قسيمة راتب معتمدة من OctoHR",
+            "authority_banner_en": "Authoritative OctoHR payroll obligation. Payment processing disabled.",
+            "authority_banner_ar": "التزام رواتب معتمد من OctoHR. معالجة الدفع معطّلة.",
         }
     return {
         "money_authority": "external",

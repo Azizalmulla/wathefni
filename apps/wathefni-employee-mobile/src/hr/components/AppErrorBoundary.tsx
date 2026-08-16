@@ -24,7 +24,7 @@ export class AppErrorBoundary extends Component<Props, State> {
       <LocaleProvider initialLocale="en" persist={false}>
         <Screen>
           <StatePanel
-            title="Wathefni HR needs a fresh start"
+            title="OctoHR needs a fresh start"
             body="No decision was submitted. Close and reopen the app, then try again."
             icon="shield-checkmark-outline"
           />

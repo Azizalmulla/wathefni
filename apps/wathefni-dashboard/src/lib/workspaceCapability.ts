@@ -87,7 +87,7 @@ export const WORKSPACE_SURFACES: WorkspaceSurface[] = [
     group: 'prehire',
     moduleAnyOf: ['pre_hiring', 'leave', 'attendance', 'onboarding', 'shifts', 'payroll', 'compliance', 'analytics'],
     permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export', 'leave.read', 'attendance.read', 'onboarding.read', 'payroll.read'],
-    label: 'Wathefni Assistant',
+    label: 'OctoHR Assistant',
   },
   {
     id: 'nav.jobs',

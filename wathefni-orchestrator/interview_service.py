@@ -427,7 +427,7 @@ def sync_provider_for_interview(
         start = life.parse_aware_datetime(start, default_tz=timezone.utc)
     if isinstance(end, str):
         end = life.parse_aware_datetime(end, default_tz=timezone.utc)
-    summary = f"Wathefni interview with {interview.get('candidate_name') or 'candidate'}"
+    summary = f"OctoHR interview with {interview.get('candidate_name') or 'candidate'}"
     attendee_list = [a for a in (attendees or []) if a]
     if interview.get("candidate_email") and interview["candidate_email"] not in attendee_list:
         attendee_list.insert(0, str(interview["candidate_email"]))
@@ -593,7 +593,7 @@ def _sync_microsoft_for_interview(
         start = life.parse_aware_datetime(start, default_tz=timezone.utc)
     if isinstance(end, str):
         end = life.parse_aware_datetime(end, default_tz=timezone.utc)
-    summary = f"Wathefni interview with {interview.get('candidate_name') or 'candidate'}"
+    summary = f"OctoHR interview with {interview.get('candidate_name') or 'candidate'}"
     attendee_list = [a for a in (attendees or []) if a]
     if interview.get("candidate_email") and interview["candidate_email"] not in attendee_list:
         attendee_list.insert(0, str(interview["candidate_email"]))

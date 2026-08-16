@@ -42,7 +42,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
           <div style={{ maxWidth: 420, textAlign: 'center' }}>
             <h1 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 8px' }}>Something interrupted the dashboard</h1>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: '#5c564d', margin: '0 0 18px' }}>
-              Please reload the page. If it keeps happening, contact your Wathefni administrator.
+              Please reload the page. If it keeps happening, contact your OctoHR administrator.
             </p>
             <button
               onClick={() => window.location.reload()}

@@ -70,7 +70,7 @@ PLAN_CATALOG: dict[str, dict[str, Any]] = {
     },
     # Internal / continuous freeze — effectively uncapped commercial quotas.
     "internal": {
-        "label": "Wathefni internal",
+        "label": "OctoHR internal",
         "daily_message_quota": 0,  # 0 = unlimited (queue never for volume)
         "monthly_message_quota": 0,
         "daily_source_bytes_quota": 0,

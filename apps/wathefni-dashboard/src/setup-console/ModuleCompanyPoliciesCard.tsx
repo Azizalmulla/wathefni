@@ -431,7 +431,7 @@ function ModulePolicyCard({
                 </label>
               ) : null}
               {moduleId === 'documents' ? (
-                <p className="text-xs">{isAr ? 'استخراج المستندات مملوك لوطّفني — غير قابل لإعداد العميل.' : 'Document extraction is Wathefni-owned — not customer-configurable.'}</p>
+                <p className="text-xs">{isAr ? 'استخراج المستندات مملوك لـ OctoHR — غير قابل لإعداد العميل.' : 'Document extraction is OctoHR-owned — not customer-configurable.'}</p>
               ) : null}
             </div>
           ) : null}

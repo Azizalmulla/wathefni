@@ -1298,14 +1298,14 @@ def _preview_body_for_action(legacy: Any, action_type: str, action: dict[str, An
                 return str((legacy.compose_email_content(app, action) or {}).get("body") or "").strip()
             except Exception:
                 pass
-        return str(action.get("message_text") or action.get("email_body") or f"Hi {name},\n\nWathefni HR is following up regarding your application.").strip()
+        return str(action.get("message_text") or action.get("email_body") or f"Hi {name},\n\nOctoHR is following up regarding your application.").strip()
     if action_type == "send_screening_questions":
         questions = _screening_questions_for_app(legacy, app)
         lines = [f"Hi {name},", "", f"Thanks for applying for {role}. Please answer these quick application questions:", ""]
         for idx, question in enumerate(questions[:5], 1):
             lines.append(f"{idx}. {question.get('question') or question.get('text') or 'Application question'}")
         return "\n".join(lines).strip()
-    return str(action.get("message_text") or action.get("message") or f"Hi {name},\n\nWathefni HR is following up regarding your application.").strip()
+    return str(action.get("message_text") or action.get("message") or f"Hi {name},\n\nOctoHR is following up regarding your application.").strip()
 
 
 def _truncate_preview_body(body: str, *, limit: int = 700) -> str:
@@ -3236,7 +3236,7 @@ def _workflow_communication_message(
             lines.append(f"We'd like to invite you to an online interview at {time_label}.")
         elif meet_link:
             lines.append(f"We'd like to invite you to an online interview via Google Meet: {meet_link}")
-        lines.extend(["", "Best,", "Wathefni HR"])
+        lines.extend(["", "Best,", "OctoHR"])
         return "\n".join(lines)
     if explicit:
         return explicit
@@ -4190,7 +4190,7 @@ register(
     ActionSpec(
         name="schedule_interview",
         description=(
-            "Create the canonical Wathefni interview record and sync an external calendar event "
+            "Create the canonical OctoHR interview record and sync an external calendar event "
             "(Google Meet or Microsoft Teams when configured). "
             "Accepts natural-language times like 'tomorrow at 4pm'. Sensitive: requires confirmation. "
             "Uses interview_service — never a parallel gog-only path."
@@ -4408,7 +4408,7 @@ register(
     ActionSpec(
         name="cancel_interview",
         description=(
-            "Cancel the active Wathefni interview for a candidate using the same cancel authority as the dashboard. "
+            "Cancel the active OctoHR interview for a candidate using the same cancel authority as the dashboard. "
             "Optionally syncs calendar cancellation when Google is connected. Requires interview.manage and confirmation. Idempotent."
         ),
         entity_type="candidate",
@@ -4428,7 +4428,7 @@ register(
     ActionSpec(
         name="reschedule_interview",
         description=(
-            "Reschedule the active Wathefni interview for a candidate to a new date/time using the same authority as the dashboard. "
+            "Reschedule the active OctoHR interview for a candidate to a new date/time using the same authority as the dashboard. "
             "Updates the same external calendar event when connected. Requires interview.manage and confirmation."
         ),
         entity_type="candidate",

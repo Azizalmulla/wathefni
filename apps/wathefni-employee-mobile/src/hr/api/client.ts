@@ -30,10 +30,10 @@ function safeError(payload: unknown, fallback: string): { code: string; message:
 
 export async function rawRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   if (!path.startsWith('/dashboard/mobile/')) {
-    throw new ApiError(0, 'unapproved_api_path', 'This API path is not approved for Wathefni HR.')
+    throw new ApiError(0, 'unapproved_api_path', 'This API path is not approved for OctoHR.')
   }
   if (!configuredBase) {
-    throw new ApiError(0, 'api_not_configured', 'Wathefni HR is not connected to an API environment.')
+    throw new ApiError(0, 'api_not_configured', 'OctoHR is not connected to an API environment.')
   }
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (options.token) headers.Authorization = `Bearer ${options.token}`

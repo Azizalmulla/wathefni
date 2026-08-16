@@ -682,7 +682,7 @@ def process_lifecycle_signals(
                         disposition = DISPOSITION_BLOCKED
                         status = "blocked"
                         review_reason = why
-                        authority_note = "Newer Wathefni activity / native authority blocks source termination."
+                        authority_note = "Newer OctoHR activity / native authority blocks source termination."
                     elif policy == POLICY_AUTO:
                         disposition = DISPOSITION_WILL_APPLY
                         status = "proposed"

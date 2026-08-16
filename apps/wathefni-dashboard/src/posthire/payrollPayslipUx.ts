@@ -55,7 +55,7 @@ type Copy = {
 
 const EN: Copy = {
   title: 'Payslips',
-  subtitle: 'Preview and external payslip documents — Wathefni does not pay.',
+  subtitle: 'Preview and external payslip documents — OctoHR does not pay.',
   honesty:
     'Native payslips are non-authoritative previews. External payslips mirror imported results; the external system remains money authority. Payment processing is disabled. Closing a payroll period does not release a payslip to the employee app — release is an explicit action.',
   nativeLabel: 'Native preview (not payment authority)',
@@ -103,7 +103,7 @@ const EN: Copy = {
 
 const AR: Copy = {
   title: 'قسائم الراتب',
-  subtitle: 'وثائق معاينة وخارجية — وظّفني لا يدفع.',
+  subtitle: 'وثائق معاينة وخارجية — لا يدفع OctoHR.',
   honesty:
     'قسائم المعاينة المحلية غير ملزمة. القسائم الخارجية مرآة للنتائج المستوردة؛ النظام الخارجي يبقى سلطة المال. معالجة الدفع معطّلة. إغلاق فترة الرواتب لا يُظهر القسيمة في تطبيق الموظف — الإصدار إجراء صريح.',
   nativeLabel: 'معاينة محلية (ليست سلطة دفع)',

@@ -760,7 +760,7 @@ def require_company_inbound_email(company_code: str | None) -> None:
             status_code=403,
             detail={
                 "error": "inbound_tenant_not_allowlisted",
-                "message": "Forwarded inbound CV email is limited to Wathefni and test tenants in this phase.",
+                "message": "Forwarded inbound CV email is limited to OctoHR and test tenants in this phase.",
             },
         )
     if not company_inbound_email_enabled(company_code):
@@ -5439,20 +5439,20 @@ OPENCLAW_PROMPT_DOCS: dict[str, tuple[str, ...]] = {
 }
 
 TOOL_AGENT_BASE_SYSTEM = (
-    "You are the Wathefni HR tool-calling agent. Select at most one tool. "
+    "You are the OctoHR tool-calling agent. Select at most one tool. "
     "Use tool calls for communication/status/read-only candidate search tasks, shifts scheduling tasks, attendance tasks, leave/time-off tasks, payroll hours, timesheet approval tasks, payroll policy/preview tasks, and payroll export tasks. Do not call tools for hire, shortlist, or other unsupported HR actions. "
     "If HR says him/her/the guy, use recent context. If no tool is suitable, answer with no tool call."
 )
 
 PLANNER_BASE_SYSTEM = (
-    "You are the Wathefni HR tool planner. Choose exactly one backend tool or null. "
+    "You are the OctoHR tool planner. Choose exactly one backend tool or null. "
     "Return JSON only with keys: tool, args, confidence, reason. "
     "Do not execute state-changing HR actions. For hire/shortlist/start onboarding, return null unless the user is only asking status. "
     "Shift, attendance, leave, payroll hours, timesheet approval, payroll policy, payroll preview, and payroll export tools are allowed when listed in tool_definitions. Use tools only for actions listed in tool_definitions."
 )
 
 CAPABILITY_PLANNER_BASE_SYSTEM = (
-    "You propose structured capability intent for Wathefni HR operations. "
+    "You propose structured capability intent for OctoHR operations. "
     "Return JSON only. Do not execute tools, do not answer the user, and do not invent facts, records, scores, permissions, sent status, candidates, or results. "
     "GPT proposes only; the backend validates entities, permissions, module gates, business rules, and execution. "
     "Allowed capability values: small_talk, read_check, compare_evaluate, filter_refine, update_record, send_message, change_stage, explain_history, retry_repair, none. "
@@ -5662,7 +5662,7 @@ def openclaw_prompt_context_block(prompt_name: str | None = None) -> str:
     if not sections:
         return ""
     return (
-        "OpenClaw workspace instructions loaded from the Wathefni runtime workspace. "
+        "OpenClaw workspace instructions loaded from the OctoHR runtime workspace. "
         "Use them for identity, tone, workflow, and tool-contract guidance. "
         "They do not override backend ActionResult truth, module gates, routing invariants, or stored database facts.\n\n"
         + "\n\n".join(sections)
@@ -5675,8 +5675,8 @@ def openclaw_concise_prompt_context_block(prompt_name: str | None = None) -> str
     loaded_names = [Path(str((docs.get(key) or {}).get("path"))).name for key in ("identity", "soul", "skills", "tools") if (docs.get(key) or {}).get("loaded")]
     hashes = {key: (docs.get(key) or {}).get("sha256") for key in ("identity", "soul", "skills", "tools")}
     return (
-        f"Concise Wathefni context for {prompt_name or 'planner'}. Use GPT-5.4 to interpret natural HR language into structured JSON only when this is an interpretation step.\n"
-        "Wathefni is an HR operations system. Postgres, backend validation, and ActionResult are operational truth.\n"
+        f"Concise OctoHR context for {prompt_name or 'planner'}. Use GPT-5.4 to interpret natural HR language into structured JSON only when this is an interpretation step.\n"
+        "OctoHR is an HR operations system. Postgres, backend validation, and ActionResult are operational truth.\n"
         "GPT may propose intent, entities, targets, filters, message purpose, and clarification needs.\n"
         "GPT must not execute, invent records, invent sent status, invent permissions, or make operational truth claims.\n"
         "Backend validates candidate/employee records, permissions, modules, editable fields, and business rules before execution.\n"
@@ -5732,7 +5732,7 @@ def openclaw_prompt_debug_status() -> dict[str, Any]:
             "capability_planner": bool(block),
             "style_layer": bool(block),
             "toolcall_planner": "tool-call runtime owns HR-admin behavior; capability helpers use concise OpenClaw context where still needed by auxiliary APIs",
-            "final_reply_renderer": "mutation wording LLM receives OpenClaw docs; deterministic read-only/greeting/fallback renderers keep backend-grounded templates and Wathefni style helpers",
+            "final_reply_renderer": "mutation wording LLM receives OpenClaw docs; deterministic read-only/greeting/fallback renderers keep backend-grounded templates and OctoHR style helpers",
         },
         "compression": {
             "orchestrator_prompt_context": "loaded fresh from files for planner/style LLM calls; not stored in chat memory",
@@ -10993,7 +10993,7 @@ def call_analytical_refinement_planner(
         return None
     system = openclaw_augmented_system_prompt(
         (
-            "You propose structured intent for Wathefni analytical follow-up refinements. "
+            "You propose structured intent for OctoHR analytical follow-up refinements. "
             "Return JSON only. Do not execute tools, do not answer the user, and do not invent records or results. "
             "Only identify whether the latest HR message is refining the previous read-only analytical action. "
             "Allowed intent values: analytical_refinement, clarification_needed, unsupported, none. "
@@ -11266,7 +11266,7 @@ def analytical_refinement_from_planner(request: WhatsAppTurnRequest, latest: dic
         return {
             "supported": False,
             "previous_action_type": action_type,
-            "reply": f"I couldn’t match {format_inline_list(invalid)} in Wathefni’s records. Try a known role, status, branch, team, period, or top count.",
+            "reply": f"I couldn’t match {format_inline_list(invalid)} in OctoHR’s records. Try a known role, status, branch, team, period, or top count.",
             "planner_proposal": json_safe(proposal),
             "source": json_safe(latest),
         }
@@ -14214,7 +14214,7 @@ def call_gpt_rank_evaluator(candidates: list[dict[str, Any]], role_profile: dict
     model = env_values.get("WATHEFNI_RANKING_EVALUATOR_MODEL") or provider["model"]
     provider = {**provider, "model": model}
     system = (
-        "You are Wathefni's structured recruiting evaluator. Evaluate candidate fit only from provided evidence. "
+        "You are OctoHR's structured recruiting evaluator. Evaluate candidate fit only from provided evidence. "
         "Return valid JSON with an evaluations array. Do not invent facts, do not make hiring decisions, and do not alter numeric scores."
     )
     user_payload = gpt_rank_evaluation_payload(candidates, role_profile, query)
@@ -19855,7 +19855,7 @@ def notify_employee_bank_correction(
     if not emp_key:
         return {"ok": False, "error": "employee_key_required"}
     dedupe = f"bank_correction:{request_id or emp_key}"
-    message = "Your bank details need a correction. Please open Bank in the Wathefni app."
+    message = "Your bank details need a correction. Please open Bank in the OctoHR app."
     return deliver_employee_notification(
         employee,
         flow="bank",
@@ -27667,7 +27667,7 @@ def handle_candidate_truth_turn(request: WhatsAppTurnRequest) -> dict[str, Any] 
         return {"reply": candidate_safe_module_unavailable_reply(), "application": json_safe(application), "module_disabled": "pre_hiring"}
     truth = candidate_cv_truth(application)
     if truth.get("cv_received") and truth.get("storage_ok"):
-        reply = "Yes, I have your CV saved. Wathefni HR will review it and follow up with the next step."
+        reply = "Yes, I have your CV saved. OctoHR will review it and follow up with the next step."
     elif truth.get("cv_received"):
         reply = "I can see CV information on your application, but I do not see a safely stored file yet. Please resend your CV as a PDF, Word document, or clear image."
     else:
@@ -27701,7 +27701,7 @@ def apply_candidate_reply_policy(reply: str | None, *, request: WhatsAppTurnRequ
     elif "ranking_or_score" in violations or "comparison" in violations or "internal_notes" in violations:
         safe = "I can’t share hiring review details here. I can help with your application status, missing information, or next steps."
     else:
-        safe = "Thanks — your application is in progress. Wathefni HR will review your information and follow up with the next step."
+        safe = "Thanks — your application is in progress. OctoHR will review your information and follow up with the next step."
     return {"reply": safe, "policy_applied": True, "violations": violations, "original_reply": text}
 
 
@@ -28147,7 +28147,7 @@ def candidate_missing_or_next_reply(application: dict[str, Any]) -> str:
         next_question = format_next_screening_question([q for q in questions if isinstance(q, dict)], [str(item) for item in pending_keys])
         return f"Your CV is received. Next step: please answer this quick application question:\n\n{next_question}"
     if str(application.get("screening_status") or screening.get("status") or "").lower() in {"complete", "completed"}:
-        return "Your application is complete for review. Wathefni HR will review it and follow up with the next step."
+        return "Your application is complete for review. OctoHR will review it and follow up with the next step."
     return "Your application is in progress. I can help with your CV, quick application questions, or application status."
 
 
@@ -30345,7 +30345,7 @@ def plan_employee_onboarding_reply(
     next_item: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
     system = (
-        "You classify employee onboarding replies for Wathefni. "
+        "You classify employee onboarding replies for OctoHR. "
         "Call classify_employee_onboarding_reply when the reply contains a name, bank/IBAN details, a document/photo indication, or any onboarding item. "
         "Use current_pending_item for ambiguous document/photo media. "
         "For Civil ID, passport, personal photo, medical, or education certificates, text-only messages are not receipts; require current-message media. "
@@ -32438,7 +32438,7 @@ def notify_candidate(app: dict[str, Any], account_id: str | None, message: str |
         return {**exc.as_result(), "candidate": candidate_contact(app) if isinstance(app, dict) else {}}
     contact = candidate_contact(app)
     name = contact.get("name") or "there"
-    body = message or f"Hi {name}, you have been shortlisted. Wathefni HR will contact you with the next step."
+    body = message or f"Hi {name}, you have been shortlisted. OctoHR will contact you with the next step."
     company = str((app or {}).get("company_code") or "").strip().upper()
     # Fail-closed: Assistant/send path requires company WhatsApp candidate audience configured.
     if company:
@@ -32934,7 +32934,7 @@ def seed_assessment_item_bank() -> None:
                 """
                 INSERT INTO assessment_batteries
                 (battery_key, company_code, name, version, sections, raw_json, updated_at)
-                VALUES (%s,'GLOBAL','Wathefni Ability Assessment','v1',%s,%s,now())
+                VALUES (%s,'GLOBAL','OctoHR Ability Assessment','v1',%s,%s,now())
                 ON CONFLICT (battery_key) DO UPDATE SET
                   name=EXCLUDED.name,
                   version=EXCLUDED.version,
@@ -33386,7 +33386,7 @@ def build_report_sections(
             "style": "verify_ability_style",
             "norm_version": norm_version,
             "sections": ability_scores,
-            "interpretation": "Percentile, T-score, and sten are generated from Wathefni's internal synthetic norm table until client benchmark data is available.",
+            "interpretation": "Percentile, T-score, and sten are generated from OctoHR's internal synthetic norm table until client benchmark data is available.",
         },
         "competency_profile": {
             "title": "Competency Profile",
@@ -34801,7 +34801,7 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
             actor_type="candidate",
         )
         return {
-            "reply": "Assessment cancelled. Wathefni HR can send it again if needed.",
+            "reply": "Assessment cancelled. OctoHR can send it again if needed.",
             "attempt": cancelled,
             "intent": "cancel_assessment",
             "turn_focus": "candidate_assessment",
@@ -34863,7 +34863,7 @@ def handle_candidate_assessment_turn(request: WhatsAppTurnRequest) -> dict[str, 
         conn.commit()
     if expired:
         return {
-            "reply": "This assessment has expired. Please contact Wathefni HR for a new invitation.",
+            "reply": "This assessment has expired. Please contact OctoHR for a new invitation.",
             "attempt": json_safe(locked),
             "intent": "assessment_expired",
             "turn_focus": "candidate_assessment",
@@ -36124,7 +36124,7 @@ def onboarding_reminder_message(employee: dict[str, Any]) -> tuple[str, list[str
     name = employee.get("name") or "there"
     missing = missing_employee_documents(employee)
     if not missing:
-        return f"Hi {name}, Wathefni HR is following up on your onboarding. Please send any remaining requested details here.", []
+        return f"Hi {name}, OctoHR is following up on your onboarding. Please send any remaining requested details here.", []
 
     labels = [DOCUMENT_LABELS.get(item, item.replace("_", " ")) for item in missing]
     items_text = format_inline_list(labels)
@@ -36180,8 +36180,8 @@ def onboarding_started_message(employee: dict[str, Any]) -> str:
     next_item = find_next_required_onboarding_item(str(employee.get("employee_key") or ""))
     if next_item:
         label = next_item.get("label") or item_display_label(next_item)
-        return f"Hi {name}, welcome to Wathefni. To start your onboarding, please send {label}."
-    return f"Hi {name}, welcome to Wathefni. HR has started your onboarding and will contact you here if anything is needed."
+        return f"Hi {name}, welcome to OctoHR. To start your onboarding, please send {label}."
+    return f"Hi {name}, welcome to OctoHR. HR has started your onboarding and will contact you here if anything is needed."
 
 
 def notify_employee_onboarding_started(employee: dict[str, Any], account_id: str | None) -> dict[str, Any]:
@@ -36776,25 +36776,25 @@ def compose_email_content(app: dict[str, Any], action: dict[str, Any]) -> dict[s
     explicit_subject = str(action.get("email_subject") or "").strip()
     explicit_body = str(action.get("message_text") or action.get("email_body") or "").strip()
     if explicit_subject or explicit_body:
-        subject = explicit_subject or "Wathefni HR"
-        body = explicit_body or f"Hi {name},\n\nWathefni HR is following up regarding your application.\n\nBest,\nWathefni HR"
+        subject = explicit_subject or "OctoHR"
+        body = explicit_body or f"Hi {name},\n\nOctoHR is following up regarding your application.\n\nBest,\nOctoHR"
         if "\n" not in body:
-            body = f"Hi {name},\n\n{body}\n\nBest,\nWathefni HR"
+            body = f"Hi {name},\n\n{body}\n\nBest,\nOctoHR"
     elif purpose == "shortlisted" or re.search(r"\b(shortlist|shortlisted)\b", text):
         subject = "Application Update"
         body = (
             f"Hi {name},\n\n"
-            "Good news — you have been shortlisted for your Wathefni application. "
-            "Wathefni HR will follow up with any next steps.\n\n"
-            "Best,\nWathefni HR"
+            "Good news — you have been shortlisted for your OctoHR application. "
+            "OctoHR will follow up with any next steps.\n\n"
+            "Best,\nOctoHR"
         )
     elif purpose == "onboarding_compliance" or re.search(r"\b(onboarding|compliance|requirements?|civil id|passport|iban|documents?)\b", text):
         subject = "Onboarding and Compliance Requirements"
         body = (
             f"Hi {name},\n\n"
-            "Congratulations again on being hired by Wathefni. Please prepare your onboarding and compliance requirements. "
-            "Wathefni HR will follow up with any required documents or next steps.\n\n"
-            "Best,\nWathefni HR"
+            "Congratulations again on being hired through OctoHR. Please prepare your onboarding and compliance requirements. "
+            "OctoHR will follow up with any required documents or next steps.\n\n"
+            "Best,\nOctoHR"
         )
     elif purpose == "assessment_reminder" or (re.search(r"\b(assessment|test|exam)\b", text) and re.search(r"\b(remind|reminder|follow up|follow-up)\b", text)):
         subject = "Application Assessment Reminder"
@@ -36802,27 +36802,27 @@ def compose_email_content(app: dict[str, Any], action: dict[str, Any]) -> dict[s
             f"Hi {name},\n\n"
             "This is a reminder to complete your application assessment. "
             "Please keep an eye on your email and phone for the assessment details and complete it as soon as possible.\n\n"
-            "Best,\nWathefni HR"
+            "Best,\nOctoHR"
         )
     elif purpose == "assessment" or re.search(r"\b(assessment|test|exam)\b", text):
         subject = "Application Assessment"
         body = (
             f"Hi {name},\n\n"
-            "Wathefni HR is following up regarding the application assessment for your application. "
+            "OctoHR is following up regarding the application assessment for your application. "
             "Please keep an eye on your email and phone for the assessment details.\n\n"
-            "Best,\nWathefni HR"
+            "Best,\nOctoHR"
         )
     elif purpose == "interview" or re.search(r"\b(interview|meeting)\b", text):
         subject = "Interview Follow-up"
         body = (
             f"Hi {name},\n\n"
-            "Wathefni HR is following up regarding your interview/application. "
+            "OctoHR is following up regarding your interview/application. "
             "Please keep an eye on your email and phone for the next details.\n\n"
-            "Best,\nWathefni HR"
+            "Best,\nOctoHR"
         )
     else:
-        subject = "Wathefni HR"
-        body = f"Hi {name},\n\nWathefni HR is following up regarding your application.\n\nBest,\nWathefni HR"
+        subject = "OctoHR"
+        body = f"Hi {name},\n\nOctoHR is following up regarding your application.\n\nBest,\nOctoHR"
     return {"subject": subject, "body": body}
 
 
@@ -37039,7 +37039,7 @@ def dispatch_outbound_email(
     sent["intended_mode"] = intended_mode or resolved_mode or "wathefni"
     if emergency_fallback_used:
         sent["hr_notice"] = hr_notice
-        sent["user_status"] = "Sent through Wathefni (emergency fallback)"
+        sent["user_status"] = "Sent through OctoHR (emergency fallback)"
     return sent
 
 
@@ -37423,7 +37423,7 @@ def schedule_interview(app: dict[str, Any], action: dict[str, Any]) -> dict[str,
             "message": "I need an exact interview time before scheduling.",
         }
     account = openclaw_env().get("GOG_ACCOUNT", "")
-    summary = f"Wathefni interview with {contact.get('name') or 'candidate'}"
+    summary = f"OctoHR interview with {contact.get('name') or 'candidate'}"
     args = [
         "calendar",
         "create",
@@ -38515,9 +38515,9 @@ def safe_fallback_reply(kind: str) -> str:
     if kind == "operational":
         return "I don’t want to guess on that. I need to check the action history before I make any claim about sending, failing, or completing an action."
     if kind == "domain":
-        return "I should answer that from Wathefni’s stored records, not old chat context. Ask me to show, rank, or compare the relevant records and I’ll use the backend data."
+        return "I should answer that from OctoHR’s stored records, not old chat context. Ask me to show, rank, or compare the relevant records and I’ll use the backend data."
     if kind == "neutral_help":
-        return "Please send a specific HR request so Wathefni can route it through the right grounded workflow."
+        return "Please send a specific HR request so OctoHR can route it through the right grounded workflow."
     return "Please send a specific HR request."
 
 
@@ -38609,7 +38609,7 @@ def format_check_assessment_config_reply(result: dict[str, Any]) -> str:
             role_labels.append(str(profile.get("label") or key))
     return (
         "Yes. The live assessment config is present.\n"
-        f"- Battery: {battery.get('name') or battery.get('battery_key') or 'Wathefni assessment battery'}\n"
+        f"- Battery: {battery.get('name') or battery.get('battery_key') or 'OctoHR assessment battery'}\n"
         f"- Item bank: {item_bank.get('item_count') or item_bank.get('total_items') or 0} items\n"
         f"- Role profiles: {len(role_profiles)} configured"
         + (f" ({', '.join(role_labels)})" if role_labels else "")
@@ -42330,7 +42330,7 @@ def require_internal_principal(
     return principal
 
 
-app = FastAPI(title="Wathefni HR Orchestrator")
+app = FastAPI(title="OctoHR API")
 
 # Authenticated surface reads carry per-actor business state. Without an explicit
 # directive an OS-level HTTP cache may reuse a response the app cannot invalidate,
@@ -42405,6 +42405,13 @@ try:
 except Exception as exc:
     logger.warning("app_links router not mounted: %s", exc)
 
+try:
+    import public_brand as _public_brand
+
+    app.include_router(_public_brand.router)
+except Exception as exc:
+    logger.warning("public brand router not mounted: %s", exc)
+
 
 @app.get("/orchestrator/debug/prompt-context")
 def orchestrator_debug_prompt_context(_internal: dict[str, Any] = Depends(require_internal_access)):
@@ -42474,7 +42481,7 @@ PREHIRE_DASHBOARD_HTML = """
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wathefni Pre-Hiring Dashboard</title>
+  <title>OctoHR Pre-Hiring Dashboard</title>
   <style>
     :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { margin: 0; background: #0f172a; color: #e2e8f0; }
@@ -42500,7 +42507,7 @@ PREHIRE_DASHBOARD_HTML = """
 </head>
 <body>
   <header>
-    <h1>Wathefni Pre-Hiring Dashboard</h1>
+    <h1>OctoHR Pre-Hiring Dashboard</h1>
     <div class="muted">Postgres-backed candidate, application, ranking, and notification views.</div>
   </header>
   <main>
@@ -42720,7 +42727,7 @@ SETUP_CONSOLE_HTML = r"""<!DOCTYPE html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Wathefni — Setup Console</title>
+<title>OctoHR — Setup Console</title>
 <style>
   :root { --bg:#f6f7f9; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --brand:#1e293b; --ok:#15803d; --okbg:#dcfce7; --warn:#b45309; --warnbg:#fef3c7; }
   * { box-sizing:border-box; }
@@ -42761,7 +42768,7 @@ SETUP_CONSOLE_HTML = r"""<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <div><h1>Wathefni — Setup Console</h1><div class="sub">Provision a new client without touching the database. Operator access only.</div></div>
+  <div><h1>OctoHR — Setup Console</h1><div class="sub">Provision a new client without touching the database. Operator access only.</div></div>
   <div class="row">
     <input type="text" id="opPhone" placeholder="Platform admin phone" style="width:170px" />
     <input type="text" id="opToken" placeholder="Operator token" style="width:200px" />
@@ -42862,7 +42869,7 @@ function renderPanel(d){
       <div id="inviteBox"></div>
     </div>
     <div class="section"><h2>Owner WhatsApp identity (optional)</h2>
-      <p class="muted" style="font-size:12px;margin-bottom:8px"><strong>Owner WhatsApp identity linked</strong> = lets this owner/admin operate the workspace through the shared Wathefni WhatsApp assistant.<br/><strong>Customer WhatsApp channel provisioning</strong> = a separate, manual step (the company's own client-facing WhatsApp sender, employee intake, and proactive templates). It is <strong>not</strong> set up here.</p>
+      <p class="muted" style="font-size:12px;margin-bottom:8px"><strong>Owner WhatsApp identity linked</strong> = lets this owner/admin operate the workspace through the shared OctoHR WhatsApp assistant.<br/><strong>Customer WhatsApp channel provisioning</strong> = a separate, manual step (the company's own client-facing WhatsApp sender, employee intake, and proactive templates). It is <strong>not</strong> set up here.</p>
       <label>WhatsApp phone</label><input type="text" id="waPhone" placeholder="9659xxxxxxx" />
       <div class="row" style="margin-top:10px"><button class="secondary" onclick="linkWhatsapp()">Link owner identity</button></div>
     </div>`;
@@ -43554,7 +43561,7 @@ def public_video_interview_html() -> str:
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wathefni Video Interview</title>
+  <title>OctoHR Video Interview</title>
   <style>
     :root {
       color-scheme: light;
@@ -43644,7 +43651,7 @@ def public_video_interview_html() -> str:
   <main>
     <section class="shell" aria-live="polite">
       <header>
-      <div class="brand">Wathefni Video Interview</div>
+      <div class="brand">OctoHR Video Interview</div>
         <h1 id="title">Opening your interview...</h1>
         <div class="meta">
           <span id="subtitle"></span>
@@ -44182,7 +44189,7 @@ def public_calendar_guest_html() -> str:
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Wathefni Calendar</title>
+  <title>OctoHR Calendar</title>
   <style>
     :root { --ink:#23211d; --muted:#716a5e; --bg:#f7f2e9; --panel:#fffaf0; --line:#e8dfd0; --ok:#2f6b4f; --warn:#7a5a20; }
     * { box-sizing: border-box; }
@@ -45595,7 +45602,7 @@ def require_active_company(company_code: str | None) -> str:
                             detail={
                                 "error": result.reason_code or f"company_{status}",
                                 "message": result.remediation
-                                or "This company workspace is not active. Contact the Wathefni platform operator.",
+                                or "This company workspace is not active. Contact the OctoHR platform operator.",
                                 "company_code": company,
                                 "company_status": status,
                                 "correlation_id": result.audit_correlation_id,
@@ -45610,7 +45617,7 @@ def require_active_company(company_code: str | None) -> str:
             status_code=403,
             detail={
                 "error": f"company_{status}",
-                "message": "This company workspace is not active. Contact the Wathefni platform operator.",
+                "message": "This company workspace is not active. Contact the OctoHR platform operator.",
                 "company_code": company,
                 "company_status": status,
             },
@@ -45882,7 +45889,7 @@ def assistant_dashboard_context(context: dict[str, Any] = Depends(dashboard_cont
             status_code=403,
             detail={
                 "error": "permission_denied",
-                "message": "You do not have permission to use Wathefni Assistant.",
+                "message": "You do not have permission to use OctoHR Assistant.",
                 "role": context.get("actor_role"),
             },
         )
@@ -47110,7 +47117,7 @@ def dashboard_setup_readiness(context: dict[str, Any] = Depends(dashboard_contex
             "View employees", "employees")
     if "compliance" in modules:
         add("compliance_docs", "Track employee documents", counts.get("compliance_documents", 0) > 0,
-            "Add documents like Civil ID and residency so Wathefni can flag what is missing or expiring.",
+            "Add documents like Civil ID and residency so OctoHR can flag what is missing or expiring.",
             "Open Compliance", "compliance")
     add("team", "Invite your HR team", counts.get("users", 0) >= 2,
         "Give your colleagues access so your whole HR team can manage hiring and employees.",
@@ -47238,7 +47245,7 @@ def _setup_console_operator_context_payload(phone: str, *, auth_source: str) -> 
         "actor_email": "",
         "actor_role": "platform_admin",
         "auth_source": auth_source,
-        "hr_user": {"phone": phone, "role": "platform_admin", "name": "Wathefni Platform Admin", "status": "active"},
+        "hr_user": {"phone": phone, "role": "platform_admin", "name": "OctoHR Platform Admin", "status": "active"},
     }
 
 
@@ -47274,7 +47281,7 @@ def superadmin_context(
             if not session_phone or (phone and phone != session_phone):
                 raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
             if not allow or session_phone not in allow:
-                raise HTTPException(status_code=403, detail={"error": "not_platform_admin", "message": "This account is not a Wathefni platform administrator."})
+                raise HTTPException(status_code=403, detail={"error": "not_platform_admin", "message": "This account is not an OctoHR platform administrator."})
             # Operator must still be allowlisted in credentials map (revocation via env).
             if session_phone not in setup_operator_credentials():
                 raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
@@ -47291,7 +47298,7 @@ def superadmin_context(
     if not configured or not hmac.compare_digest(provided, configured):
         raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
     if not allow or phone not in allow:
-        raise HTTPException(status_code=403, detail={"error": "not_platform_admin", "message": "This account is not a Wathefni platform administrator."})
+        raise HTTPException(status_code=403, detail={"error": "not_platform_admin", "message": "This account is not an OctoHR platform administrator."})
     return _setup_console_operator_context_payload(phone, auth_source="operator_token")
 
 
@@ -48108,7 +48115,7 @@ def setup_console_email_force_wathefni(company_code: str, superadmin: dict[str, 
             "hr_user": superadmin.get("hr_user"),
         },
         "email_force_wathefni",
-        summary=f"Forced outbound email fallback to Wathefni for {company}.",
+        summary=f"Forced outbound email fallback to OctoHR for {company}.",
         target_type="company_email_settings",
         target=company,
         details={},
@@ -51521,7 +51528,7 @@ def send_interview_invite(
         skip, skip_reason = False, None
     if skip:
         safe_message = (
-            "A calendar invitation was already sent to the candidate, so Wathefni did not send a second interview email. "
+            "A calendar invitation was already sent to the candidate, so OctoHR did not send a second interview email. "
             "Turn on “Also send an email with calendar invitations” in Settings, or use Send email explicitly."
         )
         return {
@@ -51536,7 +51543,7 @@ def send_interview_invite(
             "candidate_notified": bool(interview.get("candidate_notified") or interview.get("calendar_invite_sent")),
             "calendar_invite_sent": bool(interview.get("calendar_invite_sent")),
         }
-    subject = "Interview Invitation - Wathefni"
+    subject = "Interview Invitation - OctoHR"
     body = compose_interview_invite_message(application, interview)
     if "join the meeting" in normalize_text(body) and not interview.get("meet_link") and "calendar invite" not in normalize_text(body):
         return {"ok": False, "error": "missing_meet_link_for_joining_copy", "interview": candidate_interview_summary(interview)}
@@ -51700,7 +51707,7 @@ def create_candidate_interview_from_schedule(
     meet_link = interview_meet_link_from_calendar(schedule_result) or interview_meet_link_from_calendar(calendar)
     candidate_email = application.get("candidate_email")
     calendar_invite_sent = bool(calendar_event_id and candidate_email)
-    sent_subject = str(schedule_result.get("summary") or f"Wathefni interview with {application.get('candidate_name') or 'candidate'}")
+    sent_subject = str(schedule_result.get("summary") or f"OctoHR interview with {application.get('candidate_name') or 'candidate'}")
     sent_body = (
         f"Google Calendar invite sent to {candidate_email}. Google Meet: {meet_link}"
         if meet_link
@@ -51944,7 +51951,7 @@ def async_video_interview_public_state(interview: dict[str, Any]) -> dict[str, A
             "consent_accepted_at": json_safe(interview.get("consent_accepted_at")),
             "completed_at": json_safe(interview.get("completed_at")),
             "retake_policy": (interview.get("async_video_config") or {}).get("retake_policy") if isinstance(interview.get("async_video_config"), dict) else {},
-            "privacy_notice": "Your video answers are recorded for Wathefni HR screening review. AI may summarize your answers, but HR remains the decision-maker.",
+            "privacy_notice": "Your video answers are recorded for OctoHR screening review. AI may summarize your answers, but HR remains the decision-maker.",
         },
         "questions": [public_video_question_payload(row) for row in questions],
         "responses": [public_video_response_payload(row) for row in responses],
@@ -52678,7 +52685,7 @@ def generate_async_video_interview_summary(interview: dict[str, Any], responses:
     if not provider:
         return fallback
     system = (
-        "You summarize asynchronous video interview transcripts for Wathefni HR. Return JSON only. "
+        "You summarize asynchronous video interview transcripts for OctoHR. Return JSON only. "
         "Use only provided evidence. Transcripts may contain errors; note where HR should verify original video. "
         "Do not make or imply a final hiring decision."
     )
@@ -53470,7 +53477,7 @@ def generate_interview_ai_summary(notes: str, transcript: str | None, applicatio
     if not provider:
         return fallback
     system = (
-        "You summarize Wathefni HR interview notes. Return JSON only with keys: "
+        "You summarize OctoHR interview notes. Return JSON only with keys: "
         "summary, strengths, concerns, communication_notes, role_fit_evidence, missing_evidence, "
         "follow_up_questions, recommended_next_step, decision_policy. "
         "Do not make the hiring decision. Keep HR as the decision-maker. Do not invent facts beyond the notes/transcript."
@@ -55077,7 +55084,7 @@ def assessment_report_html(payload: dict[str, Any]) -> HTMLResponse:
 <body>
   <main>
     <header>
-      <div class="muted">Wathefni Assessment Report / Official deterministic score JSON</div>
+      <div class="muted">OctoHR Assessment Report / Official deterministic score JSON</div>
       <h1>{esc(attempt.get('candidate_name') or attempt.get('phone') or 'Candidate')}</h1>
       <div class="muted">{esc(attempt.get('position_title') or attempt.get('position_code') or 'Role')} / {esc(job_match.get('role_profile_label') or 'General Role')}</div>
     </header>
@@ -58594,7 +58601,7 @@ def dashboard_platform_oauth_callback(
     provider = (result.get("integration") or {}).get("provider_key") or ""
     html = f"""<!doctype html><html><body style="font-family:system-ui;padding:2rem;background:#f7f3eb;color:#15120d">
     <h1>Connected</h1>
-    <p>{provider} is connected for {company}. You can close this window and return to Wathefni Calendar.</p>
+    <p>{provider} is connected for {company}. You can close this window and return to OctoHR Calendar.</p>
     <script>try{{window.opener&&window.opener.postMessage({{type:'wathefni_platform_oauth',ok:true,provider:'{provider}'}},'*');}}catch(e){{}}</script>
     </body></html>"""
     from fastapi.responses import HTMLResponse
@@ -61690,7 +61697,7 @@ def dashboard_prehire_report_export(
         },
     )
     return csv_stream_response(
-        f"wathefni-prehire-{report_type}-{stamp}.csv",
+        f"octohr-prehire-{report_type}-{stamp}.csv",
         headers,
         rows,
     )
@@ -63098,7 +63105,7 @@ def process_privacy_mailbox_inbound(payload: dict[str, Any]) -> dict[str, Any]:
     if not sensitive:
         forward_subject = f"[privacy@wathefni.ai] {subject or '(no subject)'}"
         forward_body = (
-            "Wathefni privacy mailbox inbound copy (non-sensitive metadata forward).\n\n"
+            "OctoHR privacy mailbox inbound copy (non-sensitive metadata forward).\n\n"
             f"Mailbox: {privacy_mailbox_address()}\n"
             f"From: {from_address or ''}\n"
             f"Subject: {subject or ''}\n"
@@ -64959,7 +64966,7 @@ def dashboard_email_settings_put(request: dict[str, Any] | None = None, context:
         if not _iip.company_on_inbound_allowlist(company):
             raise HTTPException(
                 status_code=403,
-                detail={"error": "inbound_tenant_not_allowlisted", "message": "Inbound flags are limited to Wathefni and test tenants."},
+                detail={"error": "inbound_tenant_not_allowlisted", "message": "Inbound flags are limited to OctoHR and test tenants."},
             )
         if "inbound_forwarding_enabled" in body:
             set_company_setting(company, "inbound_forwarding_enabled", bool(body.get("inbound_forwarding_enabled")))
@@ -65037,7 +65044,7 @@ def dashboard_email_settings_action(request: dict[str, Any] | None = None, conte
             "ok": False,
             "action": "connect",
             "status": "setup_required",
-            "message": "Ask Wathefni support to connect your Microsoft mailbox. This is not self-serve yet.",
+            "message": "Ask OctoHR support to connect your Microsoft mailbox. This is not self-serve yet.",
             "view": tea.public_email_sending_view(sys.modules[__name__], company),
         }
     raise HTTPException(status_code=400, detail={"error": "invalid_action", "message": "Choose Connect, Verify, or Test."})
@@ -68700,7 +68707,7 @@ def deliver_app_activation_code(
             flow="app_activation",
             template_key="app_activation",
             text=f"Your {company} app activation code is {code}. It expires in {_EMPLOYEE_APP_INVITE_TTL_HOURS} hours.",
-            email_subject="Your Wathefni app activation code",
+            email_subject="Your OctoHR app activation code",
             company_code=company,
             variables={"code": code, "company_name": company, "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
             subject_key=employee.get("employee_key"),
@@ -77640,7 +77647,7 @@ def shifts_wave6c_sender_factory(cur: Any) -> Any:
                 }
             result = send_outbound_email(
                 to=recipient,
-                subject=f"[Wathefni] {headline}",
+                subject=f"[OctoHR] {headline}",
                 body=body,
                 company_code=str(company_code).upper(),
                 subject_type="employee",
@@ -82402,7 +82409,7 @@ def whatsapp_turn(
     if request.sender_role != "hr_admin" and not is_hr_phone(request.sender_phone) and not canonical_lifecycle_enabled():
         blocked = OrchestratorResponse(
             authoritative=True,
-            reply_text="Wathefni candidate intake is temporarily unavailable. Please contact HR.",
+            reply_text="OctoHR candidate intake is temporarily unavailable. Please contact HR.",
             final_reply_source="canonical_lifecycle_required",
             intent="candidate_intake_disabled",
             turn_focus="candidate_safety",
@@ -82418,7 +82425,7 @@ def whatsapp_turn(
     except Exception as exc:
         failure = OrchestratorResponse(
             authoritative=True,
-            reply_text="I hit a Wathefni backend issue before I could safely answer. Please try again in a moment.",
+            reply_text="I hit an OctoHR backend issue before I could safely answer. Please try again in a moment.",
             final_reply_source="whatsapp_turn_error",
             intent="orchestrator_error",
             turn_focus="ingress",
@@ -82493,7 +82500,7 @@ def _whatsapp_turn_impl(request: WhatsAppTurnRequest):
         print(f"toolcall_orchestrator_error: {exc}", flush=True)
         return OrchestratorResponse(
             authoritative=True,
-            reply_text="I hit a Wathefni backend issue before I could safely answer. Please try again in a moment.",
+            reply_text="I hit an OctoHR backend issue before I could safely answer. Please try again in a moment.",
             final_reply_source="toolcall_orchestrator_error",
             intent="orchestrator_error",
             turn_focus="toolcall_error",

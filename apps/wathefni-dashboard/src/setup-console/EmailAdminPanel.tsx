@@ -63,7 +63,7 @@ export function EmailAdminPanel({
         <div>
           <p className="text-sm font-medium">Email sending (admin)</p>
           <p className="text-xs text-subtle">
-            Mode: {String(settings.outbound_mode || 'wathefni')} · MS configured:{' '}
+            Mode: {String(settings.outbound_mode || 'wathefni') === 'wathefni' ? 'OctoHR' : String(settings.outbound_mode)} · MS configured:{' '}
             {String(Boolean(snapshot?.microsoft_mail_configured))} · Postmark account:{' '}
             {String(Boolean(snapshot?.postmark_account_configured))}
           </p>
@@ -100,9 +100,9 @@ export function EmailAdminPanel({
           size="sm"
           variant="ghost"
           disabled={busy}
-          onClick={() => void run('Forced Wathefni fallback', () => forceCompanyEmailWathefni(credentials, companyCode))}
+          onClick={() => void run('Forced OctoHR fallback', () => forceCompanyEmailWathefni(credentials, companyCode))}
         >
-          Force Wathefni
+          Force OctoHR
         </Button>
       </div>
 
