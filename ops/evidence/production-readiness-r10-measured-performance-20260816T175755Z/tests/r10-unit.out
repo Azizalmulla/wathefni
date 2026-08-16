@@ -1,0 +1,11 @@
+    PRODUCTION READINESS R10 — measured performance contracts
+      PASS  list_employees_page exists
+      PASS  HR employee directory uses list_employees_page
+      PASS  HR employee directory does not call company_employees
+      PASS  directory LIMIT is capped at 500
+      PASS  employee Home is a dedicated /app/home route
+      PASS  company_employees documents why it is uncapped
+
+    R10_MEASURED_PERFORMANCE_UNIT_PASS
+    6 passed, 0 failed
+

@@ -1,0 +1,19 @@
+# Smoke: cold launch lands on unified unsigned entry (phone activation).
+# Does not authenticate. Proves the release binary opens and shows sign-in.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - unsigned
+  - employee
+  - hr
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.methodSwitch"
+    timeout: 45000
+- assertVisible:
+    id: "e2e.auth.method.phone"
+- assertVisible:
+    id: "e2e.auth.employee.phone"

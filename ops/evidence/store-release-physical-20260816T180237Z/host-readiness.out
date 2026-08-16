@@ -1,0 +1,18 @@
+{
+  "app_id": "ai.wathefni.employee",
+  "target_device": null,
+  "target_platform": null,
+  "repo_root": "/Users/azizalmulla/Desktop/claw",
+  "maestro_ok": true,
+  "java_ok": true,
+  "simctl_ok": true,
+  "ios_runtime_ok": true,
+  "ios_booted": true,
+  "app_installed_booted": true,
+  "adb_ok": true,
+  "usb_android_device": true,
+  "disk_free_gb": "6",
+  "ui_runtime_ready": true,
+  "blockers": [],
+  "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+}

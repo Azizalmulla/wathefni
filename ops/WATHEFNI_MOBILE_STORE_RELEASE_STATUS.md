@@ -3,7 +3,7 @@
 **Stamp issued:** none  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
 **Date:** 2026-08-16  
-**Result:** **AUTOMATABLE WORK GREEN; EMPLOYEE OWNER GRANT AND PHYSICAL RP REMAIN**
+**Result:** **FINAL REQUALIFICATION BLOCKED: AUTHENTICATED EMPLOYEE AND PHYSICAL RP REMAIN UNPROVEN**
 
 HR Web redesign and Analytics UX were not started. Frozen HCM/Product/PT architecture was not reopened.
 
@@ -75,13 +75,13 @@ No screenshot comparison, AI visual analysis, or normal-loop video was used.
 | iOS simulator | unsigned entry/method switching PASS; authenticated activation/tabs OWNER-BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 | Android emulator | unsigned entry/method switching PASS; authenticated activation/tabs OWNER-BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 
-Evidence:
+Fresh final-requalification evidence:
 
-- iOS EN: `ops/evidence/mobile-e2e-gate-20260816T163249Z/`.
-- iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T164450Z/`.
-- Android EN: `ops/evidence/mobile-e2e-gate-20260816T164944Z/`.
-- Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T165215Z/`.
-- Final complete gate: `ops/evidence/mobile-e2e-gate-20260816T170015Z/` — 4 `MOBILE_PASS`, 6 API-spine proofs, HR `SHIP`, Employee `NO-SHIP` solely for activation/session ownership.
+- iOS EN: `ops/evidence/mobile-e2e-gate-20260816T173415Z/` — 4 `MOBILE_PASS`, HR `SHIP`.
+- iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T173728Z/` — authenticated `UI.hr-session-ar` `MOBILE_PASS`.
+- Android EN: `ops/evidence/mobile-e2e-gate-20260816T174451Z/` — clean retry, 4 `MOBILE_PASS`, HR `SHIP`.
+- Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T175424Z/` — authenticated `UI.hr-session-ar` `MOBILE_PASS` after recovery from a transient offline screen.
+- Final complete gate: `ops/evidence/mobile-e2e-gate-20260816T180240Z/` — 4 `MOBILE_PASS`, 6 API-spine proofs, HR `SHIP`, Employee `NO-SHIP` solely for missing Employee activation/session credentials.
 
 The safe activation provisioner uses only the existing `WATHEFNI-9655497001`–`003` synthetic canaries, writes a one-time code only to the local mode-0600 secret file, and never prints or records it. Provisioning correctly failed closed before generating a code because the E2E owner lacks `employees.manage`; the privilege-escalation guard was not bypassed.
 
@@ -97,11 +97,19 @@ The safe activation provisioner uses only the existing `WATHEFNI-9655497001`–`
 - Cross-surface convergence: **12/12 + 16/16**.
 - Clean Setup canary: **18/18**.
 
+Fresh final-requalification evidence:
+
+- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T175658Z/`.
+- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T175755Z/`.
+- Store build/live readiness: `ops/evidence/store-build-live-20260816T175824Z/`.
+- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T175912Z/`.
+- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T180218Z/`.
+
 `RELEASE_HARNESS_COMPLETED` is not the full-pass stamp. The harness intentionally preserves the Employee owner block and physical evidence requirements.
 
 ## Physical device gate — UNPROVEN
 
-The host audit found one real iPhone 15 Pro Max running iOS 26.5.2 with Wathefni `ai.wathefni.employee` version 0.3.0 build 23 installed; no real Android phone was connected. The iPhone accepted and ran a locally signed Maestro XCTest runner, but Maestro 2.8.0/Xcode 26 did not establish the host/device driver tunnel before the phone disconnected. No Wathefni signing key, bundle ID, or app configuration was changed.
+The fresh host audit at `ops/evidence/store-release-physical-20260816T180237Z/` found one real iPhone and no real Android phone. Its authority result is `PHYSICAL_MATRIX=DEVICE_PRESENT_BUT_UNRUN`; every RP item remains `UNPROVEN`. A statement that the physical gate is complete is not sufficient release evidence without the required observed matrix and device/build metadata.
 
 No physical checklist item is marked PASS. Keyboard, PIN, biometrics, local lock, privacy cover, real push, external HTTPS links, camera, file picker/viewer, offline/reconnect, foreground refresh, EN, AR/RTL, and sign-out/session isolation still require observed runs on one real iPhone and one real Android phone.
 

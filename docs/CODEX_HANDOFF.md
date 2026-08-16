@@ -3,7 +3,7 @@
 **Updated:** 2026-08-16  
 **Branch:** `authority-cutover`  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
-**Status:** **ALL AUTOMATABLE RELEASE GATES GREEN; EMPLOYEE OWNER GRANT AND PHYSICAL RP REMAIN**
+**Status:** **FINAL REQUALIFICATION BLOCKED: AUTHENTICATED EMPLOYEE AND PHYSICAL RP REMAIN UNPROVEN**
 
 The GitHub repository is the Wathefni source authority. Continue only the frozen mobile store-release closure. Do not reopen HCM/Product/PT architecture, start HR Web/Analytics redesign, or add product scope.
 
@@ -14,8 +14,8 @@ The GitHub repository is the Wathefni source authority. Continue only the frozen
 - Production readiness: `/health` and `/ready` are HTTP 200; the full frozen R8 environment, permission authority, link-signing, delivery, error/failed-job, and migration dimensions are green without weakening.
 - Security/convergence: R9 live tenant/permission attack **48/48**; core convergence **12/12**; domain matrix **16/16**.
 - Release suite: `./ops/test-smoke` reached `SMOKE_OK`; `./ops/test-release` reached `RELEASE_HARNESS_COMPLETED` after R10 **11/11**, R11 **53/53**, store build **26/26**, and clean Setup canary **18/18**.
-- Maestro: authenticated HR EN and AR passed on iOS and Android. Employee unsigned EN paths passed on both platforms; authenticated Employee activation/tabs are owner-blocked because the WATHEFNI E2E owner lacks `employees.manage`.
-- Physical RP: **UNPROVEN**. A real iPhone was detected and accepted the signed Maestro XCTest runner, but the driver tunnel did not become ready before it disconnected. No real Android phone was connected. No physical PASS is claimed.
+- Maestro: fresh authenticated HR EN and AR runs passed on iOS and Android. Employee unsigned EN paths passed on both platforms; the final gate remains Employee `NO-SHIP` because no Employee activation/session credential is available and the configured owner lacks `employees.manage`.
+- Physical RP: **UNPROVEN**. The fresh host matrix detected one real iPhone, no real Android phone, and no executed RP journey. Every required item remains `UNPROVEN`; no physical PASS is claimed.
 
 ## Exact remaining actions
 
@@ -53,17 +53,17 @@ WATHEFNI_EXPECTED_ANDROID_SHA256_CERTS='<three comma-separated Play app-signing 
 ## Latest evidence
 
 - Exact association deployment/qualification: `ops/evidence/store-release-associations-20260816T155815Z/REPORT.md`.
-- iOS EN: `ops/evidence/mobile-e2e-gate-20260816T163249Z/`.
-- iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T164450Z/`.
-- Android EN: `ops/evidence/mobile-e2e-gate-20260816T164944Z/`.
-- Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T165215Z/`.
-- Full mobile gate: `ops/evidence/mobile-e2e-gate-20260816T170015Z/`.
-- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T165423Z/`.
-- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T165531Z/`.
-- Store build/live readiness: `ops/evidence/store-build-live-20260816T165637Z/`.
-- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T165747Z/`.
-- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T165952Z/`.
-- Physical host audit: `ops/evidence/store-release-physical-20260816T170013Z/PHYSICAL_MATRIX.md`.
+- iOS EN: `ops/evidence/mobile-e2e-gate-20260816T173415Z/`.
+- iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T173728Z/`.
+- Android EN: `ops/evidence/mobile-e2e-gate-20260816T174451Z/`.
+- Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T175424Z/`.
+- Full mobile gate: `ops/evidence/mobile-e2e-gate-20260816T180240Z/`.
+- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T175658Z/`.
+- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T175755Z/`.
+- Store build/live readiness: `ops/evidence/store-build-live-20260816T175824Z/`.
+- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T175912Z/`.
+- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T180218Z/`.
+- Physical host audit: `ops/evidence/store-release-physical-20260816T180237Z/PHYSICAL_MATRIX.md`.
 
 Status authority: `ops/WATHEFNI_MOBILE_STORE_RELEASE_STATUS.md`. Physical procedure: `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md`.
 

@@ -1,0 +1,23 @@
+    PRODUCTION READINESS R10 — measured staging latency
+    tenant: R9P9F14EB headcount=80
+      TIME  list_employees_page n=50 4ms total=80
+      PASS  paged directory total is 80
+      PASS  paged directory returns at most 50 rows
+      PASS  list_employees_page under budget
+      TIME  dashboard login 150ms status=200
+      PASS  HR login 200
+      TIME  GET /dashboard/posthire/employees 273ms status=200
+      PASS  employees HTTP 200
+      PASS  employees HTTP under budget
+      PASS  HTTP directory is paged
+      TIME  GET /app/home 99ms status=200
+      PASS  employee Home responds
+      PASS  employee Home under budget
+      TIME  GET /health 4ms status=200
+      PASS  health 200
+      PASS  health under 500ms
+
+    R10_MEASURED_PERFORMANCE_DB_PASS
+    11 passed, 0 failed
+
+STAGING_RC=0

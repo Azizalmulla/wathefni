@@ -1,0 +1,76 @@
+# Arabic/RTL authenticated HR critical path.
+# Prerequisite: an HR session and local PIN established by smoke/01-hr-login.
+# The simulator/device locale must be Arabic before this flow starts.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - locale
+  - ar
+  - rtl
+  - hr
+  - requires_hr_session
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.pin.root"
+    timeout: 60000
+- inputText: ${MAESTRO_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+- tapOn:
+    id: "e2e.tab.hr.more"
+- runFlow:
+    when:
+      visible: ".*Settings.*"
+    commands:
+      - tapOn: ".*Settings.*"
+      - extendedWaitUntil:
+          visible: "Language"
+          timeout: 30000
+      - tapOn: "Language"
+      - extendedWaitUntil:
+          visible: "اللغة"
+          timeout: 60000
+      - tapOn: "رجوع"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.more"
+    timeout: 60000
+- assertVisible: ".*الرئيسية.*"
+- assertVisible: ".*المزيد.*"
+- tapOn:
+    id: "e2e.tab.hr.home"
+- assertVisible: "يحتاج إلى قرارك"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.people"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.people"
+      - assertVisible: ".*الأشخاص.*"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.inbox"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.inbox"
+      - assertVisible: ".*الوارد.*"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.hiring"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.hiring"
+      - assertVisible: ".*التوظيف.*"
+- tapOn:
+    id: "e2e.tab.hr.more"
+- assertVisible: ".*الإعدادات.*"

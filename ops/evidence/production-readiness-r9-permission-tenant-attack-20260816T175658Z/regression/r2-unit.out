@@ -1,0 +1,125 @@
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=banned_known_value
+retired link secret ignored purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET_PREVIOUS reason=banned_known_value
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+internal tenant token rejected company=WEAKCO reason=weak_or_missing
+break-glass token rejected reason=too_short
+break-glass token rejected reason=same_as_internal_token
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T17:57:02.505705+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T17:57:02.506103+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T17:57:02.506238+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+    PRODUCTION READINESS R2 — security hardening unit contracts
+
+    P0-2 — link signing secrets fail closed
+      PASS  assessment: committed dev constant rejected
+      PASS  video_interview: committed dev constant rejected
+      PASS  database URL rejected as signing key
+      PASS  dashboard token cannot be reused as signing key
+      PASS  short secret rejected
+      PASS  low-entropy secret rejected
+      PASS  missing secret rejected
+      PASS  dedicated strong secret accepted
+      PASS  assessment unavailable while unset
+      PASS  signing without a secret raises LinkSecretUnavailable
+      PASS  readiness reports link signing not ok
+      PASS  readiness never returns secret material
+      PASS  banned constant in env still fails closed
+      PASS  valid dedicated secret makes capability available
+      PASS  fingerprint is a short digest, not the secret
+      PASS  rotation accepts one retired key
+      PASS  retired banned constant is dropped
+
+    P0-2 — forged tokens from the removed fallbacks
+      PASS  assessment token forged with the old constant is rejected
+      PASS  video token forged with the old constant is rejected
+      PASS  token forged with the database URL is rejected
+      PASS  token signed by the dedicated secret verifies
+      PASS  token bound to its subject
+      PASS  tampered token rejected
+      PASS  expired token rejected
+      PASS  link issued before rotation still verifies
+      PASS  link stops verifying once the retired key is removed
+      PASS  capability unavailable with no secret
+      PASS  verification fails closed with no secret
+
+    P0-5 — internal endpoint classification and principals
+      PASS  every internal route in scope is classified
+      PASS  no ambiguous classification
+      PASS  destructive routes are break-glass, never tenant-routine
+      PASS  tenant-scoped routes all declare a company scope
+      PASS  classified: /orchestrator/audit/turns
+      PASS  classified: /orchestrator/audit/pending-actions
+      PASS  classified: /orchestrator/audit/action-results
+      PASS  classified: /orchestrator/posthire/documents/email-intake
+      PASS  classified: /orchestrator/debug/intake-quarantine/sweep
+      PASS  classified: /orchestrator/debug/intake-worker/run
+      PASS  no configuration means no principal
+      PASS  platform token resolves to a platform principal
+      PASS  tenant token resolves to its own company
+      PASS  unknown token resolves to nothing
+      PASS  weak tenant token is refused
+
+    P0-5 — break-glass credential separation
+      PASS  break-glass disabled by default
+      PASS  break-glass unconfigured by default
+      PASS  short break-glass token refused
+      PASS  break-glass token equal to the internal token is refused
+      PASS  distinct strong break-glass token accepted
+
+    P0-4 — internal worker channel
+      PASS  shared token is not a worker token by default
+      PASS  no worker secret + localhost is denied
+      PASS  shared internal token alone is denied
+      PASS  wrong worker token denied
+      PASS  correct dedicated worker token accepted
+      PASS  no localhost allowlist remains in the worker gate
+
+    P0-3 / P1-22 — rate-limit policy framework
+      PASS  policy registered: dashboard_login
+      PASS  policy registered: setup_operator_login
+      PASS  policy registered: calendar_guest_token
+      PASS  policy registered: internal_break_glass
+      PASS  every policy has a positive limit and window
+      PASS  every policy names its dimensions
+      PASS  login policies count failures, public token policies count requests
+      PASS  setup operator lock is at least as strict as dashboard
+      PASS  policies are tunable without a code change
+      PASS  override removal restores the default
+      PASS  identity digests are not reversible
+      PASS  empty principal is labelled, not hashed
+      PASS  passwords never reach the audit record
+      PASS  operator tokens never reach the audit record
+      PASS  bearer tokens never reach the audit record
+      PASS  signing secrets never reach the audit record
+      PASS  nested credentials are redacted too
+      PASS  diagnostic context survives redaction
+
+    P0-3 — the source dimension cannot be spoofed by the caller
+      PASS  a direct caller's X-Forwarded-For is ignored
+      PASS  behind the edge proxy the appended hop wins, not the caller's claim
+      PASS  a single trusted hop is still honoured
+      PASS  a peer with no header is used as-is
+      PASS  an unknown peer is labelled
+      PASS  the trusted proxy set is configurable for other topologies
+
+    R2 — source-level regressions that must not come back
+      PASS  no committed assessment dev secret in app.py
+      PASS  no committed video-interview dev secret in app.py
+      PASS  signing no longer falls back to the database URL
+      PASS  audit reads are company scoped
+      PASS  web_dashboard metadata alone is no longer tenant authority
+      PASS  dashboard turn authority marker exists
+
+    R2_SECURITY_UNIT_PASS
+    84 passed, 0 failed
+
