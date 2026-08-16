@@ -3,7 +3,7 @@
 **Stamp issued:** none  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
 **Date:** 2026-08-16  
-**Result:** **AUTOMATABLE WORK GREEN; OWNER/PHYSICAL GATES REMAIN**
+**Result:** **AUTOMATABLE WORK GREEN; EMPLOYEE OWNER GRANT AND PHYSICAL RP REMAIN**
 
 HR Web redesign and Analytics UX were not started. Frozen HCM/Product/PT architecture was not reopened.
 
@@ -19,108 +19,95 @@ Source: `ops/e2e/functional-coverage-ledger.json` (**2,093** production records)
 | Employee mobile | **74/74** | Composition/contract ownership + targeted Maestro |
 | HR mobile | **40/40** | Composition/contract ownership + targeted Maestro |
 | Deep links | **38/38** | Live HTTPS routing |
-| Client API contracts | **1,238/1,238** | Five-dimensional ownership: authorized request, permission/module, tenant, state, result |
+| Client API contracts | **1,238/1,238** | Authorized request, permission/module, tenant, state, and result ownership |
 | Assistant tools | **28/28** | Executable proof ownership |
 
-Coverage status totals: **175 structural**, **1,880 contract**, **38 live**, **0 unowned**.
+Coverage status totals: **175 structural**, **1,880 contract**, **38 live**, **0 unowned**. The mounted schema/ownership gate covers 1,238 operations, 48 proof-owner suites, and 530 literal client paths.
 
-API checks:
+## Production store associations — GREEN
 
-- Mounted schema/ownership gate: **9 passed, 0 failed**; 1,238 operations, 48 proof-owner suites, 530 literal client paths.
-- Private fail-closed staging probe: **1,196 passed, 0 failed**, scoped only to operations carrying canonical private-auth dependencies.
-- Assistant onboarding tools: **28/28**.
+The existing production orchestrator configuration path now contains the real public association identifiers:
+
+- Apple App ID: `ZZJ645575F.ai.wathefni.employee`.
+- Android package: `ai.wathefni.employee`.
+- All three supplied Google Play app-signing SHA-256 fingerprints are present. No upload key or signing key was changed.
+
+The orchestrator was restarted without redeploying product code. The exact production association qualifier proved:
+
+- AASA and Digital Asset Links return HTTP 200 directly, with `application/json`, no redirect dependency;
+- AASA contains exactly the production Apple App ID and only `/l` plus `/l/*`;
+- Digital Asset Links contains the canonical package, `delegate_permission/common.handle_all_urls`, and exactly all three production fingerprints;
+- all 38 registered HTTPS routes resolve through the governed router and unknown paths fail closed.
+
+Result: **`HTTPS_APP_LINKS_LIVE_PASS` — 90 passed, 0 failed** with the exact expected identifiers. The standard release-suite association invocation also passed **89/89**.
 
 ## Production readiness — GREEN
 
-`https://api.wathefni.ai/ready` returns HTTP 200 with `status=ready` and the full frozen R8 dimensions:
+`https://api.wathefni.ai/health` and `/ready` return HTTP 200. The full frozen R8 readiness payload reports:
 
-- production application/database binding matches;
+- matching production application/database binding;
 - backend-current permission authority and trusted-authority enforcement;
-- legacy dashboard token auth disabled;
+- legacy dashboard token authentication disabled;
 - assessment and video-interview link signing configured and healthy;
 - delivery contract `r8-delivery-safety-v1`;
 - zero recent delivery errors and zero failed jobs at qualification time;
-- migrations healthy, no pending migrations, no drift, forward-only policy, and rollback runbook.
+- migrations applied with none pending, no drift, forward-only policy, and rollback runbook present.
 
 The readiness contract was not weakened to obtain green.
 
+## Association and cross-surface security — GREEN
+
+- App-link unit contract: **19/19**.
+- Mobile HTTPS-link contract: **6/6**.
+- Module composition contract: **76/76**.
+- R9 live tenant/permission attack: **48/48**.
+- Core UI/API/canonical convergence: **12/12**.
+- Domain convergence matrix: **16/16**, covering Recruiting, Interviews, Onboarding, Attendance, Shifts, Payroll/Payslips, Documents, Performance/OKRs, Talent, Learning, Benefits, Employee Relations, Engagement, Compensation Planning, Workforce Planning, and Setup/module composition. Employees and Leave are in the core proof.
+
+Valid Employee and HR destinations, unknown slugs, missing records, unauthenticated stashing, wrong permissions, disabled modules, and wrong-tenant/object paths are governed by the same tested resolver and permission/module authorities. The `wathefni://` custom scheme remains present.
+
 ## Maestro/UI state
 
-No screenshots, AI visual analysis, or normal-loop video were used.
+No screenshot comparison, AI visual analysis, or normal-loop video was used.
 
 | Platform | Employee | HR | Language evidence |
 |---|---|---|---|
-| iOS simulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
-| Android emulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
+| iOS simulator | unsigned entry/method switching PASS; authenticated activation/tabs OWNER-BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
+| Android emulator | unsigned entry/method switching PASS; authenticated activation/tabs OWNER-BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 
-Latest complete gate: `ops/evidence/mobile-e2e-gate-20260816T142419Z/` — 4 `MOBILE_PASS`, 6 API spine checks, one honest Employee-session block; HR `SHIP`, Employee `NO-SHIP` solely because activation credentials were absent.
+Evidence:
 
-The release runner now maps `MOBILE_E2E_EMPLOYEE_PHONE/CODE` before flow selection, so providing those values unlocks the Employee path directly.
+- iOS EN: `ops/evidence/mobile-e2e-gate-20260816T163249Z/`.
+- iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T164450Z/`.
+- Android EN: `ops/evidence/mobile-e2e-gate-20260816T164944Z/`.
+- Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T165215Z/`.
+- Final complete gate: `ops/evidence/mobile-e2e-gate-20260816T170015Z/` — 4 `MOBILE_PASS`, 6 API-spine proofs, HR `SHIP`, Employee `NO-SHIP` solely for activation/session ownership.
 
-## Cross-surface convergence — GREEN
+The safe activation provisioner uses only the existing `WATHEFNI-9655497001`–`003` synthetic canaries, writes a one-time code only to the local mode-0600 secret file, and never prints or records it. Provisioning correctly failed closed before generating a code because the E2E owner lacks `employees.manage`; the privilege-escalation guard was not bypassed.
 
-- Core canonical convergence: **18 passed, 0 failed**.
-- Domain matrix: **16 passed, 0 failed** across Recruiting, Interviews, Onboarding, Attendance, Shifts, Payroll/Payslips, Documents, Performance/OKRs, Talent, Learning, Benefits, Employee Relations, Engagement, Compensation Planning, Workforce Planning, and Setup/module composition.
-- Employees and Leave are included in the 18-check core convergence proof.
+## Full automated release suite — GREEN
 
-Evidence: `ops/evidence/e2e-cross-surface-20260816T142156Z/`.
-
-## Full release suite — GREEN within honest blocked-gate semantics
-
-- `./ops/test-smoke` → `SMOKE_OK`.
+- `PYTHONDONTWRITEBYTECODE=1 ./ops/test-smoke` → `SMOKE_OK`.
 - `./ops/test-release` → `RELEASE_HARNESS_COMPLETED`.
-- R9 tenant/permission attack: **48/48**.
-- R10 measured staging/live performance: **11/11**; live `/health` and `/ready` within budget.
+- R9 live tenant/permission attack: **48/48**.
+- R10 staging/live measured performance: **11/11**.
 - R11 EN/AR release language: **53/53**.
 - Store build gate: **26/26**.
+- Production associations: **89/89** in the standard harness; **90/90** under exact expected-ID qualification.
+- Cross-surface convergence: **12/12 + 16/16**.
 - Clean Setup canary: **18/18**.
-- Final Android release manifest: backup disabled, cleartext disabled, no debug/development scheme, no overlay/microphone/legacy-storage permissions, and only the intended Wathefni scheme + App Link host.
 
-Native manifest evidence: `ops/evidence/android-release-manifest-20260816T141100Z/`.
+`RELEASE_HARNESS_COMPLETED` is not the full-pass stamp. The harness intentionally preserves the Employee owner block and physical evidence requirements.
 
-`RELEASE_HARNESS_COMPLETED` is not the full-pass stamp: the harness preserves exit code 2 as an explicit owner/device block for association, Employee activation, and physical-device gates.
+## Physical device gate — UNPROVEN
 
-## Owner-dependent association values
+The host audit found one real iPhone 15 Pro Max running iOS 26.5.2 with Wathefni `ai.wathefni.employee` version 0.3.0 build 23 installed; no real Android phone was connected. The iPhone accepted and ran a locally signed Maestro XCTest runner, but Maestro 2.8.0/Xcode 26 did not establish the host/device driver tunnel before the phone disconnected. No Wathefni signing key, bundle ID, or app configuration was changed.
 
-### Apple
+No physical checklist item is marked PASS. Keyboard, PIN, biometrics, local lock, privacy cover, real push, external HTTPS links, camera, file picker/viewer, offline/reconnect, foreground refresh, EN, AR/RTL, and sign-out/session isolation still require observed runs on one real iPhone and one real Android phone.
 
-1. Sign in at <https://developer.apple.com/account>.
-2. Open **Membership details** and copy the 10-character **Team ID**.
-3. Form `TEAMID.ai.wathefni.employee` and configure it as `WATHEFNI_IOS_APP_ID` in the production `wathefni-orchestrator.service` environment.
+## Exact remaining stop-condition gates
 
-Apple reference: <https://developer.apple.com/help/glossary/team-id/>.
+1. Through the existing authorized Setup/superadmin path, apply the canonical `setup_owner_bootstrap_v1` permission bundle (or otherwise grant `employees.manage`) to the WATHEFNI E2E owner. Do not self-grant or bypass the privilege-escalation guard. Then run `ops/mobile-e2e/provision-employee-activation.py` and the Employee activation/tab flows in iOS EN/AR and Android EN/AR; verify the redeemed invite and active session.
+2. Reconnect and keep unlocked one real iPhone and one real Android phone, enable the normal developer/trust prompts, and execute every item in `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md` with human-observed evidence.
 
-### Android
-
-1. Open Play Console and select Wathefni.
-2. Go to **Protected with Play → Play Store distribution → Go to Play app signing**.
-3. In **App signing key certificate**, copy **SHA-256 certificate fingerprint**. Do not use the upload-key fingerprint.
-4. Configure it as `WATHEFNI_ANDROID_SHA256_CERTS` in the production `wathefni-orchestrator.service` environment. Multiple active fingerprints are comma-separated.
-
-Google reference: <https://support.google.com/googleplay/android-developer/answer/9842756?hl=en>.
-
-Shortest production configuration path:
-
-```ini
-# sudo systemctl edit wathefni-orchestrator.service
-[Service]
-Environment="WATHEFNI_IOS_APP_ID=TEAMID.ai.wathefni.employee"
-Environment="WATHEFNI_ANDROID_SHA256_CERTS=AA:BB:...:FF"
-```
-
-Then run `sudo systemctl daemon-reload`, restart `wathefni-orchestrator.service`, and qualify:
-
-```bash
-WATHEFNI_APP_LINK_BASE=https://api.wathefni.ai \
-  wathefni-orchestrator/.venv/bin/python ops/e2e/qualify-https-app-links.py
-```
-
-Current live result: **84 passed, 0 failed, exit 2 OWNER_BLOCKED**. AASA is valid JSON with empty `details`; assetlinks is valid JSON `[]`. After configuration the qualifier requires the exact production bundle suffix and a valid 32-byte SHA-256 fingerprint before returning 0.
-
-## Remaining stop-condition gates
-
-1. Add valid, unconsumed Employee activation credentials to `~/.config/wathefni/e2e.env` (mode 0600), rerun Employee activation/tabs on iOS and Android, and provide an Employee bearer for the five-check employee API spine if available.
-2. Provision both association values and obtain qualifier exit 0 with non-empty AASA/assetlinks.
-3. Execute `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md` on one real iPhone and one real Android phone.
-
-No `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` may be issued before all three are proven.
+No `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` may be issued before both gates are genuinely proven.

@@ -7,11 +7,25 @@ import os
 import re
 import sys
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 PASS = 0
 FAIL = 0
 BASE = os.environ.get("WATHEFNI_APP_LINK_BASE", "http://127.0.0.1:8011").rstrip("/")
+EXPECTED_IOS_APP_ID = os.environ.get("WATHEFNI_EXPECTED_IOS_APP_ID", "").strip()
+EXPECTED_ANDROID_CERTS = {
+    part.strip().upper()
+    for part in os.environ.get("WATHEFNI_EXPECTED_ANDROID_SHA256_CERTS", "").split(",")
+    if part.strip()
+}
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+OPENER = build_opener(NoRedirect())
 
 
 def check(label: str, condition: bool, detail: object = None) -> None:
@@ -28,7 +42,7 @@ def check(label: str, condition: bool, detail: object = None) -> None:
 def http(path: str) -> tuple[int, str, str]:
     req = Request(BASE + path, headers={"Accept": "text/html, application/json"})
     try:
-        with urlopen(req, timeout=20) as resp:
+        with OPENER.open(req, timeout=20) as resp:
             body = resp.read().decode("utf-8", errors="replace")
             ctype = resp.headers.get("Content-Type", "")
             return resp.status, body, ctype
@@ -68,7 +82,8 @@ def main() -> int:
     check("unknown slug fails closed 404", missing_status == 404, missing_status)
     check("unknown slug still offers store fallback", "App Store" in missing_html and "Google Play" in missing_html)
     aasa_status, aasa_body, aasa_type = http("/.well-known/apple-app-site-association")
-    check("AASA is served", aasa_status == 200, (aasa_status, aasa_type))
+    check("AASA is served directly without a redirect", aasa_status == 200, (aasa_status, aasa_type))
+    check("AASA content type is application/json", "application/json" in aasa_type.lower(), aasa_type)
     try:
         aasa = json.loads(aasa_body) if aasa_status == 200 else {}
     except json.JSONDecodeError:
@@ -79,13 +94,19 @@ def main() -> int:
         owner_blockers.append("WATHEFNI_IOS_APP_ID")
     else:
         app_ids = [str(row.get("appID") or "") for row in aasa_details if isinstance(row, dict)]
-        check(
-            "AASA has a production Wathefni application identifier",
-            any(re.fullmatch(r"[A-Z0-9]{10}\.ai\.wathefni\.employee", app_id) for app_id in app_ids),
-            app_ids,
-        )
-    asset_status, asset_body, _ = http("/.well-known/assetlinks.json")
-    check("assetlinks is served", asset_status == 200, asset_status)
+        if EXPECTED_IOS_APP_ID:
+            check("AASA has exactly the expected production application identifier", app_ids == [EXPECTED_IOS_APP_ID], app_ids)
+        else:
+            check(
+                "AASA has a production Wathefni application identifier",
+                any(re.fullmatch(r"[A-Z0-9]{10}\.ai\.wathefni\.employee", app_id) for app_id in app_ids),
+                app_ids,
+            )
+        paths = [row.get("paths") for row in aasa_details if isinstance(row, dict)]
+        check("AASA covers only the registered Wathefni link paths", paths == [["/l", "/l/*"]], paths)
+    asset_status, asset_body, asset_type = http("/.well-known/assetlinks.json")
+    check("assetlinks is served directly without a redirect", asset_status == 200, asset_status)
+    check("assetlinks content type is application/json", "application/json" in asset_type.lower(), asset_type)
     try:
         assets = json.loads(asset_body) if asset_status == 200 else None
     except json.JSONDecodeError:
@@ -100,16 +121,22 @@ def main() -> int:
             if isinstance(row, dict) and "delegate_permission/common.handle_all_urls" in (row.get("relation") or [])
         ]
         fingerprints = [
-            str(value)
+            str(value).upper()
             for target in android_targets
             if target.get("namespace") == "android_app" and target.get("package_name") == "ai.wathefni.employee"
             for value in (target.get("sha256_cert_fingerprints") or [])
         ]
         check(
-            "assetlinks has the production package and SHA-256 certificate",
-            any(re.fullmatch(r"(?:[0-9A-F]{2}:){31}[0-9A-F]{2}", value.upper()) for value in fingerprints),
+            "assetlinks has the production package, relation, and valid SHA-256 certificates",
+            bool(fingerprints) and all(re.fullmatch(r"(?:[0-9A-F]{2}:){31}[0-9A-F]{2}", value) for value in fingerprints),
             "malformed or wrong-package association",
         )
+        if EXPECTED_ANDROID_CERTS:
+            check(
+                "assetlinks has exactly every expected production app-signing certificate",
+                set(fingerprints) == EXPECTED_ANDROID_CERTS,
+                {"expected": sorted(EXPECTED_ANDROID_CERTS), "actual": sorted(fingerprints)},
+            )
     print(f"\n    HTTPS_APP_LINKS_LIVE_{'PASS' if not FAIL else 'FAIL'}  {PASS} passed, {FAIL} failed")
     if owner_blockers:
         print(f"      OWNER_BLOCKED  provision {', '.join(owner_blockers)}; installed-app intercept cannot verify yet")

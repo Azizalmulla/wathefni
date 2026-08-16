@@ -86,6 +86,8 @@ def redact_maestro_debug_logs(since: float) -> None:
         for key in (
             "MAESTRO_HR_COMPANY",
             "MAESTRO_HR_EMAIL",
+            "MAESTRO_HR_EMAIL_LOCAL",
+            "MAESTRO_HR_EMAIL_DOMAIN",
             "MAESTRO_HR_PASSWORD",
             "MAESTRO_EMPLOYEE_PHONE",
             "MAESTRO_EMPLOYEE_CODE",
@@ -162,6 +164,15 @@ def flow_files(suite: str) -> list[Path]:
 
 def main() -> int:
     load_secrets()
+    hr_email = os.environ.get("MAESTRO_HR_EMAIL", "").strip()
+    email_local, separator, email_domain = hr_email.partition("@")
+    if separator and email_local and email_domain:
+        # Entering a complete address in one Maestro inputText command is
+        # unreliable on the iOS email keyboard. Always derive the two safe
+        # fragments from the authoritative full credential so stale helper
+        # variables cannot change the identity under test.
+        os.environ["MAESTRO_HR_EMAIL_LOCAL"] = email_local
+        os.environ["MAESTRO_HR_EMAIL_DOMAIN"] = email_domain
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     evid = Path(EVID_OVERRIDE) if EVID_OVERRIDE else ROOT / "ops" / "evidence" / f"mobile-e2e-gate-{stamp}"
     evid.mkdir(parents=True, exist_ok=True)
@@ -383,6 +394,12 @@ def main() -> int:
                         continue
                     stripped = stripped.replace("- launchApp:\n    clearState: true", "- launchApp")
                 run_path = dest_dir / path.name
+                if TARGET_PLATFORM == "ios" and TARGET_LOCALE == "ar" and path.name == "hr-session-ar.yaml":
+                    # iOS SecureStore is Keychain-backed, so clearing app data
+                    # preserves the authenticated session while removing the
+                    # prior AsyncStorage locale. The app then boots from the
+                    # explicitly prepared Arabic simulator locale.
+                    stripped = stripped.replace("- launchApp\n", "- launchApp:\n    clearState: true\n", 1)
                 run_path.write_text(stripped, encoding="utf-8")
                 out_log = ui_dir / f"{path.stem}.log"
                 maestro_cmd = [maestro_bin]

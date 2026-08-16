@@ -71,4 +71,3 @@ tags:
     timeout: 60000
 - assertVisible:
     id: "e2e.tab.hr.home"
-- takeScreenshot: hr-home-after-login

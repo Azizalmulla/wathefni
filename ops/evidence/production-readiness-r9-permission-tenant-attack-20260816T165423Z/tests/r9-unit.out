@@ -1,0 +1,37 @@
+    PRODUCTION READINESS R9 — permission / tenant attack contracts (no DB)
+
+    session company is the only tenant authority
+      PASS  dashboard_context exists
+      PASS  session user company is taken from the session, not the header
+      PASS  mismatched X-Company-Code is 403 dashboard_company_forbidden
+      PASS  employee /app identity is the session employee only
+      PASS  employee /app still enforces the rollout allowlist
+
+    role SOD contracts
+      PASS  owner has users.manage + settings.manage
+      PASS  hr_admin has settings.manage but never users.manage
+      PASS  manager has no payroll.export
+      PASS  manager has no er.sensitive
+      PASS  manager has no talent.sensitive
+      PASS  manager has no performance.sensitive
+      PASS  payroll_operator is payroll-only
+      PASS  payroll_operator has no users.manage
+      PASS  viewer has no leave.decide
+      PASS  hr_admin holds ER + talent + performance sensitive
+      PASS  hr_admin holds payroll.export
+
+    P1-19 defence-in-depth company_code predicates
+      PASS  employee raw_json write is company-scoped
+      PASS  unscoped employee raw_json write is gone
+      PASS  onboarding received write is company-scoped
+      PASS  unscoped onboarding received write is gone
+      PASS  no employee_key-only UPDATE/DELETE on employees
+      PASS  remaining unscoped writes are not the employees hub
+
+    fail-closed error vocabulary
+      PASS  module_disabled is a 403 entitlement error
+      PASS  permission_denied is used for missing permissions
+      PASS  document hub 404s out-of-scope files
+
+    R9_PERMISSION_TENANT_ATTACK_UNIT_PASS
+    25 passed, 0 failed

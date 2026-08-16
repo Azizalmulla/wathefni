@@ -1,0 +1,39 @@
+# Physical RP matrix — 20260816T170013Z
+
+Physical claims require physical evidence. This host check does not substitute a device run.
+
+| Probe | Result |
+|---|---|
+| iOS USB device | PRESENT |
+| Android USB device | ABSENT |
+
+## Devices seen
+
+### iOS
+```
+azizalmulla’s MacBook Pro (B936A62C-0228-51DA-8C0A-5BB343D81356)
+Aziz’s iPhone (26.5.2) (00008130-000C08563A30001C)
+```
+
+### Android
+```
+none
+```
+
+## RP items
+
+| ID | Item | Result |
+|---|---|---|
+| PH-1-keyboard-visible | required on real iOS + Android | UNPROVEN |
+| PH-2-keyboard-actions | required on real iOS + Android | UNPROVEN |
+| PH-3-android-keyboard | required on real iOS + Android | UNPROVEN |
+| PH-4-offsets | required on real iOS + Android | UNPROVEN |
+| PH-5-biometrics | required on real iOS + Android | UNPROVEN |
+| PH-6-pin-lock | required on real iOS + Android | UNPROVEN |
+| PH-7-camera-files | required on real iOS + Android | UNPROVEN |
+| PH-8-push | required on real iOS + Android | UNPROVEN |
+| PH-9-deep-links | required on real iOS + Android | UNPROVEN |
+| PH-10-offline-privacy | required on real iOS + Android | UNPROVEN |
+| PH-11-rtl | required on real iOS + Android | UNPROVEN |
+
+**PHYSICAL_MATRIX=DEVICE_PRESENT_BUT_UNRUN** — hardware is attached; the RP journey script was not executed in this pass.

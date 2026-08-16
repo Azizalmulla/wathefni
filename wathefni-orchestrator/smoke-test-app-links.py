@@ -39,8 +39,24 @@ def main() -> int:
     os.environ.pop("WATHEFNI_ANDROID_SHA256_CERTS", None)
     check("AASA details empty until team id is provisioned", app_links.aasa_document()["applinks"]["details"] == [])
     check("assetlinks empty until cert fingerprints are provisioned", app_links.assetlinks_document() == [])
-    os.environ["WATHEFNI_IOS_APP_ID"] = "TEAMID.ai.wathefni.employee"
-    check("AASA includes appID when configured", app_links.aasa_document()["applinks"]["details"][0]["appID"].endswith("ai.wathefni.employee"))
+    os.environ["WATHEFNI_IOS_APP_ID"] = "A1B2C3D4E5.ai.wathefni.employee"
+    check(
+        "AASA includes the exact appID when configured",
+        app_links.aasa_document()["applinks"]["details"][0]["appID"] == "A1B2C3D4E5.ai.wathefni.employee",
+    )
+    fp1 = ":".join(["AA"] * 32)
+    fp2 = ":".join(["BB"] * 32)
+    os.environ["WATHEFNI_ANDROID_SHA256_CERTS"] = f"{fp1}, {fp2.lower()}"
+    assetlinks = app_links.assetlinks_document()
+    check(
+        "assetlinks preserves every comma-separated certificate",
+        assetlinks[0]["target"]["sha256_cert_fingerprints"] == [fp1, fp2],
+    )
+    check(
+        "assetlinks uses the canonical Android package and relation",
+        assetlinks[0]["target"]["package_name"] == "ai.wathefni.employee"
+        and assetlinks[0]["relation"] == ["delegate_permission/common.handle_all_urls"],
+    )
     app_json = (ROOT.parent / "apps" / "wathefni-employee-mobile" / "app.json").read_text(encoding="utf-8")
     check("iOS associatedDomains lists api.wathefni.ai", "applinks:api.wathefni.ai" in app_json)
     check("Android intentFilters host api.wathefni.ai", "api.wathefni.ai" in app_json and "pathPrefix" in app_json)

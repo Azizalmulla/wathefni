@@ -10,7 +10,8 @@ tags:
   - hr
   - requires_hr_session
 ---
-- launchApp
+- launchApp:
+    clearState: true
 - extendedWaitUntil:
     visible:
       id: "e2e.pin.root"

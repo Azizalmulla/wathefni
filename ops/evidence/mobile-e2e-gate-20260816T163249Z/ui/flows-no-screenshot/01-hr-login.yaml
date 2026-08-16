@@ -21,11 +21,6 @@ tags:
     id: "e2e.auth.hr.company"
 - eraseText
 - inputText: ${MAESTRO_HR_COMPANY}
-- scrollUntilVisible:
-    element:
-      id: "e2e.auth.hr.email"
-    direction: DOWN
-    timeout: 20000
 - tapOn:
     id: "e2e.auth.hr.email"
 - eraseText
@@ -34,11 +29,6 @@ tags:
 - inputText: ${MAESTRO_HR_EMAIL_LOCAL}
 - inputText: "@"
 - inputText: ${MAESTRO_HR_EMAIL_DOMAIN}
-- scrollUntilVisible:
-    element:
-      id: "e2e.auth.hr.password"
-    direction: DOWN
-    timeout: 20000
 - tapOn:
     id: "e2e.auth.hr.password"
 - eraseText
@@ -71,4 +61,3 @@ tags:
     timeout: 60000
 - assertVisible:
     id: "e2e.tab.hr.home"
-- takeScreenshot: hr-home-after-login

@@ -1,0 +1,23 @@
+    STORE RELEASE — clean Setup canary
+    tenant: QADD0650 base: http://127.0.0.1:8011
+      PASS  operator credentials present
+      PASS  Setup operator login
+      PASS  operator access token issued
+      PASS  Setup creates company
+      PASS  new company bootstrap is not pre-staffed
+      PASS  Setup enables catalog modules
+      PASS  Setup seeds owner invite
+      PASS  owner invite token returned
+      PASS  owner accepts invite through Setup/auth
+      PASS  owner dashboard login
+      PASS  owner session issued
+      PASS  owner session includes employees.read from bootstrap
+      PASS  owner session includes employees.manage from bootstrap
+      PASS  owner can open company Setup
+      PASS  owner enables Leave through Setup
+      PASS  owner creates employee through HR API
+      PASS  owner can read the new roster
+      PASS  HR leave surface is reachable for the new company
+      CLEANUP  QADD0650
+
+    CLEAN_CANARY_PASS  18 passed, 0 failed
